@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <data profile-file-target="" profile-target="" version="0.4" xmlns="http://www.netbeans.org/ns/profiler/1"/>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <!--Do not use Project Properties customizer when editing this file manually.-->
+            <name>JAXWS-RI</name>
+            <properties>
+                <property-file>nbproject/project.properties</property-file>
+            </properties>
+            <folders>
+                <source-folder>
+                    <label>rt/src</label>
+                    <type>java</type>
+                    <location>rt/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>tools/wscompile/src</label>
+                    <type>java</type>
+                    <location>tools/wscompile/src</location>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <target>main</target>
+                </action>
+                <action name="clean">
+                    <target>clean</target>
+                </action>
+                <action name="rebuild">
+                    <target>clean</target>
+                    <target>main</target>
+                </action>
+                <action name="compile.single">
+                    <target>tools-compile</target>
+                </action>
+                <action name="javadoc">
+                    <target>javadocs</target>
+                </action>
+            </ide-actions>
+            <export>
+                <type>jar</type>
+                <location>build/lib/activation.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/FastInfoset.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/http.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jaxb-api.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jaxb-impl.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jaxb-xjc.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jaxws-api.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jaxws-rt.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jaxws-tools.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jsr173_api.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jsr181-api.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/jsr250-api.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/resolver.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/saaj-api.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/saaj-impl.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/sjsxp.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>rt/src</label>
+                        <location>rt/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>tools/wscompile/src</label>
+                        <location>tools/wscompile/src</location>
+                    </source-folder>
+                    <source-file>
+                        <location>build.xml</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <!--
+                    <separator/>
+                    <action>
+                        <label>Debug Wscompile</label>
+                        <target>debug-wscompile</target>
+                        <property name="args">${wscompile.args}</property>
+                    </action>
+                    <action>
+                        <label>Debug WsGen</label>
+                        <target>debug-wsgen</target>
+                        <property name="args">${wsgen.args}</property>
+                    </action>
+                    <action>
+                        <label>Debug Test Client</label>
+                        <target>run-client-server-main</target>
+                        <property name="classname">${test.classname}</property>
+                    </action>
+                    -->
+                    <ide-action name="build"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="rebuild"/>
+                    <ide-action name="compile.single"/>
+                    <ide-action name="javadoc"/>
+                </context-menu>
+            </view>
+            <subprojects/>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
+            <compilation-unit>
+                <package-root>rt/src</package-root>
+                <package-root>tools/wscompile/src</package-root>
+                <classpath mode="compile">lib/activation.jar:lib/ant-junit.jar:lib/ant-launcher.jar:lib/ant-nodeps.jar:lib/ant-trax.jar:lib/ant.jar:lib/FastInfoset.jar:lib/jaxb-api.jar:lib/jaxb-impl.jar:lib/jaxb-libs.jar:lib/jaxb-xjc.jar:lib/jaxws-api.jar:lib/jsr173_api.jar:lib/jsr181-api.jar:lib/junit.jar:lib/relaxngDatatype.jar:lib/saaj-api.jar:lib/saaj-impl.jar:lib/servlet.jar:lib/sjsxp.jar:lib/http.jar:lib/jsr250-api.jar</classpath>
+                <built-to>build/lib/activation.jar</built-to>
+                <built-to>build/lib/FastInfoset.jar</built-to>
+                <built-to>build/lib/http.jar</built-to>
+                <built-to>build/lib/jaxb-api.jar</built-to>
+                <built-to>build/lib/jaxb-impl.jar</built-to>
+                <built-to>build/lib/jaxb-xjc.jar</built-to>
+                <built-to>build/lib/jaxws-api.jar</built-to>
+                <built-to>build/lib/jaxws-rt.jar</built-to>
+                <built-to>build/lib/jaxws-tools.jar</built-to>
+                <built-to>build/lib/jsr173_api.jar</built-to>
+                <built-to>build/lib/jsr181-api.jar</built-to>
+                <built-to>build/lib/jsr250-api.jar</built-to>
+                <built-to>build/lib/resolver.jar</built-to>
+                <built-to>build/lib/saaj-api.jar</built-to>
+                <built-to>build/lib/saaj-impl.jar</built-to>
+                <built-to>build/lib/sjsxp.jar</built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>

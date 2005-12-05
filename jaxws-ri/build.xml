@@ -1,0 +1,600 @@
+<?xml version="1.0"?>
+
+<!--
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the "License").  You may not use this file except
+ in compliance with the License.
+ 
+ You can obtain a copy of the license at
+ https://jwsdp.dev.java.net/CDDLv1.0.html
+ See the License for the specific language governing
+ permissions and limitations under the License.
+ 
+ When distributing Covered Code, include this CDDL
+ HEADER in each file and include the License file at
+ https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+ add the following below this CDDL HEADER, with the
+ fields enclosed by brackets "[]" replaced with your
+ own identifying information: Portions Copyright [yyyy]
+ [name of copyright owner]
+-->
+
+
+<!-- ************ JAXWS build file ************************************** -->
+
+
+
+<project name="JAXWS-RI" default="main" basedir=".">
+
+  <property name="Name" value="JAX-WS RI"/>
+  <property name="version" value="2.0"/>
+      
+  <property name="build.home" value="${basedir}/build"/>  
+  <property name="lib.home" value="${basedir}/lib"/>
+  <property name="ant.home" value="${basedir}/lib"/>
+    <!-- The base directory for docs -->
+  <property name="docs.home" value="${basedir}/docs"/>
+  <!-- The base directory for distribution targets -->
+  <property name="dist.home" value="${basedir}/dist"/>
+  <property name="dist20.home" value="${dist.home}/jaxws-ri"/> 
+  
+  
+  <!-- this property is used by "wsgen/wsimport -version".
+             It should be set via the RE build
+             scripts via 'ant -Dbuild.id="b08"' otherwise the current date and time
+             will be used -->
+  <tstamp>
+      <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
+  </tstamp>
+  <property name="build.id" value="${now}(${user.name})" />
+  <property name="build.version" value="${Name} ${version}-${build.id}" />
+  <echo message="The build id is: ${build.version}" /> 
+
+  <property file="${user.home}/build.properties"/>   <!-- User local        -->
+  <property file="build.properties"/>                <!-- Component local   -->
+  <property file="../build.properties"/>             <!-- Commons local     -->  
+
+  <property file="project.properties"/>
+
+
+  <path id="runtime.compile.classpath">
+    <fileset dir="${lib.home}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+  
+  <path id="tools.compile.classpath">
+    <path refid="runtime.compile.classpath"/>
+    <pathelement location="${build.home}/lib/jaxws-rt.jar"/>
+    <pathelement location="${java.home}/../lib/tools.jar"/>
+  </path>
+  
+  <target name="init">
+    <echo message="-------- ${Name} ${version} --------"/>
+  </target>
+
+  <target name="prepare" depends="init">
+    <mkdir dir="${build.home}"/>
+    <mkdir dir="${build.home}/lib"/>
+    <mkdir dir="${build.home}/bin"/>  
+    <mkdir dir="${build.home}/samples"/>  
+  </target>
+
+  <target name="runtime-compile" depends="prepare">
+    <ant dir="${basedir}/rt"
+        target="compile"
+        inheritrefs="true"/>
+  </target>
+
+  <target name="runtime-compile-mustang" depends="prepare">
+    <ant dir="${basedir}/rt"
+        target="compile-mustang"
+        inheritrefs="true"/>
+  </target>
+
+  <path id="spi-path">
+     <pathelement path="${basedir}/rt/src"/>
+     <pathelement path="${basedir}/tools/wscompile/src"/>
+  </path>
+  <target name="javadocs-spi" depends="image">
+    <javadoc packagenames="com.sun.xml.ws.spi.runtime.*, com.sun.tools.ws.spi.*"
+         sourcepathref="spi-path"
+         destdir="${build.home}/javadocs/spi"
+         author="false"
+         version="false"
+         windowtitle="${Name} Generated Documentation"
+         doctitle="${Name}"
+         bottom="Copyright &#169; 2005 Sun Microsystems, Inc. All Rights Reserved.">
+        <classpath refid="tools.compile.classpath"/>
+    </javadoc>
+  </target>
+
+
+  <target name="javadocs" depends="image">
+    <javadoc packagenames=".,com.sun.xml.ws.*,com.sun.pept.*,javax.xml.ws.*,javax.xml.soap.*,javax.xml.bind.*,com.sun.tools.ws.*"
+         sourcepath="${basedir}/rt/src:${basedir}/tools/wscompile/src"
+         destdir="${build.home}/javadocs/"
+         author="false"
+         version="false"
+         windowtitle="${Name} Generated Documentation"
+         doctitle="${Name}"
+         bottom="Copyright &#169; 2005 Sun Microsystems, Inc. All Rights Reserved.">
+        <classpath refid="runtime.compile.classpath"/>
+    </javadoc>
+  </target>
+
+  <macrodef name="versionProp"
+    description="generates a version property file">
+    <attribute name="file" />
+    <sequential>
+      <echo file="@{file}"
+>build-id=${build.id}
+build-version=${build.version}
+major-version=${version}
+</echo>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="updateManifestWithVersion"
+          description="updates a jar manifest file with the version information">
+    <attribute name="file" />
+    <sequential>
+      <manifest mode="update" file="@{file}">
+        <attribute name="Build-Id" value="${build.id}" />
+        <attribute name="Build-Version" value="${build.version}" />
+        <attribute name="Major-Version" value="${version}" />
+      </manifest>
+    </sequential>
+  </macrodef>
+
+    <target name="architecture-document" depends="prepare"
+            description="generate architecture documents (which is just a glorified javadoc)">
+<!--      <ant dir="tools/taglets" target="compile" />  -->
+      <mkdir dir="${build.home}/javadoc" />
+      <javadoc
+            destdir="${build.home}/javadoc"
+            use="true"
+            author="false"
+            version="false"
+            windowtitle="JAX-WS RI"
+            doctitle="JAX-WS RI"
+            access="package">
+        <doclet name="com.sun.xml.bind.taglets.CustomHtmlDoclet"
+                path="${basedir}/tools/lib/taglets.jar">
+        </doclet>
+        <arg value="-quiet"/>
+
+        <packageset dir="${basedir}/javadoc"/>
+        <group title="Root Architecture Document" packages="jaxws" />
+
+        <packageset dir="${basedir}/rt/src"/>
+        <group title="Runtime" packages="com.sun.xml.ws.*,com.sun.pept.*" />
+
+        <packageset dir="${basedir}/tools/wscompile/src"/>
+        <group title="Tools" packages="com.sun.tools.ws.*,com.sun.istack.*" />
+   
+        <!--        <packageset dir="${runtime.src}"/>
+        <packageset dir="${runtime-api.src}"/>
+        <packageset dir="${schemagen.src}"/>
+        <group title="Runtime API for JAX-WS" packages="com.sun.xml.bind.api" />
+        <group title="Runtime" packages="com.sun.xml.bind*" />
+
+        <packageset dir="${xjc.src}"/>
+        <group title="XJC API for JAX-WS" packages="com.sun.tools.xjc.api" />
+        <group title="XJC" packages="com.sun.tools.xjc*:com.sun.tools.jxc*" />
+-->
+        <link href="https://jaxb.dev.java.net/nonav/jaxb20-pr/api/"
+          offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxb-api"   />
+<!--        <link href="http://java.sun.com/webservices/docs/1.6/api/"
+          offline="true" packagelistloc="${basedir}/tools/javadoc-link/saaj"   />          -->
+        <link href="http://java.sun.com/j2se/1.5.0/docs/api/"
+          offline="true" packagelistloc="${basedir}/tools/javadoc-link/j2se5.0"  />
+        <link href="https://jaxb-architecture-document.dev.java.net/nonav/doc/"
+          offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxb-ri"  />
+
+        <classpath refid="tools.compile.classpath"/>
+<!--        <classpath>
+          <fileset dir="${build.home}/../lib" includes="**/*.jar" />
+        </classpath>-->
+      </javadoc>
+    </target>
+
+
+  <target name="runtime-build" depends="runtime-compile">
+    <!-- Copy resource files etc -->
+    <copy todir="${basedir}/rt/build/classes">
+      <fileset dir="${basedir}/rt/src">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+
+    <versionProp file="${basedir}/rt/build/classes/com/sun/xml/ws/version.properties" />
+
+    <!-- Copying the manifest -->
+    <copy file="${basedir}/rt/etc/manifest" todir="${basedir}/rt/build"/>
+    <updateManifestWithVersion file="${basedir}/rt/build/manifest" />
+
+    <jar jarfile="${build.home}/lib/jaxws-rt.jar"
+        manifest="${basedir}/rt/build/manifest">
+      <fileset dir="${basedir}/rt/build/classes"/>
+    </jar>
+  </target>
+
+
+  <target name="runtime-build-mustang" depends="runtime-compile-mustang">
+    <!-- Copy resource files etc -->
+    <copy todir="${basedir}/rt/build/classes">
+      <fileset dir="${basedir}/rt/src">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+
+    <versionProp file="${basedir}/rt/build/classes/com/sun/xml/ws/version.properties" />
+
+    <!-- Copying the manifest -->
+    <copy file="${basedir}/rt/etc/manifest" todir="${basedir}/rt/build"/>
+    <updateManifestWithVersion file="${basedir}/rt/build/manifest" />
+
+    <jar jarfile="${build.home}/lib/jaxws-rt.jar"
+        manifest="${basedir}/rt/build/manifest">
+      <fileset dir="${basedir}/rt/build/classes"/>
+    </jar>
+  </target>
+
+  <!-- runtime must be built before tools -->
+  <target name="tools-compile" depends="runtime-build">
+    <ant dir="${basedir}/tools/wscompile"
+        target="compile"
+        inheritrefs="true"/>
+  </target>
+
+  <target name="tools-build" depends="tools-compile">
+    <!-- Copy resource files etc -->
+    <copy todir="${basedir}/tools/wscompile/build/classes">
+      <fileset dir="${basedir}/tools/wscompile/src">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+    
+    <!-- copy bin scripts -->  
+    <copy  todir="${build.home}/bin">
+      <fileset dir="${basedir}/tools/bin"
+        includes="wsimport.sh, wsimport.bat wsgen.bat wsgen.sh"/>
+    </copy>
+    <chmod perm="+x" file="${build.home}/bin/*.sh"/>  
+    
+    <copy    todir="${build.home}/lib">
+      <fileset dir="${lib.home}/" 
+               includes="**/*.jar" 
+               excludes="ant.jar, ant-junit.jar, ant-launcher.jar, ant-nodeps.jar, ant-trax.jar, junit.jar, servlet.jar"/>
+    </copy>
+
+    <!-- Copying the manifest -->
+    <copy file="${basedir}/tools/etc/manifest" todir="${basedir}/tools/wscompile/build"/>
+    <updateManifestWithVersion file="${basedir}/tools/wscompile/build/manifest" />
+
+    <versionProp file="${basedir}/tools/wscompile/build/classes/com/sun/tools/ws/version.properties" />
+
+    <jar jarfile="${build.home}/lib/jaxws-tools.jar"
+        manifest="${basedir}/tools/wscompile/build/manifest">
+      <fileset dir="${basedir}/tools/wscompile/build/classes"/>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.home}"/>
+    <delete dir="${dist.home}"/>
+    <ant dir="${basedir}/rt" target="clean"/>
+    <ant dir="${basedir}/tools/wscompile" target="clean"/>
+  </target>
+
+  <!-- for now, this gets everything built -->
+  <target name="image" depends="tools-build">
+    <copy todir="${build.home}">
+        <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt" />
+    </copy>
+  </target>
+
+  <target name="main" depends="image"/>
+  
+  <!-- ********** Targets added for running/debugging in NetBeans ********** -->
+  
+  <!-- set to same dir as in test/config/build.properties -->
+  <property name="test.build.temp" value="${basedir}/test/build/temp"/>
+  
+  <path id="debug.classpath">
+    <path refid="tools.compile.classpath"/>
+    <pathelement location="${java.home}/../lib/tools.jar"/>
+    <pathelement location="${build.home}/lib/jaxws-tools.jar"/>
+  </path>
+  
+  <path id="debug.sourcepath">
+    <pathelement location="${basedir}/rt/src"/>
+    <pathelement location="${basedir}/tools/wscompile/src"/>
+    <pathelement location="${basedir}/xjc"/>
+  </path>
+  
+  <target name="debug-wsimport"
+      depends="image"
+      if="netbeans.home"
+      description="Debug wscimport">
+      
+    <echo message="starting wsimport with arguments: ${args}"/>
+    
+    <!-- "jpda.address" can be any property name -->
+    <nbjpdastart name="wsimport"
+        addressproperty="jpda.address"
+        transport="dt_socket">
+      <classpath refid="debug.classpath"/>
+      <sourcepath refid="debug.sourcepath"/>
+    </nbjpdastart>
+    
+    <java fork="true" classname="com.sun.tools.ws.wscompile.Main">
+      <arg line="${args}"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+      <classpath refid="debug.classpath"/>
+    </java>
+  </target>
+
+  <target name="debug-wsgen"
+      depends="image"
+      if="netbeans.home"
+      description="Debug wsgen">
+      
+    <echo message="starting wsgen with arguments: ${args}"/>
+    
+    <!-- "jpda.address" can be any property name -->
+    <nbjpdastart name="wsgen"
+        addressproperty="jpda.address"
+        transport="dt_socket">
+      <classpath refid="debug.classpath"/>
+      <sourcepath refid="debug.sourcepath"/>
+    </nbjpdastart>
+    
+    <java fork="true" classname="com.sun.tools.ws.WsGen">
+      <arg line="${args}"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+      <classpath refid="debug.classpath"/>
+    </java>
+  </target>
+
+  <!-- used to run any client server class with a main() method, for instance
+    when debugging a test -->
+  <path id="client.server.test.classpath">
+    <path refid="debug.classpath"/>
+    <pathelement location="${basedir}/test/lib/jaxwsTestUtil.jar"/>
+    <pathelement location="${basedir}/test/build/server-classes"/>
+    <pathelement location="${basedir}/test/build/temp/classes"/>
+    <pathelement location="${junit.jar}"/>
+    <pathelement path="${java.class.path}"/>
+  </path>
+  
+  <path id="client.server.debug.sourcepath">
+    <path refid="debug.sourcepath"/>
+    <pathelement location="${basedir}/test/src"/>
+    <pathelement location="${basedir}/test/build/server-classes"/>
+    <pathelement location="${basedir}/test/build/temp/classes"/>
+  </path>
+  
+  <!-- this does not (yet) build the test. you should still do an
+    "ant clean build runclient" first to create the files -->
+  <target name="run-client-server-main"
+      if="netbeans.home"
+      depends="image"
+      description="Run a client in the client-server tests">
+      
+    <nbjpdastart name="client-server"
+        addressproperty="jpda.address"
+        transport="dt_socket">
+      <classpath refid="runtime.compile.classpath"/>
+      <sourcepath refid="client.server.debug.sourcepath"/>
+    </nbjpdastart>
+    
+    <java fork="true" classname="${classname}">
+      <arg value="${args}"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+      <jvmarg value="-Dtempdir=${test.build.temp}"/>
+      <classpath refid="client.server.test.classpath"/>
+    </java>
+  </target>
+  
+  <!-- ********** End of NetBeans targets ********** -->
+  
+  <target name="docs" depends="prepare" >
+    <copy todir="${build.home}/docs">
+      <fileset dir="${docs.home}">
+        <include name="**/*.html" />
+        <include name="**/*.txt" />
+        <include name="**/*.jpg" />
+        <exclude name="**/internal/**" />
+      </fileset>
+    </copy>
+  </target>
+    
+  <target name="dist" depends="image, docs">
+    <mkdir dir="${dist.home}"/>
+    <mkdir dir="${dist20.home}"/>
+    <mkdir dir="${dist20.home}/bin"/>
+    <mkdir dir="${dist20.home}/lib"/>
+    <mkdir dir="${dist20.home}/docs"/>
+    <mkdir dir="${dist20.home}/samples"/>
+
+    <copy tofile="${dist20.home}/build.xml" file="${build.home}/../etc/istackonsjsas.xml"/>
+    <copy    todir="${dist20.home}/bin">
+      <fileset dir="${build.home}/bin"
+          includes="wsimport.*, wsgen.*"/>
+    </copy>
+
+    <chmod perm="+x" file="${dist20.home}/bin/wsimport.sh"/>
+    <chmod perm="+x" file="${dist20.home}/bin/wsgen.sh"/>
+
+    <copy    todir="${dist20.home}/lib">
+	<fileset
+		dir="${build.home}/lib"
+		includes="*.jar"/>    	
+    </copy>
+    	
+    <copy    todir="${dist20.home}/docs">
+      <fileset dir="${build.home}/docs"/>
+    </copy>
+  	
+  	<copy todir="${dist20.home}/samples">
+        <fileset dir="samples" includes="**" excludes="**/CVS/**" />
+	</copy>
+  	
+    <copy todir="${dist20.home}">
+  	<fileset dir="${build.home}" includes="*.txt"/>
+    </copy>
+
+    <!-- add a copy of the license and README files to the top level -->
+    <copy todir="${dist20.home}"
+          file="license.txt" />
+    <copy todir="${dist20.home}"
+          file="README" />
+  </target>
+  
+  <target name="dist.zip" description="create a stand-alone distribution image of the JAX-WS RI"
+          depends="dist">
+    <zip file="${build.home}/jaxws-ri.zip">
+      <fileset dir="${dist.home}" />
+    </zip>
+  </target>
+
+  <target name="src.zip" description="create source zip bundles of the JAX-WS RI">
+    <zip file="${build.home}/jaxws-rt.src.zip">
+      <fileset dir="${basedir}/rt/src" />
+    </zip>
+    <zip file="${build.home}/jaxws-tools.src.zip">
+      <fileset dir="${basedir}/tools/wscompile/src" />
+    </zip>
+  </target>
+
+    <target name="integrate-jaxb-hudson" depends="prepare"
+            description="integrate the last successful JAXB Hudson build">
+      <get src="http://kohsuke.sfbay.sun.com/hudson/job/jaxb-ri/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/jaxb-ri.zip"
+           dest="${build.home}/jaxb-ri.zip" />
+      <mkdir dir="${build.home}/jaxb" />
+      <unzip src="${build.home}/jaxb-ri.zip" dest="${build.home}/jaxb"/>
+      <copy todir="lib">
+        <fileset dir="${build.home}/jaxb/jaxb-ri/lib" includes="*.zip,*.jar"
+                 excludes="activation.jar, jsr173_1.0_api.jar, jaxb1-impl.jar" />
+      </copy>
+  <!--<delete dir="${build.home}/jaxb" /> -->
+    </target>
+
+  <target name="integrate-saaj-hudson" depends="prepare"
+          description="integrate the last successful SAAJ RI Hudson build">
+    <get src="http://kohsuke.sfbay/hudson/job/saaj-ri/lastSuccessfulBuild/artifact/saaj-ri/dist/lib/saaj-impl.jar"
+         dest="lib/saaj-impl.jar" />
+    <get src="http://kohsuke.sfbay/hudson/job/saaj-ri/lastSuccessfulBuild/artifact/saaj-ri/zip-dist/SAAJ-1.3.src.zip"
+         dest="lib/saaj-impl.src.zip" />
+    <get src="http://kohsuke.sfbay/hudson/job/saaj-api/lastSuccessfulBuild/artifact/saaj-api/build/lib/saaj-api.jar"
+         dest="lib/saaj-api.jar" />
+    <get src="http://kohsuke.sfbay/hudson/job/saaj-api/lastSuccessfulBuild/artifact/saaj-api/build/saaj-api-src.zip"
+         dest="lib/saaj-api-src.zip" />
+  </target>
+
+    <taskdef name="installerBuilder"
+        classname="com.sun.tools.xjc.installer.builder.BuilderTask">
+      <classpath>
+        <fileset dir="${basedir}/tools/lib" includes="installer-builder.jar, sfx4j-1.0.jar"/>
+      </classpath>
+    </taskdef>
+    
+    <target name="generate-weekly-binary"
+        description="generate java.net binary distribution">
+      <antcall target="dist.zip">
+        <param name="compile.debug" value="true"/>
+      </antcall>
+      <tstamp/>
+      <!-- generate the class -->
+      <installerBuilder classFile="${build.home}/JAXWS_SI_${DSTAMP}.jar"
+          licenseFile="${basedir}/license.txt"
+          zipFile="${build.home}/jaxws-ri.zip" />
+      <delete file="${build.home}/jaxws-ri.zip" />
+    </target>
+        
+    <target name="generate-weekly-source"
+        depends="prepare"
+        description="generate java.net binary distribution">
+      <tstamp/>
+            
+      <!-- create the zip file contents -->
+      <property name="source.drop.dir" value="${build.home}/source-bundle"/>
+      <delete dir="${source.drop.dir}"/>
+      <mkdir dir="${source.drop.dir}"/>
+      <mkdir dir="${source.drop.dir}/jaxws-si/lib"/>
+      <copy todir="${source.drop.dir}/jaxws-si/lib">
+        <fileset dir="${basedir}/lib">
+          <include name="*.jar"/>
+          <exclude name="ant*.*"/>
+          <exclude name="junit.jar"/>
+        </fileset>
+      </copy>
+      <copy file="${basedir}/license.txt"
+          todir="${source.drop.dir}/jaxws-si"/>
+      <copy file="${basedir}/etc/src-bundle.xml"
+          tofile="${source.drop.dir}/jaxws-si/build.xml"/>
+      <mkdir dir="${source.drop.dir}/jaxws-si/bin"/>
+      <copy todir="${source.drop.dir}/jaxws-si/bin">
+        <fileset dir="${basedir}/tools/bin">
+          <include name="*.sh"/>
+          <include name="*.bat"/>
+        </fileset>
+      </copy>
+      <mkdir dir="${source.drop.dir}/jaxws-si/src"/>
+      <copy todir="${source.drop.dir}/jaxws-si/src">
+        <fileset dir="${basedir}">
+          <include name="rt/**/*.java"/>
+          <include name="rt/**/*.properties"/>
+          <include name="tools/**/*.java"/>
+          <include name="tools/**/*.properties"/>
+        </fileset>
+      </copy>
+      <zip destfile="${source.drop.dir}/jaxws-src.zip">
+        <zipfileset dir="${source.drop.dir}"/>
+      </zip>
+      <!-- 1.X version opens to a zip file, so wrap our zip
+          in another one to send to installer -->
+      <zip destfile="${source.drop.dir}/jaxws-src-installer.zip">
+        <zipfileset file="${source.drop.dir}/jaxws-src.zip"/>
+      </zip>
+          
+      <!-- generate the installer -->
+      <installerBuilder classFile="${build.home}/JAXWS_SI_source_${DSTAMP}.jar"
+          licenseFile="${basedir}/license.txt"
+          zipFile="${source.drop.dir}/jaxws-src-installer.zip"/>
+      <delete dir="${source.drop.dir}"/>
+    </target>
+
+
+
+  <!-- =====================
+       SVR4 DISTRIBUTION 
+       ===================== -->
+  <!-- assumes the dist target has been run -->
+  <target name="create.pkg" description="Create JAX-WS svr4 package">
+    <ant antfile="build-pkg.xml" target="create.pkg" inheritrefs="true"/>
+  </target>
+
+  <!-- =====================
+       RPM DISTRIBUTION 
+       ===================== -->
+  <!-- assumes the dist target has been called -->
+  <target name="create.rpm" description="Create JAX-WS RPM">
+    <ant antfile="build-pkg.xml" target="create.rpm" inheritrefs="true"/>
+  </target>
+
+  <!-- =======================
+       ZIP FILE DISTRIBUTION 
+       ======================= -->
+  <!-- assumes the dist target has been called -->
+  <target name="create.zip" description="Create JAX-WS ZIP">
+    <ant antfile="build-pkg.xml" target="create.zip" inheritrefs="true"/>
+  </target>
+
+</project>

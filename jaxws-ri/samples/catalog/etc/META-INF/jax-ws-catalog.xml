@@ -1,0 +1,7 @@
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog"
+    prefer="system">
+
+    <system systemId="http://localhost:8080/jaxws-catalog/addnumbers?wsdl"
+          uri="../AddNumbers.wsdl"/>
+
+</catalog>
