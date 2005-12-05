@@ -11,7 +11,7 @@ import javax.xml.stream.XMLStreamException;
  * but that would require delegation, which introduces unnecessary overhead.
  *
  * TODO
- * - Add methods to write other primitive types, such as hex and integers 
+ * - Add methods to write other primitive types, such as hex and integers
  *   (and arrays of).
  *   A textual implementation would write characters in accordance
  *   to the canonical lexical definitions specified in W3C XML Schema: datatypes.
@@ -24,7 +24,7 @@ import javax.xml.stream.XMLStreamException;
  * - Consider including the ability to write an Object. The JAXB marshaller can
  *   be used.
  * - Add the ability to writeStart and writeEnd on attributes so that the same
- *   methods for writing primitive types (and characters, which will require new methods) 
+ *   methods for writing primitive types (and characters, which will require new methods)
  *   can be used for writing attribute values as well as element content.
  * @author Kohsuke Kawaguchi
  */
