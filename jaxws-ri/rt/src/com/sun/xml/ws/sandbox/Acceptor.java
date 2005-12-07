@@ -1,7 +1,7 @@
 package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.chain.Chain;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
 
 /**
  * Represents a component that listens to the transport (such as
@@ -12,13 +12,13 @@ import com.sun.xml.ws.sandbox.chain.Chain;
  * This object is responsible for the following work:
  * <ol>
  *  <li>Listens to the transport and creates a {@link Message}.
- *  <li>Sends it to {@link Chain} for processing, and receives a reply {@link Message}.
+ *  <li>Sends it to {@link Pipe} for processing, and receives a reply {@link Message}.
  *  <li>Sends a reply {@link Message} to the transport.
  * </ol>
  *
  * <p>
- * An {@link Acceptor} receives a {@link Chain} object when it's constructed,
- * so there is no setter method for it. The {@link Chain} object that the {@link Acceptor}
+ * An {@link Acceptor} receives a {@link Pipe} object when it's constructed,
+ * so there is no setter method for it. The {@link Pipe} object that the {@link Acceptor}
  * owns do not need to be exposed to outside, so there's no setter method.
  *
  * <p>
