@@ -1,5 +1,7 @@
 package com.sun.xml.ws.sandbox.message;
 
+import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
