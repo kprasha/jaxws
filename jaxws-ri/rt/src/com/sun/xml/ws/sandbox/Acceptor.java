@@ -27,4 +27,13 @@ import com.sun.xml.ws.sandbox.pipe.Pipe;
  * TODO: how an acceptor is created?
  */
 public interface Acceptor {
+    /**
+     * Stops accepting new messages.
+     * This method is used to "unpublish" an endpoint.
+     *
+     * <p>
+     * Since this method is used as a part of clean-up, any error should be
+     * just logged and be recovered.
+     */
+    void close();
 }
