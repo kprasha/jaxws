@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox.message;
 
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+import com.sun.xml.ws.sandbox.Encoder;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
@@ -75,15 +76,20 @@ import java.lang.reflect.Proxy;
  * attachments and headers, and when serializing all headers
  * and attachments will be ignored.
  *
+ *
+ *
+ * <h2>Message and XOP</h2>
+ * <p>
+ * XOP is considered as an {@link Encoder}, and therefore when you are looking at
+ * {@link Message}, you'll never see &lt;xop:Include> or any such elements
+ * (instead you'll see the base64 data inlined.)
+ *
+ *
+ *
  * TODO: can body element have foreign attributes? maybe ID for security?
  *       Yes, when the SOAP body is signed there will be an ID attribute present
  *       But in this case any security based impl may need access
  *       to the concrete representation.
- * TODO: Who handles XOP? Is it done inside the message or outside?
- *       Currently SAAJ does no XOP processing but provides the ability to link
- *       an element (with an ID) to an attachment part. We may want to revisit this
- *       and provide functionality semantically process when required e.g. to hide
- *       such details from SOAP header block processors and XWSS.
  * TODO: HTTP headers?
  *       Yes. Abstracted as transport-based properties.
  * TODO: who handles SOAP 1.1 and SOAP 1.2 difference?
