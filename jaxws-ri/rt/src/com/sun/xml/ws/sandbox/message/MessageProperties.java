@@ -1,9 +1,9 @@
 package com.sun.xml.ws.sandbox.message;
 
+import java.util.List;
 import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.util.Map;
+import javax.xml.ws.handler.MessageContext.Scope;
 
 /**
  * Properties associated with a {@link Message}.
@@ -23,5 +23,18 @@ import java.util.Map;
  * of those when requested.
  */
 public abstract /*for now*/ class MessageProperties implements MessageContext {
+    /* value of MessageContext.HTTP_REQUEST_HEADERS property */
+    private Map<String, List<String>> httpRequestHeaders;
+    
+    /* value of MessageContext.HTTP_RESPONSE_HEADERS property */
+    private Map<String, List<String>> httpResponseHeaders;
+    
+    public void setHttpRequestHeaders(Map<String, List<String>> headers) {
+        this.httpRequestHeaders = headers;
+    }
+    
+    public Map<String, List<String>> getHttpRequestHeaders() {
+        return httpRequestHeaders;
+    }
 
 }
