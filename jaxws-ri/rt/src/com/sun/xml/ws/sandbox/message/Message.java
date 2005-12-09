@@ -207,6 +207,14 @@ public abstract class Message {
     public abstract XMLStreamReader readPayload();
 
     /**
+     * Writes the payload to StAX.
+     *
+     * This method writes just the payload of the message to the writer.
+     * This consumes the message.
+     */
+    public abstract void writePayloadTo(XMLStreamWriterEx sw);
+
+    /**
      * Writes the whole SOAP message (but not attachments)
      * to the given writer.
      *
