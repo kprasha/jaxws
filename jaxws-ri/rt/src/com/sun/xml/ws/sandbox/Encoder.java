@@ -2,9 +2,10 @@ package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.ws.sandbox.message.Message;
 
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Encodes a {@link Message} (its XML infoset and attachments) to a sequence of bytes.
@@ -67,7 +68,7 @@ public interface Encoder {
      *
      * <p>
      * TODO: for the convenience of implementation, write
-     * an adapter that wraps {@link ByteBuffer} to {@link OutputStream}.
+     * an adapter that wraps {@link WritableByteChannel} to {@link OutputStream}.
      */
-    String encode( Message message, ByteBuffer buffer );
+    String encode( Message message, WritableByteChannel buffer );
 }

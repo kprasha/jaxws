@@ -5,6 +5,7 @@ import com.sun.xml.ws.sandbox.message.Message;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
 /**
  * The reverse operation of {@link Encoder}.
@@ -47,5 +48,5 @@ public interface Decoder {
      *
      * @see #decode(InputStream, String)
      */
-    Message decode( ByteBuffer in, String contentType );
+    Message decode( ReadableByteChannel in, String contentType );
 }
