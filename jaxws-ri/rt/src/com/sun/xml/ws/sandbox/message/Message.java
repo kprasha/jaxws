@@ -225,4 +225,27 @@ public abstract class Message {
     // TODO: do we need a method that reads payload as a fault?
     // do we want a separte streaming representation of fault?
     // or would SOAPFault in SAAJ do?
+
+    /**
+     * Creates a copy of a {@link Message}.
+     *
+     * <p>
+     * This method creates a new {@link Message} whose header/payload/attachments/properties
+     * are identical to this {@link Message}. Once created, the created {@link Message}
+     * and the original {@link Message} behaves independently --- adding header/
+     * attachment to one {@link Message} doesn't affect another {@link Message}
+     * at all.
+     *
+     * <h3>Design Rationale</h3>
+     * <p>
+     * Since a {@link Message} body is read-once, sometimes
+     * (such as when you do fail-over, or WS-RM) you need to
+     * create an idential copy of a {@link Message}.
+     *
+     * <p>
+     * The actual copy operation depends on the layout
+     * of the data in memory, hence it's best to be done by
+     * the {@link Message} implementation itself.
+     */
+    public abstract Message copy();
 }
