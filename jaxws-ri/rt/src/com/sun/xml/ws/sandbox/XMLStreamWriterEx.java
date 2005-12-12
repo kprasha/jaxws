@@ -2,6 +2,8 @@ package com.sun.xml.ws.sandbox;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.activation.DataHandler;
+import java.io.OutputStream;
 
 /**
  * {@link XMLStreamWriter} extended to support XOP.
@@ -46,6 +48,50 @@ public interface XMLStreamWriterEx {
      * <p>
      * The use of this method has some restriction to support XOP. Namely, this method
      * must be invoked as a sole content of an element.
+     *
+     * <p>
+     * (data,start,len) triplet identifies the binary data to be written.
+     *
+     * @param contentType
+     *      this mandatory parameter identifies the MIME type of the binary data.
+     *      If the MIME type isn't known by the caller, "application/octet-stream" can
+     *      be always used to indicate "I don't know." Never null.
      */
-    void writeBinary(byte[] data, int start, int len) throws XMLStreamException;
+    void writeBinary(byte[] data, int start, int len, String contentType) throws XMLStreamException;
+
+    /**
+     * Writes the binary data.
+     *
+     * <p>
+     * This method works like the {@link #writeBinary(byte[], int, int, String)} method,
+     * except that it takes the binary data in the form of {@link DataHandler}, which
+     * contains a MIME type ({@link DataHandler#getContentType()} as well as the payload
+     * {@link DataHandler#getInputStream()}.
+     *
+     * @param data
+     *      always non-null.
+     */
+    void writeBinary(DataHandler data) throws XMLStreamException;
+
+    /**
+     * Writes the binary data.
+     *
+     * <p>
+     * This version of the writeBinary method allows the caller to produce
+     * the binary data by writing it to {@link OutputStream}.
+     *
+     * <p>
+     * It is the caller's responsibility to write and close
+     * a stream before it invokes any other methods on {@link XMLStreamWriterEx}
+     * or {@link XMLStreamWriter}.
+     *
+     * TODO: experimental. appreciate feedback
+     * @param contentType
+     *      See the content-type parameter of
+     *      {@link #writeBinary(byte[], int, int, String)}. Must not be null.
+     *
+     * @return
+     *      always return a non-null {@link OutputStream}.
+     */
+    OutputStream writeBinary(String contentType) throws XMLStreamException;
 }
