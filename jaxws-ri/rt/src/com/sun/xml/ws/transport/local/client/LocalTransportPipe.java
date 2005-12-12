@@ -23,7 +23,7 @@ import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
-import com.sun.xml.ws.sandbox.message.AttachmentSet;
+import com.sun.xml.ws.sandbox.impl.XMLStreamWriterExImpl;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
@@ -34,17 +34,15 @@ import com.sun.xml.ws.spi.runtime.WebServiceContext;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.transport.local.LocalMessage;
 import com.sun.xml.ws.transport.local.server.LocalConnectionImpl;
+
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Map;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.ws.WebServiceException;
 
 /**
  *
@@ -113,12 +111,12 @@ public class LocalTransportPipe implements Pipe {
 
         public String encode(Message message, OutputStream out) throws IOException {
             // TODO attachments, XOP
-            XMLStreamWriterEx writer = new XMLStreamWriterExImpl(out);
+            XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
             message.writeTo(writer);
             return "text/xml";
         }
 
-        public String encode(Message message, ByteBuffer buffer) {
+        public String encode(Message message, WritableByteChannel buffer) {
             //TODO: not yet implemented
             throw new UnsupportedOperationException();
         }
@@ -134,31 +132,10 @@ public class LocalTransportPipe implements Pipe {
             throw new UnsupportedOperationException();
         }
 
-        public Message decode(ByteBuffer in, String contentType) {
+        public Message decode(ReadableByteChannel in, String contentType) {
             //TODO: not yet implemented
             throw new UnsupportedOperationException();
         }
         
     }
-    
-    private static class XMLStreamWriterExImpl implements XMLStreamWriterEx {
-        private OutputStream out;
-        private XMLStreamWriter writer;
-        
-        public XMLStreamWriterExImpl(OutputStream out) {
-            this.out = out;
-            writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
-        }
-
-        public XMLStreamWriter getBase() {
-            return writer;
-        }
-
-        public void writeBinary(byte[] data, int start, int len) throws XMLStreamException {
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-        
-    }
-    
 }
