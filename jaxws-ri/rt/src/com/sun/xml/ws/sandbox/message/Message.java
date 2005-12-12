@@ -7,6 +7,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
+import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
 
@@ -83,6 +84,21 @@ import java.lang.reflect.Proxy;
  * XOP is considered as an {@link Encoder}, and therefore when you are looking at
  * {@link Message}, you'll never see &lt;xop:Include> or any such elements
  * (instead you'll see the base64 data inlined.)
+ *
+ *
+ *
+ * <h2>Message lifespan</h2>
+ * <p>
+ * Often {@link MessageProperties} include information local to a particular
+ * invocaion (such as {@link HttpServletRequest}, from this angle, it makes sense
+ * to tie a lifespan of a message to one pipeline invocation.
+ * <p>
+ * On the other hand, if you think about WS-RM, it often needs to hold on to
+ * a message longer than a pipeline invocation (you might get an HTTP request,
+ * get a message X, get a second HTTP request, get another message Y, and
+ * only then you might want to process X.)
+ * <p>
+ * TODO: what do we do about this?
  *
  *
  *
