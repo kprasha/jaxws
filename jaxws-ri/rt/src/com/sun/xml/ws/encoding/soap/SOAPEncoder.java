@@ -126,7 +126,6 @@ public abstract class SOAPEncoder implements Encoder, InternalSoapEncoder {
             writeFault(faultInfo, messageInfo, writer);
             writer.writeEndDocument();
             writer.close();
-            baos.close();
             Transformer transformer = XmlUtil.newTransformer();
             StreamSource source = new StreamSource(baos.newInputStream());
             DOMResult domResult = new DOMResult();
@@ -395,7 +394,6 @@ public abstract class SOAPEncoder implements Encoder, InternalSoapEncoder {
      * @param rUri
      * @param wPrefix
      * @param wUri
-     * @return
      */
     private static boolean declarePrefix(String rPrefix, String rUri, String wPrefix, String wUri){
         if (wUri == null ||((wPrefix != null) && !rPrefix.equals(wPrefix))||
