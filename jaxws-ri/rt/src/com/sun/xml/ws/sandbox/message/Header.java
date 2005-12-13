@@ -63,14 +63,26 @@ public interface Header {
      * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver".
      *
      * @return
-     *      never null.
-     *      this string must be interned.
+     *      never null. This string need not be interned.
      */
     public String getRole();
 
     /**
-     * True if this header is to be relayed if not processed
-     * (only supported for SOAP 1.2).
+     * True if this header is to be relayed if not processed.
+     * For SOAP 1.1 messages, this method always return false.
+     *
+     * <p>
+     * IOW, this method returns true if there's @soap:relay='true'
+     * is present.
+     *
+     * <h3>Implementation Note</h3>
+     * <p>
+     * The implementation needs to check for both "true" and "1",
+     * but because attribute values are normalized, it doesn't have
+     * to consider " true", " 1 ", and so on.
+     *
+     * @return
+     *      false.
      */
     public boolean isRelay();
     
