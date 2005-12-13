@@ -3,6 +3,7 @@ package com.sun.xml.ws.sandbox.message;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamException;
@@ -32,6 +33,13 @@ import javax.xml.stream.XMLStreamReader;
  * @see HeaderList
  */
 public interface Header {
+    // TODO: Vivek pointed out that the only time we are looking at
+    // mustUnderstand and role are when we do the mustUnderstand error check
+    // (that is, to find out if there's any header with @mustUnderstand that
+    // has appropriate role for us.)
+    // if that's the case, it might be better if we define this whole operation
+    // as one method, instead of exposing two properties.
+
     /**
      * True if this header must be understood.
      */
@@ -40,6 +48,7 @@ public interface Header {
     /**
      * Gets the value of the soap:role attribute (or soap:actor for SOAP 1.1).
      *
+     * <p>
      * SOAP 1.1 values are normalized into SOAP 1.2 values.
      *
      * An omitted SOAP 1.1 actor attribute value will become:
@@ -48,6 +57,14 @@ public interface Header {
      * "http://schemas.xmlsoap.org/soap/actor/next"
      * will become:
      * "http://www.w3.org/2003/05/soap-envelope/role/next"
+     *
+     * <p>
+     * If the soap:role attribute is absent, this method returns
+     * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver".
+     *
+     * @return
+     *      never null.
+     *      this string must be interned.
      */
     public String getRole();
 
@@ -60,14 +77,18 @@ public interface Header {
     /**
      * Gets the namespace URI of this header element.
      *
-     * @return never null
+     * @return
+     *      never null.
+     *      this string must be interned.
      */
     public String getNamespaceURI();
 
     /**
      * Gets the local name of this header element.
      *
-     * @return never null
+     * @return
+     *      never null.
+     *      this string must be interned.
      */
     public String getLocalPart();
 
@@ -80,7 +101,7 @@ public interface Header {
      * Reads the header as a JAXB object by using the given unmarshaller.
      *
      */
-    public <T> T readAsJAXB(Unmarshaller unmarshaller);
+    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
     
     /**
      * Writes out the header.
