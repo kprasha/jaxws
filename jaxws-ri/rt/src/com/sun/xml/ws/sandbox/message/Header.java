@@ -83,6 +83,10 @@ public interface Header {
     
     /**
      * Writes out the header.
+     *
+     * @throws XMLStreamException
+     *      if the operation fails for some reason. This leaves the
+     *      writer to an undefined state.
      */
     public void writeTo(XMLStreamWriterEx w) throws XMLStreamException;
 
@@ -90,6 +94,10 @@ public interface Header {
      * Writes out the header to the given SOAPMessage.
      *
      * TODO: justify why this is necessary
+     *
+     * @throws XMLStreamException
+     *      if the operation fails for some reason. This leaves the
+     *      writer to an undefined state.
      */
-    public void writeTo(SOAPMessage saaj);
+    public void writeTo(SOAPMessage saaj) throws XMLStreamException;
 }
