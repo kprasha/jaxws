@@ -37,10 +37,25 @@ public interface Header {
     public boolean isMustUnderstood();
 
     /**
-     * Gets the value of the soap:actor attribute (or soap:role for SOAP 1.2), or null.
+     * Gets the value of the soap:role attribute (or soap:actor for SOAP 1.1).
+     *
+     * SOAP 1.1 values are normalized into SOAP 1.2 values.
+     *
+     * An omitted SOAP 1.1 actor attribute value will become:
+     * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver"
+     * An SOAP 1.1 actor attribute value of:
+     * "http://schemas.xmlsoap.org/soap/actor/next"
+     * will become:
+     * "http://www.w3.org/2003/05/soap-envelope/role/next"
      */
-    public String getActor();
+    public String getRole();
 
+    /**
+     * True if this header is to be relayed if not processed
+     * (only supported for SOAP 1.2).
+     */
+    public boolean isRelay();
+    
     /**
      * Gets the namespace URI of this header element.
      *
