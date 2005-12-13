@@ -197,6 +197,15 @@ public class XMLStreamReaderUtil {
         }
     }
 
+    public static void verifyTag(XMLStreamReader reader, String localName, String namespaceURI) {
+        if (localName != reader.getLocalName() || namespaceURI != reader.getNamespaceURI()) {
+            throw new XMLStreamReaderException(
+                "xmlreader.unexpectedState.tag",
+                    "{" + namespaceURI + "}" + localName,
+                    "{" + reader.getNamespaceURI() + "}" + reader.getLocalName());
+        }
+    }
+    
     public static void verifyTag(XMLStreamReader reader, QName name) {
         if (!name.equals(reader.getName())) {
             throw new XMLStreamReaderException(
