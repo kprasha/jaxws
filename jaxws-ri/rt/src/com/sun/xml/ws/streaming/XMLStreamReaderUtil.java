@@ -182,8 +182,8 @@ public class XMLStreamReaderUtil {
      * be called multiple times to get the same list of attributes. 
      */
     public static Attributes getAttributes(XMLStreamReader reader) {
-        return (reader.getEventType() == reader.START_ELEMENT ||
-                reader.getEventType() == reader.ATTRIBUTE) ?
+        return (reader.getEventType() == START_ELEMENT ||
+                reader.getEventType() == ATTRIBUTE) ?
                 new AttributesImpl(reader) : null;
     }
 
@@ -207,12 +207,7 @@ public class XMLStreamReaderUtil {
     }
     
     public static void verifyTag(XMLStreamReader reader, QName name) {
-        if (!name.equals(reader.getName())) {
-            throw new XMLStreamReaderException(
-                "xmlreader.unexpectedState.tag",
-                    name,
-                    reader.getName());
-        }
+        verifyTag(reader, name.getLocalPart(), name.getNamespaceURI() );
     }
 
     public static String getStateName(XMLStreamReader reader) {
