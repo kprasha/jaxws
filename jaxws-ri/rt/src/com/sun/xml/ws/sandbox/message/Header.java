@@ -4,6 +4,7 @@ import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -95,9 +96,9 @@ public interface Header {
      *
      * TODO: justify why this is necessary
      *
-     * @throws XMLStreamException
+     * @throws SOAPException
      *      if the operation fails for some reason. This leaves the
      *      writer to an undefined state.
      */
-    public void writeTo(SOAPMessage saaj) throws XMLStreamException;
+    public void writeTo(SOAPMessage saaj) throws SOAPException;
 }
