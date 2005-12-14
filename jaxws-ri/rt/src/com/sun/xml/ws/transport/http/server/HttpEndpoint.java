@@ -101,7 +101,6 @@ public class HttpEndpoint {
                 ByteArrayBuffer baos = new ByteArrayBuffer();
                 try {
                     transformer.transform(source, new StreamResult(baos));
-                    baos.close();
                 } catch (TransformerException te) {
                     throw new ServerRtException("server.rt.err",te);
                 }

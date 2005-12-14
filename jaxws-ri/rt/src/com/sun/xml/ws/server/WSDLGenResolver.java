@@ -188,7 +188,6 @@ public class WSDLGenResolver implements WSDLOutputResolver {
         }
 
         public InputStream getDoc() {
-            bout.close();
             return bout.newInputStream();
         }
 
