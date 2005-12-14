@@ -105,9 +105,26 @@ public interface Header {
     public String getLocalPart();
 
     /**
-     * Reads the header as a {@link XMLStreamReader}
+     * Reads the header as a {@link XMLStreamReader}.
+     *
+     *
+     * <h3>Performance Expectation</h3>
+     * <p>
+     * For some {@link Header} implementations, this operation
+     * is a non-trivial operation. Therefore, use of this method
+     * is discouraged unless the caller is interested in reading
+     * the whole header.
+     *
+     * <p>
+     * Similarly, if the caller wants to use this method only to do
+     * the API conversion (such as simply firing SAX events from
+     * {@link XMLStreamReader}), then the JAX-WS team requests
+     * that you talk to us.
+     *
+     * @return
+     *      must not null.
      */
-    public XMLStreamReader readHeader();
+    public XMLStreamReader readHeader() throws XMLStreamException;
 
     /**
      * Reads the header as a JAXB object by using the given unmarshaller.
