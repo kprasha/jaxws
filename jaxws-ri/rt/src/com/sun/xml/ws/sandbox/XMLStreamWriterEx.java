@@ -12,8 +12,10 @@ import java.io.OutputStream;
  * For more intuitive design, this interface would have extended {@link XMLStreamWriter},
  * but that would require delegation, which introduces unnecessary overhead.
  *
- * TODO
- * - Add methods to write other primitive types, such as hex and integers
+ * <h2>TODO</h2>
+ * <ol>
+ * <li>
+ *   Add methods to write other primitive types, such as hex and integers
  *   (and arrays of).
  *   A textual implementation would write characters in accordance
  *   to the canonical lexical definitions specified in W3C XML Schema: datatypes.
@@ -21,19 +23,26 @@ import java.io.OutputStream;
  *   that would otherwise be base64 encoded when using the textual implementation.
  *   A Fast Infoset implementation would encoded binary data the primitive types in
  *   binary form.
- * - Consider renaming writeBinary to writeBytesAsBase64 to be consistent with
+ * <li>
+ *   Consider renaming writeBinary to writeBytesAsBase64 to be consistent with
  *   infoset abstraction.
- * - Consider including the ability to write an Object. The JAXB marshaller can
- *   be used.
- * - Add the ability to writeStart and writeEnd on attributes so that the same
+ * <li>
+ *   Add the ability to writeStart and writeEnd on attributes so that the same
  *   methods for writing primitive types (and characters, which will require new methods)
  *   can be used for writing attribute values as well as element content.
+ * </ol>
+ *
+ * @see XMLStreamReaderEx
  * @author Kohsuke Kawaguchi
  */
 public interface XMLStreamWriterEx {
 
     /**
      * Gets the base {@link XMLStreamWriter}.
+     * 
+     * @return
+     *      multiple invocation of this method must return
+     *      the same object.
      */
     XMLStreamWriter getBase();
 
