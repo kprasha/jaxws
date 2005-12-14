@@ -1,5 +1,7 @@
 package com.sun.xml.ws.sandbox;
 
+import com.sun.xml.ws.sandbox.impl.XMLStreamWriterExImpl;
+
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.activation.DataHandler;
@@ -33,13 +35,14 @@ import java.io.OutputStream;
  * </ol>
  *
  * @see XMLStreamReaderEx
+ * @see XMLStreamWriterExImpl
  * @author Kohsuke Kawaguchi
  */
 public interface XMLStreamWriterEx {
 
     /**
      * Gets the base {@link XMLStreamWriter}.
-     * 
+     *
      * @return
      *      multiple invocation of this method must return
      *      the same object.

@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.bind.v2.runtime.unmarshaller.Base64Data;
+import com.sun.xml.ws.sandbox.impl.XMLStreamReaderExImpl;
 
 import javax.activation.DataSource;
 import javax.xml.stream.XMLStreamReader;
@@ -15,6 +16,7 @@ import java.io.InputStream;
  * but that would require delegation, which introduces unnecessary overhead.
  *
  * @see XMLStreamWriterEx
+ * @see XMLStreamReaderExImpl
  * @author Kohsuke Kawaguchi
  */
 public interface XMLStreamReaderEx {
