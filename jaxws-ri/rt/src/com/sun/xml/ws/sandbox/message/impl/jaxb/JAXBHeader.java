@@ -1,5 +1,8 @@
 package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferResult;
+import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Header;
 import org.xml.sax.Attributes;
@@ -39,6 +42,12 @@ abstract class JAXBHeader implements Header {
      * See the <tt>FLAG_***</tt> constants.
      */
     protected int flags;
+
+    /**
+     * Once the header is turned into infoset,
+     * this buffer keeps it.
+     */
+    private XMLStreamBuffer infoset;
 
     public JAXBHeader(Marshaller marshaller, Object jaxbObject) {
         this.marshaller = marshaller;
@@ -134,9 +143,19 @@ abstract class JAXBHeader implements Header {
         return localName;
     }
 
-    public XMLStreamReader readHeader() {
-        // TODO
-        throw new UnsupportedOperationException();
+    public XMLStreamReader readHeader() throws XMLStreamException {
+        try {
+            if(infoset==null) {
+                infoset = new XMLStreamBuffer();
+                XMLStreamBufferResult sbr = new XMLStreamBufferResult(infoset);
+                marshaller.marshal(jaxbObject,sbr);
+            }
+            StreamReaderBufferProcessor r = new StreamReaderBufferProcessor();
+            r.setXMLStreamBuffer(infoset);
+            return r;
+        } catch (JAXBException e) {
+            throw new XMLStreamException(e);
+        }
     }
 
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
