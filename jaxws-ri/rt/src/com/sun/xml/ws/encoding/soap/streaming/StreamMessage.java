@@ -20,9 +20,11 @@ public class StreamMessage extends Message {
     protected String _payloadLocalName;
 
     protected String _payloadNamespaceURI;
+
+    private final HeaderList headers;
     
     public StreamMessage(HeaderList headers, XMLStreamReader reader) {
-        super(headers);
+        this.headers = headers;
         
         _reader = reader;
         
@@ -31,14 +33,18 @@ public class StreamMessage extends Message {
     }
     
     public StreamMessage(HeaderList headers) {
-        super(headers);
-        
+        this.headers = headers;
+
         _reader = null;
         
         _payloadLocalName = "";
         _payloadNamespaceURI = "";
     }
-    
+
+    public HeaderList getHeaders() {
+        return headers;
+    }
+
     public MessageProperties getProperties() {
         throw new UnsupportedOperationException();
     }
