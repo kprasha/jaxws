@@ -14,6 +14,10 @@ public final class JAXBHeader11 extends JAXBHeader {
         super(marshaller, jaxbObject);
     }
 
+    /**
+     * @deprecated
+     *      pointless invocation.
+     */
     public boolean isRelay() {
         return false;
     }

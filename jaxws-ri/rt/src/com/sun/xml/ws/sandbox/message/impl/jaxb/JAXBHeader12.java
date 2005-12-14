@@ -6,6 +6,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.soap.SOAPConstants;
 
 /**
+ * {@link JAXBHeader} for SOAP 1.2.
+ * 
  * @author Kohsuke Kawaguchi
  */
 public final class JAXBHeader12 extends JAXBHeader {
