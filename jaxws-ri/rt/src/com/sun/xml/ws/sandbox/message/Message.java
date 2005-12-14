@@ -127,25 +127,18 @@ import java.lang.reflect.Proxy;
  */
 public abstract class Message {
 
-    private final HeaderList headers;
-
-    protected Message(HeaderList headers) {
-        this.headers = headers;
-    }
-
-    protected Message() {
-        this(new HeaderList());
-    }
-
     /**
      * Gets all the headers of this message.
+     *
+     * <h3>Implementation Note</h3>
+     * <p>
+     * {@link Message} implementation is allowed to defer
+     * the construction of {@link HeaderList} object.
      *
      * @return
      *      always return the same non-null object.
      */
-    public final HeaderList getHeaders() {
-        return headers;
-    }
+    public abstract HeaderList getHeaders();
 
     /**
      * Returns the properties of this message.
