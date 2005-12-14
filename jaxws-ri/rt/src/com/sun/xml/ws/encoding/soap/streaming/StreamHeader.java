@@ -5,6 +5,7 @@ import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Header;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -23,7 +24,7 @@ public class StreamHeader implements Header {
     
     protected boolean _isMustUnderstand;
     
-    protected String _role = "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver";
+    protected String _role = SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER;
     
     protected boolean _isRelay;
     
