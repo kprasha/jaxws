@@ -70,7 +70,7 @@ public class LocalTransportPipe implements Pipe {
             WSConnection con = new LocalConnectionImpl(lm);
             // get transport headers from message
             MessageProperties props = msg.getProperties();
-            Map<String, List<String>> reqHeaders = props.getHttpRequestHeaders();
+            Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
             con.setHeaders(reqHeaders);
 
             Encoder encoder = new EnvelopeEncoder();
