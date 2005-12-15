@@ -32,14 +32,12 @@ import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.corba.se.spi.ior.Writeable;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Iterator;
@@ -51,8 +49,13 @@ import java.util.Map;
  * @author jitu
  */
 public class HttpTransportPipe implements Pipe {
+
+    private final Encoder encoder;
+    private final Decoder decoder;
     
     public HttpTransportPipe() {
+        encoder = new EnvelopeEncoder();
+        decoder = new EnvelopeDecoder();
     }
 
     public void postConstruct() {
@@ -67,13 +70,12 @@ public class HttpTransportPipe implements Pipe {
             
             // get transport headers from message
             MessageProperties props = msg.getProperties();
-            Map<String, List<String>> reqHeaders = props.getHttpRequestHeaders();
+            Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
             con.setHeaders(reqHeaders);
 
-            Encoder encoder = new EnvelopeEncoder();
             encoder.encode(msg, con.getOutput());
+            con.closeOutput();
             
-            Decoder decoder = new EnvelopeDecoder();
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
             return decoder.decode(con.getInput(), ct);
