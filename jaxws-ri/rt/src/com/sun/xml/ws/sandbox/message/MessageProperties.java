@@ -64,8 +64,10 @@ public class MessageProperties implements MessageContext {
     /**
      * Bag to capture "other" properties that do not have
      * strongly-typed presence on this object.
+     *
+     * TODO: allocate this instance lazily.
      */
-    private final Map<String,Object> otherProperties = new HashMap<String, Object>();
+    private Map<String,Object> otherProperties = new HashMap<String, Object>();
 
 
     public int size() {
