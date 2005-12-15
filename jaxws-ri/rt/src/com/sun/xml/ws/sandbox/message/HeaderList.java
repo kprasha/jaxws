@@ -2,6 +2,7 @@ package com.sun.xml.ws.sandbox.message;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A list of {@link Header}s on a {@link Message}.
@@ -15,6 +16,20 @@ import java.util.Iterator;
  * @see Message#getHeaders()
  */
 public final class HeaderList extends ArrayList<Header> {
+
+    /**
+     * Creates an empty {@link HeaderList}.
+     */
+    public HeaderList() {
+    }
+
+    /**
+     * Copy constructor.
+     */
+    public HeaderList(List<Header> headers) {
+        super(headers);
+    }
+
     /**
      * The number of total headers.
      */
@@ -48,7 +63,7 @@ public final class HeaderList extends ArrayList<Header> {
     public Iterator<Header> getHeaders(String nsUri, String localName) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Gets an iteration of headers {@link Header} in the specified namespace.
      *
@@ -58,7 +73,7 @@ public final class HeaderList extends ArrayList<Header> {
     public Iterator<Header> getHeaders(String nsUri) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Adds a new {@link Header}.
      *
