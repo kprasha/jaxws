@@ -7,23 +7,24 @@ import com.sun.xml.ws.sandbox.message.AttachmentSet;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.SOAPUtil;
-import org.w3c.dom.NamedNodeMap;
+import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -42,18 +43,17 @@ import java.util.Map;
 
 public class SAAJMessage extends Message{
     private SOAPMessage sm;
+    private HeaderList headers;
     private MessageProperties properties;
     private String payloadLocalName;
     private String payloadNamspace;
     private SAAJAttachmentSet attSet;
 
-    public SAAJMessage(SOAPMessage sm){
-        super();
-        this.sm = sm;
-    }
+    private boolean parsedHeader;
 
-    public SAAJMessage(HeaderList headers, SOAPMessage sm) {
-        super(headers);
+    public SAAJMessage(SOAPMessage sm){
+        properties = new MessageProperties();
+
         this.sm = sm;
         try {
             Node body = sm.getSOAPBody();
@@ -68,6 +68,35 @@ public class SAAJMessage extends Message{
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
+    }
+
+    public SAAJMessage(HeaderList headers, SOAPMessage sm) {
+        this(sm);
+        this.headers = headers;
+    }
+
+    /**
+     * Gets all the headers of this message.
+     * @return always return the same non-null object.
+     */
+    public HeaderList getHeaders() {
+        if(parsedHeader)
+            return headers;
+
+        if(headers == null)
+            headers = new HeaderList();
+        
+        try {
+            SOAPHeader header = sm.getSOAPHeader();
+            Iterator iter = header.examineAllHeaderElements();
+            while(iter.hasNext()){
+                headers.add(new SAAJHeader((SOAPHeaderElement)iter.next()));
+            }
+            parsedHeader = true;
+        } catch (SOAPException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return headers;
     }
 
     /**
@@ -184,7 +213,7 @@ public class SAAJMessage extends Message{
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
             if(pn != null)
-                serializeNode(pn, sw.getBase());
+                DOMUtil.serializeNode(pn, sw.getBase());
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         } catch (SOAPException e) {
@@ -201,7 +230,7 @@ public class SAAJMessage extends Message{
     public void writeTo(XMLStreamWriterEx sw) {
         try {
             SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
-            serializeNode(se, sw.getBase());
+            DOMUtil.serializeNode(se, sw.getBase());
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
@@ -250,48 +279,7 @@ public class SAAJMessage extends Message{
         }
     }
 
-    /**
-     * Traverses a DOM node and writes out on a streaming writer.
-     * @param node
-     * @param writer
-     */
-    private void serializeNode(Node node, XMLStreamWriter writer) throws XMLStreamException {
-        writer.writeStartElement(node.getPrefix(), node.getLocalName(), node.getNamespaceURI());
-        if (node.hasAttributes()){
-            NamedNodeMap attrs = node.getAttributes();
-            int numOfAttributes = attrs.getLength();
-            for(int i = 0; i < numOfAttributes; i++){
-                Node attr = attrs.item(i);
-                writer.writeAttribute(attr.getPrefix(), attr.getNamespaceURI(), attr.getLocalName(), attr.getNodeValue());
-            }
-        }
 
-        if(node.hasChildNodes()){
-            NodeList children = node.getChildNodes();
-            for(int i = 0; i< children.getLength(); i++){
-                Node child = children.item(i);
-                switch(child.getNodeType()){
-                    case Node.PROCESSING_INSTRUCTION_NODE:
-                        writer.writeProcessingInstruction(child.getNodeValue());
-                    case Node.DOCUMENT_TYPE_NODE:
-                        break;
-                    case Node.CDATA_SECTION_NODE:
-                        writer.writeCData(child.getNodeValue());
-                        break;
-                    case Node.COMMENT_NODE:
-                        writer.writeComment(child.getNodeValue());
-                        break;
-                    case Node.TEXT_NODE:
-                        writer.writeCharacters(child.getNodeValue());
-                        break;
-                    default:
-                        serializeNode(child, writer);
-                        break;
-                }
-            }
-        }
-        writer.writeEndElement();
-    }
 
 
     private class SAAJAttachment implements Attachment{
