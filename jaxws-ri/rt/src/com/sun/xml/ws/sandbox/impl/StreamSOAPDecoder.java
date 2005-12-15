@@ -1,5 +1,5 @@
 
-package com.sun.xml.ws.encoding.soap.streaming;
+package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
@@ -8,6 +8,8 @@ import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
+import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import java.io.IOException;
 import java.io.InputStream;

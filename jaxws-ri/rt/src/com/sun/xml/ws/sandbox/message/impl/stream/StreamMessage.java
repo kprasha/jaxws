@@ -1,4 +1,4 @@
-package com.sun.xml.ws.encoding.soap.streaming;
+package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.AttachmentSet;
