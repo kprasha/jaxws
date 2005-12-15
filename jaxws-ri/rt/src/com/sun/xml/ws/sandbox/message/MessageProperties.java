@@ -34,6 +34,18 @@ import java.util.Set;
  * the assumption that most of time no user code really cares about
  * properties in {@link MessageContext}, and even those who does will
  * just use a few {@link #get(Object)} method at most.
+ *
+ *
+ * <h3>TODO</h3>
+ * <ol>
+ *  <li>this class needs to be cloneable since Message is copiable.
+ *  <li>The three live views aren't implemented correctly. It will be
+ *      more work to do so, although I'm sure it's possible.
+ *  <li>Scope. Can someone shit down with me (Kohsuke) and tell me
+ *      how they work?
+ * </ol>
+ *
+ * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings({"SuspiciousMethodCalls"})
 public class MessageProperties implements MessageContext {
