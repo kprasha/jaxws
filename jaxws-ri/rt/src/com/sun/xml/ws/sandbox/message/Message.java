@@ -6,6 +6,7 @@ import com.sun.xml.ws.sandbox.Encoder;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
@@ -210,8 +211,11 @@ public abstract class Message {
      * Creates the equivalent {@link SOAPMessage} from this message.
      *
      * This consumes the message.
+     *
+     * @throws SOAPException
+     *      if there's any error while creating a {@link SOAPMessage}.
      */
-    public abstract SOAPMessage readAsSOAPMessage();
+    public abstract SOAPMessage readAsSOAPMessage() throws SOAPException ;
 
     /**
      * Reads the payload as a JAXB object by using the given unmarshaller.
