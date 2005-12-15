@@ -1,29 +1,63 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
-import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.streaming.SourceReaderFactory;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.util.DOMUtil;
 
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.ws.WebServiceException;
+
+import org.w3c.dom.Node;
 
 /**
- * $Id: SAAJHeader.java,v 1.1.2.1 2005-12-14 01:46:54 vivekp Exp $
+ * @author Vivek Pandey
  */
 
-/**
- * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
 public class SAAJHeader implements Header{
+
+    private SOAPHeaderElement header;
+    private boolean isMustUnderstood;
+    private String role;
+    private boolean relay;
+    private int flags;
+    private String localName;
+    private String namespaceUri;
+
+    protected static final int FLAG_ACTOR            = 0x0001;
+    protected static final int FLAG_MUST_UNDERSTAND   = 0x0002;
+    protected static final int FLAG_RELAY             = 0x0004;
+
+
+    public SAAJHeader(SOAPHeaderElement header) {
+        this.header = header;
+        Node n = header.getFirstChild();
+        if(n != null){
+            localName = n.getLocalName();
+            namespaceUri = n.getNamespaceURI();
+        }
+    }
+
     /**
      * True if this header must be understood.
+     *
+     * Read the mustUndestandHeader only once, save reading it from DOM everytime.
      */
     public boolean isMustUnderstood() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        if(isSet(FLAG_MUST_UNDERSTAND)){
+            isMustUnderstood = header.getMustUnderstand();
+            set(FLAG_MUST_UNDERSTAND);
+        }
+        return isMustUnderstood;
     }
 
     /**
@@ -46,7 +80,18 @@ public class SAAJHeader implements Header{
      * @return never null. This string need not be interned.
      */
     public String getRole() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        if(isSet(FLAG_ACTOR))
+            return role;
+
+        role = header.getActor();
+
+        //SAAJ may return null, lets return the default value in that case
+        //TODO: findout SOAP version
+        if(role == null)
+            role = "http://schemas.xmlsoap.org/soap/actor/next";
+
+        set(FLAG_ACTOR);
+        return role;
     }
 
     /**
@@ -66,7 +111,17 @@ public class SAAJHeader implements Header{
      * @return false.
      */
     public boolean isRelay() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        if(isSet(FLAG_RELAY))
+            return relay;
+
+        //SAAJ throws UnsupportedOperationException if its SOAP 1.1 version
+        //Ideally this method should always throw false for SOAP 1.1
+        try{
+            relay = header.getRelay();
+        }catch(UnsupportedOperationException e){
+            relay = false;
+        }
+        return relay;
     }
 
     /**
@@ -76,7 +131,7 @@ public class SAAJHeader implements Header{
      *         this string must be interned.
      */
     public String getNamespaceURI() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return namespaceUri;
     }
 
     /**
@@ -86,7 +141,7 @@ public class SAAJHeader implements Header{
      *         this string must be interned.
      */
     public String getLocalPart() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return localName;
     }
 
     /**
@@ -109,14 +164,22 @@ public class SAAJHeader implements Header{
      * @return must not null.
      */
     public XMLStreamReader readHeader() throws XMLStreamException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Node n = header.getFirstChild();
+        return (n != null)?SourceReaderFactory.createSourceReader(new DOMSource(n), true):null;
     }
 
     /**
      * Reads the header as a JAXB object by using the given unmarshaller.
      */
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            Node n = header.getFirstChild();
+            if(n != null)
+                return (T) unmarshaller.unmarshal(n);
+            return null;
+        } catch (JAXBException e) {
+            throw new WebServiceException(e);
+        }
     }
 
     /**
@@ -127,18 +190,36 @@ public class SAAJHeader implements Header{
      *          writer to an undefined state.
      */
     public void writeTo(XMLStreamWriterEx w) throws XMLStreamException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            Node n = header.getFirstChild();
+            DOMUtil.serializeNode(n, w.getBase());
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
     }
 
     /**
      * Writes out the header to the given SOAPMessage.
-     * <p/>
-     * TODO: justify why this is necessary
+     *
+     * When will we need this method?
      *
      * @throws javax.xml.soap.SOAPException if the operation fails for some reason. This leaves the
      *                                      writer to an undefined state.
      */
     public void writeTo(SOAPMessage saaj) throws SOAPException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param flag
+     * @return
+     */
+    protected boolean isSet(int flag){
+        return (flags&flag) != 0;
+    }
+
+    protected void set(int flag){
+        flags |= flag;
     }
 }
