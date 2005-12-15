@@ -53,6 +53,10 @@ public interface Encoder {
      * Internally, this method is most likely invoke {@link Message#writeTo(XMLStreamWriterEx)}
      * to turn the message into infoset.
      *
+     * @param out
+     *      Must not be null. The caller is responsible for closing the stream,
+     *      not the callee.
+     *
      * @return
      *      The MIME content type of the encoded message (such as "application/xml").
      *      This information is often ncessary by transport.
