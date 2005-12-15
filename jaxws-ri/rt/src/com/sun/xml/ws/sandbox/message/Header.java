@@ -30,6 +30,10 @@ import javax.xml.stream.XMLStreamReader;
  * replaying the infoset, which is efficiently but still
  * costly.
  *
+ * <p>
+ * A {@link Header} may belong to more than one {@link HeaderList}
+ * due to wrapping of {@link Message}.
+ *
  * @see HeaderList
  */
 public interface Header {
