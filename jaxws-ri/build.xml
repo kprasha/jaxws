@@ -502,7 +502,7 @@ major-version=${version}
           description="integrate the last successful XmlStreamBuffer Hudson build">
     <get src="http://kohsuke.sfbay/hudson/job/xmlstreambuffer/lastSuccessfulBuild/artifact/xmlstreambuffer/package/StreamBuffer.src.zip"
          dest="lib/streambuffer.src.zip" />
-    <get src="http://kohsuke.sfbay/hudson/job/xmlstreambuffer/build/2005-12-14_13-59-40/artifact/xmlstreambuffer/streambuffer/dist/streambuffer.jar"
+    <get src="http://kohsuke.sfbay/hudson/job/xmlstreambuffer/lastSuccessfulBuild/artifact/xmlstreambuffer/streambuffer/dist/streambuffer.jar"
          dest="lib/streambuffer.jar" />
   </target>
 
