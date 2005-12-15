@@ -1,5 +1,8 @@
 package com.sun.xml.ws.sandbox.message;
 
+import java.util.Iterator;
+import java.util.Collections;
+
 /**
  * A set of {@link Attachment} on a {@link Message}.
  *
@@ -35,4 +38,19 @@ public interface AttachmentSet extends Iterable<Attachment> {
     // *      must not be null.
     // */
     //void add(Attachment att);
+
+
+    /**
+     * Immutable {@link AttachmentSet} that has no {@link Attachment}.
+     */
+    // if we need mutation method on AttachmentSet, such singleton won't be possible.
+    public static final AttachmentSet EMPTY = new AttachmentSet() {
+        public Attachment get(String contentId) {
+            return null;
+        }
+
+        public Iterator<Attachment> iterator() {
+            return Collections.<Attachment>emptyList().iterator();
+        }
+    };
 }
