@@ -7,6 +7,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
@@ -227,7 +228,7 @@ public abstract class Message {
      *
      * This consumes the message.
      */
-    public abstract XMLStreamReader readPayload();
+    public abstract XMLStreamReader readPayload() throws XMLStreamException;
 
     /**
      * Writes the payload to StAX.

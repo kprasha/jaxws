@@ -75,16 +75,14 @@ abstract class JAXBHeader implements Header {
         if(isSet(FLAG_PARSED))
             return;
 
+        RootElementSniffer sniffer = new RootElementSniffer() {
+            @Override
+            protected void checkAttributes(Attributes a) {
+                JAXBHeader.this.checkHeaderAttribute(a);
+            }
+        };
         try {
-            marshaller.marshal(jaxbObject,new DefaultHandler() {
-                public void startElement(String uri, String localName, String qName, Attributes a) throws SAXException {
-                    JAXBHeader.this.nsUri = uri;
-                    JAXBHeader.this.localName = localName;
-                    checkHeaderAttribute(a);
-                    // no need to parse any further.
-                    throw aSAXException;
-                }
-            });
+            marshaller.marshal(jaxbObject,sniffer);
         } catch (JAXBException e) {
             // if it's due to us aborting the processing after the first element,
             // we can safely ignore this exception.
@@ -92,10 +90,8 @@ abstract class JAXBHeader implements Header {
             // if it's due to error in the object, the same error will be reported
             // when the readHeader() method is used, so we don't have to report
             // an error right now.
-
-            // recover by setting dummies.
-            nsUri = "##error";
-            localName = "##error";
+            nsUri = sniffer.nsUri;
+            localName = sniffer.localName;
         }
     }
 
@@ -184,5 +180,4 @@ abstract class JAXBHeader implements Header {
     protected static final int FLAG_MUST_UNDERSTAND   = 0x0002;
     protected static final int FLAG_RELAY             = 0x0004;
 
-    private static final SAXException aSAXException = new SAXException();
 }
