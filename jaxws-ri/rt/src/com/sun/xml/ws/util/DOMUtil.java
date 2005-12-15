@@ -23,6 +23,8 @@ package com.sun.xml.ws.util;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,6 +34,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -80,5 +84,48 @@ public class DOMUtil {
             throw iae;
         }
         return null;
+    }
+
+    /**
+     * Traverses a DOM node and writes out on a streaming writer.
+     * @param node
+     * @param writer
+     */
+    public static void serializeNode(Node node, XMLStreamWriter writer) throws XMLStreamException {
+        writer.writeStartElement(node.getPrefix(), node.getLocalName(), node.getNamespaceURI());
+        if (node.hasAttributes()){
+            NamedNodeMap attrs = node.getAttributes();
+            int numOfAttributes = attrs.getLength();
+            for(int i = 0; i < numOfAttributes; i++){
+                Node attr = attrs.item(i);
+                writer.writeAttribute(attr.getPrefix(), attr.getNamespaceURI(), attr.getLocalName(), attr.getNodeValue());
+            }
+        }
+
+        if(node.hasChildNodes()){
+            NodeList children = node.getChildNodes();
+            for(int i = 0; i< children.getLength(); i++){
+                Node child = children.item(i);
+                switch(child.getNodeType()){
+                    case Node.PROCESSING_INSTRUCTION_NODE:
+                        writer.writeProcessingInstruction(child.getNodeValue());
+                    case Node.DOCUMENT_TYPE_NODE:
+                        break;
+                    case Node.CDATA_SECTION_NODE:
+                        writer.writeCData(child.getNodeValue());
+                        break;
+                    case Node.COMMENT_NODE:
+                        writer.writeComment(child.getNodeValue());
+                        break;
+                    case Node.TEXT_NODE:
+                        writer.writeCharacters(child.getNodeValue());
+                        break;
+                    default:
+                        serializeNode(child, writer);
+                        break;
+                }
+            }
+        }
+        writer.writeEndElement();
     }
 }
