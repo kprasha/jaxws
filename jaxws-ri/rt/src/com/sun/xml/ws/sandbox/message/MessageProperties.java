@@ -3,6 +3,7 @@ package com.sun.xml.ws.sandbox.message;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import javax.activation.DataHandler;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,6 +61,19 @@ public class MessageProperties implements MessageContext {
      */
     @ContextProperty(HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> httpResponseHeaders;
+
+    /**
+     * Value of {@link #INBOUND_MESSAGE_ATTACHMENTS} property
+     */
+    @ContextProperty(INBOUND_MESSAGE_ATTACHMENTS)
+    public Map<String, DataHandler> inboundMessageAttachments;
+
+    /**
+     * Value of {@link #OUTBOUND_MESSAGE_ATTACHMENTS} property
+     */
+    @ContextProperty(OUTBOUND_MESSAGE_ATTACHMENTS)
+    public Map<String, DataHandler> outboundMessageAttachments;
+
 
     /**
      * Bag to capture "other" properties that do not have
