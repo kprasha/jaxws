@@ -25,8 +25,15 @@ import java.util.Set;
  *
  * <p>
  * If there are properties known the JAX-WS statically, they should be
- * present on this class as fields. We can generate a {@link Map} view
- * of those when requested.
+ * present on this class as fields with {@link ContextProperty} annotation.
+ *
+ * <h3>Implementation Note</h3>
+ * <p>
+ * This implementation is designed to favor access through fields, although
+ * it still allows access through {@link Map} methods. This is based on
+ * the assumption that most of time no user code really cares about
+ * properties in {@link MessageContext}, and even those who does will
+ * just use a few {@link #get(Object)} method at most.
  */
 @SuppressWarnings({"SuspiciousMethodCalls"})
 public class MessageProperties implements MessageContext {

@@ -17,6 +17,10 @@ import java.util.Map;
  * can be set through {@link Map} anyway, you won't be
  * losing abstraction by doing so.)
  *
+ * <p>
+ * For similar reason, this annotation can be only placed
+ * on a reference type, not primitive type.
+ *
  * @see MessageProperties
  * @author Kohsuke Kawaguchi
  */
