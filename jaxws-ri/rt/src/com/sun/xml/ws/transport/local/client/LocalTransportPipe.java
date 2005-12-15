@@ -22,8 +22,6 @@ package com.sun.xml.ws.transport.local.client;
 import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
-import com.sun.xml.ws.sandbox.impl.XMLStreamWriterExImpl;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
@@ -31,16 +29,10 @@ import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.Tie;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.transport.local.LocalMessage;
 import com.sun.xml.ws.transport.local.server.LocalConnectionImpl;
 
 import javax.xml.ws.WebServiceException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Map;
 
@@ -53,9 +45,14 @@ public class LocalTransportPipe implements Pipe {
     private RuntimeEndpointInfo endpointInfo;
     private static final Tie tie = new Tie();
     LocalMessage lm = new LocalMessage();
-    
-    public LocalTransportPipe(RuntimeEndpointInfo endpointInfo) {
+
+    private final Encoder encoder;
+    private final Decoder decoder;
+
+    public LocalTransportPipe(RuntimeEndpointInfo endpointInfo, Encoder encoder, Decoder decoder) {
         this.endpointInfo = endpointInfo;
+        this.encoder = encoder;
+        this.decoder = decoder;
     }
 
     public void postConstruct() {
@@ -73,7 +70,6 @@ public class LocalTransportPipe implements Pipe {
             Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
             con.setHeaders(reqHeaders);
 
-            Encoder encoder = new EnvelopeEncoder();
             encoder.encode(msg, con.getOutput());
 
             // Set up RuntimeEndpointInfo with MessageContext
@@ -86,7 +82,6 @@ public class LocalTransportPipe implements Pipe {
 
             tie.handle(con, endpointInfo);
             
-            Decoder decoder = new EnvelopeDecoder();
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
             return decoder.decode(con.getInput(), ct);
@@ -102,40 +97,5 @@ public class LocalTransportPipe implements Pipe {
     }
 
     public void preDestroy() {
-    }
-    
-    private static class EnvelopeEncoder implements Encoder {
-        public String getStaticContentType() {
-            return "text/xml";
-        }
-
-        public String encode(Message message, OutputStream out) throws IOException {
-            // TODO attachments, XOP
-            XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
-            message.writeTo(writer);
-            return "text/xml";
-        }
-
-        public String encode(Message message, WritableByteChannel buffer) {
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-        
-    }
-        
-    private static class EnvelopeDecoder implements Decoder {
-        
-        public Message decode(InputStream in, String contentType) throws IOException {
-            Message msg = null;
-            // msg = new StreamMessage(in);
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-
-        public Message decode(ReadableByteChannel in, String contentType) {
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-        
     }
 }

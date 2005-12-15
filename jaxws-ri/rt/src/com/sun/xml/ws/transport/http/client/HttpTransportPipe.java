@@ -24,6 +24,8 @@ import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
+import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.sandbox.impl.XMLStreamWriterExImpl;
 import com.sun.xml.ws.sandbox.message.Attachment;
 import com.sun.xml.ws.sandbox.message.AttachmentSet;
@@ -36,10 +38,8 @@ import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +52,10 @@ public class HttpTransportPipe implements Pipe {
 
     private final Encoder encoder;
     private final Decoder decoder;
-    
-    public HttpTransportPipe() {
-        encoder = new EnvelopeEncoder();
-        decoder = new EnvelopeDecoder();
+
+    public HttpTransportPipe(Encoder encoder, Decoder decoder) {
+        this.encoder = encoder;
+        this.decoder = decoder;
     }
 
     public void postConstruct() {
@@ -164,40 +164,6 @@ public class HttpTransportPipe implements Pipe {
         
     }
     
-    
-    private static class EnvelopeEncoder implements Encoder {
-        public String getStaticContentType() {
-            return "text/xml";
-        }
-
-        public String encode(Message message, OutputStream out) throws IOException {
-            // TODO attachments, XOP
-            XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
-            message.writeTo(writer);
-            return "text/xml";
-        }
-
-        public String encode(Message message, WritableByteChannel buffer) {
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-    }
-        
-    private static class EnvelopeDecoder implements Decoder {
-        
-        public Message decode(InputStream in, String contentType) throws IOException {
-            Message msg = null;
-            // msg = new StreamMessage(in);
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-
-        public Message decode(ReadableByteChannel in, String contentType) {
-            //TODO: not yet implemented
-            throw new UnsupportedOperationException();
-        }
-        
-    }
     
     private static class UniqueValue {
         /**
