@@ -4,6 +4,7 @@ import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.Encoder;
 
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
@@ -215,8 +216,11 @@ public abstract class Message {
      * Reads the payload as a JAXB object by using the given unmarshaller.
      *
      * This consumes the message.
+     *
+     * @throws JAXBException
+     *      If JAXB reports an error during the processing.
      */
-    public abstract <T> T readAsJAXB(Unmarshaller unmarshaller);
+    public abstract <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
 
     /**
      * Reads the payload as a {@link XMLStreamReader}

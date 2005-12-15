@@ -78,7 +78,7 @@ public class SAAJMessage extends Message{
     public boolean hasHeaders() {
         return getHeaders().size() > 0;
     }
-    
+
     /**
      * Gets all the headers of this message.
      * @return always return the same non-null object.
@@ -89,7 +89,7 @@ public class SAAJMessage extends Message{
 
         if(headers == null)
             headers = new HeaderList();
-        
+
         try {
             SOAPHeader header = sm.getSOAPHeader();
             Iterator iter = header.examineAllHeaderElements();
@@ -179,14 +179,12 @@ public class SAAJMessage extends Message{
      * <p/>
      * This consumes the message.
      */
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) {
+    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
             if(pn != null)
                 return (T) unmarshaller.unmarshal(pn);
             return null;
-        } catch (JAXBException e) {
-            throw new WebServiceException(e);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
@@ -368,7 +366,7 @@ public class SAAJMessage extends Message{
         }
     }
 
-    private class SAAJAttachmentSet implements AttachmentSet{
+    private class SAAJAttachmentSet implements AttachmentSet {
 
         private SOAPMessage sm;
         private Map<String, Attachment> attMap;
