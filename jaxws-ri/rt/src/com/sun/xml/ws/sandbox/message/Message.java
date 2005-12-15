@@ -128,6 +128,14 @@ import java.lang.reflect.Proxy;
 public abstract class Message {
 
     /**
+     * Returns true if headers are present in the message.
+     *
+     * @return
+     *      true if headers are present.
+     */
+    public abstract boolean hasHeaders();
+
+    /**
      * Gets all the headers of this message.
      *
      * <h3>Implementation Note</h3>
@@ -152,7 +160,9 @@ public abstract class Message {
      * Gets the attachments of this message
      * (attachments live outside a message.)
      */
-    public abstract AttachmentSet getAttachments();
+    public AttachmentSet getAttachments() {
+        return AttachmentSet.EMPTY;
+    }
 
     /**
      * Gets the local name of the payload element.

@@ -9,16 +9,21 @@ import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+
 /**
+ * {@link Header} whose physical data representation is an XMLStreamBuffer.
  *
  * @author Paul.Sandoz@Sun.Com
  */
-public class StreamHeader implements Header {
-    private static final String SOAP_NAMESPACE_URI = "http://....";
-
-    private static final String SOAP_MUST_UNDERSTAND = "mustUnderstand";
-    private static final String SOAP_ROLE = "role";
-    private static final String SOAP_RELAY = "relay";
+public abstract class StreamHeader implements Header {
+    
+    protected static final String SOAP_1_1_MUST_UNDERSTAND = "mustUnderstand";
+    protected static final String SOAP_1_2_MUST_UNDERSTAND = SOAP_1_1_MUST_UNDERSTAND;
+    
+    protected static final String SOAP_1_1_ROLE = "role";
+    protected static final String SOAP_1_2_ROLE = "actor";
+    
+    protected static final String SOAP_1_2_RELAY = "relay";
   
     protected final XMLStreamBufferMark _mark;
     
@@ -78,30 +83,14 @@ public class StreamHeader implements Header {
     public void writeTo(SOAPMessage saaj) {
         throw new UnsupportedOperationException();        
     }    
-    
-    private void processHeaderAttributes(XMLStreamReader reader) {
-        for (int i = 0; i < reader.getAttributeCount(); i++) {
-            final String localName = reader.getAttributeLocalName(i);
-            final String namespaceURI = reader.getAttributeNamespace(i);
 
-            if (namespaceURI == SOAP_NAMESPACE_URI) {
-                if (localName == SOAP_MUST_UNDERSTAND) {
-                    final String value = reader.getAttributeValue(i);
-                    if (value != null && (value.equals("1") || value.equals("true"))) {
-                        _isMustUnderstand = true;
-                    }
-                } else if (localName == SOAP_ROLE) {
-                    final String value = reader.getAttributeValue(i);
-                    if (value != null && value.length() > 0) {
-                        _role = value;
-                    }
-                } else if (localName == SOAP_RELAY) {
-                    final String value = reader.getAttributeValue(i);
-                    if (value != null && (value.equals("1") || value.equals("true"))) {
-                        _isRelay = true;
-                    }
-                }
-            }
+    protected abstract void processHeaderAttributes(XMLStreamReader reader);
+    
+    protected final boolean convertToBoolean(String value) {
+        if (value != null && (value.equals("1") || value.equals("true"))) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

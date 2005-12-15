@@ -75,6 +75,10 @@ public class SAAJMessage extends Message{
         this.headers = headers;
     }
 
+    public boolean hasHeaders() {
+        return getHeaders().size() > 0;
+    }
+    
     /**
      * Gets all the headers of this message.
      * @return always return the same non-null object.

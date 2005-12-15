@@ -20,29 +20,23 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 /**
- * A streaming SOAP decoder.
+ * A stream SOAP decoder.
  *
  * @author Paul Sandoz
  */
-public class StreamSOAPDecoder implements Decoder {
+public abstract class StreamSOAPDecoder implements Decoder {
     
-    private static final String SOAP_NAMESPACE_URI = "http://....";
     private static final String SOAP_ENVELOPE = "Envelope";
     private static final String SOAP_HEADER = "Header";
     private static final String SOAP_BODY = "Body";
 
-    private static final String SOAP_MUST_UNDERSTAND = "mustUnderstand";
-    private static final String SOAP_ROLE = "role";
-    private static final String SOAP_RELAY = "relay";
-
-    /** Creates a new instance of StreamingSOAPDecoder */
-    public StreamSOAPDecoder() {
+    protected final String SOAP_NAMESPACE_URI;
+    
+    protected StreamSOAPDecoder(String namespace) {
+        SOAP_NAMESPACE_URI = namespace;
     }
     
     public Message decode(InputStream in, String contentType) throws IOException {
-
-        // TODO, from content type work out SOAP version
-        
         XMLStreamReader reader = createXMLStreamReader();
 
         XMLStreamReaderUtil.verifyReaderState(reader,
@@ -94,10 +88,10 @@ public class StreamSOAPDecoder implements Decoder {
         if (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
             // Payload is present
             // XMLStreamReader is positioned at the first child
-            return new StreamMessage(null, reader);
+            return createMessage(headers, reader);
         } else {
             // Empty payload <soap:Body/>
-            return new StreamMessage(null);
+            return createMessage(headers, null);
         } 
     }
 
@@ -131,10 +125,10 @@ public class StreamSOAPDecoder implements Decoder {
             // Mark
             XMLStreamBufferMark mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
             // Create Header
-            headers.add(new StreamHeader(reader, mark));
+            headers.add(createHeader(reader, mark));
             
             // Cache the header block
-            // Reader will be positioned at next header block or
+            // After caching Reader will be positioned at next header block or
             // the end of the </soap:header>
             creator.createElementFragment(reader, false);            
         }
@@ -143,6 +137,12 @@ public class StreamSOAPDecoder implements Decoder {
         XMLStreamReaderUtil.nextElementContent(reader);
         
         return buffer;
+    }
+    
+    protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBufferMark mark);
+    
+    protected StreamMessage createMessage(HeaderList headers, XMLStreamReader reader) {
+         return new StreamMessage(headers, reader);
     }
     
     private XMLStreamReader createXMLStreamReader() {

@@ -1,7 +1,6 @@
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
-import com.sun.xml.ws.sandbox.message.AttachmentSet;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
@@ -11,54 +10,61 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 
 public class StreamMessage extends Message {
+    private final MessageProperties props;
+    
     /*
      * The reader will be positioned at
      * the first child of the SOAP body
      */
-    protected XMLStreamReader _reader;
-    
-    protected String _payloadLocalName;
+    protected final XMLStreamReader reader;
 
-    protected String _payloadNamespaceURI;
-
-    private final HeaderList headers;
+    private HeaderList headers;
     
+    protected String payloadLocalName;
+
+    protected String payloadNamespaceURI;
+
     public StreamMessage(HeaderList headers, XMLStreamReader reader) {
         this.headers = headers;
         
-        _reader = reader;
+        this.reader = reader;
         
-        _payloadLocalName = _reader.getLocalName();
-        _payloadNamespaceURI = _reader.getNamespaceURI();
+        if (this.reader != null) {
+            this.payloadLocalName = this.reader.getLocalName();
+            this.payloadNamespaceURI = this.reader.getNamespaceURI();
+        } else {
+            this.payloadLocalName = "";
+            this.payloadNamespaceURI = "";
+        }
+        
+        this.props = new MessageProperties();
     }
     
     public StreamMessage(HeaderList headers) {
-        this.headers = headers;
-
-        _reader = null;
-        
-        _payloadLocalName = "";
-        _payloadNamespaceURI = "";
+        this(headers, null);
     }
 
+    public boolean hasHeaders() {
+        return (headers == null) ? false : headers.size() > 0;
+    }
+    
     public HeaderList getHeaders() {
+        if (headers == null) {
+            headers = new HeaderList();
+        }
         return headers;
     }
 
     public MessageProperties getProperties() {
-        throw new UnsupportedOperationException();
-    }
-
-    public AttachmentSet getAttachments() {
-        throw new UnsupportedOperationException();
+        return props;
     }
 
     public String getPayloadLocalPart() {
-        return _payloadLocalName;
+        return payloadLocalName;
     }
 
     public String getPayloadNamespaceURI() {
-        return _payloadNamespaceURI;
+        return payloadNamespaceURI;
     }
 
     public boolean isFault() {
@@ -82,7 +88,7 @@ public class StreamMessage extends Message {
     }
 
     public XMLStreamReader readPayload() {
-        return _reader;
+        return this.reader;
     }
 
     

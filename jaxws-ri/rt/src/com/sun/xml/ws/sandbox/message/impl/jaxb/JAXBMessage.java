@@ -29,6 +29,10 @@ public /*for now, work in progress*/ abstract class JAXBMessage extends Message 
         this.props = that.props;
     }
 
+    public boolean hasHeaders() {
+        return (headers == null) ? false : headers.size() > 0;
+    }
+    
     public HeaderList getHeaders() {
         if(headers==null)
             headers = new HeaderList();
@@ -37,10 +41,6 @@ public /*for now, work in progress*/ abstract class JAXBMessage extends Message 
 
     public MessageProperties getProperties() {
         return props;
-    }
-
-    public AttachmentSet getAttachments() {
-        return AttachmentSet.EMPTY;
     }
 
     public Message copy() {
