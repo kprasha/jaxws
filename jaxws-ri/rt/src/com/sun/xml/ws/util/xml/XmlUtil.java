@@ -49,6 +49,9 @@ import javax.xml.ws.WebServiceException;
 import com.sun.org.apache.xml.internal.resolver.CatalogManager;
 import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.SAXException;
 
 /**
  * @author WS Development Team
@@ -179,10 +182,10 @@ public class XmlUtil {
             throw new IllegalStateException("Unable to create a JAXP transformer");
         }
     }
-    
+
     /*
-     * Gets an EntityResolver using XML catalog
-     */
+    * Gets an EntityResolver using XML catalog
+    */
     public static EntityResolver createEntityResolver(URL catalogUrl) {
         // set up a manager
         CatalogManager manager = new CatalogManager();
@@ -201,7 +204,7 @@ public class XmlUtil {
      * Gets a default EntityResolver for catalog at META-INF/jaxws-catalog.xml
      */
     public static EntityResolver createDefaultCatalogResolver() {
-    
+
         // set up a manager
         CatalogManager manager = new CatalogManager();
         manager.setIgnoreMissingProperties(true);
@@ -226,4 +229,20 @@ public class XmlUtil {
 
         return new CatalogResolver(manager);
     }
+
+    /**
+     * {@link ErrorHandler} that always treat the error as fatal.
+     */
+    public static final ErrorHandler DRACONIAN_ERROR_HANDLER = new ErrorHandler() {
+        public void warning(SAXParseException exception) {
+        }
+
+        public void error(SAXParseException exception) throws SAXException {
+            throw exception;
+        }
+
+        public void fatalError(SAXParseException exception) throws SAXException {
+            throw exception;
+        }
+    };
 }
