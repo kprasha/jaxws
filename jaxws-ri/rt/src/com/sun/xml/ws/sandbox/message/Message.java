@@ -9,6 +9,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
@@ -239,16 +240,24 @@ public abstract class Message {
      *
      * This method writes just the payload of the message to the writer.
      * This consumes the message.
+     *
+     * @throws XMLStreamException
+     *      If the {@link XMLStreamWriter} reports an error,
+     *      or some other errors happen during the processing.
      */
-    public abstract void writePayloadTo(XMLStreamWriterEx sw);
+    public abstract void writePayloadTo(XMLStreamWriterEx sw) throws XMLStreamException;
 
     /**
      * Writes the whole SOAP message (but not attachments)
      * to the given writer.
      *
      * This consumes the message.
+     *
+     * @throws XMLStreamException
+     *      If the {@link XMLStreamWriter} reports an error,
+     *      or some other errors happen during the processing.
      */
-    public abstract void writeTo(XMLStreamWriterEx sw);
+    public abstract void writeTo(XMLStreamWriterEx sw) throws XMLStreamException;
 
     // TODO: do we need this?
     // public abstract void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
