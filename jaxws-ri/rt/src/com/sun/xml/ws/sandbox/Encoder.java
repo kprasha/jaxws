@@ -91,13 +91,15 @@ public interface Encoder {
      * want to have two {@link Encoder} instances. That's what this
      * method produces.
      *
+     * <h2>Implentation Note</h2>
      * <p>
-     * It is the caller's responsibility to serialize
-     * the invocation of the {@link #copy()} method and
-     * the {@link #encode} methods, so that the implementation of this method
-     * does not have to worry about concurrent modification (IOW, when
-     * this method is called, it is guaranteed by the caller that no one else
-     * is using the {@link #encode} methods.)
+     * Note that this method might be invoked by one thread while
+     * another thread is executing one of the {@link #encode} methods.
+     * <!-- or otherwise you'd always have to maintain one idle copy -->
+     * <!-- just so that you can make copies from -->
+     * This should be OK because you'll be only copying things that
+     * are thread-safe, and creating new ones for thread-unsafe resources,
+     * but please let us know if this contract is difficult.
      *
      * @return
      *      always non-null valid {@link Encoder} that performs
