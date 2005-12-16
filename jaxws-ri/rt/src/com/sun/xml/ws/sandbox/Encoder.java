@@ -102,8 +102,9 @@ public interface Encoder {
      *      any state that requires isolation (such as temporary buffer.)
      *
      *      <p>
-     *      If the {@link Encoder} implementation is by itself
-     *      re-entrant, this method may simply return <tt>this</tt>.
+     *      If the {@link Encoder} implementation is already
+     *      re-entrant and multi-thread safe to begin with,
+     *      then this method may simply return <tt>this</tt>.
      */
     Encoder copy();
 }
