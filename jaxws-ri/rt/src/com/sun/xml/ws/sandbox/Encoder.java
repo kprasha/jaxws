@@ -91,6 +91,14 @@ public interface Encoder {
      * want to have two {@link Encoder} instances. That's what this
      * method produces.
      *
+     * <p>
+     * It is the caller's responsibility to serialize
+     * the invocation of the {@link #copy()} method and
+     * the {@link #encode} methods, so that the implementation of this method
+     * does not have to worry about concurrent modification (IOW, when
+     * this method is called, it is guaranteed by the caller that no one else
+     * is using the {@link #encode} methods.)
+     *
      * @return
      *      always non-null valid {@link Encoder} that performs
      *      the encoding work in the same way --- that is, if you
