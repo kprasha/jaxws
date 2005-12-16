@@ -21,28 +21,50 @@
 package com.sun.xml.ws.encoding.soap;
 
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.soap.*;
 
 
 /**
- * @author WS Development Team
+ * Represents various constants of SOAP 1.1 and SOAP 1.2.
+ *
+ * @author Kohsuke Kawaguchi
  */
+public enum SOAPVersion {
+    SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
+            SOAPConstants.URI_ENVELOPE,
+            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL),
 
-public class SOAPVersion {
+    SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
+            SOAP12Constants.URI_ENVELOPE,
+            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL);
 
-    private final String version;
+    /**
+     * Either {@link SOAPBinding#SOAP11HTTP_BINDING} or
+     *  {@link SOAPBinding#SOAP12HTTP_BINDING}
+     */
+    public final String binding;
 
-    private SOAPVersion(String ver) {
-        this.version = ver;
+    /**
+     * SOAP envelope namespace URI.
+     */
+    public final String nsUri;
+
+    /**
+     * SAAJ {@link MessageFactory} for this SOAP version.
+     */
+    public final MessageFactory saajFactory;
+
+    private SOAPVersion(String binding, String nsUri, String saajFactoryString) {
+        this.binding = binding;
+        this.nsUri = nsUri;
+        try {
+            saajFactory = MessageFactory.newInstance(saajFactoryString);
+        } catch (SOAPException e) {
+            throw new Error(e);
+        }
     }
 
     public String toString() {
-        return this.version;
+        return binding;
     }
-
-    public boolean equals(String strVersion) {
-        return version.equals(strVersion);
-    }
-
-    public static final SOAPVersion SOAP_11 = new SOAPVersion(SOAPBinding.SOAP11HTTP_BINDING);
-    public static final SOAPVersion SOAP_12 = new SOAPVersion(SOAPBinding.SOAP12HTTP_BINDING);
 }
