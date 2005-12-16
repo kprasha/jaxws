@@ -87,8 +87,15 @@ import java.lang.reflect.Proxy;
  * <p>
  * XOP is considered as an {@link Encoder}, and therefore when you are looking at
  * {@link Message}, you'll never see &lt;xop:Include> or any such elements
- * (instead you'll see the base64 data inlined.)
+ * (instead you'll see the base64 data inlined.) If a consumer of infoset isn't
+ * interested in handling XOP by himself, this allows him to work with XOP
+ * correctly even without noticing it.
  *
+ * <p>
+ * For producers and consumers that are interested in accessing the binary data
+ * more efficiently, they can use {@link XmlStreamReaderEx} and
+ * {@link XmlStreamWriterEx}.
+ * 
  *
  *
  * <h2>Message lifespan</h2>
