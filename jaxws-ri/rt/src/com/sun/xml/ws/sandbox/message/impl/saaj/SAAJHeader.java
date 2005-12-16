@@ -55,10 +55,11 @@ public class SAAJHeader implements Header{
      * Read the mustUndestandHeader only once, save reading it from DOM everytime.
      */
     public boolean isMustUnderstood() {
-        if(isSet(FLAG_MUST_UNDERSTAND)){
-            isMustUnderstood = header.getMustUnderstand();
-            set(FLAG_MUST_UNDERSTAND);
-        }
+        if(isSet(FLAG_MUST_UNDERSTAND))
+            return isMustUnderstood;
+
+        isMustUnderstood = header.getMustUnderstand();
+        set(FLAG_MUST_UNDERSTAND);
         return isMustUnderstood;
     }
 
