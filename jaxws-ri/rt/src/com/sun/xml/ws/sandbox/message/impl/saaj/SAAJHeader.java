@@ -45,11 +45,8 @@ public class SAAJHeader implements Header{
 
     public SAAJHeader(SOAPHeaderElement header) {
         this.header = header;
-        Node n = header.getFirstChild();
-        if(n != null){
-            localName = n.getLocalName();
-            namespaceUri = n.getNamespaceURI();
-        }
+        localName = header.getLocalName();
+        namespaceUri = header.getNamespaceURI();
     }
 
     /**
@@ -169,8 +166,7 @@ public class SAAJHeader implements Header{
      * @return must not null.
      */
     public XMLStreamReader readHeader() throws XMLStreamException {
-        Node n = header.getFirstChild();
-        return (n != null)?SourceReaderFactory.createSourceReader(new DOMSource(n), true):null;
+        return SourceReaderFactory.createSourceReader(new DOMSource(header), true);
     }
 
     /**
@@ -178,10 +174,7 @@ public class SAAJHeader implements Header{
      */
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         try {
-            Node n = header.getFirstChild();
-            if(n != null)
-                return (T) unmarshaller.unmarshal(n);
-            return null;
+            return (T) unmarshaller.unmarshal(header);
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
@@ -196,8 +189,7 @@ public class SAAJHeader implements Header{
      */
     public void writeTo(XMLStreamWriterEx w) throws XMLStreamException {
         try {
-            Node n = header.getFirstChild();
-            DOMUtil.serializeNode(n, w.getBase());
+            DOMUtil.serializeNode(header, w.getBase());
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
