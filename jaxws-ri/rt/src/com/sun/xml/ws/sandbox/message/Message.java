@@ -250,9 +250,14 @@ public abstract class Message {
      */
     public abstract void writeTo(XMLStreamWriterEx sw);
 
+    // TODO: do we need this?
+    // public abstract void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
+
     // TODO: do we need a method that reads payload as a fault?
     // do we want a separte streaming representation of fault?
     // or would SOAPFault in SAAJ do?
+
+
 
     /**
      * Creates a copy of a {@link Message}.
