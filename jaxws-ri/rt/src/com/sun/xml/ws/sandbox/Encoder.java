@@ -24,6 +24,11 @@ import java.nio.channels.WritableByteChannel;
  * <p>
  * {@link Encoder} does not produce transport-specific information, such as HTTP headers.
  *
+ * <p>
+ * {@link Encoder} is a non-reentrant object, meaning no two threads
+ * can concurrently invoke the decode method. This allows the implementation
+ * to easily reuse parser objects (as instance variables), which are costly otherwise.
+ *
  * @author Kohsuke Kawaguchi
  */
 public interface Encoder {

@@ -10,6 +10,11 @@ import java.nio.channels.ReadableByteChannel;
 /**
  * The reverse operation of {@link Encoder}.
  *
+ * <p>
+ * {@link Decoder} is a non-reentrant object, meaning no two threads
+ * can concurrently invoke the decode method. This allows the implementation
+ * to easily reuse parser objects (as instance variables), which are costly otherwise. 
+ *
  *
  * TODO: do we need a look up table from content type to {@link Decoder}?
  *
