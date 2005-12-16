@@ -1,21 +1,30 @@
 package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferResult;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
 import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.helpers.LocatorImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.util.JAXBSource;
 import javax.xml.bind.util.JAXBResult;
-import javax.xml.transform.Source;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 
 /**
  * {@link Message} backed by a JAXB bean.
@@ -39,14 +48,28 @@ public /*for now, work in progress*/ abstract class JAXBMessage extends Message 
     private String nsUri,localName;
 
     /**
-     * If we have the infoset representation, this field is non-null.
+     * If we have the infoset representation for the payload, this field is non-null.
      */
     private XMLStreamBuffer infoset;
 
-    public JAXBMessage( Marshaller marshaller, Object jaxbObject ) {
+    private final SOAPVersion soapVer;
+
+
+    /**
+     * Creates a {@link Message} backed by a JAXB bean.
+     *
+     * @param marshaller
+     *      The marshaller to be used to produce infoset from the object. Must not be null.
+     * @param jaxbObject
+     *      The JAXB object that represents the payload. must not be null.
+     * @param soapVer
+     *      The SOAP version of the message. Must not be null.
+     */
+    public JAXBMessage( Marshaller marshaller, Object jaxbObject, SOAPVersion soapVer ) {
         props = new MessageProperties();
         this.marshaller = marshaller;
         this.jaxbObject = jaxbObject;
+        this.soapVer = soapVer;
     }
 
     /**
@@ -62,10 +85,11 @@ public /*for now, work in progress*/ abstract class JAXBMessage extends Message 
         this.jaxbObject = that.jaxbObject;
         // TODO: we need a different marshaller
         this.marshaller = that.marshaller;
+        this.soapVer = that.soapVer;
     }
 
     public boolean hasHeaders() {
-        return (headers == null) ? false : headers.size() > 0;
+        return headers!=null && !headers.isEmpty();
     }
 
     public HeaderList getHeaders() {
@@ -130,11 +154,57 @@ public /*for now, work in progress*/ abstract class JAXBMessage extends Message 
                 XMLStreamBufferResult sbr = new XMLStreamBufferResult(infoset);
                 marshaller.marshal(jaxbObject,sbr);
             }
-            StreamReaderBufferProcessor r = new StreamReaderBufferProcessor();
-            r.setXMLStreamBuffer(infoset);
-            return r;
+            return infoset.processUsingXMLStreamReader();
         } catch (JAXBException e) {
             throw new XMLStreamException(e);
         }
     }
+
+    public Source readEnvelopeAsSource() {
+        return new SAXSource(new XMLReaderImpl(this),XMLReaderImpl.THE_SOURCE);
+    }
+
+    /**
+     * Writes the whole envelope as SAX events.
+     */
+    public void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
+        String soapNsUri = soapVer.nsUri;
+
+        contentHandler.setDocumentLocator(NULL_LOCATOR);
+        contentHandler.startDocument();
+        contentHandler.startPrefixMapping("S",soapNsUri);
+        contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
+        contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
+        if(hasHeaders()) {
+            int len = headers.size();
+            for( int i=0; i<len; i++ ) {
+                // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
+                headers.get(i).writeTo(contentHandler,errorHandler);
+            }
+        }
+        contentHandler.endElement(soapNsUri,"Header","S:Header");
+        // write the body
+        contentHandler.startElement(soapNsUri,"Body","S:Body",EMPTY_ATTS);
+        try {
+            try {
+                marshaller.setProperty(Marshaller.JAXB_FRAGMENT,true);
+                marshaller.marshal(jaxbObject,contentHandler);
+            } finally {
+                marshaller.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
+        } catch (JAXBException e) {
+            errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
+        }
+        contentHandler.endElement(soapNsUri,"Body","S:Body");
+        contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
+    }
+
+    public SOAPMessage readAsSOAPMessage() throws SOAPException {
+        SOAPMessage msg = soapVer.saajFactory.createMessage();
+        // TODO
+        return msg;
+    }
+
+    private static final Attributes EMPTY_ATTS = new AttributesImpl();
+    private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }
