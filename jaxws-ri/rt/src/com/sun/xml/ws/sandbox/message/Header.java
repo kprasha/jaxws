@@ -1,11 +1,15 @@
 package com.sun.xml.ws.sandbox.message;
 
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -89,7 +93,7 @@ public interface Header {
      *      false.
      */
     public boolean isRelay();
-    
+
     /**
      * Gets the namespace URI of this header element.
      *
@@ -135,7 +139,7 @@ public interface Header {
      *
      */
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
-    
+
     /**
      * Writes out the header.
      *
@@ -148,11 +152,41 @@ public interface Header {
     /**
      * Writes out the header to the given SOAPMessage.
      *
-     * TODO: justify why this is necessary
+     * <p>
+     * Sometimes a {@link Message} needs to produce itself
+     * as {@link SOAPMessage}, in which case each header needs
+     * to turn itself into a header.
      *
      * @throws SOAPException
      *      if the operation fails for some reason. This leaves the
      *      writer to an undefined state.
      */
     public void writeTo(SOAPMessage saaj) throws SOAPException;
+
+    /**
+     * Writes out the header as SAX events.
+     *
+     * <p>
+     * Sometimes a {@link Message} needs to produce SAX events,
+     * and this method is necessary for headers to participate to it.
+     *
+     * <p>
+     * A header is responsible for producing the SAX events for its part,
+     * including <tt>startPrefixMapping</tt> and <tt>endPrefixMapping</tt>,
+     * but not startDocument/endDocument.
+     *
+     * <p>
+     * Note that SAX contract requires that any error that does NOT originate
+     * from {@link ContentHandler} (meaning any parsing error and etc) must
+     * be first reported to {@link ErrorHandler}. If the SAX event production
+     * cannot be continued and the processing needs to abort, the code may
+     * then throw the same {@link SAXParseException} reported to {@link ErrorHandler}.
+     *
+     * @param contentHandler
+     *      The {@link ContentHandler} that receives SAX events.
+     *
+     * @param errorHandler
+     *      The {@link ErrorHandler} that receives parsing errors.
+     */
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException;
 }

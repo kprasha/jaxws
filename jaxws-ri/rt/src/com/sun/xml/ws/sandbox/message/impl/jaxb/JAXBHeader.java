@@ -2,12 +2,13 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Header;
 import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -146,9 +147,7 @@ abstract class JAXBHeader implements Header {
                 XMLStreamBufferResult sbr = new XMLStreamBufferResult(infoset);
                 marshaller.marshal(jaxbObject,sbr);
             }
-            StreamReaderBufferProcessor r = new StreamReaderBufferProcessor();
-            r.setXMLStreamBuffer(infoset);
-            return r;
+            return infoset.processUsingXMLStreamReader();
         } catch (JAXBException e) {
             throw new XMLStreamException(e);
         }
@@ -173,6 +172,16 @@ abstract class JAXBHeader implements Header {
             marshaller.marshal(jaxbObject,saaj.getSOAPHeader());
         } catch (JAXBException e) {
             throw new SOAPException(e);
+        }
+    }
+
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        try {
+            marshaller.marshal(jaxbObject,contentHandler);
+        } catch (JAXBException e) {
+            SAXParseException x = new SAXParseException(e.getMessage(),null,null,-1,-1,e);
+            errorHandler.fatalError(x);
+            throw x;
         }
     }
 

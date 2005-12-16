@@ -5,6 +5,7 @@ import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.bind.unmarshaller.DOMScanner;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -12,12 +13,16 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPHeader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebServiceException;
 
 import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
 
 /**
  * @author Vivek Pandey
@@ -207,7 +212,16 @@ public class SAAJHeader implements Header{
      *                                      writer to an undefined state.
      */
     public void writeTo(SOAPMessage saaj) throws SOAPException {
-        throw new UnsupportedOperationException();
+        // TODO: check if this is really fast enough
+        SOAPHeader header = saaj.getSOAPHeader();
+        Node node = header.getOwnerDocument().importNode(this.header, true);
+        header.appendChild(node);
+    }
+
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        DOMScanner ds = new DOMScanner();
+        ds.setContentHandler(contentHandler);
+        ds.scan(header);
     }
 
     /**
