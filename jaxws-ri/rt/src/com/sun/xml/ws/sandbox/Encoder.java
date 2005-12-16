@@ -91,7 +91,7 @@ public interface Encoder {
      * want to have two {@link Encoder} instances. That's what this
      * method produces.
      *
-     * <h2>Implentation Note</h2>
+     * <h3>Implentation Note</h3>
      * <p>
      * Note that this method might be invoked by one thread while
      * another thread is executing one of the {@link #encode} methods.
