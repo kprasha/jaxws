@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -39,6 +40,12 @@ public abstract class StreamSOAPDecoder implements Decoder {
     public Message decode(InputStream in, String contentType) throws IOException {
         XMLStreamReader reader = createXMLStreamReader();
 
+        // Check at the start of the document
+        XMLStreamReaderUtil.verifyReaderState(reader,
+                javax.xml.stream.XMLStreamConstants.START_DOCUMENT);
+        
+        // Move to soap:Envelope and verify
+        XMLStreamReaderUtil.nextElementContent(reader);
         XMLStreamReaderUtil.verifyReaderState(reader,
                 javax.xml.stream.XMLStreamConstants.START_ELEMENT);
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_ENVELOPE);
