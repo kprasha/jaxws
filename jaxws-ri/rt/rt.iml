@@ -81,7 +81,9 @@
           <root url="jar://$MODULE_DIR$/../lib/jsr173_api.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/jsr173_1.0_src.zip!/src" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
@@ -148,6 +150,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/../lib/resolver-src.zip!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/streambuffer.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/streambuffer.src.zip!/streambuffer/src" />
         </SOURCES>
       </library>
     </orderEntry>
