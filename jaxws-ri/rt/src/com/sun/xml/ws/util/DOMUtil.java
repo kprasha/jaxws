@@ -92,13 +92,21 @@ public class DOMUtil {
      * @param writer
      */
     public static void serializeNode(Node node, XMLStreamWriter writer) throws XMLStreamException {
-        writer.writeStartElement(node.getPrefix(), node.getLocalName(), node.getNamespaceURI());
+        String prefix = node.getPrefix();
+        if( prefix == null)
+            prefix ="";
+
+        writer.writeStartElement(prefix, node.getLocalName(), node.getNamespaceURI());
+
         if (node.hasAttributes()){
             NamedNodeMap attrs = node.getAttributes();
             int numOfAttributes = attrs.getLength();
             for(int i = 0; i < numOfAttributes; i++){
                 Node attr = attrs.item(i);
-                writer.writeAttribute(attr.getPrefix(), attr.getNamespaceURI(), attr.getLocalName(), attr.getNodeValue());
+                prefix = attr.getPrefix();
+                if(prefix == null)
+                    prefix = "";
+                writer.writeAttribute(prefix, attr.getNamespaceURI(), attr.getLocalName(), attr.getNodeValue());
             }
         }
 
