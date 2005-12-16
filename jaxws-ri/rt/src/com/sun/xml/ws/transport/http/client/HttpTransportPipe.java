@@ -53,9 +53,12 @@ public class HttpTransportPipe implements Pipe {
     private final Encoder encoder;
     private final Decoder decoder;
 
-    public HttpTransportPipe(Encoder encoder, Decoder decoder) {
+    private Map<String,Object> context;
+
+    public HttpTransportPipe(Encoder encoder, Decoder decoder,  Map<String,Object> context) {
         this.encoder = encoder;
         this.decoder = decoder;
+        this.context = context;
     }
 
     public void postConstruct() {
@@ -66,7 +69,8 @@ public class HttpTransportPipe implements Pipe {
         try {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
-            WSConnection con = new HttpClientTransport();
+            WSConnection con = new HttpClientTransport(System.out, context);
+           
             
             // get transport headers from message
             MessageProperties props = msg.getProperties();
@@ -79,6 +83,7 @@ public class HttpTransportPipe implements Pipe {
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
             return decoder.decode(con.getInput(), ct);
+            
         } catch(WebServiceException wex) {
             throw wex;
         } catch(Exception ex) {
@@ -87,7 +92,7 @@ public class HttpTransportPipe implements Pipe {
     }
     
     private String getContentType(Map<String, List<String>> headers) {
-        return null;
+        return "text/xml";
     }
 
     public void preDestroy() {

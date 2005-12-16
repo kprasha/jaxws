@@ -76,6 +76,7 @@ public class HttpClientTransport extends WSConnectionImpl {
         else
             soapVer = SOAPVersion.SOAP_11;
 
+
         _messageFactory = soapVer.saajFactory;
         endpoint = (String)context.get(ENDPOINT_ADDRESS_PROPERTY);
     }
@@ -94,6 +95,7 @@ public class HttpClientTransport extends WSConnectionImpl {
             connectForResponse();
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new ClientTransportException("http.client.failed",ex);
         }
 
@@ -210,9 +212,9 @@ public class HttpClientTransport extends WSConnectionImpl {
         return bab.newInputStream(0,length);
     }
 
-    protected Map<String, List<String>> collectResponseMimeHeaders() {
-        /*
-        MimeHeaders mimeHeaders = new MimeHeaders();
+    public Map<String, List<String>> collectResponseMimeHeaders() {
+
+       /* MimeHeaders mimeHeaders = new MimeHeaders();
         for (int i = 1; ; ++i) {
             String key = httpConnection.getHeaderFieldKey(i);
             if (key == null) {
@@ -234,8 +236,36 @@ public class HttpClientTransport extends WSConnectionImpl {
             headers.put (header.getName (), h);
         }
         return headers;
-         */
+        */
         return httpConnection.getHeaderFields();
+    }
+
+    public MimeHeaders collectMimeHeaders() {
+
+        MimeHeaders mimeHeaders = new MimeHeaders();
+        for (int i = 1; ; ++i) {
+            String key = httpConnection.getHeaderFieldKey(i);
+            if (key == null) {
+                break;
+            }
+            String value = httpConnection.getHeaderField(i);
+            try {
+                mimeHeaders.addHeader(key, value);
+            } catch (IllegalArgumentException e) {
+                // ignore headers that are illegal in MIME
+            }
+        }
+        return mimeHeaders;
+       /* Map<String, List<String>> headers = new HashMap<String, List<String>>();
+        for (Iterator iter = mimeHeaders.getAllHeaders(); iter.hasNext();) {
+            MimeHeader header = (MimeHeader)iter.next();
+            List<String> h = new ArrayList<String>();
+            h.add(header.getValue());
+            headers.put (header.getName (), h);
+        }
+        return headers;
+        */
+        //return httpConnection.getHeaderFields();
     }
 
     protected void connectForResponse()
@@ -395,10 +425,10 @@ public class HttpClientTransport extends WSConnectionImpl {
         httpConnection.setRequestMethod("POST");
 
         // set the properties on HttpURLConnection
-        for (Map.Entry entry : super.getHeaders().entrySet()) {
-            httpConnection.addRequestProperty ((String)entry.getKey(), ((List<String>)entry.getValue()).get(0));
-        }
-
+        //kw-12/1605for (Map.Entry entry : super.getHeaders().entrySet()) {
+           // httpConnection.addRequestProperty ((String)entry.getKey(), ((List<String>)entry.getValue()).get(0));
+        //}
+        
         return httpConnection;
     }
 
