@@ -384,7 +384,7 @@ public class RuntimeModeler {
             Style.DOCUMENT : Style.RPC;
         rtSOAPBinding.setStyle(style);
         //default soap version is 1.1, change it to soap 1.2 if the binding id says so
-        if(SOAPVersion.SOAP_12.equals(bindingId))
+        if(SOAPVersion.SOAP_12.binding.equals(bindingId))
             rtSOAPBinding.setSOAPVersion(SOAPVersion.SOAP_12);
         return rtSOAPBinding;
     }
