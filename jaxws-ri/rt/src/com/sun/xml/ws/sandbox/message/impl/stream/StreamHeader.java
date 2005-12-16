@@ -93,12 +93,4 @@ public abstract class StreamHeader implements Header {
     }
 
     protected abstract void processHeaderAttributes(XMLStreamReader reader);
-
-    protected final boolean convertToBoolean(String value) {
-        if (value != null && (value.equals("1") || value.equals("true"))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

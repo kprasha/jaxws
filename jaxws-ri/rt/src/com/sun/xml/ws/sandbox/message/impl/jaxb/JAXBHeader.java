@@ -4,6 +4,7 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.sandbox.message.impl.Util;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -104,19 +105,9 @@ abstract class JAXBHeader implements Header {
     protected abstract void checkHeaderAttribute(Attributes a);
 
     protected final void checkMustUnderstand(String localName, Attributes a, int i) {
-        if(localName=="mustUnderstand" && parseBool(a.getValue(i)))
+        if(localName=="mustUnderstand" && Util.parseBool(a.getValue(i)))
             set(FLAG_MUST_UNDERSTAND);
     }
-
-    protected final boolean parseBool(String value) {
-        if(value.length()==0)
-            return false;
-
-        char ch = value.charAt(0);
-        return ch=='t' || ch=='1';
-    }
-
-
 
     public final boolean isMustUnderstood() {
         parseIfNecessary();

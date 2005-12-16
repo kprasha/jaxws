@@ -5,6 +5,8 @@ import org.xml.sax.Attributes;
 import javax.xml.bind.Marshaller;
 import javax.xml.soap.SOAPConstants;
 
+import com.sun.xml.ws.sandbox.message.impl.Util;
+
 /**
  * {@link JAXBHeader} for SOAP 1.2.
  * 
@@ -29,7 +31,7 @@ public final class JAXBHeader12 extends JAXBHeader {
                 if(localName=="role") {
                     role = a.getValue(i);
                 } else
-                if(localName=="relay" && parseBool(a.getValue(i))) {
+                if(localName=="relay" && Util.parseBool(a.getValue(i))) {
                     set(FLAG_RELAY);
                 } else
                     checkMustUnderstand(localName, a, i);
