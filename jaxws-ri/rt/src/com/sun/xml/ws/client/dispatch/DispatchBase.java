@@ -35,6 +35,7 @@ import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.pept.Delegate;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.MessageFactory;
@@ -56,6 +57,8 @@ import java.util.logging.Logger;
 import static com.sun.xml.ws.client.BindingProviderProperties.DISPATCH_CONTEXT;
 import static com.sun.xml.ws.client.dispatch.DispatchContext.DISPATCH_MESSAGE_CLASS;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
+import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.activation.DataSource;
 
@@ -393,8 +396,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
 
         if (msg != null) {
             if (((msg instanceof Source) && _mode == Service.Mode.MESSAGE) &&
-                (!_getBindingId().equals(HTTPBinding.HTTP_BINDING)))
-            {
+                (!_getBindingId().equals(HTTPBinding.HTTP_BINDING))) {
                 try {
                     SOAPMessage message = SOAPVersion.fromBinding(_getBindingId()).saajFactory.createMessage();
                     message.getSOAPPart().setContent((Source) msg);
@@ -410,19 +412,21 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
         } else {
             //todo - needs to be a get request
             if (!isValidHttpGETRequest(msg))
-            //if (!_getBindingId().toString().equals(HTTPBinding.HTTP_BINDING))
+                //if (!_getBindingId().toString().equals(HTTPBinding.HTTP_BINDING))
                 throw new WebServiceException("No Message to Send to web service");
             //else {
-                //setMessageStruct(messageStruct, msg);
+            //setMessageStruct(messageStruct, msg);
 
-           //}
+            //}
         }
+        //
         setMessageStruct(messageStruct, msg);
         return messageStruct;
     }
 
     private void setMessageStruct(MessageStruct messageStruct, Object msg) {
-        messageStruct.setData(new Object[]{msg});
+        if ((msg != null)&& (msg instanceof SOAPMessage))
+           messageStruct.setData(new Object[]{ MessageImplFactory.getInstance().createMessage(msg)});
         setMetadata(getRequestContext(), msg, messageStruct);
 
         // Initialize content negotiation property
@@ -513,16 +517,16 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
         context.setProperty(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
 
         if (obj != null) {
-            if (obj instanceof Source){
+            if (obj instanceof Source) {
                 context.setProperty(DispatchContext.DISPATCH_MESSAGE_CLASS,
                     DispatchContext.MessageClass.SOURCE);
-             }else if (obj instanceof SOAPMessage) {
+            } else if (obj instanceof SOAPMessage) {
                 context.setProperty(DispatchContext.DISPATCH_MESSAGE_CLASS,
                     DispatchContext.MessageClass.SOAPMESSAGE);
-            } else if  ((obj instanceof DataSource) &&
+            } else if ((obj instanceof DataSource) &&
                 _getBindingId().toString().equals(HTTPBinding.HTTP_BINDING)) {
-                    context.setProperty(DispatchContext.DISPATCH_MESSAGE_CLASS,
-                        DispatchContext.MessageClass.DATASOURCE);
+                context.setProperty(DispatchContext.DISPATCH_MESSAGE_CLASS,
+                    DispatchContext.MessageClass.DATASOURCE);
 
             } else if (_jaxbContext != null) {
                 context.setProperty(DispatchContext.DISPATCH_MESSAGE_CLASS,
@@ -557,7 +561,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
                     //context.setProperty(DispatchContext.DISPATCH_MESSAGE, DispatchContext.MessageType.HTTP_DATASOURCE_PAYLOAD);
                 else if (mode == Service.Mode.MESSAGE)
                     context.setProperty(DispatchContext.DISPATCH_MESSAGE, DispatchContext.MessageType.HTTP_DATASOURCE_MESSAGE);
-            } else {               
+            } else {
                 context.setProperty(DispatchContext.DISPATCH_MESSAGE_CLASS, _clazz);
             }
         } else if (hasJAXBContext(obj, null)) {
@@ -574,7 +578,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
                     context.setProperty(DispatchContext.DISPATCH_MESSAGE, DispatchContext.MessageType.JAXB_MESSAGE);
             }
         }
-               
+
         return context;
     }
 
@@ -594,16 +598,16 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
         return null;
     }
 
-    private boolean isValidHttpGETRequest(Object msg){
-       boolean isValid = false;
+    private boolean isValidHttpGETRequest(Object msg) {
+        boolean isValid = false;
 
-       String bindingId = _getBindingId().toString();
-       String method = (String)getRequestContext().get(MessageContext.HTTP_REQUEST_METHOD);
-       if (method != null){
-          isValid = "GET".equalsIgnoreCase(method)?true:false &&
-           (SOAPBinding.SOAP12HTTP_BINDING.equals(bindingId) ||
-               HTTPBinding.HTTP_BINDING.equals(bindingId))?true:false;
-       }
+        String bindingId = _getBindingId().toString();
+        String method = (String) getRequestContext().get(MessageContext.HTTP_REQUEST_METHOD);
+        if (method != null) {
+            isValid = "GET".equalsIgnoreCase(method) ? true : false &&
+                (SOAPBinding.SOAP12HTTP_BINDING.equals(bindingId) ||
+                    HTTPBinding.HTTP_BINDING.equals(bindingId)) ? true : false;
+        }
         return isValid;
     }
 
