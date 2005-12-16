@@ -54,11 +54,17 @@ public enum SOAPVersion {
      */
     public final MessageFactory saajFactory;
 
+    /**
+     * SAAJ {@link SOAPFactory} for this SOAP version.
+     */
+    public final SOAPFactory saajSoapFactory;
+
     private SOAPVersion(String binding, String nsUri, String saajFactoryString) {
         this.binding = binding;
         this.nsUri = nsUri;
         try {
             saajFactory = MessageFactory.newInstance(saajFactoryString);
+            saajSoapFactory = SOAPFactory.newInstance(saajFactoryString);
         } catch (SOAPException e) {
             throw new Error(e);
         }
@@ -66,5 +72,26 @@ public enum SOAPVersion {
 
     public String toString() {
         return binding;
+    }
+
+    /**
+     * Returns {@link SOAPVersion} whose {@link #binding} equals to
+     * the given string.
+     *
+     * This method does not perform input string validation.
+     *
+     * @param binding
+     *      for historical reason, we treat null as {@link #SOAP_11},
+     *      but you really shouldn't be passing null.
+     * @return always non-null.
+     */
+    public static SOAPVersion fromBinding(String binding) {
+        if(binding==null)
+            return SOAP_11;
+        
+        if(binding.equals(SOAP_12.binding))
+            return SOAP_12;
+        else
+            return SOAP_11;
     }
 }
