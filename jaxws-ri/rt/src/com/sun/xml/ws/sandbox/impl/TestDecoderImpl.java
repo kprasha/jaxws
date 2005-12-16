@@ -3,6 +3,7 @@ package com.sun.xml.ws.sandbox.impl;
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
@@ -21,12 +22,8 @@ public final class TestDecoderImpl implements Decoder {
 
     private final MessageFactory factory;
 
-    private TestDecoderImpl() {
-        try {
-            factory = MessageFactory.newInstance();
-        } catch (SOAPException e) {
-            throw new AssertionError(e);    // impossible
-        }
+    private TestDecoderImpl(SOAPVersion soapVersion) {
+        factory = soapVersion.saajFactory;
     }
 
     public Message decode(InputStream in, String contentType) throws IOException {
@@ -43,5 +40,6 @@ public final class TestDecoderImpl implements Decoder {
     }
 
 
-    public static final Decoder INSTANCE = new TestDecoderImpl();
+    public static final Decoder INSTANCE11 = new TestDecoderImpl(SOAPVersion.SOAP_11);
+    public static final Decoder INSTANCE12 = new TestDecoderImpl(SOAPVersion.SOAP_12);
 }
