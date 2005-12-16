@@ -31,6 +31,7 @@ import static com.sun.xml.ws.client.dispatch.DispatchContext.MessageType.HTTP_JA
 import com.sun.xml.ws.client.dispatch.impl.DispatchContactInfoList;
 import com.sun.xml.ws.client.dispatch.impl.DispatchDelegate;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.pept.Delegate;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
@@ -391,18 +392,11 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
         MessageStruct messageStruct = _delegate.getMessageStruct();
 
         if (msg != null) {
-            MessageFactory factory = null;
             if (((msg instanceof Source) && _mode == Service.Mode.MESSAGE) &&
-                (!_getBindingId().toString().equals(HTTPBinding.HTTP_BINDING)))
+                (!_getBindingId().equals(HTTPBinding.HTTP_BINDING)))
             {
                 try {
-
-                    if (_getBindingId().toString().equals(SOAPBinding.SOAP12HTTP_BINDING))
-                        factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-                    else
-                        factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
-
-                    SOAPMessage message = factory.createMessage();
+                    SOAPMessage message = SOAPVersion.fromBinding(_getBindingId()).saajFactory.createMessage();
                     message.getSOAPPart().setContent((Source) msg);
                     message.saveChanges();
                     msg = message;

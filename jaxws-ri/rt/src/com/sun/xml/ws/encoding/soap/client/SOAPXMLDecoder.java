@@ -36,6 +36,7 @@ import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.SOAPDecoder;
 import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
@@ -461,8 +462,7 @@ public class SOAPXMLDecoder extends SOAPDecoder {
             // parse the current element that the reader is pointing to
             Transformer trans = XmlUtil.newTransformer();
 
-            MessageFactory messageFactory = MessageFactory.newInstance();
-            SOAPMessage soapMessage = messageFactory.createMessage();
+            SOAPMessage soapMessage = SOAPVersion.SOAP_11.saajFactory.createMessage();
             Detail detail = soapMessage.getSOAPBody().addFault().addDetail();
 
             // repeatedly copy all the child elements of <detail>.

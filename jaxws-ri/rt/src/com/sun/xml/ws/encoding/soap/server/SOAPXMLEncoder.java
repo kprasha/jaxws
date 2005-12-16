@@ -27,6 +27,7 @@ import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.SOAPEncoder;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
@@ -99,7 +100,7 @@ public class SOAPXMLEncoder extends SOAPEncoder {
 
             MimeHeaders mh = new MimeHeaders();
             mh.addHeader("Content-Type", getContentType(messageInfo, marshaller));
-            SOAPMessage msg = SOAPUtil.createMessage(mh, bab.newInputStream(), getBindingId());
+            SOAPMessage msg = getBindingId().saajFactory.createMessage(mh, bab.newInputStream());
             processAttachments(response, msg);
             
             // Restore default XOP processing before returning
@@ -242,7 +243,7 @@ public class SOAPXMLEncoder extends SOAPEncoder {
      * This method is used to create the appropriate SOAPMessage (1.1 or 1.2 using SAAJ api).
      * @return the BindingID associated with this encoder
      */
-    protected String getBindingId(){
-        return SOAPBinding.SOAP11HTTP_BINDING;
+    protected SOAPVersion getBindingId(){
+        return SOAPVersion.SOAP_11;
     }
 }

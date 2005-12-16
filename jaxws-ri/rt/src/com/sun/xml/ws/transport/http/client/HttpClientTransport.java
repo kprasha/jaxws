@@ -24,6 +24,7 @@ import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -67,20 +68,16 @@ public class HttpClientTransport extends WSConnectionImpl {
         this.context = context;
         _logStream = logStream;
 
+        SOAPVersion soapVer;
+
         String bindingId = (String)context.get(BINDING_ID_PROPERTY);
-        try {
-            if (bindingId == null)
-                bindingId = SOAPBinding.SOAP11HTTP_BINDING;
+        if (bindingId != null)
+            soapVer = SOAPVersion.fromBinding(bindingId);
+        else
+            soapVer = SOAPVersion.SOAP_11;
 
-            if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING))
-                _messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-            else
-                _messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
-
-            endpoint = (String)context.get(ENDPOINT_ADDRESS_PROPERTY);
-        } catch (Exception e) {
-            throw new ClientTransportException("http.client.cannotCreateMessageFactory");
-        }
+        _messageFactory = soapVer.saajFactory;
+        endpoint = (String)context.get(ENDPOINT_ADDRESS_PROPERTY);
     }
 
     /**

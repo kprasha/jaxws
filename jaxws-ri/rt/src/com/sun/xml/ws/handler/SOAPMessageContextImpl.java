@@ -22,6 +22,7 @@ import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 
 import javax.xml.bind.JAXBContext;
@@ -116,7 +117,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         try {
             List beanList = new ArrayList();
             SOAPMessage msg = getMessage();
-            Name name = SOAPFactory.newInstance().createName(header.getLocalPart(),
+            Name name = SOAPVersion.SOAP_11.saajSoapFactory.createName(header.getLocalPart(),
                     header.getPrefix(), header.getNamespaceURI());
             SOAPHeader sHeader = msg.getSOAPHeader();
             if (sHeader == null) {

@@ -28,6 +28,7 @@ import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.client.BindingProviderProperties;
@@ -124,7 +125,7 @@ public class SOAP12XMLEncoder extends SOAPXMLEncoder {
      * This method is used to create the appropriate SOAPMessage (1.1 or 1.2 using SAAJ api).
      * @return the BindingID associated with this encoder
      */
-    protected String getBindingId(){
-        return SOAPBinding.SOAP12HTTP_BINDING;
+    protected SOAPVersion getBindingId(){
+        return SOAPVersion.SOAP_12;
     }
 }
