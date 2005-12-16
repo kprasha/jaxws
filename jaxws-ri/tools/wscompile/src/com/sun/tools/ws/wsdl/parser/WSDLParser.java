@@ -20,6 +20,10 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
+import static com.sun.xml.ws.util.xml.XmlUtil.DRACONIAN_ERROR_HANDLER;
+import static com.sun.xml.ws.util.xml.XmlUtil.*;
+import static com.sun.xml.ws.util.xml.XmlUtil.*;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -249,22 +253,7 @@ public class WSDLParser {
             builderFactory.setNamespaceAware(true);
             builderFactory.setValidating(false);
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            builder.setErrorHandler(new ErrorHandler() {
-                public void error(SAXParseException e)
-                    throws SAXParseException {
-                    throw e;
-                }
-
-                public void fatalError(SAXParseException e)
-                    throws SAXParseException {
-                    throw e;
-                }
-
-                public void warning(SAXParseException err)
-                    throws SAXParseException {
-                    // do nothing
-                }
-            });
+            builder.setErrorHandler(DRACONIAN_ERROR_HANDLER);
             if(entityResolver != null)
                 builder.setEntityResolver(entityResolver);
             else
@@ -400,22 +389,7 @@ public class WSDLParser {
             builderFactory.setNamespaceAware(true);
             builderFactory.setValidating(false);
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            builder.setErrorHandler(new ErrorHandler() {
-                public void error(SAXParseException e)
-                    throws SAXParseException {
-                    throw e;
-                }
-
-                public void fatalError(SAXParseException e)
-                    throws SAXParseException {
-                    throw e;
-                }
-
-                public void warning(SAXParseException err)
-                    throws SAXParseException {
-                    // do nothing
-                }
-            });
+            builder.setErrorHandler(DRACONIAN_ERROR_HANDLER);
             builder.setEntityResolver(new NullEntityResolver());
 
             try {

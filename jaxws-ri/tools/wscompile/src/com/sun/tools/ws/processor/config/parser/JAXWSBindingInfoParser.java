@@ -38,6 +38,7 @@ import org.xml.sax.SAXParseException;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.util.xml.NullEntityResolver;
 import com.sun.tools.ws.wsdl.framework.ParseException;
+import com.sun.xml.ws.util.xml.XmlUtil;
 
 /**
  * @author Vivek Pandey
@@ -61,22 +62,7 @@ public class JAXWSBindingInfoParser {
             builderFactory.setNamespaceAware(true);
             builderFactory.setValidating(false);
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            builder.setErrorHandler(new ErrorHandler() {
-                public void error(SAXParseException e)
-                    throws SAXParseException {
-                    throw e;
-                }
-
-                public void fatalError(SAXParseException e)
-                    throws SAXParseException {
-                    throw e;
-                }
-
-                public void warning(SAXParseException err)
-                    throws SAXParseException {
-                    // do nothing
-                }
-            });
+            builder.setErrorHandler(XmlUtil.DRACONIAN_ERROR_HANDLER);
 
             builder.setEntityResolver(new NullEntityResolver());
             Document dom = builder.parse(source);
