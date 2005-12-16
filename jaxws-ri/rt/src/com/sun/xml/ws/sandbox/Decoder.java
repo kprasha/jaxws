@@ -13,7 +13,7 @@ import java.nio.channels.ReadableByteChannel;
  * <p>
  * {@link Decoder} is a non-reentrant object, meaning no two threads
  * can concurrently invoke the decode method. This allows the implementation
- * to easily reuse parser objects (as instance variables), which are costly otherwise. 
+ * to easily reuse parser objects (as instance variables), which are costly otherwise.
  *
  *
  * TODO: do we need a look up table from content type to {@link Decoder}?
@@ -54,4 +54,12 @@ public interface Decoder {
      * @see #decode(InputStream, String)
      */
     Message decode( ReadableByteChannel in, String contentType );
+
+    /**
+     * Creates a copy of this {@link Decoder}.
+     *
+     * <p>
+     * See {@link Encoder#copy()} for the detailed contract.
+     */
+    Decoder copy();
 }

@@ -77,6 +77,10 @@ public class MimeEncoder implements Encoder {
         throw new UnsupportedOperationException();
     }
 
+    public Encoder copy() {
+        return this;
+    }
+
     private static class UniqueValue {
         /**
          * A global part number.  Access is not synchronized because the

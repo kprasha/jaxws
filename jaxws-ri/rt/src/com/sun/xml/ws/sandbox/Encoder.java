@@ -81,4 +81,29 @@ public interface Encoder {
      * an adapter that wraps {@link WritableByteChannel} to {@link OutputStream}.
      */
     String encode( Message message, WritableByteChannel buffer );
+
+    /**
+     * Creates a copy of this {@link Encoder}.
+     *
+     * <p>
+     * Since {@link Encoder} instance is not re-entrant, the caller
+     * who needs to encode two {@link Message}s simultaneously will
+     * want to have two {@link Encoder} instances. That's what this
+     * method produces.
+     *
+     * @return
+     *      always non-null valid {@link Encoder} that performs
+     *      the encoding work in the same way --- that is, if you
+     *      copy an FI encoder, you'll get another FI encoder.
+     *
+     *      <p>
+     *      Once copied, two {@link Encoder}s may be invoked from
+     *      two threads concurrently; therefore, they must not share
+     *      any state that requires isolation (such as temporary buffer.)
+     *
+     *      <p>
+     *      If the {@link Encoder} implementation is by itself
+     *      re-entrant, this method may simply return <tt>this</tt>.
+     */
+    Encoder copy();
 }

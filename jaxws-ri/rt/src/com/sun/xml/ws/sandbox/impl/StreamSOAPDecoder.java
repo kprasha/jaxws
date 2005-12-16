@@ -109,17 +109,22 @@ public abstract class StreamSOAPDecoder implements Decoder {
     public Message decode(ReadableByteChannel in, String contentType ) {
         throw new UnsupportedOperationException();
     }
-    
-    private XMLStreamBuffer cacheHeaders(XMLStreamReader reader, 
-            Map<String, String> namespaces, HeaderList headers) throws XMLStreamException, XMLStreamBufferException {
+
+    public Decoder copy() {
+        // TODO: when you make Decoder stateful, implement the copy method.
+        return this;
+    }
+
+    private XMLStreamBuffer cacheHeaders(XMLStreamReader reader,
+                                         Map<String, String> namespaces, HeaderList headers) throws XMLStreamException, XMLStreamBufferException {
         XMLStreamBuffer buffer = createXMLStreamBuffer();
         StreamReaderBufferCreator creator = new StreamReaderBufferCreator();
         creator.setXMLStreamBuffer(buffer);
-        
+
         // Reader is positioned at the first header block
         while(reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
             Map<String, String> headerBlockNamespaces = namespaces;
-                        
+
             // Collect namespaces on SOAP header block
             if (reader.getNamespaceCount() > 0) {
                 headerBlockNamespaces = new HashMap();
@@ -128,21 +133,21 @@ public abstract class StreamSOAPDecoder implements Decoder {
                     headerBlockNamespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
                 }
             }
-            
+
             // Mark
             XMLStreamBufferMark mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
             // Create Header
             headers.add(createHeader(reader, mark));
-            
+
             // Cache the header block
             // After caching Reader will be positioned at next header block or
             // the end of the </soap:header>
-            creator.createElementFragment(reader, false);            
+            creator.createElementFragment(reader, false);
         }
-        
+
         // Move to soap:Body
         XMLStreamReaderUtil.nextElementContent(reader);
-        
+
         return buffer;
     }
     

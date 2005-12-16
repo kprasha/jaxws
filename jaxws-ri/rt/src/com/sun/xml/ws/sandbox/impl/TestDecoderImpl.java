@@ -39,6 +39,10 @@ public final class TestDecoderImpl implements Decoder {
         throw new UnsupportedOperationException();
     }
 
+    public Decoder copy() {
+        return this;
+    }
+
 
     public static final Decoder INSTANCE11 = new TestDecoderImpl(SOAPVersion.SOAP_11);
     public static final Decoder INSTANCE12 = new TestDecoderImpl(SOAPVersion.SOAP_12);

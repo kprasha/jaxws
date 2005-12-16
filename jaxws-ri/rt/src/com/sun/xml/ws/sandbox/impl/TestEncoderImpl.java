@@ -38,5 +38,9 @@ public final class TestEncoderImpl implements Encoder {
         throw new UnsupportedOperationException();
     }
 
+    public Encoder copy() {
+        return this;
+    }
+
     public static final Encoder INSTANCE = new TestEncoderImpl();
 }
