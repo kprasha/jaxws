@@ -4,6 +4,8 @@ import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.util.xml.StAXSource;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamReader;
@@ -76,18 +78,20 @@ public class StreamMessage extends Message {
     }
 
     public Source readPayloadAsSource() {
-        throw new UnsupportedOperationException();
+        return new StAXSource(reader, true);
     }
 
     public SOAPMessage readAsSOAPMessage() {
         throw new UnsupportedOperationException();
     }
 
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) {
-        throw new UnsupportedOperationException();
+    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        // TODO: How can the unmarshaller process this as a fragment?
+        return (T)unmarshaller.unmarshal(reader);
     }
 
     public XMLStreamReader readPayload() {
+        // TODO: What about access at and beyond </soap:Body>
         return this.reader;
     }
 
