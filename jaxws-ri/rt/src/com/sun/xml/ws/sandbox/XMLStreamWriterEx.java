@@ -1,7 +1,5 @@
 package com.sun.xml.ws.sandbox;
 
-import com.sun.xml.ws.sandbox.impl.XMLStreamWriterExImpl;
-
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.activation.DataHandler;
@@ -11,8 +9,15 @@ import java.io.OutputStream;
  * {@link XMLStreamWriter} extended to support XOP.
  *
  * <p>
- * For more intuitive design, this interface would have extended {@link XMLStreamWriter},
- * but that would require delegation, which introduces unnecessary overhead.
+ * Some infoset serializer (such as XOP encoder, FastInfoset) uses a format
+ * that can represent binary data more efficiently than base64 encoding.
+ * Such infoset serializer may choose to implement this interface, to allow
+ * the caller to pass in binary data more efficiently without first converting
+ * it to binary data.
+ *
+ * <p>
+ * Callers capable of using this interface can see if the serializer supports
+ * it by simply downcasting {@link XMLStreamWriter} to {@link XMLStreamWriterEx}.
  *
  * <h2>TODO</h2>
  * <ol>
@@ -35,19 +40,9 @@ import java.io.OutputStream;
  * </ol>
  *
  * @see XMLStreamReaderEx
- * @see XMLStreamWriterExImpl
  * @author Kohsuke Kawaguchi
  */
-public interface XMLStreamWriterEx {
-
-    /**
-     * Gets the base {@link XMLStreamWriter}.
-     *
-     * @return
-     *      multiple invocation of this method must return
-     *      the same object.
-     */
-    XMLStreamWriter getBase();
+public interface XMLStreamWriterEx extends XMLStreamWriter {
 
     /**
      * Write the binary data.
@@ -94,8 +89,7 @@ public interface XMLStreamWriterEx {
      *
      * <p>
      * It is the caller's responsibility to write and close
-     * a stream before it invokes any other methods on {@link XMLStreamWriterEx}
-     * or {@link XMLStreamWriter}.
+     * a stream before it invokes any other methods on {@link XMLStreamWriter}.
      *
      * TODO: experimental. appreciate feedback
      * @param contentType

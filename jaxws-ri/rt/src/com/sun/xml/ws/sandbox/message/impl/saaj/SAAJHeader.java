@@ -1,28 +1,25 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.bind.unmarshaller.DOMScanner;
-
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.ws.WebServiceException;
-
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Vivek Pandey
@@ -188,9 +185,9 @@ public class SAAJHeader implements Header{
      *          if the operation fails for some reason. This leaves the
      *          writer to an undefined state.
      */
-    public void writeTo(XMLStreamWriterEx w) throws XMLStreamException {
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
-            DOMUtil.serializeNode(header, w.getBase());
+            DOMUtil.serializeNode(header, w);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
@@ -217,11 +214,6 @@ public class SAAJHeader implements Header{
         ds.scan(header);
     }
 
-    /**
-     *
-     * @param flag
-     * @return
-     */
     protected boolean isSet(int flag){
         return (flags&flag) != 0;
     }

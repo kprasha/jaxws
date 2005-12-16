@@ -1,34 +1,53 @@
 package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.bind.v2.runtime.unmarshaller.Base64Data;
-import com.sun.xml.ws.sandbox.impl.XMLStreamReaderExImpl;
 
-import javax.activation.DataSource;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
-import java.io.InputStream;
 
 /**
  * {@link XMLStreamReader} extended for reading binary data.
  *
  * <p>
- * For more intuitive design, this interface would have extended {@link XMLStreamReader},
- * but that would require delegation, which introduces unnecessary overhead.
+ * Some producer of infoset (in particular, such as FastInfoset,
+ * XOP deecoder), usees a native format that enables efficient
+ * treatment of binary data. For ordinary infoset consumer
+ * (that just uses {@link XMLStreamReader}, those binary data
+ * will just look like base64-encoded string, but this interface
+ * allows consumers of such infoset to access this raw binary data.
+ * Such infoset producer may choose to implement this additoinal
+ * interface, to expose this functionality.
+ *
+ * <p>
+ * Consumers that are capable of using this interface can query
+ * {@link XMLStreamReader} if it supports this by simply downcasting
+ * it to this interface like this:
+ *
+ * <pre>
+ * XMLStreamReader reader = ...;
+ * if( reader instanceof XMLStreamReaderEx ) {
+ *   // this reader supports binary data exchange
+ *   ...
+ * } else {
+ *   // noop
+ *   ...
+ * }
+ * </pre>
+ *
+ * <p>
+ * Also note that it is also allowed for the infoset producer
+ * to implement this interface in such a way that {@link #getPCDATA()}
+ * always delegate to {@link #getText()}, although it's not desirable.
+ *
+ * <p>
+ * This interface is a private contract between such producers
+ * and consumers to allow them to exchange binary data without
+ * converting it to base64.
  *
  * @see XMLStreamWriterEx
- * @see XMLStreamReaderExImpl
  * @author Kohsuke Kawaguchi
  */
-public interface XMLStreamReaderEx {
-    /**
-     * Gets the base {@link XMLStreamReader}.
-     *
-     * @return
-     *      multiple invocation of this method must return
-     *      the same object.
-     */
-    XMLStreamReader getBase();
-
+public interface XMLStreamReaderEx extends XMLStreamReader {
     ///**
     // * Works like {@link XMLStreamReader#getText()}
     // * but returns text as {@link DataSource}.
@@ -95,7 +114,7 @@ public interface XMLStreamReaderEx {
     //byte[] getTextAsByteArray() throws XMLStreamException;
 
     /**
-     * Works like {@link XMLStreamReader#getText()}
+     * Works like {@link #getText()}
      * but hides the actual data representation.
      *
      * @return
@@ -113,7 +132,7 @@ public interface XMLStreamReaderEx {
      *      <p>
      *      The object returned from this method belongs to the parser,
      *      and its content is guaranteed to be the same only until
-     *      the {@link XMLStreamReader#next()} method is invoked.
+     *      the {@link #next()} method is invoked.
      *
      * @throws IllegalStateException
      *      if the parser is not pointing at characters infoset item.
@@ -121,5 +140,5 @@ public interface XMLStreamReaderEx {
      * TODO:
      *      fix the dependency to JAXB internal class.
      */
-    CharSequence getText() throws XMLStreamException;
+    CharSequence getPCDATA() throws XMLStreamException;
 }

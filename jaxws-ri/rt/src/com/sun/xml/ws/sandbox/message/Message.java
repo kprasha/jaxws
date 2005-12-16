@@ -2,6 +2,7 @@ package com.sun.xml.ws.sandbox.message;
 
 import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.Encoder;
+import com.sun.xml.ws.sandbox.XMLStreamReaderEx;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
@@ -93,9 +94,9 @@ import java.lang.reflect.Proxy;
  *
  * <p>
  * For producers and consumers that are interested in accessing the binary data
- * more efficiently, they can use {@link XmlStreamReaderEx} and
- * {@link XmlStreamWriterEx}.
- * 
+ * more efficiently, they can use {@link XMLStreamReaderEx} and
+ * {@link XMLStreamWriterEx}.
+ *
  *
  *
  * <h2>Message lifespan</h2>
@@ -252,11 +253,13 @@ public abstract class Message {
      *      If the {@link XMLStreamWriter} reports an error,
      *      or some other errors happen during the processing.
      */
-    public abstract void writePayloadTo(XMLStreamWriterEx sw) throws XMLStreamException;
+    public abstract void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException;
 
     /**
      * Writes the whole SOAP message (but not attachments)
      * to the given writer.
+     *
+     * This includes the complete {@link
      *
      * This consumes the message.
      *
@@ -264,7 +267,7 @@ public abstract class Message {
      *      If the {@link XMLStreamWriter} reports an error,
      *      or some other errors happen during the processing.
      */
-    public abstract void writeTo(XMLStreamWriterEx sw) throws XMLStreamException;
+    public abstract void writeTo(XMLStreamWriter sw) throws XMLStreamException;
 
     // TODO: do we need this?
     // public abstract void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {

@@ -12,6 +12,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 
 /**
@@ -147,7 +148,7 @@ public interface Header {
      *      if the operation fails for some reason. This leaves the
      *      writer to an undefined state.
      */
-    public void writeTo(XMLStreamWriterEx w) throws XMLStreamException;
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException;
 
     /**
      * Writes out the header to the given SOAPMessage.

@@ -19,28 +19,14 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
-import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
-import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
-import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
-import com.sun.xml.ws.sandbox.impl.XMLStreamWriterExImpl;
-import com.sun.xml.ws.sandbox.message.Attachment;
-import com.sun.xml.ws.sandbox.message.AttachmentSet;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
 import com.sun.xml.ws.spi.runtime.WSConnection;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
-import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.WritableByteChannel;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

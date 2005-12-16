@@ -6,6 +6,7 @@ import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import java.nio.channels.WritableByteChannel;
 import java.io.OutputStream;
@@ -23,7 +24,7 @@ public final class TestEncoderImpl implements Encoder {
     }
 
     public String encode(Message message, OutputStream out) {
-        XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
+        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         try {
             message.writeTo(writer);
         } catch (XMLStreamException e) {

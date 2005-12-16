@@ -3,24 +3,24 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Header;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 import org.w3c.dom.Node;
-
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
 
 
 /**
@@ -90,11 +90,10 @@ public abstract class StreamHeader implements Header {
         return (T)unmarshaller.unmarshal(_mark.processUsingXMLStreamReader());
     }
 
-    
-    public void writeTo(XMLStreamWriterEx w) throws XMLStreamException {
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
             // TODO what about in-scope namespaces
-            _mark.processUsingXMLStreamWriter(w.getBase());
+            _mark.processUsingXMLStreamWriter(w);
         } catch (XMLStreamBufferException e) {
             throw new XMLStreamException(e);
         }
@@ -111,7 +110,7 @@ public abstract class StreamHeader implements Header {
             DOMResult result = new DOMResult();
             t.transform(source, result);
             Node d = result.getNode();
-            
+
             SOAPHeader header = saaj.getSOAPHeader();
             Node node = header.getOwnerDocument().importNode(result.getNode(), true);
             header.appendChild(node);

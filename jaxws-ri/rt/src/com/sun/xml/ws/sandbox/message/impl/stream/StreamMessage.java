@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 
 public class StreamMessage extends Message {
@@ -97,11 +98,11 @@ public class StreamMessage extends Message {
 
     
     
-    public void writePayloadTo(XMLStreamWriterEx sw) {
+    public void writePayloadTo(XMLStreamWriter sw) {
         throw new UnsupportedOperationException();
     }
 
-    public void writeTo(XMLStreamWriterEx sw) {
+    public void writeTo(XMLStreamWriter sw) {
         throw new UnsupportedOperationException();
     }
 

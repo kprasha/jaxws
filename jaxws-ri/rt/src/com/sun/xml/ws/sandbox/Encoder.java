@@ -2,6 +2,7 @@ package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.ws.sandbox.message.Message;
 
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -50,7 +51,7 @@ public interface Encoder {
      * (from &lt;soap:Envelope> to &lt;/soap:Envelope>).
      *
      * <p>
-     * Internally, this method is most likely invoke {@link Message#writeTo(XMLStreamWriterEx)}
+     * Internally, this method is most likely invoke {@link Message#writeTo(XMLStreamWriter)}
      * to turn the message into infoset.
      *
      * @param out

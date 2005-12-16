@@ -9,6 +9,7 @@ import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,10 +48,10 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeln("Content-Id: " + primaryCid, out);
         OutputUtil.writeln("Content-Type: " + primaryCt, out);
         OutputUtil.writeln(out);                    // write \r\n
-        XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
+        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         try {
             message.writeTo(writer);
-            writer.getBase().close();       // TODO Does this close stream ??
+            writer.close();       // TODO Does this close stream ??
         } catch (XMLStreamException xe) {
             throw new WebServiceException(xe);
         }

@@ -20,6 +20,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * {@link Header} whose physical data representation is a JAXB bean.
@@ -150,9 +151,9 @@ abstract class JAXBHeader implements Header {
         return (T)r.getResult();
     }
 
-    public void writeTo(XMLStreamWriterEx w) throws XMLStreamException {
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
-            marshaller.marshal(jaxbObject,w.getBase());
+            marshaller.marshal(jaxbObject,w);
         } catch (JAXBException e) {
             throw new XMLStreamException(e);
         }

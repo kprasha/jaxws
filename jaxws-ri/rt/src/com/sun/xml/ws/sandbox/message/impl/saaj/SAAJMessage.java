@@ -25,6 +25,7 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -211,11 +212,11 @@ public class SAAJMessage extends Message{
      * This method writes just the payload of the message to the writer.
      * This consumes the message.
      */
-    public void writePayloadTo(XMLStreamWriterEx sw) {
+    public void writePayloadTo(XMLStreamWriter sw) {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
             if(pn != null)
-                DOMUtil.serializeNode(pn, sw.getBase());
+                DOMUtil.serializeNode(pn,sw);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         } catch (SOAPException e) {
@@ -229,10 +230,10 @@ public class SAAJMessage extends Message{
      * <p/>
      * This consumes the message.
      */
-    public void writeTo(XMLStreamWriterEx sw) {
+    public void writeTo(XMLStreamWriter sw) {
         try {
             SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
-            DOMUtil.serializeNode(se, sw.getBase());
+            DOMUtil.serializeNode(se,sw);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {

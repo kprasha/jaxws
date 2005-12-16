@@ -203,9 +203,7 @@ public final class JAXBMessage extends Message {
         contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
     }
 
-    public void writeTo(XMLStreamWriterEx sw) throws XMLStreamException {
-        XMLStreamWriter w = sw.getBase();
-
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         String soapNsUri = soapVer.nsUri;
         w.writeStartDocument();
         w.writeNamespace("S",soapNsUri);
@@ -214,7 +212,7 @@ public final class JAXBMessage extends Message {
         if(hasHeaders()) {
             int len = headers.size();
             for( int i=0; i<len; i++ ) {
-                headers.get(i).writeTo(sw);
+                headers.get(i).writeTo(w);
             }
         }
         w.writeEndElement();
@@ -248,10 +246,10 @@ public final class JAXBMessage extends Message {
         return msg;
     }
 
-    public void writePayloadTo(XMLStreamWriterEx sw) throws XMLStreamException {
+    public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
             // TODO: XOP handling
-            marshaller.marshal(jaxbObject,sw.getBase());
+            marshaller.marshal(jaxbObject,sw);
         } catch (JAXBException e) {
             throw new XMLStreamException(e);
         }
