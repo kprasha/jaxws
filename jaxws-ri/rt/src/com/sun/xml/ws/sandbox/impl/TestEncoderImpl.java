@@ -5,6 +5,8 @@ import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.WebServiceException;
 import java.nio.channels.WritableByteChannel;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -20,9 +22,13 @@ public final class TestEncoderImpl implements Encoder {
         return "text/xml";
     }
 
-    public String encode(Message message, OutputStream out) throws IOException {
+    public String encode(Message message, OutputStream out) {
         XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
-        message.writeTo(writer);
+        try {
+            message.writeTo(writer);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
         return "text/xml";
     }
 

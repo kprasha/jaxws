@@ -48,8 +48,8 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeln("Content-Type: " + primaryCt, out);
         OutputUtil.writeln(out);                    // write \r\n
         XMLStreamWriterEx writer = new XMLStreamWriterExImpl(XMLStreamWriterFactory.createXMLStreamWriter(out));
-        message.writeTo(writer);
         try {
+            message.writeTo(writer);
             writer.getBase().close();       // TODO Does this close stream ??
         } catch (XMLStreamException xe) {
             throw new WebServiceException(xe);

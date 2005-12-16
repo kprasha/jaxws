@@ -6,6 +6,9 @@ import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -23,6 +26,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 
@@ -31,7 +35,7 @@ import javax.xml.transform.sax.SAXSource;
  *
  * @author Kohsuke Kawaguchi
  */
-public /*for now, work in progress*/ abstract class JAXBMessage extends Message {
+public final class JAXBMessage extends Message {
     private HeaderList headers;
     private final MessageProperties props;
 
@@ -199,11 +203,64 @@ public /*for now, work in progress*/ abstract class JAXBMessage extends Message 
         contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
     }
 
+    public void writeTo(XMLStreamWriterEx sw) throws XMLStreamException {
+        XMLStreamWriter w = sw.getBase();
+
+        String soapNsUri = soapVer.nsUri;
+        w.writeStartDocument();
+        w.writeNamespace("S",soapNsUri);
+        w.writeStartElement("S","Envelope",soapNsUri);
+        w.writeStartElement("S","Header",soapNsUri);
+        if(hasHeaders()) {
+            int len = headers.size();
+            for( int i=0; i<len; i++ ) {
+                headers.get(i).writeTo(sw);
+            }
+        }
+        w.writeEndElement();
+        // write the body
+        w.writeStartElement("S","Body",soapNsUri);
+        try {
+            try {
+                marshaller.setProperty(Marshaller.JAXB_FRAGMENT,true);
+                marshaller.marshal(jaxbObject,w);
+            } finally {
+                marshaller.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
+        } catch (JAXBException e) {
+            throw new XMLStreamException(e);
+        }
+        w.writeEndElement();
+        w.writeEndElement();
+        w.writeEndDocument();
+    }
+
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
         SOAPMessage msg = soapVer.saajFactory.createMessage();
-        // TODO
+        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
+        try {
+            writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
+        } catch (SAXException e) {
+            throw new SOAPException(e);
+        }
+        // TODO: add attachments and so on.
+        // we can use helper classes, I think.
         return msg;
     }
+
+    public void writePayloadTo(XMLStreamWriterEx sw) throws XMLStreamException {
+        try {
+            // TODO: XOP handling
+            marshaller.marshal(jaxbObject,sw.getBase());
+        } catch (JAXBException e) {
+            throw new XMLStreamException(e);
+        }
+    }
+
+    public Message copy() {
+        return new JAXBMessage(this);
+    }
+
 
     private static final Attributes EMPTY_ATTS = new AttributesImpl();
     private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
