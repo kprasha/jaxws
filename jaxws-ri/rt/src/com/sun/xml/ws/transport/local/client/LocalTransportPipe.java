@@ -59,7 +59,7 @@ public class LocalTransportPipe implements Pipe {
      * Copy constructor for {@link #copy()}.
      */
     private LocalTransportPipe(LocalTransportPipe that) {
-        this(that.endpointInfo,encoder.copy(),decoder.copy());
+        this(that.endpointInfo,that.encoder.copy(),that.decoder.copy());
     }
 
     public void postConstruct() {

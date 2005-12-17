@@ -52,7 +52,7 @@ public class HttpTransportPipe implements Pipe {
      * Copy constructor for {@link #copy()}.
      */
     private HttpTransportPipe(HttpTransportPipe that) {
-        this( encoder.copy(), decoder.copy(), that.context );
+        this( that.encoder.copy(), that.decoder.copy(), that.context );
     }
 
     public void postConstruct() {
