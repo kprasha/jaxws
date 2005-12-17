@@ -6,7 +6,6 @@ import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import org.xml.sax.Attributes;
@@ -145,7 +144,7 @@ public final class JAXBMessage extends Message {
         }
     }
 
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         JAXBResult out = new JAXBResult(unmarshaller);
         marshaller.marshal(jaxbObject,out);
         return (T)out.getResult();

@@ -234,7 +234,7 @@ public abstract class Message {
      * @throws JAXBException
      *      If JAXB reports an error during the processing.
      */
-    public abstract <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
+    public abstract <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
 
     /**
      * Reads the payload as a {@link XMLStreamReader}

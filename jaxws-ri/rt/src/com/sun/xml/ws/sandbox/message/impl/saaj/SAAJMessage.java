@@ -1,17 +1,14 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Attachment;
 import com.sun.xml.ws.sandbox.message.AttachmentSet;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
-import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.SOAPUtil;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
@@ -180,7 +177,7 @@ public class SAAJMessage extends Message{
      * <p/>
      * This consumes the message.
      */
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
             if(pn != null)

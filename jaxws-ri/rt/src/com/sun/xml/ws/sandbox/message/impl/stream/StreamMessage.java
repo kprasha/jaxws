@@ -1,6 +1,5 @@
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
@@ -14,7 +13,7 @@ import javax.xml.transform.Source;
 
 public class StreamMessage extends Message {
     private final MessageProperties props;
-    
+
     /*
      * The reader will be positioned at
      * the first child of the SOAP body
@@ -22,16 +21,16 @@ public class StreamMessage extends Message {
     protected final XMLStreamReader reader;
 
     private HeaderList headers;
-    
+
     protected String payloadLocalName;
 
     protected String payloadNamespaceURI;
 
     public StreamMessage(HeaderList headers, XMLStreamReader reader) {
         this.headers = headers;
-        
+
         this.reader = reader;
-        
+
         if (this.reader != null) {
             this.payloadLocalName = this.reader.getLocalName();
             this.payloadNamespaceURI = this.reader.getNamespaceURI();
@@ -39,10 +38,10 @@ public class StreamMessage extends Message {
             this.payloadLocalName = "";
             this.payloadNamespaceURI = "";
         }
-        
+
         this.props = new MessageProperties();
     }
-    
+
     public StreamMessage(HeaderList headers) {
         this(headers, null);
     }
@@ -50,7 +49,7 @@ public class StreamMessage extends Message {
     public boolean hasHeaders() {
         return (headers == null) ? false : headers.size() > 0;
     }
-    
+
     public HeaderList getHeaders() {
         if (headers == null) {
             headers = new HeaderList();
@@ -86,7 +85,7 @@ public class StreamMessage extends Message {
         throw new UnsupportedOperationException();
     }
 
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         // TODO: How can the unmarshaller process this as a fragment?
         return (T)unmarshaller.unmarshal(reader);
     }
