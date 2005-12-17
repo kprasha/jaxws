@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox.pipe;
 
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.Encoder;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,10 +53,12 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *
  * <h2>Pipe Lifecycle</h2>
  * <p>
- * {@link Pipe} list is expensive to set up, so once it's created it will be reused.
- * A {@link Pipe} list is not reentrant; one pipe is used to process one request/response
+ * {@link Pipe}line is expensive to set up, so once it's created it will be reused.
+ * A {@link Pipe}line is not reentrant; one pipe is used to process one request/response
  * at at time. This allows a {@link Pipe} implementation to cache thread-specific resource
- * (such as a buffer, temporary array, or JAXB Unmarshaller.)
+ * (such as a buffer, temporary array, or JAXB Unmarshaller) as instance variables.
+ * For the caller of {@link Pipe}s that need concurrent access, see
+ * the {@link #copy()} method.
  *
  * 
  *
@@ -107,8 +110,13 @@ public interface Pipe {
      * This can be used to invoke {@link PostConstruct} lifecycle methods
      * on user handler.
      *
+     * <p>
      * TODO: most likely we want this to take some parameter so that
      * channel can find out the environment it lives in.
+     *
+     * <p>
+     * TODO: is this really necessary? wouldn't it be suffice to just
+     * do the initialization inside a pipe's constructor?
      */
     void postConstruct();
 
@@ -166,4 +174,36 @@ public interface Pipe {
      * on user handler. The invocation of it is optional on the client side.
      */
     void preDestroy();
+
+    /**
+     * Creates an identical clone of this {@link Pipe}.
+     *
+     * <p>
+     * This method creates an identical pipeline that can be used
+     * concurrently with this pipeline. When the caller of a pipeline
+     * is multi-threaded and need concurrent use of the same pipeline,
+     * it can do so by creating copies through this method.
+     *
+     * <h3>Implementation Note</h3>
+     * <p>
+     * For most {@link Pipe} implementations that delegate to another
+     * {@link Pipe}, this method requires that you also copy the {@link Pipe}
+     * that you delegate to.
+     * <p>
+     * For limited number of {@link Pipe}s that do not maintain any
+     * thread unsafe resource, it is allowed to simply return <tt>this</tt>
+     * from this method (notice that even if you are stateless, if you
+     * got a delegating {@link Pipe} and that one isn't stateless, you
+     * still have to copy yourself.)
+     *
+     * <p>
+     * Note that this method might be invoked by one thread while another
+     * thread is executing the {@link #process(Message)} method. See
+     * the {@link Encoder#copy()} for more discussion about this.
+     *
+     *
+     * @return
+     *      always non-null {@link Pipe}.
+     */
+    Pipe copy();
 }

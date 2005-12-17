@@ -41,23 +41,31 @@ public class HttpTransportPipe implements Pipe {
 
     private Map<String,Object> context;
 
+    // TODO: what's this 'context'? please document.
     public HttpTransportPipe(Encoder encoder, Decoder decoder,  Map<String,Object> context) {
         this.encoder = encoder;
         this.decoder = decoder;
         this.context = context;
     }
 
+    /**
+     * Copy constructor for {@link #copy()}.
+     */
+    private HttpTransportPipe(HttpTransportPipe that) {
+        this( encoder.copy(), decoder.copy(), that.context );
+    }
+
     public void postConstruct() {
     }
 
     public Message process(Message msg) {
-        
+
         try {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
             WSConnection con = new HttpClientTransport(System.out, context);
-           
-            
+
+
             // get transport headers from message
             MessageProperties props = msg.getProperties();
             Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
@@ -65,22 +73,26 @@ public class HttpTransportPipe implements Pipe {
 
             encoder.encode(msg, con.getOutput());
             con.closeOutput();
-            
+
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
             return decoder.decode(con.getInput(), ct);
-            
+
         } catch(WebServiceException wex) {
             throw wex;
         } catch(Exception ex) {
             throw new WebServiceException(ex);
         }
     }
-    
+
     private String getContentType(Map<String, List<String>> headers) {
         return "text/xml";
     }
 
     public void preDestroy() {
+    }
+
+    public Pipe copy() {
+        return new HttpTransportPipe(this);
     }
 }
