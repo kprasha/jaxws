@@ -65,6 +65,9 @@ public class MessageProperties implements MessageContext {
     /**
      * Value of {@link #INBOUND_MESSAGE_ATTACHMENTS} property
      */
+    // TODO: do not compute these values eagerly.
+    // allow ContextProperty to be on a method so that
+    // this can be computed lazily
     @ContextProperty(INBOUND_MESSAGE_ATTACHMENTS)
     public Map<String, DataHandler> inboundMessageAttachments;
 
