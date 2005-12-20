@@ -53,6 +53,7 @@ import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
+import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.util.Base64Util;
 import com.sun.xml.ws.util.FastInfosetUtil;
 import com.sun.xml.ws.util.MessageInfoUtil;
@@ -61,11 +62,7 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.soap.MimeHeader;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
+import javax.xml.soap.*;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMResult;
@@ -95,6 +92,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.URL;
 
 import com.sun.xml.ws.handler.MessageContextUtil;
 import com.sun.xml.messaging.saaj.soap.MessageImpl;
@@ -117,6 +115,10 @@ import static com.sun.xml.ws.client.BindingProviderProperties.SOAP12_XML_FI_ACCE
 import static com.sun.xml.ws.client.BindingProviderProperties.XML_ACCEPT_VALUE;
 import static com.sun.xml.ws.client.BindingProviderProperties.XML_FI_ACCEPT_VALUE;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
+import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
+import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 
 
 /**
@@ -164,15 +166,23 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         SOAPMessage sm = null;
         boolean handlerResult = true;
         boolean isRequestResponse = (messageInfo.getMEP() == MessageStruct.REQUEST_RESPONSE_MEP);
-
+        Message message = null;
         try {
             if (messageInfo.getMetaData(DispatchContext.DISPATCH_MESSAGE_MODE) == Service.Mode.MESSAGE) {
-                sm = (SOAPMessage) messageInfo.getData()[0];
+                sm =(SOAPMessage)messageInfo.getData()[0];
+
+                //sm = (SOAPMessage) messageInfo.getData()[0];
                 // Ensure supplied message is encoded according to conneg
                 FastInfosetUtil.ensureCorrectEncoding(messageInfo, sm);
             }
+            /*Map<String,Object> context =
+                (Map<String,Object>)messageInfo.getMetaData(BindingProviderProperties.JAXWS_CONTEXT_PROPERTY);
 
-            SOAPHandlerContext handlerContext = null;
+            String endpointAddress =
+                (String)context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+            URL endpointURL = new URL(endpointAddress);
+            */
+           /* SOAPHandlerContext handlerContext = null;
             InternalMessage im = encoder.toInternalMessage(messageInfo);
 
             HandlerChainCaller caller = getHandlerChainCaller(messageInfo);
@@ -259,9 +269,10 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
 
             if (sm == null)
                 sm = encoder.toSOAPMessage(im, messageInfo);
-
+           */
             Map<String, Object> context = processMetadata(messageInfo, sm);
-/*
+
+
             // set the MIME headers on connection headers
             Map<String, List<String>> ch = new HashMap<String, List<String>>();
             for (Iterator iter = sm.getMimeHeaders().getAllHeaders(); iter.hasNext();) {
@@ -272,23 +283,28 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
                 h.add(mh.getValue());
                 ch.put(mh.getName(), h);
             }
- */
 
-            setConnection(messageInfo, context);
-            //((WSConnection) messageInfo.getConnection()).setHeaders(ch);
+
+           // setConnection(messageInfo, context);
+            ((WSConnection) messageInfo.getConnection()).setHeaders(ch);
 
             if (!isAsync(messageInfo)) {
-                WSConnection connection = (WSConnection) messageInfo.getConnection();
-
-                logRequestMessage(sm, messageInfo);
-                SOAPConnectionUtil.sendResponse(connection, sm);
+                //WSConnection connection = (WSConnection) messageInfo.getConnection();
+                SAAJMessage saajmsg = new SAAJMessage(sm) ;
+                saajmsg.getProperties().httpRequestHeaders = ch;
+                //logRequestMessage(sm, messageInfo);
+               // HttpTransportPipe pipe = new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11, context);
+               // Message response = pipe.process(saajmsg);
+               // messageInfo.setResponse(response);
+                //SOAPConnectionUtil.sendResponse(connection, sm);
             }
 
-            if (isRequestResponse) {
+            /*if (isRequestResponse) {
                 receive(messageInfo);
             } else if (isOneway(messageInfo)) {
                 checkReturnStatus(messageInfo);
             }
+            */
         } catch (WebServiceException wse) {
             setResponseType(wse, messageInfo);
             messageInfo.setResponse(wse);
@@ -372,7 +388,13 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
                 contentNegotiation != "none" ? XML_FI_ACCEPT_VALUE : XML_ACCEPT_VALUE);
         }
 
+
+
         messageContext.put(BINDING_ID_PROPERTY, bindingId);
+
+         MimeHeaders mhs = soapMessage.getMimeHeaders();
+         mhs.addHeader("Content-Type", "text/xml");
+         mhs.addHeader("Content-Transfer-Encoding", "binary");
 
         // SOAPAction: MIME header
         RuntimeContext runtimeContext = (RuntimeContext) messageInfo.getMetaData(JAXWS_RUNTIME_CONTEXT);
@@ -406,7 +428,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         return messageContext;
     }
 
-    protected void setConnection(MessageInfo messageInfo, Map<String, Object> context) {
+   /* protected void setConnection(MessageInfo messageInfo, Map<String, Object> context) {
         ClientTransportFactory clientTransportFactory = (ClientTransportFactory) context.get(CLIENT_TRANSPORT_FACTORY);
         WSConnection connection = null;
         if (clientTransportFactory == null) {
@@ -415,6 +437,17 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         }
         connection = clientTransportFactory.create(context);
         messageInfo.setConnection(connection);
+    }
+    */
+    protected void setTransportPipe(MessageInfo messageInfo, Map<String, Object> context) {
+        //ClientTransportFactory clientTransportFactory = (ClientTransportFactory) context.get(CLIENT_TRANSPORT_FACTORY);
+        //WSConnection connection = null;
+        //if (clientTransportFactory == null) {
+        //    clientTransportFactory = new HttpClientTransportFactory();
+        //    context.put(CLIENT_TRANSPORT_FACTORY, clientTransportFactory);
+        //}
+        //connection = clientTransportFactory.create(context);
+        //messageInfo.setConnection(connection);
     }
 
     protected void setResponseType(Throwable e, MessageInfo messageInfo) {

@@ -33,22 +33,28 @@ import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.ws.BindingProvider;
 import static javax.xml.ws.BindingProvider.*;
+
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
+
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.MimeHeader;
+import javax.xml.soap.SOAPException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.*;
 
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
+import com.sun.xml.ws.spi.runtime.MessageContext;
 import com.sun.xml.ws.util.Base64Util;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.model.JavaMethod;
@@ -75,30 +81,36 @@ public class DispatchDelegate extends DelegateBase {
         MessageInfo messageInfo = (MessageInfo) messageStruct;
 
         ContextMap properties = (ContextMap)
-                messageInfo.getMetaData(BindingProviderProperties.JAXWS_CONTEXT_PROPERTY);
-        BindingProvider dispatch = (BindingProvider)properties.get(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY);
+            messageInfo.getMetaData(BindingProviderProperties.JAXWS_CONTEXT_PROPERTY);
+        BindingProvider dispatch = (BindingProvider) properties.get(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY);
 
         //if (!contactInfoList.iterator().hasNext())
         //    throw new WebServiceException("can't pickup message encoder/decoder, no ContactInfo!");
 
         if (messageInfo.getMetaData(DispatchContext.DISPATCH_MESSAGE_MODE) == Service.Mode.MESSAGE)
-              msg =(Message)messageInfo.getData()[0];
+            msg = (Message) messageInfo.getData()[0];
 
         //temp
-        Map<String, Object> context = processMetadata(messageInfo, null);
+        MessageProperties context = processMetadata(messageInfo, msg);
+
 
         if (!isAsync(messageInfo)) {
 
-            DispatchPipes dispatcher = new DispatchPipes();
-            dispatcher.assemblePipes(context);
-            Message response = dispatcher.process(msg);
-            messageInfo.setResponse(response);
+            HttpTransportPipe dispatcher =
+                new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11, context);
 
-       }
+            Message response = dispatcher.process(msg);
+            SOAPMessage result = null;
+            try {
+                result = response.readAsSOAPMessage();
+            } catch (SOAPException e) {
+                e.printStackTrace();
+            }
+            messageInfo.setResponse(result);
+
+        }
 
     }
-
-
 
     /*private ContactInfo getContactInfo(ContactInfoList cil, String bindingId){
          ContactInfoListIterator iter = cil.iterator();
@@ -112,27 +124,40 @@ public class DispatchDelegate extends DelegateBase {
      }
     */
 
-    //temp
- protected Map<String, Object> processMetadata(MessageInfo messageInfo, SOAPMessage soapMessage) {
-        Map<String, Object> messageContext = new HashMap<String, Object>();
-        List<String> header = new ArrayList<String>();
+    //temp-kw
+    protected MessageProperties processMetadata(MessageInfo messageInfo, Message saajMessage) {
+        // Map<String, Object> messageContext = new HashMap<String, Object>();
+        MessageProperties messageProps = saajMessage.getProperties();
+        Map<String, List<String>> requestHeaders = messageProps.httpRequestHeaders;
+        if (requestHeaders == null) {
+            requestHeaders = new HashMap<String, List<String>>();
+            messageProps.httpRequestHeaders = requestHeaders;
+        }
 
+        //just make sure this is getting set for now-temp
+        ArrayList ct = new ArrayList<String>();
+        ct.add("text/xml");
+        requestHeaders.put("Content-Type", ct);
+        ArrayList cte = new ArrayList<String>();
+        cte.add("binary");
+        requestHeaders.put("Content-Transfer-Encoding", cte);
         ContextMap properties = (ContextMap) messageInfo.getMetaData(JAXWS_CONTEXT_PROPERTY);
 
         if (messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP)
-            messageContext.put(ONE_WAY_OPERATION, "true");
+            messageProps.put(ONE_WAY_OPERATION, "true");
 
         String soapAction = null;
         boolean useSoapAction = false;
 
         // process the properties
         if (properties != null) {
-            for (Iterator names = properties.getPropertyNames(); names.hasNext();) {
+            for (Iterator names = properties.getPropertyNames(); names.hasNext();)
+            {
                 String propName = (String) names.next();
 
                 // consume PEPT-specific properties
                 if (propName.equals(ClientTransportFactory.class.getName())) {
-                    messageContext.put(CLIENT_TRANSPORT_FACTORY, (ClientTransportFactory) properties.get(propName));
+                    messageProps.put(CLIENT_TRANSPORT_FACTORY, (ClientTransportFactory) properties.get(propName));
                 } else if (propName.equals(USERNAME_PROPERTY)) {
                     String credentials = (String) properties.get(USERNAME_PROPERTY);
                     if (credentials != null) {
@@ -148,14 +173,15 @@ public class DispatchDelegate extends DelegateBase {
                         }
                         //kwsoapMessage.getMimeHeaders().addHeader("Authorization", "Basic " + credentials);
                     }
-                } else if (propName.equals(BindingProvider.SOAPACTION_USE_PROPERTY)) {
+                } else
+                if (propName.equals(BindingProvider.SOAPACTION_USE_PROPERTY)) {
                     useSoapAction = ((Boolean)
                         properties.get(BindingProvider.SOAPACTION_USE_PROPERTY)).booleanValue();
                     if (useSoapAction)
                         soapAction = (String)
                             properties.get(BindingProvider.SOAPACTION_URI_PROPERTY);
                 } else {
-                    messageContext.put(propName, properties.get(propName));
+                    messageProps.put(propName, properties.get(propName));
                 }
             }
         }
@@ -164,15 +190,19 @@ public class DispatchDelegate extends DelegateBase {
         String contentNegotiation = (String) messageInfo.getMetaData(CONTENT_NEGOTIATION_PROPERTY);
 
         String bindingId = getBindingId(messageInfo);
+        ArrayList cn = new ArrayList<String>();
         if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+
             //soapMessage.getMimeHeaders().setHeader(ACCEPT_PROPERTY,
             //    contentNegotiation != "none" ? SOAP12_XML_FI_ACCEPT_VALUE : SOAP12_XML_ACCEPT_VALUE);
         } else {
-           // soapMessage.getMimeHeaders().setHeader(ACCEPT_PROPERTY,
-           //     contentNegotiation != "none" ? XML_FI_ACCEPT_VALUE : XML_ACCEPT_VALUE);
+            cn.add(XML_ACCEPT_VALUE);
+            requestHeaders.put(ACCEPT_PROPERTY, cn);
+            // soapMessage.getMimeHeaders().setHeader(ACCEPT_PROPERTY,
+            //     contentNegotiation != "none" ? XML_FI_ACCEPT_VALUE : XML_ACCEPT_VALUE);
         }
 
-        messageContext.put(BINDING_ID_PROPERTY, bindingId);
+        messageProps.put(BINDING_ID_PROPERTY, bindingId);
 
         // SOAPAction: MIME header
         RuntimeContext runtimeContext = (RuntimeContext) messageInfo.getMetaData(JAXWS_RUNTIME_CONTEXT);
@@ -183,7 +213,7 @@ public class DispatchDelegate extends DelegateBase {
                 //header.clear();
                 if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
                     if ((soapAction != null) && (soapAction.length() > 0)) {
-                        ((MessageImpl) soapMessage).setAction(soapAction);
+                        //((MessageImpl) soapMessage).setAction(soapAction);
                     }
                 } else {
                     if (soapAction == null) {
@@ -193,7 +223,9 @@ public class DispatchDelegate extends DelegateBase {
                     }
                 }
             }
-        } else if (messageInfo.getMetaData(BindingProviderProperties.DISPATCH_CONTEXT) != null) {
+        } else
+        if (messageInfo.getMetaData(BindingProviderProperties.DISPATCH_CONTEXT) != null)
+        {
             //bug fix 6344358
             //header.clear();
             if (soapAction == null) {
@@ -203,10 +235,10 @@ public class DispatchDelegate extends DelegateBase {
             }
         }
 
-        return messageContext;
+        return messageProps;
     }
 
-   
+
     /**
      * @return true if message exchange pattern indicates asynchronous, otherwise returns false
      */
@@ -218,23 +250,23 @@ public class DispatchDelegate extends DelegateBase {
         return false;
     }
 
-     private void setDefaultEncoding(RequestContext requestContext) {
-         requestContext.put(BindingProviderProperties.ACCEPT_ENCODING_PROPERTY,
-                 BindingProviderProperties.XML_ENCODING_VALUE);
-     }
+    private void setDefaultEncoding(RequestContext requestContext) {
+        requestContext.put(BindingProviderProperties.ACCEPT_ENCODING_PROPERTY,
+            BindingProviderProperties.XML_ENCODING_VALUE);
+    }
 
     /**
-        * This method is used to create the appropriate SOAPMessage (1.1 or 1.2 using SAAJ api).
-        *
-        * @return the BindingId associated with messageInfo
-        */
-       protected String getBindingId(MessageInfo messageInfo) {
-           SOAPEncoder encoder = (SOAPEncoder) messageInfo.getEncoder();
-           if (encoder instanceof SOAP12XMLEncoder)
-               return SOAPBinding.SOAP12HTTP_BINDING;
-           else
-               return SOAPBinding.SOAP11HTTP_BINDING;
-       }
-    
+     * This method is used to create the appropriate SOAPMessage (1.1 or 1.2 using SAAJ api).
+     *
+     * @return the BindingId associated with messageInfo
+     */
+    protected String getBindingId(MessageInfo messageInfo) {
+        SOAPEncoder encoder = (SOAPEncoder) messageInfo.getEncoder();
+        if (encoder instanceof SOAP12XMLEncoder)
+            return SOAPBinding.SOAP12HTTP_BINDING;
+        else
+            return SOAPBinding.SOAP11HTTP_BINDING;
+    }
+
 
 }

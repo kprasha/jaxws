@@ -426,7 +426,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
 
     private void setMessageStruct(MessageStruct messageStruct, Object msg) {
         if ((msg != null)&& (msg instanceof SOAPMessage))
-           messageStruct.setData(new Object[]{ MessageImplFactory.getInstance().createMessage(msg)});
+           messageStruct.setData(new Object[]{ new SAAJMessage((SOAPMessage)msg)});
         setMetadata(getRequestContext(), msg, messageStruct);
 
         // Initialize content negotiation property

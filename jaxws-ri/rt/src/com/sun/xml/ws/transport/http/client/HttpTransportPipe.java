@@ -25,6 +25,7 @@ import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
 import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.transport.WSConnectionImpl;
 
 import javax.xml.ws.WebServiceException;
 import java.util.List;
@@ -39,13 +40,13 @@ public class HttpTransportPipe implements Pipe {
     private final Encoder encoder;
     private final Decoder decoder;
 
-    private Map<String,Object> context;
+    private MessageProperties context;
 
     // TODO: what's this 'context'? please document.
-    public HttpTransportPipe(Encoder encoder, Decoder decoder,  Map<String,Object> context) {
+    public HttpTransportPipe(Encoder encoder, Decoder decoder,  MessageProperties context) {
         this.encoder = encoder;
         this.decoder = decoder;
-        this.context = context;
+        this.context = context;  //TODO:can get messageprops from message do not need this
     }
 
     /**
@@ -63,14 +64,12 @@ public class HttpTransportPipe implements Pipe {
         try {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
-            WSConnection con = new HttpClientTransport(System.out, context);
-
+            WSConnection con = new HttpClientTransport(null, context);
 
             // get transport headers from message
             MessageProperties props = msg.getProperties();
             Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
             con.setHeaders(reqHeaders);
-
             encoder.encode(msg, con.getOutput());
             con.closeOutput();
 

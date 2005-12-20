@@ -25,6 +25,7 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.sandbox.message.MessageProperties;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -61,11 +62,11 @@ public class HttpClientTransport extends WSConnectionImpl {
     private Map<String, List<String>> respHeaders = null;
 
     public HttpClientTransport() {
-        this(null, new HashMap<String, Object>());
+        this(null, new MessageProperties());
     }
 
-    public HttpClientTransport(OutputStream logStream, Map<String, Object> context) {
-        this.context = context;
+    public HttpClientTransport(OutputStream logStream, Map<String,Object> context) {
+        this.context = (MessageProperties)context;
         _logStream = logStream;
 
         SOAPVersion soapVer;
@@ -254,6 +255,8 @@ public class HttpClientTransport extends WSConnectionImpl {
             } catch (IllegalArgumentException e) {
                 // ignore headers that are illegal in MIME
             }
+             mimeHeaders.addHeader("Content-Type", "text/xml");
+             mimeHeaders.addHeader("Content-Transfer-Encoding", "binary");
         }
         return mimeHeaders;
        /* Map<String, List<String>> headers = new HashMap<String, List<String>>();
@@ -383,7 +386,7 @@ public class HttpClientTransport extends WSConnectionImpl {
     }
 
     protected HttpURLConnection createHttpConnection(String endpoint,
-                                                     Map<String, Object> context)
+                                                     MessageProperties context)
             throws IOException {
 
         boolean verification = false;
@@ -416,6 +419,7 @@ public class HttpClientTransport extends WSConnectionImpl {
 
         // allow interaction with the web page - user may have to supply
         // username, password id web page is accessed from web browser
+
         httpConnection.setAllowUserInteraction(true);
         // enable input, output streams
         httpConnection.setDoOutput(true);
@@ -425,9 +429,9 @@ public class HttpClientTransport extends WSConnectionImpl {
         httpConnection.setRequestMethod("POST");
 
         // set the properties on HttpURLConnection
-        //kw-12/1605for (Map.Entry entry : super.getHeaders().entrySet()) {
-           // httpConnection.addRequestProperty ((String)entry.getKey(), ((List<String>)entry.getValue()).get(0));
-        //}
+        for (Map.Entry entry : super.getHeaders().entrySet()) {
+            httpConnection.addRequestProperty ((String)entry.getKey(), ((List<String>)entry.getValue()).get(0));
+        }
         
         return httpConnection;
     }
@@ -468,7 +472,7 @@ public class HttpClientTransport extends WSConnectionImpl {
     private MessageFactory _messageFactory;
     HttpURLConnection httpConnection = null;
     String endpoint = null;
-    Map<String, Object> context = null;
+    MessageProperties context = null;
     CookieJar cookieJar = null;
     boolean isFailure = false;
     OutputStream _logStream = null;
