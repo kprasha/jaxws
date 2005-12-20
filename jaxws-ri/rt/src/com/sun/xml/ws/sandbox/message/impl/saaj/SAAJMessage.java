@@ -14,12 +14,7 @@ import org.w3c.dom.Node;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -31,15 +26,13 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Vivek Pandey
  */
 
-public class SAAJMessage extends Message{
+public class SAAJMessage extends Message {
     private SOAPMessage sm;
     private HeaderList headers;
     private MessageProperties properties;
@@ -49,18 +42,19 @@ public class SAAJMessage extends Message{
 
     private boolean parsedHeader;
 
-    public SAAJMessage(SOAPMessage sm){
+    public SAAJMessage(SOAPMessage sm) {
         properties = new MessageProperties();
 
         this.sm = sm;
+      
         try {
             Node body = sm.getSOAPBody();
             Node n = body.getFirstChild();
             // hope this is correct. Caching the localname and namespace of the payload should be fine
             // but what about if a Handler replaces the payload with something else? Weel, may be it
             // will be error condition anyway
-            if(n != null){
-                payloadLocalName =  n.getLocalName();
+            if (n != null) {
+                payloadLocalName = n.getLocalName();
                 payloadNamspace = n.getNamespaceURI();
             }
         } catch (SOAPException e) {
@@ -79,24 +73,25 @@ public class SAAJMessage extends Message{
 
     /**
      * Gets all the headers of this message.
+     *
      * @return always return the same non-null object.
      */
     public HeaderList getHeaders() {
-        if(parsedHeader)
+        if (parsedHeader)
             return headers;
 
-        if(headers == null)
+        if (headers == null)
             headers = new HeaderList();
 
         try {
             SOAPHeader header = sm.getSOAPHeader();
             Iterator iter = header.examineAllHeaderElements();
-            while(iter.hasNext()){
-                headers.add(new SAAJHeader((SOAPHeaderElement)iter.next()));
+            while (iter.hasNext()) {
+                headers.add(new SAAJHeader((SOAPHeaderElement) iter.next()));
             }
             parsedHeader = true;
         } catch (SOAPException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return headers;
     }
@@ -115,14 +110,13 @@ public class SAAJMessage extends Message{
      * (attachments live outside a message.)
      */
     public AttachmentSet getAttachments() {
-        if(attSet == null)
-            attSet =  new SAAJAttachmentSet(sm);
+        if (attSet == null)
+            attSet = new SAAJAttachmentSet(sm);
         return attSet;
     }
 
     /**
      * Gets the local name of the payload element.
-     *
      */
     public String getPayloadLocalPart() {
         return payloadLocalName;
@@ -156,7 +150,7 @@ public class SAAJMessage extends Message{
     public Source readPayloadAsSource() {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
-            return (pn != null)?new DOMSource(pn):null;
+            return (pn != null) ? new DOMSource(pn) : null;
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
@@ -180,7 +174,7 @@ public class SAAJMessage extends Message{
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
-            if(pn != null)
+            if (pn != null)
                 return (T) unmarshaller.unmarshal(pn);
             return null;
         } catch (SOAPException e) {
@@ -196,8 +190,8 @@ public class SAAJMessage extends Message{
     public XMLStreamReader readPayload() {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
-            return (pn != null)?
-            SourceReaderFactory.createSourceReader(new DOMSource(pn), true):null;
+            return (pn != null) ?
+                SourceReaderFactory.createSourceReader(new DOMSource(pn), true) : null;
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
@@ -212,8 +206,8 @@ public class SAAJMessage extends Message{
     public void writePayloadTo(XMLStreamWriter sw) {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
-            if(pn != null)
-                DOMUtil.serializeNode(pn,sw);
+            if (pn != null)
+                DOMUtil.serializeNode(pn, sw);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         } catch (SOAPException e) {
@@ -230,7 +224,8 @@ public class SAAJMessage extends Message{
     public void writeTo(XMLStreamWriter sw) {
         try {
             SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
-            DOMUtil.serializeNode(se,sw);
+            DOMUtil.serializeNode(se, sw);
+            sw.flush();            
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
@@ -263,15 +258,16 @@ public class SAAJMessage extends Message{
         try {
             SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
             SOAPMessage msg = null;
-            if(se.getNamespaceURI().equals(SOAPConstants.QNAME_SOAP_ENVELOPE.getNamespaceURI())){
+            if (se.getNamespaceURI().equals(SOAPConstants.QNAME_SOAP_ENVELOPE.getNamespaceURI()))
+            {
                 msg = SOAPUtil.createMessage(SOAPBinding.SOAP11HTTP_BINDING);
-            }else{
+            } else {
                 msg = SOAPUtil.createMessage(SOAPBinding.SOAP12HTTP_BINDING);
             }
             msg.getSOAPPart().getEnvelope().getOwnerDocument().importNode(se, true);
             Iterator iter = sm.getAttachments();
-            while(iter.hasNext()){
-                msg.addAttachmentPart((AttachmentPart)iter.next());
+            while (iter.hasNext()) {
+                msg.addAttachmentPart((AttachmentPart) iter.next());
             }
             return new SAAJMessage(getHeaders(), msg);
         } catch (SOAPException e) {
@@ -280,9 +276,7 @@ public class SAAJMessage extends Message{
     }
 
 
-
-
-    private class SAAJAttachment implements Attachment{
+    private class SAAJAttachment implements Attachment {
 
         AttachmentPart ap;
 
@@ -382,11 +376,11 @@ public class SAAJMessage extends Message{
          *         if no such attachment exist.
          */
         public Attachment get(String contentId) {
-            if(!attIter.hasNext())
+            if (!attIter.hasNext())
                 return null;
 
             // if this is the first time then create the attachment Map
-            if(attMap == null){
+            if (attMap == null) {
                 attMap = createAttachmentMap();
             }
             return attMap.get(contentId);
@@ -398,16 +392,16 @@ public class SAAJMessage extends Message{
          * @return an Iterator.
          */
         public Iterator<Attachment> iterator() {
-            if(attMap == null){
+            if (attMap == null) {
                 attMap = createAttachmentMap();
             }
             return attMap.values().iterator();
         }
 
-        private Map<String, Attachment> createAttachmentMap(){
+        private Map<String, Attachment> createAttachmentMap() {
             HashMap<String, Attachment> map = new HashMap<String, Attachment>();
-            while(attIter.hasNext()){
-                AttachmentPart ap = (AttachmentPart)attIter.next();
+            while (attIter.hasNext()) {
+                AttachmentPart ap = (AttachmentPart) attIter.next();
                 attMap.put(ap.getContentId(), new SAAJAttachment(ap));
             }
             return map;
