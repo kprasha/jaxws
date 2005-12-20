@@ -2,9 +2,8 @@ package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.ws.sandbox.message.Message;
 
-import java.io.InputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 
 /**
@@ -38,9 +37,19 @@ public interface Decoder {
      *      the data to be read into a {@link Message}. The transport would have
      *      read any transport-specific header before it passes an {@link InputStream},
      *      and {@link InputStream} is expected to be read until EOS. Never null.
+     *
+     *      <p>
+     *      Some transports, such as SMTP, may 'encode' data into another format
+     *      (such as uuencode, base64, etc.) It is the caller's responsibility to
+     *      'decode' these transport-level encoding before it passes data into
+     *      {@link Decoder}.
+     *
      * @param contentType
      *      The MIME content type (like "application/xml") of this byte stream.
-     *      TODO: is this really necessary?
+     *      Thie text includes all the sub-headers of the content-type header. Therefore,
+     *      in more complex case, this could be something like
+     *      <tt>multipart/related; boundary="--=_outer_boundary"; type="multipart/alternative"</tt>.
+     *      This parameter must not be null.
      *
      * @return never null.
      *
