@@ -47,6 +47,7 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeln(startBoundary, out);     // write --boundary\r\n
         OutputUtil.writeln("Content-Id: " + primaryCid, out);
         OutputUtil.writeln("Content-Type: " + primaryCt, out);
+        OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
         OutputUtil.writeln(out);                    // write \r\n
         XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         try {
@@ -62,6 +63,7 @@ public class MimeEncoder implements Encoder {
             OutputUtil.writeln(startBoundary, out);     // write --boundary\r\n
             OutputUtil.writeln("Content-Id: " + att.getContentId(), out);
             OutputUtil.writeln("Content-Type: " + att.getContentType(), out);
+            OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
             OutputUtil.writeln(out);                    // write \r\n
             att.writeTo(out);
             OutputUtil.writeln(out);                    // write \r\n
