@@ -31,6 +31,7 @@ import java.lang.reflect.Proxy;
  *    &lt;soap:Header>.
  *    It can be read multiple times,
  *    can be added or removed, but it is not modifiable.
+ *    See {@link HeaderList} for more about headers.
  *
  * <li>
  *    The payload of the message, which is a representation
