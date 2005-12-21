@@ -19,6 +19,8 @@ import org.xml.sax.helpers.LocatorImpl;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.util.JAXBResult;
 import javax.xml.bind.util.JAXBSource;
 import javax.xml.soap.SOAPException;
@@ -28,6 +30,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.namespace.QName;
 
 /**
  * {@link Message} backed by a JAXB bean.
@@ -64,7 +67,9 @@ public final class JAXBMessage extends Message {
      * @param marshaller
      *      The marshaller to be used to produce infoset from the object. Must not be null.
      * @param jaxbObject
-     *      The JAXB object that represents the payload. must not be null.
+     *      The JAXB object that represents the payload. must not be null. This object
+     *      must be bound to an element (which means it either is a {@link JAXBElement} or
+     *      an instanceof a class with {@link XmlRootElement}).
      * @param soapVer
      *      The SOAP version of the message. Must not be null.
      */
@@ -73,6 +78,30 @@ public final class JAXBMessage extends Message {
         this.marshaller = marshaller;
         this.jaxbObject = jaxbObject;
         this.soapVer = soapVer;
+    }
+
+    /**
+     * Creates a {@link Message} backed by a JAXB bean.
+     *
+     * @param marshaller
+     *      The marshaller to be used to produce infoset from the object. Must not be null.
+     * @param tagName
+     *      The tag name of the payload element. Must not be null.
+     * @param declaredType
+     *      The expected type (IOW the declared defined in the schema) of the instance.
+     *      If this is different from <tt>jaxbTypeObject</tt>, @xsi:type will be produced.
+     * @param jaxbTypeObject
+     *      The JAXB object that represents the payload. must not be null. This object
+     *      may be a type that binds to an XML type, not an element, such as {@link String}
+     *      or {@link Integer} that doesn't necessarily have an element name.
+     * @param soapVer
+     *      The SOAP version of the message. Must not be null.
+     */
+    public <T> JAXBMessage( Marshaller marshaller, QName tagName, Class<T> declaredType, T jaxbTypeObject, SOAPVersion soapVer ) {
+        this(marshaller,new JAXBElement<T>(tagName,declaredType,jaxbTypeObject),soapVer);
+        // fill in those known values eagerly
+        this.nsUri = tagName.getNamespaceURI();
+        this.localName = tagName.getLocalPart();
     }
 
     /**
