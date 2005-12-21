@@ -153,7 +153,9 @@ public abstract class Message {
      * <h3>Implementation Note</h3>
      * <p>
      * {@link Message} implementation is allowed to defer
-     * the construction of {@link HeaderList} object.
+     * the construction of {@link HeaderList} object. So
+     * if you only want to check for the existence of any header
+     * element, use {@link #hasHeaders()}.
      *
      * @return
      *      always return the same non-null object.
