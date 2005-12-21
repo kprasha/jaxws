@@ -1,5 +1,7 @@
 package com.sun.xml.ws.sandbox.message;
 
+import com.sun.xml.ws.sandbox.Decoder;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +14,12 @@ import java.util.List;
  * from outside a {@link Message}, this is necessary
  * since intermediate processing layers often need to
  * put additional headers.
+ *
+ * <p>
+ * Following the SOAP convention, the order among headers
+ * are not significant. However, {@link Decoder}s are
+ * expected to preserve the order of headers in the input
+ * message as much as possible.
  *
  * @see Message#getHeaders()
  */
