@@ -1,10 +1,9 @@
 package com.sun.xml.ws.sandbox.pipe;
 
+import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
-import com.sun.xml.ws.sandbox.Encoder;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Provider;
@@ -134,6 +133,14 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * <p>
  * Note that access to such resource often needs to be synchronized,
  * since multiple copies of pipelines may execute concurrently.
+ *
+ * <p>
+ * If such information is read-only,
+ * it can be stored as instance variables of a pipe,
+ * and its reference copied as pipes get copied. (The only difference between
+ * this and per-thread state is that you just won't allocate new things when
+ * pipes get copied here.)
+ *
  *
  * <h3>VM-wide state</h3>
  * <p>
