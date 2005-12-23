@@ -32,6 +32,9 @@ public final class PipeCloner {
         return new PipeCloner().copy(p);
     }
 
+    // no need to be constructed publicly. always use the static clone method.
+    private PipeCloner() {}
+
     /**
      * Invoked by a {@link Pipe#copy(PipeCloner)} implementation
      * to copy a reference to another pipe.
