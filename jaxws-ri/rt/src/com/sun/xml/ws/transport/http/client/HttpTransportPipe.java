@@ -57,9 +57,6 @@ public class HttpTransportPipe implements Pipe {
         this( that.encoder.copy(), that.decoder.copy(), that.context );
     }
 
-    public void postConstruct() {
-    }
-
     public Message process(Message msg) {
 
         try {

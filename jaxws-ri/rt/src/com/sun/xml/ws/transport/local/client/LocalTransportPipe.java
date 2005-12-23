@@ -63,9 +63,6 @@ public class LocalTransportPipe implements Pipe {
         this(that.endpointInfo,that.encoder.copy(),that.decoder.copy());
     }
 
-    public void postConstruct() {
-    }
-
     public Message process(Message msg) {
         
         try {

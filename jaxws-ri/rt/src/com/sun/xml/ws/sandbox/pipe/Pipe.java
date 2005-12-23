@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox.pipe;
 
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.Encoder;
 
 import javax.annotation.PostConstruct;
@@ -52,15 +53,93 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *
  *
  * <h2>Pipe Lifecycle</h2>
- * <p>
  * {@link Pipe}line is expensive to set up, so once it's created it will be reused.
  * A {@link Pipe}line is not reentrant; one pipe is used to process one request/response
- * at at time. This allows a {@link Pipe} implementation to cache thread-specific resource
- * (such as a buffer, temporary array, or JAXB Unmarshaller) as instance variables.
- * For the caller of {@link Pipe}s that need concurrent access, see
- * the {@link #copy(PipeCloner)} method.
+ * at at time. Where a need arises to process multiple requests concurrently, a pipeline
+ * gets cloned through {@link PipeCloner}.
+ * <p>
+ * Created pipelines (including cloned ones and the original) may be discarded and GCed
+ * at any time at the discretion of whoever owns pipelines. Pipes can, however, expect
+ * at least one copy (or original) of pipeline to live at any given time while a pipeline
+ * owner is interested in the given pipeline configuration (in more concerete terms,
+ * for example, as long as a dispatch object lives, it's going to keep at least one
+ * copy of a pipeline alive.)
+ * <p>
+ * Before a pipeline owner dies, it may invoke {@link #preDestroy()} on the last
+ * remaining pipeline. It is "may" for pipeline owners that live in the client-side
+ * of JAX-WS (such as dispatches and proxies), but it is a "must" for pipeline owners
+ * that live in the server-side of JAX-WS.
+ * <p>
+ * This last invocation gives a chance for some pipes to clean up any state/resource
+ * acquired (such as WS-RM's sequence, WS-Trust's SecurityToken.)
  *
- * 
+ *
+ *
+ * <h2>Pipe and State</h2>
+ * <p>
+ * The lifecycle of pipelines is designed to allow a {@link Pipe} to store various
+ * state in easily accessible fashion.
+ *
+ *
+ * <h3>Per-message state</h3>
+ * <p>
+ * Any information that changes from a message to message should be
+ * stored in {@link MessageProperties}. This includes information like
+ * transport-specific headers.
+ *
+ * <h3>Per-thread state</h3>
+ * <p>
+ * Any expensive objects that are non-reentrant can be stored in
+ * instance variables of a {@link Pipe}, since {@link #process(Message)} is
+ * non reentrant. When a pipe is copied, new instances should be allocated
+ * so that two {@link Pipe} instances don't share thread-unsafe resources.
+ * This includes things like canonicalizers, JAXB unmarshallers, buffers,
+ * and so on.
+ *
+ * <h3>Per-proxy state</h3>
+ * <p>
+ * Information that is tied to a particular proxy/dispatch can be stored
+ * in a separate object that is referenced from a pipe. When
+ * a new pipe is copied, you can simply hand out a reference to the newly
+ * created one, so that all copied pipes refer to the same instance.
+ * See the following code as an example:
+ *
+ * <pre>
+ * class PipeImpl {
+ *   // this object stores per-proxy state
+ *   class DataStore {
+ *     int counter;
+ *   }
+ *
+ *   private DataStore ds;
+ *
+ *   // create a fresh new pipe
+ *   public PipeImpl(...) {
+ *     ....
+ *     ds = new DataStore();
+ *   }
+ *
+ *   // copy constructor
+ *   private PipeImpl(PipeImpl that) {
+ *     ...
+ *     this.ds = that.ds;
+ *   }
+ *
+ *   public PipeImpl copy(PipeCloner pc) {
+ *     return new PipeImpl(this);
+ *   }
+ * }
+ * </pre>
+ *
+ * <p>
+ * Note that access to such resource often needs to be synchronized,
+ * since multiple copies of pipelines may execute concurrently.
+ *
+ * <h3>VM-wide state</h3>
+ * <p>
+ * <tt>static</tt> is always there for you to use.
+ *
+ *
  *
  * <h2>Pipes and Handlers</h2>
  * <p>
@@ -75,6 +154,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * to handlers (i.e. {@link Handler#close(MessageContext)} method.
  *
  *
+ * <pre>
  * TODO: needs more thinking about how channel pipe is created.
  * it's different between the client and the server.
  *
@@ -101,25 +181,9 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *          Manage input e.g. JAXB beans and associated with parts of the SOAP message
  *      inbound invoker: invoke the service
  *         Inkoke SEI, e.g. EJB or SEI in servlet.
+ * </pre>
  */
 public interface Pipe {
-    /**
-     * Invoked after the pipe chain is set up to give {@link Pipe}s a chance
-     * to initialize themselves.
-     *
-     * This can be used to invoke {@link PostConstruct} lifecycle methods
-     * on user handler.
-     *
-     * <p>
-     * TODO: most likely we want this to take some parameter so that
-     * channel can find out the environment it lives in.
-     *
-     * <p>
-     * TODO: is this really necessary? wouldn't it be suffice to just
-     * do the initialization inside a pipe's constructor?
-     */
-    void postConstruct();
-
     /**
      * Sends a {@link Message} and returns a response {@link Message} to it.
      *
@@ -167,7 +231,7 @@ public interface Pipe {
     Message process( Message msg );
 
     /**
-     * Invokes before the pipe chain is about to be discarded,
+     * Invoked before the last copy of the pipeline is about to be discarded,
      * to give {@link Pipe}s a chance to clean up any resources.
      *
      * This can be used to invoke {@link PreDestroy} lifecycle methods
@@ -204,7 +268,7 @@ public interface Pipe {
      * @param cloner
      *      Use this object to clone other pipe references you have
      *      in your pipe. See {@link PipeCloner} for more discussion
-     *      about why. 
+     *      about why.
      *
      * @return
      *      always non-null {@link Pipe}.
