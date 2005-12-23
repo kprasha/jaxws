@@ -77,6 +77,16 @@ public class MessageProperties implements MessageContext {
     @ContextProperty(OUTBOUND_MESSAGE_ATTACHMENTS)
     public Map<String, DataHandler> outboundMessageAttachments;
 
+    /**
+     * True if this message came from a transport (IOW inbound),
+     * and in paricular from a "secure" transport. A transport
+     * needs to set this flag appropriately.
+     *
+     * <p>
+     * This is a requirement from the security team.
+     */
+    // TODO: expose this as a property
+    public boolean wasTransportSecure;
 
     /**
      * Bag to capture "other" properties that do not have
