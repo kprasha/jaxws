@@ -58,7 +58,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * at at time. This allows a {@link Pipe} implementation to cache thread-specific resource
  * (such as a buffer, temporary array, or JAXB Unmarshaller) as instance variables.
  * For the caller of {@link Pipe}s that need concurrent access, see
- * the {@link #copy()} method.
+ * the {@link #copy(PipeCloner)} method.
  *
  * 
  *
@@ -201,9 +201,14 @@ public interface Pipe {
      * thread is executing the {@link #process(Message)} method. See
      * the {@link Encoder#copy()} for more discussion about this.
      *
+     * @param cloner
+     *      Use this object to clone other pipe references you have
+     *      in your pipe. See {@link PipeCloner} for more discussion
+     *      about why. 
      *
      * @return
      *      always non-null {@link Pipe}.
+     * @param cloner
      */
-    Pipe copy();
+    Pipe copy(PipeCloner cloner);
 }

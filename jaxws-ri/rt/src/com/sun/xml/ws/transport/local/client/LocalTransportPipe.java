@@ -25,6 +25,7 @@ import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.sandbox.pipe.PipeCloner;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.Tie;
 import com.sun.xml.ws.spi.runtime.WSConnection;
@@ -56,7 +57,7 @@ public class LocalTransportPipe implements Pipe {
     }
 
     /**
-     * Copy constructor for {@link #copy()}.
+     * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
     private LocalTransportPipe(LocalTransportPipe that) {
         this(that.endpointInfo,that.encoder.copy(),that.decoder.copy());
@@ -106,7 +107,7 @@ public class LocalTransportPipe implements Pipe {
     public void preDestroy() {
     }
 
-    public Pipe copy() {
+    public Pipe copy(PipeCloner cloner) {
         return new LocalTransportPipe(this);
     }
 }
