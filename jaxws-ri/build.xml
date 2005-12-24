@@ -151,6 +151,15 @@ major-version=${release.impl.version}
             description="generate architecture documents (which is just a glorified javadoc)">
 <!--      <ant dir="tools/taglets" target="compile" />  -->
       <mkdir dir="${build.home}/javadoc" />
+      
+      <taskdef name="sequence-diagram" classname="com.sun.xml.bind.taglets.SequenceDiagramTask">
+        <classpath refid="tools.compile.classpath"/>
+      </taskdef>
+      <sequence-diagram
+        src="${basedir}/rt/src"
+        dest="${build.home}/javadoc"
+        includes="**/*.seq" />
+      
       <javadoc
             destdir="${build.home}/javadoc"
             use="true"
