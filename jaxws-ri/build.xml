@@ -153,7 +153,9 @@ major-version=${release.impl.version}
       <mkdir dir="${build.home}/javadoc" />
       
       <taskdef name="sequence-diagram" classname="com.sun.xml.bind.taglets.SequenceDiagramTask">
-        <classpath refid="tools.compile.classpath"/>
+        <classpath>
+          <pathelement path="${basedir}/tools/lib/taglets.jar" />
+        </classpath>
       </taskdef>
       <sequence-diagram
         src="${basedir}/rt/src"
