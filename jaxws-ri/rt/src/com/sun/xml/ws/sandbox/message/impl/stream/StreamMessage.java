@@ -3,6 +3,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -11,7 +12,11 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 
-public class StreamMessage extends Message {
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+
+public class StreamMessage extends AbstractMessageImpl {
     private final MessageProperties props;
 
     /*
@@ -69,14 +74,6 @@ public class StreamMessage extends Message {
         return payloadNamespaceURI;
     }
 
-    public boolean isFault() {
-        throw new UnsupportedOperationException();
-    }
-
-    public Source readEnvelopeAsSource() {
-        throw new UnsupportedOperationException();
-    }
-
     public Source readPayloadAsSource() {
         return new StAXSource(reader, true);
     }
@@ -95,13 +92,18 @@ public class StreamMessage extends Message {
         return this.reader;
     }
 
-    
-    
+
+
     public void writePayloadTo(XMLStreamWriter sw) {
         throw new UnsupportedOperationException();
     }
 
     public void writeTo(XMLStreamWriter sw) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        // TODO
         throw new UnsupportedOperationException();
     }
 

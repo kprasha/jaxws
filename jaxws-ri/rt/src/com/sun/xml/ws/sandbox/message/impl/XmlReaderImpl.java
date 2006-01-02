@@ -1,6 +1,7 @@
-package com.sun.xml.ws.sandbox.message.impl.jaxb;
+package com.sun.xml.ws.sandbox.message.impl;
 
 import com.sun.xml.ws.sandbox.message.HeaderList;
+import com.sun.xml.ws.sandbox.message.Message;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -26,9 +27,9 @@ final class XMLReaderImpl extends XMLFilterImpl {
      */
     private ContentHandler  contentHandler = DUMMY;
 
-    private final JAXBMessage msg;
+    private final Message msg;
 
-    XMLReaderImpl(JAXBMessage msg) {
+    XMLReaderImpl(Message msg) {
         this.msg = msg;
     }
 

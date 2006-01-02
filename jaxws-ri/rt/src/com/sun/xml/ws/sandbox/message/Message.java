@@ -1,21 +1,25 @@
 package com.sun.xml.ws.sandbox.message;
 
 import com.sun.xml.ws.sandbox.Encoder;
-
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.JAXBException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.Source;
-import javax.servlet.http.HttpServletRequest;
-import java.io.InputStream;
-import java.lang.reflect.Proxy;
-
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.SAXException;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.ContentHandler;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Source;
+import java.io.InputStream;
+import java.lang.reflect.Proxy;
 
 /**
  * Represents a SOAP message.
@@ -115,7 +119,7 @@ import org.jvnet.staxex.XMLStreamWriterEx;
  * TODO: what do we do about this?
  *
  *
- *
+ * <pre>
  * TODO: can body element have foreign attributes? maybe ID for security?
  *       Yes, when the SOAP body is signed there will be an ID attribute present
  *       But in this case any security based impl may need access
@@ -138,6 +142,9 @@ import org.jvnet.staxex.XMLStreamWriterEx;
  *       SOAP version is determined by the context, so message itself doesn't carry it around (?)
  *
  * TODO: wrapping message needs easier. in particular properties and attachments.
+ * </pre>
+ *
+ * @author Kohsuke Kawaguchi
  */
 public abstract class Message {
 
@@ -201,9 +208,11 @@ public abstract class Message {
         // TODO: is SOAP version a property of a Message?
         // or is it defined by external factors?
         // how do I compare?
-        return getPayloadLocalPart()=="Fault"
-            && getPayloadNamespaceURI()=="http://schemas.xmlsoap.org/soap/envelope/";
+        if(getPayloadLocalPart()!="Fault")
+            return false;
 
+        String nsUri = getPayloadNamespaceURI();
+        return nsUri== SOAPVersion.SOAP_11.nsUri || nsUri==SOAPVersion.SOAP_12.nsUri;
     }
 
     /**
@@ -263,8 +272,6 @@ public abstract class Message {
      * Writes the whole SOAP message (but not attachments)
      * to the given writer.
      *
-     * This includes the complete {@link
-     *
      * This consumes the message.
      *
      * @throws XMLStreamException
@@ -273,8 +280,22 @@ public abstract class Message {
      */
     public abstract void writeTo(XMLStreamWriter sw) throws XMLStreamException;
 
-    // TODO: do we need this?
-    // public abstract void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
+    /**
+     * Writes the whole SOAP envelope as SAX events.
+     *
+     * <p>
+     * This consumes the message.
+     *
+     * @param contentHandler
+     *      must not be nulll.
+     * @param errorHandler
+     *      must not be null.
+     *      any error encountered during the SAX event production must be
+     *      first reported to this error handler. Fatal errors can be then
+     *      thrown as {@link SAXParseException}. {@link SAXException}s thrown
+     *      from {@link ErrorHandler} should propagate directly through this method.
+     */
+    public abstract void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException;
 
     // TODO: do we need a method that reads payload as a fault?
     // do we want a separte streaming representation of fault?

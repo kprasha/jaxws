@@ -8,7 +8,11 @@ import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.bind.unmarshaller.DOMScanner;
 import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
@@ -236,6 +240,12 @@ public class SAAJMessage extends Message {
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
+    }
+
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        DOMScanner ds = new DOMScanner();
+        ds.setContentHandler(contentHandler);
+        ds.scan(sm.getSOAPPart());
     }
 
     /**

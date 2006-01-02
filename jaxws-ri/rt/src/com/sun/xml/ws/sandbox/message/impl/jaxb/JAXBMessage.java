@@ -6,6 +6,8 @@ import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.sandbox.message.impl.XMLReaderImpl;
+import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import org.xml.sax.Attributes;
@@ -37,7 +39,7 @@ import javax.xml.namespace.QName;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class JAXBMessage extends Message {
+public final class JAXBMessage extends AbstractMessageImpl {
     private HeaderList headers;
     private final MessageProperties props;
 
@@ -189,10 +191,6 @@ public final class JAXBMessage extends Message {
         } catch (JAXBException e) {
             throw new XMLStreamException(e);
         }
-    }
-
-    public Source readEnvelopeAsSource() {
-        return new SAXSource(new XMLReaderImpl(this),XMLReaderImpl.THE_SOURCE);
     }
 
     /**
