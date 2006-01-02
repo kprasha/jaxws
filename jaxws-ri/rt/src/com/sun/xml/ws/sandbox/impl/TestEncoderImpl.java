@@ -1,16 +1,14 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
-import java.nio.channels.WritableByteChannel;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Mock up {@link Encoder} that just writes the SOAP envelope as XML,

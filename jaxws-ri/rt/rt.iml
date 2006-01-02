@@ -50,7 +50,9 @@
           <root url="jar://$MODULE_DIR$/../lib/jaxws-api.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/jaxws-api-src.zip!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
@@ -161,6 +163,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/../lib/streambuffer.src.zip!/streambuffer/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/stax-ex.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/stax-ex-src.zip!/src/java" />
         </SOURCES>
       </library>
     </orderEntry>

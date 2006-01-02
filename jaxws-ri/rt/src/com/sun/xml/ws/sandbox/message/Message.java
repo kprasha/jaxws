@@ -1,8 +1,6 @@
 package com.sun.xml.ws.sandbox.message;
 
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.XMLStreamReaderEx;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
@@ -15,6 +13,9 @@ import javax.xml.transform.Source;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
+
+import org.jvnet.staxex.XMLStreamReaderEx;
+import org.jvnet.staxex.XMLStreamWriterEx;
 
 /**
  * Represents a SOAP message.

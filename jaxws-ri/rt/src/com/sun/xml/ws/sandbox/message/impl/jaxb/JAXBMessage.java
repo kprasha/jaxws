@@ -60,7 +60,6 @@ public final class JAXBMessage extends Message {
 
     private final SOAPVersion soapVer;
 
-
     /**
      * Creates a {@link Message} backed by a JAXB bean.
      *

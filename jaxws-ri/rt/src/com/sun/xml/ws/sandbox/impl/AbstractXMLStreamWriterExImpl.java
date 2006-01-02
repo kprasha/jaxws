@@ -1,12 +1,13 @@
 package com.sun.xml.ws.sandbox.impl;
 
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.xml.stream.XMLStreamException;
 import javax.activation.DataHandler;
 import java.io.OutputStream;
 import java.io.IOException;
+
+import org.jvnet.staxex.XMLStreamWriterEx;
 
 /**
  * Partial default implementation of {@link XMLStreamWriterEx}.

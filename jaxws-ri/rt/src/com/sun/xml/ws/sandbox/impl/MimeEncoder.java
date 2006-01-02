@@ -3,7 +3,6 @@ package com.sun.xml.ws.sandbox.impl;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Attachment;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
