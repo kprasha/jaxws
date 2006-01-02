@@ -11,9 +11,15 @@ import javax.xml.transform.sax.SAXSource;
  * Partial {@link Message} implementation.
  *
  * <p>
- * This class implements some of the {@link Message} methods in a default,
- * possibly slow way. Derived classes should examine carefully
- * which method can be implemented faster.
+ * This class implements some of the {@link Message} methods.
+ * The idea is that those implementations may be non-optimal but
+ * it may save effort in implementing {@link Message} and reduce
+ * the code size.
+ *
+ * <p>
+ * {@link Message} classes that are used more commonly should
+ * examine carefully which method can be implemented faster,
+ * and override them accordingly.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -25,6 +31,6 @@ public abstract class AbstractMessageImpl extends Message {
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         return (T)unmarshaller.unmarshal(readPayloadAsSource());
     }
-    
+
     // TODO: expand
 }
