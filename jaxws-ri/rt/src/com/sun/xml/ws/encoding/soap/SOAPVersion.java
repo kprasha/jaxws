@@ -94,4 +94,21 @@ public enum SOAPVersion {
         else
             return SOAP_11;
     }
+
+    /**
+     * Returns {@link SOAPVersion} whose {@link #nsUri} equals to
+     * the given string.
+     *
+     * This method does not perform input string validation.
+     *
+     * @param nsUri
+     *      must not be null.
+     * @return always non-null.
+     */
+    public static SOAPVersion fromNsUri(String nsUri) {
+        if(nsUri.equals(SOAP_12.nsUri))
+            return SOAP_12;
+        else
+            return SOAP_11;
+    }
 }

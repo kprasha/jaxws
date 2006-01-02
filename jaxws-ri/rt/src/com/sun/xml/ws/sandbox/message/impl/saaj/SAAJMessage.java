@@ -1,20 +1,24 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.Attachment;
 import com.sun.xml.ws.sandbox.message.AttachmentSet;
 import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
-import com.sun.xml.ws.util.SOAPUtil;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.*;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -22,11 +26,12 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author Vivek Pandey
@@ -257,13 +262,7 @@ public class SAAJMessage extends Message {
     public Message copy() {
         try {
             SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
-            SOAPMessage msg = null;
-            if (se.getNamespaceURI().equals(SOAPConstants.QNAME_SOAP_ENVELOPE.getNamespaceURI()))
-            {
-                msg = SOAPUtil.createMessage(SOAPBinding.SOAP11HTTP_BINDING);
-            } else {
-                msg = SOAPUtil.createMessage(SOAPBinding.SOAP12HTTP_BINDING);
-            }
+            SOAPMessage msg = SOAPVersion.fromNsUri(se.getNamespaceURI()).saajFactory.createMessage();
             msg.getSOAPPart().getEnvelope().getOwnerDocument().importNode(se, true);
             Iterator iter = sm.getAttachments();
             while (iter.hasNext()) {
