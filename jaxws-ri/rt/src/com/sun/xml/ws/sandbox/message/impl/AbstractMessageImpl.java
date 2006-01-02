@@ -2,6 +2,8 @@ package com.sun.xml.ws.sandbox.message.impl;
 
 import com.sun.xml.ws.sandbox.message.Message;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 
@@ -20,5 +22,9 @@ public abstract class AbstractMessageImpl extends Message {
         return new SAXSource(new XMLReaderImpl(this), XMLReaderImpl.THE_SOURCE);
     }
 
+    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        return (T)unmarshaller.unmarshal(readPayloadAsSource());
+    }
+    
     // TODO: expand
 }
