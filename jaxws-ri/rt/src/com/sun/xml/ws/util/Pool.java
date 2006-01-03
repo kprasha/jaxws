@@ -1,9 +1,8 @@
 package com.sun.xml.ws.util;
 
-import com.sun.xml.ws.sandbox.pipe.Pipe;
 import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
 
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.util.concurrent.ConcurrentLinkedQueue;
