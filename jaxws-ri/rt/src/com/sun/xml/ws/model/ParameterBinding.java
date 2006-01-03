@@ -38,16 +38,16 @@ public final class ParameterBinding {
     /**
      * Singleton instance that represents 'BODY'
      */
-    public static final ParameterBinding BODY = new ParameterBinding("BODY",null);
+    public static final ParameterBinding BODY = new ParameterBinding(Kind.BODY,null);
     /**
      * Singleton instance that represents 'HEADER'
      */
-    public static final ParameterBinding HEADER = new ParameterBinding("HEADER",null);
+    public static final ParameterBinding HEADER = new ParameterBinding(Kind.HEADER,null);
     /**
      * Singleton instance that represents 'UNBOUND',
      * meaning the parameter doesn't have a representation in a SOAP message.
      */
-    public static final ParameterBinding UNBOUND = new ParameterBinding("UNBOUND",null);
+    public static final ParameterBinding UNBOUND = new ParameterBinding(Kind.UNBOUND,null);
     /**
      * Creates an instance that represents the attachment
      * with a given MIME type.
@@ -58,22 +58,37 @@ public final class ParameterBinding {
      * no where in JAX-WS RI two {@link ParameterBinding}s are compared today,
      */
     public static ParameterBinding createAttachment(String mimeType) {
-        return new ParameterBinding("ATTACHMENT",mimeType);
+        return new ParameterBinding(Kind.ATTACHMENT,mimeType);
+    }
+
+    /**
+     * Represents 4 kinds of binding.
+     */
+    public static enum Kind {
+        BODY, HEADER, UNBOUND, ATTACHMENT;
     }
 
 
-    private String mimeType;
-    private final String name;
+    /**
+     * Represents the kind of {@link ParameterBinding}.
+     * Always non-null.
+     */
+    public final Kind kind;
 
-    private ParameterBinding(String name,String mimeType) {
-        this.name = name;
+    /**
+     * Only used with attachment binding.
+     */
+    private String mimeType;
+
+    private ParameterBinding(Kind kind,String mimeType) {
+        this.kind = kind;
         this.mimeType = mimeType;
     }
 
 
 
     public String toString() {
-        return name;
+        return kind.toString();
     }
 
     /**
@@ -104,6 +119,6 @@ public final class ParameterBinding {
     }
 
     public boolean isAttachment(){
-        return name=="ATTACHMENT";
+        return kind==Kind.ATTACHMENT;
     }
 }
