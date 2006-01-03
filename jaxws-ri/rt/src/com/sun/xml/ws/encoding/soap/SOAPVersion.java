@@ -20,8 +20,13 @@
 
 package com.sun.xml.ws.encoding.soap;
 
+import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
+
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.soap.*;
+import javax.xml.bind.Marshaller;
 
 
 /**
@@ -32,11 +37,19 @@ import javax.xml.soap.*;
 public enum SOAPVersion {
     SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
             SOAPConstants.URI_ENVELOPE,
-            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL),
+            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL) {
+        public Header createJAXBHeader(Marshaller m, Object o) {
+            return new JAXBHeader11(m,o);
+        }
+    },
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
-            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL);
+            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL) {
+        public Header createJAXBHeader(Marshaller m, Object o) {
+            return new JAXBHeader12(m,o);
+        }
+    };
 
     /**
      * Either {@link SOAPBinding#SOAP11HTTP_BINDING} or
@@ -70,6 +83,14 @@ public enum SOAPVersion {
         }
     }
 
+    /**
+     * Creates {@link JAXBHeader11} or {@link JAXBHeader12} accordingly.
+     *
+     * @see JAXBHeader11#JAXBHeader11(Marshaller, Object)
+     * @see JAXBHeader12#JAXBHeader12(Marshaller, Object) 
+     */
+    public abstract Header createJAXBHeader(Marshaller m, Object o);
+
     public String toString() {
         return binding;
     }
@@ -88,7 +109,7 @@ public enum SOAPVersion {
     public static SOAPVersion fromBinding(String binding) {
         if(binding==null)
             return SOAP_11;
-        
+
         if(binding.equals(SOAP_12.binding))
             return SOAP_12;
         else
