@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.sandbox.message;
 
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
