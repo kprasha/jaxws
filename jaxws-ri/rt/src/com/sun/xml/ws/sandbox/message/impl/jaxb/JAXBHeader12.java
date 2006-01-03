@@ -25,6 +25,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.soap.SOAPConstants;
 
 import com.sun.xml.ws.sandbox.message.impl.Util;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 
 /**
  * {@link JAXBHeader} for SOAP 1.2.
@@ -34,6 +36,10 @@ import com.sun.xml.ws.sandbox.message.impl.Util;
 public final class JAXBHeader12 extends JAXBHeader {
     public JAXBHeader12(Marshaller marshaller, Object jaxbObject) {
         super(marshaller, jaxbObject);
+    }
+
+    public JAXBHeader12(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
+        super(bridge, bridgeInfo, jaxbObject);
     }
 
     public boolean isRelay() {

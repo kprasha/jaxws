@@ -24,6 +24,9 @@ import org.xml.sax.Attributes;
 import javax.xml.bind.Marshaller;
 import javax.xml.soap.SOAPConstants;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
+
 /**
  * {@link JAXBHeader} for SOAP 1.1.
  * @author Kohsuke Kawaguchi
@@ -31,6 +34,10 @@ import javax.xml.soap.SOAPConstants;
 public final class JAXBHeader11 extends JAXBHeader {
     public JAXBHeader11(Marshaller marshaller, Object jaxbObject) {
         super(marshaller, jaxbObject);
+    }
+
+    public JAXBHeader11(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
+        super(bridge, bridgeInfo, jaxbObject);
     }
 
     /**

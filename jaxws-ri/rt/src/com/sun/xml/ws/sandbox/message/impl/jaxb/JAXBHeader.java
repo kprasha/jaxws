@@ -21,9 +21,10 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.ws.sandbox.XMLStreamWriterEx;
 import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.Util;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -40,6 +41,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.namespace.QName;
 
 /**
  * {@link Header} whose physical data representation is a JAXB bean.
@@ -53,7 +55,8 @@ abstract class JAXBHeader implements Header {
      */
     private final Object jaxbObject;
 
-    private final Marshaller marshaller;
+    private final Bridge bridge;
+    private final BridgeContext context;
 
     // information about this header. lazily obtained.
     private String nsUri;
@@ -72,14 +75,25 @@ abstract class JAXBHeader implements Header {
     private XMLStreamBuffer infoset;
 
     public JAXBHeader(Marshaller marshaller, Object jaxbObject) {
-        this.marshaller = marshaller;
         this.jaxbObject = jaxbObject;
+        this.bridge = MarshallerBridgeContext.MARSHALLER_BRIDGE;
+        this.context = new MarshallerBridgeContext(marshaller);
 
         if (jaxbObject instanceof JAXBElement) {
             JAXBElement e = (JAXBElement) jaxbObject;
             this.nsUri = e.getName().getNamespaceURI();
             this.localName = e.getName().getLocalPart();
         }
+    }
+
+    public JAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
+        this.jaxbObject = jaxbObject;
+        this.bridge = bridge;
+        this.context = bridgeInfo;
+
+        QName tagName = bridge.getTypeReference().tagName;
+        this.nsUri = tagName.getNamespaceURI();
+        this.localName = tagName.getLocalPart();
     }
 
     protected final boolean isSet(int flagMask) {
@@ -104,7 +118,7 @@ abstract class JAXBHeader implements Header {
             }
         };
         try {
-            marshaller.marshal(jaxbObject,sniffer);
+            bridge.marshal(context,jaxbObject,sniffer);
         } catch (JAXBException e) {
             // if it's due to us aborting the processing after the first element,
             // we can safely ignore this exception.
@@ -156,7 +170,7 @@ abstract class JAXBHeader implements Header {
             if(infoset==null) {
                 infoset = new XMLStreamBuffer();
                 XMLStreamBufferResult sbr = new XMLStreamBufferResult(infoset);
-                marshaller.marshal(jaxbObject,sbr);
+                bridge.marshal(context,jaxbObject,sbr);
             }
             return infoset.processUsingXMLStreamReader();
         } catch (JAXBException e) {
@@ -166,13 +180,13 @@ abstract class JAXBHeader implements Header {
 
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         JAXBResult r = new JAXBResult(unmarshaller);
-        marshaller.marshal(jaxbObject,r);
+        bridge.marshal(context,jaxbObject,r);
         return (T)r.getResult();
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
-            marshaller.marshal(jaxbObject,w);
+            bridge.marshal(context,jaxbObject,w);
         } catch (JAXBException e) {
             throw new XMLStreamException(e);
         }
@@ -180,7 +194,7 @@ abstract class JAXBHeader implements Header {
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         try {
-            marshaller.marshal(jaxbObject,saaj.getSOAPHeader());
+            bridge.marshal(context,jaxbObject,saaj.getSOAPHeader());
         } catch (JAXBException e) {
             throw new SOAPException(e);
         }
@@ -188,7 +202,7 @@ abstract class JAXBHeader implements Header {
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         try {
-            marshaller.marshal(jaxbObject,contentHandler);
+            bridge.marshal(context,jaxbObject,contentHandler);
         } catch (JAXBException e) {
             SAXParseException x = new SAXParseException(e.getMessage(),null,null,-1,-1,e);
             errorHandler.fatalError(x);
