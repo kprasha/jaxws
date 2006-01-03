@@ -19,6 +19,8 @@
  */
 package com.sun.xml.ws.sandbox.message;
 
+import com.sun.xml.ws.client.BindingProviderProperties;
+
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -106,6 +108,15 @@ public class MessageProperties implements MessageContext {
      */
     // TODO: expose this as a property
     public boolean wasTransportSecure;
+
+    /**
+     * If a message originates from a proxy stub that implements
+     * a port interface, this field is set to point to that object.
+     *
+     * TODO: who's using this property? 
+     */
+    @ContextProperty(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
+    public Object proxy;
 
     /**
      * Bag to capture "other" properties that do not have
