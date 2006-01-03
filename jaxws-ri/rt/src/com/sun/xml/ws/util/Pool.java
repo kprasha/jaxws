@@ -1,7 +1,11 @@
 package com.sun.xml.ws.util;
 
 import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.bind.api.JAXBRIContext;
 
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -56,4 +60,40 @@ public abstract class Pool<T> {
      * concurrently.
      */
     protected abstract T create();
+
+
+    /**
+     * JAXB {@link javax.xml.bind.Marshaller} pool.
+     */
+    public static final class Marshaller extends Pool<javax.xml.bind.Marshaller> {
+        private final JAXBContext context;
+
+        public Marshaller(JAXBContext context) {
+            this.context = context;
+        }
+
+        protected javax.xml.bind.Marshaller create() {
+            try {
+                return context.createMarshaller();
+            } catch (JAXBException e) {
+                // impossible
+                throw new AssertionError(e);
+            }
+        }
+    }
+
+    /**
+     * JAXB {@link com.sun.xml.bind.api.BridgeContext} pool.
+     */
+    public static final class BridgeContext extends Pool<com.sun.xml.bind.api.BridgeContext> {
+        private final JAXBRIContext context;
+
+        public BridgeContext(JAXBRIContext context) {
+            this.context = context;
+        }
+
+        protected com.sun.xml.bind.api.BridgeContext create() {
+            return context.createBridgeContext();
+        }
+    }
 }
