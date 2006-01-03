@@ -230,10 +230,13 @@ public interface Pipe {
      *      its payload.
      *
      * @return
-     *      always a non-null valid unconsumed {@link Message}.
-     *      Even when we are processing one way, we'll still return
-     *      an empty {@link Message} (not null), so that the channel
-     *      implementations don't have to check for null.
+     *      If this method returns a non-null value, it must be
+     *      a valid unconsumed {@link Message}. This message represents
+     *      a response to the message passed as a parameter.
+     *      <p>
+     *      This method is also allowed to return null, which indicates
+     *      that there's no response. This is used for things like
+     *      one-way message and/or one-way transports.
      */
     Message process( Message msg );
 
