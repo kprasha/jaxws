@@ -123,6 +123,14 @@ public class Parameter {
         return mode==Mode.INOUT;
     }
 
+    /**
+     * If true, this parameter maps to the return value of a method invocation.
+     *
+     * <p>
+     * {@link JavaMethod#getResponseParameters()} is guaranteed to have
+     * at most one such {@link Parameter}. Note that there coule be none,
+     * in which case the method returns <tt>void</tt>.
+     */
     public boolean isResponse() {
         return index == -1;
     }
