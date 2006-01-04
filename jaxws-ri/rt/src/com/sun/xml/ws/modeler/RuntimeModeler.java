@@ -792,8 +792,7 @@ public class RuntimeModeler {
             returnType = getAsyncReturnType(method, returnType);
         }
 
-        if (!isOneway && (returnType != null) && (!returnType.getName().equals("void"))) {
-            Class returnClazz = returnType;
+        if (!isOneway && returnType!=null && returnType!=void.class) {
             Annotation[] rann = method.getAnnotations();
             TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
             Parameter returnParameter = new Parameter(rTypeReference, com.sun.xml.ws.model.Mode.OUT, -1);
