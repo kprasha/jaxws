@@ -445,7 +445,7 @@ public class RuntimeModeler {
         JavaMethod javaMethod;
         Class implementorClass = (implementor != null)
             ? implementor.getClass() : portClass;
-        if (method.getDeclaringClass().equals(implementorClass)) {
+        if (method.getDeclaringClass()==implementorClass) {
             javaMethod = new JavaMethod(method);
         } else {
             try {
