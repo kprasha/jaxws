@@ -36,42 +36,59 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
 public class StreamMessage extends AbstractMessageImpl {
-    private final MessageProperties props;
+    private final MessageProperties props = new MessageProperties();
 
-    /*
+    /**
      * The reader will be positioned at
      * the first child of the SOAP body
      */
     protected final XMLStreamReader reader;
 
+    // lazily created
     private HeaderList headers;
 
-    protected String payloadLocalName;
+    private final String payloadLocalName;
 
-    protected String payloadNamespaceURI;
+    private final String payloadNamespaceURI;
 
+    /**
+     * Creates a {@link StreamMessage} from a {@link XMLStreamReader}
+     * that points at the start element of the payload, and headers.
+     *
+     * <p>
+     * This method creaets a {@link Message} from a payload.
+     *
+     * @param headers
+     *      if null, it means no headers. if non-null,
+     *      it will be owned by this message.
+     * @param reader
+     *      must not be null.
+     */
     public StreamMessage(HeaderList headers, XMLStreamReader reader) {
         this.headers = headers;
-
         this.reader = reader;
-
-        if (this.reader != null) {
-            this.payloadLocalName = this.reader.getLocalName();
-            this.payloadNamespaceURI = this.reader.getNamespaceURI();
-        } else {
-            this.payloadLocalName = "";
-            this.payloadNamespaceURI = "";
-        }
-
-        this.props = new MessageProperties();
+        this.payloadLocalName = reader.getLocalName();
+        this.payloadNamespaceURI = reader.getNamespaceURI();
     }
 
-    public StreamMessage(HeaderList headers) {
-        this(headers, null);
+    /**
+     * Creates a {@link StreamMessage}  from a {@link XMLStreamReader}
+     * that points at the start element of &lt;S:Envelope>.
+     *
+     * <p>
+     * This method creates a message from a complete message,
+     * and parses headers and so on within itself.
+     *
+     * @param reader
+     *      must not be null.
+     */
+    public StreamMessage(XMLStreamReader reader) {
+        // TODO: implement this method later
+        throw new UnsupportedOperationException();
     }
 
     public boolean hasHeaders() {
-        return (headers == null) ? false : headers.size() > 0;
+        return headers!=null && !headers.isEmpty();
     }
 
     public HeaderList getHeaders() {
