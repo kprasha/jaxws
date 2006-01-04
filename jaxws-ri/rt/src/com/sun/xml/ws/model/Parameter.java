@@ -27,10 +27,18 @@ import javax.xml.ws.Holder;
 
 /**
  * runtime Parameter that abstracts the annotated java parameter
- * 
+ *
+ * <p>
+ * A parameter may be bound to a header, a body, or an attachment.
+ * Note that when it's bound to a body, it's bound to a body,
+ * it binds to the whole payload.
+ *
+ * <p>
+ * Sometimes multiple Java parameters are packed into the payload,
+ * in which case the subclass {@link WrapperParameter} is used. 
+ *
  * @author Vivek Pandey
  */
-
 public class Parameter {
     /**
      * 
