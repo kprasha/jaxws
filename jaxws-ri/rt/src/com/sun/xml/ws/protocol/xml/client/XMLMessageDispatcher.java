@@ -43,6 +43,7 @@ import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
@@ -134,7 +135,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
         XMLEncoder encoder = (XMLEncoder) contactInfo.getEncoder(messageInfo);
 
         boolean handlerResult = true;
-        boolean isRequestResponse = (messageInfo.getMEP() == MessageStruct.REQUEST_RESPONSE_MEP);
+        boolean isRequestResponse = (messageInfo.getMEP() == MEP.REQUEST_RESPONSE);
 
         DispatchContext dispatchContext = (DispatchContext) messageInfo.getMetaData(BindingProviderProperties.DISPATCH_CONTEXT);
 
@@ -220,7 +221,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
             setHTTPContext(messageContext, dcontext, properties);
         }
 
-        if (messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP)
+        if (messageInfo.getMEP().isOneWay())
             messageContext.put(ONE_WAY_OPERATION, "true");
 
         // process the properties
@@ -447,8 +448,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
 
         final AsyncHandlerService handler = (AsyncHandlerService) messageInfo
             .getMetaData(BindingProviderProperties.JAXWS_CLIENT_ASYNC_HANDLER);
-        final boolean callback = (messageInfo.getMEP() == MessageStruct.ASYNC_CALLBACK_MEP) ? true
-            : false;
+        final boolean callback = messageInfo.getMEP() == MEP.ASYNC_CALLBACK;
         if (callback && (handler == null))
             throw new WebServiceException("Asynchronous callback invocation, but no handler - AsyncHandler required");
 
@@ -485,8 +485,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
     protected boolean callHandlersOnRequest(XMLHandlerContext handlerContext) {
         HandlerChainCaller caller = getHandlerChainCaller(
             handlerContext.getMessageInfo());
-        boolean responseExpected = (handlerContext.getMessageInfo().getMEP() !=
-            MessageStruct.ONE_WAY_MEP);
+        boolean responseExpected = !handlerContext.getMessageInfo().getMEP().isOneWay();
         return caller.callHandlers(Direction.OUTBOUND,
             RequestOrResponse.REQUEST, handlerContext, responseExpected);
     }
@@ -567,11 +566,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
      * @return true if message exchange pattern indicates asynchronous, otherwise returns false
      */
     protected boolean isAsync(MessageInfo messageInfo) {
-        if ((messageInfo.getMEP() == MessageStruct.ASYNC_POLL_MEP)
-            || (messageInfo.getMEP() == MessageStruct.ASYNC_CALLBACK_MEP)) {
-            return true;
-        }
-        return false;
+        return messageInfo.getMEP().isAsync;
     }
 
     private void preSendHook(MessageInfo messageInfo) {
@@ -592,7 +587,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
 
     private void postReceiveHook(MessageInfo messageInfo) {
 
-        if (messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP)
+        if (messageInfo.getMEP().isOneWay())
             return;
         Object response = messageInfo.getResponse();
         if (response instanceof StreamSource) {

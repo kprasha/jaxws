@@ -23,6 +23,7 @@ package com.sun.xml.ws.encoding.soap;
 import com.sun.xml.ws.pept.encoding.Decoder;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
@@ -514,7 +515,7 @@ public abstract class SOAPDecoder implements Decoder {
         }
         RuntimeContext rtCtxt = MessageInfoUtil.getRuntimeContext(mi);
         rtCtxt.setMethodAndMEP(operationName, mi);
-        return (mi.getMEP() == MessageStruct.ONE_WAY_MEP);
+        return (mi.getMEP() == MEP.ONE_WAY);
     }
 
     /*

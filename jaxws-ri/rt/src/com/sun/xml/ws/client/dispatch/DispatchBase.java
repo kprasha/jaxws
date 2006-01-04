@@ -34,6 +34,7 @@ import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.pept.Delegate;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
 
 import javax.xml.bind.JAXBContext;
@@ -133,7 +134,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
         throws WebServiceException {
 
         MessageStruct messageStruct = setupMessageStruct(msg);
-        messageStruct.setMEP(MessageStruct.REQUEST_RESPONSE_MEP);
+        messageStruct.setMEP(MEP.REQUEST_RESPONSE);
         return sendAndReceive(messageStruct);
     }
 
@@ -169,7 +170,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
         throws WebServiceException {
 
         MessageStruct messageStruct = setupMessageStruct(msg);
-        messageStruct.setMEP(MessageStruct.ASYNC_POLL_MEP);
+        messageStruct.setMEP(MEP.ASYNC_POLL);
         Object result = sendAsync(messageStruct);
         if (result instanceof Response)
             return (Response<Object>) result;
@@ -221,7 +222,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
             throw new WebServiceException("AsyncHandler argument is null. " +
                 "AsyncHandler is required for asynchronous callback invocations ");
 
-        messageStruct.setMEP(MessageStruct.ASYNC_CALLBACK_MEP);
+        messageStruct.setMEP(MEP.ASYNC_CALLBACK);
         Object result = sendAsync(messageStruct);
         if (result instanceof WSFuture)
             return (Future<Object>) result;
@@ -260,7 +261,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
     public void invokeOneWay(Object msg) {
 
         MessageStruct messageStruct = setupMessageStruct(msg);
-        messageStruct.setMEP(MessageStruct.ONE_WAY_MEP);
+        messageStruct.setMEP(MEP.ONE_WAY);
         sendOneWay(messageStruct);
     }
 

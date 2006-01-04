@@ -25,6 +25,8 @@ import javax.xml.ws.WebServiceException;
 
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.server.PeptTie;
@@ -64,9 +66,9 @@ public class ProviderPeptTie extends PeptTie {
             messageInfo.setResponse(response);
             messageInfo.setResponseType(MessageStruct.NORMAL_RESPONSE);
             if (response == null) {
-                messageInfo.setMEP(MessageStruct.ONE_WAY_MEP);
+                messageInfo.setMEP(MEP.ONE_WAY);
             } else {
-                messageInfo.setMEP(MessageStruct.REQUEST_RESPONSE_MEP);
+                messageInfo.setMEP(MEP.REQUEST_RESPONSE);
             }
         } catch (RuntimeException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);

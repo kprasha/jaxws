@@ -21,6 +21,7 @@ package com.sun.xml.ws.wsdl.writer;
 
 
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.JAXBRIContext;
 import static com.sun.xml.bind.v2.schemagen.Util.*;
 import com.sun.xml.txw2.TXW;
@@ -266,7 +267,7 @@ public class WSDLGenerator {
                 }
             }
         }
-        if (method.getMEP() != MessageStruct.ONE_WAY_MEP) {
+        if (method.getMEP() != MEP.ONE_WAY) {
             message = portDefinitions.message().name(method.getOperationName()+RESPONSE);
             if (unwrappable) {
                 for (Parameter param : method.getResponseParameters()) {
@@ -319,13 +320,13 @@ public class WSDLGenerator {
             Operation operation = portType.operation().name(method.getOperationName());
             generateParameterOrder(operation, method);
             switch (method.getMEP()) {
-                case MessageStruct.REQUEST_RESPONSE_MEP:
+                case REQUEST_RESPONSE:
                     // input message
                     generateInputMessage(operation, method);
                     // output message
                     generateOutputMessage(operation, method);
                     break;
-                case MessageStruct.ONE_WAY_MEP:
+                case ONE_WAY:
                     generateInputMessage(operation, method);
                     break;
             }
@@ -355,7 +356,7 @@ public class WSDLGenerator {
     }
 
     protected void generateParameterOrder(Operation operation, JavaMethod method) {
-        if (method.getMEP() == MessageStruct.ONE_WAY_MEP)
+        if (method.getMEP() == MEP.ONE_WAY)
             return;
         if (isRpcLit(method))
             generateRpcParameterOrder(operation, method);
@@ -558,7 +559,7 @@ public class WSDLGenerator {
                 throw new WebServiceException("encoded use is not supported");
             }
 
-            if (method.getMEP() != MessageStruct.ONE_WAY_MEP) {
+            if (method.getMEP() != MEP.ONE_WAY) {
                 boolean unwrappable = headerParams.size() == 0;
                 // output
                 bodyParams.clear();
@@ -652,7 +653,7 @@ public class WSDLGenerator {
                 throw new WebServiceException("encoded use is not supported");
             }
 
-            if (method.getMEP() != MessageStruct.ONE_WAY_MEP) {
+            if (method.getMEP() != MEP.ONE_WAY) {
                 // output
                 boolean unwrappable = headerParams.size() == 0;
                 bodyParams.clear();

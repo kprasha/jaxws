@@ -20,6 +20,7 @@
 package com.sun.xml.ws.model;
 
 import com.sun.xml.ws.pept.ept.MessageInfo;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
@@ -92,12 +93,12 @@ public abstract class RuntimeModel {
     
     protected void populateAsyncExceptions() {
         for (JavaMethod jm : getJavaMethods()) {
-            int mep = jm.getMEP();
-            if (mep == MessageInfo.ASYNC_CALLBACK_MEP || mep == MessageInfo.ASYNC_POLL_MEP) {
+            MEP mep = jm.getMEP();
+            if (mep.isAsync) {
                 String opName = jm.getOperationName();
                 Method m = jm.getMethod();
                 Class[] params = m.getParameterTypes();
-                if (mep == MessageInfo.ASYNC_CALLBACK_MEP) {
+                if (mep == MEP.ASYNC_CALLBACK) {
                     params = new Class[params.length-1];
                     System.arraycopy(m.getParameterTypes(), 0, params, 0, m.getParameterTypes().length-1);
                 }

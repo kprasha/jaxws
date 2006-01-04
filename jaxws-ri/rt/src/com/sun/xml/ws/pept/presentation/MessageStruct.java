@@ -58,33 +58,6 @@ public interface MessageStruct {
  */
     public static final int UNCHECKED_EXCEPTION_RESPONSE = 2; 
 
-/**
- * <p>
- * Represents ...
- * </p>
- */
-    public static final int REQUEST_RESPONSE_MEP = 1; 
-
-/**
- * <p>
- * Represents ...
- * </p>
- */
-    public static final int ONE_WAY_MEP = 2; 
-
-/**
- * <p>
- * Represents ...
- * </p>
- */
-    public static final int ASYNC_POLL_MEP = 3; 
-
-/**
- * <p>
- * Represents ...
- * </p>
- */
-    public static final int ASYNC_CALLBACK_MEP = 4; 
 
   ///////////////////////////////////////
   // operations
@@ -141,9 +114,8 @@ public interface MessageStruct {
  * </p><p>
  * 
  * @param messageExchangePattern ...
- * </p>
  */
-    public void setMEP(int messageExchangePattern);
+    public void setMEP(MEP messageExchangePattern);
 /**
  * <p>
  * Does ...
@@ -152,7 +124,7 @@ public interface MessageStruct {
  * @return a int with ...
  * </p>
  */
-    public int getMEP();
+    public MEP getMEP();
 /**
  * <p>
  * Does ...

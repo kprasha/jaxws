@@ -28,6 +28,7 @@ import com.sun.xml.ws.pept.encoding.Encoder;
 import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 
 /**
@@ -38,7 +39,7 @@ public class MessageInfoBase implements MessageInfo {
     protected Object[] _data;
     protected Method _method;
     protected Map _metadata;
-    protected int _messagePattern;
+    protected MEP _messagePattern;
     protected Object _response;
     protected int _responseType;
     protected EPTFactory _eptFactory;
@@ -78,11 +79,11 @@ public class MessageInfoBase implements MessageInfo {
         return value;
     }
 
-    public int getMEP() {
+    public MEP getMEP() {
         return _messagePattern;
     }
 
-    public void setMEP(int messagePattern) {
+    public void setMEP(MEP messagePattern) {
         _messagePattern = messagePattern;
     }
 

@@ -27,6 +27,7 @@ import java.util.List;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 
 /**
  * Build this runtime model using java SEI and annotations
@@ -35,7 +36,7 @@ import com.sun.xml.ws.pept.presentation.MessageStruct;
  */
 public class JavaMethod {
     /**
-     * 
+     *
      */
     public JavaMethod(Method method) {
         this.method = method;
@@ -51,7 +52,7 @@ public class JavaMethod {
     /**
      * @return Returns the mep.
      */
-    public int getMEP() {
+    public MEP getMEP() {
         return mep;
     }
 
@@ -59,7 +60,7 @@ public class JavaMethod {
      * @param mep
      *            The mep to set.
      */
-    public void setMEP(int mep) {
+    public void setMEP(MEP mep) {
         this.mep = mep;
     }
 
@@ -79,17 +80,17 @@ public class JavaMethod {
         this.binding = binding;
     }
 
-    
+
     public void setOperationName(String operationName) {
         this.operationName = operationName;
     }
-    
+
     public String getOperationName() {
         return operationName;
     }
-    
-    
-    
+
+
+
     /**
      * @return returns unmodifiable list of request parameters
      */
@@ -131,7 +132,7 @@ public class JavaMethod {
     }
 
     public void addResponseParameter(Parameter p){
-        if (p.isOUT() || p.isINOUT()) {            
+        if (p.isOUT() || p.isINOUT()) {
             responseParams.add(p);
         }
     }
@@ -168,7 +169,7 @@ public class JavaMethod {
     /**
      * @param ce
      */
-    public void addException(CheckedException ce) {        
+    public void addException(CheckedException ce) {
         if (!exceptions.contains(ce))
             exceptions.add(ce);
     }
@@ -214,7 +215,7 @@ public class JavaMethod {
      * @return if this is an Asynch MEP
      */
     public boolean isAsync(){
-        return mep == MessageStruct.ASYNC_CALLBACK_MEP || mep == MessageStruct.ASYNC_POLL_MEP;
+        return mep.isAsync;
     }
 
     private List<CheckedException> exceptions = new ArrayList<CheckedException>();
@@ -226,7 +227,7 @@ public class JavaMethod {
     private final List<Parameter> unmResParams =
             Collections.unmodifiableList(responseParams);
     private Object binding;
-    private int mep;
+    private MEP mep;
     private String operationName;
 }
 

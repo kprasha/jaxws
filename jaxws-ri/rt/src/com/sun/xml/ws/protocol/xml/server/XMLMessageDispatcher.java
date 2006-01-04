@@ -356,7 +356,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
     }
 
     public static boolean isOneway(MessageInfo messageInfo) {
-        return (messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP);
+        return messageInfo.getMEP().isOneWay();
     }
 
         /*

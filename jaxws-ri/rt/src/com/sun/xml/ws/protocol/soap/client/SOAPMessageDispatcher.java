@@ -22,6 +22,7 @@ package com.sun.xml.ws.protocol.soap.client;
 import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.AsyncHandlerService;
@@ -165,7 +166,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         SOAPXMLEncoder encoder = (SOAPXMLEncoder) contactInfo.getEncoder(messageInfo);
         SOAPMessage sm = null;
         boolean handlerResult = true;
-        boolean isRequestResponse = (messageInfo.getMEP() == MessageStruct.REQUEST_RESPONSE_MEP);
+        boolean isRequestResponse = (messageInfo.getMEP() == MEP.REQUEST_RESPONSE);
         Message message = null;
         try {
             if (messageInfo.getMetaData(DispatchContext.DISPATCH_MESSAGE_MODE) == Service.Mode.MESSAGE) {
@@ -318,7 +319,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
 
 
     private boolean isOneway(MessageInfo messageInfo) {
-        return messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP ? true : false;
+        return messageInfo.getMEP() == MEP.ONE_WAY;
     }
 
     /**
@@ -335,7 +336,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
 
         ContextMap properties = (ContextMap) messageInfo.getMetaData(JAXWS_CONTEXT_PROPERTY);
 
-        if (messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP)
+        if (messageInfo.getMEP().isOneWay())
             messageContext.put(ONE_WAY_OPERATION, "true");
 
         String soapAction = null;
@@ -642,8 +643,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
 
         final AsyncHandlerService handler = (AsyncHandlerService) messageInfo
             .getMetaData(BindingProviderProperties.JAXWS_CLIENT_ASYNC_HANDLER);
-        final boolean callback = (messageInfo.getMEP() == MessageStruct.ASYNC_CALLBACK_MEP) ? true
-            : false;
+        final boolean callback = messageInfo.getMEP() == MEP.ASYNC_CALLBACK;
         if (callback && (handler == null))
             throw new WebServiceException("Asynchronous callback invocation, but no handler - AsyncHandler required");
 
@@ -680,7 +680,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
 
     protected boolean callHandlersOnRequest(SOAPHandlerContext handlerContext) {
         HandlerChainCaller caller = getHandlerChainCaller(handlerContext.getMessageInfo());
-        boolean responseExpected = (handlerContext.getMessageInfo().getMEP() != MessageStruct.ONE_WAY_MEP);
+        boolean responseExpected = !handlerContext.getMessageInfo().getMEP().isOneWay();
         return caller.callHandlers(Direction.OUTBOUND, RequestOrResponse.REQUEST, handlerContext,
             responseExpected);
     }
@@ -803,11 +803,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
      * @return true if message exchange pattern indicates asynchronous, otherwise returns false
      */
     protected boolean isAsync(MessageInfo messageInfo) {
-        if ((messageInfo.getMEP() == MessageStruct.ASYNC_POLL_MEP)
-            || (messageInfo.getMEP() == MessageStruct.ASYNC_CALLBACK_MEP)) {
-            return true;
-        }
-        return false;
+        return messageInfo.getMEP().isAsync;
     }
 
     private void preSendHook(MessageInfo messageInfo) {

@@ -143,7 +143,7 @@ public class DispatchDelegate extends DelegateBase {
         requestHeaders.put("Content-Transfer-Encoding", cte);
         ContextMap properties = (ContextMap) messageInfo.getMetaData(JAXWS_CONTEXT_PROPERTY);
 
-        if (messageInfo.getMEP() == MessageStruct.ONE_WAY_MEP)
+        if (messageInfo.getMEP().isOneWay())
             messageProps.put(ONE_WAY_OPERATION, "true");
 
         String soapAction = null;
@@ -243,11 +243,7 @@ public class DispatchDelegate extends DelegateBase {
      * @return true if message exchange pattern indicates asynchronous, otherwise returns false
      */
     protected boolean isAsync(MessageInfo messageInfo) {
-        if ((messageInfo.getMEP() == MessageStruct.ASYNC_POLL_MEP)
-            || (messageInfo.getMEP() == MessageStruct.ASYNC_CALLBACK_MEP)) {
-            return true;
-        }
-        return false;
+        return messageInfo.getMEP().isAsync;
     }
 
     private void setDefaultEncoding(RequestContext requestContext) {

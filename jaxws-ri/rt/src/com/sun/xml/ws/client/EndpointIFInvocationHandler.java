@@ -21,6 +21,7 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
 import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.server.RuntimeContext;
@@ -127,19 +128,15 @@ public class EndpointIFInvocationHandler
     public Object implementSEIMethod(Method method, Object[] parameters) throws Throwable {
 
         MessageStruct messageStruct = _delegate.getMessageStruct();
-        int mmep = 0;
+        MEP mmep = null;
         if (_rtcontext != null) {
             JavaMethod jmethod = _rtcontext.getModel().getJavaMethod(method);
             if (jmethod != null) {
-                int mep = jmethod.getMEP();
-                mmep = (mep == MessageStruct.REQUEST_RESPONSE_MEP) ?
-                    MessageStruct.REQUEST_RESPONSE_MEP : (mep == MessageStruct.ONE_WAY_MEP) ?
-                    MessageStruct.ONE_WAY_MEP : ((mep == MessageStruct.ASYNC_POLL_MEP) ?
-                    MessageStruct.ASYNC_POLL_MEP : MessageStruct.ASYNC_CALLBACK_MEP);
+                mmep =jmethod.getMEP();
             } else throw new WebServiceException("runtime model information for java Method " + method.getName() + " is not known .");
         } //need to check if this is dispatch invocation
 
-        if (mmep == MessageStruct.ASYNC_CALLBACK_MEP) {
+        if (mmep == MEP.ASYNC_CALLBACK) {
             for (Object param : parameters) {
                 if (AsyncHandler.class.isAssignableFrom(param.getClass())) {
                     //messageStruct.setMetaData(BindingProviderProperties.JAXWS_CLIENT_ASYNC_HANDLER, param);

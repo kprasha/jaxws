@@ -20,6 +20,7 @@
 package com.sun.xml.ws.modeler;
 
 import com.sun.xml.ws.pept.presentation.MessageStruct;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
@@ -461,7 +462,7 @@ public class RuntimeModeler {
         //use for checking
 
         //set MEP -oneway, async, req/resp
-        int mep = getMEP(method);
+        MEP mep = getMEP(method);
         javaMethod.setMEP(mep);
 
         String action = null;
@@ -511,16 +512,16 @@ public class RuntimeModeler {
         runtimeModel.addJavaMethod(javaMethod);
     }
 
-    private int getMEP(Method m){
+    private MEP getMEP(Method m){
         if (m.isAnnotationPresent(Oneway.class)) {
-            return MessageStruct.ONE_WAY_MEP;
+            return MEP.ONE_WAY;
         }
         if(Response.class.isAssignableFrom(m.getReturnType())){
-            return MessageStruct.ASYNC_POLL_MEP;
+            return MEP.ASYNC_POLL;
         }else if(Future.class.isAssignableFrom(m.getReturnType())){
-            return MessageStruct.ASYNC_CALLBACK_MEP;
+            return MEP.ASYNC_CALLBACK;
         }
-        return MessageStruct.REQUEST_RESPONSE_MEP;
+        return MEP.REQUEST_RESPONSE;
     }
 
     /**
