@@ -112,11 +112,10 @@ public class SAAJMessage extends Message {
             headers = new HeaderList();
 
         try {
-            SOAPVersion v = SOAPVersion.fromNsUri(sm.getSOAPPart().getNamespaceURI());
             SOAPHeader header = sm.getSOAPHeader();
             Iterator iter = header.examineAllHeaderElements();
             while (iter.hasNext()) {
-                headers.add(new SAAJHeader((SOAPHeaderElement) iter.next(),v));
+                headers.add(new SAAJHeader((SOAPHeaderElement) iter.next()));
             }
             parsedHeader = true;
         } catch (SOAPException e) {

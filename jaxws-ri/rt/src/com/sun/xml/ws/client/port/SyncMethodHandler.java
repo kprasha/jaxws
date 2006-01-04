@@ -102,7 +102,7 @@ final class SyncMethodHandler extends MethodHandler {
         }
 
         {// prepare objects for processing response
-            // TODO
+
         }
     }
 

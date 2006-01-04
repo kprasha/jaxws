@@ -41,10 +41,6 @@ abstract class SourceHeader implements Header {
 
     protected abstract Header getStreamHeader();
 
-    public String getAttribute(String nsUri, String localName) {
-        throw new UnsupportedOperationException();
-    }
-
     public String getNamespaceURI() {
         if(nsUri != null)
             return nsUri;

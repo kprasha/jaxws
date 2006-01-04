@@ -19,14 +19,12 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.Header;
-import com.sun.xml.ws.sandbox.message.impl.AbstractHeaderImpl;
-import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
+import com.sun.xml.ws.sandbox.message.impl.Util;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -38,19 +36,19 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.util.JAXBResult;
-import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.namespace.QName;
 
 /**
  * {@link Header} whose physical data representation is a JAXB bean.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class JAXBHeader extends AbstractHeaderImpl {
+abstract class JAXBHeader implements Header {
 
     /**
      * The JAXB object that represents the header.
@@ -63,10 +61,12 @@ public final class JAXBHeader extends AbstractHeaderImpl {
     // information about this header. lazily obtained.
     private String nsUri;
     private String localName;
+    protected String role;
+
     /**
-     * Attributes on the header.
+     * See the <tt>FLAG_***</tt> constants.
      */
-    private Attributes attributes;
+    protected int flags;
 
     /**
      * Once the header is turned into infoset,
@@ -74,8 +74,7 @@ public final class JAXBHeader extends AbstractHeaderImpl {
      */
     private XMLStreamBuffer infoset;
 
-    public JAXBHeader(Marshaller marshaller, Object jaxbObject, SOAPVersion soapver) {
-        super(soapver);
+    public JAXBHeader(Marshaller marshaller, Object jaxbObject) {
         this.jaxbObject = jaxbObject;
         this.bridge = MarshallerBridgeContext.MARSHALLER_BRIDGE;
         this.context = new MarshallerBridgeContext(marshaller);
@@ -87,8 +86,7 @@ public final class JAXBHeader extends AbstractHeaderImpl {
         }
     }
 
-    public JAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject, SOAPVersion soapver) {
-        super(soapver);
+    public JAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
         this.jaxbObject = jaxbObject;
         this.bridge = bridge;
         this.context = bridgeInfo;
@@ -98,11 +96,27 @@ public final class JAXBHeader extends AbstractHeaderImpl {
         this.localName = tagName.getLocalPart();
     }
 
+    protected final boolean isSet(int flagMask) {
+        return (flags&flagMask)!=0;
+    }
+
+    protected final void set(int flagMask) {
+        flags |= flagMask;
+    }
+
     /**
      * Lazily parse the first element to obtain attribute values on it.
      */
-    private void parse() {
-        RootElementSniffer sniffer = new RootElementSniffer();
+    protected final void parseIfNecessary() {
+        if(isSet(FLAG_PARSED))
+            return;
+
+        RootElementSniffer sniffer = new RootElementSniffer() {
+            @Override
+            protected void checkAttributes(Attributes a) {
+                JAXBHeader.this.checkHeaderAttribute(a);
+            }
+        };
         try {
             bridge.marshal(context,jaxbObject,sniffer);
         } catch (JAXBException e) {
@@ -112,28 +126,43 @@ public final class JAXBHeader extends AbstractHeaderImpl {
             // if it's due to error in the object, the same error will be reported
             // when the readHeader() method is used, so we don't have to report
             // an error right now.
-            nsUri = sniffer.getNsUri();
-            localName = sniffer.getLocalName();
-            attributes = sniffer.getAttributes();
+            nsUri = sniffer.nsUri;
+            localName = sniffer.localName;
         }
+    }
+
+    /**
+     * Checks for well-known SOAP attributes.
+     *
+     * Note that JAXB RI produces interned attribute names.
+     */
+    protected abstract void checkHeaderAttribute(Attributes a);
+
+    protected final void checkMustUnderstand(String localName, Attributes a, int i) {
+        if(localName=="mustUnderstand" && Util.parseBool(a.getValue(i)))
+            set(FLAG_MUST_UNDERSTAND);
+    }
+
+    public final boolean isMustUnderstood() {
+        parseIfNecessary();
+        return isSet(FLAG_MUST_UNDERSTAND);
+    }
+
+    public String getRole() {
+        parseIfNecessary();
+        return role;
     }
 
     public String getNamespaceURI() {
         if(nsUri==null)
-            parse();
+            parseIfNecessary();
         return nsUri;
     }
 
     public String getLocalPart() {
         if(localName==null)
-            parse();
+            parseIfNecessary();
         return localName;
-    }
-
-    public String getAttribute(String nsUri, String localName) {
-        if(attributes==null)
-            parse();
-        return attributes.getValue(nsUri,localName);
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
@@ -180,5 +209,9 @@ public final class JAXBHeader extends AbstractHeaderImpl {
             throw x;
         }
     }
+
+    protected static final int FLAG_PARSED            = 0x0001;
+    protected static final int FLAG_MUST_UNDERSTAND   = 0x0002;
+    protected static final int FLAG_RELAY             = 0x0004;
 
 }

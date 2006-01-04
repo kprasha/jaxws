@@ -27,7 +27,6 @@ import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
-import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -179,8 +178,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
             // if it's due to error in the object, the same error will be reported
             // when the readHeader() method is used, so we don't have to report
             // an error right now.
-            nsUri = sniffer.getNsUri();
-            localName = sniffer.getLocalName();
+            nsUri = sniffer.nsUri;
+            localName = sniffer.localName;
         }
     }
 
