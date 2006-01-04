@@ -1,6 +1,6 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
-import com.sun.xml.ws.sandbox.message.impl.jaxb.RootElementSniffer;
+import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Node;

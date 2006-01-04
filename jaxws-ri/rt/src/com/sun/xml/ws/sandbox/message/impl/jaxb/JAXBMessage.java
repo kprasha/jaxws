@@ -27,6 +27,7 @@ import com.sun.xml.ws.sandbox.message.HeaderList;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
+import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;

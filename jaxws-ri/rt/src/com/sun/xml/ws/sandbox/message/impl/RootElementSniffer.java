@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.message.impl.jaxb;
+package com.sun.xml.ws.sandbox.message.impl;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -25,7 +25,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
 /**
- * Sniffs the root element name and its attributes.
+ * Sniffs the root element name and its attributes from SAX events.
  *
  * @author Kohsuke Kawaguchi
  */

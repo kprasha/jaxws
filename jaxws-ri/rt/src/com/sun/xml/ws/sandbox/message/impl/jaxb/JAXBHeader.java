@@ -26,6 +26,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.AbstractHeaderImpl;
+import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
