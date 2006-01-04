@@ -23,6 +23,8 @@ package com.sun.xml.ws.encoding.soap;
 import com.sun.xml.ws.sandbox.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.soap.*;
@@ -41,6 +43,9 @@ public enum SOAPVersion {
         public Header createJAXBHeader(Marshaller m, Object o) {
             return new JAXBHeader11(m,o);
         }
+        public Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
+            return new JAXBHeader11(bridge,bridgeInfo,jaxbObject);
+        }
     },
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
@@ -48,6 +53,9 @@ public enum SOAPVersion {
             javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL) {
         public Header createJAXBHeader(Marshaller m, Object o) {
             return new JAXBHeader12(m,o);
+        }
+        public Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
+            return new JAXBHeader12(bridge,bridgeInfo,jaxbObject);
         }
     };
 
@@ -90,6 +98,13 @@ public enum SOAPVersion {
      * @see JAXBHeader12#JAXBHeader12(Marshaller, Object) 
      */
     public abstract Header createJAXBHeader(Marshaller m, Object o);
+
+    /**
+     * Creates {@link JAXBHeader11} or {@link JAXBHeader12} accordingly.
+     *
+     * @see #createJAXBHeader(Marshaller, Object)
+     */
+    public abstract Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject);
 
     public String toString() {
         return binding;
