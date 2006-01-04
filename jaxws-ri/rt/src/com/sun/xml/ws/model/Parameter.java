@@ -35,7 +35,7 @@ import javax.xml.ws.Holder;
  *
  * <p>
  * Sometimes multiple Java parameters are packed into the payload,
- * in which case the subclass {@link WrapperParameter} is used. 
+ * in which case the subclass {@link WrapperParameter} is used.
  *
  * @author Vivek Pandey
  */
@@ -79,7 +79,7 @@ public class Parameter {
     }
 
     /**
-     * @return WrapperStyle == true
+     * @return true if <tt>this instanceof {@link WrapperParameter}</tt>.
      */
     public boolean isWrapperStyle() {
         return false;

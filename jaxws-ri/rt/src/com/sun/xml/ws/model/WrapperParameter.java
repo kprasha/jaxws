@@ -26,19 +26,35 @@ import java.util.List;
 import com.sun.xml.bind.api.TypeReference;
 
 /**
- * Models Wrapper parameter
+ * {@link Parameter} that represents a wrapper,
+ * which is a parameter that consists of multiple nested {@link Parameter}s
+ * within.
+ *
+ * <p>
+ * Java method parameters represented by nested {@link Parameter}s will be
+ * packed into a "wrapper bean" and it becomes the {@link Parameter} for the
+ * body.
+ *
+ * <p>
+ * This parameter is only used for the {@link ParameterBinding#BODY} binding.
  * 
  * @author Vivek Pandey
  */
-public class WrapperParameter extends Parameter{
+public class WrapperParameter extends Parameter {
+    /**
+     *
+     * @param type
+     *      represents the wrapper bean that can hold all the parameter values
+     *      together.
+     */
     public WrapperParameter(TypeReference type, Mode mode, int index) {
         super(type, mode, index);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.xml.ws.rt.model.Parameter#isWrapperStyle()
+    /**
+     *
+     * @deprecated
+     *      Why are you calling a method that always return true?
      */
     @Override
     public boolean isWrapperStyle() {
@@ -70,7 +86,6 @@ public class WrapperParameter extends Parameter{
     /**
      * removes the wrapper child from the given index
      * @param index
-     * @return
      */
     public Parameter removeWrapperChild(int index){
         return wrapperChildren.remove(index);
