@@ -22,25 +22,27 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * Sniffs the root element name and its attributes.
  *
  * @author Kohsuke Kawaguchi
  */
-public class RootElementSniffer extends DefaultHandler {
-    String nsUri = "##error";
-    String localName = "##error";
+public final class RootElementSniffer extends DefaultHandler {
+    private String nsUri = "##error";
+    private String localName = "##error";
+    private Attributes atts;
 
     public void startElement(String uri, String localName, String qName, Attributes a) throws SAXException {
         this.nsUri = uri;
         this.localName = localName;
-        checkAttributes(a);
+        if(a.getLength()==0)    // often there's no attribute
+            this.atts = EMPTY_ATTRIBUTES;
+        else
+            this.atts = new AttributesImpl(a);
         // no need to parse any further.
         throw aSAXException;
-    }
-
-    protected void checkAttributes(Attributes a) {
     }
 
     public String getNsUri() {
@@ -51,5 +53,10 @@ public class RootElementSniffer extends DefaultHandler {
         return localName;
     }
 
+    public Attributes getAttributes() {
+        return atts;
+    }
+
     private static final SAXException aSAXException = new SAXException();
+    private static final Attributes EMPTY_ATTRIBUTES = new AttributesImpl();
 }

@@ -178,8 +178,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
             // if it's due to error in the object, the same error will be reported
             // when the readHeader() method is used, so we don't have to report
             // an error right now.
-            nsUri = sniffer.nsUri;
-            localName = sniffer.localName;
+            nsUri = sniffer.getNsUri();
+            localName = sniffer.getLocalName();
         }
     }
 

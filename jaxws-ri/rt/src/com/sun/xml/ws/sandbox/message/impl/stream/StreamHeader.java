@@ -27,6 +27,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.AttributesImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -69,16 +71,37 @@ public abstract class StreamHeader implements Header {
 
     protected String _namespaceURI;
 
+    private final Attributes atts;
+
     public StreamHeader(XMLStreamReader reader, XMLStreamBufferMark mark) {
         _mark = mark;
         _localName = reader.getLocalName();
         _namespaceURI = reader.getNamespaceURI();
 
+        // TODO: can be more efficient
+        AttributesImpl impl = new AttributesImpl();
+        for( int i = reader.getAttributeCount()-1; i>=0; i-- ) {
+            impl.addAttribute(
+                fixNull(reader.getAttributeNamespace(i)),
+                reader.getAttributeLocalName(i),
+                null, null,
+                reader.getAttributeValue(i) );
+        }
+        this.atts = impl;
+
         processHeaderAttributes(reader);
+    }
+
+    private static String fixNull(String s) {
+        return s==null ? "" : s;
     }
 
     public boolean isMustUnderstood() {
         return _isMustUnderstand;
+    }
+
+    public String getAttribute(String nsUri, String localName) {
+        return atts.getValue(nsUri,localName);
     }
 
     public String getRole() {

@@ -69,6 +69,10 @@ public interface Header {
 
     /**
      * True if this header must be understood.
+     *
+     * <h3>Implementation Note</h3>
+     * <p>
+     * In typical case this method is invoked only up to once.
      */
     public boolean isMustUnderstood();
 
@@ -89,6 +93,10 @@ public interface Header {
      * If the soap:role attribute is absent, this method returns
      * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver".
      *
+     * <h3>Implementation Note</h3>
+     * <p>
+     * In typical case this method is invoked only up to once.
+     *
      * @return
      *      never null. This string need not be interned.
      */
@@ -107,6 +115,9 @@ public interface Header {
      * The implementation needs to check for both "true" and "1",
      * but because attribute values are normalized, it doesn't have
      * to consider " true", " 1 ", and so on.
+     *
+     * <p>
+     * In typical case this method is invoked only up to once.
      *
      * @return
      *      false.
@@ -130,6 +141,24 @@ public interface Header {
      *      this string must be interned.
      */
     public String getLocalPart();
+
+    /**
+     * Gets the attribute value on the header element.
+     *
+     * <p>
+     * This method is exposed for general-use, but the primary motivation
+     * was for the security components to check for <tt>wsse:Id</tt> and
+     * other such ID attributes.
+     *
+     * @param nsUri
+     *      can be empty but never null.
+     * @param localName
+     *      must not be null.
+     *
+     * @return
+     *      null if the attribute is not present.
+     */
+    public String getAttribute(String nsUri, String localName);
 
     /**
      * Reads the header as a {@link XMLStreamReader}.

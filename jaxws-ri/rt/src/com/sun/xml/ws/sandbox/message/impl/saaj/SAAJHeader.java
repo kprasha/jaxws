@@ -21,8 +21,10 @@ package com.sun.xml.ws.sandbox.message.impl.saaj;
 
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.sandbox.message.impl.AbstractHeaderImpl;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -41,106 +43,27 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * {@link Header} backed by a {@link SOAPHeaderElement}.
+ *
  * @author Vivek Pandey
  */
-
-public class SAAJHeader implements Header{
+public final class SAAJHeader extends AbstractHeaderImpl {
 
     private SOAPHeaderElement header;
-    private boolean isMustUnderstood;
-    private String role;
-    private boolean relay;
-    private int flags;
     private String localName;
     private String namespaceUri;
 
-    protected static final int FLAG_ACTOR            = 0x0001;
-    protected static final int FLAG_MUST_UNDERSTAND   = 0x0002;
-    protected static final int FLAG_RELAY             = 0x0004;
 
 
-    public SAAJHeader(SOAPHeaderElement header) {
+    public SAAJHeader(SOAPHeaderElement header, SOAPVersion soapVersion) {
+        super(soapVersion);
         this.header = header;
         localName = header.getLocalName();
         namespaceUri = header.getNamespaceURI();
     }
 
-    /**
-     * True if this header must be understood.
-     *
-     * Read the mustUndestandHeader only once, save reading it from DOM everytime.
-     */
-    public boolean isMustUnderstood() {
-        if(isSet(FLAG_MUST_UNDERSTAND))
-            return isMustUnderstood;
-
-        isMustUnderstood = header.getMustUnderstand();
-        set(FLAG_MUST_UNDERSTAND);
-        return isMustUnderstood;
-    }
-
-    /**
-     * Gets the value of the soap:role attribute (or soap:actor for SOAP 1.1).
-     * <p/>
-     * <p/>
-     * SOAP 1.1 values are normalized into SOAP 1.2 values.
-     * <p/>
-     * An omitted SOAP 1.1 actor attribute value will become:
-     * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver"
-     * An SOAP 1.1 actor attribute value of:
-     * "http://schemas.xmlsoap.org/soap/actor/next"
-     * will become:
-     * "http://www.w3.org/2003/05/soap-envelope/role/next"
-     * <p/>
-     * <p/>
-     * If the soap:role attribute is absent, this method returns
-     * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver".
-     *
-     * @return never null. This string need not be interned.
-     */
-    public String getRole() {
-        if(isSet(FLAG_ACTOR))
-            return role;
-
-        role = header.getActor();
-
-        //SAAJ may return null, lets return the default value in that case
-        //TODO: findout SOAP version
-        if(role == null)
-            role = "http://schemas.xmlsoap.org/soap/actor/next";
-
-        set(FLAG_ACTOR);
-        return role;
-    }
-
-    /**
-     * True if this header is to be relayed if not processed.
-     * For SOAP 1.1 messages, this method always return false.
-     * <p/>
-     * <p/>
-     * IOW, this method returns true if there's @soap:relay='true'
-     * is present.
-     * <p/>
-     * <h3>Implementation Note</h3>
-     * <p/>
-     * The implementation needs to check for both "true" and "1",
-     * but because attribute values are normalized, it doesn't have
-     * to consider " true", " 1 ", and so on.
-     *
-     * @return false.
-     */
-    public boolean isRelay() {
-        if(isSet(FLAG_RELAY))
-            return relay;
-
-        //SAAJ throws UnsupportedOperationException if its SOAP 1.1 version
-        //Ideally this method should always throw false for SOAP 1.1
-        try{
-            relay = header.getRelay();
-        }catch(UnsupportedOperationException e){
-            relay = false;
-        }
-        return relay;
+    public String getAttribute(String nsUri, String localName) {
+        return header.getAttributeNS(nsUri,localName);
     }
 
     /**
@@ -231,13 +154,5 @@ public class SAAJHeader implements Header{
         DOMScanner ds = new DOMScanner();
         ds.setContentHandler(contentHandler);
         ds.scan(header);
-    }
-
-    protected boolean isSet(int flag){
-        return (flags&flag) != 0;
-    }
-
-    protected void set(int flag){
-        flags |= flag;
     }
 }
