@@ -35,24 +35,22 @@ abstract class MessageFiller {
      */
     static final class Header extends MessageFiller {
         private final SOAPVersion ver;
-
-        /**
-         * Represents the binding of a parameter.
-         */
         private final Bridge bridge;
+        private final SyncMethodHandler owner;
+        private final ValueGetter getter;
 
-        private final PortInterfaceStub owner;
-
-        public Header(PortInterfaceStub owner, int methodPos, SOAPVersion ver, Bridge bridge) {
+        protected Header(SyncMethodHandler owner, int methodPos, SOAPVersion ver, Bridge bridge, ValueGetter getter) {
             super(methodPos);
             this.owner = owner;
             this.ver = ver;
             this.bridge = bridge;
+            this.getter = getter;
         }
 
         void fillIn(Object[] methodArgs, Message msg) {
+            Object value = getter.get(methodArgs[methodPos]);
             msg.getHeaders().add(ver.createJAXBHeader(
-                bridge, owner.bridgeContexts.take(), methodArgs[methodPos]));
+                bridge, owner.owner.bridgeContexts.take(), value));
         }
     }
 }

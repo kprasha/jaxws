@@ -1,22 +1,17 @@
 package com.sun.xml.ws.client.port;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.CompositeStructure;
-import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.model.Parameter;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-import com.sun.xml.ws.streaming.XMLStreamReaderException;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,50 +48,62 @@ final class SyncMethodHandler extends MethodHandler {
     private final BodySetter[] inSetters;
     private final MessageFiller[] inFillers;
 
-
+    /**
+     * Used to get a value from method invocation parameter.
+     *
+     * valueGetters[i] is for methodArgs[i], and so on.
+     */
+    /*package*/ final ValueGetter[] valueGetters;
 
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethod method) {
         super(owner);
 
         this.operationName = new QName(owner.model.getTargetNamespace(), method.getOperationName() );
 
-        List<Bridge> requestBodyBridges = new ArrayList<Bridge>();
-        List<BodySetter> reqParamSetters = new ArrayList<BodySetter>();
-        List<MessageFiller> fillers = new ArrayList<MessageFiller>();
+        {// prepare objects for creating messages
+            List<Parameter> rp = method.getRequestParameters();
 
-        // prepare objects for creating messages
-        for (Parameter param : method.getRequestParameters()) {
-            switch(param.getInBinding().kind) {
-            case BODY:
-                Bridge bridge = owner.model.getBridge(param.getTypeReference());
-                requestBodyBridges.add(bridge);
+            List<Bridge> requestBodyBridges = new ArrayList<Bridge>();
+            List<BodySetter> reqParamSetters = new ArrayList<BodySetter>();
+            List<MessageFiller> fillers = new ArrayList<MessageFiller>();
+            valueGetters = new ValueGetter[rp.size()];
 
-                BodySetter setter;
-                if(param.isINOUT())
-                    setter = new BodySetter.Holder(param.getIndex(), reqParamSetters.size());
-                else
-                    setter = new BodySetter.Plain(param.getIndex(),reqParamSetters.size());
+            for (Parameter param : rp) {
+                ValueGetter getter = ValueGetter.fromMode(param.getMode());
 
-                reqParamSetters.add(setter);
-                break;
-            case HEADER:
-                // TODO: distinguish holder vs plain 
-                fillers.add(new MessageFiller.Header(
-                    owner,
-                    param.getIndex(),
-                    owner.soapVersion,
-                    owner.model.getBridge(param.getTypeReference()) ));
-            case ATTACHMENT:
-                // TODO: implement this later
-                throw new UnsupportedOperationException();
-            default:
-                throw new AssertionError(); // impossible
+                switch(param.getInBinding().kind) {
+                case BODY:
+                    Bridge bridge = owner.model.getBridge(param.getTypeReference());
+                    requestBodyBridges.add(bridge);
+
+                    BodySetter setter = new BodySetter(
+                        param.getIndex(), reqParamSetters.size(), getter);
+
+                    reqParamSetters.add(setter);
+                    break;
+                case HEADER:
+                    fillers.add(new MessageFiller.Header(
+                        this,
+                        param.getIndex(),
+                        owner.soapVersion,
+                        owner.model.getBridge(param.getTypeReference()),
+                        getter ));
+                case ATTACHMENT:
+                    // TODO: implement this later
+                    throw new UnsupportedOperationException();
+                default:
+                    throw new AssertionError(); // impossible
+                }
             }
+
+            this.inSetters = reqParamSetters.toArray(new BodySetter[reqParamSetters.size()]);
+            this.inFillers = fillers.toArray(new MessageFiller[fillers.size()]);
+            this.parameterBridges = requestBodyBridges.toArray(new Bridge[requestBodyBridges.size()]);
         }
 
-        this.inSetters = reqParamSetters.toArray(new BodySetter[reqParamSetters.size()]);
-        this.inFillers = fillers.toArray(new MessageFiller[fillers.size()]);
-        this.parameterBridges = requestBodyBridges.toArray(new Bridge[requestBodyBridges.size()]);
+        {// prepare objects for processing response
+
+        }
     }
 
     public Object invoke(Object proxy, Object[] args) throws WebServiceException {

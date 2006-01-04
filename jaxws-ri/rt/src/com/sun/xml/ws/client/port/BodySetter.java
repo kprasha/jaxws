@@ -14,55 +14,29 @@ import com.sun.xml.bind.api.CompositeStructure;
  * @author Kohsuke Kawaguchi
  * @see MessageFiller
  */
-abstract class BodySetter {
+final class BodySetter {
     /**
      * The index of the method invocation parameters that this object looks for.
      */
-    protected final int methodPos;
+    private final int methodPos;
     /**
      * The index inside the payload.
      */
-    protected final int messagePos;
+    private final int messagePos;
 
-    BodySetter(int methodPos, int messagePos) {
+    private final ValueGetter getter;
+
+    BodySetter(int methodPos, int messagePos, ValueGetter getter) {
         this.methodPos = methodPos;
         this.messagePos = messagePos;
+        this.getter = getter;
     }
 
     /**
      * Picks up an object from the method arguments and sets it
      * to the right place inside {@link CompositeStructure}.
      */
-    abstract void set( Object[] methodArgs, CompositeStructure msg );
-
-    /**
-     * {@link BodySetter} for a plain argument.
-     *
-     * This class just moves an argument into a {@link CompositeStructure}.
-     */
-    static final class Plain extends BodySetter {
-        public Plain(int methodPos, int messagePos) {
-            super(methodPos, messagePos);
-        }
-
-        void set( Object[] methodArgs, CompositeStructure msg ) {
-            msg.values[messagePos] = methodArgs[methodPos];
-        }
-    }
-
-    /**
-     * {@link BodySetter} for a {@link javax.xml.ws.Holder} argument.
-     *
-     * This class moves the value inside a {@link Holder} into
-     * a {@link CompositeStructure}.
-     */
-    static final class Holder extends BodySetter {
-        public Holder(int methodPos, int messagePos) {
-            super(methodPos, messagePos);
-        }
-
-        void set( Object[] methodArgs, CompositeStructure msg ) {
-            msg.values[messagePos] = ((javax.xml.ws.Holder)methodArgs[methodPos]).value;
-        }
+    void set( Object[] methodArgs, CompositeStructure msg ) {
+        msg.values[messagePos] = getter.get(methodArgs[methodPos]);
     }
 }

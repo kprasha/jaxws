@@ -6,6 +6,7 @@ import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 
 import javax.xml.ws.WebServiceException;
@@ -36,7 +37,10 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         this.marshallers = new Pool.Marshaller(model.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());
 
-        // TODO: fill in methodHandlers
+        // fill in methodHandlers
+        for( JavaMethod m : model.getJavaMethods() ) {
+
+        }
     }
 
     public final RuntimeModel model;
