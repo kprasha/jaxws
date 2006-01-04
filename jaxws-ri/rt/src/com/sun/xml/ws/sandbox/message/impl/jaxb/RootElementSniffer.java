@@ -28,7 +28,7 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author Kohsuke Kawaguchi
  */
-class RootElementSniffer extends DefaultHandler {
+public class RootElementSniffer extends DefaultHandler {
     String nsUri = "##error";
     String localName = "##error";
 
@@ -41,6 +41,14 @@ class RootElementSniffer extends DefaultHandler {
     }
 
     protected void checkAttributes(Attributes a) {
+    }
+
+    public String getNsUri() {
+        return nsUri;
+    }
+
+    public String getLocalName() {
+        return localName;
     }
 
     private static final SAXException aSAXException = new SAXException();
