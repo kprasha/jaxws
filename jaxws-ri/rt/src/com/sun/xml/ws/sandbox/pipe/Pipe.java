@@ -114,7 +114,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * This includes things like canonicalizers, JAXB unmarshallers, buffers,
  * and so on.
  *
- * <h3>Per-proxy state</h3>
+ * <h3>Per-proxy/per-endpoint state</h3>
  * <p>
  * Information that is tied to a particular proxy/dispatch can be stored
  * in a separate object that is referenced from a pipe. When
