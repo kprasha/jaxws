@@ -8,8 +8,10 @@ import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.binding.BindingImpl;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.Binding;
 import javax.xml.ws.spi.ServiceDelegate;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -25,8 +27,8 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public final class PortInterfaceStub extends Stub implements InvocationHandler {
-    public PortInterfaceStub(ServiceDelegate owner, Class portInterface, RuntimeModel model, Pipe master, SOAPVersion soapVersion ) {
-        super(master);
+    public PortInterfaceStub(ServiceDelegate owner, Binding binding, Class portInterface, RuntimeModel model, Pipe master, SOAPVersion soapVersion ) {
+        super(master,binding);
         this.owner = owner;
         this.model = model;
         this.portInterface = portInterface;
