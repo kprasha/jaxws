@@ -20,6 +20,7 @@
 package com.sun.xml.ws.sandbox.message;
 
 import com.sun.xml.ws.sandbox.Encoder;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
@@ -332,6 +333,35 @@ public abstract class Message {
      * attachment to one {@link Message} doesn't affect another {@link Message}
      * at all.
      *
+     * <p>
+     * This method does <b>NOT</b> consume a message.
+     *
+     * <p>
+     * To enable efficient copy operations, there's a few restrictions on
+     * how copied message can be used.
+     *
+     * <ol>
+     *  <li>The original and the copy may not be
+     *      used concurrently by two threads (this allows two {@link Message}s
+     *      to share some internal resources, such as JAXB marshallers.)
+     *      Note that it's OK for the original and the copy to be processed
+     *      by two threads, as long as they are not concurrent.
+     *
+     *  <li>The copy has the same 'life scope'
+     *      as the original (this allows shallower copy, such as
+     *      JAXB beans wrapped in {@link JAXBMessage}.)
+     * </ol>
+     *
+     * <p>
+     * A 'life scope' of a message created during a message processing
+     * in a pipeline is until a pipeline processes the next message.
+     * A message cannot be kept beyond its life scope.
+     *
+     * (This experimental design is to allow message objects to be reused
+     * --- feedback appreciated.)
+     *
+     *
+     *
      * <h3>Design Rationale</h3>
      * <p>
      * Since a {@link Message} body is read-once, sometimes
@@ -342,6 +372,12 @@ public abstract class Message {
      * The actual copy operation depends on the layout
      * of the data in memory, hence it's best to be done by
      * the {@link Message} implementation itself.
+     *
+     * <p>
+     * The restrictions placed on the use of copied {@link Message} can be
+     * relaxed if necessary, but it will make the copy method more expensive.
      */
+    // TODO: update the class javadoc with 'lifescope'
+    // and move the discussion about life scope there.
     public abstract Message copy();
 }
