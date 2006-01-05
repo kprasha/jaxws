@@ -21,6 +21,7 @@
 package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.bind.api.Bridge;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
@@ -58,6 +59,9 @@ public class Parameter {
     }
 
     /**
+     * TODO: once the model gets JAXBContext, shouldn't {@link Bridge}s
+     * be made available from model objects?
+     *
      * @return Returns the TypeReference associated with this Parameter
      */
     public TypeReference getTypeReference() {

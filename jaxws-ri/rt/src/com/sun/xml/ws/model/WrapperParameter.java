@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.bind.api.CompositeStructure;
+
+import javax.xml.namespace.QName;
 
 /**
  * {@link Parameter} that represents a wrapper,
@@ -43,12 +46,11 @@ import com.sun.xml.bind.api.TypeReference;
 public class WrapperParameter extends Parameter {
     /**
      *
-     * @param type
-     *      represents the wrapper bean that can hold all the parameter values
-     *      together.
+     * @param tagName
+     *      Tag name of the wrapper element.
      */
-    public WrapperParameter(TypeReference type, Mode mode, int index) {
-        super(type, mode, index);
+    public WrapperParameter(QName tagName, Mode mode, int index) {
+        super(new TypeReference(tagName, CompositeStructure.class), mode, index);
     }
 
     /**
@@ -94,5 +96,6 @@ public class WrapperParameter extends Parameter {
     public void clear(){
         wrapperChildren.clear();
     }
+
     protected final List<Parameter> wrapperChildren = new ArrayList<Parameter>();
 }
