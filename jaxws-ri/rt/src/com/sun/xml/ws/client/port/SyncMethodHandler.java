@@ -7,6 +7,7 @@ import com.sun.xml.ws.model.Parameter;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.client.RequestContext;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
@@ -115,12 +116,9 @@ final class SyncMethodHandler extends MethodHandler {
 
             MessageProperties props = msg.getProperties();
             props.proxy = proxy;
+            props.requestContext = owner.getRequestContext();
+            
             // TODO: fill in MessageProperties
-            //RequestContext requestContext = (RequestContext)(java.util.Map)((BindingProvider) _proxy).getRequestContext();
-            //requestContext.put(JAXWS_CLIENT_HANDLE_PROPERTY, _proxy);
-            //messageStruct.setMetaData(JAXWS_RUNTIME_CONTEXT, _rtcontext);
-            //messageStruct.setMetaData(JAXWS_CONTEXT_PROPERTY, requestContext);
-            //
             ////set mtom threshold value to
             //Object mtomThreshold = requestContext.get(MTOM_THRESHOLOD_VALUE);
             //messageStruct.setMetaData(MTOM_THRESHOLOD_VALUE, mtomThreshold);
