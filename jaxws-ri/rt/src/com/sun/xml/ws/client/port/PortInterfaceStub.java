@@ -1,23 +1,21 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.client.Stub;
-import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.model.RuntimeModel;
-import com.sun.xml.ws.model.JavaMethod;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.model.JavaMethod;
+import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.util.Pool;
 
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.Binding;
 import javax.xml.ws.spi.ServiceDelegate;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -27,14 +25,12 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public final class PortInterfaceStub extends Stub implements InvocationHandler {
-    public PortInterfaceStub(ServiceDelegate owner, Binding binding, Class portInterface, RuntimeModel model, Pipe master, SOAPVersion soapVersion ) {
+    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, Class portInterface, RuntimeModel model, Pipe master ) {
         super(master,binding);
         this.owner = owner;
         this.model = model;
         this.portInterface = portInterface;
-        // TODO: is this the right way to get the SOAP version?
-        // or is it available from somewhere?
-        this.soapVersion = soapVersion;
+        this.soapVersion = SOAPVersion.fromBinding(binding.getBindingId());
 
         this.marshallers = new Pool.Marshaller(model.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());
