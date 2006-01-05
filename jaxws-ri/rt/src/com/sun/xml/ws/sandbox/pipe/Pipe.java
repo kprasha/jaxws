@@ -214,7 +214,7 @@ public interface Pipe {
      * Sends a {@link Message} and returns a response {@link Message} to it.
      *
      * @throws WebServiceException
-     *      Inside the server, this signals an error condition where
+     *      On the server side, this signals an error condition where
      *      a fault reply is in order (or the exception gets eaten by
      *      the top-most transport {@link Pipe} if it's one-way.)
      *      This frees each {@link Pipe} from try/catching a
@@ -223,35 +223,40 @@ public interface Pipe {
      *      Note that this method is also allowed to return a {@link Message}
      *      that has a fault as the payload.
      *
+     *      On the client side, the {@link WebServiceException} thrown
+     *      will be propagated all the way back to the calling client
+     *      applications.
+     *
      * @throws RuntimeException
      *      Other runtime exception thrown by this method must
-     *      be treated as a bug in the channel implementation,
+     *      be treated as a bug in the pipe implementation,
      *      and therefore should not be converted into a fault.
-     *      Otherwise it becomes very difficult to debug implementation
-     *      problems.
+     *      (Otherwise it becomes very difficult to debug implementation
+     *      problems.)
      *
-     *      The consequence of this is that if a channel calls
+     *      <p>
+     *      On the server side, this exception should be most likely
+     *      just logged. On the client-side it gets propagated to the
+     *      client application.
+     *
+     *      <p>
+     *      The consequence of this is that if a pipe calls
      *      into an user application (such as {@link SOAPHandler}
      *      or {@link LogicalHandler}), where a {@link RuntimeException}
      *      is *not* a bug in the JAX-WS implementation, it must be catched
      *      and wrapped into a {@link WebServiceException}.
      *
-     * TODO: we talke about designating a special exception class,
-     * like <tt>AbortError</tt> to indicate a fatal situation where
-     * we just have to bail out. The idea is to prohibit any {@link Pipe}
-     * from eating it.
-     *
      * @param msg
-     *      always a non-null valid unconsumed {@link Message}.
+     *      always a non-null valid unconsumed {@link Message} that
+     *      represents a request.
      *      The callee may consume a {@link Message} (and in fact
      *      most of the time it will), and therefore once a {@link Message}
-     *      is given to a {@link Pipe}, the caller may not access
-     *      its payload.
+     *      is given to a {@link Pipe}.
      *
      * @return
      *      If this method returns a non-null value, it must be
      *      a valid unconsumed {@link Message}. This message represents
-     *      a response to the message passed as a parameter.
+     *      a response to the request message passed as a parameter.
      *      <p>
      *      This method is also allowed to return null, which indicates
      *      that there's no response. This is used for things like
@@ -295,7 +300,8 @@ public interface Pipe {
      * the {@link Encoder#copy()} for more discussion about this.
      *
      * @param cloner
-     *      Use this object to clone other pipe references you have
+     *      Use this object (in particular its {@link PipeCloner#copy(Pipe)} method
+     *      to clone other pipe references you have
      *      in your pipe. See {@link PipeCloner} for more discussion
      *      about why.
      *
