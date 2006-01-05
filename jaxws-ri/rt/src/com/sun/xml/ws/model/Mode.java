@@ -20,6 +20,8 @@
 
 package com.sun.xml.ws.model;
 
+import javax.jws.WebParam;
+
 /**
  * Defines parameter mode, IN, OUT or INOUT
  *
@@ -33,4 +35,13 @@ public enum Mode {
         this.mode = mode;
     }
     private final int mode;
+
+    public static Mode from(WebParam.Mode m) {
+        switch(m) {
+        case IN:    return IN;
+        case OUT:   return OUT;
+        case INOUT: return INOUT;
+        }
+        throw new AssertionError();
+    }
 }
