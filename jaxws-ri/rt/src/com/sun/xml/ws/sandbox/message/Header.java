@@ -146,14 +146,14 @@ public interface Header {
      * the whole header.
      *
      * <p>
-     * {@link Message}s that come from tranport usually provides
-     * a reasonably efficient implementation of this method.
-     *
-     * <p>
      * Similarly, if the caller wants to use this method only to do
      * the API conversion (such as simply firing SAX events from
      * {@link XMLStreamReader}), then the JAX-WS team requests
      * that you talk to us.
+     *
+     * <p>
+     * {@link Message}s that come from tranport usually provides
+     * a reasonably efficient implementation of this method.
      *
      * @return
      *      must not null.
