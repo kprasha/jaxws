@@ -6,6 +6,7 @@ import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.client.RequestContext;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.ws.Holder;
@@ -92,7 +93,7 @@ final class SyncMethodHandler extends MethodHandler {
         }
     }
 
-    public Object invoke(Object proxy, Object[] args) throws WebServiceException {
+    public Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException {
 
         Marshaller m = owner.marshallers.take();
 
@@ -101,7 +102,7 @@ final class SyncMethodHandler extends MethodHandler {
 
             MessageProperties props = msg.getProperties();
             props.proxy = proxy;
-            props.requestContext = owner.getRequestContext();
+            props.requestContext = rc;
 
             // TODO: fill in MessageProperties
             ////set mtom threshold value to

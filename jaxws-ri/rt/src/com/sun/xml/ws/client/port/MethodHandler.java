@@ -1,5 +1,7 @@
 package com.sun.xml.ws.client.port;
 
+import com.sun.xml.ws.client.RequestContext;
+
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -30,8 +32,12 @@ public abstract class MethodHandler {
      *      actual number of arguments to the method. Additional array space should be
      *      simply ignored.
      *
+     * @param rc
+     *      This {@link RequestContext} is used for invoking this method.
+     *      We take this as a separate parameter because of the async invocation
+     *      handling, which requires a separate copy.
      * @return
      *      a return value from the method invocation. may be null.
      */
-    public abstract Object invoke(Object proxy, Object[] args) throws WebServiceException;
+    public abstract Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException;
 }

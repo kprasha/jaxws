@@ -1,5 +1,7 @@
 package com.sun.xml.ws.client.port;
 
+import com.sun.xml.ws.client.RequestContext;
+
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Callable;
@@ -28,14 +30,17 @@ final class CallbackMethodHandler extends MethodHandler {
         this.handlerPos = handlerPos;
     }
 
-    public Future<?> invoke(final Object proxy, final Object[] args) throws WebServiceException {
+    public Future<?> invoke(final Object proxy, final Object[] args, RequestContext rc) throws WebServiceException {
         // the spec requires the last argument
         final AsyncHandler handler = (AsyncHandler)args[handlerPos];
+
+        // need to take a copy. required by the spec
+        final RequestContext snapshot = rc.copy();
 
         final ResponseImpl[] r = new ResponseImpl[1];
         r[0] = new ResponseImpl<Object>(new Callable<Object>() {
             public Object call() throws Exception {
-                Object t = core.invoke(proxy,args);
+                Object t = core.invoke(proxy,args,snapshot);
                 handler.handleResponse(r[0]);
                 return t;
             }

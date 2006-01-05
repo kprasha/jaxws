@@ -79,7 +79,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws WebServiceException, Throwable {
         MethodHandler handler = methodHandlers.get(method);
         if(handler!=null) {
-            return handler.invoke(proxy, args);
+            return handler.invoke(proxy, args, getRequestContext());
         } else {
             // we handles the other method invocations by ourselves
             try {
