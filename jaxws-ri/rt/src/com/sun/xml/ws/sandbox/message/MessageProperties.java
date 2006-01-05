@@ -20,10 +20,12 @@
 package com.sun.xml.ws.sandbox.message;
 
 import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.client.RequestContext;
 
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import javax.xml.ws.BindingProvider;
 import javax.activation.DataHandler;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -117,6 +119,13 @@ public class MessageProperties implements MessageContext {
      */
     @ContextProperty(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
     public Object proxy;
+
+    /**
+     * The client appliation configures this map through
+     * {@link BindingProvider#getRequestContext()}.
+     */
+    @ContextProperty(BindingProviderProperties.JAXWS_CONTEXT_PROPERTY)
+    public RequestContext requestContext;
 
     /**
      * Bag to capture "other" properties that do not have
