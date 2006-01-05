@@ -35,10 +35,15 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         this.marshallers = new Pool.Marshaller(model.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());
 
-        // fill in methodHandlers
+        // fill in methodHandlers.
+        // first fill in sychronized versions
         for( JavaMethod m : model.getJavaMethods() ) {
-
+            if(!m.getMEP().isAsync) {
+                methodHandlers.put(m.getMethod(),new SyncMethodHandler(this,m));
+            }
         }
+
+        // TODO: fill in asynchronous versions by using the synchronized versions
     }
 
     public final RuntimeModel model;

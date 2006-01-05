@@ -11,7 +11,7 @@ import com.sun.xml.ws.sandbox.message.Message;
  * Instance of this class is used to handle header parameters and attachment parameters.
  * They add things to {@link Message}.
  *
- * @see BodySetter
+ * @see BodyBuilder
  * @author Kohsuke Kawaguchi
  */
 abstract class MessageFiller {

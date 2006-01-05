@@ -1,16 +1,13 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.model.Parameter;
+import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-import com.sun.xml.ws.client.RequestContext;
 
 import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
@@ -30,7 +27,7 @@ import java.util.List;
  *
  * <h2>Creating {@link JAXBMessage}</h2>
  * <p>
- * At the construction time, we prepare {@link BodySetter}s and {@link MessageFiller}s
+ * At the construction time, we prepare {@link BodyBuilder} and {@link MessageFiller}s
  * that know how to move arguments into a {@link Message}.
  * Some arguments go to the payload, some go to headers, still others go to attachments.
  *
@@ -38,15 +35,8 @@ import java.util.List;
  */
 final class SyncMethodHandler extends MethodHandler {
 
-    private final QName operationName;
-
-    /**
-     * Specifies how to data-bind payload parameters.
-     */
-    private final Bridge[] parameterBridges;
-
     // these objects together create a message from method parameters
-    private final BodySetter[] inSetters;
+    private final BodyBuilder bodyBuilder;
     private final MessageFiller[] inFillers;
 
     /**
@@ -59,28 +49,23 @@ final class SyncMethodHandler extends MethodHandler {
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethod method) {
         super(owner);
 
-        this.operationName = new QName(owner.model.getTargetNamespace(), method.getOperationName() );
-
         {// prepare objects for creating messages
             List<Parameter> rp = method.getRequestParameters();
 
-            List<Bridge> requestBodyBridges = new ArrayList<Bridge>();
-            List<BodySetter> reqParamSetters = new ArrayList<BodySetter>();
+            BodyBuilder bodyBuilder = null;
             List<MessageFiller> fillers = new ArrayList<MessageFiller>();
             valueGetters = new ValueGetter[rp.size()];
 
             for (Parameter param : rp) {
-                ValueGetter getter = ValueGetter.fromMode(param.getMode());
+                ValueGetter getter = ValueGetter.get(param);
 
                 switch(param.getInBinding().kind) {
                 case BODY:
-                    Bridge bridge = owner.model.getBridge(param.getTypeReference());
-                    requestBodyBridges.add(bridge);
-
-                    BodySetter setter = new BodySetter(
-                        param.getIndex(), reqParamSetters.size(), getter);
-
-                    reqParamSetters.add(setter);
+                    if(param.isWrapperStyle()) {
+                        bodyBuilder = new BodyBuilder.Wrapped((WrapperParameter)param,owner.model);
+                    } else {
+                        bodyBuilder = new BodyBuilder.Bare(param,owner.model);
+                    }
                     break;
                 case HEADER:
                     fillers.add(new MessageFiller.Header(
@@ -97,9 +82,9 @@ final class SyncMethodHandler extends MethodHandler {
                 }
             }
 
-            this.inSetters = reqParamSetters.toArray(new BodySetter[reqParamSetters.size()]);
+            assert bodyBuilder!=null;
+            this.bodyBuilder = bodyBuilder;
             this.inFillers = fillers.toArray(new MessageFiller[fillers.size()]);
-            this.parameterBridges = requestBodyBridges.toArray(new Bridge[requestBodyBridges.size()]);
         }
 
         {// prepare objects for processing response
@@ -112,12 +97,12 @@ final class SyncMethodHandler extends MethodHandler {
         Marshaller m = owner.marshallers.take();
 
         try {
-            Message msg = createRequestMessage(args, m);
+            Message msg = createRequestMessage(args);
 
             MessageProperties props = msg.getProperties();
             props.proxy = proxy;
             props.requestContext = owner.getRequestContext();
-            
+
             // TODO: fill in MessageProperties
             ////set mtom threshold value to
             //Object mtomThreshold = requestContext.get(MTOM_THRESHOLOD_VALUE);
@@ -164,20 +149,15 @@ final class SyncMethodHandler extends MethodHandler {
     /**
      * Creates a request {@link JAXBMessage} from method arguments.
      *
-     * @param m
-     *      The marshalled borrowed from a pool.
      */
-    private Message createRequestMessage(Object[] args, Marshaller m) {
-        CompositeStructure cs = new CompositeStructure();
-        cs.bridges = parameterBridges;
-        cs.values = new Object[parameterBridges.length];
-
-        for (BodySetter bs : inSetters)
-            bs.set(args,cs);
-        Message msg = new JAXBMessage(m,operationName, CompositeStructure.class, cs, owner.soapVersion );
+    private Message createRequestMessage(Object[] args) {
+        Message msg = new JAXBMessage(
+            bodyBuilder.bridge, bodyBuilder.build(args),
+            owner.model.getBridgeContext(), owner.soapVersion );
 
         for (MessageFiller filler : inFillers)
             filler.fillIn(args,msg);
+
         return msg;
     }
 }
