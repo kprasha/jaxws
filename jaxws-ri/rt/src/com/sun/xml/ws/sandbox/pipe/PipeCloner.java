@@ -76,12 +76,12 @@ public final class PipeCloner {
      * @return
      *      The cloned pipe. Always non-null.
      */
-    public Pipe copy(Pipe p) {
+    public <T extends Pipe> T copy(T p) {
         Pipe r = master2copy.get(p);
         if(r==null) {
             r = p.copy(this);
             master2copy.put(p,r);
         }
-        return r;
+        return (T)r;
     }
 }
