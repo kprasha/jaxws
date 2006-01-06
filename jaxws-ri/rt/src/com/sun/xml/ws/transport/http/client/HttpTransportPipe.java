@@ -26,7 +26,6 @@ import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
 import com.sun.xml.ws.sandbox.pipe.PipeCloner;
 import com.sun.xml.ws.spi.runtime.WSConnection;
-import com.sun.xml.ws.transport.WSConnectionImpl;
 
 import javax.xml.ws.WebServiceException;
 import java.util.List;
@@ -41,20 +40,16 @@ public class HttpTransportPipe implements Pipe {
     private final Encoder encoder;
     private final Decoder decoder;
 
-    private MessageProperties context;
-
-    // TODO: what's this 'context'? please document.
-    public HttpTransportPipe(Encoder encoder, Decoder decoder,  MessageProperties context) {
+    public HttpTransportPipe(Encoder encoder, Decoder decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
-        this.context = context;  //TODO:can get messageprops from message do not need this
     }
 
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
     private HttpTransportPipe(HttpTransportPipe that) {
-        this( that.encoder.copy(), that.decoder.copy(), that.context );
+        this( that.encoder.copy(), that.decoder.copy() );
     }
 
     public Message process(Message msg) {
@@ -62,7 +57,7 @@ public class HttpTransportPipe implements Pipe {
         try {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
-            WSConnection con = new HttpClientTransport(null, context);
+            WSConnection con = new HttpClientTransport(null, msg.getProperties());
 
             // get transport headers from message
             MessageProperties props = msg.getProperties();

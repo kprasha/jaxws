@@ -97,7 +97,7 @@ public class DispatchDelegate extends DelegateBase {
         if (!isAsync(messageInfo)) {
 
             HttpTransportPipe dispatcher =
-                new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11, context);
+                new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
 
             Message response = dispatcher.process(msg);
             SOAPMessage result = null;
