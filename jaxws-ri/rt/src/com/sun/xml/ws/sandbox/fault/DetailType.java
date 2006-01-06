@@ -19,7 +19,6 @@ public class DetailType {
      * The detail entry could be 0 or more elements. Perhaps some elements may be
      * known to JAXB while others can be handled using DOMHandler.
      */
-    @XmlAnyElement
-    @XmlMixed
+    @XmlAnyElement(lax=true)
     public List<Object> detailEntry;
 }
