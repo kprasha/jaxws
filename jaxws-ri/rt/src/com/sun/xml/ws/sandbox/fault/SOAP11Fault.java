@@ -2,6 +2,8 @@ package com.sun.xml.ws.sandbox.fault;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.soap.Detail;
 
 /**
  * This class represents SOAP1.1 Fault. This class will be used to marshall/unmarshall a soap fault using JAXB.
@@ -28,21 +30,21 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Vivek Pandey
  */
 @XmlRootElement(name = "Fault", namespace = "http://schemas.xmlsoap.org/soap/envelope/")
-public class SOAP11Fault<T> {
-    @XmlElement(name = "faultcode", namespace = "")
-    private String code;
+public class SOAP11Fault {
 
-    @XmlElement(name = "faultstring", namespace = "")
+    private String code;
     private String reason;
 
-    @XmlElement(name = "faultactor", namespace = "")
+
     private String actor;
 
     /**
      * detail is a choice between {@link javax.xml.soap.Detail} and a JAXB object. Lets keep it as T or can be {@link Object} as well
      */
-    @XmlElement(name = "detail", namespace = "")
-    private T detail;
+    private DetailType detail;
+
+    public SOAP11Fault() {
+    }
 
     /**
      * This constructor takes soap fault detail among other things. The detail could represent {@link javax.xml.soap.Detail}
@@ -53,13 +55,14 @@ public class SOAP11Fault<T> {
      * @param actor
      * @param detail
      */
-    public SOAP11Fault(String code, String reason, String actor, T detail) {
+    public SOAP11Fault(String code, String reason, String actor, DetailType detail) {
         this.code = code;
         this.reason = reason;
         this.actor = actor;
         this.detail = detail;
     }
 
+    @XmlElement(name = "faultcode", namespace = "")
     public String getCode() {
         return code;
     }
@@ -68,6 +71,7 @@ public class SOAP11Fault<T> {
         this.code = code;
     }
 
+    @XmlElement(name = "faultstring", namespace = "")
     public String getReason() {
         return reason;
     }
@@ -76,6 +80,7 @@ public class SOAP11Fault<T> {
         this.reason = reason;
     }
 
+    @XmlElement(name = "faultactor", namespace = "")
     public String getActor() {
         return actor;
     }
@@ -87,14 +92,15 @@ public class SOAP11Fault<T> {
     /**
      * returns a java type T - this could be a {@link javax.xml.soap.Detail} or a JAXB object
      */
-    public T getDetail() {
+    @XmlElement(name = "detail", namespace = "", type = DetailType.class)
+    public DetailType getDetail() {
         return detail;
     }
 
     /**
      * @param detail could be {@link javax.xml.soap.Detail} or a JAXB object
      */
-    public void setDetail(T detail) {
+    public void setDetail(DetailType detail) {
         this.detail = detail;
     }
 }
