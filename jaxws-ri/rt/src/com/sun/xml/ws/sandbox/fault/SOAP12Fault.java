@@ -3,6 +3,10 @@ package com.sun.xml.ws.sandbox.fault;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 import java.net.URI;
 
 /**
@@ -35,23 +39,32 @@ import java.net.URI;
  * @author Vivek Pandey
  */
 @XmlRootElement(name = "Fault", namespace = "http://www.w3.org/2003/05/soap-envelope")
+@XmlAccessorType(AccessType.FIELD)
+@XmlType(name = "", propOrder = {
+    "Code",
+    "Reason",
+    "Node",
+    "Role",
+    "Detail"
+})
 public class SOAP12Fault {
+    @XmlTransient
     public static final String ns = "http://www.w3.org/2003/05/soap-envelope";
 
-    @XmlElement(name = "Code", namespace = ns, type = CodeType.class)
-    public CodeType code;
+    @XmlElement(namespace = ns)
+    public CodeType Code;
 
-    @XmlElement(name = "Reason", namespace = ns, type = ReasonType.class)
-    public ReasonType reason;
+    @XmlElement(namespace = ns)
+    public ReasonType Reason;
 
-    @XmlElement(name = "Node", namespace = ns, type = URI.class, nillable = true)
-    public URI node;
+    //@XmlElement(namespace = ns, nillable = true)
+    public String Node;
 
-    @XmlElement(name = "Role", namespace = ns, type = URI.class, nillable = true)
-    public URI role;
+    //@XmlElement(namespace = ns, nillable = true)
+    public String Role;
 
-    @XmlElement(name = "Detail", namespace = ns, nillable = true, type = DetailType.class)
-    public DetailType detail;
+    //@XmlElement(namespace = ns, nillable = true)
+    public DetailType Detail;
 
 }
 

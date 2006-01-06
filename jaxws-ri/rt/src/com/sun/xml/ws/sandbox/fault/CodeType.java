@@ -2,6 +2,9 @@ package com.sun.xml.ws.sandbox.fault;
 
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.AccessType;
 import javax.xml.namespace.QName;
 
 /**
@@ -17,19 +20,24 @@ import javax.xml.namespace.QName;
  *  &lt;/env:Code>
  * </pre>
  */
-@XmlType(name = "CodeType", namespace = "http://www.w3.org/2003/05/soap-envelope")
+@XmlAccessorType(AccessType.FIELD)
+@XmlType(name = "CodeType", namespace = "http://www.w3.org/2003/05/soap-envelope", propOrder = {
+    "Value",
+    "Subcode"
+})
 public class CodeType {
+    @XmlTransient
     private static final String ns="http://www.w3.org/2003/05/soap-envelope";
 
     /**
      * mandatory, minOccurs=1
      */
-    @XmlElement(name = "Value", namespace = ns, type = QName.class)
-    public QName value;
+    @XmlElement(namespace = ns)
+    public QName Value;
 
     /**
      * optional, minOcccurs=0, maxOccurs="1"
      */
-    @XmlElement(name = "Subcode", namespace = ns, type = SubcodeType.class, nillable = true)
-    public SubcodeType subcode;
+    @XmlElement(namespace = ns)
+    public SubcodeType Subcode;
 }
