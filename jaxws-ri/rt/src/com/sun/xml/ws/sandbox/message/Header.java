@@ -137,6 +137,10 @@ public interface Header {
     /**
      * Reads the header as a {@link XMLStreamReader}.
      *
+     * <p>
+     * The returned parser points at the start element of this header.
+     * (IOW, {@link XMLStreamReader#getEventType()} would return
+     * {@link XMLStreamReader#START_ELEMENT}.
      *
      * <h3>Performance Expectation</h3>
      * <p>
