@@ -145,6 +145,15 @@ public class ServiceContext {
             ", entityResolver=" + entityResolver +
             "}";
     }
+
+    /**
+     * TODO: Need implmentation, added to compile {@link ServiceContextBuilder}
+     * @param portName
+     * @param roles
+     */
+    public void setRoles(QName portName, Set<String> roles) {
+
+    }
 }
 class SCAnnotations {
     String tns;
