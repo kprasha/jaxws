@@ -186,8 +186,7 @@ public abstract class ServiceContextBuilder {
                     model.getPortName(),
                     model.getServiceQName()),
                     chainInfo.getHandlers());
-                serviceContext.setHandlerResolver(resolver);
-                serviceContext.setRoles(chainInfo.getRoles());
+                serviceContext.setRoles(portName,chainInfo.getRoles());
 
             }
         }
@@ -251,7 +250,14 @@ public abstract class ServiceContextBuilder {
         SCAnnotations SCAnnotations = new SCAnnotations();
         ArrayList<QName> portQNames = new ArrayList<QName>();
         if (sc != null) {
-            WebServiceClient wsc = (WebServiceClient) sc.getAnnotation(WebServiceClient.class);
+            //WebServiceClient wsc = (WebServiceClient) sc.getAnnotation(WebServiceClient.class);
+            final Class tmpSC = sc;
+            WebServiceClient wsc = (WebServiceClient)
+                AccessController.doPrivileged(new PrivilegedAction() {
+                    public Object run() {
+                        return tmpSC.getAnnotation(WebServiceClient.class);
+                    }
+            });            
             if (wsc != null) {
                 String name = wsc.name();
                 String tns = wsc.targetNamespace();
