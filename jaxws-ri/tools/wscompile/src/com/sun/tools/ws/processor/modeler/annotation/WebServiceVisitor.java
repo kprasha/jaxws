@@ -40,28 +40,18 @@ import com.sun.mirror.util.DeclarationVisitor;
 import com.sun.mirror.util.SimpleDeclarationVisitor;
 import com.sun.mirror.util.SourcePosition;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import java.util.StringTokenizer;
 
-import com.sun.xml.ws.modeler.RuntimeModeler;
-import com.sun.tools.ws.processor.model.Parameter;
+import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.tools.ws.processor.model.Port;
-import com.sun.tools.ws.processor.model.Service;
-import com.sun.tools.ws.processor.model.java.JavaInterface;
-import com.sun.tools.ws.processor.model.java.JavaSimpleType;
-import com.sun.tools.ws.processor.model.java.JavaType;
 import com.sun.tools.ws.processor.modeler.JavaSimpleTypeCreator;
 import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.SEIContext;
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
-
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 
 import javax.jws.HandlerChain;
 import javax.jws.Oneway;

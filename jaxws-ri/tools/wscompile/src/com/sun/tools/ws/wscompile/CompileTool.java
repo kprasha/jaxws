@@ -25,7 +25,6 @@ import com.sun.mirror.apt.AnnotationProcessorFactory;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.tools.ws.processor.Processor;
 import com.sun.tools.ws.processor.ProcessorAction;
-import com.sun.tools.ws.processor.ProcessorConstants;
 import com.sun.tools.ws.processor.ProcessorNotificationListener;
 import com.sun.tools.ws.processor.ProcessorOptions;
 import com.sun.tools.ws.processor.config.ClassModelInfo;
@@ -50,6 +49,7 @@ import com.sun.xml.ws.util.VersionUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
@@ -580,12 +580,12 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                     bindingType.value().length()>0)
                     bindingID = bindingType.value();
             }
-            com.sun.xml.ws.modeler.RuntimeModeler rtModeler = 
-                    new com.sun.xml.ws.modeler.RuntimeModeler(endpointClass, serviceName, bindingID);
+            com.sun.xml.ws.model.RuntimeModeler rtModeler =
+                    new com.sun.xml.ws.model.RuntimeModeler(endpointClass, serviceName, bindingID);
             rtModeler.setClassLoader(classLoader);
             if (portName != null)
                 rtModeler.setPortName(portName);
-            com.sun.xml.ws.model.RuntimeModel rtModel = rtModeler.buildRuntimeModel();
+            RuntimeModel rtModel = rtModeler.buildRuntimeModel();
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new com.sun.xml.ws.wsdl.writer.WSDLOutputResolver() {
                         public Result getWSDLOutput(String suggestedFilename) {
