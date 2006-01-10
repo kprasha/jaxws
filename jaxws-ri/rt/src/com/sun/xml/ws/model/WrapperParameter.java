@@ -25,17 +25,18 @@ import java.util.List;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
+import com.sun.xml.ws.sandbox.api.model.Parameter;
 
 import javax.xml.namespace.QName;
 
 /**
- * {@link Parameter} that represents a wrapper,
- * which is a parameter that consists of multiple nested {@link Parameter}s
+ * {@link ParameterImpl} that represents a wrapper,
+ * which is a parameter that consists of multiple nested {@link ParameterImpl}s
  * within.
  *
  * <p>
- * Java method parameters represented by nested {@link Parameter}s will be
- * packed into a "wrapper bean" and it becomes the {@link Parameter} for the
+ * Java method parameters represented by nested {@link ParameterImpl}s will be
+ * packed into a "wrapper bean" and it becomes the {@link ParameterImpl} for the
  * body.
  *
  * <p>
@@ -43,7 +44,7 @@ import javax.xml.namespace.QName;
  * 
  * @author Vivek Pandey
  */
-public class WrapperParameter extends Parameter {
+public class WrapperParameter extends ParameterImpl {
     /**
      *
      * @param tagName
@@ -74,7 +75,7 @@ public class WrapperParameter extends Parameter {
      * @param wrapperChildren
      *            The wrapperChildren to set.
      */
-    public void addWrapperChildren(List<Parameter> wrapperChildren) {
+    public void addWrapperChildren(List<ParameterImpl> wrapperChildren) {
         this.wrapperChildren.addAll(wrapperChildren);
     }
 

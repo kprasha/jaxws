@@ -19,12 +19,9 @@
  */
 package com.sun.xml.ws.client.dispatch.impl;
 
-import com.sun.xml.ws.pept.ept.ContactInfo;
 import com.sun.xml.ws.pept.ept.ContactInfoList;
-import com.sun.xml.ws.pept.ept.ContactInfoListIterator;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
-import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
 import com.sun.xml.ws.encoding.soap.SOAPEncoder;
 import com.sun.xml.ws.encoding.soap.client.SOAP12XMLEncoder;
@@ -40,25 +37,19 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.MimeHeader;
 import javax.xml.soap.SOAPException;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.*;
 
-import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
-import com.sun.xml.ws.spi.runtime.MessageContext;
 import com.sun.xml.ws.util.Base64Util;
 import com.sun.xml.ws.server.RuntimeContext;
-import com.sun.xml.ws.model.JavaMethod;
-import com.sun.xml.messaging.saaj.soap.MessageImpl;
 
 /**
  * @author WS Development Team

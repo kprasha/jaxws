@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.model;
 
-import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
@@ -34,8 +33,10 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.wsdl.parser.Binding;
 import com.sun.xml.ws.wsdl.parser.Part;
 import com.sun.xml.ws.wsdl.parser.BindingOperation;
-import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.xml.ws.model.soap.SOAPBinding;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.sandbox.api.model.CheckedException;
+import com.sun.xml.ws.sandbox.api.model.Parameter;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -106,7 +107,7 @@ public abstract class RuntimeModel {
                     Method om = m.getDeclaringClass().getMethod(opName, params);
                     JavaMethod jm2 = getJavaMethod(om);
                     for (CheckedException ce : jm2.getCheckedExceptions()) {
-                        jm.addException(ce);
+                        ((JavaMethodImpl)jm).addException(ce);
                     }
                 } catch (NoSuchMethodException ex) {
                 }
@@ -320,7 +321,7 @@ public abstract class RuntimeModel {
         Iterator iter = set.iterator();
         while (iter.hasNext()){
             QName key = (QName) iter.next();
-            JavaMethod jmethod = (JavaMethod) nameToJM.get(key);
+            JavaMethod jmethod = nameToJM.get(key);
             if (jmethod.getOperationName().equals(jm.getOperationName())){
                return key;
             }
@@ -336,7 +337,7 @@ public abstract class RuntimeModel {
         return Collections.unmodifiableList(javaMethods);
     }
 
-    public void addJavaMethod(JavaMethod jm) {
+    public void addJavaMethod(JavaMethodImpl jm) {
         if (jm != null)
             javaMethods.add(jm);
     }
@@ -363,7 +364,7 @@ public abstract class RuntimeModel {
                 ParameterBinding paramBinding = wsdlBinding.getBinding(method.getOperationName(),
                         partName, Mode.IN);
                 if(paramBinding != null)
-                    param.setInBinding(paramBinding);
+                    ((ParameterImpl)param).setInBinding(paramBinding);
             }
 
             List<Parameter> resAttachParams = null;
@@ -383,16 +384,16 @@ public abstract class RuntimeModel {
                 ParameterBinding paramBinding = wsdlBinding.getBinding(method.getOperationName(),
                         partName, Mode.OUT);
                 if(paramBinding != null)
-                    param.setOutBinding(paramBinding);
+                    ((ParameterImpl)param).setOutBinding(paramBinding);
             }
             if(reqAttachParams != null){
                 for(Parameter p : reqAttachParams){
-                    method.addRequestParameter(p);
+                    ((JavaMethodImpl)method).addRequestParameter(p);
                 }
             }
             if(resAttachParams != null){
                 for(Parameter p : resAttachParams){
-                    method.addResponseParameter(p);
+                    ((JavaMethodImpl)method).addResponseParameter(p);
                 }
             }
 
@@ -427,9 +428,9 @@ public abstract class RuntimeModel {
                     partName, mode);
             if(paramBinding != null){
                 if(mode == Mode.IN)
-                    param.setInBinding(paramBinding);
+                    ((ParameterImpl)param).setInBinding(paramBinding);
                 else if(mode == Mode.OUT)
-                    param.setOutBinding(paramBinding);
+                    ((ParameterImpl)param).setOutBinding(paramBinding);
 
                 if(paramBinding.isUnbound()){
                         unboundParams.add(param);

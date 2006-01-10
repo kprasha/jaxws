@@ -25,7 +25,7 @@ import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.internal.AttachmentBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.model.Parameter;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.model.WrapperParameter;
@@ -33,6 +33,7 @@ import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.MessageContextUtil;
+import com.sun.xml.ws.sandbox.api.model.Parameter;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
@@ -84,9 +85,9 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                     resp = value;
                 else {
                     if (data[p.getIndex()] != null) {
-                        Parameter.setHolderValue(data[p.getIndex()], value);
+                        ParameterImpl.setHolderValue(data[p.getIndex()], value);
                     } else {
-                        data[p.getIndex()] = p.createHolderValue(value);
+                        data[p.getIndex()] = ((ParameterImpl)p).createHolderValue(value);
                     }
                 }
             }
@@ -104,9 +105,9 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                 return setIfPrimitive(param.getTypeReference().type);
             return obj;
         } else if (data[param.getIndex()] != null) {
-            Parameter.setHolderValue(data[param.getIndex()], obj);
+            ParameterImpl.setHolderValue(data[param.getIndex()], obj);
         } else {
-            data[param.getIndex()] = param.createHolderValue(obj);
+            data[param.getIndex()] = ((ParameterImpl)param).createHolderValue(obj);
         }
         return null;
     }

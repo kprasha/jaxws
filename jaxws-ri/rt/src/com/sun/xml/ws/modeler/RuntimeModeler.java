@@ -24,11 +24,11 @@ import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
-import com.sun.xml.ws.model.JavaMethod;
+import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.Mode;
-import com.sun.xml.ws.model.CheckedException;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.ExceptionType;
-import com.sun.xml.ws.model.Parameter;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.model.WrapperParameter;
@@ -36,6 +36,7 @@ import com.sun.xml.ws.model.soap.SOAPRuntimeModel;
 import com.sun.xml.ws.model.soap.Style;
 import com.sun.xml.ws.wsdl.parser.BindingOperation;
 import com.sun.xml.ws.wsdl.parser.Part;
+import com.sun.xml.ws.sandbox.api.model.CheckedException;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -438,16 +439,16 @@ public class RuntimeModeler {
 
         // Use implementor to find the exact invocation method as implementor
         // could be a proxy to portClass object
-        JavaMethod javaMethod;
+        JavaMethodImpl javaMethod;
         Class implementorClass = (implementor != null)
             ? implementor.getClass() : portClass;
         if (method.getDeclaringClass()==implementorClass) {
-            javaMethod = new JavaMethod(method);
+            javaMethod = new JavaMethodImpl(method);
         } else {
             try {
                 Method tmpMethod = implementorClass.getMethod(method.getName(),
                     method.getParameterTypes());
-                javaMethod = new JavaMethod(tmpMethod);
+                javaMethod = new JavaMethodImpl(tmpMethod);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeModelerException("runtime.modeler.method.not.found",
                     new Object[] {method.getName(), portClass.getName()});
@@ -529,7 +530,7 @@ public class RuntimeModeler {
      * @param method the <code>method</code> to model
      * @param webService The <code>WebService</code> annotation instance on the <code>portClass</code>
      */
-    protected void processDocWrappedMethod(JavaMethod javaMethod, String methodName,
+    protected void processDocWrappedMethod(JavaMethodImpl javaMethod, String methodName,
                                            WebMethod webMethod, String operationName, Method method, WebService webService) {
         boolean isOneway = method.isAnnotationPresent(Oneway.class);
         RequestWrapper reqWrapper = method.getAnnotation(RequestWrapper.class);
@@ -625,7 +626,7 @@ public class RuntimeModeler {
             Annotation[] rann = method.getAnnotations();
             if (resultQName.getLocalPart() != null) {
                 TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
-                Parameter returnParameter = new Parameter(rTypeReference, Mode.OUT, -1);
+                ParameterImpl returnParameter = new ParameterImpl(rTypeReference, Mode.OUT, -1);
                 if (isResultHeader) {
                     returnParameter.setBinding(ParameterBinding.HEADER);
                     javaMethod.addParameter(returnParameter);
@@ -644,7 +645,7 @@ public class RuntimeModeler {
         QName paramQName = null;
         for (Class clazzType : parameterTypes) {
             String partName=null;
-            Parameter param = null;
+            ParameterImpl param = null;
             String paramName = "arg"+pos;
             String paramNamespace = "";
             boolean isHeader = false;
@@ -690,7 +691,7 @@ public class RuntimeModeler {
             paramQName = new QName(paramNamespace, paramName);
             TypeReference typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
-            param = new Parameter(typeRef, paramMode, pos++);
+            param = new ParameterImpl(typeRef, paramMode, pos++);
             if (isHeader) {
                 param.setBinding(ParameterBinding.HEADER);
                 javaMethod.addParameter(param);
@@ -722,15 +723,15 @@ public class RuntimeModeler {
      * @param method the runtime model <code>JavaMethod</code> instance being created
      * @param webService the runtime model <code>JavaMethod</code> instance being created
      */
-    protected void processRpcMethod(JavaMethod javaMethod, String methodName,
+    protected void processRpcMethod(JavaMethodImpl javaMethod, String methodName,
                                     WebMethod webMethod, String operationName, Method method, WebService webService) {
         boolean isOneway = method.isAnnotationPresent(Oneway.class);
         QName reqElementName = new QName(targetNamespace, operationName);
         QName resElementName = null;
 
         //build ordered list
-        Map<Integer, Parameter> resRpcParams = new HashMap<Integer, Parameter>();
-        Map<Integer, Parameter> reqRpcParams = new HashMap<Integer, Parameter>();
+        Map<Integer, ParameterImpl> resRpcParams = new HashMap<Integer, ParameterImpl>();
+        Map<Integer, ParameterImpl> reqRpcParams = new HashMap<Integer, ParameterImpl>();
         if(binding != null){
             binding.finalizeBinding();
         }
@@ -785,7 +786,7 @@ public class RuntimeModeler {
         if (!isOneway && returnType!=null && returnType!=void.class) {
             Annotation[] rann = method.getAnnotations();
             TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
-            Parameter returnParameter = new Parameter(rTypeReference, Mode.OUT, -1);
+            ParameterImpl returnParameter = new ParameterImpl(rTypeReference, Mode.OUT, -1);
             returnParameter.setPartName(resultPartName);
             if(isResultHeader){
                 returnParameter.setBinding(ParameterBinding.HEADER);
@@ -813,7 +814,7 @@ public class RuntimeModeler {
         int pos = 0;
         QName paramQName = null;
         for (Class clazzType : parameterTypes) {
-            Parameter param = null;
+            ParameterImpl param = null;
             String paramName = "";
             String paramNamespace = "";
             String partName = "";
@@ -868,7 +869,7 @@ public class RuntimeModeler {
             TypeReference typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
 
-            param = new Parameter(typeRef, paramMode, pos++);
+            param = new ParameterImpl(typeRef, paramMode, pos++);
             param.setPartName(partName);
 
             if(paramMode == Mode.INOUT){
@@ -923,7 +924,7 @@ public class RuntimeModeler {
      * @param javaMethod the runtime model object to add the exception model objects to
      * @param method the <code>method</code> from which to find the exceptions to model
      */
-    protected void processExceptions(JavaMethod javaMethod, Method method) {
+    protected void processExceptions(JavaMethodImpl javaMethod, Method method) {
         for (Type exception : method.getGenericExceptionTypes()) {
             if (REMOTE_EXCEPTION_CLASS.isAssignableFrom((Class)exception))
                 continue;
@@ -951,7 +952,7 @@ public class RuntimeModeler {
             TypeReference typeRef = new TypeReference(faultName, exceptionBean,
                 anns);
             CheckedException checkedException =
-                new CheckedException((Class)exception, typeRef, exceptionType);
+                new CheckedExceptionImpl((Class)exception, typeRef, exceptionType);
             javaMethod.addException(checkedException);
         }
     }
@@ -983,7 +984,7 @@ public class RuntimeModeler {
      * @param method the runtime model <code>JavaMethod</code> instance being created
      * @param webService the runtime model <code>JavaMethod</code> instance being created
      */
-    protected void processDocBareMethod(JavaMethod javaMethod, String methodName,
+    protected void processDocBareMethod(JavaMethodImpl javaMethod, String methodName,
                                         WebMethod webMethod, String operationName, Method method, WebService webService) {
 
         String resultName = operationName+RESPONSE;
@@ -1014,7 +1015,7 @@ public class RuntimeModeler {
             if (resultName != null) {
                 responseQName = new QName(resultTNS, resultName);
                 TypeReference rTypeReference = new TypeReference(responseQName, returnType, rann);
-                Parameter returnParameter = new Parameter(rTypeReference, Mode.OUT, -1);
+                ParameterImpl returnParameter = new ParameterImpl(rTypeReference, Mode.OUT, -1);
 
                 if(resultPartName == null || (resultPartName.length() == 0)){
                     resultPartName = resultName;
@@ -1037,7 +1038,7 @@ public class RuntimeModeler {
         QName requestQName = null;
         int pos = 0;
         for (Class clazzType : parameterTypes) {
-            Parameter param = null;
+            ParameterImpl param = null;
             String paramName = operationName; //method.getName();
             String partName = null;
             String requestNamespace = targetNamespace;
@@ -1084,7 +1085,7 @@ public class RuntimeModeler {
                 new TypeReference(requestQName, clazzType,
                     pannotations[pos]);
 
-            param = new Parameter(typeRef, paramMode, pos++);
+            param = new ParameterImpl(typeRef, paramMode, pos++);
             if(partName == null || (partName.length() == 0)){
                     partName = paramName;
             }

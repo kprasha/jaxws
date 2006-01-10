@@ -20,7 +20,6 @@
 package com.sun.xml.ws.wsdl.writer;
 
 
-import com.sun.xml.ws.pept.presentation.MessageStruct;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.JAXBRIContext;
 import static com.sun.xml.bind.v2.schemagen.Util.*;
@@ -31,9 +30,6 @@ import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
-import com.sun.xml.ws.model.CheckedException;
-import com.sun.xml.ws.model.JavaMethod;
-import com.sun.xml.ws.model.Parameter;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.model.WrapperParameter;
@@ -60,6 +56,9 @@ import com.sun.xml.ws.wsdl.writer.document.soap.BodyType;
 import com.sun.xml.ws.wsdl.writer.document.soap.Header;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPAddress;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.sandbox.api.model.Parameter;
+import com.sun.xml.ws.sandbox.api.model.CheckedException;
 
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;
@@ -614,8 +613,8 @@ public class WSDLGenerator {
         QName requestMessage = new QName(targetNamespace, method.getOperationName());
         QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
         if (method.getBinding() instanceof SOAPBinding) {
-            List<Parameter> bodyParams = new ArrayList<Parameter>();
-            List<Parameter> headerParams = new ArrayList<Parameter>();
+            ArrayList<Parameter> bodyParams = new ArrayList<Parameter>();
+            ArrayList<Parameter> headerParams = new ArrayList<Parameter>();
             splitParameters(bodyParams, headerParams, method.getRequestParameters());
             SOAPBinding soapBinding = (SOAPBinding)method.getBinding();
             operation.soap12Operation().soapAction(soapBinding.getSOAPAction());

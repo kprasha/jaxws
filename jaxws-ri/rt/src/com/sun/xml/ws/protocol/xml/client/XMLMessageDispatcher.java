@@ -39,7 +39,6 @@ import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.handler.HandlerChainCaller.RequestOrResponse;
 import com.sun.xml.ws.handler.XMLHandlerContext;
-import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
@@ -51,6 +50,7 @@ import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
 import com.sun.xml.ws.util.XMLConnectionUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
 
 import javax.activation.DataSource;
 import javax.xml.bind.JAXBContext;
@@ -72,11 +72,8 @@ import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
 
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.*;
-import java.util.*;
 import java.io.*;
 
 import java.io.IOException;

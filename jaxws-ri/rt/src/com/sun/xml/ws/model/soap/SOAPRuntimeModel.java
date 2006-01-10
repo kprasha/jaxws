@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.model.soap;
 
-import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.messaging.saaj.soap.SOAPVersionMismatchException;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
@@ -33,6 +32,9 @@ import com.sun.xml.ws.model.*;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.MessageInfoUtil;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.sandbox.api.model.Parameter;
+import com.sun.xml.ws.sandbox.api.model.CheckedException;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;
@@ -350,8 +352,9 @@ public class SOAPRuntimeModel extends RuntimeModel {
         internalMsg.addHeader(hdrBlock);
         return internalMsg;
     }
-    
+
     /**
+     *
      * @param e
      * @param actor
      * @param detail

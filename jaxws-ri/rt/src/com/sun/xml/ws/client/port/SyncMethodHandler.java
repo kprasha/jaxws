@@ -1,11 +1,11 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.ws.model.JavaMethod;
-import com.sun.xml.ws.model.Parameter;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.sandbox.api.model.Parameter;
 import com.sun.xml.ws.client.RequestContext;
 
 import javax.xml.bind.Marshaller;

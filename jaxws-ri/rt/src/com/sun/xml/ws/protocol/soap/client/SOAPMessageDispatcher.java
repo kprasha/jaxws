@@ -36,7 +36,6 @@ import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.client.WSFuture;
 import com.sun.xml.ws.client.dispatch.DispatchContext;
 import com.sun.xml.ws.client.dispatch.ResponseImpl;
-import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.soap.SOAPEncoder;
 import com.sun.xml.ws.encoding.soap.client.SOAP12XMLEncoder;
 import com.sun.xml.ws.encoding.soap.client.SOAPXMLDecoder;
@@ -48,13 +47,10 @@ import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.handler.HandlerChainCaller.RequestOrResponse;
 import com.sun.xml.ws.handler.SOAPHandlerContext;
-import com.sun.xml.ws.model.JavaMethod;
 import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
 import com.sun.xml.ws.spi.runtime.WSConnection;
-import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
-import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.util.Base64Util;
 import com.sun.xml.ws.util.FastInfosetUtil;
 import com.sun.xml.ws.util.MessageInfoUtil;
@@ -69,7 +65,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
-import javax.xml.ws.ProtocolException;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
@@ -93,7 +88,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.net.URL;
 
 import com.sun.xml.ws.handler.MessageContextUtil;
 import com.sun.xml.messaging.saaj.soap.MessageImpl;
@@ -118,8 +112,7 @@ import static com.sun.xml.ws.client.BindingProviderProperties.XML_FI_ACCEPT_VALU
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
-import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
-import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
+import com.sun.xml.ws.sandbox.api.model.JavaMethod;
 
 
 /**
