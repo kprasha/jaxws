@@ -38,7 +38,7 @@ import com.sun.xml.ws.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.handler.HandlerChainCaller.RequestOrResponse;
 import com.sun.xml.ws.handler.MessageContextUtil;
 import com.sun.xml.ws.handler.SOAPHandlerContext;
-import com.sun.xml.ws.model.soap.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPRuntimeModel;
 import com.sun.xml.ws.server.AppMsgContextImpl;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;

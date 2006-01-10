@@ -31,7 +31,6 @@ import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.model.ParameterBinding;
-import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.model.soap.Style;
@@ -59,6 +58,7 @@ import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
 import com.sun.xml.ws.sandbox.api.model.JavaMethod;
 import com.sun.xml.ws.sandbox.api.model.Parameter;
 import com.sun.xml.ws.sandbox.api.model.CheckedException;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;

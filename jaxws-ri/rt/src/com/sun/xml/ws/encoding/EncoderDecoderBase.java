@@ -25,7 +25,8 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.encoding.soap.SerializationException;
 import com.sun.xml.ws.server.RuntimeContext;
-import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 import javax.xml.bind.JAXBException;
 import java.util.Map;
@@ -113,7 +114,7 @@ public abstract class EncoderDecoderBase {
 
     private RawAccessor getRawAccessor(RuntimeContext context, Class wrapperBean, String nsURI, String localName){
         RuntimeModel model = context.getModel();
-        Map<Integer, RawAccessor> map = model.getRawAccessorMap();
+        Map<Integer, RawAccessor> map = ((AbstractRuntimeModelImpl)model).getRawAccessorMap();
         int id  = getHashCode(wrapperBean, nsURI, localName);
         RawAccessor ra = map.get(id);
         if(ra == null){

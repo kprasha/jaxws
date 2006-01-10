@@ -27,10 +27,11 @@ import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
-import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 /**
  * Entry point for all server requests.
@@ -38,7 +39,7 @@ import com.sun.xml.ws.developer.JAXWSProperties;
  * @author WS Development Team
  */
 public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
-    
+
     /**
      * Common entry point for server runtime. <br>
      * Creates a MessageInfo for every Request/Response.<br>
@@ -56,24 +57,24 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
      * @throws Exception throws Exception if any error occurs
      */
     public void handle(WSConnection connection,
-        com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo endpoint)
+                       com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo endpoint)
     throws Exception {
-        
+
         // Create MessageInfo. MessageInfo holds all the info for this request
         Delegate delegate = new DelegateBase();
         MessageInfo messageInfo = (MessageInfo)delegate.getMessageStruct();
-        
+
         // Create runtime context, runtime model for dynamic runtime
         RuntimeEndpointInfo endpointInfo = (RuntimeEndpointInfo)endpoint;
         RuntimeModel runtimeModel = endpointInfo.getRuntimeModel();
-        RuntimeContext runtimeContext = new RuntimeContext(runtimeModel);
+        RuntimeContext runtimeContext = new RuntimeContext((AbstractRuntimeModelImpl) runtimeModel);
         runtimeContext.setRuntimeEndpointInfo(endpointInfo);
-        
+
         // Update MessageContext
         MessageContext msgCtxt =
             endpointInfo.getWebServiceContext().getMessageContext();
         updateMessageContext(endpointInfo, msgCtxt);
-        
+
         // Set runtime context on MessageInfo
         MessageInfoUtil.setRuntimeContext(messageInfo, runtimeContext);
         messageInfo.setConnection(connection);
@@ -81,25 +82,25 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
         // Select EPTFactory based on binding, and transport
         EPTFactory eptFactory = EPTFactoryFactoryBase.getEPTFactory(messageInfo);
         messageInfo.setEPTFactory(eptFactory);
-        
+
         // MessageDispatcher archestrates the flow
         MessageDispatcher messageDispatcher =
             messageInfo.getEPTFactory().getMessageDispatcher(messageInfo);
         messageDispatcher.receive(messageInfo);
     }
-    
+
     /**
      * Updates MessageContext object with Service, and Port QNames
      */
     private void updateMessageContext( RuntimeEndpointInfo endpoint,
-        MessageContext ctxt) {
-   
+                                       MessageContext ctxt) {
+
         ctxt.put(MessageContext.WSDL_SERVICE, endpoint.getServiceName());
         ctxt.setScope(MessageContext.WSDL_SERVICE, Scope.APPLICATION);
-        ctxt.put(MessageContext.WSDL_PORT, endpoint.getPortName());          
+        ctxt.put(MessageContext.WSDL_PORT, endpoint.getPortName());
         ctxt.setScope(MessageContext.WSDL_PORT, Scope.APPLICATION);
         ctxt.setScope(JAXWSProperties.MTOM_THRESHOLOD_VALUE, Scope.APPLICATION);
         ctxt.put(JAXWSProperties.MTOM_THRESHOLOD_VALUE, endpoint.getMtomThreshold());
     }
-    
+
 }

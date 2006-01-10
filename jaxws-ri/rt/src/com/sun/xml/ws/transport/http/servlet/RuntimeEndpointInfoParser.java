@@ -32,12 +32,11 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceProvider;
-import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.modeler.RuntimeModeler;
+import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.spi.runtime.Binding;
@@ -185,7 +184,7 @@ public class RuntimeEndpointInfoParser {
     }
 
     protected String getMandatoryNonEmptyAttribute(XMLStreamReader reader, Attributes attributes,
-        String name) {
+                                                   String name) {
         String value = getAttribute(attributes, name);
         if (value == null) {
             failWithLocalName("runtime.parser.missing.attribute", reader, name);
@@ -203,7 +202,7 @@ public class RuntimeEndpointInfoParser {
      * on the RuntimeEndpointInfo.
      */
     protected void setHandlersAndRoles(RuntimeEndpointInfo rei,
-        XMLStreamReader reader) {
+                                       XMLStreamReader reader) {
 
         if (XMLStreamReaderUtil.nextElementContent(reader) ==
             XMLStreamConstants.END_ELEMENT ||
@@ -218,7 +217,7 @@ public class RuntimeEndpointInfoParser {
             serviceName =
                 RuntimeModeler.getServiceName(rei.getImplementorClass());
         }
-        
+
         HandlerAnnotationInfo handlerInfo =
             HandlerAnnotationProcessor.parseHandlerFile(reader, classLoader,
             serviceName, rei.getPortName(),
@@ -284,10 +283,10 @@ public class RuntimeEndpointInfoParser {
                 name);
         }
     }
-    
+
     /*
-     * Gets endpoint implementation class
-     */
+    * Gets endpoint implementation class
+    */
     protected Class getImplementorClass(String name) {
         try {
             return Class.forName(name, true, classLoader);
@@ -319,12 +318,12 @@ public class RuntimeEndpointInfoParser {
 
     public static final String NS_RUNTIME =
         "http://java.sun.com/xml/ns/jax-ws/ri/runtime";
-    
+
     public static final QName QNAME_ENDPOINTS =
         new QName(NS_RUNTIME, "endpoints");
     public static final QName QNAME_ENDPOINT =
         new QName(NS_RUNTIME, "endpoint");
-    
+
     public static final String ATTR_VERSION = "version";
     public static final String ATTR_NAME = "name";
     public static final String ATTR_IMPLEMENTATION = "implementation";

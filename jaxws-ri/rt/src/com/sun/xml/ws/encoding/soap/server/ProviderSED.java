@@ -25,7 +25,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.encoding.internal.InternalEncoder;
 import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.model.soap.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPRuntimeModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import javax.xml.transform.Source;

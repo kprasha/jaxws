@@ -25,10 +25,9 @@ import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.handler.HandlerContext;
-
-
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 
 /**
@@ -36,31 +35,31 @@ import com.sun.xml.ws.handler.HandlerContext;
  */
 public class RuntimeContext {
 
-    public RuntimeContext(RuntimeModel model) {
+    public RuntimeContext(AbstractRuntimeModelImpl model) {
         this.model = model;
     }
-    
+
     /**
      * @return Returns the model.
      */
     public RuntimeModel getModel() {
         return model;
     }
-    
+
     /**
      * @return Returns info about endpoint
      */
     public RuntimeEndpointInfo getRuntimeEndpointInfo() {
         return endpointInfo;
     }
-    
+
     /**
      * sets info about endpoint
      */
     public void setRuntimeEndpointInfo(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;
     }
-    
+
     /**
      * @param name
      * @param mi
@@ -69,7 +68,7 @@ public class RuntimeContext {
     public Method getDispatchMethod(QName name, MessageInfo mi) {
         return getDispatchMethod(name);
     }
-    
+
     /**
      * @param name
      * @return the <code>Method</code> associated with the operation named name
@@ -77,7 +76,7 @@ public class RuntimeContext {
     public Method getDispatchMethod(QName name){
         return model.getDispatchMethod(name);
     }
-        
+
     /**
      * @param qname
      * @param mi
@@ -85,14 +84,14 @@ public class RuntimeContext {
     public void setMethodAndMEP(QName qname, MessageInfo mi) {
         if (model != null) {
             mi.setMethod(model.getDispatchMethod(qname));
-            
+
             // if null, default MEP is ok
             if (qname != null && model.getJavaMethod(qname) != null) {
                 mi.setMEP(model.getJavaMethod(qname).getMEP());
             }
         }
     }
-    
+
     /**
      * @param name
      * @return the decoder Info associated with operation named name
@@ -100,11 +99,11 @@ public class RuntimeContext {
     public Object getDecoderInfo(QName name) {
         return model.getDecoderInfo(name);
     }
-    
+
     public BridgeContext getBridgeContext() {
         return (model != null)?model.getBridgeContext():null;
     }
-       
+
     public HandlerContext getHandlerContext() {
         return handlerContext;
     }
@@ -113,7 +112,7 @@ public class RuntimeContext {
         this.handlerContext = handlerContext;
     }
 
-    private RuntimeModel model;
+    private AbstractRuntimeModelImpl model;
     private HandlerContext handlerContext;
     private RuntimeEndpointInfo endpointInfo;
 }

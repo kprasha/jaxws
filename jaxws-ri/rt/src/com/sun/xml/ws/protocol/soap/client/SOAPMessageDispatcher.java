@@ -47,7 +47,6 @@ import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.handler.HandlerChainCaller.RequestOrResponse;
 import com.sun.xml.ws.handler.SOAPHandlerContext;
-import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
 import com.sun.xml.ws.spi.runtime.WSConnection;
@@ -113,6 +112,8 @@ import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 
 
 /**
@@ -755,7 +756,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
             RuntimeModel model = rtContext.getModel();
             JavaMethod javaMethod = model.getJavaMethod(messageInfo.getMethod());
             if (javaMethod != null) {
-                QName operationName = model.getQNameForJM(javaMethod);
+                QName operationName = ((AbstractRuntimeModelImpl)model).getQNameForJM(javaMethod);
                 messageContext.put(MessageContext.WSDL_OPERATION, operationName);
             }
             //set handlerContext

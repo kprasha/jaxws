@@ -10,10 +10,11 @@ import com.sun.xml.ws.client.dispatch.DispatchBase;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchFactory;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.handler.PortInfoImpl;
-import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
 import com.sun.xml.ws.wsdl.parser.Binding;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 import org.xml.sax.EntityResolver;
 
 import javax.activation.DataSource;
@@ -351,7 +352,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         if (portQName != null) {
             Binding binding = serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portQName);
             eif.setBindingID(binding.getBindingId());
-            model.applyParameterBinding(binding);
+            ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
         }
 
         //needs cleaning up

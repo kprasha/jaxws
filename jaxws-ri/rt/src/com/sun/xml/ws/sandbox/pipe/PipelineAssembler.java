@@ -1,6 +1,6 @@
 package com.sun.xml.ws.sandbox.pipe;
 
-import com.sun.xml.ws.model.RuntimeModel;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;

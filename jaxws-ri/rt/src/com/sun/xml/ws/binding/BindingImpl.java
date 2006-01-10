@@ -23,7 +23,7 @@ package com.sun.xml.ws.binding;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerChainCaller;
-import com.sun.xml.ws.modeler.RuntimeModeler;
+import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
 
 import javax.xml.ws.Binding;

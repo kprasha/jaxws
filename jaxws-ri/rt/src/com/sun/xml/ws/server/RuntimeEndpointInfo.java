@@ -53,8 +53,8 @@ import javax.xml.ws.Endpoint;
 
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.RuntimeModel;
-import com.sun.xml.ws.modeler.RuntimeModeler;
+import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
@@ -66,6 +66,7 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.Service;
 import com.sun.xml.ws.wsdl.parser.WSDLDocument;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
@@ -289,7 +290,7 @@ public class RuntimeEndpointInfo extends Endpoint
     
     
     /**
-     * creates a RuntimeModel using @link com.sun.xml.ws.modeler.RuntimeModeler. 
+     * creates a RuntimeModel using @link com.sun.xml.ws.model.RuntimeModeler.
      * The modeler creates the model by reading annotations on ImplementorClassobject. 
      * RuntimeModel is read only and is accessed from multiple threads afterwards.
 
@@ -346,7 +347,7 @@ public class RuntimeEndpointInfo extends Endpoint
             }
             //set momt processing
             if(binding instanceof SOAPBindingImpl){
-                runtimeModel.enableMtom(((SOAPBinding)binding).isMTOMEnabled());
+                ((SOAPRuntimeModel)runtimeModel).enableMtom(((SOAPBinding)binding).isMTOMEnabled());
             }
         }
         deployed = true;

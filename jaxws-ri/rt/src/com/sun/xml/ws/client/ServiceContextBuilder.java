@@ -21,8 +21,8 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
-import com.sun.xml.ws.model.RuntimeModel;
-import com.sun.xml.ws.modeler.RuntimeModeler;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
@@ -166,7 +166,7 @@ public abstract class ServiceContextBuilder {
             RuntimeModeler modeler = new RuntimeModeler(portInterface,
                 serviceName, bindingId);
             modeler.setPortName(portName);
-            RuntimeModel model = modeler.buildRuntimeModel();
+            AbstractRuntimeModelImpl model = modeler.buildRuntimeModel();
 
             eifc.setRuntimeContext(new RuntimeContext(model));
 

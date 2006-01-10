@@ -34,7 +34,6 @@ import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.model.ExceptionType;
 import com.sun.xml.ws.model.ParameterBinding;
-import com.sun.xml.ws.model.RuntimeModel;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.server.RuntimeContext;
@@ -42,6 +41,7 @@ import com.sun.xml.ws.util.StringUtils;
 import com.sun.xml.ws.sandbox.api.model.JavaMethod;
 import com.sun.xml.ws.sandbox.api.model.Parameter;
 import com.sun.xml.ws.sandbox.api.model.CheckedException;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;
