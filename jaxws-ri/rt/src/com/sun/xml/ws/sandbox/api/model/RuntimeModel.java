@@ -20,7 +20,7 @@ import java.util.Collection;
  */
 public interface RuntimeModel {
     /**
-     * {@link BridgeContext} is not thread safe, the RuntimeModelImpl must return a thread local {@link BridgeContext}
+     * {@link BridgeContext} is not thread safe, the RuntimeModel must return a thread local {@link BridgeContext}
      *
      * @return the <code>{@link BridgeContext}</code>
      */
