@@ -6,6 +6,7 @@ package com.sun.xml.ws.client.dispatch.rearch.datasource;
 
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
 
 import javax.activation.DataSource;
 import javax.xml.namespace.QName;
@@ -28,16 +29,21 @@ import java.util.concurrent.Future;
  */
 public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
+
     /**
+     * 
      * @param port
-     * @param aClass
+     * @param clazz
      * @param mode
-     * @param service
+     * @param obj
+     * @param pipe
+     * @param binding
      */
-    public DataSourceDispatch(QName port, Class<DataSource> aClass, Service.Mode mode, Object service) {
-        super(port, aClass, mode, service);
+    public DataSourceDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, Object obj, Pipe pipe, Binding binding) {
+       super(port, clazz, mode, obj,pipe, binding);
     }
 
+   
     /**
      * @param arg
      * @return

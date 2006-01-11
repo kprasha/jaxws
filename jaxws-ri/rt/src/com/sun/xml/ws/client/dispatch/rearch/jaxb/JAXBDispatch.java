@@ -6,8 +6,12 @@ package com.sun.xml.ws.client.dispatch.rearch.jaxb;
 
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
 import java.util.concurrent.Future;
@@ -30,8 +34,8 @@ import java.util.concurrent.Future;
 public class JAXBDispatch<Object> extends DispatchImpl<Object> {
 
 
-    public JAXBDispatch(QName port, JAXBContext jc, Service.Mode mode, Object service) {
-        super(port, jc, mode, service);
+    public JAXBDispatch(QName port, JAXBContext jc, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
+        super(port, jc, mode, service, pipe, binding);
     }
 
 
@@ -68,7 +72,15 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
      * @return
      */
     protected Message createMessage(java.lang.Object msg) {
-        return null;
+        assert(jaxbcontext != null);
+
+        Marshaller marshaller = null;
+        try {
+            marshaller = jaxbcontext.createMarshaller();
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return new JAXBMessage(marshaller, msg, soapVersion);
     }
 
     /**

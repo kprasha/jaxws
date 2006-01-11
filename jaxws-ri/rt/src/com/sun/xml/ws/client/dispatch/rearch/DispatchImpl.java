@@ -5,12 +5,45 @@
 package com.sun.xml.ws.client.dispatch.rearch;
 
 import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.ContextMap;
+import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.dispatch.DispatchContext;
+import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CONTEXT_PROPERTY;
+import static com.sun.xml.ws.client.BindingProviderProperties.ONE_WAY_OPERATION;
+import static com.sun.xml.ws.client.BindingProviderProperties.CLIENT_TRANSPORT_FACTORY;
+import static com.sun.xml.ws.client.BindingProviderProperties.ACCEPT_PROPERTY;
+import static com.sun.xml.ws.client.BindingProviderProperties.SOAP12_XML_FI_ACCEPT_VALUE;
+import static com.sun.xml.ws.client.BindingProviderProperties.SOAP12_XML_ACCEPT_VALUE;
+import static com.sun.xml.ws.client.BindingProviderProperties.XML_FI_ACCEPT_VALUE;
+import static com.sun.xml.ws.client.BindingProviderProperties.XML_ACCEPT_VALUE;
+import static com.sun.xml.ws.client.BindingProviderProperties.BINDING_ID_PROPERTY;
+import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_RUNTIME_CONTEXT;
+import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY;
+import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.pept.ept.MessageInfo;
+import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
+import com.sun.xml.ws.util.Base64Util;
+import static com.sun.xml.ws.developer.JAXWSProperties.CONTENT_NEGOTIATION_PROPERTY;
+import com.sun.xml.ws.server.RuntimeContext;
+//import com.sun.xml.ws.model.JavaMethod;
+import com.sun.xml.messaging.saaj.soap.MessageImpl;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.Service;
+import javax.xml.ws.*;
+import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.transform.Source;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.MimeHeader;
+import java.util.*;
 
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -28,20 +61,90 @@ import javax.xml.ws.Service;
 
 public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
+    protected Service.Mode mode;
+    protected QName portname;
+    protected Class<T> clazz;
+    protected Object owner;
+    protected JAXBContext jaxbcontext;
+    protected SOAPVersion soapVersion;
 
-    // Todo: Needs change
-    public DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, Object obj) {
-        super(null, null); //TODO: integrate Stub Class
+
+    /**
+     *
+     * @param port
+     * @param aClass
+     * @param mode
+     * @param obj
+     * @param pipe
+     * @param binding
+     */
+    public DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
+        this(port, mode, obj, pipe, binding);
+        this.clazz = aClass;
+
+
     }
 
-    // Todo: Needs change
-    public DispatchImpl(QName port, JAXBContext jc, Service.Mode mode, Object obj) {
-        super(null, null); //TODo: integrate Stub class
+    /**
+     *
+     * @param port
+     * @param jc
+     * @param mode
+     * @param obj
+     * @param pipe
+     * @param binding
+     */
+    public DispatchImpl(QName port, JAXBContext jc, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
+        this(port, mode, obj, pipe, binding);
+        jaxbcontext = jc;
+
     }
+
+    /**
+     *
+     * @param port
+     * @param mode
+     * @param obj
+     * @param pipe
+     * @param binding
+     */
+    public DispatchImpl(QName port, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding){
+        super(pipe, binding);
+        portname = port;
+        this.mode = mode;
+        owner = obj;
+        this.soapVersion = SOAPVersion.fromBinding(((BindingImpl)binding).getBindingId());
+    }
+
 
     /**
      * @param msg
      * @return
      */
     protected abstract Message createMessage(T msg);
+
+
+    //todo: temp just to get something working
+    protected void setProperties(Message msg) {
+
+        MessageProperties props = msg.getProperties();
+        props.put(JAXWS_CLIENT_HANDLE_PROPERTY, this);
+        props.put(ENDPOINT_ADDRESS_PROPERTY, ((WSServiceDelegate) owner).getEndpointAddress(portname));
+
+        props.put(BINDING_ID_PROPERTY, ((BindingImpl)binding).getBindingId());
+        if (jaxbcontext != null)
+            props.put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
+
+
+        //not needed but leave for now --maybe mode is needed
+        props.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
+        if (clazz != null)
+            props.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
+        props.put("SOAPVersion", soapVersion);
+        props.put(JAXWS_CONTEXT_PROPERTY, getRequestContext());
+
+        
+
+    }
+
 }

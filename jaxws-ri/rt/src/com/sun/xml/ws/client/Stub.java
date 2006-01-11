@@ -24,7 +24,7 @@ public abstract class Stub implements BindingProvider {
     /**
      * Reuse pipelines as it's expensive to create.
      */
-    private final Pool<Pipe> pipes = new Pool<Pipe>() {
+    protected final Pool<Pipe> pipes = new Pool<Pipe>() {
         protected Pipe create() {
             return PipeCloner.clone(master);
         }

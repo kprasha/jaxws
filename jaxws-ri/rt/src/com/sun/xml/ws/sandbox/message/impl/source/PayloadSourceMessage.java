@@ -200,8 +200,9 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         }
         String soapNsUri = soapVersion.nsUri;
         w.writeStartDocument();
-        w.writeNamespace("S",soapNsUri);
+       // w.writeNamespace("S",soapNsUri);
         w.writeStartElement("S","Envelope",soapNsUri);
+        w.writeNamespace("S",soapNsUri);
 
         //write soapenv:Header
         w.writeStartElement("S","Header",soapNsUri);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Your Corporation. All Rights Reserved.
+ * Copyright (c) 2005 Sun Microsystems Corporation. All Rights Reserved.
  */
 package com.sun.xml.ws.client;
 
@@ -8,12 +8,16 @@ import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.client.dispatch.DispatchBase;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchFactory;
+import com.sun.xml.ws.client.dispatch.rearch.StandalonePipeAssembler;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.handler.PortInfoImpl;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.sandbox.pipe.PipelineAssembler;
 import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
-import com.sun.xml.ws.wsdl.parser.Binding;
+
+//import com.sun.xml.ws.wsdl.parser.Binding;
 import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 import org.xml.sax.EntityResolver;
 
@@ -22,10 +26,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
+import javax.xml.ws.*;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.handler.PortInfo;
@@ -82,6 +83,10 @@ public class WSServiceDelegate extends ServiceDelegate {
     protected ServiceContext serviceContext;
     protected Executor executor;
     private HashSet<Object> seiProxies;
+    private Pipe masterPipe;
+
+    //to get this going just use this--?do we need factory for different assembler types?
+    private static PipelineAssembler assembler = new StandalonePipeAssembler();
 
     /**
      * {@link CatalogResolver} to check META-INF/jax-ws-catalog.xml.
@@ -97,6 +102,10 @@ public class WSServiceDelegate extends ServiceDelegate {
         if (serviceContext.getHandlerResolver() != null) {
             handlerResolver = serviceContext.getHandlerResolver();
         }
+        assembler = new StandalonePipeAssembler();
+
+        masterPipe = ((StandalonePipeAssembler) assembler).create((Object) this);
+
     }
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
@@ -117,7 +126,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         }
         if (ports == null)
             populatePorts();
-
+        masterPipe = ((StandalonePipeAssembler) assembler).create((Object) this);
     }
 
     private void processServiceContext(QName portName, Class portInterface) throws WebServiceException {
@@ -172,7 +181,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         return createEndpointIFBaseProxy(null, portInterface);
     }
 
-    //todo: rename addPort :spec tbd
+
     public void addPort(QName portName, String bindingId,
                         String endpointAddress) throws WebServiceException {
 
@@ -188,11 +197,23 @@ public class WSServiceDelegate extends ServiceDelegate {
 
     public <T> Dispatch createDispatch(QName qName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
         //Note: may not be the most performant way to do this- needs review
-        return new DispatchFactoryImpl<T>().createDispatch(qName, aClass, mode, (Object) this);
+        return new DispatchFactoryImpl<T>().createDispatch(qName, aClass, mode, (Object) this, masterPipe, getBinding(qName));
+    }
+
+    public String getEndpointAddress(QName qName) {
+        PortInfoBase dispatchPort = dispatchPorts.get(qName);
+        return dispatchPort.getTargetEndpoint();
+
+    }
+
+    public Binding getBinding(QName qName) {
+        PortInfoBase dispatchPort = dispatchPorts.get(qName);
+        return getBindingforProvider(qName, dispatchPort.getBindingId());
+
     }
 
     public Dispatch<Object> createDispatch(QName qName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        return new JAXBDispatch(qName, jaxbContext, mode, this);
+        return new JAXBDispatch(qName, jaxbContext, mode, this, masterPipe, (javax.xml.ws.Binding)getBinding(qName));
     }
 
     public QName getServiceName() {
@@ -315,6 +336,42 @@ public class WSServiceDelegate extends ServiceDelegate {
         }
     }
 
+/*
+     * Set the binding on the binding provider. Called by the service
+     * class when creating the binding provider.
+     */
+
+    /* Todo: temp for now just trying to get something working -kw **/
+    protected javax.xml.ws.Binding getBindingforProvider(QName portName, String bindingId) {
+
+        // get handler chain
+        List<Handler> handlerChain = null;
+        if (getHandlerResolver() != null && getServiceName() != null) {
+            PortInfo portInfo = new PortInfoImpl(bindingId.toString(),
+                portName, getServiceName());
+            handlerChain = getHandlerResolver().getHandlerChain(portInfo);
+        } else {
+            handlerChain = new ArrayList<Handler>();
+        }
+
+        // create binding
+        if (bindingId.toString().equals(SOAPBinding.SOAP11HTTP_BINDING) ||
+            bindingId.toString().equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+            SOAPBindingImpl bindingImpl = new SOAPBindingImpl(handlerChain,
+                bindingId.toString(), getServiceName());
+
+            if (serviceContext.getRoles() != null) {
+                bindingImpl.setRoles(serviceContext.getRoles());
+            }
+            return (javax.xml.ws.Binding)bindingImpl;
+            //provider._setBinding(bindingImpl);
+        } else if (bindingId.toString().equals(HTTPBinding.HTTP_BINDING)) {
+            return (javax.xml.ws.Binding)new  HTTPBindingImpl(handlerChain);
+            //provider._setBinding(new HTTPBindingImpl(handlerChain));
+        }
+        return null;
+    }
+
 
     private Dispatch createDispatchClazz(QName port, Class clazz, Service.Mode mode) throws WebServiceException {
         PortInfoBase dispatchPort = dispatchPorts.get(port);
@@ -350,9 +407,10 @@ public class WSServiceDelegate extends ServiceDelegate {
         //apply parameter bindings
         RuntimeModel model = eif.getRuntimeContext().getModel();
         if (portQName != null) {
-            Binding binding = serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portQName);
+            com.sun.xml.ws.wsdl.parser.Binding binding = (com.sun.xml.ws.wsdl.parser.Binding) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portQName);
             eif.setBindingID(binding.getBindingId());
             ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
+
         }
 
         //needs cleaning up
@@ -385,6 +443,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         return context;
     }
 
+
     class DaemonThreadFactory implements ThreadFactory {
         public Thread newThread(Runnable r) {
             Thread daemonThread = new Thread(r);
@@ -393,30 +452,33 @@ public class WSServiceDelegate extends ServiceDelegate {
         }
     }
 
-/**
-* Class implementing DispatchFactory interface
-* Used to create a type-safe Dispatch<T> for
-* Source.class, DataSource.class and SOAPMessage.class
-* classes.
-* Note: Not entirely sure this is needed that's why its inner class. Review needed.
-*/
+    /**
+     * Class implementing DispatchFactory interface
+     * Used to create a type-safe Dispatch<T> for
+     * Source.class, DataSource.class and SOAPMessage.class
+     * classes.
+     * Note: Not entirely sure this is needed that's why its here. Review needed.
+     */
 
     private static final class DispatchFactoryImpl<T> implements DispatchFactory<T> {
-    /**
-     * Creator method for typed Dispatch<T>
-     * @param port QName for port specific Dispatch
-     * @param clazz Source, DataSource or SOAPMessage class
-     * @param mode  SERVICE.Mode.PAYLOAD or SERVICE.Mode.MESSAGE    -
-     * @param delegate  - TODO: What should this object be
-     * @return Dispatch<T> Typed specific Dispatch
-     */
-        public Dispatch<T> createDispatch(QName port, Class<T> clazz, Service.Mode mode, Object delegate) {
+        /**
+         * Creator method for typed Dispatch<T>
+         *
+         * @param port     QName for port specific Dispatch
+         * @param clazz    Source, DataSource or SOAPMessage class
+         * @param mode     SERVICE.Mode.PAYLOAD or SERVICE.Mode.MESSAGE    -
+         * @param delegate - TODO: What should this object be
+         * @return Dispatch<T> Typed specific Dispatch
+         */
+        public Dispatch<T> createDispatch(QName port, Class<T> clazz, Service.Mode mode, Object delegate, Pipe pipe, javax.xml.ws.Binding binding) {
+            //todo://added just to get something going for dispatch
+
             if (clazz == SOAPMessage.class) {
-                return SOAP_DISPATCH_FACTORY.createDispatch(port, SOAPMessage.class, mode, delegate);
+                return SOAP_DISPATCH_FACTORY.createDispatch(port, SOAPMessage.class, mode, delegate, pipe, binding);
             } else if (clazz == Source.class) {
-                return SOURCE_DISPATCH_FACTORY.createDispatch(port, Source.class, mode, delegate);
+                return SOURCE_DISPATCH_FACTORY.createDispatch(port, Source.class, mode, delegate, pipe, binding);
             } else if (clazz == DataSource.class) {
-                return DATASOURCE_DISPATCH_FACTORY.createDispatch(port, DataSource.class, mode, delegate);
+                return DATASOURCE_DISPATCH_FACTORY.createDispatch(port, DataSource.class, mode, delegate, pipe, binding);
             } else
                 throw new WebServiceException("Unknown class type " + clazz.getName());
         }

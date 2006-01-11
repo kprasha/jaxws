@@ -4,13 +4,20 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.source;
 
+import static javax.xml.ws.Service.Mode.PAYLOAD;
+
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.ws.*;
-import java.util.Map;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.MimeHeader;
+import java.util.*;
 import java.util.concurrent.Future;
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -29,8 +36,8 @@ import java.util.concurrent.Future;
 
 public class SourceDispatch extends DispatchImpl<Source> {
 
-    public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, Object service) {
-        super(port, aClass, mode, service);
+    public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
+        super(port, aClass, mode, service, pipe,binding);
     }
 
 
@@ -59,7 +66,10 @@ public class SourceDispatch extends DispatchImpl<Source> {
      */
     public Source invoke(Source msg)
         throws WebServiceException {
-        return null;
+        Message message = createMessage(msg);
+        setProperties(message);
+        Message response = process(message);
+        return response.readPayloadAsSource();
     }
 
     /**
@@ -182,6 +192,29 @@ public class SourceDispatch extends DispatchImpl<Source> {
      */
 
     protected Message createMessage(Source msg) {
-        return null;
+        Message message = null;
+        /*switch(mode){
+            case PAYLOAD:
+               message = new PayloadSourceMessage(msg,soapVersion);
+               break;
+            case MESSAGE:
+                //message = new
+                return null; //todo: what message?
+            default:
+        }
+
+        Map<String, List<String>> ch = new HashMap<String, List<String>>();
+
+        List<String> ct = new ArrayList();
+        ct.add("text/xml");
+        ch.put("Content-Type", ct);
+
+        List<String> cte = new ArrayList();
+        cte.add("binary");
+        ch.put("Content-Transfer-Encoding", cte);
+
+        message.getProperties().httpRequestHeaders = ch;
+        */
+        return message;
     }
 }

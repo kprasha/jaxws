@@ -6,10 +6,17 @@ package com.sun.xml.ws.client.dispatch.rearch.soapmsg;
 
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.util.Pool;
 
 import javax.xml.namespace.QName;
+import javax.xml.soap.MimeHeader;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.*;
+import java.util.*;
 import java.util.concurrent.Future;
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -27,15 +34,19 @@ import java.util.concurrent.Future;
  */
 
 public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
+    Pool.Marshaller marshallers;
+
+
     /**
-     *
      * @param port
      * @param aClass
      * @param mode
      * @param service
      */
-    public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, Object service) {
-        super(port, aClass, mode, service);
+    public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
+        super(port, aClass, mode, service, pipe, binding);
+        //may only be needed for jaxb objects
+        //Pool.Marshaller marshallers = new Pool.Marshaller(jaxbcontext);
     }
 
     /**
@@ -63,18 +74,38 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      */
     public SOAPMessage invoke(SOAPMessage msg)
         throws WebServiceException {
-
-       return null;
+        Message message = createMessage(msg);
+        setProperties(message);
+        Message response = process(message);
+        try {
+            return response.readAsSOAPMessage();
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
     }
 
     /**
-     *
-     *
      * @param arg
      * @return
      */
     protected Message createMessage(SOAPMessage arg) {
-        return null;
+        MimeHeaders mhs = arg.getMimeHeaders();
+        mhs.addHeader("Content-Type", "text/xml");
+        mhs.addHeader("Content-Transfer-Encoding", "binary");
+        Map<String, List<String>> ch = new HashMap<String, List<String>>();
+        for (Iterator iter = arg.getMimeHeaders().getAllHeaders(); iter.hasNext();)
+        {
+            List<String> h = new ArrayList<String>();
+            MimeHeader mh = (MimeHeader) iter.next();
+
+            h.clear();
+            h.add(mh.getValue());
+            ch.put(mh.getName(), h);
+        }
+
+        Message msg = new SAAJMessage(arg);
+        msg.getProperties().httpRequestHeaders = ch;
+        return msg;
     }
 
     /**
@@ -180,6 +211,8 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      */
 
     public void invokeOneWay(SOAPMessage msg) {
-
+        Message message = process(createMessage(msg));
     }
+
+
 }
