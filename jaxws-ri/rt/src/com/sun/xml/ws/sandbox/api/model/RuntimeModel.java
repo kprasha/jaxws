@@ -10,8 +10,11 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * This interface provides a read-only view of the RuntimeModelImpl. RuntimeModelImpl captures the port/binding
- * related details to the runtime system.
+ * This interface would be used to get the model constructed from the endpoint interface(SEI) related
+ * to a <code>wsdl:port</code>, such as {@link JavaMethod}.
+ *
+ * It can also be used to get JAXB contexts - {@link JAXBRIContext} and {@link BridgeContext}, also a
+ * {@link Bridge} associated with a {@link TypeReference}.
  *
  * @author Vivek Pandey
  */
