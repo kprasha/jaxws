@@ -330,11 +330,9 @@ public class WSServiceDelegate extends ServiceDelegate {
 //
 //            if (serviceContext.getRoles() != null) {
 //                bindingImpl.setRoles(serviceContext.getRoles());
-//=======
             
             if (serviceContext.getRoles(portName) != null) {
                 bindingImpl.setRoles(serviceContext.getRoles(portName));
-//>>>>>>> 1.17
             }
             provider._setBinding(bindingImpl);
         } else if (bindingId.toString().equals(HTTPBinding.HTTP_BINDING)) {
