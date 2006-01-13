@@ -205,16 +205,16 @@ public class WSServletContextListener
                 endpoint.generateWSDL();
             } else {
                 endpoint.setMetadata(copyDocs(docs));
-				if (endpoint.getWsdlUrl() != null) {
-					docs = endpoint.getDocMetadata();
-					DocInfo wsdlDoc = docs.get(endpoint.getWsdlUrl().toString());
-					if (wsdlDoc != null) {
-						wsdlDoc.setQueryString("wsdl");
-					}
-				}
-				RuntimeEndpointInfo.fillDocInfo(endpoint);
+                if (endpoint.getWsdlUrl() != null) {
+                    docs = endpoint.getDocMetadata();
+                    DocInfo wsdlDoc = docs.get(endpoint.getWsdlUrl().toString());
+                    if (wsdlDoc != null) {
+                        wsdlDoc.setQueryString("wsdl");
+                    }
+                }
+                RuntimeEndpointInfo.fillDocInfo(endpoint);
             }
-			RuntimeEndpointInfo.publishWSDLDocs(endpoint);
+            RuntimeEndpointInfo.publishWSDLDocs(endpoint);
             endpoint.updateQuery2DocInfo();
         }
     }

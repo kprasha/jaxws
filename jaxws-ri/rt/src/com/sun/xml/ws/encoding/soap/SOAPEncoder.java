@@ -111,6 +111,8 @@ public abstract class SOAPEncoder implements Encoder, InternalSoapEncoder {
             ByteArrayBuffer baos = new ByteArrayBuffer();
             XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(baos);
             writeRpcLitPayload(rpcLitPayload, messageInfo, writer);
+            writer.close();
+            baos.close();            
             Transformer transformer = XmlUtil.newTransformer();
             StreamSource source = new StreamSource(baos.newInputStream());
             DOMResult domResult = new DOMResult();
@@ -118,6 +120,10 @@ public abstract class SOAPEncoder implements Encoder, InternalSoapEncoder {
             return new DOMSource(domResult.getNode());
         } catch (TransformerException te) {
             throw new WebServiceException(te);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        } catch (java.io.IOException ioe) {
+            throw new WebServiceException(ioe);            
         }
     }
 
