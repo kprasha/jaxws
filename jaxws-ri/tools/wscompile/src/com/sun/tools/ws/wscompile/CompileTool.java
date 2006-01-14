@@ -49,7 +49,7 @@ import com.sun.xml.ws.util.VersionUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
