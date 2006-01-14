@@ -19,8 +19,8 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.sandbox.Decoder;
-import com.sun.xml.ws.sandbox.Encoder;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
