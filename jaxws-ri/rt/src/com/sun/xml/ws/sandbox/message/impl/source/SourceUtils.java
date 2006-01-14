@@ -44,15 +44,15 @@ public class SourceUtils {
     }
 
     public boolean isDOMSource(){
-        return (srcType&domSource) == 1;
+        return (srcType&domSource) == domSource;
     }
 
     public boolean isStreamSource(){
-        return (srcType&streamSource) == 1;
+        return (srcType&streamSource) == streamSource;
     }
 
     public boolean isSaxSource(){
-        return (srcType&saxSource) == 1;
+        return (srcType&saxSource) == saxSource;
     }
 
     /**

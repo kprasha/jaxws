@@ -2,6 +2,7 @@ package com.sun.xml.ws.sandbox.message.impl.source;
 
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
@@ -9,6 +10,7 @@ import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.ASCIIUtility;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.Attributes;
@@ -65,7 +67,10 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         sourceUtils = new SourceUtils(src);
         if(src instanceof StreamSource){
             StreamSource streamSource = (StreamSource)src;
-            streamMessage = new StreamMessage(null, XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true));
+            XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
+            //move the cursor to the payload element
+            XMLStreamReaderUtil.next(reader);
+            streamMessage = new StreamMessage(null, reader, SOAPVersion.fromNsUri(SOAPNamespaceConstants.ENVELOPE));
         }
     }
 
@@ -178,10 +183,16 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     }
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        if(sourceUtils.isStreamSource())
+            return (T)streamMessage.readPayloadAsJAXB(unmarshaller);
         return (T)unmarshaller.unmarshal(src);
+
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {
+        if(sourceUtils.isStreamSource()){
+            return streamMessage.readPayload();
+        }
         return SourceReaderFactory.createSourceReader(src, true);
     }
 
