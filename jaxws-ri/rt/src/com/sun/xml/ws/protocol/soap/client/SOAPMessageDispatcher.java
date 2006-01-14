@@ -111,8 +111,8 @@ import static com.sun.xml.ws.client.BindingProviderProperties.XML_FI_ACCEPT_VALU
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 
 

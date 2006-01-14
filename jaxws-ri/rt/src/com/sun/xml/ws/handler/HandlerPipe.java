@@ -4,8 +4,8 @@
 package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 
 /**
  * @author WS Development team
@@ -19,7 +19,7 @@ public class HandlerPipe implements Pipe {
     }
 
     /**
-     * Copy constructor for {@link com.sun.xml.ws.sandbox.pipe.Pipe#copy(com.sun.xml.ws.sandbox.pipe.PipeCloner)}.
+     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
     /**
      * @param that
@@ -34,7 +34,7 @@ public class HandlerPipe implements Pipe {
      *            represents a request.
      *            The callee may consume a {@link com.sun.xml.ws.sandbox.message.Message} (and in fact
      *            most of the time it will), and therefore once a {@link com.sun.xml.ws.sandbox.message.Message}
-     *            is given to a {@link com.sun.xml.ws.sandbox.pipe.Pipe}.
+     *            is given to a {@link com.sun.xml.ws.api.pipe.Pipe}.
      * @return If this method returns a non-null value, it must be
      *         a valid unconsumed {@link com.sun.xml.ws.sandbox.message.Message}. This message represents
      *         a response to the request message passed as a parameter.
@@ -45,8 +45,8 @@ public class HandlerPipe implements Pipe {
      * @throws javax.xml.ws.WebServiceException
      *                          On the server side, this signals an error condition where
      *                          a fault reply is in order (or the exception gets eaten by
-     *                          the top-most transport {@link com.sun.xml.ws.sandbox.pipe.Pipe} if it's one-way.)
-     *                          This frees each {@link com.sun.xml.ws.sandbox.pipe.Pipe} from try/catching a
+     *                          the top-most transport {@link com.sun.xml.ws.api.pipe.Pipe} if it's one-way.)
+     *                          This frees each {@link com.sun.xml.ws.api.pipe.Pipe} from try/catching a
      *                          {@link javax.xml.ws.WebServiceException} in every layer.
      *                          <p/>
      *                          Note that this method is also allowed to return a {@link com.sun.xml.ws.sandbox.message.Message}

@@ -45,7 +45,7 @@ import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
 import com.sun.xml.ws.util.Base64Util;

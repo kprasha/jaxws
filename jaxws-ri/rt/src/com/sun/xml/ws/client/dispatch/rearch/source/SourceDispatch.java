@@ -4,20 +4,13 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.source;
 
-import static javax.xml.ws.Service.Mode.PAYLOAD;
-
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.ws.*;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.MimeHeader;
-import java.util.*;
 import java.util.concurrent.Future;
 /**
  * TODO: Use sandbox classes, update javadoc

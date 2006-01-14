@@ -5,45 +5,22 @@
 package com.sun.xml.ws.client.dispatch.rearch;
 
 import com.sun.xml.ws.client.Stub;
-import com.sun.xml.ws.client.ContextMap;
-import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DispatchContext;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CONTEXT_PROPERTY;
-import static com.sun.xml.ws.client.BindingProviderProperties.ONE_WAY_OPERATION;
-import static com.sun.xml.ws.client.BindingProviderProperties.CLIENT_TRANSPORT_FACTORY;
-import static com.sun.xml.ws.client.BindingProviderProperties.ACCEPT_PROPERTY;
-import static com.sun.xml.ws.client.BindingProviderProperties.SOAP12_XML_FI_ACCEPT_VALUE;
-import static com.sun.xml.ws.client.BindingProviderProperties.SOAP12_XML_ACCEPT_VALUE;
-import static com.sun.xml.ws.client.BindingProviderProperties.XML_FI_ACCEPT_VALUE;
-import static com.sun.xml.ws.client.BindingProviderProperties.XML_ACCEPT_VALUE;
 import static com.sun.xml.ws.client.BindingProviderProperties.BINDING_ID_PROPERTY;
-import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_RUNTIME_CONTEXT;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.MessageProperties;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
-import com.sun.xml.ws.util.Base64Util;
-import static com.sun.xml.ws.developer.JAXWSProperties.CONTENT_NEGOTIATION_PROPERTY;
-import com.sun.xml.ws.server.RuntimeContext;
 //import com.sun.xml.ws.model.JavaMethod;
-import com.sun.xml.messaging.saaj.soap.MessageImpl;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.transform.Source;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.MimeHeader;
-import java.util.*;
 
 /**
  * TODO: Use sandbox classes, update javadoc

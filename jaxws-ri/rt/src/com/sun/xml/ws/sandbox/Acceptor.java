@@ -20,7 +20,7 @@
 package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 
 /**
  * Represents a component that listens to the transport (such as

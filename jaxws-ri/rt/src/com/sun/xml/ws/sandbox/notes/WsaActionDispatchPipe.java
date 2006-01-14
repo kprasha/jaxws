@@ -1,7 +1,7 @@
 package com.sun.xml.ws.sandbox.notes;
 
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.Header;
 

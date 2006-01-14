@@ -4,9 +4,9 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.ws.WebServiceException;

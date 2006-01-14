@@ -25,7 +25,7 @@ import java.util.List;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
-import com.sun.xml.ws.sandbox.api.model.Parameter;
+import com.sun.xml.ws.api.model.Parameter;
 
 import javax.xml.namespace.QName;
 

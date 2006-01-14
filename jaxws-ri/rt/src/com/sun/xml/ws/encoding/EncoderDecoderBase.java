@@ -26,7 +26,7 @@ import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.encoding.soap.SerializationException;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import javax.xml.bind.JAXBException;
 import java.util.Map;

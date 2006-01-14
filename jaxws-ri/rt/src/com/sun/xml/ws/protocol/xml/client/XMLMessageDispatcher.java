@@ -50,7 +50,7 @@ import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
 import com.sun.xml.ws.util.XMLConnectionUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.JavaMethod;
 
 import javax.activation.DataSource;
 import javax.xml.bind.JAXBContext;

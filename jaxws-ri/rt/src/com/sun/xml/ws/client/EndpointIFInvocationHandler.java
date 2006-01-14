@@ -25,8 +25,8 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.wsdl.WSDLContext;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.model.SOAPRuntimeModel;
 
 import javax.xml.namespace.QName;

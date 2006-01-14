@@ -4,8 +4,8 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 
 //Todo: does this need to be abstract? --here simple to get Dispatch going`
 
@@ -17,7 +17,7 @@ public abstract class PipeImpl implements Pipe {
      *            represents a request.
      *            The callee may consume a {@link com.sun.xml.ws.sandbox.message.Message} (and in fact
      *            most of the time it will), and therefore once a {@link com.sun.xml.ws.sandbox.message.Message}
-     *            is given to a {@link com.sun.xml.ws.sandbox.pipe.Pipe}.
+     *            is given to a {@link com.sun.xml.ws.api.pipe.Pipe}.
      * @return If this method returns a non-null value, it must be
      *         a valid unconsumed {@link com.sun.xml.ws.sandbox.message.Message}. This message represents
      *         a response to the request message passed as a parameter.
@@ -28,8 +28,8 @@ public abstract class PipeImpl implements Pipe {
      * @throws javax.xml.ws.WebServiceException
      *                          On the server side, this signals an error condition where
      *                          a fault reply is in order (or the exception gets eaten by
-     *                          the top-most transport {@link com.sun.xml.ws.sandbox.pipe.Pipe} if it's one-way.)
-     *                          This frees each {@link com.sun.xml.ws.sandbox.pipe.Pipe} from try/catching a
+     *                          the top-most transport {@link com.sun.xml.ws.api.pipe.Pipe} if it's one-way.)
+     *                          This frees each {@link com.sun.xml.ws.api.pipe.Pipe} from try/catching a
      *                          {@link javax.xml.ws.WebServiceException} in every layer.
      *                          <p/>
      *                          Note that this method is also allowed to return a {@link com.sun.xml.ws.sandbox.message.Message}
@@ -62,7 +62,7 @@ public abstract class PipeImpl implements Pipe {
 
     /**
      * Invoked before the last copy of the pipeline is about to be discarded,
-     * to give {@link com.sun.xml.ws.sandbox.pipe.Pipe}s a chance to clean up any resources.
+     * to give {@link com.sun.xml.ws.api.pipe.Pipe}s a chance to clean up any resources.
      * <p/>
      * This can be used to invoke {@link javax.annotation.PreDestroy} lifecycle methods
      * on user handler. The invocation of it is optional on the client side.
@@ -72,7 +72,7 @@ public abstract class PipeImpl implements Pipe {
     }
 
     /**
-     * Creates an identical clone of this {@link com.sun.xml.ws.sandbox.pipe.Pipe}.
+     * Creates an identical clone of this {@link com.sun.xml.ws.api.pipe.Pipe}.
      * <p/>
      * <p/>
      * This method creates an identical pipeline that can be used
@@ -82,14 +82,14 @@ public abstract class PipeImpl implements Pipe {
      * <p/>
      * <h3>Implementation Note</h3>
      * <p/>
-     * For most {@link com.sun.xml.ws.sandbox.pipe.Pipe} implementations that delegate to another
-     * {@link com.sun.xml.ws.sandbox.pipe.Pipe}, this method requires that you also copy the {@link com.sun.xml.ws.sandbox.pipe.Pipe}
+     * For most {@link com.sun.xml.ws.api.pipe.Pipe} implementations that delegate to another
+     * {@link com.sun.xml.ws.api.pipe.Pipe}, this method requires that you also copy the {@link com.sun.xml.ws.api.pipe.Pipe}
      * that you delegate to.
      * <p/>
-     * For limited number of {@link com.sun.xml.ws.sandbox.pipe.Pipe}s that do not maintain any
+     * For limited number of {@link com.sun.xml.ws.api.pipe.Pipe}s that do not maintain any
      * thread unsafe resource, it is allowed to simply return <tt>this</tt>
      * from this method (notice that even if you are stateless, if you
-     * got a delegating {@link com.sun.xml.ws.sandbox.pipe.Pipe} and that one isn't stateless, you
+     * got a delegating {@link com.sun.xml.ws.api.pipe.Pipe} and that one isn't stateless, you
      * still have to copy yourself.)
      * <p/>
      * <p/>
@@ -97,12 +97,12 @@ public abstract class PipeImpl implements Pipe {
      * thread is executing the {@link #process(com.sun.xml.ws.sandbox.message.Message)} method. See
      * the {@link com.sun.xml.ws.sandbox.Encoder#copy()} for more discussion about this.
      *
-     * @param cloner Use this object (in particular its {@link com.sun.xml.ws.sandbox.pipe.PipeCloner#copy(com.sun.xml.ws.sandbox.pipe.Pipe)} method
+     * @param cloner Use this object (in particular its {@link com.sun.xml.ws.api.pipe.PipeCloner#copy(com.sun.xml.ws.api.pipe.Pipe)} method
      *               to clone other pipe references you have
-     *               in your pipe. See {@link com.sun.xml.ws.sandbox.pipe.PipeCloner} for more discussion
+     *               in your pipe. See {@link com.sun.xml.ws.api.pipe.PipeCloner} for more discussion
      *               about why.
      * @param cloner
-     * @return always non-null {@link com.sun.xml.ws.sandbox.pipe.Pipe}.
+     * @return always non-null {@link com.sun.xml.ws.api.pipe.Pipe}.
      */
     public Pipe copy(PipeCloner cloner) {
         return null;

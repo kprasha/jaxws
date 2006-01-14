@@ -18,4 +18,4 @@
  * of these types to their implementation classes. This warning doesn't
  * apply to subpackages.
  */
-package com.sun.xml.ws.sandbox.api;
+package com.sun.xml.ws.api;

@@ -3,9 +3,9 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.pipe.PipelineAssembler;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipelineAssembler;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 public abstract class PipeAssemblerImpl implements PipelineAssembler {
 
@@ -19,7 +19,7 @@ public abstract class PipeAssemblerImpl implements PipelineAssembler {
      * <p/>
      * <p/>
      * When the runtime needs multiple pipelines from the same
-     * configuration, it does so by making a {@link com.sun.xml.ws.sandbox.pipe.Pipe#copy(com.sun.xml.ws.sandbox.pipe.PipeCloner) copy}.
+     * configuration, it does so by making a {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner) copy}.
      * So this method can assume that every time it's invoked
      * the <tt>model</tt> would be different.
      * (TODO:exact nature of such assumption depends on how we

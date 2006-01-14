@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.pipe;
+package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.sandbox.message.Message;

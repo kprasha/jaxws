@@ -55,10 +55,10 @@ import com.sun.xml.ws.wsdl.writer.document.soap.BodyType;
 import com.sun.xml.ws.wsdl.writer.document.soap.Header;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPAddress;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
-import com.sun.xml.ws.sandbox.api.model.Parameter;
-import com.sun.xml.ws.sandbox.api.model.CheckedException;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;

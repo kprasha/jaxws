@@ -1,8 +1,8 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
-import com.sun.xml.ws.sandbox.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.ws.Binding;

@@ -25,7 +25,7 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.model.soap.Style;
 import com.sun.xml.ws.pept.presentation.MEP;
-import com.sun.xml.ws.sandbox.api.model.CheckedException;
+import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.wsdl.parser.BindingOperation;
 import com.sun.xml.ws.wsdl.parser.Part;
 

@@ -25,7 +25,7 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
-import com.sun.xml.ws.sandbox.api.WSBinding;
+import com.sun.xml.ws.api.WSBinding;
 
 import javax.xml.ws.Binding;
 import javax.xml.ws.handler.Handler;
@@ -99,7 +99,7 @@ public abstract class BindingImpl implements
         }
         return new ArrayList(handlers);
     }
-    
+
     public boolean hasHandlers() {
         if (handlers == null || handlers.size() == 0) {
             return false;

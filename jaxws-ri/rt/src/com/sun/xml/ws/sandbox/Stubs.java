@@ -2,11 +2,11 @@ package com.sun.xml.ws.sandbox;
 
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
-import com.sun.xml.ws.sandbox.api.WSService;
-import com.sun.xml.ws.sandbox.api.WSBinding;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;

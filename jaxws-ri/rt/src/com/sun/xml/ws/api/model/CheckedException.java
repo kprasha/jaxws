@@ -1,4 +1,4 @@
-package com.sun.xml.ws.sandbox.api.model;
+package com.sun.xml.ws.api.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.model.ExceptionType;

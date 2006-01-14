@@ -28,14 +28,13 @@ import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.encoding.soap.message.*;
-import com.sun.xml.ws.model.*;
 import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.MessageInfoUtil;
-import com.sun.xml.ws.sandbox.api.model.JavaMethod;
-import com.sun.xml.ws.sandbox.api.model.Parameter;
-import com.sun.xml.ws.sandbox.api.model.CheckedException;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.CheckedException;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;

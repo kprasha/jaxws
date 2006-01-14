@@ -3,8 +3,8 @@ package com.sun.xml.ws.client.port;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.sandbox.api.model.Parameter;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import javax.xml.ws.Holder;
 import java.util.List;

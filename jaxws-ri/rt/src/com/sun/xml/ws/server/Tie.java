@@ -31,7 +31,7 @@ import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.developer.JAXWSProperties;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 /**
  * Entry point for all server requests.

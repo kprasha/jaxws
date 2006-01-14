@@ -7,7 +7,7 @@ package com.sun.xml.ws.client.dispatch.rearch.soapmsg;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.namespace.QName;

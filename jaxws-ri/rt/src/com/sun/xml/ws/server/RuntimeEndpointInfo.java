@@ -66,7 +66,7 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.Service;
 import com.sun.xml.ws.wsdl.parser.WSDLDocument;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;

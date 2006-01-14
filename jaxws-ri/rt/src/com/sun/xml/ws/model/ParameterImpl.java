@@ -22,7 +22,7 @@ package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.ws.sandbox.api.model.Parameter;
+import com.sun.xml.ws.api.model.Parameter;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
@@ -140,7 +140,7 @@ public class ParameterImpl implements Parameter {
      * If true, this parameter maps to the return value of a method invocation.
      *
      * <p>
-     * {@link com.sun.xml.ws.sandbox.api.model.JavaMethod#getResponseParameters()} is guaranteed to have
+     * {@link com.sun.xml.ws.api.model.JavaMethod#getResponseParameters()} is guaranteed to have
      * at most one such {@link ParameterImpl}. Note that there coule be none,
      * in which case the method returns <tt>void</tt>.
      */

@@ -32,8 +32,8 @@ import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.MessageContextUtil;
-import com.sun.xml.ws.sandbox.api.model.Parameter;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;

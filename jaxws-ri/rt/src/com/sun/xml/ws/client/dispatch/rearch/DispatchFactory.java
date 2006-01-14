@@ -6,13 +6,12 @@ package com.sun.xml.ws.client.dispatch.rearch;
 import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
-import javax.xml.ws.Binding;
 import javax.xml.transform.Source;
 import javax.activation.DataSource;
 

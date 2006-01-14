@@ -21,9 +21,7 @@
 package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.sandbox.api.model.CheckedException;
-
-import java.lang.reflect.Type;
+import com.sun.xml.ws.api.model.CheckedException;
 
 /**
  * CheckedException class. Holds the exception class - class that has public

@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.api.wsdl.writer;
+package com.sun.xml.ws.api.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
@@ -82,7 +82,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod represented by <code>operation</code> 
      */
     public void addOperationExtension(com.sun.xml.ws.wsdl.writer.document.Operation operation, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
     
 
     /**
@@ -97,7 +97,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod represented by <code>operation</code> 
      */
     public void addBindingOperationExtension(com.sun.xml.ws.wsdl.writer.document.BindingOperationType operation, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
     
     /**
      * This method is invoked so that extensions to an input <code>wsdl:message</code>
@@ -111,7 +111,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod used to generate <code>message</code> 
      */
     public void addInputMessageExtension(com.sun.xml.ws.wsdl.writer.document.Message message, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
 
     /**
      * This method is invoked so that extensions to an output <code>wsdl:message</code>
@@ -125,7 +125,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod used to generate output <code>message</code> 
      */
     public void addOutputMessageExtension(com.sun.xml.ws.wsdl.writer.document.Message message, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
 
     
     /**
@@ -141,7 +141,7 @@ public interface WSDLGeneratorExtension {
      * @param ce This is the CheckedException corresponding to this fault <code>message</code>
      */
     public void addFaultMessageExtension(com.sun.xml.ws.wsdl.writer.document.Message message, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod, com.sun.xml.ws.sandbox.api.model.CheckedException ce);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod, com.sun.xml.ws.api.model.CheckedException ce);
     
     
     /**
@@ -157,7 +157,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:input</code> 
      */
     public void addOperationInputExtension(TypedXmlWriter input, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
 
 
     /**
@@ -173,7 +173,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:output</code> 
      */
     public void addOperationOutputExtension(TypedXmlWriter output, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
 
     /**
      * This method is invoked so that extensions to a 
@@ -189,7 +189,7 @@ public interface WSDLGeneratorExtension {
      * @param ce This is the CheckedException corresponding to the <code>fault</code>
      */
     public void addOperationFaultExtension(com.sun.xml.ws.wsdl.writer.document.FaultType fault, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod, com.sun.xml.ws.sandbox.api.model.CheckedException ce);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod, com.sun.xml.ws.api.model.CheckedException ce);
 
 
 
@@ -206,7 +206,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:input</code> 
      */
     public void addBindingOperationInputExtension(TypedXmlWriter input, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
 
 
     /**
@@ -222,7 +222,7 @@ public interface WSDLGeneratorExtension {
      * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:output</code> 
      */
     public void addBindingOperationOutputExtension(TypedXmlWriter output, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod);
 
     /**
      * This method is invoked so that extensions to a 
@@ -238,5 +238,5 @@ public interface WSDLGeneratorExtension {
      * @param ce This is the CheckedException corresponding to the <code>fault</code>
      */
     public void addBindingOperationFaultExtension(com.sun.xml.ws.wsdl.writer.document.FaultType fault, 
-            com.sun.xml.ws.sandbox.api.model.JavaMethod javaMethod, com.sun.xml.ws.sandbox.api.model.CheckedException ce);
+            com.sun.xml.ws.api.model.JavaMethod javaMethod, com.sun.xml.ws.api.model.CheckedException ce);
 }

@@ -1,4 +1,4 @@
-package com.sun.xml.ws.sandbox.api;
+package com.sun.xml.ws.api;
 
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.Service;

@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.pipe;
+package com.sun.xml.ws.api.pipe;
 
 import java.util.Map;
 import java.util.HashMap;

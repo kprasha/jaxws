@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.spi.runtime;
 
-import com.sun.xml.ws.sandbox.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Pipe;
 
 /**
  * The <code>Binding</code> is the spi interface that extends the base interface
