@@ -1,6 +1,6 @@
 package com.sun.xml.ws.sandbox.impl;
 
-import com.sun.xml.ws.sandbox.Decoder;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;

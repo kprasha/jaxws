@@ -5,7 +5,7 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
-import com.sun.xml.ws.sandbox.Decoder;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;

@@ -6,7 +6,7 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
-import com.sun.xml.ws.sandbox.Decoder;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.util.ASCIIUtility;
 
@@ -522,10 +522,10 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
     }
 
     /**
-     * Creates a copy of this {@link com.sun.xml.ws.sandbox.Decoder}.
+     * Creates a copy of this {@link com.sun.xml.ws.api.pipe.Decoder}.
      * <p/>
      * <p/>
-     * See {@link com.sun.xml.ws.sandbox.Encoder#copy()} for the detailed contract.
+     * See {@link com.sun.xml.ws.api.pipe.Encoder#copy()} for the detailed contract.
      */
     public Decoder copy() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.

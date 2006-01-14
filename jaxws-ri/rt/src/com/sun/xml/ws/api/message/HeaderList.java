@@ -19,7 +19,7 @@
  */
 package com.sun.xml.ws.api.message;
 
-import com.sun.xml.ws.sandbox.Decoder;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.Header;
 
 import java.util.ArrayList;

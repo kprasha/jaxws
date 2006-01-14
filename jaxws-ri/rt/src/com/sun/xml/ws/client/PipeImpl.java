@@ -95,7 +95,7 @@ public abstract class PipeImpl implements Pipe {
      * <p/>
      * Note that this method might be invoked by one thread while another
      * thread is executing the {@link #process(com.sun.xml.ws.api.message.Message)} method. See
-     * the {@link com.sun.xml.ws.sandbox.Encoder#copy()} for more discussion about this.
+     * the {@link com.sun.xml.ws.api.pipe.Encoder#copy()} for more discussion about this.
      *
      * @param cloner Use this object (in particular its {@link com.sun.xml.ws.api.pipe.PipeCloner#copy(com.sun.xml.ws.api.pipe.Pipe)} method
      *               to clone other pipe references you have

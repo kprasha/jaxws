@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 
