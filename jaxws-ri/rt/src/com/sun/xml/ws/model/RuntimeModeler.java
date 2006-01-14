@@ -19,23 +19,15 @@
  */
 package com.sun.xml.ws.model;
 
-import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
-import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.model.Mode;
-import com.sun.xml.ws.model.CheckedExceptionImpl;
-import com.sun.xml.ws.model.ExceptionType;
-import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.model.ParameterBinding;
-import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
-import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.model.soap.Style;
+import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.sandbox.api.model.CheckedException;
 import com.sun.xml.ws.wsdl.parser.BindingOperation;
 import com.sun.xml.ws.wsdl.parser.Part;
-import com.sun.xml.ws.sandbox.api.model.CheckedException;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -45,26 +37,25 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.Response;
 import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebFault;
+import javax.xml.ws.http.HTTPBinding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.rmi.RemoteException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.Future;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.http.HTTPBinding;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * Creates a runtime model of a SEI (portClass).
