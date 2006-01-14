@@ -41,8 +41,8 @@ import javax.xml.soap.SOAPException;
 import java.util.logging.Logger;
 import java.util.*;
 
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 import com.sun.xml.ws.api.model.JavaMethod;

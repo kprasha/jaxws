@@ -22,11 +22,6 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.*;
-import static com.sun.xml.ws.client.BindingProviderProperties.DISPATCH_CONTEXT;
-import static com.sun.xml.ws.client.dispatch.DispatchContext.DISPATCH_MESSAGE_CLASS;
-import static com.sun.xml.ws.client.dispatch.DispatchContext.MessageType.HTTP_DATASOURCE_MESSAGE;
-import static com.sun.xml.ws.client.dispatch.DispatchContext.MessageType.HTTP_SOURCE_PAYLOAD;
-import static com.sun.xml.ws.client.dispatch.DispatchContext.MessageType.HTTP_JAXB_PAYLOAD;
 
 import com.sun.xml.ws.client.dispatch.impl.DispatchContactInfoList;
 import com.sun.xml.ws.client.dispatch.impl.DispatchDelegate;
@@ -39,8 +34,6 @@ import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
@@ -55,10 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 
-import static com.sun.xml.ws.client.BindingProviderProperties.DISPATCH_CONTEXT;
-import static com.sun.xml.ws.client.dispatch.DispatchContext.DISPATCH_MESSAGE_CLASS;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
-import com.sun.xml.ws.sandbox.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.activation.DataSource;

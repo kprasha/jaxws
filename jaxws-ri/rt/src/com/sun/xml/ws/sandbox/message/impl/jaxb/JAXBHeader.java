@@ -21,7 +21,7 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.Util;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;

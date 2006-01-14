@@ -19,9 +19,9 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
-import com.sun.xml.ws.sandbox.message.HeaderList;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
 import javax.xml.bind.JAXBException;

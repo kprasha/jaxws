@@ -26,7 +26,7 @@ import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.MessageProperties;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -35,9 +35,7 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.soap.MessageFactory;
-import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPConstants;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
 import javax.xml.ws.soap.SOAPBinding;
@@ -46,9 +44,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

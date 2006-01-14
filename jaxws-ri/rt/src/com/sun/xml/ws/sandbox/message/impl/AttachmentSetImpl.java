@@ -19,8 +19,8 @@
  */
 package com.sun.xml.ws.sandbox.message.impl;
 
-import com.sun.xml.ws.sandbox.message.AttachmentSet;
-import com.sun.xml.ws.sandbox.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Attachment;
 
 import java.util.ArrayList;
 

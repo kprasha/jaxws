@@ -109,7 +109,7 @@ import static com.sun.xml.ws.client.BindingProviderProperties.SOAP12_XML_FI_ACCE
 import static com.sun.xml.ws.client.BindingProviderProperties.XML_ACCEPT_VALUE;
 import static com.sun.xml.ws.client.BindingProviderProperties.XML_FI_ACCEPT_VALUE;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
-import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.RuntimeModel;

@@ -20,11 +20,11 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
-import com.sun.xml.ws.sandbox.message.Attachment;
-import com.sun.xml.ws.sandbox.message.AttachmentSet;
-import com.sun.xml.ws.sandbox.message.HeaderList;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
@@ -268,25 +268,25 @@ public class SAAJMessage extends Message {
     }
 
     /**
-     * Creates a copy of a {@link com.sun.xml.ws.sandbox.message.Message}.
+     * Creates a copy of a {@link com.sun.xml.ws.api.message.Message}.
      * <p/>
      * <p/>
-     * This method creates a new {@link com.sun.xml.ws.sandbox.message.Message} whose header/payload/attachments/properties
-     * are identical to this {@link com.sun.xml.ws.sandbox.message.Message}. Once created, the created {@link com.sun.xml.ws.sandbox.message.Message}
-     * and the original {@link com.sun.xml.ws.sandbox.message.Message} behaves independently --- adding header/
-     * attachment to one {@link com.sun.xml.ws.sandbox.message.Message} doesn't affect another {@link com.sun.xml.ws.sandbox.message.Message}
+     * This method creates a new {@link com.sun.xml.ws.api.message.Message} whose header/payload/attachments/properties
+     * are identical to this {@link com.sun.xml.ws.api.message.Message}. Once created, the created {@link com.sun.xml.ws.api.message.Message}
+     * and the original {@link com.sun.xml.ws.api.message.Message} behaves independently --- adding header/
+     * attachment to one {@link com.sun.xml.ws.api.message.Message} doesn't affect another {@link com.sun.xml.ws.api.message.Message}
      * at all.
      * <p/>
      * <h3>Design Rationale</h3>
      * <p/>
-     * Since a {@link com.sun.xml.ws.sandbox.message.Message} body is read-once, sometimes
+     * Since a {@link com.sun.xml.ws.api.message.Message} body is read-once, sometimes
      * (such as when you do fail-over, or WS-RM) you need to
-     * create an idential copy of a {@link com.sun.xml.ws.sandbox.message.Message}.
+     * create an idential copy of a {@link com.sun.xml.ws.api.message.Message}.
      * <p/>
      * <p/>
      * The actual copy operation depends on the layout
      * of the data in memory, hence it's best to be done by
-     * the {@link com.sun.xml.ws.sandbox.message.Message} implementation itself.
+     * the {@link com.sun.xml.ws.api.message.Message} implementation itself.
      */
     public Message copy() {
         try {

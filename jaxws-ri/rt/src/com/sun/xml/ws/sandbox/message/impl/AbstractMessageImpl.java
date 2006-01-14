@@ -19,7 +19,7 @@
  */
 package com.sun.xml.ws.sandbox.message.impl;
 
-import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;

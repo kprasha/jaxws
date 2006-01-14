@@ -3,7 +3,7 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 
@@ -11,15 +11,15 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 
 public abstract class PipeImpl implements Pipe {
     /**
-     * Sends a {@link com.sun.xml.ws.sandbox.message.Message} and returns a response {@link com.sun.xml.ws.sandbox.message.Message} to it.
+     * Sends a {@link com.sun.xml.ws.api.message.Message} and returns a response {@link com.sun.xml.ws.api.message.Message} to it.
      *
-     * @param msg always a non-null valid unconsumed {@link com.sun.xml.ws.sandbox.message.Message} that
+     * @param msg always a non-null valid unconsumed {@link com.sun.xml.ws.api.message.Message} that
      *            represents a request.
-     *            The callee may consume a {@link com.sun.xml.ws.sandbox.message.Message} (and in fact
-     *            most of the time it will), and therefore once a {@link com.sun.xml.ws.sandbox.message.Message}
+     *            The callee may consume a {@link com.sun.xml.ws.api.message.Message} (and in fact
+     *            most of the time it will), and therefore once a {@link com.sun.xml.ws.api.message.Message}
      *            is given to a {@link com.sun.xml.ws.api.pipe.Pipe}.
      * @return If this method returns a non-null value, it must be
-     *         a valid unconsumed {@link com.sun.xml.ws.sandbox.message.Message}. This message represents
+     *         a valid unconsumed {@link com.sun.xml.ws.api.message.Message}. This message represents
      *         a response to the request message passed as a parameter.
      *         <p/>
      *         This method is also allowed to return null, which indicates
@@ -32,7 +32,7 @@ public abstract class PipeImpl implements Pipe {
      *                          This frees each {@link com.sun.xml.ws.api.pipe.Pipe} from try/catching a
      *                          {@link javax.xml.ws.WebServiceException} in every layer.
      *                          <p/>
-     *                          Note that this method is also allowed to return a {@link com.sun.xml.ws.sandbox.message.Message}
+     *                          Note that this method is also allowed to return a {@link com.sun.xml.ws.api.message.Message}
      *                          that has a fault as the payload.
      *                          <p/>
      *                          On the client side, the {@link javax.xml.ws.WebServiceException} thrown
@@ -94,7 +94,7 @@ public abstract class PipeImpl implements Pipe {
      * <p/>
      * <p/>
      * Note that this method might be invoked by one thread while another
-     * thread is executing the {@link #process(com.sun.xml.ws.sandbox.message.Message)} method. See
+     * thread is executing the {@link #process(com.sun.xml.ws.api.message.Message)} method. See
      * the {@link com.sun.xml.ws.sandbox.Encoder#copy()} for more discussion about this.
      *
      * @param cloner Use this object (in particular its {@link com.sun.xml.ws.api.pipe.PipeCloner#copy(com.sun.xml.ws.api.pipe.Pipe)} method

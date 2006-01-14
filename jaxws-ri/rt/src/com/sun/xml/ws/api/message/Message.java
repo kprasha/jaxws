@@ -17,11 +17,13 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.message;
+package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.sandbox.Encoder;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.HeaderList;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.xml.sax.SAXParseException;

@@ -1,6 +1,6 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader12;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 

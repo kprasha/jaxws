@@ -20,7 +20,7 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
 import com.sun.xml.bind.unmarshaller.DOMScanner;
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Node;
@@ -169,7 +169,7 @@ public class SAAJHeader implements Header{
      * <p/>
      * <h3>Performance Expectation</h3>
      * <p/>
-     * For some {@link com.sun.xml.ws.sandbox.message.Header} implementations, this operation
+     * For some {@link com.sun.xml.ws.api.message.Header} implementations, this operation
      * is a non-trivial operation. Therefore, use of this method
      * is discouraged unless the caller is interested in reading
      * the whole header.

@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.message;
+package com.sun.xml.ws.api.message;
 
 import javax.xml.ws.handler.MessageContext;
 import java.lang.annotation.Retention;

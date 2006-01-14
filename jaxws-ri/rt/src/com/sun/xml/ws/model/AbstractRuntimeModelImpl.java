@@ -157,7 +157,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @param name
      * @return either a <code>RpcLitpayload</code> or a <code>JAXBBridgeInfo</code> for 
      * either a message payload or header
-     * @deprecated Will no longer be needed with the {@link com.sun.xml.ws.sandbox.message.Message}
+     * @deprecated Will no longer be needed with the {@link com.sun.xml.ws.api.message.Message}
      */
     public Object getDecoderInfo(QName name) {
         Object obj = payloadMap.get(name);
@@ -172,7 +172,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     /**
      * @param name Qualified name of the message payload or header
      * @param payload  One of {@link RpcLitPayload} or {@link JAXBBridgeInfo}
-     * @deprecated It will be no longer needed with the {@link com.sun.xml.ws.sandbox.message.Message}
+     * @deprecated It will be no longer needed with the {@link com.sun.xml.ws.api.message.Message}
      */
     void addDecoderInfo(QName name, Object payload) {
         payloadMap.put(name, payload);

@@ -11,4 +11,4 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
-import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.api.message.Message;

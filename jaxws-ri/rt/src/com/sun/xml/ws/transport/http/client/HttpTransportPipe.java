@@ -21,8 +21,8 @@ package com.sun.xml.ws.transport.http.client;
 
 import com.sun.xml.ws.sandbox.Decoder;
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.spi.runtime.WSConnection;

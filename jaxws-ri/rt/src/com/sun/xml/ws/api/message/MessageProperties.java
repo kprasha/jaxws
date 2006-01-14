@@ -17,10 +17,12 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.message;
+package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.api.message.ContextProperty;
+import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;

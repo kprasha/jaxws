@@ -11,8 +11,8 @@ import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CONTEXT_PROP
 import static com.sun.xml.ws.client.BindingProviderProperties.BINDING_ID_PROPERTY;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;

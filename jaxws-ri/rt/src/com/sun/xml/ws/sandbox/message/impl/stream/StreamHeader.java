@@ -22,7 +22,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Header;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;

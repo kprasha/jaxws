@@ -17,7 +17,9 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.message;
+package com.sun.xml.ws.api.message;
+
+import com.sun.xml.ws.api.message.Attachment;
 
 import java.util.Iterator;
 import java.util.Collections;

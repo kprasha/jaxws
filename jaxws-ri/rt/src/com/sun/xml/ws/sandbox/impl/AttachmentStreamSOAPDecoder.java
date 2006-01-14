@@ -4,11 +4,10 @@ package com.sun.xml.ws.sandbox.impl;
 import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
-import com.sun.xml.messaging.saaj.packaging.mime.internet.MimeBodyPart;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.sandbox.Decoder;
-import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.util.ASCIIUtility;
 
 import javax.xml.ws.WebServiceException;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.BitSet;
-import java.util.List;
 
 /**
  * @author Vivek Pandey
@@ -245,7 +243,7 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
     }
 
     private boolean find(InputStream is, byte[] pattern, ByteOutputStream out) throws IOException {
-	    int i;
+        int i;
         int l = pattern.length;
         int lx = l -1;
         int bufferLength = 0;
@@ -403,7 +401,7 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
     }
 
     public boolean find(InputStream is, byte[] pattern) throws IOException {
-	    int i;
+        int i;
         int l = pattern.length;
         int lx = l -1;
         int bufferLength = 0;

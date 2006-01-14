@@ -1,7 +1,7 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.ContentHandler;

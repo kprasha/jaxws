@@ -20,8 +20,8 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.sandbox.Encoder;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.MessageProperties;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.MessageProperties;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.Dispatch;

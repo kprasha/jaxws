@@ -5,7 +5,7 @@
 package com.sun.xml.ws.client.dispatch.rearch.datasource;
 
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
-import com.sun.xml.ws.sandbox.message.Message;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.activation.DataSource;

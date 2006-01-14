@@ -19,20 +19,13 @@
  */
 package com.sun.xml.ws.sandbox.message.impl;
 
-import com.sun.xml.ws.sandbox.message.HeaderList;
-import com.sun.xml.ws.sandbox.message.Message;
-import org.xml.sax.Attributes;
+import com.sun.xml.ws.api.message.Message;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.LocatorImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
 
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.sax.SAXSource;
 
 /**

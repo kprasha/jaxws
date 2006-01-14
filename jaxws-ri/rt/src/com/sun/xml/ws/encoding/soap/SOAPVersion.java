@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.encoding.soap;
 
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
 import com.sun.xml.bind.api.Bridge;

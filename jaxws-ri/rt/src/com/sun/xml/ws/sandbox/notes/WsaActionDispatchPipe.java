@@ -2,8 +2,8 @@ package com.sun.xml.ws.sandbox.notes;
 
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.sandbox.message.Message;
-import com.sun.xml.ws.sandbox.message.Header;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Header;
 
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
