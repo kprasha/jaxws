@@ -20,10 +20,16 @@
 
 package com.sun.xml.ws.spi.runtime;
 
-/** The <code>Binding</code> is the spi interface that extends the base interface
- *  for JAX-WS protocol bindings.
+import com.sun.xml.ws.sandbox.pipe.Pipe;
+
+/**
+ * The <code>Binding</code> is the spi interface that extends the base interface
+ * for JAX-WS protocol bindings.
  * This interface is implemented by com.sun.xml.ws.client.Binding.
-**/
+ *
+ * @deprecated
+ *      we'll be converting {@link SystemHandlerDelegate} to {@link Pipe}.
+ **/
 public interface Binding extends javax.xml.ws.Binding {
 
   public SystemHandlerDelegate getSystemHandlerDelegate();

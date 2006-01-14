@@ -25,6 +25,7 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
+import com.sun.xml.ws.sandbox.api.WSBinding;
 
 import javax.xml.ws.Binding;
 import javax.xml.ws.handler.Handler;
@@ -52,7 +53,7 @@ import javax.xml.namespace.QName;
  * @author WS Development Team
  */
 public abstract class BindingImpl implements
-    com.sun.xml.ws.spi.runtime.Binding {
+    com.sun.xml.ws.spi.runtime.Binding, WSBinding {
 
     // caller ignored on server side
     protected HandlerChainCaller chainCaller;

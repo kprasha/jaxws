@@ -11,14 +11,14 @@ import com.sun.xml.ws.client.dispatch.rearch.DispatchFactory;
 import com.sun.xml.ws.client.dispatch.rearch.StandalonePipeAssembler;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.handler.PortInfoImpl;
+import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.sandbox.api.WSService;
+import com.sun.xml.ws.sandbox.api.WSBinding;
+import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 import com.sun.xml.ws.sandbox.pipe.Pipe;
 import com.sun.xml.ws.sandbox.pipe.PipelineAssembler;
-import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
-
-//import com.sun.xml.ws.wsdl.parser.Binding;
-import com.sun.xml.ws.sandbox.api.model.RuntimeModel;
 import org.xml.sax.EntityResolver;
 
 import javax.activation.DataSource;
@@ -26,16 +26,23 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
-import javax.xml.ws.*;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.handler.PortInfo;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.spi.ServiceDelegate;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -68,7 +75,7 @@ import java.util.concurrent.ThreadFactory;
  * @see java.util.concurrent.Executor
  * @since JAX-WS 2.0
  */
-public class WSServiceDelegate extends ServiceDelegate {
+public class WSServiceDelegate extends WSService {
 
     protected static final String GET = "get";
 
@@ -104,7 +111,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         }
         assembler = new StandalonePipeAssembler();
 
-        masterPipe = ((StandalonePipeAssembler) assembler).create((Object) this);
+        masterPipe = ((StandalonePipeAssembler) assembler).create(this);
 
     }
 
@@ -126,7 +133,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         }
         if (ports == null)
             populatePorts();
-        masterPipe = ((StandalonePipeAssembler) assembler).create((Object) this);
+        masterPipe = ((StandalonePipeAssembler) assembler).create(this);
     }
 
     private void processServiceContext(QName portName, Class portInterface) throws WebServiceException {
@@ -147,7 +154,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         if (executor != null)
         //todo:needs to be decoupled from service at execution
         {
-            return (Executor) executor;
+            return executor;
         } else
             executor = Executors.newFixedThreadPool(3, new DaemonThreadFactory());
         return executor;
@@ -206,21 +213,21 @@ public class WSServiceDelegate extends ServiceDelegate {
 
     }
 
-    public Binding getBinding(QName qName) {
+    public WSBinding getBinding(QName qName) {
         PortInfoBase dispatchPort = dispatchPorts.get(qName);
         return getBindingforProvider(qName, dispatchPort.getBindingId());
 
     }
 
     public Dispatch<Object> createDispatch(QName qName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        return new JAXBDispatch(qName, jaxbContext, mode, this, masterPipe, (javax.xml.ws.Binding)getBinding(qName));
+        return new JAXBDispatch(qName, jaxbContext, mode, this, masterPipe, getBinding(qName));
     }
 
     public QName getServiceName() {
         return serviceContext.getServiceName();
     }
 
-    public Iterator getPorts() throws WebServiceException {
+    public Iterator<QName> getPorts() throws WebServiceException {
         if (ports == null)
             populatePorts();
 
@@ -235,8 +242,8 @@ public class WSServiceDelegate extends ServiceDelegate {
 
     protected void addPorts(QName[] ports) {
         if (ports != null) {
-            for (int i = 0; i < ports.length; ++i) {
-                addPort(ports[i]);
+            for (QName port : ports) {
+                addPort(port);
             }
         }
     }
@@ -252,14 +259,13 @@ public class WSServiceDelegate extends ServiceDelegate {
                 serviceContext.setServiceName(wscontext.getFirstServiceName());
             }
         }
-        Set knownPorts = null;
 
         if (wscontext != null) {
             QName serviceName = serviceContext.getServiceName();
-            knownPorts =
+            Set<QName> knownPorts =
                 wscontext.getPortsAsSet(serviceName);
             if (knownPorts != null) {
-                QName[] portz = (QName[]) knownPorts.toArray(
+                QName[] portz = knownPorts.toArray(
                     new QName[knownPorts.size()]);
                 addPorts(portz);
                 for (QName port : portz) {
@@ -330,7 +336,7 @@ public class WSServiceDelegate extends ServiceDelegate {
 //
 //            if (serviceContext.getRoles() != null) {
 //                bindingImpl.setRoles(serviceContext.getRoles());
-            
+
             if (serviceContext.getRoles(portName) != null) {
                 bindingImpl.setRoles(serviceContext.getRoles(portName));
             }
@@ -346,7 +352,7 @@ public class WSServiceDelegate extends ServiceDelegate {
      */
 
     /* Todo: temp for now just trying to get something working -kw **/
-    protected javax.xml.ws.Binding getBindingforProvider(QName portName, String bindingId) {
+    protected WSBinding getBindingforProvider(QName portName, String bindingId) {
 
         // get handler chain
         List<Handler> handlerChain = null;
@@ -366,11 +372,11 @@ public class WSServiceDelegate extends ServiceDelegate {
 
             if (serviceContext.getRoles(portName) != null) {
                 bindingImpl.setRoles(serviceContext.getRoles(portName));
-            }            
-            return (javax.xml.ws.Binding)bindingImpl;
+            }
+            return bindingImpl;
             //provider._setBinding(bindingImpl);
         } else if (bindingId.toString().equals(HTTPBinding.HTTP_BINDING)) {
-            return (javax.xml.ws.Binding)new  HTTPBindingImpl(handlerChain);
+            return new HTTPBindingImpl(handlerChain);
             //provider._setBinding(new HTTPBindingImpl(handlerChain));
         }
         return null;
@@ -380,7 +386,7 @@ public class WSServiceDelegate extends ServiceDelegate {
     private Dispatch createDispatchClazz(QName port, Class clazz, Service.Mode mode) throws WebServiceException {
         PortInfoBase dispatchPort = dispatchPorts.get(port);
         if (dispatchPort != null) {
-            DispatchBase dBase = new DispatchBase((PortInfoBase) dispatchPort, clazz, (Service.Mode) mode, this);
+            DispatchBase dBase = new DispatchBase(dispatchPort, clazz, mode, this);
             setBindingOnProvider(dBase, port, dBase._getBindingId());
             return dBase;
         } else {
@@ -391,7 +397,7 @@ public class WSServiceDelegate extends ServiceDelegate {
     private Dispatch createDispatchJAXB(QName port, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
         PortInfoBase dispatchPort = dispatchPorts.get(port);
         if (dispatchPort != null) {
-            DispatchBase dBase = new DispatchBase((PortInfoBase) dispatchPort, jaxbContext, mode, this);
+            DispatchBase dBase = new DispatchBase(dispatchPort, jaxbContext, mode, this);
             setBindingOnProvider(dBase, port, dBase._getBindingId());
             return dBase;
         } else {
@@ -411,7 +417,7 @@ public class WSServiceDelegate extends ServiceDelegate {
         //apply parameter bindings
         RuntimeModel model = eif.getRuntimeContext().getModel();
         if (portQName != null) {
-            com.sun.xml.ws.wsdl.parser.Binding binding = (com.sun.xml.ws.wsdl.parser.Binding) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portQName);
+            com.sun.xml.ws.wsdl.parser.Binding binding = serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portQName);
             eif.setBindingID(binding.getBindingId());
             ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
 
@@ -429,7 +435,7 @@ public class WSServiceDelegate extends ServiceDelegate {
                 BindingProviderProperties.class,
                 com.sun.xml.ws.spi.runtime.StubBase.class
             }, handler);
-        handler.setProxy((Object) proxy);
+        handler.setProxy(proxy);
         return (BindingProvider) proxy;
     }
 

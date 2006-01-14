@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
- * {@link MethodHandler} that usee {@link AsyncHandler}.
+ * {@link MethodHandler} that uses {@link AsyncHandler}.
  *
  * @author Kohsuke Kawaguchi
  */
