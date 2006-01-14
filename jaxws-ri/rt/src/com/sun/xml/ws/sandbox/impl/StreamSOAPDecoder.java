@@ -153,10 +153,8 @@ public abstract class StreamSOAPDecoder implements Decoder {
     
     protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBufferMark mark);
     
-    protected StreamMessage createMessage(HeaderList headers, XMLStreamReader reader) {
-         return new StreamMessage(headers, reader);
-    }
-    
+    protected abstract StreamMessage createMessage(HeaderList headers, XMLStreamReader reader);
+
     private XMLStreamReader createXMLStreamReader() {
         // TODO Get reader from factory based on content type
         throw new UnsupportedOperationException();
