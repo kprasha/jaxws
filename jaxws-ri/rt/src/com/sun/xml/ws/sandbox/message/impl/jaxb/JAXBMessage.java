@@ -266,8 +266,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         String soapNsUri = soapVer.nsUri;
         w.writeStartDocument();
-        w.writeNamespace("S",soapNsUri);
         w.writeStartElement("S","Envelope",soapNsUri);
+        w.writeNamespace("S",soapNsUri);        
         w.writeStartElement("S","Header",soapNsUri);
         if(hasHeaders()) {
             int len = headers.size();
@@ -287,6 +287,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
         w.writeEndElement();
         w.writeEndElement();
         w.writeEndDocument();
+        w.flush();
+        w.close();
     }
 
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
