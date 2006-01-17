@@ -82,6 +82,26 @@ public abstract class Pool<T> {
     }
 
     /**
+     * JAXB {@link javax.xml.bind.Marshaller} pool.
+     */
+    public static final class Unmarshaller extends Pool<javax.xml.bind.Unmarshaller> {
+        private final JAXBContext context;
+
+        public Unmarshaller(JAXBContext context) {
+            this.context = context;
+        }
+
+        protected javax.xml.bind.Unmarshaller create() {
+            try {
+                return context.createUnmarshaller();
+            } catch (JAXBException e) {
+                // impossible
+                throw new AssertionError(e);
+            }
+        }
+    }
+
+    /**
      * JAXB {@link com.sun.xml.bind.api.BridgeContext} pool.
      */
     public static final class BridgeContext extends Pool<com.sun.xml.bind.api.BridgeContext> {
