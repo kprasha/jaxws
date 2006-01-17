@@ -8,13 +8,17 @@ import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.util.Pool;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import javax.xml.bind.*;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 import javax.xml.ws.*;
 import java.util.concurrent.Future;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -33,9 +37,18 @@ import java.util.concurrent.Future;
 
 public class JAXBDispatch<Object> extends DispatchImpl<Object> {
 
-
+      //todo: use pool -temp to get going
+    Marshaller marshaller;
+    Unmarshaller unmarshaller;
+    Pool.Marshaller marshallers;
+    Pool.Unmarshaller unmarshallers;
     public JAXBDispatch(QName port, JAXBContext jc, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
         super(port, jc, mode, service, pipe, binding);
+        //temp temp temp - todo:check with KK on how to use pool
+        //perhaps pool should be in DispatchImpl?
+        //??to pool JAXB objects??
+        marshallers = new Pool.Marshaller(jaxbcontext);
+        unmarshallers = new Pool.Unmarshaller(jaxbcontext);
     }
 
 
@@ -62,26 +75,69 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
      *          JAXBContext to marshall msg or unmarshall the response. The cause of
      *          the WebServiceException is the original JAXBException.
      */
+
     public Object invoke(Object msg)
         throws WebServiceException {
+        Message message = createMessage(msg);
+        setProperties(message);
+        //todo: temp --where is best place to put this??
+        Map<String, List<String>> ch = new HashMap<String, List<String>>();
+
+        List<String> ct = new ArrayList();
+        ct.add("text/xml");
+        ch.put("Content-Type", ct);
+
+        List<String> cte = new ArrayList();
+        cte.add("binary");
+        ch.put("Content-Transfer-Encoding", cte);
+
+        message.getProperties().httpRequestHeaders = ch;
+        //todo:temp
+        Message response = process(message);
+        switch (mode) {
+            case PAYLOAD:
+                try {
+                   return (Object)response.readPayloadAsJAXB(unmarshaller);
+                } catch (Exception e) {
+                    throw new WebServiceException(e);
+                }
+            case MESSAGE: {
+
+                 throw new UnsupportedOperationException();
+
+            }
+        }
         return null;
     }
+
 
     /**
      * @param msg
      * @return
      */
-    protected Message createMessage(java.lang.Object msg) {
-        assert(jaxbcontext != null);
 
-        Marshaller marshaller = null;
-        try {
-            marshaller = jaxbcontext.createMarshaller();
-        } catch (JAXBException e) {
-            e.printStackTrace();
+    protected Message createMessage(java.lang.Object msg) {
+            assert(jaxbcontext != null);
+            //todo: use Pool - temp to get going
+            try {
+                marshaller = jaxbcontext.createMarshaller();
+                marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
+                unmarshaller = jaxbcontext.createUnmarshaller();
+            } catch (JAXBException e) {
+                throw new WebServiceException(e);
+            }
+
+            switch (mode) {
+                case PAYLOAD:
+                case MESSAGE:
+                    return new JAXBMessage(marshaller, msg, soapVersion);
+                    //todo
+                default:
+                    throw new WebServiceException("Unrecognized message mode");
+            }
+
         }
-        return new JAXBMessage(marshaller, msg, soapVersion);
-    }
+
 
     /**
      * Invoke a service operation asynchronously.  The
@@ -113,8 +169,8 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
      */
     public Response<Object> invokeAsync(Object msg)
         throws WebServiceException {
+         throw new UnsupportedOperationException();
 
-        return null;
     }
 
 
@@ -153,8 +209,8 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
      *          the WebServiceException is the original JAXBException.
      */
     public Future<?> invokeAsync(Object msg, AsyncHandler<Object> handler) {
+         throw new UnsupportedOperationException();
 
-        return null;
     }
 
     /**
@@ -186,7 +242,7 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
      */
 
     public void invokeOneWay(Object msg) {
-
+         throw new UnsupportedOperationException();
 
     }
 }

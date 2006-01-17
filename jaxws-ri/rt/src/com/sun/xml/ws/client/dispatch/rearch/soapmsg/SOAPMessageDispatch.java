@@ -138,8 +138,7 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      */
     public Response<SOAPMessage> invokeAsync(SOAPMessage msg)
         throws WebServiceException {
-
-        return null;
+        throw new UnsupportedOperationException();
     }
 
 
@@ -178,8 +177,7 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      *          the WebServiceException is the original JAXBException.
      */
     public Future<?> invokeAsync(SOAPMessage msg, AsyncHandler<SOAPMessage> handler) {
-
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -211,6 +209,7 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      */
 
     public void invokeOneWay(SOAPMessage msg) {
+        //todo:not complete
         Message message = process(createMessage(msg));
     }
 

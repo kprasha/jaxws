@@ -17,13 +17,20 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
 //import com.sun.xml.ws.model.JavaMethod;
+import com.sun.xml.messaging.saaj.soap.MessageImpl;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
+import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.transform.Source;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.MimeHeader;
+import java.util.*;
 
 /**
- * TODO: Use sandbox classes, update javadoc
+ * TODO: update javadoc, use sandbox classes where can
  */
 /**
  * The <code>javax.xml.ws.Dispatch</code> interface provides support
@@ -102,12 +109,20 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
 
     //todo: temp just to get something working
+
+    /**
+     *
+     * @param msg
+     */
     protected void setProperties(Message msg) {
 
         MessageProperties props = msg.getProperties();
         props.put(JAXWS_CLIENT_HANDLE_PROPERTY, this);
         props.put(ENDPOINT_ADDRESS_PROPERTY, ((WSServiceDelegate) owner).getEndpointAddress(portname));
 
+
+        //todo: these may not be needed but leave for now- also what props does tango
+        //todo:integration require
         props.put(BINDING_ID_PROPERTY, ((BindingImpl)binding).getBindingId());
         if (jaxbcontext != null)
             props.put(JAXB_CONTEXT_PROPERTY, jaxbcontext);

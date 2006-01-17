@@ -4,13 +4,23 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.source;
 
+import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 import javax.xml.ws.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -30,7 +40,7 @@ import java.util.concurrent.Future;
 public class SourceDispatch extends DispatchImpl<Source> {
 
     public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
-        super(port, aClass, mode, service, pipe,binding);
+        super(port, aClass, mode, service, pipe, binding);
     }
 
 
@@ -95,8 +105,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
      */
     public Response<Source> invokeAsync(Source msg)
         throws WebServiceException {
+        throw new UnsupportedOperationException();
 
-        return null;
     }
 
 
@@ -135,8 +145,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
      *          the WebServiceException is the original JAXBException.
      */
     public Future<?> invokeAsync(Source msg, AsyncHandler<Source> handler) {
+        throw new UnsupportedOperationException();
 
-        return null;
     }
 
     /**
@@ -168,8 +178,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
      */
 
     public void invokeOneWay(Source msg) {
-
-
+       throw new UnsupportedOperationException();
     }
 
 
@@ -186,14 +195,25 @@ public class SourceDispatch extends DispatchImpl<Source> {
 
     protected Message createMessage(Source msg) {
         Message message = null;
-        /*switch(mode){
+        switch (mode) {
             case PAYLOAD:
-               message = new PayloadSourceMessage(msg,soapVersion);
-               break;
+                message = new PayloadSourceMessage(msg, soapVersion);
+                break;
             case MESSAGE:
-                //message = new
-                return null; //todo: what message?
+                //Todo: temporary until protocol message is done
+                SOAPMessage soapmsg = null;
+                try {
+                    //todo:
+                    soapmsg = SOAPVersion.fromBinding(((SOAPBindingImpl) binding).getBindingId().toString()).saajFactory.createMessage();
+                    soapmsg.getSOAPPart().setContent((Source) msg);
+                    soapmsg.saveChanges();
+                } catch (SOAPException e) {
+                    throw new WebServiceException(e);
+                }
+                message = new SAAJMessage(soapmsg);
+                break;
             default:
+                throw new WebServiceException("Unrecognized message mode");
         }
 
         Map<String, List<String>> ch = new HashMap<String, List<String>>();
@@ -207,7 +227,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
         ch.put("Content-Transfer-Encoding", cte);
 
         message.getProperties().httpRequestHeaders = ch;
-        */
+
         return message;
     }
 }
