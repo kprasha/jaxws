@@ -42,6 +42,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPBody;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -66,7 +67,8 @@ public class SAAJMessage extends Message {
     private MessageProperties properties;
     private String payloadLocalName;
     private String payloadNamspace;
-    private SAAJAttachmentSet attSet;
+    private AttachmentSet attSet;
+    private Node payload;
 
     private boolean parsedHeader;
 
@@ -77,22 +79,28 @@ public class SAAJMessage extends Message {
       
         try {
             Node body = sm.getSOAPBody();
-            Node n = body.getFirstChild();
+            payload = body.getFirstChild();
             // hope this is correct. Caching the localname and namespace of the payload should be fine
             // but what about if a Handler replaces the payload with something else? Weel, may be it
             // will be error condition anyway
-            if (n != null) {
-                payloadLocalName = n.getLocalName();
-                payloadNamspace = n.getNamespaceURI();
+            if (payload != null) {
+                payloadLocalName = payload.getLocalName();
+                payloadNamspace = payload.getNamespaceURI();
             }
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
     }
 
-    public SAAJMessage(HeaderList headers, SOAPMessage sm) {
+    /**
+     * This constructor is a convenience and called by the {@link #copy}
+     * @param headers
+     * @param sm
+     */
+    private SAAJMessage(HeaderList headers, AttachmentSet as, SOAPMessage sm) {
         this(sm);
         this.headers = headers;
+        this.attSet = as;
     }
 
     public boolean hasHeaders() {
@@ -176,13 +184,7 @@ public class SAAJMessage extends Message {
      * This consumes the message.
      */
     public Source readPayloadAsSource() {
-        try {
-            Node pn = sm.getSOAPBody().getFirstChild();
-            return (pn != null) ? new DOMSource(pn) : null;
-        } catch (SOAPException e) {
-            throw new WebServiceException(e);
-        }
-
+        return (payload != null) ? new DOMSource(payload) : null;
     }
 
     /**
@@ -216,13 +218,8 @@ public class SAAJMessage extends Message {
      * This consumes the message.
      */
     public XMLStreamReader readPayload() {
-        try {
-            Node pn = sm.getSOAPBody().getFirstChild();
-            return (pn != null) ?
-                SourceReaderFactory.createSourceReader(new DOMSource(pn), true) : null;
-        } catch (SOAPException e) {
-            throw new WebServiceException(e);
-        }
+        return (payload != null) ?
+                SourceReaderFactory.createSourceReader(new DOMSource(payload), true) : null;
     }
 
     /**
@@ -233,12 +230,9 @@ public class SAAJMessage extends Message {
      */
     public void writePayloadTo(XMLStreamWriter sw) {
         try {
-            Node pn = sm.getSOAPBody().getFirstChild();
-            if (pn != null)
-                DOMUtil.serializeNode(pn, sw);
+            if (payload != null)
+                DOMUtil.serializeNode(payload, sw);
         } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
-        } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
     }
@@ -290,14 +284,10 @@ public class SAAJMessage extends Message {
      */
     public Message copy() {
         try {
-            SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
-            SOAPMessage msg = SOAPVersion.fromNsUri(se.getNamespaceURI()).saajFactory.createMessage();
-            msg.getSOAPPart().getEnvelope().getOwnerDocument().importNode(se, true);
-            Iterator iter = sm.getAttachments();
-            while (iter.hasNext()) {
-                msg.addAttachmentPart((AttachmentPart) iter.next());
-            }
-            return new SAAJMessage(getHeaders(), msg);
+            SOAPBody sb = sm.getSOAPPart().getEnvelope().getBody();
+            SOAPMessage msg = SOAPVersion.fromNsUri(sb.getNamespaceURI()).saajFactory.createMessage();
+            msg.getSOAPPart().getEnvelope().getBody().getOwnerDocument().importNode(sb, true);
+            return new SAAJMessage(getHeaders(), getAttachments(), msg);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
@@ -383,6 +373,10 @@ public class SAAJMessage extends Message {
          */
         public void writeTo(SOAPMessage saaj) {
             saaj.addAttachmentPart(ap);
+        }
+
+        AttachmentPart asAttachmentPart(){
+            return ap;
         }
     }
 
