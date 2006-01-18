@@ -138,7 +138,7 @@ public abstract class ServiceContextBuilder {
 
     //todo: valid port in wsdl
     private static void processAnnotations(ServiceContext serviceContext, Class portInterface) throws WebServiceException {
-        EndpointIFContext eifc = serviceContext.getEndpointIFContext(portInterface.getName());
+        EndpointIFContext eifc = serviceContext.getEndpointIFContext(portInterface);
         if ((eifc == null) || (eifc.getRuntimeContext() == null)) {
 
             if (eifc == null) {

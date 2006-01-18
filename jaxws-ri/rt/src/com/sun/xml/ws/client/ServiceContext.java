@@ -85,9 +85,9 @@ public class ServiceContext {
         rolesMap.put(portName,roles);
     }
 
-    public EndpointIFContext getEndpointIFContext(String className) {
+    public EndpointIFContext getEndpointIFContext(Class sei) {
         for (EndpointIFContext eif: seiContext){
-            if (eif.getSei().getName().equals(className)){
+            if (eif.getSei()==sei){
                 //this is the one
                 return eif;
             }

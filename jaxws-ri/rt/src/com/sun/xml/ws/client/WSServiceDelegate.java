@@ -12,9 +12,9 @@ import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.client.dispatch.DispatchBase;
 import com.sun.xml.ws.client.dispatch.rearch.StandalonePipeAssembler;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
+import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -79,14 +79,15 @@ public class WSServiceDelegate extends WSService {
 
     protected HashSet<QName> ports;
 
-    protected HashMap<QName, PortInfoBase> dispatchPorts;
+    private final HashMap<QName, PortInfoBase> dispatchPorts = new HashMap<QName, PortInfoBase>();
     protected HandlerResolver handlerResolver;
 
     protected Object serviceProxy;
     protected URL wsdlLocation;
     protected ServiceContext serviceContext;
     protected Executor executor;
-    private HashSet<Object> seiProxies;
+    private final HashSet<Object> seiProxies = new HashSet<Object>();
+
     private Pipe masterPipe;
 
     //to get this going just use this--?do we need factory for different assembler types?
@@ -101,8 +102,6 @@ public class WSServiceDelegate extends WSService {
 
     public WSServiceDelegate(ServiceContext scontext) {
         serviceContext = scontext;
-        this.dispatchPorts = new HashMap();
-        seiProxies = new HashSet();
         if (serviceContext.getHandlerResolver() != null) {
             handlerResolver = serviceContext.getHandlerResolver();
         }
@@ -113,10 +112,6 @@ public class WSServiceDelegate extends WSService {
     }
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
-        this.dispatchPorts = new HashMap();
-        //this.ports = new HashSet();
-        seiProxies = new HashSet();
-
         if (wsdlDocumentLocation != null) {
             serviceContext = ServiceContextBuilder.build(
                 wsdlDocumentLocation, serviceClass, XmlUtil.createDefaultCatalogResolver());
@@ -131,10 +126,6 @@ public class WSServiceDelegate extends WSService {
         if (ports == null)
             populatePorts();
         masterPipe = ((StandalonePipeAssembler) assembler).create(this);
-    }
-
-    private void processServiceContext(QName portName, Class portInterface) throws WebServiceException {
-        ServiceContextBuilder.completeServiceContext(serviceContext, portInterface);
     }
 
     public URL getWSDLLocation() {
@@ -170,9 +161,9 @@ public class WSServiceDelegate extends WSService {
         handlerResolver = resolver;
     }
 
-    public Object getPort(QName portName, Class portInterface)
+    public <T> T getPort(QName portName, Class<T> portInterface)
         throws WebServiceException {
-        Object seiProxy = createEndpointIFBaseProxy(portName, portInterface);
+        T seiProxy = createEndpointIFBaseProxy(portName, portInterface);
         seiProxies.add(seiProxy);
         if (portName != null) {
             addPort(portName);
@@ -181,7 +172,7 @@ public class WSServiceDelegate extends WSService {
         return seiProxy;
     }
 
-    public Object getPort(Class portInterface) throws WebServiceException {
+    public <T> T getPort(Class<T> portInterface) throws WebServiceException {
         return createEndpointIFBaseProxy(null, portInterface);
     }
 
@@ -210,9 +201,9 @@ public class WSServiceDelegate extends WSService {
 
     }
 
-    public BindingImpl getBinding(QName qName) {
-        PortInfoBase dispatchPort = dispatchPorts.get(qName);
-        return getBindingforProvider(qName, dispatchPort.getBindingId());
+    public BindingImpl getBinding(QName portName) {
+        PortInfoBase dispatchPort = dispatchPorts.get(portName);
+        return createBinding(portName, dispatchPort.getBindingId());
 
     }
 
@@ -287,14 +278,15 @@ public class WSServiceDelegate extends WSService {
         return new WebServiceException("dii.service.no.wsdl.available");
     }
 
-    private Object createEndpointIFBaseProxy(QName portName, Class portInterface) throws WebServiceException {
+    private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {
 
-        processServiceContext(portName, portInterface);
+        ServiceContextBuilder.completeServiceContext(serviceContext, portInterface);
+
         if (portName == null) {
-            portName = serviceContext.getEndpointIFContext(portInterface.getName()).getPortName();
+            portName = serviceContext.getEndpointIFContext(portInterface).getPortName();
         }
-        if (!serviceContext.getWsdlContext().contains(getServiceName(), portName))
-        {
+
+        if (!serviceContext.getWsdlContext().contains(getServiceName(), portName)) {
             throw new WebServiceException("Port " + portName + "is not found in service " + serviceContext.getServiceName());
         }
 
@@ -307,15 +299,13 @@ public class WSServiceDelegate extends WSService {
         return ports;
     }
 
-    /*
-     * Set the binding on the binding provider. Called by the service
-     * class when creating the binding provider.
+    /**
+     * Determines the binding of the given port.
      */
-    protected void setBindingOnProvider(InternalBindingProvider provider,
-                                        QName portName, String bindingId) {
+    protected BindingImpl createBinding(QName portName, String bindingId) {
 
         // get handler chain
-        List<Handler> handlerChain = null;
+        List<Handler> handlerChain;
         if (getHandlerResolver() != null && getServiceName() != null) {
             PortInfo portInfo = new PortInfoImpl(bindingId,
                 portName, getServiceName());
@@ -337,46 +327,14 @@ public class WSServiceDelegate extends WSService {
             if (serviceContext.getRoles(portName) != null) {
                 bindingImpl.setRoles(serviceContext.getRoles(portName));
             }
-            provider._setBinding(bindingImpl);
-        } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
-            provider._setBinding(new HTTPBindingImpl(handlerChain));
-        }
-    }
-
-/*
-     * Set the binding on the binding provider. Called by the service
-     * class when creating the binding provider.
-     */
-
-    /* Todo: temp for now just trying to get something working -kw **/
-    private BindingImpl getBindingforProvider(QName portName, String bindingId) {
-
-        // get handler chain
-        List<Handler> handlerChain = null;
-        if (getHandlerResolver() != null && getServiceName() != null) {
-            PortInfo portInfo = new PortInfoImpl(bindingId,
-                portName, getServiceName());
-            handlerChain = getHandlerResolver().getHandlerChain(portInfo);
-        } else {
-            handlerChain = new ArrayList<Handler>();
-        }
-
-        // create binding
-        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-            bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            SOAPBindingImpl bindingImpl = new SOAPBindingImpl(handlerChain,
-                bindingId, getServiceName());
-
-            if (serviceContext.getRoles(portName) != null) {
-                bindingImpl.setRoles(serviceContext.getRoles(portName));
-            }
             return bindingImpl;
-            //provider._setBinding(bindingImpl);
         } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
             return new HTTPBindingImpl(handlerChain);
-            //provider._setBinding(new HTTPBindingImpl(handlerChain));
         }
-        return null;
+
+        // TODO: what does this mean?
+        // is this a configuration error or assertion failure?
+        throw new Error();
     }
 
 
@@ -384,7 +342,7 @@ public class WSServiceDelegate extends WSService {
         return serviceContext.getWsdlContext().getWsdlLocation();
     }
 
-    private Object buildEndpointIFProxy(QName portQName, Class portInterface)
+    private <T> T buildEndpointIFProxy(QName portQName, Class<T> portInterface)
         throws WebServiceException {
 
         EndpointIFContext eif = completeEndpointIFContext(serviceContext, portQName, portInterface);
@@ -398,25 +356,22 @@ public class WSServiceDelegate extends WSService {
 
         }
 
-        //needs cleaning up
-        EndpointIFInvocationHandler handler =
-            new EndpointIFInvocationHandler(portInterface,
-                eif, this, getServiceName()); //need handler registry passed in here
-        setBindingOnProvider(handler, portQName, handler._getBindingId());
+        PortInterfaceStub pis = new PortInterfaceStub(this,
+            createBinding(portQName,eif.getBindingID()),
+            portInterface,model,
+            assembler.create(model));
 
-        Object proxy = Proxy.newProxyInstance(portInterface.getClassLoader(),
+        return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{
                 portInterface, BindingProvider.class,
                 BindingProviderProperties.class,
                 com.sun.xml.ws.spi.runtime.StubBase.class
-            }, handler);
-        handler.setProxy(proxy);
-        return (BindingProvider) proxy;
+            }, pis));
     }
 
     private EndpointIFContext completeEndpointIFContext(ServiceContext serviceContext, QName portQName, Class portInterface) {
 
-        EndpointIFContext context = serviceContext.getEndpointIFContext(portInterface.getName());
+        EndpointIFContext context = serviceContext.getEndpointIFContext(portInterface);
         WSDLContext wscontext = serviceContext.getWsdlContext();
         if (wscontext != null) {
             String endpoint = wscontext.getEndpoint(serviceContext.getServiceName(), portQName);

@@ -81,7 +81,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         if(handler!=null) {
             return handler.invoke(proxy, args, getRequestContext());
         } else {
-            // we handles the other method invocations by ourselves
+            // we handle the other method invocations by ourselves
             try {
                 return method.invoke(this,args);
             } catch (IllegalAccessException e) {
