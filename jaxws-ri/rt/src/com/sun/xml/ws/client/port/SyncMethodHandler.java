@@ -1,12 +1,13 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.ws.model.soap.SOAPBinding;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.ws.Holder;
@@ -40,6 +41,8 @@ final class SyncMethodHandler extends MethodHandler {
     private final BodyBuilder bodyBuilder;
     private final MessageFiller[] inFillers;
 
+    private final String soapAction;
+
     /**
      * Used to get a value from method invocation parameter.
      *
@@ -49,6 +52,8 @@ final class SyncMethodHandler extends MethodHandler {
 
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethod method) {
         super(owner);
+
+        this.soapAction = ((SOAPBinding)method.getBinding()).getSOAPAction();
 
         {// prepare objects for creating messages
             List<Parameter> rp = method.getRequestParameters();
@@ -103,6 +108,7 @@ final class SyncMethodHandler extends MethodHandler {
             MessageProperties props = msg.getProperties();
             props.proxy = proxy;
             props.requestContext = rc;
+            props.soapAction = soapAction;
 
             // TODO: fill in MessageProperties
             ////set mtom threshold value to
