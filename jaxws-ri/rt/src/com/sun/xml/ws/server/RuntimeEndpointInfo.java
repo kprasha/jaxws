@@ -20,6 +20,37 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
+import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
+import com.sun.xml.ws.spi.runtime.Binding;
+import com.sun.xml.ws.spi.runtime.WebServiceContext;
+import com.sun.xml.ws.util.HandlerAnnotationInfo;
+import com.sun.xml.ws.util.HandlerAnnotationProcessor;
+import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
+import com.sun.xml.ws.util.localization.Localizer;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.wsdl.parser.Service;
+import com.sun.xml.ws.wsdl.parser.WSDLDocument;
+import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.SAXException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Source;
+import javax.xml.ws.Provider;
+import javax.xml.ws.WebServiceProvider;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.SOAPBinding;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -33,43 +64,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.io.IOException;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Executor;
-
-import javax.annotation.Resource;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Provider;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.transform.Source;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.xml.ws.WebServiceProvider;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.Endpoint;
-
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
-import com.sun.xml.ws.model.RuntimeModeler;
-import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
-import com.sun.xml.ws.spi.runtime.Binding;
-import com.sun.xml.ws.spi.runtime.WebServiceContext;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
-import com.sun.xml.ws.util.HandlerAnnotationInfo;
-import com.sun.xml.ws.util.HandlerAnnotationProcessor;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.Service;
-import com.sun.xml.ws.wsdl.parser.WSDLDocument;
-import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
-import com.sun.xml.ws.api.model.RuntimeModel;
-
-import org.xml.sax.EntityResolver;
-import org.xml.sax.SAXException;
+import java.util.logging.Logger;
 
 
 
@@ -80,7 +78,7 @@ import org.xml.sax.SAXException;
  * WSDL & Schema Metadata
  * @author WS Development Team
  */
-public class RuntimeEndpointInfo extends Endpoint
+public class RuntimeEndpointInfo extends WSEndpoint
     implements com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo {
     
     private String name;
@@ -90,7 +88,7 @@ public class RuntimeEndpointInfo extends Endpoint
     private boolean deployed;
     private String urlPattern;
     private List<Source> metadata;
-    private Binding binding;
+    private BindingImpl binding;
     private RuntimeModel runtimeModel;
     private Object implementor;
     private Class implementorClass;
@@ -174,7 +172,7 @@ public class RuntimeEndpointInfo extends Endpoint
         // bindings or need to look in the WSDL
         if(wsdlUrl == null){
             RuntimeModeler rap = new RuntimeModeler(getImplementorClass(),
-                getImplementor(), getServiceName(), ((BindingImpl)binding).getBindingId());
+                getImplementor(), getServiceName(), binding.getBindingId());
             if (getPortName() != null) {
                 rap.setPortName(getPortName());
             }
@@ -194,7 +192,7 @@ public class RuntimeEndpointInfo extends Endpoint
                     if(service == null)
                         throw new ServerRtException("runtime.parser.wsdl.noservice", new Object[]{serviceName, getWsdlUrl()});
 
-                    String bindingId = ((BindingImpl)binding).getBindingId();
+                    String bindingId = binding.getBindingId();
                     List<com.sun.xml.ws.wsdl.parser.Binding> bindings = wsdlDoc.getBindings(service, bindingId);
                     if(bindings.size() == 0)
                         throw new ServerRtException("runtime.parser.wsdl.nobinding", new Object[]{bindingId, serviceName, getWsdlUrl()});
@@ -331,7 +329,7 @@ public class RuntimeEndpointInfo extends Endpoint
                 setPortName(runtimeModel.getPortName());
             }
             if (getBinding().getHandlerChain() == null) {
-                String bindingId = ((BindingImpl) binding).getBindingId();
+                String bindingId = binding.getBindingId();
                 HandlerAnnotationInfo chainInfo =
                     HandlerAnnotationProcessor.buildHandlerInfo(
                     implementorClass, getServiceName(),
@@ -369,7 +367,7 @@ public class RuntimeEndpointInfo extends Endpoint
      * It generates WSDL only for SOAP1.1, and for XSOAP1.2 bindings
      */
     public void generateWSDL() {
-        BindingImpl bindingImpl = (BindingImpl)getBinding();
+        BindingImpl bindingImpl = getBinding();
         String bindingId = bindingImpl.getActualBindingId();
         if (!bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) &&
             !bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
@@ -388,7 +386,7 @@ public class RuntimeEndpointInfo extends Endpoint
         }
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(getDocMetadata());
         WSDLGenerator wsdlGen = new WSDLGenerator(runtimeModel, wsdlResolver,
-                ((BindingImpl)binding).getBindingId());
+                binding.getBindingId());
         try {
             wsdlGen.doGeneration();
         } catch(Exception e) {
@@ -442,10 +440,10 @@ public class RuntimeEndpointInfo extends Endpoint
     }
 
     public void setBinding(Binding binding){
-        this.binding = binding;
+        this.binding = (BindingImpl)binding;
     }
 
-    public Binding getBinding() {
+    public BindingImpl getBinding() {
         return binding;
     }
     
@@ -730,7 +728,7 @@ public class RuntimeEndpointInfo extends Endpoint
      * it if it happens and continue with the next handler.
      */
     public void destroy() {
-        Binding binding = getBinding();
+        BindingImpl binding = getBinding();
         if (binding != null) {
             List<Handler> handlers = binding.getHandlerChain();
             if (handlers != null) {

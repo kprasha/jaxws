@@ -1,5 +1,7 @@
 package com.sun.xml.ws.api;
 
+import com.sun.xml.ws.client.WSServiceDelegate;
+
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.Service;
 
@@ -17,6 +19,9 @@ import javax.xml.ws.Service;
  * nevertheless represents {@link Service}. We want them
  * to think of this as an internal representation of a service.
  *
+ * <p>
+ * Only JAX-WS internal code may downcast this to {@link WSServiceDelegate}.
+ * 
  * @author Kohsuke Kawaguchi
  */
 public abstract class WSService extends ServiceDelegate {
