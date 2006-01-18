@@ -85,14 +85,14 @@ public class SOAPBinding {
      * @return true if this is a document/literal SOAPBinding
      */
     public boolean isDocLit() {
-        return style.equals(Style.DOCUMENT) && use.equals(Use.LITERAL);
+        return style==Style.DOCUMENT && use==Use.LITERAL;
     }
 
     /**
      * @return true if this is a rpc/literal SOAPBinding
      */
     public boolean isRpcLit() {
-        return style.equals(Style.RPC) && use.equals(Use.LITERAL);
+        return style==Style.RPC && use==Use.LITERAL;
     }
 
     /**
