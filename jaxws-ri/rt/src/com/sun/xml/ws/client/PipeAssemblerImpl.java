@@ -22,7 +22,7 @@ public abstract class PipeAssemblerImpl implements PipelineAssembler {
      * configuration, it does so by making a {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner) copy}.
      * So this method can assume that every time it's invoked
      * the <tt>model</tt> would be different.
-     * (TODO:exact nature of such assumption depends on how we
+     * (TODO: exact nature of such assumption depends on how we
      * design discovery mechanism. so this might change.)
      *
      * @param model The created pipeline will be used to serve this model.

@@ -4,13 +4,18 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.datasource;
 
-import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 
 import javax.activation.DataSource;
 import javax.xml.namespace.QName;
-import javax.xml.ws.*;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Future;
 
 /**
@@ -29,25 +34,10 @@ import java.util.concurrent.Future;
  */
 public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
-
-    /**
-     * 
-     * @param port
-     * @param clazz
-     * @param mode
-     * @param obj
-     * @param pipe
-     * @param binding
-     */
-    public DataSourceDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, Object obj, Pipe pipe, Binding binding) {
-       super(port, clazz, mode, obj,pipe, binding);
+    public DataSourceDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, WSServiceDelegate service, Pipe pipe, BindingImpl binding) {
+       super(port, clazz, mode, service, pipe, binding);
     }
 
-   
-    /**
-     * @param arg
-     * @return
-     */
     protected Message createMessage(DataSource arg) {
         return null;
     }

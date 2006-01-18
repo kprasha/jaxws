@@ -4,19 +4,24 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.source;
 
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
-import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
-import javax.xml.ws.*;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +44,8 @@ import java.util.concurrent.Future;
 
 public class SourceDispatch extends DispatchImpl<Source> {
 
-    public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
-        super(port, aClass, mode, service, pipe, binding);
+    public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
+        super(port, aClass, mode, owner, pipe,binding);
     }
 
 
@@ -204,8 +209,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 SOAPMessage soapmsg = null;
                 try {
                     //todo:
-                    soapmsg = SOAPVersion.fromBinding(((SOAPBindingImpl) binding).getBindingId().toString()).saajFactory.createMessage();
-                    soapmsg.getSOAPPart().setContent((Source) msg);
+                    soapmsg = SOAPVersion.fromBinding(((SOAPBindingImpl) binding).getBindingId()).saajFactory.createMessage();
+                    soapmsg.getSOAPPart().setContent(msg);
                     soapmsg.saveChanges();
                 } catch (SOAPException e) {
                     throw new WebServiceException(e);
@@ -218,11 +223,11 @@ public class SourceDispatch extends DispatchImpl<Source> {
 
         Map<String, List<String>> ch = new HashMap<String, List<String>>();
 
-        List<String> ct = new ArrayList();
+        List<String> ct = new ArrayList<String>();
         ct.add("text/xml");
         ch.put("Content-Type", ct);
 
-        List<String> cte = new ArrayList();
+        List<String> cte = new ArrayList<String>();
         cte.add("binary");
         ch.put("Content-Transfer-Encoding", cte);
 

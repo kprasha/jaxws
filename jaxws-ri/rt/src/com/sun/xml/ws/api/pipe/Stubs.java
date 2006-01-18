@@ -1,12 +1,12 @@
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.port.PortInterfaceStub;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.dispatch.rearch.DispatchFactory;
+import com.sun.xml.ws.client.port.PortInterfaceStub;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -55,6 +55,8 @@ public abstract class Stubs {
     /**
      * Creates a new {@link Dispatch} stub that connects to the given pipe.
      *
+     * @param portName
+     *      see {@link Service#createDispatch(QName, Class, Service.Mode)}.
      * @param service
      *      see <a href="#param">common parameters</a>
      * @param binding
@@ -70,11 +72,12 @@ public abstract class Stubs {
      *
      * TODO: are these parameters making sense?
      */
-    public <T> Dispatch<T> createDispatch( WSService service,
+    public <T> Dispatch<T> createDispatch( QName portName,
+                                           WSService service,
                                            WSBinding binding,
                                            Class<T> type, Service.Mode mode, Pipe next ) {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException();
+
+        return DispatchFactory.createDispatch( portName, type, mode, service, next, binding );
     }
 
     /**

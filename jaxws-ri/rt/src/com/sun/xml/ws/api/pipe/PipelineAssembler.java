@@ -2,9 +2,9 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.model.RuntimeModel;
 
+import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import javax.xml.namespace.QName;
 import java.net.URL;
 
 /**

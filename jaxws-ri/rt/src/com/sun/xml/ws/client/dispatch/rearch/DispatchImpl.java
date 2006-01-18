@@ -4,30 +4,19 @@
 
 package com.sun.xml.ws.client.dispatch.rearch;
 
-import com.sun.xml.ws.client.Stub;
-import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.dispatch.DispatchContext;
-import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CONTEXT_PROPERTY;
-import static com.sun.xml.ws.client.BindingProviderProperties.BINDING_ID_PROPERTY;
-import static com.sun.xml.ws.client.BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY;
-import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
-//import com.sun.xml.ws.model.JavaMethod;
-import com.sun.xml.messaging.saaj.soap.MessageImpl;
+import static com.sun.xml.ws.client.BindingProviderProperties.*;
+import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.dispatch.DispatchContext;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
-import javax.xml.ws.*;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.transform.Source;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.MimeHeader;
-import java.util.*;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Service;
 
 /**
  * TODO: update javadoc, use sandbox classes where can
@@ -42,69 +31,29 @@ import java.util.*;
  * @author WS Development Team
  * @version 1.0
  */
-
 public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
-    protected Service.Mode mode;
-    protected QName portname;
+    protected final Service.Mode mode;
+    protected final QName portname;
     protected Class<T> clazz;
-    protected Object owner;
-    protected JAXBContext jaxbcontext;
-    protected SOAPVersion soapVersion;
+    protected final WSServiceDelegate owner;
+    protected final SOAPVersion soapVersion;
 
 
-    /**
-     *
-     * @param port
-     * @param aClass
-     * @param mode
-     * @param obj
-     * @param pipe
-     * @param binding
-     */
-    public DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
-        this(port, mode, obj, pipe, binding);
+    protected DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
+        this(port, mode, owner, pipe, binding);
         this.clazz = aClass;
-
-
     }
 
-    /**
-     *
-     * @param port
-     * @param jc
-     * @param mode
-     * @param obj
-     * @param pipe
-     * @param binding
-     */
-    public DispatchImpl(QName port, JAXBContext jc, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
-        this(port, mode, obj, pipe, binding);
-        jaxbcontext = jc;
-
-    }
-
-    /**
-     *
-     * @param port
-     * @param mode
-     * @param obj
-     * @param pipe
-     * @param binding
-     */
-    public DispatchImpl(QName port, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding){
+    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding){
         super(pipe, binding);
-        portname = port;
+        this.portname = port;
         this.mode = mode;
-        owner = obj;
-        this.soapVersion = SOAPVersion.fromBinding(((BindingImpl)binding).getBindingId());
+        this.owner = owner;
+        this.soapVersion = SOAPVersion.fromBinding(binding.getBindingId());
     }
 
 
-    /**
-     * @param msg
-     * @return
-     */
     protected abstract Message createMessage(T msg);
 
 
@@ -118,15 +67,9 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
         MessageProperties props = msg.getProperties();
         props.put(JAXWS_CLIENT_HANDLE_PROPERTY, this);
-        props.put(ENDPOINT_ADDRESS_PROPERTY, ((WSServiceDelegate) owner).getEndpointAddress(portname));
+        props.put(ENDPOINT_ADDRESS_PROPERTY, owner.getEndpointAddress(portname));
 
-
-        //todo: these may not be needed but leave for now- also what props does tango
-        //todo:integration require
-        props.put(BINDING_ID_PROPERTY, ((BindingImpl)binding).getBindingId());
-        if (jaxbcontext != null)
-            props.put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
-
+        props.put(BINDING_ID_PROPERTY, binding.getBindingId());
 
         //not needed but leave for now --maybe mode is needed
         props.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
@@ -134,9 +77,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             props.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
         props.put("SOAPVersion", soapVersion);
         props.put(JAXWS_CONTEXT_PROPERTY, getRequestContext());
-
-        
-
     }
 
 }

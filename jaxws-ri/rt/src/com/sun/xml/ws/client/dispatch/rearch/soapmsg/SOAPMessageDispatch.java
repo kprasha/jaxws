@@ -4,10 +4,12 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.soapmsg;
 
-import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.namespace.QName;
@@ -15,8 +17,15 @@ import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.ws.*;
-import java.util.*;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -41,10 +50,10 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      * @param port
      * @param aClass
      * @param mode
-     * @param service
+     * @param owner
      */
-    public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
-        super(port, aClass, mode, service, pipe, binding);
+    public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
+        super(port, aClass, mode, owner, pipe, binding);
         //may only be needed for jaxb objects
         //Pool.Marshaller marshallers = new Pool.Marshaller(jaxbcontext);
     }

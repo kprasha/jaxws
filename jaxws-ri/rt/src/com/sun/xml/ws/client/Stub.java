@@ -3,6 +3,7 @@ package com.sun.xml.ws.client;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.ws.Binding;
@@ -41,7 +42,7 @@ public abstract class Stub implements BindingProvider {
      */
     private final Pipe master;
 
-    protected final Binding binding;
+    protected final BindingImpl binding;
 
     private RequestContext requestContext = new RequestContext(this);
     private ResponseContext responseContext;
@@ -53,7 +54,7 @@ public abstract class Stub implements BindingProvider {
      *      As a {@link BindingProvider}, this object will
      *      return this binding from {@link BindingProvider#getBinding()}.
      */
-    protected Stub(Pipe master, Binding binding) {
+    protected Stub(Pipe master, BindingImpl binding) {
         this.master = master;
         this.binding = binding;
         pipes.recycle(master);

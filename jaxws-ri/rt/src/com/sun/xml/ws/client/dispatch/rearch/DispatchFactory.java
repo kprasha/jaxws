@@ -6,13 +6,17 @@ package com.sun.xml.ws.client.dispatch.rearch;
 import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.binding.BindingImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
-import javax.xml.ws.Binding;
+import javax.xml.ws.WebServiceException;
 import javax.xml.transform.Source;
 import javax.activation.DataSource;
 
@@ -22,42 +26,50 @@ import javax.activation.DataSource;
 * Source.class, DataSource.class and SOAPMessage.class
 * classes.
 */
-public interface DispatchFactory<T> {
+public abstract class DispatchFactory {
+    private DispatchFactory() {} // no instanciation please
 
     /**
-     * Dispatch<T> creator method definition
+     * Factory for SOAPMessage.class
      */
-    public Dispatch createDispatch(QName port, Class<T> clazz, Service.Mode mode, Object delegate, Pipe pipe, javax.xml.ws.Binding binding);
+    public static Dispatch<SOAPMessage> createSAAJDispatch(QName port, Service.Mode mode, WSService owner, Pipe pipe, WSBinding binding) {
+        return new SOAPMessageDispatch(port, SOAPMessage.class, mode, (WSServiceDelegate)owner, pipe, (BindingImpl)binding);
+    }
 
-   /**
-   * Type specific factories with inner Dispatch<T> creator methods
-   * Note: JAXB typed DispatchFactory not needed as we know by virtue of JAXBContext parameter
-   * that it is a JAXBDispatch**
-   */
+    /**
+     * Factory for DataSource.class
+     */
+    public static Dispatch<DataSource> createDataSourceDispatch(QName port, Service.Mode mode, WSService owner, Pipe pipe, WSBinding binding) {
+        return new DataSourceDispatch(port, DataSource.class, mode, (WSServiceDelegate)owner, pipe, (BindingImpl)binding);
+    }
 
-   /** Factory for SOAPMessage.class */
-   public static final DispatchFactory<SOAPMessage> SOAP_DISPATCH_FACTORY = new DispatchFactory<SOAPMessage>() {
+    /**
+     * Factory for Source.class
+     */
+    public static Dispatch<Source> createSourceDispatch(QName port, Service.Mode mode, WSService owner, Pipe pipe, WSBinding binding) {
+        return new SourceDispatch(port, Source.class, mode, (WSServiceDelegate)owner, pipe, (BindingImpl)binding);
+    }
 
-        public Dispatch createDispatch(QName port, Class<SOAPMessage> clazz, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
-            return (Dispatch) new SOAPMessageDispatch(port, clazz, mode, obj, pipe, binding);
-        }
-    };
+    /**
+     * Creator method for typed Dispatch<T>.
+     *
+     * @param port  QName for port specific Dispatch
+     * @param clazz {@link Source}, {@link DataSource} or {@link SOAPMessage} class.
+     * @param mode  Is this a {@link Dispatch} for a payload or a whole message.
+     * @return Dispatch<T> Typed specific Dispatch
+     */
+    public static <T> Dispatch<T> createDispatch(QName port, Class<T> clazz, Service.Mode mode, WSService owner, Pipe pipe, WSBinding binding) {
+        //todo://added just to get something going for dispatch
 
-    /* Factory for DataSource.class */
-    public static final DispatchFactory<DataSource> DATASOURCE_DISPATCH_FACTORY = new DispatchFactory<DataSource>() {
-
-        public Dispatch createDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
-            return (Dispatch) new DataSourceDispatch(port, clazz, mode, obj, pipe, binding);
-        }
-    };
-
-    /** Factory for Source.class */
-    public static final DispatchFactory<Source> SOURCE_DISPATCH_FACTORY = new DispatchFactory<Source>() {
-
-        public Dispatch createDispatch(QName port, Class<Source> clazz, Service.Mode mode, Object obj, Pipe pipe, javax.xml.ws.Binding binding) {
-            return (Dispatch) new SourceDispatch(port, clazz, mode, obj, pipe, binding);
-        }
-    };    
+        if (clazz == SOAPMessage.class) {
+            return (Dispatch<T>) createSAAJDispatch(port, mode, owner, pipe, binding);
+        } else if (clazz == Source.class) {
+            return (Dispatch<T>) createSourceDispatch(port, mode, owner, pipe, binding);
+        } else if (clazz == DataSource.class) {
+            return (Dispatch<T>) createDataSourceDispatch(port, mode, owner, pipe, binding);
+        } else
+            throw new WebServiceException("Unknown class type " + clazz.getName());
+    }
 }
 
 

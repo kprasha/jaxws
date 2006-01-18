@@ -4,21 +4,29 @@
 
 package com.sun.xml.ws.client.dispatch.rearch.jaxb;
 
-import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.BindingImpl;
+import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
+import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
-import javax.xml.ws.*;
-import java.util.concurrent.Future;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.concurrent.Future;
 
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -37,13 +45,17 @@ import java.util.ArrayList;
 
 public class JAXBDispatch<Object> extends DispatchImpl<Object> {
 
-      //todo: use pool -temp to get going
-    Marshaller marshaller;
-    Unmarshaller unmarshaller;
-    Pool.Marshaller marshallers;
-    Pool.Unmarshaller unmarshallers;
-    public JAXBDispatch(QName port, JAXBContext jc, Service.Mode mode, Object service, Pipe pipe, Binding binding) {
-        super(port, jc, mode, service, pipe, binding);
+    private final JAXBContext jaxbcontext;
+
+    private Marshaller marshaller;
+    private Unmarshaller unmarshaller;
+    private final Pool.Marshaller marshallers;
+    private final Pool.Unmarshaller unmarshallers;
+
+
+    public JAXBDispatch(QName port, JAXBContext jc, Service.Mode mode, WSServiceDelegate service, Pipe pipe, BindingImpl binding) {
+        super(port, mode, service, pipe, binding);
+        this.jaxbcontext = jc;
         //temp temp temp - todo:check with KK on how to use pool
         //perhaps pool should be in DispatchImpl?
         //??to pool JAXB objects??
@@ -83,11 +95,11 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
         //todo: temp --where is best place to put this??
         Map<String, List<String>> ch = new HashMap<String, List<String>>();
 
-        List<String> ct = new ArrayList();
+        List<String> ct = new ArrayList<String>();
         ct.add("text/xml");
         ch.put("Content-Type", ct);
 
-        List<String> cte = new ArrayList();
+        List<String> cte = new ArrayList<String>();
         cte.add("binary");
         ch.put("Content-Transfer-Encoding", cte);
 
@@ -97,7 +109,7 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
         switch (mode) {
             case PAYLOAD:
                 try {
-                   return (Object)response.readPayloadAsJAXB(unmarshaller);
+                   return response.<Object>readPayloadAsJAXB(unmarshaller);
                 } catch (Exception e) {
                     throw new WebServiceException(e);
                 }
@@ -109,12 +121,6 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
         }
         return null;
     }
-
-
-    /**
-     * @param msg
-     * @return
-     */
 
     protected Message createMessage(java.lang.Object msg) {
             assert(jaxbcontext != null);
@@ -244,5 +250,12 @@ public class JAXBDispatch<Object> extends DispatchImpl<Object> {
     public void invokeOneWay(Object msg) {
          throw new UnsupportedOperationException();
 
+    }
+
+    @Override
+    protected void setProperties(Message msg) {
+        super.setProperties(msg);
+
+        msg.getProperties().put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
     }
 }
