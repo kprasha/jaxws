@@ -234,7 +234,7 @@ public class RuntimeEndpointInfo extends Endpoint
         if (getServiceName() == null) {
             if (isProviderEndpoint()) {
                 WebServiceProvider wsProvider =
-                    (WebServiceProvider)getImplementorClass().getAnnotation(
+                    getImplementorClass().getAnnotation(
                         WebServiceProvider.class);
                 String tns = wsProvider.targetNamespace();
                 String local = wsProvider.serviceName();
@@ -254,8 +254,7 @@ public class RuntimeEndpointInfo extends Endpoint
     public void doPortNameProcessing() {
         if (getPortName() == null) {
             if (isProviderEndpoint()) {
-                WebServiceProvider wsProvider =
-                    (WebServiceProvider)getImplementorClass().getAnnotation(
+                WebServiceProvider wsProvider = getImplementorClass().getAnnotation(
                         WebServiceProvider.class);
                 String tns = wsProvider.targetNamespace();
                 String local = wsProvider.portName();
@@ -471,7 +470,7 @@ public class RuntimeEndpointInfo extends Endpoint
         this.implementor = implementor;
     }
     
-    public Class getImplementorClass() {
+    public Class<?> getImplementorClass() {
         if (implementorClass == null) {
             implementorClass = implementor.getClass();
         }
@@ -631,9 +630,8 @@ public class RuntimeEndpointInfo extends Endpoint
     private void injectField(final Field field) {
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IllegalAccessException,
-                    InvocationTargetException {
-                    if (!field.isAccessible()) {                        
+                public Object run() throws IllegalAccessException {
+                    if (!field.isAccessible()) {
                         field.setAccessible(true);
                     }
                     field.set(implementor, wsContext);
@@ -806,7 +804,7 @@ public class RuntimeEndpointInfo extends Endpoint
         List<String> wsdlSystemIds = new ArrayList<String>();
         List<String> schemaSystemIds = new ArrayList<String>();
         for(Entry<String, DocInfo> entry : entries) {
-            DocInfo docInfo = (DocInfo)entry.getValue();
+            DocInfo docInfo = entry.getValue();
             DOC_TYPE docType = docInfo.getDocType();
             String query = docInfo.getQueryString();
             if (query == null && docType != null) {
