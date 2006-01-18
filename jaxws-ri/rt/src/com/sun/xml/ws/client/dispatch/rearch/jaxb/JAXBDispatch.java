@@ -12,6 +12,7 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
+import com.sun.xml.bind.api.JAXBRIContext;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -43,7 +44,7 @@ import java.util.concurrent.Future;
  * @version 1.0
  */
 
-public class JAXBDispatch<Object> extends DispatchImpl<Object> {
+public class JAXBDispatch extends DispatchImpl<Object> {
 
     private final JAXBContext jaxbcontext;
 

@@ -8,8 +8,10 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
+import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.bind.api.JAXBRIContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -18,6 +20,7 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
+import javax.xml.bind.JAXBContext;
 import javax.activation.DataSource;
 import java.lang.reflect.Proxy;
 
@@ -129,6 +132,32 @@ public abstract class Stubs {
             return (Dispatch<T>) createDataSourceDispatch(portName, owner, binding, mode, next);
         } else
             throw new WebServiceException("Unknown class type " + clazz.getName());
+    }
+
+    /**
+     * Creates a new JAXB-based {@link Dispatch} stub that connects to the given pipe.
+     *
+     * @param portName
+     *      see {@link Service#createDispatch(QName, Class, Service.Mode)}.
+     * @param owner
+     *      see <a href="#param">common parameters</a>
+     * @param binding
+     *      see <a href="#param">common parameters</a>
+     * @param jaxbContext
+     *      {@link JAXBContext} used to convert between objects and XML.
+     * @param mode
+     *      The mode of the dispatch.
+     *      See {@link Service#createDispatch(QName, Class, Service.Mode)}.
+     * @param next
+     *      see <a href="#param">common parameters</a>
+     *
+     * TODO: are these parameters making sense?
+     */
+    public static Dispatch<Object> createJAXBDispatch( QName portName,
+                                           WSService owner,
+                                           WSBinding binding,
+                                           JAXBContext jaxbContext, Service.Mode mode, Pipe next ) {
+        return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
     /**

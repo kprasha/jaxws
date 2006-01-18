@@ -354,7 +354,7 @@ public class WSServiceDelegate extends WSService {
         // get handler chain
         List<Handler> handlerChain = null;
         if (getHandlerResolver() != null && getServiceName() != null) {
-            PortInfo portInfo = new PortInfoImpl(bindingId.toString(),
+            PortInfo portInfo = new PortInfoImpl(bindingId,
                 portName, getServiceName());
             handlerChain = getHandlerResolver().getHandlerChain(portInfo);
         } else {
@@ -362,45 +362,23 @@ public class WSServiceDelegate extends WSService {
         }
 
         // create binding
-        if (bindingId.toString().equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-            bindingId.toString().equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
+            bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
             SOAPBindingImpl bindingImpl = new SOAPBindingImpl(handlerChain,
-                bindingId.toString(), getServiceName());
+                bindingId, getServiceName());
 
             if (serviceContext.getRoles(portName) != null) {
                 bindingImpl.setRoles(serviceContext.getRoles(portName));
             }
             return bindingImpl;
             //provider._setBinding(bindingImpl);
-        } else if (bindingId.toString().equals(HTTPBinding.HTTP_BINDING)) {
+        } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
             return new HTTPBindingImpl(handlerChain);
             //provider._setBinding(new HTTPBindingImpl(handlerChain));
         }
         return null;
     }
 
-
-    private Dispatch createDispatchClazz(QName port, Class clazz, Service.Mode mode) throws WebServiceException {
-        PortInfoBase dispatchPort = dispatchPorts.get(port);
-        if (dispatchPort != null) {
-            DispatchBase dBase = new DispatchBase(dispatchPort, clazz, mode, this);
-            setBindingOnProvider(dBase, port, dBase._getBindingId());
-            return dBase;
-        } else {
-            throw new WebServiceException("Port must be defined in order to create Dispatch");
-        }
-    }
-
-    private Dispatch createDispatchJAXB(QName port, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        PortInfoBase dispatchPort = dispatchPorts.get(port);
-        if (dispatchPort != null) {
-            DispatchBase dBase = new DispatchBase(dispatchPort, jaxbContext, mode, this);
-            setBindingOnProvider(dBase, port, dBase._getBindingId());
-            return dBase;
-        } else {
-            throw new WebServiceException("Port must be defined in order to create Dispatch");
-        }
-    }
 
     private URL getWsdlLocation() {
         return serviceContext.getWsdlContext().getWsdlLocation();
