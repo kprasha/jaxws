@@ -4,10 +4,14 @@ import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
+import com.sun.xml.ws.sandbox.message.impl.Util;
+import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.Attributes;
 import org.xml.sax.helpers.LocatorImpl;
 
 import javax.xml.bind.JAXBException;
@@ -30,42 +34,23 @@ import javax.xml.transform.sax.SAXResult;
 abstract class SourceHeader implements Header {
 
     Source src;
-    String localName;
-    String nsUri;
-    SourceUtils sourceUtils;    
+    // information about this header. lazily obtained.
+    private String nsUri;
+    private String localName;
+    protected String role;
+
+    /**
+     * See the <tt>FLAG_***</tt> constants.
+     */
+    protected int flags;
+
+    protected final SourceUtils sourceUtils;
+    protected StreamHeader sh;
 
     public SourceHeader(Source src) {
         this.src = src;
         sourceUtils = new SourceUtils(src);
-    }
 
-    protected abstract Header getStreamHeader();
-
-    public String getNamespaceURI() {
-        if(nsUri != null)
-            return nsUri;
-        if(sourceUtils.isStreamSource()){
-            nsUri = getStreamHeader().getNamespaceURI();
-        }else{
-            QName name = sourceUtils.sniff(src);
-            localName = name.getLocalPart();
-            nsUri = name.getNamespaceURI();
-        }
-        return nsUri;
-    }
-
-    public String getLocalPart() {
-        if(localName != null)
-            return localName;
-
-        if(sourceUtils.isStreamSource()){
-            localName = getStreamHeader().getLocalPart();
-        }else{
-            QName name = sourceUtils.sniff(src);
-            localName = name.getLocalPart();
-            nsUri = name.getNamespaceURI();
-        }
-        return localName;
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
@@ -78,7 +63,7 @@ abstract class SourceHeader implements Header {
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         if(sourceUtils.isStreamSource()){
-            getStreamHeader().writeTo(w);
+            sh.writeTo(w);
             return;
         }
         SourceUtils.serializeSource(src, w);
@@ -104,6 +89,83 @@ abstract class SourceHeader implements Header {
             errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
         }
     }
+
+    protected final boolean isSet(int flagMask) {
+        return (flags&flagMask)!=0;
+    }
+
+    protected final void set(int flagMask) {
+        flags |= flagMask;
+    }
+
+    /**
+     * Lazily parse the first element to obtain attribute values on it.
+     */
+    protected final void parseIfNecessary() {
+        if(isSet(FLAG_PARSED))
+            return;
+
+        /**
+         * if its StreamSource, its backed by StreamHeader implementation
+         *  so let mark the FLAG_PARSED
+         */
+
+        if(sourceUtils.isStreamSource()){
+            localName = sh.getLocalPart();
+            nsUri = sh.getNamespaceURI();
+            if(sh.isMustUnderstood())
+                set(FLAG_MUST_UNDERSTAND);
+            role = sh.getRole();            
+            set(FLAG_PARSED);
+            return;
+        }
+
+        //now its either a sax or dom Source
+        RootElementSniffer sniffer = new RootElementSniffer();
+        QName name = sourceUtils.sniff(src, sniffer);
+        localName = name.getLocalPart();
+        nsUri = name.getNamespaceURI();
+        checkHeaderAttribute(sniffer.getAttributes());
+        set(FLAG_PARSED);
+    }
+
+    /**
+     * Checks for well-known SOAP attributes.
+     *
+     * Note that JAXB RI produces interned attribute names.
+     */
+    protected abstract void checkHeaderAttribute(Attributes a);
+
+    protected final void checkMustUnderstand(String localName, Attributes a, int i) {
+        if(localName=="mustUnderstand" && Util.parseBool(a.getValue(i)))
+            set(FLAG_MUST_UNDERSTAND);
+    }
+
+    public final boolean isMustUnderstood() {
+        parseIfNecessary();
+        return isSet(FLAG_MUST_UNDERSTAND);
+    }
+
+    public String getRole() {
+        parseIfNecessary();
+        return role;
+    }
+
+    public String getNamespaceURI() {
+        if(nsUri==null)
+            parseIfNecessary();
+        return nsUri;
+    }
+
+    public String getLocalPart() {
+        if(localName==null)
+            parseIfNecessary();
+        return localName;
+    }
+
+    protected static final int FLAG_PARSED            = 0x0001;
+    protected static final int FLAG_MUST_UNDERSTAND   = 0x0002;
+    protected static final int FLAG_RELAY             = 0x0004;
 
     private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }

@@ -1,6 +1,6 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
-import com.sun.xml.ws.sandbox.message.impl.jaxb.RootElementSniffer;
+import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Node;
@@ -62,6 +62,10 @@ public class SourceUtils {
      * @return QName of the payload
      */
     public QName sniff(Source src) {
+        return sniff(src, new RootElementSniffer());
+    }
+
+    public QName sniff(Source src, RootElementSniffer sniffer){
         String localName = null;
         String namespaceUri = null;
 
@@ -72,7 +76,6 @@ public class SourceUtils {
             namespaceUri = n.getNamespaceURI();
         }else if(isSaxSource()){
             SAXSource saxSrc = (SAXSource)src;
-            RootElementSniffer sniffer = new RootElementSniffer();
             SAXResult saxResult = new SAXResult(sniffer);
             try {
                 Transformer tr = XmlUtil.newTransformer();
