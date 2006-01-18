@@ -69,7 +69,7 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @return the Binding object
      */
-    public Object getBinding() {
+    public SOAPBinding getBinding() {
         if (binding == null)
             return new SOAPBinding();
         return binding;
@@ -78,7 +78,7 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @param binding
      */
-    public void setBinding(Object binding) {
+    public void setBinding(SOAPBinding binding) {
         this.binding = binding;
     }
 
@@ -228,7 +228,7 @@ public class JavaMethodImpl implements JavaMethod {
             Collections.unmodifiableList(requestParams);
     private final List<Parameter> unmResParams =
             Collections.unmodifiableList(responseParams);
-    private Object binding;
+    private SOAPBinding binding;
     private MEP mep;
     private String operationName;
 }
