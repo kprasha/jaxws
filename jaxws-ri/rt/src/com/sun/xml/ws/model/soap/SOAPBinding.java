@@ -20,6 +20,7 @@
 package com.sun.xml.ws.model.soap;
 
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.message.MessageProperties;
 
 /**
  * Binding object that represents soap:binding
@@ -96,9 +97,12 @@ public class SOAPBinding {
     }
 
     /**
-     * @return the soapAction header value. It's always non-null. soap
-     *         message serializer needs to generated SOAPAction HTTP header with
+     * Gets the SOAPAction value.
+     *
+     * @return the soapAction header value. It's always non-null, but not quoted.
+     *         soap message serializer needs to generated SOAPAction HTTP header with
      *         the return of this method enclosed in quotes("").
+     * @see MessageProperties#soapAction
      */
     public String getSOAPAction() {
         if (soapAction == null)
