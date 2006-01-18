@@ -53,7 +53,7 @@ final class SyncMethodHandler extends MethodHandler {
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethod method) {
         super(owner);
 
-        this.soapAction = ((SOAPBinding)method.getBinding()).getSOAPAction();
+        this.soapAction = '"'+((SOAPBinding)method.getBinding()).getSOAPAction()+'"';
 
         {// prepare objects for creating messages
             List<Parameter> rp = method.getRequestParameters();
