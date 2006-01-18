@@ -144,9 +144,12 @@ public class MessageProperties implements MessageContext {
      * The value can be null.
      *
      * <p>
-     * Note that BP requires this header in the HTTP transport, but other
-     * transports are not required to support this header. See
-     * {@BP R2744} and {@BP R2745}.  
+     * Note that the way the transport sends this value out depends on
+     * transport and SOAP version.
+     *
+     * For HTTP transport and SOAP 1.1, BP requires that SOAPAction
+     * header is present (See {@BP R2744} and {@BP R2745}.) For SOAP 1.2,
+     * this is moved to the parameter of the "application/soap+xml".
      */
     @ContextProperty(BindingProviderProperties.SOAP_ACTION_PROPERTY)
     public String soapAction;
