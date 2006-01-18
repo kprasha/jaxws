@@ -21,14 +21,12 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.RequestContext;
-import com.sun.xml.ws.api.message.ContextProperty;
-import com.sun.xml.ws.api.message.Message;
 
+import javax.activation.DataHandler;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import javax.xml.ws.BindingProvider;
-import javax.activation.DataHandler;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -128,6 +126,16 @@ public class MessageProperties implements MessageContext {
      */
     @ContextProperty(BindingProviderProperties.JAXWS_CONTEXT_PROPERTY)
     public RequestContext requestContext;
+
+    /**
+     * The value of the SOAPAction header associated with the message.
+     *
+     * <p>
+     * For outgoing messages, the transport will send out this value.
+     * For incoming messages, the transport will set this field.
+     */
+    @ContextProperty(BindingProviderProperties.SOAP_ACTION_PROPERTY)
+    public String soapAction;
 
     /**
      * Bag to capture "other" properties that do not have
