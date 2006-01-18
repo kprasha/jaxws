@@ -131,8 +131,22 @@ public class MessageProperties implements MessageContext {
      * The value of the SOAPAction header associated with the message.
      *
      * <p>
-     * For outgoing messages, the transport will send out this value.
+     * For outgoing messages, the transport may sends out this value.
+     * If this field is null, the transport may choose to send <tt>""</tt>
+     * (quoted empty string.)
+     *
      * For incoming messages, the transport will set this field.
+     * If the incoming message did not contain the SOAPAction header,
+     * the transport sets this field to null.
+     *
+     * <p>
+     * If the value is non-null, it must be always in the quoted form.
+     * The value can be null.
+     *
+     * <p>
+     * Note that BP requires this header in the HTTP transport, but other
+     * transports are not required to support this header. See
+     * {@BP R2744} and {@BP R2745}.  
      */
     @ContextProperty(BindingProviderProperties.SOAP_ACTION_PROPERTY)
     public String soapAction;
