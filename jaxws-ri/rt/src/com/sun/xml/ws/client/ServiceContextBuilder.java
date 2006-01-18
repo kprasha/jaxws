@@ -37,6 +37,7 @@ import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.jws.WebService;
 import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
@@ -73,8 +74,7 @@ public abstract class ServiceContextBuilder {
             throw new WebServiceException(e);
         }
 
-        if (wsdlLocation != null)
-            serviceContext.setWsdlContext(new WSDLContext(wsdlLocation, er));
+        serviceContext.setWsdlContext(new WSDLContext(wsdlLocation, er));
 
         if (serviceCAnnotations != null) {
             serviceContext.setServiceClass(service);
@@ -88,7 +88,7 @@ public abstract class ServiceContextBuilder {
 
     public static void completeServiceContext(ServiceContext serviceContext, Class portInterface) {
         if ((serviceContext.getWsdlContext() == null) && (portInterface != null)) {
-            URL wsdlLocation = null;
+            URL wsdlLocation;
             try {
                 wsdlLocation = new URL(JAXWSUtils.getFileOrURLName(getWSDLLocation(portInterface)));
             } catch (MalformedURLException e) {
@@ -102,8 +102,8 @@ public abstract class ServiceContextBuilder {
             processAnnotations(serviceContext, portInterface);
     }
 
-    private static QName getServiceName(Class serviceInterface) {
-        WebServiceClient wsClient = (WebServiceClient) serviceInterface.getAnnotation(WebServiceClient.class);
+    private static QName getServiceName(Class<?> serviceInterface) {
+        WebServiceClient wsClient = serviceInterface.getAnnotation(WebServiceClient.class);
         QName serviceName = null;
         if (wsClient != null) {
             String name = wsClient.name();
@@ -113,9 +113,9 @@ public abstract class ServiceContextBuilder {
         return serviceName;
     }
 
-    private static QName getPortName(Class portInterface, Class serviceInterface) {
+    private static QName getPortName(Class<?> portInterface, Class<?> serviceInterface) {
         QName portName = null;
-        WebServiceClient wsClient = (WebServiceClient) serviceInterface.getAnnotation(WebServiceClient.class);
+        WebServiceClient wsClient = serviceInterface.getAnnotation(WebServiceClient.class);
         for (Method method : serviceInterface.getMethods()) {
             if (!method.getDeclaringClass().equals(serviceInterface)) {
                 continue;
@@ -162,7 +162,7 @@ public abstract class ServiceContextBuilder {
 
             //todo:use SCAnnotations and put in map
             String bindingId = serviceContext.getWsdlContext().getBindingID(
-                serviceName, portName).toString();
+                serviceName, portName);
             RuntimeModeler modeler = new RuntimeModeler(portInterface,
                 serviceName, bindingId);
             modeler.setPortName(portName);
@@ -221,7 +221,6 @@ public abstract class ServiceContextBuilder {
                     Class<?> seiClazz = method.getReturnType();
                     if ((seiClazz != null) && (!seiClazz.equals("void")))
                         classes.add(seiClazz);
-
                 }
                 return null;
             }
@@ -236,7 +235,7 @@ public abstract class ServiceContextBuilder {
      * @return the URL of the location of the WSDL for the sei, or null if none was found.
      */
 //this will change
-    private static String getWSDLLocation(Class<?> sei) throws MalformedURLException {
+    private static String getWSDLLocation(Class<?> sei) {
         WebService ws = sei.getAnnotation(WebService.class);
         if (ws == null)
             return null;
@@ -245,19 +244,16 @@ public abstract class ServiceContextBuilder {
 
 //this will change
 
-    private static SCAnnotations getSCAnnotations(Class sc) {
+    private static SCAnnotations getSCAnnotations(final Class<?> sc) {
 
         SCAnnotations SCAnnotations = new SCAnnotations();
         ArrayList<QName> portQNames = new ArrayList<QName>();
         if (sc != null) {
-            //WebServiceClient wsc = (WebServiceClient) sc.getAnnotation(WebServiceClient.class);
-            final Class tmpSC = sc;
-            WebServiceClient wsc = (WebServiceClient)
-                AccessController.doPrivileged(new PrivilegedAction() {
-                    public Object run() {
-                        return tmpSC.getAnnotation(WebServiceClient.class);
-                    }
-            });            
+            WebServiceClient wsc = AccessController.doPrivileged(new PrivilegedAction<WebServiceClient>() {
+                public WebServiceClient run() {
+                    return sc.getAnnotation(WebServiceClient.class);
+                }
+            });
             if (wsc != null) {
                 String name = wsc.name();
                 String tns = wsc.targetNamespace();
@@ -266,13 +262,11 @@ public abstract class ServiceContextBuilder {
                     SCAnnotations.serviceQName = new QName(tns, name);
                 SCAnnotations.wsdlLocation = wsc.wsdlLocation();
 
-                final Class myClass = sc;
-                Method[] methods = (Method[])
-                    AccessController.doPrivileged(new PrivilegedAction() {
-                        public Object run() {
-                            return myClass.getDeclaredMethods();
-                        }
-                    });
+                Method[] methods = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
+                    public Method[] run() {
+                        return sc.getDeclaredMethods();
+                    }
+                });
 
                 if (methods != null) {
                     ArrayList<Class<?>> classes = new ArrayList<Class<?>>(methods.length);
@@ -296,10 +290,10 @@ public abstract class ServiceContextBuilder {
         return SCAnnotations;
     }
 
-    private static <T> T getPrivMethodAnnotation(final Method method, final Class<WebEndpoint> T) {
-        return (T) AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-                return method.getAnnotation(T);
+    private static <T extends Annotation> T getPrivMethodAnnotation(final Method method, final Class<T> t) {
+        return AccessController.doPrivileged(new PrivilegedAction<T>() {
+            public T run() {
+                return method.getAnnotation(t);
             }
         });
     }
