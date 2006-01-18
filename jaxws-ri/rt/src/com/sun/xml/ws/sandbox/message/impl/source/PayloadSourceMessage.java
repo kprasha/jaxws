@@ -208,6 +208,8 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         if(sourceUtils.isStreamSource()){
             streamMessage.writeTo(w);
+            w.flush();
+            w.close();
             return;
         }
         String soapNsUri = soapVersion.nsUri;
@@ -233,6 +235,8 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
 
         w.writeEndElement();
         w.writeEndDocument();
+         w.flush();
+         w.close();
     }
 
     public Message copy() {
