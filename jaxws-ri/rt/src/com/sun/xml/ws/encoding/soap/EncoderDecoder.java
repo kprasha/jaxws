@@ -28,7 +28,6 @@ import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.MessageContextUtil;
@@ -66,7 +65,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      * @return if the parameter is a return
      */
     protected Object fillData(RuntimeContext context, Parameter param, Object obj, Object[] data,
-                              SOAPBinding binding, ParameterBinding paramBinding) {
+                              com.sun.xml.ws.api.model.soap.SOAPBinding binding, ParameterBinding paramBinding) {
         if (param.isWrapperStyle()) {
             Object resp = null;
             for (Parameter p : ((WrapperParameter) param).getWrapperChildren()) {
@@ -145,7 +144,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      * @return Payload - decided by the binding used
      */
     protected Object createPayload(RuntimeContext context, Parameter param, Object[] data,
-                                   Object result, SOAPBinding binding, ParameterBinding paramBinding) {
+                                   Object result, com.sun.xml.ws.api.model.soap.SOAPBinding binding, ParameterBinding paramBinding) {
         if(paramBinding.isAttachment()){
             Object obj = null;
             if(param.isResponse())

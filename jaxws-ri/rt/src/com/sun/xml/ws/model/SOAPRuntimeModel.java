@@ -28,7 +28,6 @@ import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.encoding.soap.message.*;
-import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.MessageInfoUtil;
@@ -59,7 +58,7 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
         for (JavaMethod m : methods) {
             if(m.isAsync())
                 continue;
-            SOAPBinding binding = (SOAPBinding) m.getBinding();
+            com.sun.xml.ws.api.model.soap.SOAPBinding binding = (com.sun.xml.ws.api.model.soap.SOAPBinding) m.getBinding();
             setDecoderInfo(m.getRequestParameters(), binding, Mode.IN);
             setDecoderInfo(m.getResponseParameters(), binding, Mode.OUT);
             for(CheckedException ce:m.getCheckedExceptions()){
@@ -70,7 +69,7 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
 
     }
 
-    private void setDecoderInfo(List<Parameter> params, SOAPBinding binding, Mode mode){
+    private void setDecoderInfo(List<Parameter> params, com.sun.xml.ws.api.model.soap.SOAPBinding binding, Mode mode){
         for (Parameter param : params) {
             ParameterBinding paramBinding = (mode == Mode.IN)?param.getInBinding():param.getOutBinding();
             if (paramBinding.isBody() && binding.isRpcLit()) {
@@ -126,12 +125,12 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
      */
     @Override
     protected void fillTypes(JavaMethod m, List<TypeReference> types) {
-        if(!(m.getBinding() instanceof SOAPBinding)){
+        if(!(m.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding)){
             //TODO throws exception
             System.out.println("Error: Wrong Binding!");
             return;
         }
-        if(((SOAPBinding)m.getBinding()).isDocLit()){
+        if(((com.sun.xml.ws.api.model.soap.SOAPBinding)m.getBinding()).isDocLit()){
             super.fillTypes(m, types);
             return;
         }

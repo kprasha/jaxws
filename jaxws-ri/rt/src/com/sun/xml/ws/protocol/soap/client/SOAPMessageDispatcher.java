@@ -396,7 +396,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         if (runtimeContext != null) {
             JavaMethod javaMethod = runtimeContext.getModel().getJavaMethod(messageInfo.getMethod());
             if (javaMethod != null) {
-                soapAction = ((com.sun.xml.ws.model.soap.SOAPBinding) javaMethod.getBinding()).getSOAPAction();
+                soapAction = ((com.sun.xml.ws.api.model.soap.SOAPBinding) javaMethod.getBinding()).getSOAPAction();
                 header.clear();
                 if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
                     if ((soapAction != null) && (soapAction.length() > 0)) {

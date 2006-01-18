@@ -33,7 +33,6 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.wsdl.parser.Binding;
 import com.sun.xml.ws.wsdl.parser.Part;
 import com.sun.xml.ws.wsdl.parser.BindingOperation;
-import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.Parameter;
@@ -359,7 +358,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         for(JavaMethod method : javaMethods){
             if(method.isAsync())
                 continue;
-            boolean isRpclit = ((SOAPBinding)method.getBinding()).isRpcLit();
+            boolean isRpclit = ((com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding()).isRpcLit();
             List<Parameter> reqParams = method.getRequestParameters();
             List<Parameter> reqAttachParams = null;
             for(Parameter param:reqParams){

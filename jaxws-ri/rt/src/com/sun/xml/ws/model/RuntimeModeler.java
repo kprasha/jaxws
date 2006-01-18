@@ -23,7 +23,7 @@ import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
-import com.sun.xml.ws.model.soap.Style;
+import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.wsdl.parser.BindingOperation;
@@ -66,7 +66,7 @@ public class RuntimeModeler {
     private String bindingId;
     private Class portClass;
     private AbstractRuntimeModelImpl runtimeModel;
-    private com.sun.xml.ws.model.soap.SOAPBinding defaultBinding;
+    private com.sun.xml.ws.model.soap.SOAPBindingImpl defaultBinding;
     private String packageName;
     private String targetNamespace;
     private boolean isWrapped = true;
@@ -365,9 +365,9 @@ public class RuntimeModeler {
      * @param soapBinding the <code>javax.jws.soap.SOAPBinding</code> to model
      * @return returns the runtime model SOAPBinding corresponding to <code>soapBinding</code>
      */
-    protected com.sun.xml.ws.model.soap.SOAPBinding createBinding(javax.jws.soap.SOAPBinding soapBinding) {
-        com.sun.xml.ws.model.soap.SOAPBinding rtSOAPBinding =
-            new com.sun.xml.ws.model.soap.SOAPBinding();
+    protected com.sun.xml.ws.model.soap.SOAPBindingImpl createBinding(javax.jws.soap.SOAPBinding soapBinding) {
+        com.sun.xml.ws.model.soap.SOAPBindingImpl rtSOAPBinding =
+            new com.sun.xml.ws.model.soap.SOAPBindingImpl();
         Style style = (soapBinding == null ||
             soapBinding.style().equals(javax.jws.soap.SOAPBinding.Style.DOCUMENT)) ?
             Style.DOCUMENT : Style.RPC;
@@ -471,7 +471,7 @@ public class RuntimeModeler {
         boolean methodIsWrapped = isWrapped;
         Style style = defaultBinding.getStyle();
         if (methodBinding != null) {
-            com.sun.xml.ws.model.soap.SOAPBinding mySOAPBinding = createBinding(methodBinding);
+            com.sun.xml.ws.model.soap.SOAPBindingImpl mySOAPBinding = createBinding(methodBinding);
             style = mySOAPBinding.getStyle();
             if (action != null)
                 mySOAPBinding.setSOAPAction(action);
@@ -479,7 +479,7 @@ public class RuntimeModeler {
                 javax.jws.soap.SOAPBinding.ParameterStyle.WRAPPED);
             javaMethod.setBinding(mySOAPBinding);
         } else {
-            com.sun.xml.ws.model.soap.SOAPBinding sb = new com.sun.xml.ws.model.soap.SOAPBinding(defaultBinding);
+            com.sun.xml.ws.model.soap.SOAPBindingImpl sb = new com.sun.xml.ws.model.soap.SOAPBindingImpl(defaultBinding);
             if (action != null)
                 sb.setSOAPAction(action);
             else

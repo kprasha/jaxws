@@ -25,11 +25,12 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.model.soap.SOAPBinding;
+import com.sun.xml.ws.model.soap.SOAPBindingImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.soap.SOAPBinding;
 
 /**
  * Build this runtime model using java SEI and annotations
@@ -71,7 +72,7 @@ public class JavaMethodImpl implements JavaMethod {
      */
     public SOAPBinding getBinding() {
         if (binding == null)
-            return new SOAPBinding();
+            return new SOAPBindingImpl();
         return binding;
     }
 

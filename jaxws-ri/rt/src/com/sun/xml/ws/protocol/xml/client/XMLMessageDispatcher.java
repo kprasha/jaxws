@@ -280,7 +280,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
         if (runtimeContext != null) {
             JavaMethod javaMethod = runtimeContext.getModel().getJavaMethod(messageInfo.getMethod());
             if (javaMethod != null) {
-                String soapAction = ((com.sun.xml.ws.model.soap.SOAPBinding) javaMethod.getBinding()).getSOAPAction();
+                String soapAction = ((com.sun.xml.ws.api.model.soap.SOAPBinding) javaMethod.getBinding()).getSOAPAction();
                 header.clear();
                 if (soapAction == null) {
                     xm.getMimeHeaders().addHeader("SOAPAction", "\"\"");

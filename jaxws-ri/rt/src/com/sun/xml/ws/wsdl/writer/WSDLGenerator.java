@@ -32,9 +32,8 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.model.soap.SOAPBinding;
-import com.sun.xml.ws.model.soap.Style;
-import com.sun.xml.ws.model.soap.Use;
+import com.sun.xml.ws.api.model.soap.Style;
+import com.sun.xml.ws.api.model.soap.Use;
 import com.sun.xml.ws.wsdl.parser.SOAPConstants;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import com.sun.xml.ws.wsdl.writer.document.Binding;
@@ -59,6 +58,8 @@ import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.soap.Style;
+import com.sun.xml.ws.api.model.soap.Use;
 
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;
@@ -313,17 +314,17 @@ public class WSDLGenerator {
      */
     protected void generateMessages() {
         for (JavaMethod method : model.getJavaMethods()) {
-            if (method.getBinding() instanceof SOAPBinding)
-                generateSOAPMessages(method, (SOAPBinding)method.getBinding());
+            if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding)
+                generateSOAPMessages(method, (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding());
         }
     }
 
    /**
      * Generates messages for a SOAPBinding
      * @param method The {@link JavaMethod} to generate messages for
-     * @param binding The {@link SOAPBinding} to add the generated messages to
+     * @param binding The {@link com.sun.xml.ws.api.model.soap.SOAPBinding} to add the generated messages to
      */
-    protected void generateSOAPMessages(JavaMethod method, SOAPBinding binding) {
+    protected void generateSOAPMessages(JavaMethod method, com.sun.xml.ws.api.model.soap.SOAPBinding binding) {
         boolean isDoclit = binding.isDocLit();
         Message message = portDefinitions.message().name(method.getOperationName());
         com.sun.xml.ws.wsdl.writer.document.Part part;
@@ -446,8 +447,8 @@ public class WSDLGenerator {
      * @return true if method is rpc/literal, otherwise, false
      */    
     protected boolean isRpcLit(JavaMethod method) {
-        if (method.getBinding() instanceof SOAPBinding) {
-            if (((SOAPBinding)method.getBinding()).getStyle().equals(Style.RPC))
+        if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
+            if (((com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding()).getStyle().equals(Style.RPC))
                 return true;
         }
         return false;
@@ -622,8 +623,8 @@ public class WSDLGenerator {
         boolean first = true;
         for (JavaMethod method : model.getJavaMethods()) {
             if (first) {
-                if (method.getBinding() instanceof SOAPBinding) {
-                    SOAPBinding sBinding = (SOAPBinding)method.getBinding();
+                if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
+                    com.sun.xml.ws.api.model.soap.SOAPBinding sBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
                     SOAPVersion soapVersion = sBinding.getSOAPVersion();
 
                     if(soapVersion.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
@@ -661,11 +662,11 @@ public class WSDLGenerator {
         String targetNamespace = model.getTargetNamespace();
         QName requestMessage = new QName(targetNamespace, method.getOperationName());
         QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
-        if (method.getBinding() instanceof SOAPBinding) {
+        if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
             List<Parameter> bodyParams = new ArrayList<Parameter>();
             List<Parameter> headerParams = new ArrayList<Parameter>();
             splitParameters(bodyParams, headerParams, method.getRequestParameters());
-            SOAPBinding soapBinding = (SOAPBinding)method.getBinding();
+            com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
             operation.soapOperation().soapAction(soapBinding.getSOAPAction());
 
             // input
@@ -759,11 +760,11 @@ public class WSDLGenerator {
         String targetNamespace = model.getTargetNamespace();
         QName requestMessage = new QName(targetNamespace, method.getOperationName());
         QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
-        if (method.getBinding() instanceof SOAPBinding) {
+        if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
             ArrayList<Parameter> bodyParams = new ArrayList<Parameter>();
             ArrayList<Parameter> headerParams = new ArrayList<Parameter>();
             splitParameters(bodyParams, headerParams, method.getRequestParameters());
-            SOAPBinding soapBinding = (SOAPBinding)method.getBinding();
+            com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
             operation.soap12Operation().soapAction(soapBinding.getSOAPAction());
 
             // input
@@ -905,7 +906,7 @@ public class WSDLGenerator {
         port.binding(new QName(serviceQName.getNamespaceURI(), portQName.getLocalPart()+BINDING));
         if (model.getJavaMethods().size() == 0)
             return;
-        if (model.getJavaMethods().iterator().next().getBinding() instanceof SOAPBinding) {
+        if (model.getJavaMethods().iterator().next().getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
             if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
                 com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress address = port._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress.class);
                 address.location(REPLACE_WITH_ACTUAL_URL);

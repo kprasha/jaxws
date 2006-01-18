@@ -35,7 +35,6 @@ import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.model.ExceptionType;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.StringUtils;
 import com.sun.xml.ws.api.model.JavaMethod;
@@ -126,7 +125,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
         List<HeaderBlock> headers = im.getHeaders();
         Map<String, AttachmentBlock> attachments = im.getAttachments();
         Object[] data = mi.getData();
-        SOAPBinding soapBinding = (SOAPBinding)jm.getBinding();
+        com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
 
         // TODO: why is the binding determined by the instance?
         //what happens when client receives unsolicited headers?
@@ -312,7 +311,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
         Object[] data = mi.getData();
         InternalMessage im = new InternalMessage();
         Iterator<Parameter> iter = jm.getRequestParameters().iterator();
-        SOAPBinding soapBinding = (SOAPBinding)jm.getBinding();
+        com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
         while (iter.hasNext()) {
             Parameter param = iter.next();
             ParameterBinding paramBinding = param.getInBinding();

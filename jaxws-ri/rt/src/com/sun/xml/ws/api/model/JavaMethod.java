@@ -23,7 +23,7 @@ public interface JavaMethod {
     MEP getMEP();
 
     /**
-     * Binding object - a {@link com.sun.xml.ws.model.soap.SOAPBinding} isntance. 
+     * Binding object - a {@link com.sun.xml.ws.api.model.soap.SOAPBinding} isntance.
      *
      * @return the Binding object
      */

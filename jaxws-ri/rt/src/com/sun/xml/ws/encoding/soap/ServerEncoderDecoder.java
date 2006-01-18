@@ -32,7 +32,6 @@ import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.model.ExceptionType;
 import com.sun.xml.ws.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.model.soap.SOAPBinding;
 import com.sun.xml.ws.model.SOAPRuntimeModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.MessageInfoUtil;
@@ -79,7 +78,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
 
         int numInputParams = jm.getInputParametersCount();
         Object data[] = new Object[numInputParams];
-        SOAPBinding soapBinding = (SOAPBinding)jm.getBinding();
+        com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
         while (iter.hasNext()) {
             Parameter param = iter.next();
             ParameterBinding paramBinding = param.getInBinding();
@@ -145,7 +144,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
                 return im;
         }
         
-        SOAPBinding soapBinding = (SOAPBinding)jm.getBinding();
+        com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
         Iterator<Parameter> iter = jm.getResponseParameters().iterator();
         while (iter.hasNext()) {
             Parameter param = iter.next();
