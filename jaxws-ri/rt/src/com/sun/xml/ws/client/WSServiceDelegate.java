@@ -13,7 +13,6 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.client.dispatch.DispatchBase;
-import com.sun.xml.ws.client.dispatch.rearch.DispatchFactory;
 import com.sun.xml.ws.client.dispatch.rearch.StandalonePipeAssembler;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.handler.PortInfoImpl;
@@ -318,7 +317,7 @@ public class WSServiceDelegate extends WSService {
         // get handler chain
         List<Handler> handlerChain = null;
         if (getHandlerResolver() != null && getServiceName() != null) {
-            PortInfo portInfo = new PortInfoImpl(bindingId.toString(),
+            PortInfo portInfo = new PortInfoImpl(bindingId,
                 portName, getServiceName());
             handlerChain = getHandlerResolver().getHandlerChain(portInfo);
         } else {
@@ -326,10 +325,10 @@ public class WSServiceDelegate extends WSService {
         }
 
         // create binding
-        if (bindingId.toString().equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-            bindingId.toString().equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
+            bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
             SOAPBindingImpl bindingImpl = new SOAPBindingImpl(handlerChain,
-                bindingId.toString(), getServiceName());
+                bindingId, getServiceName());
 //<<<<<<< WSServiceDelegate.java
 //
 //            if (serviceContext.getRoles() != null) {
@@ -339,7 +338,7 @@ public class WSServiceDelegate extends WSService {
                 bindingImpl.setRoles(serviceContext.getRoles(portName));
             }
             provider._setBinding(bindingImpl);
-        } else if (bindingId.toString().equals(HTTPBinding.HTTP_BINDING)) {
+        } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
             provider._setBinding(new HTTPBindingImpl(handlerChain));
         }
     }

@@ -21,6 +21,8 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.binding.BindingImpl;
 
+import javax.xml.namespace.QName;
+
 
 /**
  * A utility interface for all the classes
