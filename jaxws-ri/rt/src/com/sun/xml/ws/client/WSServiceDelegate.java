@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
+import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
@@ -201,7 +202,7 @@ public class WSServiceDelegate extends WSService {
 
     public <T> Dispatch<T> createDispatch(QName qName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
         //Note: may not be the most performant way to do this- needs review
-        return DispatchFactory.createDispatch(qName, aClass, mode, this, masterPipe, getBinding(qName));
+        return Stubs.createDispatch(qName, this, getBinding(qName), aClass, mode, masterPipe);
     }
 
     public String getEndpointAddress(QName qName) {

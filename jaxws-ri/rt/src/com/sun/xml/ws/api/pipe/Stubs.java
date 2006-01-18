@@ -5,13 +5,20 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.dispatch.rearch.DispatchFactory;
+import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
+import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
+import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
+import com.sun.xml.ws.client.WSServiceDelegate;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Source;
+import javax.activation.DataSource;
 import java.lang.reflect.Proxy;
 
 /**
@@ -48,20 +55,57 @@ import java.lang.reflect.Proxy;
  * For example, asynchronous method invocation will use {@link Service#getExecutor()}.
  *
  * @author Kohsuke Kawaguchi
+ * @author Kathy Walsh
  */
 public abstract class Stubs {
     private Stubs() {}   // no instanciation please
+
+    /**
+     * Creates a new {@link Dispatch} stub for {@link SOAPMessage}.
+     *
+     * This is short-cut of calling
+     * <pre>
+     * createDispatch(port,owner,binding,SOAPMessage.class,mode,next);
+     * </pre>
+     */
+    public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+        return new SOAPMessageDispatch(portName, SOAPMessage.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+    }
+
+    /**
+     * Creates a new {@link Dispatch} stub for {@link DataSource}.
+     *
+     * This is short-cut of calling
+     * <pre>
+     * createDispatch(port,owner,binding,DataSource.class,mode,next);
+     * </pre>
+     */
+    public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+        return new DataSourceDispatch(portName, DataSource.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+    }
+
+    /**
+     * Creates a new {@link Dispatch} stub for {@link Source}.
+     *
+     * This is short-cut of calling
+     * <pre>
+     * createDispatch(port,owner,binding,Source.class,mode,next);
+     * </pre>
+     */
+    public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+        return new SourceDispatch(portName, Source.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+    }
 
     /**
      * Creates a new {@link Dispatch} stub that connects to the given pipe.
      *
      * @param portName
      *      see {@link Service#createDispatch(QName, Class, Service.Mode)}.
-     * @param service
+     * @param owner
      *      see <a href="#param">common parameters</a>
      * @param binding
      *      see <a href="#param">common parameters</a>
-     * @param type
+     * @param clazz
      *      Type of the {@link Dispatch} to be created.
      *      See {@link Service#createDispatch(QName, Class, Service.Mode)}.
      * @param mode
@@ -72,12 +116,19 @@ public abstract class Stubs {
      *
      * TODO: are these parameters making sense?
      */
-    public <T> Dispatch<T> createDispatch( QName portName,
-                                           WSService service,
+    public static <T> Dispatch<T> createDispatch( QName portName,
+                                           WSService owner,
                                            WSBinding binding,
-                                           Class<T> type, Service.Mode mode, Pipe next ) {
+                                           Class<T> clazz, Service.Mode mode, Pipe next ) {
 
-        return DispatchFactory.createDispatch( portName, type, mode, service, next, binding );
+        if (clazz == SOAPMessage.class) {
+            return (Dispatch<T>) createSAAJDispatch(portName, owner, binding, mode, next);
+        } else if (clazz == Source.class) {
+            return (Dispatch<T>) createSourceDispatch(portName, owner, binding, mode, next);
+        } else if (clazz == DataSource.class) {
+            return (Dispatch<T>) createDataSourceDispatch(portName, owner, binding, mode, next);
+        } else
+            throw new WebServiceException("Unknown class type " + clazz.getName());
     }
 
     /**
