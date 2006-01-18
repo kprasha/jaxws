@@ -54,8 +54,6 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      */
     public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
         super(port, aClass, mode, owner, pipe, binding);
-        //may only be needed for jaxb objects
-        //Pool.Marshaller marshallers = new Pool.Marshaller(jaxbcontext);
     }
 
     /**
@@ -219,7 +217,7 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
 
     public void invokeOneWay(SOAPMessage msg) {
         //todo:not complete
-        Message message = process(createMessage(msg));
+        Message result = process(createMessage(msg));
     }
 
 

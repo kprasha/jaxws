@@ -12,7 +12,6 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
-import com.sun.xml.bind.api.JAXBRIContext;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -23,6 +22,7 @@ import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.transform.Source;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +94,29 @@ public class JAXBDispatch extends DispatchImpl<Object> {
         Message message = createMessage(msg);
         setProperties(message);
         //todo: temp --where is best place to put this??
+
+        //todo:temp
+        Message response = process(message);
+        switch (mode) {
+            case PAYLOAD:
+                try {
+                   return response.<Object>readPayloadAsJAXB(unmarshaller);
+                } catch (Exception e) {
+                    throw new WebServiceException(e);
+                }
+            case MESSAGE: {
+                Source result = response.readEnvelopeAsSource();
+                try {
+                    return (Object)unmarshaller.unmarshal(result);
+                } catch (JAXBException e) {
+                    throw new WebServiceException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+    private void setHttpRequestHeaders(Message message) {
         Map<String, List<String>> ch = new HashMap<String, List<String>>();
 
         List<String> ct = new ArrayList<String>();
@@ -105,22 +128,6 @@ public class JAXBDispatch extends DispatchImpl<Object> {
         ch.put("Content-Transfer-Encoding", cte);
 
         message.getProperties().httpRequestHeaders = ch;
-        //todo:temp
-        Message response = process(message);
-        switch (mode) {
-            case PAYLOAD:
-                try {
-                   return response.<Object>readPayloadAsJAXB(unmarshaller);
-                } catch (Exception e) {
-                    throw new WebServiceException(e);
-                }
-            case MESSAGE: {
-
-                 throw new UnsupportedOperationException();
-
-            }
-        }
-        return null;
     }
 
     protected Message createMessage(java.lang.Object msg) {
@@ -138,11 +145,9 @@ public class JAXBDispatch extends DispatchImpl<Object> {
                 case PAYLOAD:
                 case MESSAGE:
                     return new JAXBMessage(marshaller, msg, soapVersion);
-                    //todo
                 default:
                     throw new WebServiceException("Unrecognized message mode");
             }
-
         }
 
 
@@ -249,14 +254,18 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      */
 
     public void invokeOneWay(Object msg) {
-         throw new UnsupportedOperationException();
+         Message message = createMessage(msg);
+        setProperties(message);
+        //todo: temp --where is best place to put this??
 
+        //todo:temp
+        Message response = process(message);
     }
 
     @Override
     protected void setProperties(Message msg) {
         super.setProperties(msg);
-
+        setHttpRequestHeaders(msg);
         msg.getProperties().put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
     }
 }

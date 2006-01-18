@@ -45,7 +45,7 @@ import java.util.concurrent.Future;
 public class SourceDispatch extends DispatchImpl<Source> {
 
     public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
-        super(port, aClass, mode, owner, pipe,binding);
+        super(port, aClass, mode, owner, pipe, binding);
     }
 
 
@@ -182,8 +182,11 @@ public class SourceDispatch extends DispatchImpl<Source> {
      *          the WebServiceException is the original JAXBException.
      */
 
-    public void invokeOneWay(Source msg) {
-       throw new UnsupportedOperationException();
+    public void invokeOneWay(Source msg) throws
+        WebServiceException {
+       Message message = createMessage(msg);
+       setProperties(message);
+       Message response = process(message);
     }
 
 
