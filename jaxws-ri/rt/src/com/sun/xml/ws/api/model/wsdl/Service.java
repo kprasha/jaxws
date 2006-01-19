@@ -4,16 +4,27 @@ import com.sun.xml.ws.api.model.wsdl.Extensible;
 
 import javax.xml.namespace.QName;
 import java.util.Map;
+import java.util.Iterator;
 
 /**
  * Abstracts wsdl:service.
  *
  * @author Vivek Pandey
  */
-public interface Service extends Map<QName, Port>, Extensible {
+public interface Service extends Extensible {
     /**
      * Gets the name of the wsdl:service@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
      */
     QName getName();
+
+    /**
+     * Gets the {@link Port} for a given port name
+     *
+     * @param portName non-null operationName
+     * @return null if a {@link Port} is not found
+     */
+    public Port get(QName portName);
+
+    public Iterator<Port> getPorts();    
 }
