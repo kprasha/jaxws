@@ -38,8 +38,8 @@ public interface JavaMethod {
     String getOperationName();
 
     /**
-     * Request parameters can be {@link com.sun.xml.ws.model.Mode#IN} or
-     * {@link com.sun.xml.ws.model.Mode#INOUT} and these parameters go in a request message on-the-wire.
+     * Request parameters can be {@link com.sun.xml.ws.api.model.Mode#IN} or
+     * {@link com.sun.xml.ws.api.model.Mode#INOUT} and these parameters go in a request message on-the-wire.
      * Further a Parameter can be instance of {@link com.sun.xml.ws.model.WrapperParameter} when
      * the operation is wrapper style.
      *
@@ -48,8 +48,9 @@ public interface JavaMethod {
     List<Parameter> getRequestParameters();
 
     /**
-     * Response parameters go in the response message on-the-wire and can be of {@link com.sun.xml.ws.model.Mode#OUT} or
-     * {@link com.sun.xml.ws.model.Mode#INOUT}
+     * Response parameters go in the response message on-the-wire and can be of
+     * {@link com.sun.xml.ws.api.model.Mode#OUT} or
+     * {@link com.sun.xml.ws.api.model.Mode#INOUT}
      * @return returns unmodifiable list of response parameters
      */
     List<Parameter> getResponseParameters();
