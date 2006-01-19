@@ -39,6 +39,12 @@ import com.sun.xml.ws.api.WSEndpoint;
  */
 public abstract class Container {
     /**
+     * For derived classes.
+     */
+    protected Container() {
+    }
+
+    /**
      * Gets the specified SPI.
      *
      * <p>
