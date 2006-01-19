@@ -6,6 +6,7 @@ package com.sun.xml.ws.client;
 import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.Stubs;
@@ -229,11 +230,9 @@ public class WSServiceDelegate extends WSService {
         return getWsdlLocation();
     }
 
-    protected void addPorts(QName[] ports) {
-        if (ports != null) {
-            for (QName port : ports) {
-                addPort(port);
-            }
+    protected void addPorts(Iterator<Port> ports) {
+        while(ports.hasNext()){
+            addPort(ports.next().getName());
         }
     }
 
@@ -251,13 +250,11 @@ public class WSServiceDelegate extends WSService {
 
         if (wscontext != null) {
             QName serviceName = serviceContext.getServiceName();
-            Set<QName> knownPorts =
-                wscontext.getPortsAsSet(serviceName);
-            if (knownPorts != null) {
-                QName[] portz = knownPorts.toArray(
-                    new QName[knownPorts.size()]);
-                addPorts(portz);
-                for (QName port : portz) {
+            Iterator<Port> knownPorts = wscontext.getPorts(serviceName);
+            if(knownPorts.hasNext()){
+                addPorts(knownPorts);
+                while(knownPorts.hasNext()) {
+                    QName port = knownPorts.next().getName();
                     String endpoint =
                         wscontext.getEndpoint(serviceName, port);
                     String bid = wscontext.getWsdlBinding(serviceName, port)

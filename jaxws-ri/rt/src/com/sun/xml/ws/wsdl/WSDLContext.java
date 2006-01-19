@@ -98,9 +98,9 @@ public class WSDLContext {
         Service service = wsdlDoc.getService(serviceName);
         String endpoint = null;
         if (service != null) {
-            Iterator<Map.Entry<QName, Port>> iter = service.entrySet().iterator();
+            Iterator<Port> iter = service.getPorts();
             if (iter.hasNext()) {
-                Port port = iter.next().getValue();
+                Port port = iter.next();
                 endpoint = port.getAddress();
             }
         }
@@ -130,10 +130,10 @@ public class WSDLContext {
         targetNamespace = tns;
     }
 
-    public Set<QName> getPortsAsSet(QName serviceName) {
+    public Iterator<Port> getPorts(QName serviceName){
         Service service = wsdlDoc.getService(serviceName);
         if (service != null) {
-            return service.keySet();
+            return service.getPorts();
         }
         return null;
     }
@@ -143,9 +143,9 @@ public class WSDLContext {
         Service service = wsdlDoc.getService(serviceName);
         if (service != null) {
 
-            Iterator<Map.Entry<QName, Port>> iter = service.entrySet().iterator();
+            Iterator<Port> iter = service.getPorts();
             while (iter.hasNext()) {
-                Port port = iter.next().getValue();
+                Port port = iter.next();
                 if (port.getName().equals(portName))
                     return true;
             }
