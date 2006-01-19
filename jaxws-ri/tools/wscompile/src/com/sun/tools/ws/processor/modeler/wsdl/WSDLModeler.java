@@ -23,7 +23,6 @@ import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JType;
 import com.sun.tools.ws.processor.ProcessorOptions;
 import com.sun.tools.ws.processor.config.WSDLModelInfo;
-import com.sun.tools.ws.processor.generator.GeneratorConstants;
 import com.sun.tools.ws.processor.model.AsyncOperation;
 import com.sun.tools.ws.processor.model.AsyncOperationType;
 import com.sun.tools.ws.processor.model.Block;
@@ -95,7 +94,7 @@ import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.tools.xjc.api.TypeAndAnnotation;
 import com.sun.tools.xjc.api.XJC;
 import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.ws.model.Mode;
+import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.InputSource;
 

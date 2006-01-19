@@ -26,7 +26,7 @@ import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
 import com.sun.tools.ws.wsdl.framework.Kind;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
-import com.sun.xml.ws.model.Mode;
+import com.sun.xml.ws.api.model.Mode;
 
 /**
  * Entity corresponding to a WSDL message part.
@@ -102,7 +102,7 @@ public class MessagePart extends Entity {
         if (_descriptorKind == null || _descriptor == null) {
             failValidation("validation.missingRequiredProperty", "descriptor");
         }else if(_descriptor.getLocalPart().equals("")){
-            failValidation("validation.invalidElement", _descriptor.toString());               
+            failValidation("validation.invalidElement", _descriptor.toString());
         }
     }
 
