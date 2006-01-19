@@ -85,4 +85,11 @@ public interface BindingOperation extends Extensible {
      * @return null if the part is not found.
      */
     String getMimeTypeForOutputPart(String part);
+
+    /**
+     * Gets the wsdl:portType/wsdl:operation model - {@link PortTypeOperation},
+     * associated with this binding operation.
+     * @return non-null {@link PortTypeOperation}
+     */
+    public PortTypeOperation getPortTypeOperation();
 }

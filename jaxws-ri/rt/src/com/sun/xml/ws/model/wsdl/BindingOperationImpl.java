@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.wsdl.BindingOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -140,6 +141,13 @@ public class BindingOperationImpl extends AbstractExtensibleImpl implements Bind
 
     public String getMimeTypeForOutputPart(String part){
         return outputMimeTypes.get(part);
+    }
+
+    /**
+     * TODO
+     */
+    public PortTypeOperation getPortTypeOperation() {
+        throw new UnsupportedOperationException();
     }
 
     public void setInputExplicitBodyParts(boolean b) {
