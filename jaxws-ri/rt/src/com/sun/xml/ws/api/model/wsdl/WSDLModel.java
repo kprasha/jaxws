@@ -3,6 +3,7 @@ package com.sun.xml.ws.api.model.wsdl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPBinding;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 public interface WSDLModel {
 
     /**
-     * Gets {@link com.sun.xml.ws.api.model.wsdl.PortType} that models <code>wsdl:portType</code>
+     * Gets {@link PortType} that models <code>wsdl:portType</code>
      *
      * @param name non-null quaified name of wsdl:message, where the localName is the value of <code>wsdl:portType@name</code> and
      *             the namespaceURI is the value of wsdl:definitions@targetNamespace
@@ -45,8 +46,8 @@ public interface WSDLModel {
      * Returns the bindings for the given bindingId
      *
      * @param service   non-null service
-     * @param bindingId non-null - can be either {@link javax.xml.ws.soap.SOAPBinding#SOAP11HTTP_BINDING} or
-     *                  {@link javax.xml.ws.soap.SOAPBinding#SOAP12HTTP_BINDING}
+     * @param bindingId non-null - can be either {@link SOAPBinding#SOAP11HTTP_BINDING} or
+     *                  {@link SOAPBinding#SOAP12HTTP_BINDING}
      * @return empty List if no wsdl:binding corresponding to the bindingId is found.
      */
     List<WSDLBinding> getBindings(Service service, String bindingId);
@@ -83,15 +84,15 @@ public interface WSDLModel {
 
     /**
      * Gives the binding Id for a given wsdl:port and wsdl:service name. The binding Id can be either
-     * {@link javax.xml.ws.soap.SOAPBinding#SOAP11HTTP_BINDING} or {@link javax.xml.ws.soap.SOAPBinding#SOAP12HTTP_BINDING}
+     * {@link SOAPBinding#SOAP11HTTP_BINDING} or {@link SOAPBinding#SOAP12HTTP_BINDING}
      * of the given service and port.
      *
      * @param service qualified name of wsdl:service. Must be non-null.
      * @param port    qualified name of wsdl:port. Must be non-null.
      * @return The binding ID associated with the serivce and port.
      * @throws WebServiceException If the binding correponding to the service or port is unkown (other than
-     *                             {@link javax.xml.ws.soap.SOAPBinding#SOAP11HTTP_BINDING} or
-     *                             {@link javax.xml.ws.soap.SOAPBinding#SOAP12HTTP_BINDING})
+     *                             {@link SOAPBinding#SOAP11HTTP_BINDING} or
+     *                             {@link SOAPBinding#SOAP12HTTP_BINDING})
      */
     String getBindingId(QName service, QName port) throws WebServiceException;
 }
