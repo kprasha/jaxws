@@ -199,6 +199,19 @@ public class MessageProperties implements MessageContext {
         return otherProperties.get(key);
     }
 
+    /**
+     * Sets a property.
+     *
+     * <h3>Implementation Note</h3>
+     * This method is slow. Code inside JAX-WS should define strongly-typed
+     * fields in this class and access them directly, instead of using this.
+     *
+     * @throws IllegalArgumentException
+     *      if the given key is an alias of a strongly-typed field,
+     *      and if the value object given is not assignable to the field.
+     *
+     * @see ContextProperty
+     */
     public Object put(String key, Object value) {
         StaticProperty sp = props.get(key);
         if(sp!=null) {
