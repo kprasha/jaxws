@@ -194,7 +194,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         try {
             return ctxt.put(name, value);
         } catch (IllegalArgumentException e) {
-            // MessageProperties implement this.
+            // MessageProperties throws this exception if the type doesn't match
             throw new HandlerException("handler.messageContext.invalid.class",
                     new Object[] { value, name });
         }
