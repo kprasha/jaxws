@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.handler;
 import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
@@ -28,7 +27,6 @@ import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.Name;
-import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
@@ -192,8 +190,14 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         return ctxt.keySet();
     }
 
-    public Object put(String str, Object obj) {
-        return ctxt.put(str, obj);
+    public Object put(String name, Object value) {
+        try {
+            return ctxt.put(name, value);
+        } catch (IllegalArgumentException e) {
+            // MessageProperties implement this.
+            throw new HandlerException("handler.messageContext.invalid.class",
+                    new Object[] { value, name });
+        }
     }
 
     public void putAll(Map<? extends String, ? extends Object> map) {
