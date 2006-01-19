@@ -1,9 +1,6 @@
 package com.sun.xml.ws.api.model;
 
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.model.Mode;
-import com.sun.xml.ws.model.ParameterBinding;
-
 import javax.xml.namespace.QName;
 
 /**

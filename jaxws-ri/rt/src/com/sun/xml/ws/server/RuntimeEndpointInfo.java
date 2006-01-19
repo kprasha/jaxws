@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -38,8 +39,6 @@ import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.Service;
-import com.sun.xml.ws.wsdl.parser.WSDLDocument;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
@@ -189,7 +188,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                 if(serviceName == null)
                     serviceName = RuntimeModeler.getServiceName(getImplementorClass());
                 if(getPortName() != null){
-                    wsdlBinding = wsdlDoc.getBinding(getServiceName(), getPortName());
+                    wsdlBinding = (WSDLBindingImpl) wsdlDoc.getBinding(getServiceName(), getPortName());
                     if(wsdlBinding == null)
                         throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", new Object[]{serviceName, portName, getWsdlUrl()});
                 }else{
@@ -198,7 +197,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                         throw new ServerRtException("runtime.parser.wsdl.noservice", new Object[]{serviceName, getWsdlUrl()});
 
                     String bindingId = binding.getBindingId();
-                    List<com.sun.xml.ws.wsdl.parser.Binding> bindings = wsdlDoc.getBindings(service, bindingId);
+                    List<WSDLBinding> bindings = wsdlDoc.getBindings(service, bindingId);
                     if(bindings.size() == 0)
                         throw new ServerRtException("runtime.parser.wsdl.nobinding", new Object[]{bindingId, serviceName, getWsdlUrl()});
 
