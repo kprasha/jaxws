@@ -1,6 +1,6 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.ws.model.Mode;
+import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.Parameter;
 
 import javax.xml.ws.Holder;
@@ -37,7 +37,7 @@ enum ValueGetter {
     abstract Object get(Object parameter);
 
     static ValueGetter get(Parameter p) {
-        if(p.getMode()==Mode.IN)
+        if(p.getMode()== Mode.IN)
             return PLAIN;
         else
             return HOLDER;

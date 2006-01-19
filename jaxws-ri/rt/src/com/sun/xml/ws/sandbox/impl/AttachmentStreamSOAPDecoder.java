@@ -237,7 +237,7 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
     private int readBody(InputStream is, byte[] pattern, ByteOutputStream baos) throws IOException {
         if (!find(is, pattern, baos)) {
             throw new WebServiceException(
-            "Missing boundary delimitier while reading Body Part");
+            "Missing boundary delimitier while reading Body PartImpl");
         }
         return b;
     }
@@ -460,7 +460,7 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
                throw new WebServiceException(
                    "Unexpected singular '-' character after Mime Boundary");
             } else {
-                //System.out.println("Last Part Found");
+                //System.out.println("Last PartImpl Found");
                 lastPartFound.flip(0);
                 // read the next char
                 b  = is.read();

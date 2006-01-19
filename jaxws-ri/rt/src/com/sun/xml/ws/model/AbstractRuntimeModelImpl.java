@@ -30,13 +30,16 @@ import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.wsdl.parser.Binding;
-import com.sun.xml.ws.wsdl.parser.Part;
-import com.sun.xml.ws.wsdl.parser.BindingOperation;
+import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
+import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.Part;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -351,7 +354,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @param wsdlBinding
      * @deprecated To be removed once client side new architecture is implemented
      */
-    public void applyParameterBinding(Binding wsdlBinding){
+    public void applyParameterBinding(WSDLBindingImpl wsdlBinding){
         if(wsdlBinding == null)
             return;
         wsdlBinding.finalizeBinding();
@@ -421,7 +424,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      *
      * Returns attachment parameters if/any.
      */
-    private List<Parameter> applyRpcLitParamBinding(JavaMethod method, WrapperParameter wrapperParameter, Binding wsdlBinding, Mode mode) {
+    private List<Parameter> applyRpcLitParamBinding(JavaMethod method, WrapperParameter wrapperParameter, WSDLBinding wsdlBinding, Mode mode) {
         String opName = method.getOperationName();
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
         BindingOperation bo = wsdlBinding.get(opName);

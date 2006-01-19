@@ -18,7 +18,8 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.server;
-import com.sun.xml.ws.wsdl.parser.Service;
+import com.sun.xml.ws.api.model.wsdl.Service;
+
 import java.io.InputStream;
 import java.net.URL;
 

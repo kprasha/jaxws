@@ -20,13 +20,17 @@
 package com.sun.xml.ws.wsdl;
 
 import com.sun.xml.ws.wsdl.parser.*;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.Port;
+import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
+import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPBinding;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,7 +45,7 @@ public class WSDLContext {
     private final URL orgWsdlLocation;
     private String targetNamespace;
     private String bindingId;
-    private final WSDLDocument wsdlDoc;
+    private final WSDLModelImpl wsdlDoc;
 
     /**
      * Creates a {@link WSDLContext} by parsing the given wsdl file.
@@ -55,7 +59,7 @@ public class WSDLContext {
 
         orgWsdlLocation = wsdlDocumentLocation;
         try {
-            wsdlDoc = RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver);
+            wsdlDoc = (WSDLModelImpl) RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver);
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
@@ -157,11 +161,11 @@ public class WSDLContext {
         return wsdlDoc.getServices().keySet();
     }
 
-    public WSDLDocument getWsdlDocument() {
+    public WSDLModel getWsdlDocument() {
         return wsdlDoc;
     }
 
-    public Binding getWsdlBinding(QName service, QName port) {
+    public WSDLBinding getWsdlBinding(QName service, QName port) {
         if (wsdlDoc == null)
             return null;
         return wsdlDoc.getBinding(service, port);

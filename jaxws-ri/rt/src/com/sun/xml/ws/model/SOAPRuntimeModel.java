@@ -34,6 +34,8 @@ import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.Mode;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;

@@ -26,7 +26,7 @@ import com.sun.xml.ws.encoding.soap.internal.AttachmentBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.model.ParameterBinding;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;

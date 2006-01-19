@@ -22,7 +22,7 @@ package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.wsdl.parser.Service;
+import com.sun.xml.ws.api.model.wsdl.Service;
 import com.sun.xml.ws.wsdl.writer.WSDLOutputResolver;
 
 import javax.xml.transform.Result;

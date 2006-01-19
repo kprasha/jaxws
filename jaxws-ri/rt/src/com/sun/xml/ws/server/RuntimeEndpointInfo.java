@@ -22,10 +22,13 @@ package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.Service;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
@@ -74,14 +77,14 @@ import java.util.logging.Logger;
 
 
 /**
- * modeled after the javax.xml.ws.Endpoint class in API. 
- * Contains all the information about Binding, handler chain, Implementor object, 
+ * modeled after the javax.xml.ws.Endpoint class in API.
+ * Contains all the information about Binding, handler chain, Implementor object,
  * WSDL & Schema Metadata
  * @author WS Development Team
  */
 public class RuntimeEndpointInfo extends WSEndpoint
     implements com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo {
-    
+
     private String name;
     private QName portName;
     private QName serviceName;
@@ -127,7 +130,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     public void setWSDLFileName(String s) {
         wsdlFileName = s;
     }
-    
+
     /**
      * set the URL for primary WSDL, and an EntityResolver to resolve all
      * imports/references
@@ -136,11 +139,11 @@ public class RuntimeEndpointInfo extends WSEndpoint
         this.wsdlUrl = wsdlUrl;
         this.wsdlResolver = wsdlResolver;
     }
-    
+
     public EntityResolver getWsdlResolver() {
         return wsdlResolver;
     }
-    
+
     public URL getWsdlUrl() {
         return wsdlUrl;
     }
@@ -148,25 +151,25 @@ public class RuntimeEndpointInfo extends WSEndpoint
     public boolean isDeployed() {
         return deployed;
     }
-    
+
     public boolean isPublished() {
         return deployed;
     }
-    
+
     public void stop() {
-        
+
     }
-    
+
     public void publish(Object obj) {
-        
+
     }
-    
+
     public void publish(String address) {
-        
+
     }
-    
-    
-    
+
+
+
     public void createModel() {
         // Create runtime model for non Provider endpoints
 
@@ -181,8 +184,8 @@ public class RuntimeEndpointInfo extends WSEndpoint
             runtimeModel = rap.buildRuntimeModel();
         }else {
             try {
-                WSDLDocument wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
-                com.sun.xml.ws.wsdl.parser.Binding wsdlBinding = null;
+                WSDLModel wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
+                WSDLBindingImpl wsdlBinding = null;
                 if(serviceName == null)
                     serviceName = RuntimeModeler.getServiceName(getImplementorClass());
                 if(getPortName() != null){
@@ -218,14 +221,14 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
-    
+
+
     public boolean isProviderEndpoint() {
         Annotation ann = getImplementorClass().getAnnotation(
             WebServiceProvider.class);
         return (ann != null);
     }
-    
+
     /*
      * If serviceName is not already set via DD or programmatically, it uses
      * annotations on implementorClass to set ServiceName.
@@ -246,7 +249,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
+
     /*
      * If portName is not already set via DD or programmatically, it uses
      * annotations on implementorClass to set PortName.
@@ -275,9 +278,9 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
+
     /*
-     * Sets PortType QName 
+     * Sets PortType QName
      */
     public void doPortTypeNameProcessing() {
         if (getPortTypeName() == null) {
@@ -286,11 +289,11 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
-    
+
+
     /**
      * creates a RuntimeModel using @link com.sun.xml.ws.model.RuntimeModeler.
-     * The modeler creates the model by reading annotations on ImplementorClassobject. 
+     * The modeler creates the model by reading annotations on ImplementorClassobject.
      * RuntimeModel is read only and is accessed from multiple threads afterwards.
 
      */
@@ -301,28 +304,28 @@ public class RuntimeEndpointInfo extends WSEndpoint
         if (implementorClass == null) {
             setImplementorClass(getImplementor().getClass());
         }
-        
+
         // verify if implementor class has @WebService or @WebServiceProvider
-        
+
         // ServiceName processing
         doServiceNameProcessing();
-        
+
         // Port Name processing
         doPortNameProcessing();
-        
+
         // PortType Name processing
         //doPortTypeNameProcessing();
-        
+
         // setting a default binding
         if (binding == null) {
             String bindingId = RuntimeModeler.getBindingId(getImplementorClass());
             setBinding(new SOAPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING));
         }
-        
+
         if (isProviderEndpoint()) {
             deployProvider();
         } else {
-            // Create runtime model for non Provider endpoints    
+            // Create runtime model for non Provider endpoints
             createModel();
             if (getServiceName() == null) {
                 setServiceName(runtimeModel.getServiceQName());
@@ -351,19 +354,19 @@ public class RuntimeEndpointInfo extends WSEndpoint
         }
         deployed = true;
     }
-    
+
     public boolean needWSDLGeneration() {
         return (getWsdlUrl() == null);
     }
-    
+
     public boolean isPublishingDone() {
         return publishingDone;
     }
-    
+
     public void setPublishingDone(boolean publishingDone) {
         this.publishingDone = publishingDone;
     }
-    
+
     /*
      * Generates the WSDL and XML Schema for the endpoint if necessary
      * It generates WSDL only for SOAP1.1, and for XSOAP1.2 bindings
@@ -375,13 +378,13 @@ public class RuntimeEndpointInfo extends WSEndpoint
             !bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
             throw new ServerRtException("can.not.generate.wsdl", bindingId);
         }
-        
-        if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {  
+
+        if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
             String msg = localizer.localize(
                 messageFactory.getMessage("generate.non.standard.wsdl"));
             logger.warning(msg);
         }
-         
+
         // Generate WSDL and schema documents using runtime model
         if (getDocMetadata() == null) {
             setMetadata(new HashMap<String, DocInfo>());
@@ -398,7 +401,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         setWSDLFileName(wsdlResolver.getWSDLFile());
         setPublishingDone(true);
     }
-    
+
     /*
      * Provider endpoint validation
      */
@@ -416,7 +419,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     public void setPortName(QName n) {
         portName = n;
     }
-    
+
     public QName getPortTypeName() {
         return portTypeName;
     }
@@ -448,11 +451,11 @@ public class RuntimeEndpointInfo extends WSEndpoint
     public BindingImpl getBinding() {
         return binding;
     }
-    
+
     public java.util.List<Source> getMetadata() {
         return metadata;
     }
-        
+
     public void setMetadata(java.util.List<Source> metadata) {
 
         this.metadata = metadata;
@@ -461,26 +464,26 @@ public class RuntimeEndpointInfo extends WSEndpoint
     public RuntimeModel getRuntimeModel() {
         return runtimeModel;
     }
-    
+
     public Object getImplementor() {
         return implementor;
     }
-    
+
     public void setImplementor(Object implementor) {
         this.implementor = implementor;
     }
-    
+
     public Class<?> getImplementorClass() {
         if (implementorClass == null) {
             implementorClass = implementor.getClass();
         }
         return implementorClass;
     }
-    
+
     public void setImplementorClass(Class implementorClass) {
         this.implementorClass = implementorClass;
     }
-    
+
     public void setMetadata(Map<String, DocInfo> docs) {
         this.docs = docs;
         // update uri-->DocInfo map
@@ -495,7 +498,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             query2Doc.put(docInfo.getQueryString(), docInfo);
         }
     }
-    
+
     public void updateQuery2DocInfo() {
         // update uri-->DocInfo map
         if (query2Doc != null) {
@@ -503,29 +506,29 @@ public class RuntimeEndpointInfo extends WSEndpoint
         } else {
             query2Doc = new HashMap<String, DocInfo>();
         }
-        Set<Map.Entry<String, DocInfo>> entries = docs.entrySet();        
+        Set<Map.Entry<String, DocInfo>> entries = docs.entrySet();
         for(Map.Entry<String, DocInfo> entry : entries) {
-            DocInfo docInfo = entry.getValue();          
+            DocInfo docInfo = entry.getValue();
             query2Doc.put(docInfo.getQueryString(), docInfo);
-        }        
+        }
     }
-    
+
     public WebServiceContext getWebServiceContext() {
         return wsContext;
     }
-    
+
     public void setWebServiceContext(WebServiceContext wsContext) {
         this.wsContext = wsContext;
     }
-     
-    
+
+
     /*
      * key - /WEB-INF/wsdl/xxx.wsdl
      */
     public Map<String, DocInfo> getDocMetadata() {
         return docs;
     }
-    
+
     /*
      * path - /WEB-INF/wsdl/xxx.wsdl
      * return - xsd=a | wsdl | wsdl=b etc
@@ -533,8 +536,8 @@ public class RuntimeEndpointInfo extends WSEndpoint
     public String getQueryString(URL url) {
         Set<Entry<String, DocInfo>> entries = getDocMetadata().entrySet();
         for(Entry<String, DocInfo> entry : entries) {
-            // URLs are not matching. servlet container bug ?            
-            if (entry.getValue().getUrl().toString().equals(url.toString())) {       
+            // URLs are not matching. servlet container bug ?
+            if (entry.getValue().getUrl().toString().equals(url.toString())) {
                 return entry.getValue().getQueryString();
             }
         }
@@ -544,7 +547,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         return (docInfo == null) ? null : docInfo.getQueryString();
          */
     }
-    
+
     /*
      * queryString - xsd=a | wsdl | wsdl=b etc
      * return - /WEB-INF/wsdl/xxx.wsdl
@@ -553,7 +556,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         DocInfo docInfo = query2Doc.get(queryString);
         return (docInfo == null) ? null : docInfo.getUrl().toString();
     }
-    
+
     /*
      * Injects the WebServiceContext. Called from Servlet.init(), or
      * Endpoint.publish(). Used synchronized because multiple servlet
@@ -571,7 +574,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             injectedContext = true;
         }
     }
-    
+
     private void doFieldsInjection() {
         Class c = getImplementorClass();
         Field[] fields = c.getDeclaredFields();
@@ -579,9 +582,9 @@ public class RuntimeEndpointInfo extends WSEndpoint
             Resource resource = field.getAnnotation(Resource.class);
             if (resource != null) {
                 Class resourceType = resource.type();
-                Class fieldType = field.getType();                  
-                if (resourceType.equals(Object.class)) {                    
-                    if (fieldType.equals(javax.xml.ws.WebServiceContext.class)) {      
+                Class fieldType = field.getType();
+                if (resourceType.equals(Object.class)) {
+                    if (fieldType.equals(javax.xml.ws.WebServiceContext.class)) {
                         injectField(field);
                     }
                 } else if (resourceType.equals(javax.xml.ws.WebServiceContext.class)) {
@@ -595,7 +598,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
+
     private void doMethodsInjection() {
         Class c = getImplementorClass();
         Method[] methods = c.getDeclaredMethods();
@@ -623,7 +626,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
+
     /*
      * injects a resource into a Field
      */
@@ -642,7 +645,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             throw new ServerRtException("server.rt.err",e.getException());
         }
     }
-    
+
     /*
      * Helper method to invoke a Method
      */
@@ -662,7 +665,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             throw new ServerRtException("server.rt.err",e.getException());
         }
     }
-    
+
     /*
      * Calls the first method in the implementor object that has @BeginService
      * annotation. Servlet.init(), or Endpoint.publish() may call this. Used
@@ -679,7 +682,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             beginServiceDone = true;
         }
     }
-    
+
     /*
      * Calls the first method in the implementor object that has @EndService
      * annotation. Servlet.destory(), or Endpoint.stop() may call this. Used
@@ -697,7 +700,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             endServiceDone = true;
         }
     }
-    
+
     /*
      * Helper method to invoke methods which don't take any arguments
      * Also the annType annotation should be set only on one method
@@ -713,16 +716,16 @@ public class RuntimeEndpointInfo extends WSEndpoint
                     throw new ServerRtException("annotation.only.once",
                         new Object[] { annType } );
                 }
-                if (method.getParameterTypes().length != 0) {              
+                if (method.getParameterTypes().length != 0) {
                     throw new ServerRtException("not.zero.parameters",
                         method.getName());
                 }
                 invokeMethod(method, new Object[]{ });
                 once = true;
-            } 
+            }
         }
     }
-    
+
     /*
      * Called when the container calls endService(). Used for any
      * cleanup. Currently calls @PreDestroy method on existing
@@ -745,7 +748,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                             logger.warning("exception ignored from handler " +
                                 "@PreDestroy method: " +
                                 e.getMessage());
-                        }                            
+                        }
                         break;
                     }
                 }
@@ -766,7 +769,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     }
 
     public void setExecutor(Executor executor) {
-       
+
     }
 
     public Map<String, Object> getProperties() {
@@ -779,7 +782,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
 
     /**
      * @return returns null if no motm-threshold-value is specified in the descriptor
-     */ 
+     */
 
     public Integer getMtomThreshold() {
         return mtomThreshold;

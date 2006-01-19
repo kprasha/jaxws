@@ -26,8 +26,11 @@ import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.wsdl.parser.BindingOperation;
-import com.sun.xml.ws.wsdl.parser.Part;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -73,7 +76,7 @@ public class RuntimeModeler {
     private boolean usesWebMethod = false;
     private ClassLoader classLoader = null;
     private Object implementor;
-    private com.sun.xml.ws.wsdl.parser.Binding binding;
+    private WSDLBindingImpl binding;
     private QName serviceName;
     private QName portName;
     private Map<Class, Boolean> classUsesWebMethod = new HashMap<Class, Boolean>();
@@ -115,7 +118,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class sei, QName serviceName, com.sun.xml.ws.wsdl.parser.Binding binding){
+    public RuntimeModeler(Class sei, QName serviceName, WSDLBindingImpl binding){
         this.portClass = sei;
         this.serviceName = serviceName;
         this.bindingId = binding.getBindingId();
@@ -147,7 +150,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, com.sun.xml.ws.wsdl.parser.Binding binding) {
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLBindingImpl binding) {
         this(portClass, serviceName, binding);
         this.implementor = implementor;
     }
@@ -1273,7 +1276,7 @@ public class RuntimeModeler {
         return null;
     }
 
-    private ParameterBinding getBinding(com.sun.xml.ws.wsdl.parser.Binding binding, String operation, String part, boolean isHeader, Mode mode){
+    private ParameterBinding getBinding(com.sun.xml.ws.api.model.wsdl.WSDLBinding binding, String operation, String part, boolean isHeader, Mode mode){
         if(binding == null){
             if(isHeader)
                 return ParameterBinding.HEADER;

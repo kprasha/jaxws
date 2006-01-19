@@ -26,6 +26,7 @@ import java.util.List;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.Mode;
 
 import javax.xml.namespace.QName;
 
@@ -40,7 +41,7 @@ import javax.xml.namespace.QName;
  * body.
  *
  * <p>
- * This parameter is only used for the {@link ParameterBinding#BODY} binding.
+ * This parameter is only used for the {@link com.sun.xml.ws.api.model.ParameterBinding#BODY} binding.
  * 
  * @author Vivek Pandey
  */

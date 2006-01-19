@@ -33,7 +33,7 @@ import com.sun.xml.ws.encoding.soap.message.FaultReasonText;
 import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.model.ExceptionType;
-import com.sun.xml.ws.model.ParameterBinding;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.StringUtils;

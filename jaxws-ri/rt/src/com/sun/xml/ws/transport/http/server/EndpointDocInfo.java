@@ -20,8 +20,9 @@
 package com.sun.xml.ws.transport.http.server;
 
 import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.wsdl.parser.Service;
+import com.sun.xml.ws.model.wsdl.ServiceImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.api.model.wsdl.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

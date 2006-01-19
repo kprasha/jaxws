@@ -20,7 +20,8 @@
 package com.sun.xml.ws.transport.http.servlet;
 
 import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.wsdl.parser.Service;
+import com.sun.xml.ws.api.model.wsdl.Service;
+
 import java.io.InputStream;
 import java.net.URL;
 import javax.servlet.ServletContext;

@@ -30,7 +30,7 @@ import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.model.ExceptionType;
-import com.sun.xml.ws.model.ParameterBinding;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.model.SOAPRuntimeModel;
 import com.sun.xml.ws.server.RuntimeContext;

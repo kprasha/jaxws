@@ -30,7 +30,7 @@ import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
-import com.sun.xml.ws.model.ParameterBinding;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.soap.Use;

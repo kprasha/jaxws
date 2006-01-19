@@ -23,6 +23,8 @@ package com.sun.xml.ws.model;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.Mode;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
