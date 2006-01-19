@@ -4,17 +4,31 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Provider;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * This interface would be used to get the model constructed from the endpoint interface(SEI) related
- * to a <code>wsdl:port</code>, such as {@link JavaMethod}.
+ * Represents the relationship between an endpoint interface (SEI) and a {@link WSDLModel}.
  *
- * It can also be used to get JAXB contexts - {@link JAXBRIContext} and {@link BridgeContext}, also a
- * {@link Bridge} associated with a {@link TypeReference}.
+ * <p>
+ * This interface would be used to access which Java concepts correspond to
+ * which WSDL concepts, such as which <code>wsdl:port</code> corresponds to
+ * a SEI, or which <code>wsdl:operation</code> corresponds to {@link JavaMethod}.
+ *
+ * <P>
+ * It also retains information about the databinding done for a SEI;
+ * such as {@link JAXBRIContext} and {@link Bridge}.
+ *
+ * <p>
+ * This model is constructed only when there is a Java SEI. Therefore it's
+ * not available with {@link Dispatch} or {@link Provider}. Technologies that
+ * need to work regardless of such surface API difference shall not be using
+ * this model.
  *
  * @author Vivek Pandey
  */
