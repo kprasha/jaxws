@@ -28,34 +28,46 @@ import org.xml.sax.EntityResolver;
  * object, proxy for endpoint object etc.) about the endpoint.
  */
 public interface RuntimeEndpointInfo {
-    
+
     /**
      * Returns the name of the endpoint
      * @return name of the endpoint
      */
     public String getName();
-    
+
     /**
      * sets the name of the endpoint
      */
     public void setName(String name);
-        
+
     /**
      * Builds runtime model from implementor object.
      */
     public void init();
-    
+
     /**
      * Destroys any state in this object
      */
     public void destroy();
-    
+
+    /**
+     * Sets the {@link Container} object exported to components running
+     * inside the JAX-WS.
+     *
+     * <p>
+     * This method is expected to be invoked by the container once while
+     * the container is setting up {@link RuntimeEndpointInfo}.
+     *
+     * @see Container
+     */
+    public void setContainer(Container cont);
+
     /**
      * This object is used for method invocations. It could be actual
      * implementor or a proxy object. This must be set before calling deploy().
      */
     public void setImplementor(Object implementor);
-    
+
     /**
      * implementorClass should have <code>@WebService</code> or
      * <code>@WebServiceProvider</code> annotation.
@@ -63,14 +75,14 @@ public interface RuntimeEndpointInfo {
      * class is used to create the model.
      */
     public void setImplementorClass(Class implementorClass);
-    
+
     /**
      * Returns actual Endpoint Object where method invocation is done
      *
      * @return Object Gets the endpoint implementation object or a proxy
      */
     public Object getImplementor();
-    
+
     /**
      * Returns the set implementorClass
      *
@@ -84,38 +96,38 @@ public interface RuntimeEndpointInfo {
      * @return Binding Returns the binding for this endpoint.
      */
     public Binding getBinding();
-    
+
     /**
      * sets the binding for this endpoint. If there are handlers, set them on
      * the binding object.
      */
     public void setBinding(Binding binding);
-    
+
     /**
      * Returns the WebServiceContext of this endpoint
      *
      * @return WebServiceContext Returns the WebServiceContext of this endpoint.
      */
     public WebServiceContext getWebServiceContext();
-    
+
     /**
      * sets the WebServiceContext for this endpoint.
      */
     public void setWebServiceContext(WebServiceContext wsContext);
-    
+
     /**
      * set the URL for primary WSDL, and a resolver to resolve entities like
      * WSDL, imports/references. A resolver for XML catalog can be created using
      * WSRtObjectFactory.createResolver(URL catalogURL).
      */
     public void setWsdlInfo(URL wsdlUrl, EntityResolver resolver);
-    
+
     /**
      * Set service name from DD. If it is null, @WebService, @WebServiceProvider
      * annotations are used to get service name
      */
     public void setServiceName(QName name);
-    
+
     /**
      * Set port name from DD. If it is null, @WebService, @WebServiceProvider
      * annotations are used to get port name

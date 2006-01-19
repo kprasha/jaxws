@@ -29,6 +29,7 @@ import com.sun.xml.ws.model.SOAPRuntimeModel;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
+import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
@@ -109,6 +110,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     private static final Localizer localizer = new Localizer();
     private static final LocalizableMessageFactory messageFactory =
         new LocalizableMessageFactory("com.sun.xml.ws.resources.server");
+    private Container container;
 
     public String getName() {
         return name;
@@ -750,7 +752,15 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
         }
     }
-    
+
+    public void setContainer(Container cont) {
+        this.container = cont;
+    }
+
+    public Container getContainer() {
+        return container;
+    }
+
     public Executor getExecutor() {
         return null;
     }
