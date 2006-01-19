@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 
-public class BindingOperationImpl implements BindingOperation {
+public class BindingOperationImpl extends AbstractExtensibleImpl implements BindingOperation {
     private String name;
 
     // map of wsdl:part to the binding
@@ -48,7 +48,6 @@ public class BindingOperationImpl implements BindingOperation {
 
     private Map<String, Part> inParts;
     private Map<String, Part> outParts;
-    private Set<WSDLExtension> extensions;
 
     /**
      *
@@ -149,13 +148,5 @@ public class BindingOperationImpl implements BindingOperation {
 
     public void setOutputExplicitBodyParts(boolean b) {
         explicitOutputSOAPBodyParts = b;
-    }
-
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
-    }
-
-    public void addWSDLExtension(WSDLExtension ext){
-        extensions.add(ext);
     }
 }

@@ -22,18 +22,17 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.model.wsdl.PortTypeImpl;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.PortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
 import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
 import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.BindingOperation;
 
 import javax.xml.namespace.QName;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -61,7 +60,7 @@ public class WSDLModelImpl implements WSDLModel {
         return messages.get(name);
     }
 
-    public void addPortType(PortTypeImpl pt){
+    public void addPortType(PortType pt){
         portTypes.put(pt.getName(), pt);
     }
 
@@ -69,7 +68,7 @@ public class WSDLModelImpl implements WSDLModel {
         return portTypes.get(name);
     }
 
-    public void addBinding(WSDLBindingImpl binding){
+    public void addBinding(WSDLBinding binding){
         bindings.put(binding.getName(), binding);
     }
 
@@ -77,7 +76,7 @@ public class WSDLModelImpl implements WSDLModel {
         return bindings.get(name);
     }
 
-    public void addService(ServiceImpl svc){
+    public void addService(Service svc){
         services.put(svc.getName(), svc);
     }
 
@@ -117,8 +116,8 @@ public class WSDLModelImpl implements WSDLModel {
         if(services.isEmpty())
             return null;
         Service service = services.values().iterator().next();
-        Iterator<QName> iter = service.keySet().iterator();
-        QName port = (iter.hasNext())?iter.next():null;
+        Iterator<Port> iter = service.getPorts();
+        QName port = (iter.hasNext())?iter.next().getName():null;
         return port;
     }
 
@@ -126,8 +125,8 @@ public class WSDLModelImpl implements WSDLModel {
         if(services.isEmpty())
             return null;
         Service service = services.values().iterator().next();
-        Collection<Port> coll = service.values();
-        Port port = (coll != null)?((coll.iterator().hasNext())?coll.iterator().next():null):null;
+        Iterator<Port> iter = service.getPorts();
+        Port port = iter.hasNext()?iter.next():null;
         return port;
     }
 
@@ -190,10 +189,11 @@ public class WSDLModelImpl implements WSDLModel {
      */
     public List<WSDLBinding> getBindings(Service service, String bindingId){
         List<WSDLBinding> bs = new ArrayList<WSDLBinding>();
-        Collection<Port> ports = service.values();
-        if(ports.isEmpty())
+        Iterator<Port> ports = service.getPorts();
+        if(!ports.hasNext())
             return bs;
-        for(Port port:ports){
+        while(ports.hasNext()){
+            Port port  = ports.next();
             WSDLBinding b = bindings.get(port.getName());
             if(b == null)
                 return bs;
@@ -204,14 +204,16 @@ public class WSDLModelImpl implements WSDLModel {
     }
 
     void finalizeBinding(WSDLBinding binding){
-        assert(binding == null);
+        assert(binding != null);
         QName portTypeName = binding.getPortTypeName();
         if(portTypeName == null)
             return;
         PortType pt = portTypes.get(portTypeName);
         if(pt == null)
             return;
-        for(String op:binding.keySet()){
+        Iterator<BindingOperation> boIter = binding.getBindingOperations();
+        while(!boIter.hasNext()){
+            String op = boIter.next().getName();
             PortTypeOperation pto = pt.get(op);
             if(pto == null)
                 return;

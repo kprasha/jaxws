@@ -28,31 +28,40 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Hashtable;
 
 /**
  * Provides abstract model of wsdl:portType
  *
  * @author Vivek Pandey
  */
-public final class PortTypeImpl extends HashMap<String, PortTypeOperation>  implements PortType {
+public final class PortTypeImpl  extends AbstractExtensibleImpl implements PortType {
     private QName name;
-    private Set<WSDLExtension> extensions;
+    private final Map<String, PortTypeOperation> portTypeOperations;
 
     public PortTypeImpl(QName name) {
         super();
         this.name = name;
         extensions = new HashSet<WSDLExtension>();
+        portTypeOperations = new Hashtable<String, PortTypeOperation>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
+    public PortTypeOperation get(String operationName) {
+        return portTypeOperations.get(operationName);
     }
 
-    public void addExtension(WSDLExtension ex) {
-        extensions.add(ex);
+    /**
+     * Populates the Map that holds operation name as key and {@link PortTypeOperation} as the value.
+     * @param opName Must be non-null
+     * @param ptOp  Must be non-null
+     * @throws NullPointerException if either opName or ptOp is null
+     */
+    public void put(String opName, PortTypeOperation ptOp){
+        portTypeOperations.put(opName, ptOp);
     }
 }

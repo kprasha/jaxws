@@ -27,13 +27,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 
-public class PortTypeOperationImpl implements PortTypeOperation {
+public class PortTypeOperationImpl extends AbstractExtensibleImpl implements PortTypeOperation {
     private QName name;
     private String parameterOrder;
     private QName inputMessage;
     private QName outputMessage;
     private QName faultMessage;
-    private Set<WSDLExtension> extensions;
 
     public PortTypeOperationImpl(QName name) {
         this.name = name;
@@ -74,13 +73,5 @@ public class PortTypeOperationImpl implements PortTypeOperation {
 
     public void setFaultMessage(QName faultMessage) {
         this.faultMessage = faultMessage;
-    }
-
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
-    }
-
-    public void addWSDLExtension(WSDLExtension ext){
-        extensions.add(ext);
     }
 }

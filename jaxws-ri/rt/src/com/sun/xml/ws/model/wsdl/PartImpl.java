@@ -38,7 +38,7 @@ public final class PartImpl implements Part {
      * @param name
      * @param binding
      * @param index
-     * @see {@link WSDLModelImpl#finalizeBinding(WSDLBindingImpl)}
+     * @see {@link WSDLBindingImpl#finalizeBinding()}
      */
     public PartImpl(String name, ParameterBinding binding, int index) {
         this.name = name;

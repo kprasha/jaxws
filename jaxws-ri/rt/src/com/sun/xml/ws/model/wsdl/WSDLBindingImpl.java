@@ -31,33 +31,55 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Hashtable;
 
-public class WSDLBindingImpl extends HashMap<String, BindingOperation> implements WSDLBinding {
+public class WSDLBindingImpl extends AbstractExtensibleImpl implements WSDLBinding {
     private QName name;
     private QName portTypeName;
     private PortType portType;
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private Set<WSDLExtension> extensions;
+    private Map<String, BindingOperation> bindingOperations;
 
     public WSDLBindingImpl(QName name, QName portTypeName) {
         super();
         this.name = name;
         this.portTypeName = portTypeName;
         extensions = new HashSet<WSDLExtension>();
+        bindingOperations = new Hashtable<String, BindingOperation>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public QName getPortTypeName(){
+    public BindingOperation get(String operationName) {
+        return bindingOperations.get(operationName);
+    }
+
+    /**
+     * Populates the Map that holds operation name as key and {@link BindingOperation} as the value.
+     *
+     * @param opName Must be non-null
+     * @param ptOp   Must be non-null
+     * @throws NullPointerException if either opName or ptOp is null
+     */
+    public void put(String opName, BindingOperation ptOp) {
+        bindingOperations.put(opName, ptOp);
+    }
+
+    public QName getPortTypeName() {
         return portTypeName;
     }
 
     public PortType getPortType() {
         return portType;
+    }
+
+    public Iterator<BindingOperation> getBindingOperations() {
+        return bindingOperations.values().iterator();
     }
 
     public void setPortType(PortType portType) {
@@ -76,21 +98,21 @@ public class WSDLBindingImpl extends HashMap<String, BindingOperation> implement
         this.wsdlDoc = wsdlDoc;
     }
 
-    public ParameterBinding getBinding(String operation, String part, Mode mode){
+    public ParameterBinding getBinding(String operation, String part, Mode mode) {
         BindingOperation op = get(operation);
-        if(op == null){
+        if (op == null) {
             //TODO throw exception
             return null;
         }
-        if((Mode.IN == mode)||(Mode.INOUT == mode))
+        if ((Mode.IN == mode) || (Mode.INOUT == mode))
             return op.getInputBinding(part);
         else
             return op.getOutputBinding(part);
     }
 
-    public String getMimeType(String operation, String part, Mode mode){
+    public String getMimeType(String operation, String part, Mode mode) {
         BindingOperation op = get(operation);
-        if(Mode.IN == mode)
+        if (Mode.IN == mode)
             return op.getMimeTypeForInputPart(part);
         else
             return op.getMimeTypeForOutputPart(part);
@@ -99,18 +121,10 @@ public class WSDLBindingImpl extends HashMap<String, BindingOperation> implement
     /**
      * This method is called to apply binings in case when a specific port is required
      */
-    public void finalizeBinding(){
-        if(!finalized){
+    public void finalizeBinding() {
+        if (!finalized) {
             wsdlDoc.finalizeBinding(this);
             finalized = true;
         }
-    }
-
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
-    }
-
-    public void addWSDLExtension(WSDLExtension ext){
-        extensions.add(ext);
     }
 }

@@ -28,26 +28,41 @@ import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
 
-public class ServiceImpl extends LinkedHashMap<QName, Port> implements Service {
+public class ServiceImpl extends AbstractExtensibleImpl implements Service {
     private QName name;
-    private Set<WSDLExtension> extensions;
+    private Map<QName, Port> ports;
 
     public ServiceImpl(QName name) {
         super();
         this.name = name;
         extensions = new HashSet<WSDLExtension>();
+        ports = new LinkedHashMap<QName, Port>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
+    public Port get(QName portName) {
+        return ports.get(portName);
     }
 
-    public void addWSDLExtension(WSDLExtension ext){
-        extensions.add(ext);
+    public Iterator<Port> getPorts(){
+        return ports.values().iterator();
+    }
+
+    /**
+     * Populates the Map that holds port name as key and {@link Port} as the value.
+     *
+     * @param portName Must be non-null
+     * @param port     Must be non-null
+     * @throws NullPointerException if either opName or ptOp is null
+     */
+    public void put(QName portName, Port port) {
+        if (portName == null || port == null)
+            throw new NullPointerException();
+        ports.put(portName, port);
     }
 }

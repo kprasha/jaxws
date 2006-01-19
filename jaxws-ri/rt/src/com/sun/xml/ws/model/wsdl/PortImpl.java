@@ -28,12 +28,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 
-public class PortImpl implements Port {
+public class PortImpl extends AbstractExtensibleImpl implements Port {
     private QName name;
     private String address;
     private QName bindingName;
     private WSDLBinding binding;
-    private Set<WSDLExtension> extensions;
 
     public PortImpl(QName name, QName binding, String address) {
         this.name = name;
@@ -60,14 +59,5 @@ public class PortImpl implements Port {
 
     public void setBinding(WSDLBinding binding) {
         this.binding = binding;
-    }
-
-
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
-    }
-
-    public void addWSDLExtension(WSDLExtension ext){
-        extensions.add(ext);
     }
 }
