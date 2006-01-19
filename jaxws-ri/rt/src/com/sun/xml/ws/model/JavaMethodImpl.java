@@ -30,6 +30,7 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.wsdl.BindingOperation;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 
 /**
@@ -63,7 +64,7 @@ public class JavaMethodImpl implements JavaMethod {
      * @param mep
      *            The mep to set.
      */
-    public void setMEP(MEP mep) {
+    void setMEP(MEP mep) {
         this.mep = mep;
     }
 
@@ -79,12 +80,12 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @param binding
      */
-    public void setBinding(SOAPBinding binding) {
+    void setBinding(SOAPBinding binding) {
         this.binding = binding;
     }
 
 
-    public void setOperationName(String operationName) {
+    void setOperationName(String operationName) {
         this.operationName = operationName;
     }
 
@@ -111,7 +112,7 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @param p
      */
-    public void addParameter(ParameterImpl p) {
+    void addParameter(ParameterImpl p) {
         if (p.isIN() || p.isINOUT()) {
             if (requestParams.contains(p)) {
                 // TODO throw exception
@@ -128,13 +129,13 @@ public class JavaMethodImpl implements JavaMethod {
         }
     }
 
-    public void addRequestParameter(Parameter p){
+    void addRequestParameter(Parameter p){
         if (p.isIN() || p.isINOUT()) {
             requestParams.add(p);
         }
     }
 
-    public void addResponseParameter(Parameter p){
+    void addResponseParameter(Parameter p){
         if (p.isOUT() || p.isINOUT()) {
             responseParams.add(p);
         }
@@ -172,7 +173,7 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @param ce
      */
-    public void addException(CheckedException ce) {
+    void addException(CheckedException ce) {
         if (!exceptions.contains(ce))
             exceptions.add(ce);
     }

@@ -80,13 +80,13 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
                 for (Parameter p : wp.getWrapperChildren()) {
                     if(p.getBinding().isUnbound())
                         continue;
-                    JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(p.getTypeReference()),
+                    JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(),
                         null);
                     payload.addParameter(bi);
                 }
                 addDecoderInfo(param.getName(), payload);
             } else {
-                JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(param.getTypeReference()),
+                JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(param.getBridge().getTypeReference()),
                     null);
                 addDecoderInfo(param.getName(), bi);
             }
@@ -151,11 +151,11 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
         for(Parameter p:params){
             ParameterBinding binding = (mode == Mode.IN)?p.getInBinding():p.getOutBinding();
             if(!p.isWrapperStyle()){
-                types.add(p.getTypeReference());
+                types.add(p.getBridge().getTypeReference());
             }else if(binding.isBody()){
                 List<Parameter> wcParams = ((WrapperParameter)p).getWrapperChildren();
                 for(Parameter wc:wcParams){
-                    types.add(wc.getTypeReference());
+                    types.add(wc.getBridge().getTypeReference());
                 }
             }
         }

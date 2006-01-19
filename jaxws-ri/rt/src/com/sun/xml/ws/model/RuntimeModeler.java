@@ -573,7 +573,7 @@ public class RuntimeModeler {
         }
         resElementName = new QName(resNamespace, resName);
 
-        WrapperParameter requestWrapper = new WrapperParameter(reqElementName,
+        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, reqElementName,
             Mode.IN, 0);
         requestWrapper.setBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
@@ -581,7 +581,7 @@ public class RuntimeModeler {
         if (!isOneway) {
             //typeRef = new TypeReference(resElementName, responseClass,
             //                            new Annotation[0]);
-            responseWrapper = new WrapperParameter(resElementName,
+            responseWrapper = new WrapperParameter(runtimeModel, resElementName,
                 Mode.OUT, -1);
             javaMethod.addParameter(responseWrapper);
             responseWrapper.setBinding(ParameterBinding.BODY);
@@ -619,7 +619,7 @@ public class RuntimeModeler {
             Annotation[] rann = method.getAnnotations();
             if (resultQName.getLocalPart() != null) {
                 TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
-                ParameterImpl returnParameter = new ParameterImpl(rTypeReference, Mode.OUT, -1);
+                ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
                 if (isResultHeader) {
                     returnParameter.setBinding(ParameterBinding.HEADER);
                     javaMethod.addParameter(returnParameter);
@@ -684,7 +684,7 @@ public class RuntimeModeler {
             paramQName = new QName(paramNamespace, paramName);
             TypeReference typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
-            param = new ParameterImpl(typeRef, paramMode, pos++);
+            param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
             if (isHeader) {
                 param.setBinding(ParameterBinding.HEADER);
                 javaMethod.addParameter(param);
@@ -733,14 +733,14 @@ public class RuntimeModeler {
             resElementName = new QName(targetNamespace, operationName+RESPONSE);
         }
 
-        WrapperParameter requestWrapper = new WrapperParameter(reqElementName, Mode.IN, 0);
+        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, reqElementName, Mode.IN, 0);
         requestWrapper.setInBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
             //typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS,
             //                            new Annotation[0]);
-            responseWrapper = new WrapperParameter(resElementName, Mode.OUT, -1);
+            responseWrapper = new WrapperParameter(runtimeModel, resElementName, Mode.OUT, -1);
             responseWrapper.setOutBinding(ParameterBinding.BODY);
             javaMethod.addParameter(responseWrapper);
         }
@@ -779,7 +779,7 @@ public class RuntimeModeler {
         if (!isOneway && returnType!=null && returnType!=void.class) {
             Annotation[] rann = method.getAnnotations();
             TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
-            ParameterImpl returnParameter = new ParameterImpl(rTypeReference, Mode.OUT, -1);
+            ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
             returnParameter.setPartName(resultPartName);
             if(isResultHeader){
                 returnParameter.setBinding(ParameterBinding.HEADER);
@@ -862,7 +862,7 @@ public class RuntimeModeler {
             TypeReference typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
 
-            param = new ParameterImpl(typeRef, paramMode, pos++);
+            param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
             param.setPartName(partName);
 
             if(paramMode == Mode.INOUT){
@@ -1008,7 +1008,7 @@ public class RuntimeModeler {
             if (resultName != null) {
                 responseQName = new QName(resultTNS, resultName);
                 TypeReference rTypeReference = new TypeReference(responseQName, returnType, rann);
-                ParameterImpl returnParameter = new ParameterImpl(rTypeReference, Mode.OUT, -1);
+                ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
 
                 if(resultPartName == null || (resultPartName.length() == 0)){
                     resultPartName = resultName;
@@ -1078,7 +1078,7 @@ public class RuntimeModeler {
                 new TypeReference(requestQName, clazzType,
                     pannotations[pos]);
 
-            param = new ParameterImpl(typeRef, paramMode, pos++);
+            param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
             if(partName == null || (partName.length() == 0)){
                     partName = paramName;
             }

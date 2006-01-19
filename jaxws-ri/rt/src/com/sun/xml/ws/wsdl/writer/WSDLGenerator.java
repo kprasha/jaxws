@@ -345,7 +345,7 @@ public class WSDLGenerator {
                 if (param.isWrapperStyle()) {
                     for (Parameter childParam : ((WrapperParameter)param).getWrapperChildren()) {
                         part = message.part().name(childParam.getPartName());
-                        part.type(jaxbContext.getTypeName(childParam.getTypeReference()));
+                        part.type(jaxbContext.getTypeName(childParam.getBridge().getTypeReference()));
                     }
                 } else {
                     part = message.part().name(param.getPartName());
@@ -379,7 +379,7 @@ public class WSDLGenerator {
                     if (param.isWrapperStyle()) {
                         for (Parameter childParam : ((WrapperParameter)param).getWrapperChildren()) {
                             part = message.part().name(childParam.getPartName());
-                            part.type(jaxbContext.getTypeName(childParam.getTypeReference()));
+                            part.type(jaxbContext.getTypeName(childParam.getBridge().getTypeReference()));
                         }
                     } else {
                         part = message.part().name(param.getPartName());

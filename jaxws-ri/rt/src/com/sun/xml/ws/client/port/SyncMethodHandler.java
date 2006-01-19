@@ -78,7 +78,7 @@ final class SyncMethodHandler extends MethodHandler {
                         this,
                         param.getIndex(),
                         owner.soapVersion,
-                        owner.model.getBridge(param.getTypeReference()),
+                        param.getBridge(),
                         getter ));
                 case ATTACHMENT:
                     // TODO: implement this later

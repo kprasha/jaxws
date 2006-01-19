@@ -78,7 +78,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                     value = getWrapperChildValue(context, obj, name.getNamespaceURI(), name
                             .getLocalPart());
                     if(value == null)
-                        value = setIfPrimitive(p.getTypeReference().type);
+                        value = setIfPrimitive(p.getBridge().getTypeReference().type);
                 }
                 if (p.isResponse())
                     resp = value;
@@ -95,13 +95,13 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
 
         if(!paramBinding.isAttachment()){
             if(paramBinding.isUnbound())
-                obj = setIfPrimitive(param.getTypeReference().type);
+                obj = setIfPrimitive(param.getBridge().getTypeReference().type);
             else
                 obj = (obj != null)?((JAXBBridgeInfo)obj).getValue():null;
         }
         if (param.isResponse()) {
             if(paramBinding.isUnbound())
-                return setIfPrimitive(param.getTypeReference().type);
+                return setIfPrimitive(param.getBridge().getTypeReference().type);
             return obj;
         } else if (data[param.getIndex()] != null) {
             ParameterImpl.setHolderValue(data[param.getIndex()], obj);
@@ -158,7 +158,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
         }
         Object obj = createDocLitPayloadValue(context, param, data, result);
         RuntimeModel model = context.getModel();
-        return new JAXBBridgeInfo(model.getBridge(param.getTypeReference()), obj);
+        return new JAXBBridgeInfo(param.getBridge(), obj);
     }
 
     /*
@@ -281,7 +281,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
             else
                 value = p.getHolderValue(data[p.getIndex()]);
             RuntimeModel model = context.getModel();
-            JAXBBridgeInfo bi = new JAXBBridgeInfo(model.getBridge(p.getTypeReference()), value);
+            JAXBBridgeInfo bi = new JAXBBridgeInfo(param.getBridge(), value);
             payload.addParameter(bi);
         }
         return payload;
@@ -294,7 +294,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                 AttachmentBlock ab = entry.getValue();
                 String part = ab.getWSDLPartName();
                 if(part.equals(param.getPartName()) || part.equals("<"+param.getPartName())){
-                    Class type = (Class)param.getTypeReference().type;
+                    Class type = (Class)param.getBridge().getTypeReference().type;
 
                     if(DataHandler.class.isAssignableFrom(type))
                         return ab.asDataHandler();
@@ -347,7 +347,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
         else
         if(isXMLMimeType(mimeType))
             ab = AttachmentBlock.fromJAXB(contentId,
-                    new JAXBBridgeInfo(model.getBridge(mimeParam.getTypeReference()), obj),
+                    new JAXBBridgeInfo(mimeParam.getBridge(), obj),
                     rtContext, mimeType );
         else
             // this is also broken, as there's no guarantee that the object type and the MIME type

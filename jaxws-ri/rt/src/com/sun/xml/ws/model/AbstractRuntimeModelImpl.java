@@ -242,7 +242,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
 
     private void addTypes(List<Parameter> params, List<TypeReference> types) {
         for (Parameter p : params) {
-            types.add(p.getTypeReference());
+            types.add(p.getBridge().getTypeReference());
         }
     }
 
@@ -468,13 +468,13 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
             wrapperParameter.addWrapperChild(p);
             if(((mode == Mode.IN) && p.getInBinding().isBody())||
                     ((mode == Mode.OUT) && p.getOutBinding().isBody())){
-                JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(p.getTypeReference()), null);
+                JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(), null);
                 payload.addParameter(bi);
             }
         }
 
         for(Parameter p : attachParams){
-            JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(p.getTypeReference()), null);
+            JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(), null);
             payloadMap.put(p.getName(), bi);
         }
 

@@ -241,12 +241,12 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
     }
 
     private Object createAsyncResponseClass(Parameter parameter) {
-        Class asyncWrapper = (Class)parameter.getTypeReference().type;
+        Class asyncWrapper = (Class)parameter.getBridge().getTypeReference().type;
         if(RpcLitPayload.class.isAssignableFrom(asyncWrapper)){
             WrapperParameter wp = (WrapperParameter)parameter;
             if(wp.getWrapperChildren().size() > 0){
                 Parameter p = wp.getWrapperChildren().get(0);
-                asyncWrapper = (Class) p.getTypeReference().type;
+                asyncWrapper = (Class) p.getBridge().getTypeReference().type;
             }
         }
 

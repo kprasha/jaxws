@@ -48,7 +48,7 @@ abstract class BodyBuilder {
          * Creates a {@link BodyBuilder} from a bare parameter.
          */
         Bare(Parameter p, RuntimeModel model) {
-            super(model.getBridge(p.getTypeReference()));
+            super(p.getBridge());
             this.methodPos = p.getIndex();
             this.getter = ValueGetter.get(p);
         }
@@ -93,7 +93,7 @@ abstract class BodyBuilder {
 
             parameterBridges = new Bridge[children.size()];
             for( int i=0; i<parameterBridges.length; i++ )
-                parameterBridges[i] = model.getBridge(children.get(i).getTypeReference());
+                parameterBridges[i] = children.get(i).getBridge();
 
             indices = new int[children.size()];
             getters = new ValueGetter[children.size()];
