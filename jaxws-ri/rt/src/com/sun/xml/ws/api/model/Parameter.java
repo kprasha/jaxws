@@ -1,6 +1,8 @@
 package com.sun.xml.ws.api.model;
 
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.bind.api.Bridge;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -24,12 +26,9 @@ public interface Parameter {
     QName getName();
 
     /**
-     * TODO: once the model gets JAXBContext, shouldn't {@link com.sun.xml.bind.api.Bridge}s
-     * be made available from model objects?
-     *
-     * @return Returns the TypeReference associated with this Parameter
+     * Gives the {@link Bridge} associated with this Parameter
      */
-    TypeReference getTypeReference();
+    Bridge getBridge();
 
     /**
      * @return Returns the mode, such as IN, OUT or INOUT.

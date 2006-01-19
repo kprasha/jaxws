@@ -25,6 +25,7 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.RuntimeModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
@@ -47,11 +48,12 @@ public class ParameterImpl implements Parameter {
     /**
      * 
      */
-    public ParameterImpl(TypeReference type, Mode mode, int index) {
+    public ParameterImpl(RuntimeModel model, TypeReference type, Mode mode, int index) {
         this.typeReference = type;
         this.name = type.tagName;
         this.mode = mode;
         this.index = index;
+        this.model = model;
     }
 
     /**
@@ -59,6 +61,10 @@ public class ParameterImpl implements Parameter {
      */
     public QName getName() {
         return name;
+    }
+
+    public Bridge getBridge() {
+        return model.getBridge(typeReference);
     }
 
     /**
@@ -204,4 +210,5 @@ public class ParameterImpl implements Parameter {
     protected TypeReference typeReference;
     protected QName name;
     protected String partName;
+    protected RuntimeModel model;
 }
