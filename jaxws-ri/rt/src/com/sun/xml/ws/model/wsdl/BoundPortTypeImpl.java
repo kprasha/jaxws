@@ -32,14 +32,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Hashtable;
 
-public class BoundPortTypeImpl extends AbstractExtensibleImpl implements BoundPortType {
+public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements BoundPortType {
     private QName name;
     private QName portTypeName;
     private PortType portType;
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private Map<String, BoundOperation> bindingOperations;
+    private final Map<String, BoundOperation> bindingOperations;
 
     public BoundPortTypeImpl(QName name, QName portTypeName) {
         super();
