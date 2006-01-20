@@ -19,13 +19,12 @@
  */
 package com.sun.xml.ws.api.message;
 
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.RequestContext;
-import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.activation.DataHandler;
 import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Dispatch;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -181,7 +180,7 @@ public class MessageProperties implements MessageContext {
      * of the {@link Message} does not know if a reply is expected
      * or not.
      * (To give you some idea about when this can happen,
-     * sometimes we don't have any WSDL and so we can't tell.)  
+     * sometimes we don't have any WSDL and so we can't tell.)
      */
     @ContextProperty(BindingProviderProperties.ONE_WAY_OPERATION)
     public Boolean isOneWay;
