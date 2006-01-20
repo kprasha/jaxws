@@ -30,14 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
 
-public class BoundOperationImpl extends AbstractExtensibleImpl implements BoundOperation {
+public final class BoundOperationImpl extends AbstractExtensibleImpl implements BoundOperation {
     private String name;
 
     // map of wsdl:part to the binding
-    private Map<String, ParameterBinding> inputParts;
-    private Map<String, ParameterBinding> outputParts;
-    private Map<String, String> inputMimeTypes;
-    private Map<String, String> outputMimeTypes;
+    private final Map<String, ParameterBinding> inputParts;
+    private final Map<String, ParameterBinding> outputParts;
+    private final Map<String, String> inputMimeTypes;
+    private final Map<String, String> outputMimeTypes;
 
     private boolean explicitInputSOAPBodyParts = false;
     private boolean explicitOutputSOAPBodyParts = false;
@@ -45,8 +45,8 @@ public class BoundOperationImpl extends AbstractExtensibleImpl implements BoundO
     private Boolean emptyInputBody;
     private Boolean emptyOutputBody;
 
-    private Map<String, Part> inParts;
-    private Map<String, Part> outParts;
+    private final Map<String, Part> inParts;
+    private final Map<String, Part> outParts;
 
     /**
      *
