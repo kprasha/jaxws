@@ -3,9 +3,13 @@ package com.sun.xml.ws.api.model;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.model.ExceptionType;
 
+import javax.xml.ws.WebFault;
+import java.rmi.RemoteException;
+
 /**
- * This class provides abstractio to the  the exception class corresponding to the wsdl:fault, such as class MUST have
- * {@link javax.xml.ws.WebFault} annotation defined on it.
+ * This class provides abstractio to the  the exception class
+ * corresponding to the wsdl:fault, such as class MUST have
+ * {@link WebFault} annotation defined on it.
  *
  * Also the exception class must have
  *
@@ -19,10 +23,12 @@ import com.sun.xml.ws.model.ExceptionType;
  */
 public interface CheckedException {
     /**
-     * The returned exception class would be userdefined or WSDL exception class that
-     * extends java.lang.Exception.
+     * The returned exception class would be userdefined or WSDL exception class.
+     *
+     * @return
+     *      always non-null same object.
      */
-    Class getExcpetionClass();
+    Class<? extends RemoteException> getExcpetionClass();
 
     /**
      * The detail bean is serialized inside the detail entry in the SOAP message.

@@ -23,6 +23,8 @@ package com.sun.xml.ws.model;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.CheckedException;
 
+import java.rmi.RemoteException;
+
 /**
  * CheckedException class. Holds the exception class - class that has public
  * constructor
@@ -35,8 +37,11 @@ import com.sun.xml.ws.api.model.CheckedException;
  *
  * @author Vivek Pandey
  */
+public final class CheckedExceptionImpl implements CheckedException {
+    private final Class<? extends RemoteException> exceptionClass;
+    private final TypeReference detail;
+    private final ExceptionType exceptionType;
 
-public class CheckedExceptionImpl implements CheckedException {
     /**
      * @param exceptionClass
      *            Userdefined or WSDL exception class that extends
@@ -47,7 +52,7 @@ public class CheckedExceptionImpl implements CheckedException {
      *            either ExceptionType.UserDefined or
      *            ExceptionType.WSDLException
      */
-    public CheckedExceptionImpl(Class exceptionClass, TypeReference detail, ExceptionType exceptionType) {
+    public CheckedExceptionImpl(Class<? extends RemoteException> exceptionClass, TypeReference detail, ExceptionType exceptionType) {
         this.detail = detail;
         this.exceptionType = exceptionType;
         this.exceptionClass = exceptionClass;
@@ -57,7 +62,7 @@ public class CheckedExceptionImpl implements CheckedException {
      * @return the <code>Class</clode> for this object
      * 
      */
-    public Class getExcpetionClass() {
+    public Class<? extends RemoteException> getExcpetionClass() {
         return exceptionClass;
     }
 
@@ -72,10 +77,4 @@ public class CheckedExceptionImpl implements CheckedException {
     public ExceptionType getExceptionType() {
         return exceptionType;
     }
-
-    private Class exceptionClass;
-
-    private TypeReference detail;
-
-    private ExceptionType exceptionType;
 }

@@ -95,7 +95,7 @@ public class RuntimeModeler {
     public static final String SERVICE              = "Service";
     public static final String PORT                 = "Port";
     public static final Class HOLDER_CLASS = Holder.class;
-    public static final Class REMOTE_EXCEPTION_CLASS = RemoteException.class;
+    public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
     public static final Class RPC_LIT_PAYLOAD_CLASS = com.sun.xml.ws.encoding.jaxb.RpcLitPayload.class;
 
     /**
@@ -918,9 +918,13 @@ public class RuntimeModeler {
      * @param method the <code>method</code> from which to find the exceptions to model
      */
     protected void processExceptions(JavaMethodImpl javaMethod, Method method) {
-        for (Type exception : method.getGenericExceptionTypes()) {
+        for (Class<?> exception : method.getExceptionTypes()) {
             if (REMOTE_EXCEPTION_CLASS.isAssignableFrom((Class)exception))
                 continue;
+
+            Class<? extends RemoteException> exceptionClass
+                = exception.asSubclass(REMOTE_EXCEPTION_CLASS);
+
             Class exceptionBean;
             Annotation[] anns;
             Method faultInfoMethod = getWSDLExceptionFaultInfo((Class)exception);
@@ -934,7 +938,7 @@ public class RuntimeModeler {
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
-                WebFault webFault = (WebFault)((Class)exception).getAnnotation(WebFault.class);
+                WebFault webFault = (WebFault)exceptionClass.getAnnotation(WebFault.class);
                 exceptionBean = faultInfoMethod.getReturnType();
                 anns = faultInfoMethod.getAnnotations();
                 if (webFault.targetNamespace().length() > 0)
@@ -945,7 +949,7 @@ public class RuntimeModeler {
             TypeReference typeRef = new TypeReference(faultName, exceptionBean,
                 anns);
             CheckedException checkedException =
-                new CheckedExceptionImpl((Class)exception, typeRef, exceptionType);
+                new CheckedExceptionImpl(exceptionClass, typeRef, exceptionType);
             javaMethod.addException(checkedException);
         }
     }
@@ -1002,9 +1006,7 @@ public class RuntimeModeler {
 
         QName responseQName = null;
         if ((returnType != null) && (!returnType.getName().equals("void"))) {
-            Class returnClazz = returnType;
             Annotation[] rann = method.getAnnotations();
-            QName rqname = null;
             if (resultName != null) {
                 responseQName = new QName(resultTNS, resultName);
                 TypeReference rTypeReference = new TypeReference(responseQName, returnType, rann);
