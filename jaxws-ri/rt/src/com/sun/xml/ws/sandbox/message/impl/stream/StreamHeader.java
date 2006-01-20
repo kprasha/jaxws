@@ -23,6 +23,8 @@ import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -107,6 +109,10 @@ public abstract class StreamHeader implements Header {
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         // TODO: How can the unmarshaller process this as a fragment?
         return (T)unmarshaller.unmarshal(_mark.processUsingXMLStreamReader());
+    }
+
+    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return bridge.unmarshal(context,_mark.processUsingXMLStreamReader());
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {

@@ -24,6 +24,8 @@ import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.api.Bridge;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.xml.sax.SAXParseException;
@@ -272,9 +274,24 @@ public abstract class Message {
     public abstract <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
 
     /**
+     * Reads the payload as a JAXB object according to the given {@link Bridge},
+     * by using the specified {@link BridgeContext}.
+     *
+     * This consumes the message.
+     *
+     * @throws JAXBException
+     *      If JAXB reports an error during the processing.
+     */
+    public abstract <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException;
+
+    /**
      * Reads the payload as a {@link XMLStreamReader}
      *
      * This consumes the message.
+     *
+     * @return
+     *      always non-null valid {@link XMLStreamReader} that points to
+     *      the payload tag name.
      */
     public abstract XMLStreamReader readPayload() throws XMLStreamException;
 

@@ -98,6 +98,10 @@ public class ParameterImpl implements Parameter {
         return false;
     }
 
+    public boolean isReturnValue() {
+        return index==-1;
+    }
+
     /**
      * @return the Binding for this Parameter
      */

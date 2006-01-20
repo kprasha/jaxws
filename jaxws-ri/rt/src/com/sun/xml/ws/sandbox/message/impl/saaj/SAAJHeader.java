@@ -20,6 +20,8 @@
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
 import com.sun.xml.bind.unmarshaller.DOMScanner;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
@@ -195,6 +197,10 @@ public class SAAJHeader implements Header{
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
+    }
+
+    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return bridge.unmarshal(context,header);
     }
 
     /**

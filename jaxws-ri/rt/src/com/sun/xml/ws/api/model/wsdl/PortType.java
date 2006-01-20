@@ -7,7 +7,7 @@ import javax.xml.namespace.QName;
 import java.util.Map;
 
 /**
- * Abstraction of wsdl:portType
+ * Abstraction of wsdl:portType.
  *
  * @author Vivek Pandey
  */

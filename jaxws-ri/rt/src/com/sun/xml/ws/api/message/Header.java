@@ -33,6 +33,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
+
 
 /**
  * A SOAP header.
@@ -166,9 +169,13 @@ public interface Header {
 
     /**
      * Reads the header as a JAXB object by using the given unmarshaller.
-     *
      */
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
+
+    /**
+     * Reads the header as a JAXB object by using the given unmarshaller.
+     */
+    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException;
 
     /**
      * Writes out the header.

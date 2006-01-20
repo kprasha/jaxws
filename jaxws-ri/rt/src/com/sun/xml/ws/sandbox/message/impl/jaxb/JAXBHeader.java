@@ -184,6 +184,10 @@ abstract class JAXBHeader implements Header {
         return (T)r.getResult();
     }
 
+    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return bridge.unmarshal(context,new JAXBBridgeSource(this.bridge,this.context,jaxbObject));
+    }
+
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
             bridge.marshal(context,jaxbObject,w);

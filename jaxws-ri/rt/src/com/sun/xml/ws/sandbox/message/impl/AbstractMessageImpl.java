@@ -20,6 +20,8 @@
 package com.sun.xml.ws.sandbox.message.impl;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -49,6 +51,10 @@ public abstract class AbstractMessageImpl extends Message {
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         return (T)unmarshaller.unmarshal(readPayloadAsSource());
+    }
+
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return bridge.unmarshal(context,readPayloadAsSource());
     }
 
     // TODO: expand

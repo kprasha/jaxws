@@ -1,6 +1,8 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -59,6 +61,10 @@ abstract class SourceHeader implements Header {
 
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         return (T)unmarshaller.unmarshal(src);
+    }
+
+    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return bridge.unmarshal(context,src);
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {

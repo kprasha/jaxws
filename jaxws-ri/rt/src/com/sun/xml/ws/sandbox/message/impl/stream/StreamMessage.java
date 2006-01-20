@@ -26,6 +26,8 @@ import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -135,9 +137,13 @@ public class StreamMessage extends AbstractMessageImpl {
         throw new UnsupportedOperationException();
     }
 
-    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+    public Object readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         // TODO: How can the unmarshaller process this as a fragment?
-        return (T)unmarshaller.unmarshal(reader);
+        return unmarshaller.unmarshal(reader);
+    }
+
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return bridge.unmarshal(context,reader);
     }
 
     public XMLStreamReader readPayload() {

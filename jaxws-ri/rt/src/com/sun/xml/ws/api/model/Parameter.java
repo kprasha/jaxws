@@ -4,6 +4,8 @@ import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.Bridge;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.Holder;
+import javax.jws.WebParam;
 
 /**
  * Runtime Parameter that abstracts the annotated java parameter
@@ -48,6 +50,14 @@ public interface Parameter {
     boolean isWrapperStyle();
 
     /**
+     * Returns true if this parameter is bound to the return value from the {@link JavaMethod}.
+     *
+     * <p>
+     * Just the convenience method for <tt>getIndex()==-1</tt>
+     */
+    boolean isReturnValue();
+
+    /**
      * Returns the binding associated with the parameter. For IN parameter the binding will be
      * same as {@link #getInBinding()}, for OUT parameter the binding will be same as
      * {@link #getOutBinding()} and for INOUT parameter the binding will be same as calling
@@ -65,7 +75,7 @@ public interface Parameter {
     ParameterBinding getInBinding();
 
     /**
-     * Returns the {@link ParameterBinding} associated with the IN mode
+     * Returns the {@link ParameterBinding} associated with the OUT mode
      *
      * @return the binding
      */
@@ -88,11 +98,14 @@ public interface Parameter {
 
     /**
      * If true, this parameter maps to the return value of a method invocation.
-     * <p/>
-     * <p/>
+     *
+     * <p>
      * {@link JavaMethod#getResponseParameters()} is guaranteed to have
      * at most one such {@link Parameter}. Note that there coule be none,
      * in which case the method returns <tt>void</tt>.
+     *
+     * <p>
+     * Other response parameters are bound to {@link Holder}.
      */
     boolean isResponse();
 
@@ -108,7 +121,7 @@ public interface Parameter {
     /**
      * Gives the wsdl:part@name value
      *
-     * @return Value of {@link javax.jws.WebParam#partName()} annotation if present,
+     * @return Value of {@link WebParam#partName()} annotation if present,
      *         otherwise its the localname of the infoset associated with the parameter
      */
     String getPartName();

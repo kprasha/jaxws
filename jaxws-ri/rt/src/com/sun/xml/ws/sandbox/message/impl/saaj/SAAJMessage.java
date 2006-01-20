@@ -28,6 +28,8 @@ import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -206,6 +208,17 @@ public class SAAJMessage extends Message {
             Node pn = sm.getSOAPBody().getFirstChild();
             if (pn != null)
                 return (T) unmarshaller.unmarshal(pn);
+            return null;
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
+    }
+
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        try {
+            Node pn = sm.getSOAPBody().getFirstChild();
+            if (pn != null)
+                return bridge.unmarshal(context,pn);
             return null;
         } catch (SOAPException e) {
             throw new WebServiceException(e);
