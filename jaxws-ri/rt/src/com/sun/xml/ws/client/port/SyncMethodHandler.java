@@ -47,6 +47,8 @@ final class SyncMethodHandler extends MethodHandler {
     private final MessageFiller[] inFillers;
 
     private final String soapAction;
+    
+    private final Boolean isOneWay;
 
     /**
      * Used to get a value from method invocation parameter.
@@ -142,8 +144,9 @@ final class SyncMethodHandler extends MethodHandler {
             default:
                 responseBuilder = new ResponseBuilder.Composite(builders);
             }
-
         }
+
+        this.isOneWay = method.getMEP().isOneWay();
     }
 
     public Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException {
@@ -157,6 +160,7 @@ final class SyncMethodHandler extends MethodHandler {
             props.proxy = proxy;
             props.requestContext = rc;
             props.soapAction = soapAction;
+            props.isOneWay = isOneWay;
 
             // TODO: fill in MessageProperties
             ////set mtom threshold value to
