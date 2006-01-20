@@ -30,15 +30,15 @@ import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
+import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
-import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.Part;
 
 import javax.xml.namespace.QName;
@@ -354,7 +354,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @param wsdlBinding
      * @deprecated To be removed once client side new architecture is implemented
      */
-    public void applyParameterBinding(WSDLBindingImpl wsdlBinding){
+    public void applyParameterBinding(BoundPortTypeImpl wsdlBinding){
         if(wsdlBinding == null)
             return;
         wsdlBinding.finalizeBinding();
@@ -418,16 +418,16 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * Applies binding related information to the RpcLitPayload. The payload map is populated correctly.
      * @param method
      * @param wrapperParameter
-     * @param wsdlBinding
+     * @param boundPortType
      * @param mode
      * @return
      *
      * Returns attachment parameters if/any.
      */
-    private List<Parameter> applyRpcLitParamBinding(JavaMethod method, WrapperParameter wrapperParameter, WSDLBinding wsdlBinding, Mode mode) {
+    private List<Parameter> applyRpcLitParamBinding(JavaMethod method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
         String opName = method.getOperationName();
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
-        BindingOperation bo = wsdlBinding.get(opName);
+        BoundOperation bo = boundPortType.get(opName);
         Map<Integer, Parameter> bodyParams = new HashMap<Integer, Parameter>();
         List<Parameter> unboundParams = new ArrayList<Parameter>();
         List<Parameter> attachParams = new ArrayList<Parameter>();
@@ -436,7 +436,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
             if(partName == null)
                 continue;
 
-            ParameterBinding paramBinding = wsdlBinding.getBinding(opName,
+            ParameterBinding paramBinding = boundPortType.getBinding(opName,
                     partName, mode);
             if(paramBinding != null){
                 if(mode == Mode.IN)

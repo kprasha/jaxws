@@ -154,7 +154,7 @@ public interface JAXWSBindingsConstants {
      */
 
     /*
-     * BindingOperation
+     * BoundOperation
      *
      * <jaxws:enableAdditionalSOAPHeaderMapping>
      *  xs:boolean

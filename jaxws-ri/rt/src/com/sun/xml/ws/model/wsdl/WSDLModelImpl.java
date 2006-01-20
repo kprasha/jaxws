@@ -24,11 +24,11 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.PortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
-import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.Operation;
 import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.model.wsdl.Service;
-import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 
 import javax.xml.namespace.QName;
 
@@ -42,13 +42,13 @@ import java.util.Map;
 public class WSDLModelImpl implements WSDLModel {
     private Map<QName, Message> messages;
     private Map<QName, PortType> portTypes;
-    private Map<QName, WSDLBinding> bindings;
+    private Map<QName, BoundPortType> bindings;
     private Map<QName, Service> services;
 
     public WSDLModelImpl() {
         messages = new HashMap<QName, Message>();
         portTypes = new HashMap<QName, PortType>();
-        bindings = new HashMap<QName, WSDLBinding>();
+        bindings = new HashMap<QName, BoundPortType>();
         services = new LinkedHashMap<QName, Service>();
     }
 
@@ -68,11 +68,11 @@ public class WSDLModelImpl implements WSDLModel {
         return portTypes.get(name);
     }
 
-    public void addBinding(WSDLBinding binding){
-        bindings.put(binding.getName(), binding);
+    public void addBinding(BoundPortType boundPortType){
+        bindings.put(boundPortType.getName(), boundPortType);
     }
 
-    public WSDLBinding getBinding(QName name){
+    public BoundPortType getBinding(QName name){
         return bindings.get(name);
     }
 
@@ -92,7 +92,7 @@ public class WSDLModelImpl implements WSDLModel {
         return portTypes;
     }
 
-    public Map<QName, WSDLBinding> getBindings() {
+    public Map<QName, BoundPortType> getBindings() {
         return bindings;
     }
 
@@ -138,10 +138,10 @@ public class WSDLModelImpl implements WSDLModel {
         Port port = getFirstPort();
         if(port == null)
             return null;
-        WSDLBinding binding = bindings.get(port.getBindingName());
-        if(binding == null)
+        BoundPortType boundPortType = bindings.get(port.getBindingName());
+        if(boundPortType == null)
             return null;
-        return binding.getBindingId();
+        return boundPortType.getBindingId();
     }
 
     /**
@@ -154,7 +154,7 @@ public class WSDLModelImpl implements WSDLModel {
         if(s != null){
             Port p = s.get(port);
             if(p != null){
-                WSDLBinding b = bindings.get(p.getBindingName());
+                BoundPortType b = bindings.get(p.getBindingName());
                 if(b != null)
                     return b.getBindingId();
             }
@@ -168,9 +168,9 @@ public class WSDLModelImpl implements WSDLModel {
      * @param serviceName non-null service QName
      * @param portName    non-null port QName
      * @return
-     *          BindingOperation on success otherwise null. throws NPE if any of the parameters null
+     *          BoundOperation on success otherwise null. throws NPE if any of the parameters null
      */
-    public WSDLBinding getBinding(QName serviceName, QName portName){
+    public BoundPortType getBinding(QName serviceName, QName portName){
         Service service = services.get(serviceName);
         if(service != null){
             Port port = service.get(portName);
@@ -187,14 +187,14 @@ public class WSDLModelImpl implements WSDLModel {
      * @param service  non-null service
      * @param bindingId  non-null binding id
      */
-    public List<WSDLBinding> getBindings(Service service, String bindingId){
-        List<WSDLBinding> bs = new ArrayList<WSDLBinding>();
+    public List<BoundPortType> getBindings(Service service, String bindingId){
+        List<BoundPortType> bs = new ArrayList<BoundPortType>();
         Iterator<Port> ports = service.getPorts();
         if(!ports.hasNext())
             return bs;
         while(ports.hasNext()){
             Port port  = ports.next();
-            WSDLBinding b = bindings.get(port.getName());
+            BoundPortType b = bindings.get(port.getName());
             if(b == null)
                 return bs;
             if(b.equals(bindingId))
@@ -203,25 +203,25 @@ public class WSDLModelImpl implements WSDLModel {
         return bs;
     }
 
-    void finalizeBinding(WSDLBinding binding){
-        assert(binding != null);
-        QName portTypeName = binding.getPortTypeName();
+    void finalizeBinding(BoundPortType boundPortType){
+        assert(boundPortType != null);
+        QName portTypeName = boundPortType.getPortTypeName();
         if(portTypeName == null)
             return;
         PortType pt = portTypes.get(portTypeName);
         if(pt == null)
             return;
-        Iterator<BindingOperation> boIter = binding.getBindingOperations();
+        Iterator<BoundOperation> boIter = boundPortType.getBindingOperations();
         while(!boIter.hasNext()){
             String op = boIter.next().getName();
-            PortTypeOperation pto = pt.get(op);
+            Operation pto = pt.get(op);
             if(pto == null)
                 return;
             QName inMsgName = pto.getInputMessage();
             if(inMsgName == null)
                 continue;
             Message inMsg = messages.get(inMsgName);
-            BindingOperationImpl bo = (BindingOperationImpl) binding.get(op);
+            BoundOperationImpl bo = (BoundOperationImpl) boundPortType.get(op);
             int bodyindex = 0;
             if(inMsg != null){
                 for(String name:inMsg){

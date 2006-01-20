@@ -21,8 +21,8 @@ package com.sun.xml.ws.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.model.wsdl.Service;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.xml.sax.EntityResolver;
@@ -167,7 +167,7 @@ public class WSDLContext {
         return wsdlDoc;
     }
 
-    public WSDLBinding getWsdlBinding(QName service, QName port) {
+    public BoundPortType getWsdlBinding(QName service, QName port) {
         if (wsdlDoc == null)
             return null;
         return wsdlDoc.getBinding(service, port);

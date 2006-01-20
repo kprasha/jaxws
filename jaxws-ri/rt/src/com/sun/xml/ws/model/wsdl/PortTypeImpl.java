@@ -21,12 +21,9 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.PortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
-import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
+import com.sun.xml.ws.api.model.wsdl.Operation;
 
 import javax.xml.namespace.QName;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Hashtable;
@@ -38,30 +35,30 @@ import java.util.Hashtable;
  */
 public final class PortTypeImpl  extends AbstractExtensibleImpl implements PortType {
     private QName name;
-    private final Map<String, PortTypeOperation> portTypeOperations;
+    private final Map<String, Operation> portTypeOperations;
 
     public PortTypeImpl(QName name) {
         super();
         this.name = name;
         extensions = new HashSet<WSDLExtension>();
-        portTypeOperations = new Hashtable<String, PortTypeOperation>();
+        portTypeOperations = new Hashtable<String, Operation>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public PortTypeOperation get(String operationName) {
+    public Operation get(String operationName) {
         return portTypeOperations.get(operationName);
     }
 
     /**
-     * Populates the Map that holds operation name as key and {@link PortTypeOperation} as the value.
+     * Populates the Map that holds operation name as key and {@link Operation} as the value.
      * @param opName Must be non-null
      * @param ptOp  Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(String opName, PortTypeOperation ptOp){
+    public void put(String opName, Operation ptOp){
         portTypeOperations.put(opName, ptOp);
     }
 }

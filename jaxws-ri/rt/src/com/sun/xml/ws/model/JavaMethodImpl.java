@@ -30,7 +30,6 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.wsdl.BindingOperation;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 
 /**

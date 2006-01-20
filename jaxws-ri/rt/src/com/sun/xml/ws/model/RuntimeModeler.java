@@ -28,9 +28,9 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.Part;
-import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
+import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -76,7 +76,7 @@ public class RuntimeModeler {
     private boolean usesWebMethod = false;
     private ClassLoader classLoader = null;
     private Object implementor;
-    private WSDLBindingImpl binding;
+    private BoundPortTypeImpl binding;
     private QName serviceName;
     private QName portName;
     private Map<Class, Boolean> classUsesWebMethod = new HashMap<Class, Boolean>();
@@ -118,7 +118,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class sei, QName serviceName, WSDLBindingImpl binding){
+    public RuntimeModeler(Class sei, QName serviceName, BoundPortTypeImpl binding){
         this.portClass = sei;
         this.serviceName = serviceName;
         this.bindingId = binding.getBindingId();
@@ -150,7 +150,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLBindingImpl binding) {
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BoundPortTypeImpl binding) {
         this(portClass, serviceName, binding);
         this.implementor = implementor;
     }
@@ -1276,19 +1276,19 @@ public class RuntimeModeler {
         return null;
     }
 
-    private ParameterBinding getBinding(com.sun.xml.ws.api.model.wsdl.WSDLBinding binding, String operation, String part, boolean isHeader, Mode mode){
-        if(binding == null){
+    private ParameterBinding getBinding(com.sun.xml.ws.api.model.wsdl.BoundPortType boundPortType, String operation, String part, boolean isHeader, Mode mode){
+        if(boundPortType == null){
             if(isHeader)
                 return ParameterBinding.HEADER;
             else
                 return ParameterBinding.BODY;
         }
-        return binding.getBinding(operation, part, mode);
+        return boundPortType.getBinding(operation, part, mode);
     }
 
     private Part getPart(String opName, String partName, Mode mode){
         if(binding != null){
-            BindingOperation bo = binding.get(opName);
+            BoundOperation bo = binding.get(opName);
             if(bo != null)
                 return bo.getPart(partName, mode);
         }

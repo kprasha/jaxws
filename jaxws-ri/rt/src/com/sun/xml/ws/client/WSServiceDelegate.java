@@ -19,7 +19,7 @@ import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
+import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
 import org.xml.sax.EntityResolver;
@@ -357,7 +357,7 @@ public class WSServiceDelegate extends WSService {
         //apply parameter bindings
         RuntimeModel model = eif.getRuntimeContext().getModel();
         if (portName != null) {
-            WSDLBindingImpl binding = (WSDLBindingImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portName);
+            BoundPortTypeImpl binding = (BoundPortTypeImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portName);
             eif.setBindingID(binding.getBindingId());
             ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
 

@@ -28,10 +28,10 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.model.wsdl.PortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
-import com.sun.xml.ws.model.wsdl.PortTypeOperationImpl;
+import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.OperationImpl;
 import com.sun.xml.ws.model.wsdl.ServiceImpl;
-import com.sun.xml.ws.model.wsdl.BindingOperationImpl;
+import com.sun.xml.ws.model.wsdl.BoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.Message;
 import com.sun.xml.ws.model.wsdl.PortImpl;
 import org.xml.sax.EntityResolver;
@@ -252,7 +252,7 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        WSDLBindingImpl binding = new WSDLBindingImpl(new QName(targetNamespace, bindingName),
+        BoundPortTypeImpl binding = new BoundPortTypeImpl(new QName(targetNamespace, bindingName),
                 ParserUtil.getQName(reader, portTypeName));
         binding.setWsdlDocument(wsdlDoc);
         wsdlDoc.addBinding(binding);
@@ -273,7 +273,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private static void parseBindingOperation(XMLStreamReader reader, WSDLBindingImpl binding) {
+    private static void parseBindingOperation(XMLStreamReader reader, BoundPortTypeImpl binding) {
         String bindingOpName = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
         if(bindingOpName == null){
             //TODO: throw exception?
@@ -282,7 +282,7 @@ public class RuntimeWSDLParser {
             return;
         }
 
-        BindingOperationImpl bindingOp = new BindingOperationImpl(bindingOpName);
+        BoundOperationImpl bindingOp = new BoundOperationImpl(bindingOpName);
         binding.put(bindingOpName, bindingOp);
 
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
@@ -297,7 +297,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private static void parseInputBinding(XMLStreamReader reader, BindingOperationImpl bindingOp) {
+    private static void parseInputBinding(XMLStreamReader reader, BoundOperationImpl bindingOp) {
         boolean bodyFound = false;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -316,7 +316,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private static void parseOutputBinding(XMLStreamReader reader, BindingOperationImpl bindingOp) {
+    private static void parseOutputBinding(XMLStreamReader reader, BoundOperationImpl bindingOp) {
         boolean bodyFound = false;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -456,7 +456,7 @@ public class RuntimeWSDLParser {
         }
 
         QName operationQName = new QName(portType.getName().getNamespaceURI(), operationName);
-        PortTypeOperationImpl operation = new PortTypeOperationImpl(operationQName);
+        OperationImpl operation = new OperationImpl(operationQName);
         String parameterOrder = ParserUtil.getAttribute(reader, "parameterOrder");
         operation.setParameterOrder(parameterOrder);
         portType.put(operationName, operation);
@@ -472,14 +472,14 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private void parsePortTypeOperationInput(XMLStreamReader reader, PortTypeOperationImpl operation) {
+    private void parsePortTypeOperationInput(XMLStreamReader reader, OperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.setInputMessage(msgName);
         goToEnd(reader);
     }
 
-    private void parsePortTypeOperationOutput(XMLStreamReader reader, PortTypeOperationImpl operation) {
+    private void parsePortTypeOperationOutput(XMLStreamReader reader, OperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.setOutputMessage(msgName);

@@ -24,12 +24,12 @@ import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.Service;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPRuntimeModel;
-import com.sun.xml.ws.model.wsdl.WSDLBindingImpl;
+import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
@@ -184,11 +184,11 @@ public class RuntimeEndpointInfo extends WSEndpoint
         }else {
             try {
                 WSDLModel wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
-                WSDLBindingImpl wsdlBinding = null;
+                BoundPortTypeImpl wsdlBinding = null;
                 if(serviceName == null)
                     serviceName = RuntimeModeler.getServiceName(getImplementorClass());
                 if(getPortName() != null){
-                    wsdlBinding = (WSDLBindingImpl) wsdlDoc.getBinding(getServiceName(), getPortName());
+                    wsdlBinding = (BoundPortTypeImpl) wsdlDoc.getBinding(getServiceName(), getPortName());
                     if(wsdlBinding == null)
                         throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", new Object[]{serviceName, portName, getWsdlUrl()});
                 }else{
@@ -197,7 +197,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                         throw new ServerRtException("runtime.parser.wsdl.noservice", new Object[]{serviceName, getWsdlUrl()});
 
                     String bindingId = binding.getBindingId();
-                    List<WSDLBinding> bindings = wsdlDoc.getBindings(service, bindingId);
+                    List<BoundPortType> bindings = wsdlDoc.getBindings(service, bindingId);
                     if(bindings.size() == 0)
                         throw new ServerRtException("runtime.parser.wsdl.nobinding", new Object[]{bindingId, serviceName, getWsdlUrl()});
 

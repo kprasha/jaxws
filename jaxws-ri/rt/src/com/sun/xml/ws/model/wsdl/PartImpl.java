@@ -20,7 +20,6 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.Part;
 
 /**
@@ -38,7 +37,7 @@ public final class PartImpl implements Part {
      * @param name
      * @param binding
      * @param index
-     * @see {@link WSDLBindingImpl#finalizeBinding()}
+     * @see {@link BoundPortTypeImpl#finalizeBinding()}
      */
     public PartImpl(String name, ParameterBinding binding, int index) {
         this.name = name;

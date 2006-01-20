@@ -1,10 +1,9 @@
 package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.Extensible;
-import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
+import com.sun.xml.ws.api.model.wsdl.Operation;
 
 import javax.xml.namespace.QName;
-import java.util.Map;
 
 /**
  * Abstraction of wsdl:portType.
@@ -19,10 +18,10 @@ public interface PortType extends Extensible {
     public QName getName();
 
     /**
-     * Gets the {@link PortTypeOperation} for a given operation name
+     * Gets the {@link Operation} for a given operation name
      *
      * @param operationName non-null operationName
-     * @return null if a {@link PortTypeOperation} is not found
+     * @return null if a {@link Operation} is not found
      */
-    public PortTypeOperation get(String operationName);
+    public Operation get(String operationName);
 }

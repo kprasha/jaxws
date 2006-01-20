@@ -1,6 +1,6 @@
 package com.sun.xml.ws.api.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.Extensible;
 
 import javax.xml.namespace.QName;
@@ -19,14 +19,14 @@ public interface Port extends Extensible {
 
     /**
      * Gets wsdl:service/wsdl:port@binding attribute value as (@link QName}. This name can be used to find a
-     * {@link WSDLBinding} from {@link WSDLModel#getBinding(javax.xml.namespace.QName)}
+     * {@link BoundPortType} from {@link WSDLModel#getBinding(javax.xml.namespace.QName)}
      */
     QName getBindingName();
 
     /**
-     * Gets {@link WSDLBinding} associated with the {@link Port}.
+     * Gets {@link BoundPortType} associated with the {@link Port}.
      */
-    WSDLBinding getBinding();
+    BoundPortType getBinding();
 
     /**
      * Gets the wsdl:service/wsdl:port@address attribute value.

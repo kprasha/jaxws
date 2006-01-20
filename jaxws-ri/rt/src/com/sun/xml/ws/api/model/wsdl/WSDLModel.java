@@ -24,23 +24,23 @@ public interface WSDLModel {
     PortType getPortType(QName name);
 
     /**
-     * Gets {@link WSDLBinding} that models <code>wsdl:binding</code>
+     * Gets {@link BoundPortType} that models <code>wsdl:binding</code>
      *
      * @param name non-null quaified name of wsdl:binding, where the localName is the value of <code>wsdl:binding@name</code> and
      *             the namespaceURI is the value of wsdl:definitions@targetNamespace
-     * @return A {@link WSDLBinding} or null if no wsdl:binding found
+     * @return A {@link BoundPortType} or null if no wsdl:binding found
      */
-    WSDLBinding getBinding(QName name);
+    BoundPortType getBinding(QName name);
 
     /**
-     * Give a {@link WSDLBinding} for the given wsdl:service and wsdl:port names.
+     * Give a {@link BoundPortType} for the given wsdl:service and wsdl:port names.
      *
      * @param serviceName non-null service QName
      * @param portName    non-null port QName
-     * @return A {@link WSDLBinding}. null if the Binding for the given wsd:service and wsdl:port name are not
+     * @return A {@link BoundPortType}. null if the Binding for the given wsd:service and wsdl:port name are not
      *         found.
      */
-    WSDLBinding getBinding(QName serviceName, QName portName);
+    BoundPortType getBinding(QName serviceName, QName portName);
 
     /**
      * Returns the bindings for the given bindingId
@@ -50,7 +50,7 @@ public interface WSDLModel {
      *                  {@link SOAPBinding#SOAP12HTTP_BINDING}
      * @return empty List if no wsdl:binding corresponding to the bindingId is found.
      */
-    List<WSDLBinding> getBindings(Service service, String bindingId);
+    List<BoundPortType> getBindings(Service service, String bindingId);
 
     /**
      * Gets {@link Service} that models <code>wsdl:service</code>
@@ -69,11 +69,11 @@ public interface WSDLModel {
     Map<QName, PortType> getPortTypes();
 
     /**
-     * Gives a {@link Map} of wsdl:binding {@link QName} and {@link WSDLBinding}
+     * Gives a {@link Map} of wsdl:binding {@link QName} and {@link BoundPortType}
      *
      * @return an empty Map if the wsdl document has no wsdl:binding
      */
-    Map<QName, WSDLBinding> getBindings();
+    Map<QName, BoundPortType> getBindings();
 
     /**
      * Gives a {@link Map} of wsdl:service qualified name and {@link com.sun.xml.ws.api.model.wsdl.Service}
