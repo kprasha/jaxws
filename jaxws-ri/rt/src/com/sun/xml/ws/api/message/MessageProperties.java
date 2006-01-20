@@ -21,9 +21,11 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.activation.DataHandler;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -153,6 +155,36 @@ public class MessageProperties implements MessageContext {
      */
     @ContextProperty(BindingProviderProperties.SOAP_ACTION_PROPERTY)
     public String soapAction;
+
+    /**
+     * Indicates whether the current message is a request of
+     * an one-way operation.
+     *
+     * <p>
+     * This property is used on the client-side for
+     * outbound messages, so that the producer of a {@link Message}
+     * can communicate to the intermediate (and terminal) {@link Pipe}s
+     * about its knowledge.
+     *
+     * <p>
+     * When this property is true, it means that the producer of
+     * the {@link Message} definitely knows that it's a request
+     * {@link Message} is for an one-way operation.
+     *
+     * <p>
+     * When this property is false, it means that the producer of
+     * the {@link Message} definitely knows that it's expecting
+     * a response for this message.
+     *
+     * <p>
+     * When this property is null, it means that the producer
+     * of the {@link Message} does not know if a reply is expected
+     * or not.
+     * (To give you some idea about when this can happen,
+     * sometimes we don't have any WSDL and so we can't tell.)  
+     */
+    @ContextProperty(BindingProviderProperties.ONE_WAY_OPERATION)
+    public Boolean isOneWay;
 
     /**
      * Bag to capture "other" properties that do not have
