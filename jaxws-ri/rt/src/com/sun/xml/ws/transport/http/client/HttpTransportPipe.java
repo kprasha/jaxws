@@ -68,6 +68,9 @@ public class HttpTransportPipe implements Pipe {
 
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
+            if(con.getStatus()==WSConnection.ONEWAY)
+                return null;    // one way. no response given.
+
             return decoder.decode(con.getInput(), ct);
 
         } catch(WebServiceException wex) {
