@@ -71,9 +71,11 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *
  * <h2>Pipe Lifecycle</h2>
  * {@link Pipe}line is expensive to set up, so once it's created it will be reused.
- * A {@link Pipe}line is not reentrant; one pipe is used to process one request/response
+ * A {@link Pipe}line is not reentrant; one pipeline is used to process one request/response
  * at at time. Where a need arises to process multiple requests concurrently, a pipeline
- * gets cloned through {@link PipeCloner}.
+ * gets cloned through {@link PipeCloner}. Note that this need may happen on
+ * both server (because it quite often serves multiple requests concurrently)
+ * and client (because it needs to support asynchronous method invocations.)
  * <p>
  * Created pipelines (including cloned ones and the original) may be discarded and GCed
  * at any time at the discretion of whoever owns pipelines. Pipes can, however, expect
