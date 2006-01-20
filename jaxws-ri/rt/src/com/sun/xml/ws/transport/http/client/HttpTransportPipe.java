@@ -19,10 +19,10 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.spi.runtime.WSConnection;
@@ -53,7 +53,6 @@ public class HttpTransportPipe implements Pipe {
     }
 
     public Message process(Message msg) {
-
         try {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
@@ -72,7 +71,6 @@ public class HttpTransportPipe implements Pipe {
                 return null;    // one way. no response given.
 
             return decoder.decode(con.getInput(), ct);
-
         } catch(WebServiceException wex) {
             throw wex;
         } catch(Exception ex) {
