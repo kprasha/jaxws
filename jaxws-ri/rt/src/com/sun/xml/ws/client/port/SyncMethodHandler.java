@@ -1,15 +1,20 @@
 package com.sun.xml.ws.client.port;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.client.RequestContext;
-import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
+import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
@@ -49,6 +54,8 @@ final class SyncMethodHandler extends MethodHandler {
      * valueGetters[i] is for methodArgs[i], and so on.
      */
     /*package*/ final ValueGetter[] valueGetters;
+
+    private final ResponseBuilder responseBuilder;
 
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethod method) {
         super(owner);
@@ -94,6 +101,47 @@ final class SyncMethodHandler extends MethodHandler {
         }
 
         {// prepare objects for processing response
+            List<Parameter> rp = method.getResponseParameters();
+            List<ResponseBuilder> builders = new ArrayList<ResponseBuilder>();
+
+            for( Parameter param : rp ) {
+                ValueSetter setter = ValueSetter.get(param);
+                switch(param.getOutBinding().kind) {
+                case BODY:
+                    if(param.isWrapperStyle()) {
+                        builders.add(new ResponseBuilder.Wrapped((WrapperParameter)param));
+                    } else {
+                        builders.add(new ResponseBuilder.Body(
+                            param.getBridge(),
+                            setter));
+                    }
+                    break;
+                case HEADER:
+                    Bridge br = param.getBridge();
+                    builders.add(new ResponseBuilder.Header(
+                        br.getTypeReference().tagName,
+                        br,
+                        setter
+                    ));
+                    break;
+                case ATTACHMENT:
+                    // TODO: implement this later
+                    throw new UnsupportedOperationException();
+                default:
+                    throw new AssertionError();
+                }
+            }
+
+            switch(builders.size()) {
+            case 0:
+                responseBuilder = ResponseBuilder.NONE;
+                break;
+            case 1:
+                responseBuilder = builders.get(0);
+                break;
+            default:
+                responseBuilder = new ResponseBuilder.Composite(builders);
+            }
 
         }
     }
@@ -132,21 +180,16 @@ final class SyncMethodHandler extends MethodHandler {
                 // TODO: data-bind fault into exception
                 throw new UnsupportedOperationException();
             } else {
-                // TODO: handle normal response
-                throw new UnsupportedOperationException();
-
-                //BridgeContext bc = owner.bridgeContexts.take();
-                //try {
-                //    Object r = response.unmarshal(bc,reply.readPayload());
-                //    owner.bridgeContexts.recycle(bc);
-                //    return r;
-                //} catch (JAXBException e) {
-                //    // TODO: need to put a message saying "failed to unmarshal a response"
-                //    throw new DeserializationException(e);
-                //} catch (XMLStreamException e) {
-                //    // TODO: need to put a message saying "failed to unmarshal a response"
-                //    throw new XMLStreamReaderException(e);
-                //}
+                BridgeContext context = owner.bridgeContexts.take();
+                try {
+                    return responseBuilder.readResponse(reply,args,context);
+                } catch (JAXBException e) {
+                    throw new DeserializationException("failed.to.read.response",e);
+                } catch (XMLStreamException e) {
+                    throw new DeserializationException("failed.to.read.response",e);
+                } finally {
+                    owner.bridgeContexts.recycle(context);
+                }
             }
         } finally {
             owner.marshallers.recycle(m);

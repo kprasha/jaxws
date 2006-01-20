@@ -6,16 +6,24 @@ import com.sun.xml.ws.api.model.Parameter;
 import javax.xml.ws.Holder;
 
 /**
- * Gets a value from
+ * Gets a value from an object that represents a parameter passed
+ * as a method argument.
  *
  * <p>
  * This abstraction hides the handling of {@link Holder}.
+ *
+ * <p>
+ * {@link ValueGetter} is a stateless behavior encapsulation.
  *
  * @author Kohsuke Kawaguchi
  */
 enum ValueGetter {
     /**
-     * Creates {@link ValueGetter} that works for {@link Mode#IN}  parameter.
+     * {@link ValueGetter} that works for {@link Mode#IN}  parameter.
+     *
+     * <p>
+     * Since it's the IN mode, the parameter is not a {@link Holder},
+     * therefore the parameter itself is a value.
      */
     PLAIN() {
         Object get(Object parameter) {
@@ -25,17 +33,28 @@ enum ValueGetter {
     /**
      * Creates {@link ValueGetter} that works for {@link Holder},
      * which is  {@link Mode#INOUT} or  {@link Mode#OUT}.
+     *
+     * <p>
+     * In those {@link Mode}s, the parameter is a {@link Holder},
+     * so the value to be sent is obtained by getting the value of the holder.
      */
     HOLDER() {
         Object get(Object parameter) {
-            // TODO: handler array[idx]==null more gracefully
+            if(parameter==null)
+                // the user is allowed to pass in null where a Holder is expected.
+                return null;
             return ((Holder)parameter).value;
         }
     };
 
-
+    /**
+     * Gets the value to be sent, from a parameter given as a method argument.
+     */
     abstract Object get(Object parameter);
 
+    /**
+     * Returns a {@link ValueGetter} suitable for the given {@link Parameter}.
+     */
     static ValueGetter get(Parameter p) {
         if(p.getMode()== Mode.IN)
             return PLAIN;
