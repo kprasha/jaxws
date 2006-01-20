@@ -166,12 +166,12 @@ public class MessageProperties implements MessageContext {
      * about its knowledge.
      *
      * <p>
-     * When this property is true, it means that the producer of
+     * When this property is {@link Boolean#TRUE}, it means that the producer of
      * the {@link Message} definitely knows that it's a request
      * {@link Message} is for an one-way operation.
      *
      * <p>
-     * When this property is false, it means that the producer of
+     * When this property is {@link Boolean#FALSE}, it means that the producer of
      * the {@link Message} definitely knows that it's expecting
      * a response for this message.
      *
@@ -181,6 +181,9 @@ public class MessageProperties implements MessageContext {
      * or not.
      * (To give you some idea about when this can happen,
      * sometimes we don't have any WSDL and so we can't tell.)
+     *
+     * <p>
+     * No other {@link Boolean} instances are allowed.
      */
     @ContextProperty(BindingProviderProperties.ONE_WAY_OPERATION)
     public Boolean isOneWay;
