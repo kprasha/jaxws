@@ -5,7 +5,7 @@ package com.sun.xml.ws.client.dispatch.rearch;
 
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
@@ -13,11 +13,11 @@ import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
-    public Pipe createClient(WSDLBinding wsdlModel, WSService service) {
+    public Pipe createClient(BoundPortType wsdlModel, WSService service) {
         return new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
     }
 
-    public Pipe createServer(WSDLBinding wsdlModel, WSEndpoint endpoint, Pipe terminal) {
+    public Pipe createServer(BoundPortType wsdlModel, WSEndpoint endpoint, Pipe terminal) {
         return terminal;
     }
 }
