@@ -5,7 +5,6 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
