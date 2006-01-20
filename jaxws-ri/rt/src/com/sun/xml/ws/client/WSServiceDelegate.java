@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -185,10 +186,18 @@ public class WSServiceDelegate extends WSService {
     }
 
 
-    public <T> Dispatch<T> createDispatch(QName qName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
+    public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
         //Note: may not be the most performant way to do this- needs review
-        return Stubs.createDispatch(qName, this, getBinding(qName), aClass, mode,
-            assembler.createClient(null,getWSDLModel(),this));
+        return Stubs.createDispatch(portName, this, getBinding(portName), aClass, mode,
+            createPipeline(portName));
+    }
+
+    /**
+     * Creates a new pipeline for the given port name.
+     */
+    private Pipe createPipeline(QName portName) {
+        return assembler.createClient(
+            getWSDLModel().getBinding(portName),this);
     }
 
     public String getEndpointAddress(QName qName) {
@@ -203,9 +212,9 @@ public class WSServiceDelegate extends WSService {
 
     }
 
-    public Dispatch<Object> createDispatch(QName qName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        return new JAXBDispatch(qName, jaxbContext, mode, this,
-            assembler.createClient(null,getWSDLModel(),this), getBinding(qName));
+    public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
+        return new JAXBDispatch(portName, jaxbContext, mode, this,
+            createPipeline(portName), getBinding(portName));
     }
 
     public QName getServiceName() {
@@ -340,24 +349,24 @@ public class WSServiceDelegate extends WSService {
         return serviceContext.getWsdlContext().getWsdlLocation();
     }
 
-    private <T> T buildEndpointIFProxy(QName portQName, Class<T> portInterface)
+    private <T> T buildEndpointIFProxy(QName portName, Class<T> portInterface)
         throws WebServiceException {
 
-        EndpointIFContext eif = completeEndpointIFContext(serviceContext, portQName, portInterface);
+        EndpointIFContext eif = completeEndpointIFContext(serviceContext, portName, portInterface);
 
         //apply parameter bindings
         RuntimeModel model = eif.getRuntimeContext().getModel();
-        if (portQName != null) {
-            WSDLBindingImpl binding = (WSDLBindingImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portQName);
+        if (portName != null) {
+            WSDLBindingImpl binding = (WSDLBindingImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portName);
             eif.setBindingID(binding.getBindingId());
             ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
 
         }
 
         PortInterfaceStub pis = new PortInterfaceStub(this,
-            createBinding(portQName,eif.getBindingID()),
+            createBinding(portName,eif.getBindingID()),
             portInterface,model,
-            assembler.createClient(model,getWSDLModel(),this));
+            createPipeline(portName));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{
