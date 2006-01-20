@@ -26,9 +26,9 @@ import com.sun.xml.ws.api.model.wsdl.Part;
  *
  */
 public final class PartImpl implements Part {
-    private String name;
-    private ParameterBinding binding;
-    private int index;
+    private final String name;
+    private final ParameterBinding binding;
+    private final int index;
 
     /**
      * The constructor is used when the wsdl:part order is known from the abstract wsdl:portType. This constructor

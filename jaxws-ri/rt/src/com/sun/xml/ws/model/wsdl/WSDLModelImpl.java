@@ -39,11 +39,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WSDLModelImpl implements WSDLModel {
-    private Map<QName, Message> messages;
-    private Map<QName, PortType> portTypes;
-    private Map<QName, BoundPortType> bindings;
-    private Map<QName, Service> services;
+public final class WSDLModelImpl implements WSDLModel {
+    private final Map<QName, Message> messages;
+    private final Map<QName, PortType> portTypes;
+    private final Map<QName, BoundPortType> bindings;
+    private final Map<QName, Service> services;
 
     public WSDLModelImpl() {
         messages = new HashMap<QName, Message>();
@@ -203,7 +203,7 @@ public class WSDLModelImpl implements WSDLModel {
         return bs;
     }
 
-    void finalizeBinding(BoundPortType boundPortType){
+    void finalizeBinding(BoundPortTypeImpl boundPortType){
         assert(boundPortType != null);
         QName portTypeName = boundPortType.getPortTypeName();
         if(portTypeName == null)
@@ -211,23 +211,18 @@ public class WSDLModelImpl implements WSDLModel {
         PortType pt = portTypes.get(portTypeName);
         if(pt == null)
             return;
-        Iterator<BoundOperation> boIter = boundPortType.getBindingOperations();
-        while(!boIter.hasNext()){
-            String op = boIter.next().getName();
-            Operation pto = pt.get(op);
-            if(pto == null)
-                return;
+        for (BoundOperationImpl bop : boundPortType.getBindingOperations()) {
+            Operation pto = bop.getOperation();
             QName inMsgName = pto.getInputMessage();
             if(inMsgName == null)
                 continue;
             Message inMsg = messages.get(inMsgName);
-            BoundOperationImpl bo = (BoundOperationImpl) boundPortType.get(op);
             int bodyindex = 0;
             if(inMsg != null){
                 for(String name:inMsg){
-                    ParameterBinding pb = bo.getInputBinding(name);
+                    ParameterBinding pb = bop.getInputBinding(name);
                     if(pb.isBody()){
-                        bo.addPart(new PartImpl(name, pb, bodyindex++), Mode.IN);
+                        bop.addPart(new PartImpl(name, pb, bodyindex++), Mode.IN);
                     }
                 }
             }
@@ -238,9 +233,9 @@ public class WSDLModelImpl implements WSDLModel {
             Message outMsg = messages.get(outMsgName);
             if(outMsg!= null){
                 for(String name:outMsg){
-                    ParameterBinding pb = bo.getOutputBinding(name);
+                    ParameterBinding pb = bop.getOutputBinding(name);
                     if(pb.isBody()){
-                        bo.addPart(new PartImpl(name, pb, bodyindex++), Mode.OUT);
+                        bop.addPart(new PartImpl(name, pb, bodyindex++), Mode.OUT);
                     }
                 }
             }

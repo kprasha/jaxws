@@ -91,5 +91,5 @@ public interface BoundOperation extends Extensible {
      * associated with this binding operation.
      * @return non-null {@link Operation}
      */
-    public Operation getPortTypeOperation();
+    public Operation getOperation();
 }

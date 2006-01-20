@@ -25,7 +25,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import javax.xml.namespace.QName;
 import java.util.HashSet;
 
-public class OperationImpl extends AbstractExtensibleImpl implements Operation {
+public final class OperationImpl extends AbstractExtensibleImpl implements Operation {
     private QName name;
     private String parameterOrder;
     private QName inputMessage;
@@ -34,7 +34,6 @@ public class OperationImpl extends AbstractExtensibleImpl implements Operation {
 
     public OperationImpl(QName name) {
         this.name = name;
-        extensions = new HashSet<WSDLExtension>();
     }
 
     public QName getName() {

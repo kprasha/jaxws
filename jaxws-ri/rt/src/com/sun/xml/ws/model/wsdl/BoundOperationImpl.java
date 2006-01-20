@@ -60,7 +60,6 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         outputMimeTypes = new HashMap<String, String>();
         inParts = new HashMap<String, Part>();
         outParts = new HashMap<String, Part>();
-        extensions = new HashSet<WSDLExtension>();
     }
 
     public String getName(){
@@ -144,7 +143,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
     /**
      * TODO
      */
-    public Operation getPortTypeOperation() {
+    public Operation getOperation() {
         throw new UnsupportedOperationException();
     }
 

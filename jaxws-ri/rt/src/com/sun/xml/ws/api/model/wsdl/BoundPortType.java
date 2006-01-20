@@ -7,6 +7,8 @@ import javax.xml.namespace.QName;
 import java.util.Iterator;
 
 /**
+ * {@link PortType} bound with a specific binding.
+ *
  * @author Vivek Pandey
  */
 public interface BoundPortType extends Extensible {
@@ -37,7 +39,7 @@ public interface BoundPortType extends Extensible {
     /**
      * Gets the {@link BoundOperation}s
      */
-    Iterator<BoundOperation> getBindingOperations();
+    Iterable<? extends BoundOperation> getBindingOperations();
 
     /**
      * Returns {@link javax.xml.ws.soap.SOAPBinding#SOAP11HTTP_BINDING} or {@link javax.xml.ws.soap.SOAPBinding#SOAP12HTTP_BINDING}. This

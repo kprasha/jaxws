@@ -36,7 +36,6 @@ public class PortImpl extends AbstractExtensibleImpl implements Port {
         this.name = name;
         this.bindingName = binding;
         this.address = address;
-        extensions = new HashSet<WSDLExtension>();
     }
 
     public QName getName() {

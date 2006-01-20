@@ -21,32 +21,26 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.PortType;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.PortType;
 
 import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Hashtable;
+import java.util.Map;
 
 public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements BoundPortType {
-    private QName name;
-    private QName portTypeName;
+    private final QName name;
+    private final QName portTypeName;
     private PortType portType;
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private final Map<String, BoundOperation> bindingOperations;
+    private final Map<String,BoundOperationImpl> bindingOperations = new Hashtable<String,BoundOperationImpl>();
 
     public BoundPortTypeImpl(QName name, QName portTypeName) {
-        super();
         this.name = name;
         this.portTypeName = portTypeName;
-        extensions = new HashSet<WSDLExtension>();
-        bindingOperations = new Hashtable<String, BoundOperation>();
     }
 
     public QName getName() {
@@ -64,8 +58,8 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
      * @param ptOp   Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(String opName, BoundOperation ptOp) {
-        bindingOperations.put(opName, ptOp);
+    public void put(String opName, BoundOperationImpl ptOp) {
+        bindingOperations.put(opName,ptOp);
     }
 
     public QName getPortTypeName() {
@@ -76,8 +70,8 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         return portType;
     }
 
-    public Iterator<BoundOperation> getBindingOperations() {
-        return bindingOperations.values().iterator();
+    public Iterable<BoundOperationImpl> getBindingOperations() {
+        return bindingOperations.values();
     }
 
     public void setPortType(PortType portType) {

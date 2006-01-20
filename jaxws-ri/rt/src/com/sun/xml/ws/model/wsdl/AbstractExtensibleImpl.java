@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * All the WSDL 1.1 elements that are extensible should subclass from this abstract implementation of
@@ -13,10 +14,10 @@ import java.util.Set;
  * @author Vivek Pandey
  */
 abstract public class AbstractExtensibleImpl implements Extensible {
-    protected Set<WSDLExtension> extensions;
+    protected final Set<WSDLExtension> extensions = new HashSet<WSDLExtension>();
 
-    public Iterator<WSDLExtension> getWSDLExtensions() {
-        return extensions.iterator();
+    public Iterable<WSDLExtension> getWSDLExtensions() {
+        return extensions;
     }
 
     public void addExtension(WSDLExtension ex) {

@@ -40,7 +40,6 @@ public final class PortTypeImpl  extends AbstractExtensibleImpl implements PortT
     public PortTypeImpl(QName name) {
         super();
         this.name = name;
-        extensions = new HashSet<WSDLExtension>();
         portTypeOperations = new Hashtable<String, Operation>();
     }
 

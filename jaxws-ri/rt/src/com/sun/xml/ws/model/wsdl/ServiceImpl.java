@@ -19,15 +19,12 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.Service;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.Port;
+import com.sun.xml.ws.api.model.wsdl.Service;
 
 import javax.xml.namespace.QName;
-import java.util.LinkedHashMap;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ServiceImpl extends AbstractExtensibleImpl implements Service {
@@ -37,7 +34,6 @@ public class ServiceImpl extends AbstractExtensibleImpl implements Service {
     public ServiceImpl(QName name) {
         super();
         this.name = name;
-        extensions = new HashSet<WSDLExtension>();
         ports = new LinkedHashMap<QName, Port>();
     }
 
