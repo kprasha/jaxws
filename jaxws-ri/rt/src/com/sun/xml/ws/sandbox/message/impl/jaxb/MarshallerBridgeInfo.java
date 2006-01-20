@@ -95,6 +95,10 @@ final class MarshallerBridgeContext extends BridgeContext {
             throw new UnsupportedOperationException();
         }
 
+        public Object unmarshal(BridgeContext context, Node n) {
+            throw new UnsupportedOperationException();
+        }
+
         public TypeReference getTypeReference() {
             throw new UnsupportedOperationException();
         }
