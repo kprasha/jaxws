@@ -234,12 +234,6 @@ public class WSServiceDelegate extends WSService {
         return getWsdlLocation();
     }
 
-    protected void addPorts(Iterator<Port> ports) {
-        while(ports.hasNext()){
-            addPort(ports.next().getName());
-        }
-    }
-
     private void populatePorts() {
         if (ports == null)
             ports = new HashSet<QName>();
@@ -254,18 +248,17 @@ public class WSServiceDelegate extends WSService {
 
         if (wscontext != null) {
             QName serviceName = serviceContext.getServiceName();
-            Iterator<Port> knownPorts = wscontext.getPorts(serviceName);
-            if(knownPorts.hasNext()){
-                addPorts(knownPorts);
-                while(knownPorts.hasNext()) {
-                    QName port = knownPorts.next().getName();
-                    String endpoint =
-                        wscontext.getEndpoint(serviceName, port);
-                    String bid = wscontext.getWsdlBinding(serviceName, port)
-                        .getBindingId();
-                    dispatchPorts.put(port,
-                        new PortInfoBase(endpoint, port, bid));
-                }
+            for (Port port : wscontext.getPorts(serviceName) ) {
+                QName portName = port.getName();
+
+                addPort(portName);
+
+                String endpoint =
+                    wscontext.getEndpoint(serviceName, portName);
+                String bid = wscontext.getWsdlBinding(serviceName, portName)
+                    .getBindingId();
+                dispatchPorts.put(portName,
+                    new PortInfoBase(endpoint, portName, bid));
             }
         }
     }

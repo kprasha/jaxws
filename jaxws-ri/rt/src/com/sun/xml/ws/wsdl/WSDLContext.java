@@ -19,10 +19,10 @@
  */
 package com.sun.xml.ws.wsdl;
 
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.model.wsdl.Service;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.xml.sax.EntityResolver;
@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -100,7 +101,7 @@ public class WSDLContext {
         Service service = wsdlDoc.getService(serviceName);
         String endpoint = null;
         if (service != null) {
-            Iterator<Port> iter = service.getPorts();
+            Iterator<Port> iter = service.getPorts().iterator();
             if (iter.hasNext()) {
                 Port port = iter.next();
                 endpoint = port.getAddress();
@@ -132,25 +133,20 @@ public class WSDLContext {
         targetNamespace = tns;
     }
 
-    public Iterator<Port> getPorts(QName serviceName){
+    public Iterable<Port> getPorts(QName serviceName){
         Service service = wsdlDoc.getService(serviceName);
         if (service != null) {
             return service.getPorts();
+        } else {
+            return Collections.emptyList();
         }
-        return null;
     }
 
 
     public boolean contains(QName serviceName, QName portName) {
         Service service = wsdlDoc.getService(serviceName);
         if (service != null) {
-
-            Iterator<Port> iter = service.getPorts();
-            while (iter.hasNext()) {
-                Port port = iter.next();
-                if (port.getName().equals(portName))
-                    return true;
-            }
+            return service.get(portName)!=null;
         }
         return false;
     }

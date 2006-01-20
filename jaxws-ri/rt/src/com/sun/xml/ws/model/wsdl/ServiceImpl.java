@@ -45,8 +45,8 @@ public class ServiceImpl extends AbstractExtensibleImpl implements Service {
         return ports.get(portName);
     }
 
-    public Iterator<Port> getPorts(){
-        return ports.values().iterator();
+    public Iterable<Port> getPorts(){
+        return ports.values();
     }
 
     /**

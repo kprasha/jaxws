@@ -26,5 +26,5 @@ public interface Service extends Extensible {
      */
     public Port get(QName portName);
 
-    public Iterator<Port> getPorts();    
+    public Iterable<Port> getPorts();
 }

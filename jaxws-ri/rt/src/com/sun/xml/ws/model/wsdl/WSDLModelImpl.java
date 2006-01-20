@@ -113,19 +113,18 @@ public final class WSDLModelImpl implements WSDLModel {
      * Returns first port QName from first service as per the insertion order
      */
     public QName getFirstPortName(){
-        if(services.isEmpty())
+        Port fp = getFirstPort();
+        if(fp==null)
             return null;
-        Service service = services.values().iterator().next();
-        Iterator<Port> iter = service.getPorts();
-        QName port = (iter.hasNext())?iter.next().getName():null;
-        return port;
+        else
+            return fp.getName();
     }
 
     private Port getFirstPort(){
         if(services.isEmpty())
             return null;
         Service service = services.values().iterator().next();
-        Iterator<Port> iter = service.getPorts();
+        Iterator<Port> iter = service.getPorts().iterator();
         Port port = iter.hasNext()?iter.next():null;
         return port;
     }
@@ -189,11 +188,7 @@ public final class WSDLModelImpl implements WSDLModel {
      */
     public List<BoundPortType> getBindings(Service service, String bindingId){
         List<BoundPortType> bs = new ArrayList<BoundPortType>();
-        Iterator<Port> ports = service.getPorts();
-        if(!ports.hasNext())
-            return bs;
-        while(ports.hasNext()){
-            Port port  = ports.next();
+        for (Port port : service.getPorts()) {
             BoundPortType b = bindings.get(port.getName());
             if(b == null)
                 return bs;
