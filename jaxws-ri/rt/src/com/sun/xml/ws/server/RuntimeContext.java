@@ -35,7 +35,7 @@ import com.sun.xml.ws.api.model.RuntimeModel;
  */
 public class RuntimeContext {
 
-    public RuntimeContext(AbstractRuntimeModelImpl model) {
+    public RuntimeContext(RuntimeModel model) {
         this.model = model;
     }
 
@@ -74,7 +74,7 @@ public class RuntimeContext {
      * @return the <code>Method</code> associated with the operation named name
      */
     public Method getDispatchMethod(QName name){
-        return model.getDispatchMethod(name);
+        return ((AbstractRuntimeModelImpl)model).getDispatchMethod(name);
     }
 
     /**
@@ -83,7 +83,7 @@ public class RuntimeContext {
      */
     public void setMethodAndMEP(QName qname, MessageInfo mi) {
         if (model != null) {
-            mi.setMethod(model.getDispatchMethod(qname));
+            mi.setMethod((((AbstractRuntimeModelImpl)model).getDispatchMethod(qname)));
 
             // if null, default MEP is ok
             if (qname != null && model.getJavaMethod(qname) != null) {
@@ -97,7 +97,7 @@ public class RuntimeContext {
      * @return the decoder Info associated with operation named name
      */
     public Object getDecoderInfo(QName name) {
-        return model.getDecoderInfo(name);
+        return ((AbstractRuntimeModelImpl)model).getDecoderInfo(name);
     }
 
     public BridgeContext getBridgeContext() {
@@ -112,7 +112,7 @@ public class RuntimeContext {
         this.handlerContext = handlerContext;
     }
 
-    private AbstractRuntimeModelImpl model;
+    private RuntimeModel model;
     private HandlerContext handlerContext;
     private RuntimeEndpointInfo endpointInfo;
 }
