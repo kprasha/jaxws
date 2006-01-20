@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author Vivek Pandey
  */
-public interface BindingOperation extends Extensible {
+public interface BoundOperation extends Extensible {
     /**
      * Gets wsdl:binding/wsdl:operation@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
@@ -87,9 +87,9 @@ public interface BindingOperation extends Extensible {
     String getMimeTypeForOutputPart(String part);
 
     /**
-     * Gets the wsdl:portType/wsdl:operation model - {@link PortTypeOperation},
+     * Gets the wsdl:portType/wsdl:operation model - {@link Operation},
      * associated with this binding operation.
-     * @return non-null {@link PortTypeOperation}
+     * @return non-null {@link Operation}
      */
-    public PortTypeOperation getPortTypeOperation();
+    public Operation getPortTypeOperation();
 }

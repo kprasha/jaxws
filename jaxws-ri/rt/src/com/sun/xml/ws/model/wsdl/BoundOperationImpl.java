@@ -21,18 +21,16 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.Part;
-import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
+import com.sun.xml.ws.api.model.wsdl.Operation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
 
-public class BindingOperationImpl extends AbstractExtensibleImpl implements BindingOperation {
+public class BoundOperationImpl extends AbstractExtensibleImpl implements BoundOperation {
     private String name;
 
     // map of wsdl:part to the binding
@@ -54,7 +52,7 @@ public class BindingOperationImpl extends AbstractExtensibleImpl implements Bind
      *
      * @param name wsdl:operation name qualified value
      */
-    public BindingOperationImpl(String name) {
+    public BoundOperationImpl(String name) {
         this.name = name;
         inputParts = new HashMap<String, ParameterBinding>();
         outputParts = new HashMap<String, ParameterBinding>();
@@ -146,7 +144,7 @@ public class BindingOperationImpl extends AbstractExtensibleImpl implements Bind
     /**
      * TODO
      */
-    public PortTypeOperation getPortTypeOperation() {
+    public Operation getPortTypeOperation() {
         throw new UnsupportedOperationException();
     }
 

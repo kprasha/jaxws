@@ -19,22 +19,20 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.PortTypeOperation;
+import com.sun.xml.ws.api.model.wsdl.Operation;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
 import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
 
-public class PortTypeOperationImpl extends AbstractExtensibleImpl implements PortTypeOperation {
+public class OperationImpl extends AbstractExtensibleImpl implements Operation {
     private QName name;
     private String parameterOrder;
     private QName inputMessage;
     private QName outputMessage;
     private QName faultMessage;
 
-    public PortTypeOperationImpl(QName name) {
+    public OperationImpl(QName name) {
         this.name = name;
         extensions = new HashSet<WSDLExtension>();
     }

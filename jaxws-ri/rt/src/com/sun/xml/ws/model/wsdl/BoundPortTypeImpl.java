@@ -22,51 +22,49 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.PortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
-import com.sun.xml.ws.api.model.wsdl.BindingOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
 import javax.xml.namespace.QName;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Hashtable;
 
-public class WSDLBindingImpl extends AbstractExtensibleImpl implements WSDLBinding {
+public class BoundPortTypeImpl extends AbstractExtensibleImpl implements BoundPortType {
     private QName name;
     private QName portTypeName;
     private PortType portType;
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private Map<String, BindingOperation> bindingOperations;
+    private Map<String, BoundOperation> bindingOperations;
 
-    public WSDLBindingImpl(QName name, QName portTypeName) {
+    public BoundPortTypeImpl(QName name, QName portTypeName) {
         super();
         this.name = name;
         this.portTypeName = portTypeName;
         extensions = new HashSet<WSDLExtension>();
-        bindingOperations = new Hashtable<String, BindingOperation>();
+        bindingOperations = new Hashtable<String, BoundOperation>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public BindingOperation get(String operationName) {
+    public BoundOperation get(String operationName) {
         return bindingOperations.get(operationName);
     }
 
     /**
-     * Populates the Map that holds operation name as key and {@link BindingOperation} as the value.
+     * Populates the Map that holds operation name as key and {@link BoundOperation} as the value.
      *
      * @param opName Must be non-null
      * @param ptOp   Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(String opName, BindingOperation ptOp) {
+    public void put(String opName, BoundOperation ptOp) {
         bindingOperations.put(opName, ptOp);
     }
 
@@ -78,7 +76,7 @@ public class WSDLBindingImpl extends AbstractExtensibleImpl implements WSDLBindi
         return portType;
     }
 
-    public Iterator<BindingOperation> getBindingOperations() {
+    public Iterator<BoundOperation> getBindingOperations() {
         return bindingOperations.values().iterator();
     }
 
@@ -99,7 +97,7 @@ public class WSDLBindingImpl extends AbstractExtensibleImpl implements WSDLBindi
     }
 
     public ParameterBinding getBinding(String operation, String part, Mode mode) {
-        BindingOperation op = get(operation);
+        BoundOperation op = get(operation);
         if (op == null) {
             //TODO throw exception
             return null;
@@ -111,7 +109,7 @@ public class WSDLBindingImpl extends AbstractExtensibleImpl implements WSDLBindi
     }
 
     public String getMimeType(String operation, String part, Mode mode) {
-        BindingOperation op = get(operation);
+        BoundOperation op = get(operation);
         if (Mode.IN == mode)
             return op.getMimeTypeForInputPart(part);
         else
