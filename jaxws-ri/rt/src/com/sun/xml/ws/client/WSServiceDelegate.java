@@ -7,7 +7,7 @@ import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.Port;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -41,7 +41,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -71,7 +70,7 @@ import java.util.concurrent.ThreadFactory;
  * registering it with the service.
  *
  * @author WS Development Team
- * @see java.util.concurrent.Executor
+ * @see Executor
  * @since JAX-WS 2.0
  */
 public class WSServiceDelegate extends WSService {
@@ -90,8 +89,6 @@ public class WSServiceDelegate extends WSService {
     protected Executor executor;
     private final HashSet<Object> seiProxies = new HashSet<Object>();
 
-    private Pipe masterPipe;
-
     //to get this going just use this--?do we need factory for different assembler types?
     private static PipelineAssembler assembler = new StandalonePipeAssembler();
 
@@ -108,9 +105,6 @@ public class WSServiceDelegate extends WSService {
             handlerResolver = serviceContext.getHandlerResolver();
         }
         assembler = new StandalonePipeAssembler();
-
-        masterPipe = ((StandalonePipeAssembler) assembler).create(this);
-
     }
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
@@ -127,7 +121,6 @@ public class WSServiceDelegate extends WSService {
         }
         if (ports == null)
             populatePorts();
-        masterPipe = ((StandalonePipeAssembler) assembler).create(this);
     }
 
     public URL getWSDLLocation() {
@@ -194,7 +187,8 @@ public class WSServiceDelegate extends WSService {
 
     public <T> Dispatch<T> createDispatch(QName qName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
         //Note: may not be the most performant way to do this- needs review
-        return Stubs.createDispatch(qName, this, getBinding(qName), aClass, mode, masterPipe);
+        return Stubs.createDispatch(qName, this, getBinding(qName), aClass, mode,
+            assembler.createClient(null,getWSDLModel(),this));
     }
 
     public String getEndpointAddress(QName qName) {
@@ -210,7 +204,8 @@ public class WSServiceDelegate extends WSService {
     }
 
     public Dispatch<Object> createDispatch(QName qName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        return new JAXBDispatch(qName, jaxbContext, mode, this, masterPipe, getBinding(qName));
+        return new JAXBDispatch(qName, jaxbContext, mode, this,
+            assembler.createClient(null,getWSDLModel(),this), getBinding(qName));
     }
 
     public QName getServiceName() {
@@ -297,6 +292,11 @@ public class WSServiceDelegate extends WSService {
         return ports;
     }
 
+    private WSDLModel getWSDLModel() {
+        // TODO: can someone check if any of those can be null in some circumstances? - KK
+        return serviceContext.getWsdlContext().getWsdlDocument();
+    }
+
     /**
      * Determines the binding of the given port.
      */
@@ -357,7 +357,7 @@ public class WSServiceDelegate extends WSService {
         PortInterfaceStub pis = new PortInterfaceStub(this,
             createBinding(portQName,eif.getBindingID()),
             portInterface,model,
-            assembler.create(model));
+            assembler.createClient(model,getWSDLModel(),this));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{

@@ -1,6 +1,9 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.WSEndpoint;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
@@ -52,5 +55,10 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe create(RuntimeModel model);
+    Pipe createClient(RuntimeModel model, WSDLModel wsdlModel, WSService service);
+
+    /**
+     * 
+     */
+    Pipe createServer(RuntimeModel model, WSDLModel wsdlModel, WSEndpoint endpoint, Pipe terminal);
 }

@@ -19,23 +19,21 @@
  */
 package com.sun.xml.ws.wsdl;
 
-import com.sun.xml.ws.wsdl.parser.*;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.Port;
-import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
 import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -71,6 +69,10 @@ public class WSDLContext {
         String bId = wsdlDoc.getBindingId();
         if (bId != null)
             setBindingID(bId);
+    }
+
+    public WSDLModel getWSDLModel() {
+        return wsdlDoc;
     }
 
     public URL getWsdlLocation() {
