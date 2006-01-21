@@ -30,6 +30,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 
 /**
  * @author WS Development Team
@@ -64,5 +65,8 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
         }
         super.setHandlerChain(chain);
     }
-    
+
+    public SOAPVersion getSOAPVersion() {
+        return null;
+    }
 }

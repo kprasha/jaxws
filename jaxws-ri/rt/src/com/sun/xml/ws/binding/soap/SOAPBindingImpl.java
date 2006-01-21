@@ -20,23 +20,21 @@
 package com.sun.xml.ws.binding.soap;
 
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
+import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
+import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerChainCaller;
-import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegateFactory;
-import com.sun.xml.ws.util.SOAPUtil;
-
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
 
+import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.namespace.QName;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +44,7 @@ import java.util.Set;
 /**
  * @author WS Development Team
  */
-public class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
+public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
 
     public static final String X_SOAP12HTTP_BINDING =
@@ -58,22 +56,21 @@ public class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     protected Set<String> roles;
     protected boolean enableMtom = false;
 
+    private final SOAPVersion soapVersion;
 
-     // called by DispatchImpl
+
+    // called by DispatchImpl
     public SOAPBindingImpl(String bindingId, QName serviceName) {
-        super(bindingId, serviceName);
-        setup(getBindingId());
-        setupSystemHandlerDelegate(serviceName);
+        this(null,bindingId,serviceName);
     }
 
-     public SOAPBindingImpl(String bindingId) {
-        super(bindingId, null);
-        setup(getBindingId());
-        setupSystemHandlerDelegate(null);
+    public SOAPBindingImpl(String bindingId) {
+        this(bindingId,null);
     }
 
     public SOAPBindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
         super(handlerChain, bindingId, serviceName);
+        soapVersion = SOAPVersion.fromBinding(getBindingId());
         setup(getBindingId());
         setupSystemHandlerDelegate(serviceName);
     }
@@ -81,9 +78,11 @@ public class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     // if the binding id is unknown, no roles are added
     protected void setup(String bindingId) {
         requiredRoles = new HashSet<String>();
-        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING)) {
+        switch(soapVersion) {
+        case SOAP_11:
             requiredRoles.add(SOAPNamespaceConstants.ACTOR_NEXT);
-        } else if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+            break;
+        case SOAP_12:
             requiredRoles.add(SOAP12NamespaceConstants.ROLE_NEXT);
             requiredRoles.add(SOAP12NamespaceConstants.ROLE_ULTIMATE_RECEIVER);
         }
@@ -126,7 +125,7 @@ public class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         roles.addAll(requiredRoles);
     }
 
-    public java.util.Set<String> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
@@ -171,12 +170,12 @@ public class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     }
 
     public SOAPFactory getSOAPFactory() {
-        return SOAPUtil.getSOAPFactory(getBindingId());
+        return soapVersion.saajSoapFactory;
     }
 
 
     public MessageFactory getMessageFactory() {
-        return SOAPUtil.getMessageFactory(getBindingId());
+        return soapVersion.saajFactory;
     }
 
     /**
@@ -202,8 +201,11 @@ public class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         SystemHandlerDelegateFactory shdFactory =
             SystemHandlerDelegateFactory.getFactory();
         if (shdFactory != null) {
-            setSystemHandlerDelegate((SystemHandlerDelegate)
-                shdFactory.getDelegate(serviceName));
+            setSystemHandlerDelegate(shdFactory.getDelegate(serviceName));
         }
+    }
+
+    public SOAPVersion getSOAPVersion() {
+        return soapVersion;
     }
 }
