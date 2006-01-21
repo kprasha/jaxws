@@ -56,8 +56,7 @@ import java.util.Set;
 public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
 
     protected void createDecoderInfo() {
-        Collection<JavaMethod> methods = getJavaMethods();
-        for (JavaMethod m : methods) {
+        for (JavaMethod m : getJavaMethods()) {
             if(m.isAsync())
                 continue;
             com.sun.xml.ws.api.model.soap.SOAPBinding binding = (com.sun.xml.ws.api.model.soap.SOAPBinding) m.getBinding();
@@ -99,7 +98,7 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
     @Override
     protected void populateMaps() {
         int emptyBodyCount = 0;
-        for(JavaMethod jm:getJavaMethods()){
+        for(JavaMethodImpl jm : getJavaMethods()){
             put(jm.getMethod(), jm);
             boolean bodyFound = false;
             for(Parameter p:jm.getRequestParameters()){
@@ -164,9 +163,7 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
 
     public Set<QName> getKnownHeaders() {
         Set<QName> headers = new HashSet<QName>();
-        Iterator<JavaMethod> methods = getJavaMethods().iterator();
-        while (methods.hasNext()) {
-            JavaMethod method = methods.next();
+        for (JavaMethodImpl method : getJavaMethods()) {
             // fill in request headers
             Iterator<Parameter> params = method.getRequestParameters().iterator();
             fillHeaders(params, headers, Mode.IN);
@@ -359,7 +356,6 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
      * @param e
      * @param actor
      * @param detail
-     * @return
      */
     private static SOAPFaultInfo createSOAPFaultInfo(Throwable e, String actor,
             Object detail) {

@@ -19,31 +19,30 @@
  */
 package com.sun.xml.ws.model;
 
-import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.RawAccessor;
+import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.Part;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
-import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -52,10 +51,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * model of the web service.  Used by the runtime marshall/unmarshall 
@@ -86,7 +83,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * Populate methodToJM and nameToJM maps.
      */
     protected void populateMaps() {
-        for (JavaMethod jm : getJavaMethods()) {
+        for (JavaMethodImpl jm : getJavaMethods()) {
             put(jm.getMethod(), jm);
             for (Parameter p : jm.getRequestParameters()) {
                 put(p.getName(), jm);
@@ -180,9 +177,6 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         payloadMap.put(name, payload);
     }
 
-    /**
-     * @return
-     */
     private JAXBRIContext createJAXBContext() {
         final List<TypeReference> types = getAllTypeReferences();
         final Class[] cls = new Class[types.size()];
@@ -220,7 +214,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      */
     private List<TypeReference> getAllTypeReferences() {
         List<TypeReference> types = new ArrayList<TypeReference>();
-        Collection<JavaMethod> methods = methodToJM.values();
+        Collection<JavaMethodImpl> methods = methodToJM.values();
         for (JavaMethod m : methods) {
             fillTypes(m, types);
             fillFaultDetailTypes(m, types);
@@ -321,10 +315,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * JavaMethod jm
      */
     public QName getQNameForJM(JavaMethod jm) {
-        Set<QName> set = nameToJM.keySet();
-        Iterator iter = set.iterator();
-        while (iter.hasNext()){
-            QName key = (QName) iter.next();
+        for (QName key : nameToJM.keySet()) {
             JavaMethod jmethod = nameToJM.get(key);
             if (jmethod.getOperationName().equals(jm.getOperationName())){
                return key;
@@ -337,7 +328,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @return a <code>Collection</code> of <code>JavaMethods</code>
      * associated with this <code>RuntimeModel</code>
      */
-    public Collection<JavaMethod> getJavaMethods() {
+    public final Collection<JavaMethodImpl> getJavaMethods() {
         return Collections.unmodifiableList(javaMethods);
     }
 
@@ -491,7 +482,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @param name
      * @param jm
      */
-    void put(QName name, JavaMethod jm) {
+    void put(QName name, JavaMethodImpl jm) {
         nameToJM.put(name, jm);
     }
 
@@ -499,7 +490,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @param method
      * @param jm
      */
-    void put(Method method, JavaMethod jm) {
+    void put(Method method, JavaMethodImpl jm) {
         methodToJM.put(method, jm);
     }
 
@@ -587,9 +578,9 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     private QName serviceName;
     private QName portName;
     private QName portTypeName;
-    private Map<Method, JavaMethod> methodToJM = new HashMap<Method, JavaMethod>();
-    private Map<QName, JavaMethod> nameToJM = new HashMap<QName, JavaMethod>();
-    private List<JavaMethod> javaMethods = new ArrayList<JavaMethod>();
+    private Map<Method,JavaMethodImpl> methodToJM = new HashMap<Method, JavaMethodImpl>();
+    private Map<QName,JavaMethodImpl> nameToJM = new HashMap<QName, JavaMethodImpl>();
+    private List<JavaMethodImpl> javaMethods = new ArrayList<JavaMethodImpl>();
     private final Map<TypeReference, Bridge> bridgeMap = new HashMap<TypeReference, Bridge>();
     private final Map<QName, Object> payloadMap = new HashMap<QName, Object>();
     protected final QName emptyBodyName = new QName("");

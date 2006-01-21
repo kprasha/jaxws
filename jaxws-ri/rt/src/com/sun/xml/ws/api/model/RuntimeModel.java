@@ -103,7 +103,7 @@ public interface RuntimeModel {
      * @return a {@link Collection} of {@link JavaMethod}
      *         associated with the {@link RuntimeModel}
      */
-    Collection<JavaMethod> getJavaMethods();
+    Collection<? extends JavaMethod> getJavaMethods();
 
     /**
      * Location of the WSDL that defines the port associated with the {@link RuntimeModel}
