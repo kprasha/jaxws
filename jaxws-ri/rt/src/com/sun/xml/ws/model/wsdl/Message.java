@@ -28,7 +28,7 @@ import java.util.LinkedHashSet;
  * 
  * @author Vivek Pandey
  */
-public class Message extends LinkedHashSet<String>{
+public final class Message extends LinkedHashSet<String>{
     private QName name;
 
     /**

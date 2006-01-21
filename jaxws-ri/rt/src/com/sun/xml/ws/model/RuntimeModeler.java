@@ -279,7 +279,7 @@ public class RuntimeModeler {
             WebMethod webMethod;
             boolean hasWebMethod = false;
             for (Method method : clazz.getMethods()) {
-                if (!method.getDeclaringClass().equals(clazz))
+                if (method.getDeclaringClass()!=clazz)
                     continue;
                 webMethod = getPrivMethodAnnotation(method, WebMethod.class);
                 if (webMethod != null &&
@@ -339,7 +339,7 @@ public class RuntimeModeler {
         }*/
 
         for (Method method : clazz.getMethods()) {
-            if (method.getDeclaringClass().equals(Object.class) ||
+            if (method.getDeclaringClass()==Object.class ||
                 !isWebMethod(method, clazz)) {
                 continue;
             }
@@ -650,7 +650,7 @@ public class RuntimeModeler {
             boolean isHolder = HOLDER_CLASS.isAssignableFrom(clazzType);
             //set the actual type argument of Holder in the TypeReference
             if (isHolder) {
-                if(clazzType.getName().equals(Holder.class.getName())){
+                if(clazzType==Holder.class){
                     clazzType = Navigator.REFLECTION.erasure(((ParameterizedType)genericParameterTypes[pos]).getActualTypeArguments()[0]);
                 }
             }
@@ -820,7 +820,7 @@ public class RuntimeModeler {
             boolean isHolder = HOLDER_CLASS.isAssignableFrom(clazzType);
             //set the actual type argument of Holder in the TypeReference
             if (isHolder) {
-                if (clazzType.getName().equals(Holder.class.getName()))
+                if (clazzType==Holder.class)
                     clazzType = Navigator.REFLECTION.erasure(((ParameterizedType)genericParameterTypes[pos]).getActualTypeArguments()[0]);
             }
             Mode paramMode = isHolder ? Mode.INOUT : Mode.IN;
@@ -919,7 +919,7 @@ public class RuntimeModeler {
      */
     protected void processExceptions(JavaMethodImpl javaMethod, Method method) {
         for (Class<?> exception : method.getExceptionTypes()) {
-            if (REMOTE_EXCEPTION_CLASS.isAssignableFrom((Class)exception))
+            if (REMOTE_EXCEPTION_CLASS.isAssignableFrom(exception))
                 continue;
 
             Class<? extends RemoteException> exceptionClass
@@ -927,10 +927,10 @@ public class RuntimeModeler {
 
             Class exceptionBean;
             Annotation[] anns;
-            Method faultInfoMethod = getWSDLExceptionFaultInfo((Class)exception);
+            Method faultInfoMethod = getWSDLExceptionFaultInfo(exception);
             ExceptionType exceptionType = ExceptionType.WSDLException;
             String namespace = targetNamespace;
-            String name = ((Class)exception).getSimpleName();
+            String name = exception.getSimpleName();
             if (faultInfoMethod == null)  {
                 String beanPackage = packageName + PD_JAXWS_PACKAGE_PD;
                 String className = beanPackage+ name + BEAN;
@@ -938,7 +938,7 @@ public class RuntimeModeler {
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
-                WebFault webFault = (WebFault)exceptionClass.getAnnotation(WebFault.class);
+                WebFault webFault = exceptionClass.getAnnotation(WebFault.class);
                 exceptionBean = faultInfoMethod.getReturnType();
                 anns = faultInfoMethod.getAnnotations();
                 if (webFault.targetNamespace().length() > 0)
@@ -1047,7 +1047,7 @@ public class RuntimeModeler {
             boolean isHolder = HOLDER_CLASS.isAssignableFrom(clazzType);
             //set the actual type argument of Holder in the TypeReference
             if (isHolder) {
-                if (clazzType.getName().equals(Holder.class.getName()))
+                if (clazzType==Holder.class)
                     clazzType = Navigator.REFLECTION.erasure(((ParameterizedType)genericParameterTypes[pos]).getActualTypeArguments()[0]);
             }
 
@@ -1245,7 +1245,7 @@ public class RuntimeModeler {
             }
         }
 
-        webService = (WebService) clazz.getAnnotation(WebService.class);
+        webService = clazz.getAnnotation(WebService.class);
         String name = webService.name();
         if(name.length() == 0){
             name = clazz.getSimpleName();

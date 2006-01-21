@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ServiceImpl extends AbstractExtensibleImpl implements Service {
+public final class ServiceImpl extends AbstractExtensibleImpl implements Service {
     private QName name;
     private Map<QName, Port> ports;
 

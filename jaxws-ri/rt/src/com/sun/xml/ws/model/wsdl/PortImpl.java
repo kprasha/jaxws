@@ -26,7 +26,7 @@ import com.sun.xml.ws.api.model.wsdl.Port;
 import javax.xml.namespace.QName;
 import java.util.HashSet;
 
-public class PortImpl extends AbstractExtensibleImpl implements Port {
+public final class PortImpl extends AbstractExtensibleImpl implements Port {
     private QName name;
     private String address;
     private QName bindingName;
