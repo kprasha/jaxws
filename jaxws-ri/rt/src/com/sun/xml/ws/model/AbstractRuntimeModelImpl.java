@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * model of the web service.  Used by the runtime marshall/unmarshall 
+ * model of the web service.  Used by the runtime marshall/unmarshall
  * web service invocations
  *
  * $author: JAXWS Development Team
@@ -90,7 +90,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
             }
         }
     }
-    
+
     protected void populateAsyncExceptions() {
         for (JavaMethod jm : getJavaMethods()) {
             MEP mep = jm.getMEP();
@@ -136,14 +136,14 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     public JAXBRIContext getJAXBContext() {
         return jaxbContext;
     }
-    
-    /** 
+
+    /**
      * @return the known namespaces from JAXBRIContext
      */
     public List<String> getKnownNamespaceURIs() {
         return knownNamespaceURIs;
     }
-    
+
     /**
      * @param type
      * @return the <code>Bridge</code> for the <code>type</code>
@@ -154,7 +154,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
 
     /**
      * @param name
-     * @return either a <code>RpcLitpayload</code> or a <code>JAXBBridgeInfo</code> for 
+     * @return either a <code>RpcLitpayload</code> or a <code>JAXBBridgeInfo</code> for
      * either a message payload or header
      * @deprecated Will no longer be needed with the {@link com.sun.xml.ws.api.message.Message}
      */
@@ -200,7 +200,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         }
         knownNamespaceURIs = new ArrayList<String>();
         for (String namespace : jaxbContext.getKnownNamespaceURIs()) {
-            if (namespace.length() > 0) {    
+            if (namespace.length() > 0) {
                 if (!namespace.equals(SOAPNamespaceConstants.XSD))
                     knownNamespaceURIs.add(namespace);
             }
@@ -302,7 +302,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
 
     /**
      * @param name
-     * @return the <code>JavaMethod</code> associated with the 
+     * @return the <code>JavaMethod</code> associated with the
      * operation named name
      */
     public JavaMethod getJavaMethod(QName name) {
@@ -352,6 +352,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         for(JavaMethod method : javaMethods){
             if(method.isAsync())
                 continue;
+            QName opName = new QName(wsdlBinding.getPortTypeName().getNamespaceURI());
             boolean isRpclit = ((com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding()).isRpcLit();
             List<Parameter> reqParams = method.getRequestParameters();
             List<Parameter> reqAttachParams = null;
@@ -364,7 +365,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                 String partName = param.getPartName();
                 if(partName == null)
                     continue;
-                ParameterBinding paramBinding = wsdlBinding.getBinding(method.getOperationName(),
+                ParameterBinding paramBinding = wsdlBinding.getBinding(opName,
                         partName, Mode.IN);
                 if(paramBinding != null)
                     ((ParameterImpl)param).setInBinding(paramBinding);
@@ -384,7 +385,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                 String partName = param.getPartName();
                 if(partName == null)
                     continue;
-                ParameterBinding paramBinding = wsdlBinding.getBinding(method.getOperationName(),
+                ParameterBinding paramBinding = wsdlBinding.getBinding(opName,
                         partName, Mode.OUT);
                 if(paramBinding != null)
                     ((ParameterImpl)param).setOutBinding(paramBinding);
@@ -416,7 +417,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * Returns attachment parameters if/any.
      */
     private List<Parameter> applyRpcLitParamBinding(JavaMethod method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
-        String opName = method.getOperationName();
+        QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
         BoundOperation bo = boundPortType.get(opName);
         Map<Integer, Parameter> bodyParams = new HashMap<Integer, Parameter>();
@@ -509,7 +510,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     public QName getPortName() {
         return portName;
     }
-    
+
     public QName getPortTypeName() {
         return portTypeName;
     }
@@ -521,11 +522,11 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     void setPortName(QName name) {
         portName = name;
     }
-    
+
     void setPortTypeName(QName name) {
         portTypeName = name;
     }
-    
+
     /**
      * This is the targetNamespace for the WSDL containing the PortType
      * definition
@@ -541,7 +542,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     public String getTargetNamespace() {
         return targetNamespace;
     }
-    
+
     /**
      * Mtom processing is disabled by default. To enable it the RuntimeModel creator must call it to enable it.
      * Its used by {@link com.sun.xml.ws.server.RuntimeEndpointInfo#init()} after the runtime model is built. This method should not be exposed to outside.

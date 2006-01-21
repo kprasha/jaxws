@@ -26,10 +26,19 @@ import com.sun.xml.ws.api.model.wsdl.Port;
 import javax.xml.namespace.QName;
 import java.util.HashSet;
 
+/**
+ * Implementation of {@link Port}
+ *
+ * @author Vivek Pandey
+ */
 public final class PortImpl extends AbstractExtensibleImpl implements Port {
-    private QName name;
-    private String address;
-    private QName bindingName;
+    private final QName name;
+    private final String address;
+    private final QName bindingName;
+
+    /**
+     * To be set after the WSDL parsing is complete so that
+     */
     private BoundPortType boundPortType;
 
     public PortImpl(QName name, QName binding, String address) {

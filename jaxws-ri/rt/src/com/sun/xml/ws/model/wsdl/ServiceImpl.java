@@ -27,9 +27,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Implementation of {@link Service}
+ *
+ * @author Vivek Pandey
+ */
 public final class ServiceImpl extends AbstractExtensibleImpl implements Service {
-    private QName name;
-    private Map<QName, Port> ports;
+    private final QName name;
+    private final Map<QName, Port> ports;
 
     public ServiceImpl(QName name) {
         super();

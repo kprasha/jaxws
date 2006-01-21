@@ -30,8 +30,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
 
+/**
+ * Implementation of {@link BoundOperation}
+ *
+ * @author Vivek Pandey
+ */
 public final class BoundOperationImpl extends AbstractExtensibleImpl implements BoundOperation {
-    private String name;
+    private final String name;
 
     // map of wsdl:part to the binding
     private final Map<String, ParameterBinding> inputParts;

@@ -273,7 +273,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private static void parseBindingOperation(XMLStreamReader reader, BoundPortTypeImpl binding) {
+    private void parseBindingOperation(XMLStreamReader reader, BoundPortTypeImpl binding) {
         String bindingOpName = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
         if(bindingOpName == null){
             //TODO: throw exception?
@@ -283,7 +283,7 @@ public class RuntimeWSDLParser {
         }
 
         BoundOperationImpl bindingOp = new BoundOperationImpl(bindingOpName);
-        binding.put(bindingOpName, bindingOp);
+        binding.put(new QName(targetNamespace, bindingOpName), bindingOp);
 
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();

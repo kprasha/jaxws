@@ -25,8 +25,13 @@ import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import javax.xml.namespace.QName;
 import java.util.HashSet;
 
+/**
+ * Implementaiton of {@link Operation}
+ *
+ * @author Vivek Pandey
+ */
 public final class OperationImpl extends AbstractExtensibleImpl implements Operation {
-    private QName name;
+    private final QName name;
     private String parameterOrder;
     private QName inputMessage;
     private QName outputMessage;

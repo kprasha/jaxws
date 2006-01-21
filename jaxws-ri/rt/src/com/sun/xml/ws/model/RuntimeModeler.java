@@ -789,7 +789,7 @@ public class RuntimeModeler {
                 ParameterBinding rb = getBinding(binding, operationName, resultPartName, false, Mode.OUT);
                 returnParameter.setBinding(rb);
                 if(rb.isBody() || rb.isUnbound()){
-                    Part p = getPart(operationName, resultPartName, Mode.OUT);
+                    Part p = getPart(new QName(targetNamespace,operationName), resultPartName, Mode.OUT);
                     if(p == null)
                         resRpcParams.put(resRpcParams.size(), returnParameter);
                     else
@@ -881,7 +881,7 @@ public class RuntimeModeler {
             }
             if(param.getInBinding().isBody()){
                 if(!param.isOUT()){
-                    Part p = getPart(operationName, partName, Mode.IN);
+                    Part p = getPart(new QName(targetNamespace,operationName), partName, Mode.IN);
                     if(p == null)
                         reqRpcParams.put(reqRpcParams.size(), param);
                     else
@@ -894,7 +894,7 @@ public class RuntimeModeler {
                             throw new RuntimeModelerException("runtime.modeler.oneway.operation.no.out.parameters",
                                     new Object[] {portClass.getCanonicalName(), methodName});
                     }
-                    Part p = getPart(operationName, partName, Mode.OUT);
+                    Part p = getPart(new QName(targetNamespace,operationName), partName, Mode.OUT);
                     if(p == null)
                         resRpcParams.put(resRpcParams.size(), param);
                     else
@@ -1286,10 +1286,11 @@ public class RuntimeModeler {
             else
                 return ParameterBinding.BODY;
         }
-        return boundPortType.getBinding(operation, part, mode);
+        QName opName = new QName(boundPortType.getPortType().getName().getNamespaceURI(), operation);
+        return boundPortType.getBinding(opName, part, mode);
     }
 
-    private Part getPart(String opName, String partName, Mode mode){
+    private Part getPart(QName opName, String partName, Mode mode){
         if(binding != null){
             BoundOperation bo = binding.get(opName);
             if(bo != null)

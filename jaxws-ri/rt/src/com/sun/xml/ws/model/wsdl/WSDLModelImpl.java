@@ -39,6 +39,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link WSDLModel}
+ *
+ * @author Vivek Pandey
+ */
 public final class WSDLModelImpl implements WSDLModel {
     private final Map<QName, Message> messages;
     private final Map<QName, PortType> portTypes;
@@ -98,6 +103,19 @@ public final class WSDLModelImpl implements WSDLModel {
 
     public Map<QName, Service> getServices(){
         return services;
+    }
+
+    public BoundOperation getOperation(QName serviceName, QName portName, QName operationName) {
+        Service service = getService(serviceName);
+        if(service  == null)
+            return null;
+        Port port = service.get(portName);
+        if(port == null)
+            return null;
+        BoundPortType bpt = port.getBinding();
+        if(bpt == null)
+            return null;
+        return bpt.get(operationName);
     }
 
     /**

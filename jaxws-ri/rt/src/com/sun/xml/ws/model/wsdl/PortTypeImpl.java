@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Hashtable;
 
 /**
- * Provides abstract model of wsdl:portType
+ * Provides implementation of {@link PortType}
  *
  * @author Vivek Pandey
  */

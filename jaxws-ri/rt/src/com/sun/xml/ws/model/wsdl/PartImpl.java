@@ -21,9 +21,12 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.api.model.wsdl.PartDescriptor;
 
 /**
+ * Implementation of {@link Part}
  *
+ * @author Vivek Pandey
  */
 public final class PartImpl implements Part {
     private final String name;
@@ -55,5 +58,10 @@ public final class PartImpl implements Part {
 
     public int getIndex() {
         return index;
+    }
+
+    //TODO
+    public PartDescriptor getDescriptor() {
+        throw new UnsupportedOperationException();
     }
 }

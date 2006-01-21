@@ -29,6 +29,11 @@ import javax.xml.namespace.QName;
 import java.util.Hashtable;
 import java.util.Map;
 
+/**
+ * Implementation of {@link BoundPortType}
+ *
+ * @author Vivek Pandey
+ */
 public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements BoundPortType {
     private final QName name;
     private final QName portTypeName;
@@ -36,7 +41,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private final Map<String,BoundOperationImpl> bindingOperations = new Hashtable<String,BoundOperationImpl>();
+    private final Map<QName,BoundOperationImpl> bindingOperations = new Hashtable<QName,BoundOperationImpl>();
 
     public BoundPortTypeImpl(QName name, QName portTypeName) {
         this.name = name;
@@ -47,7 +52,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         return name;
     }
 
-    public BoundOperation get(String operationName) {
+    public BoundOperation get(QName operationName) {
         return bindingOperations.get(operationName);
     }
 
@@ -58,7 +63,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
      * @param ptOp   Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(String opName, BoundOperationImpl ptOp) {
+    public void put(QName opName, BoundOperationImpl ptOp) {
         bindingOperations.put(opName,ptOp);
     }
 
@@ -90,7 +95,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         this.wsdlDoc = wsdlDoc;
     }
 
-    public ParameterBinding getBinding(String operation, String part, Mode mode) {
+    public ParameterBinding getBinding(QName operation, String part, Mode mode) {
         BoundOperation op = get(operation);
         if (op == null) {
             //TODO throw exception
@@ -102,7 +107,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
             return op.getOutputBinding(part);
     }
 
-    public String getMimeType(String operation, String part, Mode mode) {
+    public String getMimeType(QName operation, String part, Mode mode) {
         BoundOperation op = get(operation);
         if (Mode.IN == mode)
             return op.getMimeTypeForInputPart(part);

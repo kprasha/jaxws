@@ -25,7 +25,7 @@ import java.util.TreeMap;
 import java.util.LinkedHashSet;
 
 /**
- * 
+ * Provides abstraction for wsdl:message
  * @author Vivek Pandey
  */
 public final class Message extends LinkedHashSet<String>{
