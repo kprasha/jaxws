@@ -32,7 +32,30 @@ import javax.xml.bind.Marshaller;
 
 
 /**
- * Represents various constants of SOAP 1.1 and SOAP 1.2.
+ * Version of SOAP (1.1 and 1.2).
+ *
+ * <p>
+ * This class defines various constants for SOAP 1.1 and SOAP 1.2,
+ * and also defines convenience methods to simplify the processing
+ * of multiple SOAP versions.
+ *
+ * <p>
+ * This constant alows you to do:
+ *
+ * <pre>
+ * SOAPVersion version = ...;
+ * version.someOp(...);
+ * </pre>
+ *
+ * As opposed to:
+ *
+ * <pre>
+ * if(binding is SOAP11) {
+ *   doSomeOp11(...);
+ * } else {
+ *   doSomeOp12(...);
+ * }
+ * </pre>
  *
  * @author Kohsuke Kawaguchi
  */
