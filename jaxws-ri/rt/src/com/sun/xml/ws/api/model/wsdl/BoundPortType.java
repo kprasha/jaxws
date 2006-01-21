@@ -24,7 +24,7 @@ public interface BoundPortType extends Extensible {
      * @param operationName non-null operationName
      * @return null if a {@link BoundOperation} is not found
      */
-    public BoundOperation get(String operationName);
+    public BoundOperation get(QName operationName);
 
     /**
      * Gets the wsdl:binding@type value, same as {@link PortType#getName()}
@@ -55,7 +55,7 @@ public interface BoundPortType extends Extensible {
      * @param mode      {@link Mode#IN} or {@link Mode@OUT}. Must be non-null.
      * @return null if the binding could not be resolved for the part.
      */
-    ParameterBinding getBinding(String operation, String part, Mode mode);
+    ParameterBinding getBinding(QName operation, String part, Mode mode);
 
     /**
      * Gets mime:content@part value which is the MIME type for a given operation, part and {@link Mode}.
@@ -65,5 +65,5 @@ public interface BoundPortType extends Extensible {
      * @param mode      {@link Mode#IN} or {@link Mode@OUT}. Must be non-null.
      * @return null if the binding could not be resolved for the part.
      */
-    String getMimeType(String operation, String part, Mode mode);
+    String getMimeType(QName operation, String part, Mode mode);
 }

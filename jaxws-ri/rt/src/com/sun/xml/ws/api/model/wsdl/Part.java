@@ -23,4 +23,9 @@ public interface Part {
      * @return n where n >= 0
      */
     int getIndex();
+
+    /**
+     * Gives the XML Schema descriptor referenced using either wsdl:part@element or wsdl:part@type.
+     */
+    public PartDescriptor getDescriptor();
 }

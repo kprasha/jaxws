@@ -83,6 +83,24 @@ public interface WSDLModel {
     Map<QName, Service> getServices();
 
     /**
+     * Gets the bound operation for a service, port and a tag name. the
+     * {@link BoundOperation} will provide the operation parts and the respective
+     * bindings. Here the operation would be the one whose input part descriptor is same as
+     * the tag name except for rpclit where the tag name would be {@link BoundOperation@getName()}. 
+     * <p>
+     * For example this can be used in the case when a message receipient can get the
+     * {@link BoundOperation} from the payload tag name.
+     *
+     * @param serviceName  non-null service name
+     * @param portName     non-null port name
+     * @param tag          The payload tag name.
+     * @return null if the operation is not found
+     * @throws NullPointerException if either of serviceName, portName or operationName is null.
+     * @see com.sun.xml.ws.api.model.ParameterBinding
+     */
+    BoundOperation getOperation(QName serviceName, QName portName, QName tag);
+
+    /**
      * Gives the binding Id for a given wsdl:port and wsdl:service name. The binding Id can be either
      * {@link SOAPBinding#SOAP11HTTP_BINDING} or {@link SOAPBinding#SOAP12HTTP_BINDING}
      * of the given service and port.
