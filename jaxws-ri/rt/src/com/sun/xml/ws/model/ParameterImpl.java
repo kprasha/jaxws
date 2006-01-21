@@ -45,6 +45,16 @@ import javax.xml.ws.Holder;
  * @author Vivek Pandey
  */
 public class ParameterImpl implements Parameter {
+
+    private ParameterBinding binding;
+    private ParameterBinding outBinding;
+    private String partName;
+    private final int index;
+    private final Mode mode;
+    private final TypeReference typeReference;
+    private final QName name;
+    private final RuntimeModel model;
+
     /**
      * 
      */
@@ -206,13 +216,4 @@ public class ParameterImpl implements Parameter {
     public void setPartName(String partName) {
         this.partName = partName;
     }
-    
-    protected ParameterBinding binding;
-    protected ParameterBinding outBinding;
-    protected int index;
-    protected Mode mode;
-    protected TypeReference typeReference;
-    protected QName name;
-    protected String partName;
-    protected RuntimeModel model;
 }
