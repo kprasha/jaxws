@@ -10,7 +10,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 

@@ -26,7 +26,7 @@ import com.sun.xml.ws.client.*;
 import com.sun.xml.ws.client.dispatch.impl.DispatchContactInfoList;
 import com.sun.xml.ws.client.dispatch.impl.DispatchDelegate;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.pept.Delegate;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
 import com.sun.xml.ws.pept.presentation.MEP;
@@ -34,8 +34,6 @@ import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
@@ -51,7 +49,6 @@ import java.util.logging.Logger;
 
 
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.activation.DataSource;

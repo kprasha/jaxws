@@ -25,7 +25,7 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.MessageProperties;
 
 import javax.net.ssl.HostnameVerifier;

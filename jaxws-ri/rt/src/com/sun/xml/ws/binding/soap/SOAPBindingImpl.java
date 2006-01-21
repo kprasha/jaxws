@@ -20,7 +20,7 @@
 package com.sun.xml.ws.binding.soap;
 
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerChainCaller;

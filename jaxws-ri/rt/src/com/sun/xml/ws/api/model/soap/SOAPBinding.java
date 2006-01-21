@@ -1,6 +1,6 @@
 package com.sun.xml.ws.api.model.soap;
 
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 
 /**
  * Models soap:binding in a WSDL document or a {@link javax.jws.soap.SOAPBinding} annotation. This

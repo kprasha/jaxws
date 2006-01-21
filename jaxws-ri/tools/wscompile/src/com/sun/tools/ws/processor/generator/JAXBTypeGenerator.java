@@ -36,7 +36,7 @@ import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.RpcLitStructure;
 import com.sun.tools.ws.processor.modeler.wsdl.ConsoleErrorReporter;
 import com.sun.tools.ws.processor.ProcessorOptions;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
 
 /**

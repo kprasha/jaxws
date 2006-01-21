@@ -46,7 +46,7 @@ import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.model.java.JavaInterface;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.StringUtils;
 import com.sun.xml.bind.api.JAXBRIContext;

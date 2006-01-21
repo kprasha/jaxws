@@ -1,6 +1,5 @@
 package com.sun.xml.ws.api;
 
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 

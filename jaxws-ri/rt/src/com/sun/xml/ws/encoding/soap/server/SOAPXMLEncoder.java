@@ -27,7 +27,7 @@ import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.SOAPEncoder;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
@@ -39,7 +39,6 @@ import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.MessageInfoUtil;
-import com.sun.xml.ws.util.SOAPUtil;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -49,7 +48,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.soap.SOAPBinding;
 
 /**
  * @author WS Development Team
@@ -60,7 +58,7 @@ public class SOAPXMLEncoder extends SOAPEncoder {
     protected static final String FAULTSTRING_NAME = "faultstring";
     protected static final String FAULTACTOR_NAME  = "faultactor";
     protected static final String DETAIL_NAME      = "detail";
-    
+
     public SOAPXMLEncoder() {
     }
 
@@ -68,14 +66,14 @@ public class SOAPXMLEncoder extends SOAPEncoder {
         XMLStreamWriter writer = null;
         JAXWSAttachmentMarshaller marshaller = null;
         boolean xopEnabled = false;
-        
+
         try {
             setAttachmentsMap(messageInfo, response);
             ByteArrayBuffer bab = new ByteArrayBuffer();
-            
+
             if (messageInfo.getMetaData(CONTENT_NEGOTIATION_PROPERTY) == "optimistic") {
                 writer = XMLStreamWriterFactory.createFIStreamWriter(bab);
-                
+
                 // Turn XOP off for FI
                 marshaller = getAttachmentMarshaller(messageInfo);
                 if (marshaller != null) {
@@ -88,7 +86,7 @@ public class SOAPXMLEncoder extends SOAPEncoder {
                 messageInfo.setMetaData(JAXB_OUTPUTSTREAM, bab);
                 writer = XMLStreamWriterFactory.createXMLStreamWriter(bab);
             }
-            
+
             writer.writeStartDocument();
             startEnvelope(writer);
             writeEnvelopeNamespaces(writer, messageInfo);
@@ -102,17 +100,17 @@ public class SOAPXMLEncoder extends SOAPEncoder {
             mh.addHeader("Content-Type", getContentType(messageInfo, marshaller));
             SOAPMessage msg = getBindingId().saajFactory.createMessage(mh, bab.newInputStream());
             processAttachments(response, msg);
-            
+
             // Restore default XOP processing before returning
             if (marshaller != null) {
                 marshaller.setXOPPackage(xopEnabled);
-            }            
-            
+            }
+
             return msg;
-        } 
+        }
         catch (Exception e) {
             throw new ServerRtException("soapencoder.err", new Object[]{e});
-        } 
+        }
         finally {
             if (writer != null) {
                 try {
@@ -124,7 +122,7 @@ public class SOAPXMLEncoder extends SOAPEncoder {
             }
         }
     }
-    
+
     protected JAXWSAttachmentMarshaller getAttachmentMarshaller(MessageInfo messageInfo) {
         Object rtc = messageInfo.getMetaData(BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
         if (rtc != null) {
@@ -132,12 +130,12 @@ public class SOAPXMLEncoder extends SOAPEncoder {
             if (bc != null) {
                 return (JAXWSAttachmentMarshaller) bc.getAttachmentMarshaller();
             }
-        }        
+        }
         return null;
     }
-    
-    protected String getContentType(MessageInfo messageInfo, 
-        JAXWSAttachmentMarshaller marshaller) 
+
+    protected String getContentType(MessageInfo messageInfo,
+                                    JAXWSAttachmentMarshaller marshaller)
     {
         String contentNegotiation = (String)
             messageInfo.getMetaData(BindingProviderProperties.CONTENT_NEGOTIATION_PROPERTY);
@@ -145,12 +143,12 @@ public class SOAPXMLEncoder extends SOAPEncoder {
         if (marshaller == null) {
             marshaller = getAttachmentMarshaller(messageInfo);
         }
-        
+
         if (marshaller != null && marshaller.isXopped()) {
             return XOP_SOAP11_XML_TYPE_VALUE;
         }
         else {
-            return (contentNegotiation == "optimistic") ? 
+            return (contentNegotiation == "optimistic") ?
                 FAST_INFOSET_TYPE_SOAP11 : XML_CONTENT_TYPE_VALUE;
         }
     }
@@ -167,7 +165,7 @@ public class SOAPXMLEncoder extends SOAPEncoder {
             if (MessageContextUtil.getHttpStatusCode(ctxt) == null) {
                 MessageContextUtil.setHttpStatusCode(ctxt, WSConnection.INTERNAL_ERR);
             }
-            
+
             writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
                 SOAPConstants.QNAME_SOAP_FAULT.getLocalPart(),
                 SOAPConstants.QNAME_SOAP_FAULT.getNamespaceURI());

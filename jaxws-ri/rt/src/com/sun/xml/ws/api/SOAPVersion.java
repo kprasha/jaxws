@@ -18,16 +18,18 @@
  * [name of copyright owner]
  */
 
-package com.sun.xml.ws.encoding.soap;
+package com.sun.xml.ws.api;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
+import com.sun.xml.ws.encoding.soap.*;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.soap.*;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.bind.Marshaller;
 
 
@@ -61,7 +63,7 @@ import javax.xml.bind.Marshaller;
  */
 public enum SOAPVersion {
     SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
-            SOAPConstants.URI_ENVELOPE,
+            com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE,
             javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL) {
         public Header createJAXBHeader(Marshaller m, Object o) {
             return new JAXBHeader11(m,o);

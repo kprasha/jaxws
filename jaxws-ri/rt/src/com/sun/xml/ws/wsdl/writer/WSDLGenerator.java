@@ -27,7 +27,7 @@ import com.sun.xml.txw2.TXW;
 import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.txw2.output.ResultFactory;
 import com.sun.xml.txw2.output.XmlSerializer;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.api.model.ParameterBinding;
@@ -60,6 +60,7 @@ import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.soap.Use;
+import com.sun.xml.ws.api.SOAPVersion;
 
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;

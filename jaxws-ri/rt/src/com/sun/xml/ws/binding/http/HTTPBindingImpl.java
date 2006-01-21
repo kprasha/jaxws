@@ -30,7 +30,8 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 
 /**
  * @author WS Development Team

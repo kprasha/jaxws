@@ -22,7 +22,7 @@ package com.sun.xml.ws.model;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.CheckedException;
@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
 
 import javax.jws.Oneway;

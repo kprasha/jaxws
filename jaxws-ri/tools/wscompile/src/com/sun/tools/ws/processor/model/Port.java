@@ -29,10 +29,8 @@ import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.processor.config.HandlerChainInfo;
 import com.sun.tools.ws.processor.model.java.JavaInterface;
-import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
-import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
 
 /**
  *

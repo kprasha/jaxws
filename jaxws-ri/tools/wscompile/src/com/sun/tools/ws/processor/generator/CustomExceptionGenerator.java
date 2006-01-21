@@ -24,7 +24,7 @@ import com.sun.codemodel.*;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.model.Fault;
 import com.sun.tools.ws.processor.model.Model;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 
 import javax.xml.ws.WebFault;
 import java.util.HashMap;

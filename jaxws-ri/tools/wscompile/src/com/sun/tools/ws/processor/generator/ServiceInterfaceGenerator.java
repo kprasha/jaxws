@@ -41,7 +41,9 @@ import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.model.java.JavaInterface;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
+
 import java.io.File;
 import java.io.IOException;
 import javax.xml.ws.WebEndpoint;

@@ -28,7 +28,7 @@ import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.client.BindingProviderProperties;

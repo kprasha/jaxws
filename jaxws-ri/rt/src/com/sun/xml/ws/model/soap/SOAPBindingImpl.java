@@ -21,7 +21,7 @@ package com.sun.xml.ws.model.soap;
 
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 
 /**
  * A wsdl:opeartion binding object that represents soap:binding. This can be

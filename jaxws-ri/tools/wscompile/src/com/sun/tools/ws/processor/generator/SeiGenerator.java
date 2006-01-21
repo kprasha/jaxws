@@ -36,9 +36,7 @@ import com.sun.tools.ws.processor.util.GeneratedFileInfo;
 import com.sun.tools.ws.processor.util.IndentingWriter;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
-import com.sun.tools.ws.wsdl.document.PortType;
-import com.sun.tools.xjc.api.TypeAndAnnotation;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -50,7 +48,6 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Holder;
@@ -61,15 +58,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Properties;
-import java.util.Iterator;
 
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
-    
+
     // empty string per section 9.2.1.3
     private static final String HANDLER_CHAIN_NAME = "";
-    
+
     public SeiGenerator() {
     }
 
@@ -108,12 +104,12 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             log("Class " + className + " exists. Not overriding.");
             return;
         }
-        
-        
+
+
         JDefinedClass cls = getClass(className, ClassType.INTERFACE);
         if (cls == null)
             return;
-        
+
         // If the class has methods it has already been defined
         // so skip it.
         if (!cls.methods().isEmpty())
@@ -218,14 +214,14 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             if (operation.getResponse().getBodyBlocks().hasNext()) {
                 block = operation.getResponse().getBodyBlocks().next();
                 resultName = block.getName().getLocalPart();
-                nsURI = block.getName().getNamespaceURI();                
+                nsURI = block.getName().getNamespaceURI();
             }
 
             for (Parameter parameter : operation.getResponse().getParametersList()) {
                 if (parameter.getParameterIndex() == -1) {
                     if(operation.isWrapped()||!isDocStyle){
                         if(parameter.getBlock().getLocation() == Block.HEADER){
-                            resultName = parameter.getBlock().getName().getLocalPart(); 
+                            resultName = parameter.getBlock().getName().getLocalPart();
                         }else{
                             resultName = parameter.getName();
                         }
@@ -312,7 +308,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         return (message.getBodyBlockCount() > 0 && block.equals(message.getBodyBlocks().next())) ||
                (message.getHeaderBlockCount() > 0 &&
                block.equals(message.getHeaderBlocks().next()));
-    }    
+    }
 
     private boolean isHeaderParam(Parameter param, Message message) {
         if (message.getHeaderBlockCount() == 0)
@@ -475,7 +471,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         String jd = model.getJavaDoc();
         if(jd != null){
             JPackage pkg = cm._package(wsdlModelInfo.getJavaPackageName());
-            pkg.javadoc().add(jd);                
+            pkg.javadoc().add(jd);
         }
 
         for(Port p:service.getPorts()){

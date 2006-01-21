@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.util;
 
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.message.SOAPMsgCreateException;
 import com.sun.xml.ws.encoding.soap.message.SOAPMsgFactoryCreateException;
 import org.w3c.dom.Node;

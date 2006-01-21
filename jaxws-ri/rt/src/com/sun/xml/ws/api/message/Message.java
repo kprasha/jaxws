@@ -21,7 +21,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.bind.api.BridgeContext;

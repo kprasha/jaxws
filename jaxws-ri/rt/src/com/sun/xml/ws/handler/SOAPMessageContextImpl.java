@@ -21,7 +21,7 @@ package com.sun.xml.ws.handler;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 
 import javax.xml.bind.JAXBContext;

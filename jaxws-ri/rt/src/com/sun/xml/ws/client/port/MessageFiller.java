@@ -1,8 +1,9 @@
 package com.sun.xml.ws.client.port;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.SOAPVersion;
 
 /**
  * Puts a non-payload message parameter to {@link Message}.

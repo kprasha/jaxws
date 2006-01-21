@@ -7,12 +7,12 @@ package com.sun.xml.ws.client.dispatch.rearch;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DispatchContext;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;

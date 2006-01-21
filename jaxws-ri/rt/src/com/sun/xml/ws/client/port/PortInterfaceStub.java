@@ -2,7 +2,7 @@ package com.sun.xml.ws.client.port;
 
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.Stub;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.JavaMethod;

@@ -5,7 +5,7 @@ import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader11;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.encoding.soap.SOAPVersion;
+import com.sun.xml.ws.api.SOAPVersion;
 
 import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamReader;
