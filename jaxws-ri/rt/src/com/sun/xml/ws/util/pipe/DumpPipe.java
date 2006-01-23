@@ -6,6 +6,7 @@ import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.PrintStream;
 
 /**
@@ -42,7 +43,13 @@ public class DumpPipe implements Pipe {
     private void dump(String header, Message msg) {
         out.println("====["+header+"]====");
         try {
-            msg.copy().writeTo(staxOut.createXMLStreamWriter(out));
+            XMLStreamWriter writer = staxOut.createXMLStreamWriter(new PrintStream(out) {
+                public void close() {
+                    // noop
+                }
+            });
+            msg.copy().writeTo(writer);
+            writer.close();
         } catch (XMLStreamException e) {
             e.printStackTrace(out);
         }
