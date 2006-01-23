@@ -52,6 +52,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
 
     private final Map<String, Part> inParts;
     private final Map<String, Part> outParts;
+    private Operation operation;
 
     /**
      *
@@ -149,7 +150,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
      * TODO
      */
     public Operation getOperation() {
-        throw new UnsupportedOperationException();
+        return operation;
     }
 
     public void setInputExplicitBodyParts(boolean b) {
@@ -158,5 +159,9 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
 
     public void setOutputExplicitBodyParts(boolean b) {
         explicitOutputSOAPBodyParts = b;
+    }
+
+    void freeze(BoundPortTypeImpl parent) {
+        operation = parent.getPortType().get(name);
     }
 }

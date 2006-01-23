@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.PortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
 import javax.xml.namespace.QName;
 import java.util.Hashtable;
@@ -79,10 +80,6 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         return bindingOperations.values();
     }
 
-    public void setPortType(PortType portType) {
-        this.portType = portType;
-    }
-
     public String getBindingId() {
         return bindingId;
     }
@@ -122,6 +119,14 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         if (!finalized) {
             wsdlDoc.finalizeBinding(this);
             finalized = true;
+        }
+    }
+
+    void freeze(WSDLModelImpl owner) {
+        portType = owner.getPortType(portTypeName);
+        // TODO: error check for null. that's an error in WSDL that needs to be reported
+        for (BoundOperationImpl op : bindingOperations.values()) {
+            op.freeze(this);
         }
     }
 }

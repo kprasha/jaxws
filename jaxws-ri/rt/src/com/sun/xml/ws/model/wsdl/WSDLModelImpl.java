@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Implementation of {@link WSDLModel}
@@ -45,17 +46,13 @@ import java.util.Map;
  * @author Vivek Pandey
  */
 public final class WSDLModelImpl implements WSDLModel {
-    private final Map<QName, Message> messages;
-    private final Map<QName, PortType> portTypes;
-    private final Map<QName, BoundPortType> bindings;
-    private final Map<QName, ServiceImpl> services;
+    private final Map<QName, Message> messages = new HashMap<QName, Message>();
+    private final Map<QName, PortType> portTypes = new HashMap<QName, PortType>();
+    private final Map<QName, BoundPortTypeImpl> bindings = new HashMap<QName, BoundPortTypeImpl>();
+    private final Map<QName, ServiceImpl> services = new LinkedHashMap<QName, ServiceImpl>();
 
-    public WSDLModelImpl() {
-        messages = new HashMap<QName, Message>();
-        portTypes = new HashMap<QName, PortType>();
-        bindings = new HashMap<QName, BoundPortType>();
-        services = new LinkedHashMap<QName, ServiceImpl>();
-    }
+    private final Map<QName,BoundPortType> unmBindings
+        = Collections.<QName,BoundPortType>unmodifiableMap(bindings);
 
     public void addMessage(Message msg){
         messages.put(msg.getName(), msg);
@@ -73,7 +70,7 @@ public final class WSDLModelImpl implements WSDLModel {
         return portTypes.get(name);
     }
 
-    public void addBinding(BoundPortType boundPortType){
+    public void addBinding(BoundPortTypeImpl boundPortType){
         bindings.put(boundPortType.getName(), boundPortType);
     }
 
@@ -98,7 +95,7 @@ public final class WSDLModelImpl implements WSDLModel {
     }
 
     public Map<QName, BoundPortType> getBindings() {
-        return bindings;
+        return unmBindings;
     }
 
     public Map<QName, ServiceImpl> getServices(){
@@ -187,7 +184,7 @@ public final class WSDLModelImpl implements WSDLModel {
     public List<BoundPortType> getBindings(Service service, String bindingId){
         List<BoundPortType> bs = new ArrayList<BoundPortType>();
         for (Port port : service.getPorts()) {
-            BoundPortType b = bindings.get(port.getName());
+            BoundPortTypeImpl b = bindings.get(port.getName());
             if(b == null)
                 return bs;
             if(b.equals(bindingId))
@@ -241,6 +238,9 @@ public final class WSDLModelImpl implements WSDLModel {
     public void freeze() {
         for (ServiceImpl service : services.values()) {
             service.freeze(this);
+        }
+        for (BoundPortTypeImpl bp : bindings.values()) {
+            bp.freeze();
         }
     }
 }
