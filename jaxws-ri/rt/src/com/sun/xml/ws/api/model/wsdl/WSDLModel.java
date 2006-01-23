@@ -68,20 +68,6 @@ public interface WSDLModel {
     Map<QName, PortType> getPortTypes();
 
     /**
-     * Gives a {@link Map} of all {@link Port}s in this WSDL keyed by their
-     * {@link Port#getName() name}.
-     *
-     * @return
-     *      can be empty but never null.
-     */
-    Map<QName,Port> getPorts();
-
-    /**
-     * Short-cut for <tt>getPorts().get(portName)</tt>.
-     */
-    Port getPort(QName portName);
-
-    /**
      * Gives a {@link Map} of wsdl:binding {@link QName} and {@link BoundPortType}
      *
      * @return an empty Map if the wsdl document has no wsdl:binding
