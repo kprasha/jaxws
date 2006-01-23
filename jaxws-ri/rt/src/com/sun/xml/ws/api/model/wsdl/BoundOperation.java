@@ -3,6 +3,7 @@ package com.sun.xml.ws.api.model.wsdl;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 
+import javax.xml.namespace.QName;
 import java.util.Map;
 
 /**
@@ -15,7 +16,7 @@ public interface BoundOperation extends Extensible {
      * Gets wsdl:binding/wsdl:operation@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
      */
-    String getName();
+    QName getName();
 
     /**
      * Gets {@link com.sun.xml.ws.api.model.wsdl.Part} for the given wsdl:input or wsdl:output part

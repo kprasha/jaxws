@@ -725,8 +725,8 @@ public class RuntimeModeler {
         //build ordered list
         Map<Integer, ParameterImpl> resRpcParams = new HashMap<Integer, ParameterImpl>();
         Map<Integer, ParameterImpl> reqRpcParams = new HashMap<Integer, ParameterImpl>();
-        if(binding != null){
-            binding.finalizeBinding();
+        if(binding != null && binding.isRpcLit()){
+            binding.finalizeRpcLitBinding();
         }
 
         if (!isOneway) {

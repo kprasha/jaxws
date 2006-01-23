@@ -348,7 +348,8 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     public void applyParameterBinding(BoundPortTypeImpl wsdlBinding){
         if(wsdlBinding == null)
             return;
-        wsdlBinding.finalizeBinding();
+        if(wsdlBinding.isRpcLit())
+            wsdlBinding.finalizeRpcLitBinding();
         for(JavaMethodImpl method : javaMethods){
             if(method.isAsync())
                 continue;

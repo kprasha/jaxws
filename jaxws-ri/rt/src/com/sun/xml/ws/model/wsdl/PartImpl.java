@@ -40,7 +40,7 @@ public final class PartImpl implements Part {
      * @param name
      * @param binding
      * @param index
-     * @see {@link BoundPortTypeImpl#finalizeBinding()}
+     * @see {@link BoundPortTypeImpl#finalizeRpcLitBinding()}
      */
     public PartImpl(String name, ParameterBinding binding, int index) {
         this.name = name;

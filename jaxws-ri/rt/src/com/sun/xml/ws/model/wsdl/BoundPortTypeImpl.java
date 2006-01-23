@@ -21,6 +21,7 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.PortType;
@@ -91,6 +92,27 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         this.wsdlDoc = wsdlDoc;
     }
 
+    /**
+     * sets whether the {@link BoundPortType} is rpc or lit
+     */
+    private Style style = Style.DOCUMENT;
+    public void setStyle(Style style){
+        this.style = style;
+    }
+
+    public Style getStyle() {
+        return style;
+    }
+
+    public boolean isRpcLit(){
+        return Style.RPC.equals(style);
+    }
+
+    public boolean isDoclit(){
+        return Style.DOCUMENT.equals(style);
+    }
+
+
     public ParameterBinding getBinding(QName operation, String part, Mode mode) {
         BoundOperation op = get(operation);
         if (op == null) {
@@ -114,11 +136,33 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
     /**
      * This method is called to apply binings in case when a specific port is required
      */
-    public void finalizeBinding() {
+    public void finalizeRpcLitBinding() {
         if (!finalized) {
-            wsdlDoc.finalizeBinding(this);
+            wsdlDoc.finalizeRpcLitBinding(this);
             finalized = true;
         }
+    }
+
+    public BoundOperation getOperation(QName tag){
+        /**
+         * If the style is rpc then the tag name should be
+         * same as operation name so return the operation that matches the tag name.
+         */
+        if(style.equals(Style.RPC)){
+           return bindingOperations.get(tag);
+        }
+
+        /**
+         * For doclit The tag will be the operation that has the same input part descriptor value
+         */
+        for(BoundOperationImpl op:bindingOperations.values()){
+            QName name = op.getBodyName();
+            if((name != null) && name.equals(tag))
+                return op;
+        }
+
+        //not found, return null
+        return null;
     }
 
     void freeze(WSDLModelImpl owner) {

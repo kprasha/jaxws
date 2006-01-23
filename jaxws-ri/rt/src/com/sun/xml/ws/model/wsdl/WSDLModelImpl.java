@@ -102,7 +102,8 @@ public final class WSDLModelImpl implements WSDLModel {
         return services;
     }
 
-    public BoundOperation getOperation(QName serviceName, QName portName, QName operationName) {
+    //TODO Partial impl
+    public BoundOperation getOperation(QName serviceName, QName portName, QName tag) {
         Service service = getService(serviceName);
         if(service  == null)
             return null;
@@ -112,7 +113,16 @@ public final class WSDLModelImpl implements WSDLModel {
         BoundPortType bpt = port.getBinding();
         if(bpt == null)
             return null;
-        return bpt.get(operationName);
+        PortTypeImpl pt = (PortTypeImpl) bpt.getPortType();
+        if(pt == null)
+            return null;
+
+        for(Operation op: pt.getOperations()){
+            QName msgName = op.getInputMessage();
+            Message msg = messages.get(msgName);
+            //TODO
+        }
+        return bpt.get(tag);
     }
 
     /**
@@ -193,7 +203,18 @@ public final class WSDLModelImpl implements WSDLModel {
         return bs;
     }
 
-    void finalizeBinding(BoundPortTypeImpl boundPortType){
+    private BoundOperation getBoundOperation(BoundPortType bpt){
+        PortTypeImpl pt = (PortTypeImpl) bpt.getPortType();
+        if(pt == null)
+            return null;
+        for(Operation op: pt.getOperations()){
+            QName msgName = op.getInputMessage();
+            Message msg = messages.get(msgName);
+        }
+        return null;
+    }
+
+    void finalizeRpcLitBinding(BoundPortTypeImpl boundPortType){
         assert(boundPortType != null);
         QName portTypeName = boundPortType.getPortTypeName();
         if(portTypeName == null)
@@ -202,7 +223,7 @@ public final class WSDLModelImpl implements WSDLModel {
         if(pt == null)
             return;
         for (BoundOperationImpl bop : boundPortType.getBindingOperations()) {
-            Operation pto = bop.getOperation();
+            Operation pto = pt.get(bop.getName().getLocalPart());
             QName inMsgName = pto.getInputMessage();
             if(inMsgName == null)
                 continue;

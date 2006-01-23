@@ -51,6 +51,10 @@ public final class PortTypeImpl  extends AbstractExtensibleImpl implements PortT
         return portTypeOperations.get(operationName);
     }
 
+    Iterable<Operation> getOperations() {
+        return portTypeOperations.values();
+    }
+
     /**
      * Populates the Map that holds operation name as key and {@link Operation} as the value.
      * @param opName Must be non-null

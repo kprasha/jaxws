@@ -21,11 +21,13 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.Part;
 import com.sun.xml.ws.api.model.wsdl.Operation;
 
+import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
@@ -36,7 +38,7 @@ import java.util.HashSet;
  * @author Vivek Pandey
  */
 public final class BoundOperationImpl extends AbstractExtensibleImpl implements BoundOperation {
-    private final String name;
+    private final QName name;
 
     // map of wsdl:part to the binding
     private final Map<String, ParameterBinding> inputParts;
@@ -58,7 +60,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
      *
      * @param name wsdl:operation name qualified value
      */
-    public BoundOperationImpl(String name) {
+    public BoundOperationImpl(QName name) {
         this.name = name;
         inputParts = new HashMap<String, ParameterBinding>();
         outputParts = new HashMap<String, ParameterBinding>();
@@ -68,7 +70,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         outParts = new HashMap<String, Part>();
     }
 
-    public String getName(){
+    public QName getName(){
         return name;
     }
 
@@ -161,7 +163,20 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         explicitOutputSOAPBodyParts = b;
     }
 
+    private Style style = Style.DOCUMENT;
+    public void setStyle(Style style){
+        this.style = style;
+    }
+
+    public QName getBodyName() {
+        if(style.equals(Style.RPC)){
+            return name;
+        }
+        //TODO: doclit handling
+        return null;
+    }
+
     void freeze(BoundPortTypeImpl parent) {
-        operation = parent.getPortType().get(name);
+        operation = parent.getPortType().get(name.getLocalPart());
     }
 }
