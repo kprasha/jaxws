@@ -24,7 +24,6 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.PortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
 import javax.xml.namespace.QName;
 import java.util.Hashtable;
