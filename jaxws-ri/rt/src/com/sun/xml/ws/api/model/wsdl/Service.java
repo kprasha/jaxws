@@ -24,7 +24,12 @@ public interface Service extends Extensible {
      * @param portName non-null operationName
      * @return null if a {@link Port} is not found
      */
-    public Port get(QName portName);
+    Port get(QName portName);
 
-    public Iterable<Port> getPorts();
+    /**
+     * Gets the first {@link Port} if any, or otherwise null.
+     */
+    Port getFirstPort();
+
+    Iterable<? extends Port> getPorts();
 }

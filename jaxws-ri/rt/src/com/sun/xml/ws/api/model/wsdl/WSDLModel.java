@@ -2,7 +2,6 @@ package com.sun.xml.ws.api.model.wsdl;
 
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +68,20 @@ public interface WSDLModel {
     Map<QName, PortType> getPortTypes();
 
     /**
+     * Gives a {@link Map} of all {@link Port}s in this WSDL keyed by their
+     * {@link Port#getName() name}.
+     *
+     * @return
+     *      can be empty but never null.
+     */
+    Map<QName,Port> getPorts();
+
+    /**
+     * Short-cut for <tt>getPorts().get(portName)</tt>.
+     */
+    Port getPort(QName portName);
+
+    /**
      * Gives a {@link Map} of wsdl:binding {@link QName} and {@link BoundPortType}
      *
      * @return an empty Map if the wsdl document has no wsdl:binding
@@ -99,18 +112,4 @@ public interface WSDLModel {
      * @see com.sun.xml.ws.api.model.ParameterBinding
      */
     BoundOperation getOperation(QName serviceName, QName portName, QName tag);
-
-    /**
-     * Gives the binding Id for a given wsdl:port and wsdl:service name. The binding Id can be either
-     * {@link SOAPBinding#SOAP11HTTP_BINDING} or {@link SOAPBinding#SOAP12HTTP_BINDING}
-     * of the given service and port.
-     *
-     * @param service qualified name of wsdl:service. Must be non-null.
-     * @param port    qualified name of wsdl:port. Must be non-null.
-     * @return The binding ID associated with the serivce and port.
-     * @throws WebServiceException If the binding correponding to the service or port is unkown (other than
-     *                             {@link SOAPBinding#SOAP11HTTP_BINDING} or
-     *                             {@link SOAPBinding#SOAP12HTTP_BINDING})
-     */
-    String getBindingId(QName service, QName port) throws WebServiceException;
 }

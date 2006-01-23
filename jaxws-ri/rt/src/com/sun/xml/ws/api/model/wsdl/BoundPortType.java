@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.soap.SOAPBinding;
 import java.util.Iterator;
 
 /**
@@ -42,7 +43,7 @@ public interface BoundPortType extends Extensible {
     Iterable<? extends BoundOperation> getBindingOperations();
 
     /**
-     * Returns {@link javax.xml.ws.soap.SOAPBinding#SOAP11HTTP_BINDING} or {@link javax.xml.ws.soap.SOAPBinding#SOAP12HTTP_BINDING}. This
+     * Returns {@link SOAPBinding#SOAP11HTTP_BINDING} or {@link SOAPBinding#SOAP12HTTP_BINDING}. This
      * would typically determined by the binding extension elements in wsdl:binding.
      */
     String getBindingId();

@@ -49,12 +49,14 @@ public final class WSDLModelImpl implements WSDLModel {
     private final Map<QName, PortType> portTypes;
     private final Map<QName, BoundPortType> bindings;
     private final Map<QName, Service> services;
+    private final Map<QName, Port> ports;
 
     public WSDLModelImpl() {
         messages = new HashMap<QName, Message>();
         portTypes = new HashMap<QName, PortType>();
         bindings = new HashMap<QName, BoundPortType>();
         services = new LinkedHashMap<QName, Service>();
+        ports = new LinkedHashMap<QName, Port>();
     }
 
     public void addMessage(Message msg){
@@ -95,6 +97,14 @@ public final class WSDLModelImpl implements WSDLModel {
 
     public Map<QName, PortType> getPortTypes() {
         return portTypes;
+    }
+
+    public Map<QName,Port> getPorts() {
+        return ports;
+    }
+
+    public Port getPort(QName portName) {
+        return ports.get(portName);
     }
 
     public Map<QName, BoundPortType> getBindings() {
@@ -142,7 +152,7 @@ public final class WSDLModelImpl implements WSDLModel {
         if(services.isEmpty())
             return null;
         Service service = services.values().iterator().next();
-        Iterator<Port> iter = service.getPorts().iterator();
+        Iterator<? extends Port> iter = service.getPorts().iterator();
         Port port = iter.hasNext()?iter.next():null;
         return port;
     }
@@ -151,33 +161,15 @@ public final class WSDLModelImpl implements WSDLModel {
     /**
      * Returns biningId of the first port
      */
+    @Deprecated   // is this method still in use?
     public String getBindingId(){
         Port port = getFirstPort();
         if(port == null)
             return null;
-        BoundPortType boundPortType = bindings.get(port.getBindingName());
+        BoundPortType boundPortType = port.getBinding();
         if(boundPortType == null)
             return null;
         return boundPortType.getBindingId();
-    }
-
-    /**
-     * Gives the binding Id of the given service and port
-     * @param service
-     * @param port
-     */
-    public String getBindingId(QName service, QName port){
-        Service s = services.get(service);
-        if(s != null){
-            Port p = s.get(port);
-            if(p != null){
-                BoundPortType b = bindings.get(p.getBindingName());
-                if(b != null)
-                    return b.getBindingId();
-            }
-
-        }
-        return null;
     }
 
      /**
@@ -191,10 +183,8 @@ public final class WSDLModelImpl implements WSDLModel {
         Service service = services.get(serviceName);
         if(service != null){
             Port port = service.get(portName);
-            if(port != null){
-                QName bindingName = port.getBindingName();
-                return bindings.get(bindingName);
-            }
+            if(port != null)
+                return port.getBinding();
         }
         return null;
     }

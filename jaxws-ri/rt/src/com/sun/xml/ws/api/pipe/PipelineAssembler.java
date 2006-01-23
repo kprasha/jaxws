@@ -26,11 +26,9 @@ import java.net.URL;
  * other implementations.
  *
  * <p>
- * TODO: define the exact mechanism to locate the implementation
- * of this class. Perhaps we might define a proprietary entry point
- * that works like {@link Service#create(URL, QName)} but with
- * additional parameter that takes an instance of {@link PipelineAssembler}.
- *
+ * See {@link PipelineAssemblerFactory} for how {@link PipelineAssembler}s
+ * are located.
+ * 
  * <p>
  * TODO: the JAX-WS team felt that no {@link Pipe} should be relying
  * on the {@link RuntimeModel}, so it is no longer given to the assembler.

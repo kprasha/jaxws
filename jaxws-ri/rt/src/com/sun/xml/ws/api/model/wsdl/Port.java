@@ -21,6 +21,7 @@ public interface Port extends Extensible {
      * Gets wsdl:service/wsdl:port@binding attribute value as (@link QName}. This name can be used to find a
      * {@link BoundPortType} from {@link WSDLModel#getBinding(javax.xml.namespace.QName)}
      */
+    @Deprecated // redundant?
     QName getBindingName();
 
     /**

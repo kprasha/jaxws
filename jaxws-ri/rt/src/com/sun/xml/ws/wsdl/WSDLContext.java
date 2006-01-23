@@ -34,7 +34,6 @@ import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -43,7 +42,6 @@ import java.util.Set;
 public class WSDLContext {
     private final URL orgWsdlLocation;
     private String targetNamespace;
-    private String bindingId;
     private final WSDLModelImpl wsdlDoc;
 
     /**
@@ -66,10 +64,6 @@ public class WSDLContext {
         } catch (SAXException e) {
             throw new WebServiceException(e);
         }
-
-        String bId = wsdlDoc.getBindingId();
-        if (bId != null)
-            setBindingID(bId);
     }
 
     public WSDLModel getWSDLModel() {
@@ -101,9 +95,8 @@ public class WSDLContext {
         Service service = wsdlDoc.getService(serviceName);
         String endpoint = null;
         if (service != null) {
-            Iterator<Port> iter = service.getPorts().iterator();
-            if (iter.hasNext()) {
-                Port port = iter.next();
+            Port port = service.getFirstPort();
+            if (port!=null) {
                 endpoint = port.getAddress();
             }
         }
@@ -118,11 +111,11 @@ public class WSDLContext {
     }
 
     public String getBindingID(QName serviceName, QName portName) {
-        return getWsdlDocument().getBindingId(serviceName, portName);
-    }
-
-    public void setBindingID(String id) {
-        bindingId = id;
+        Service s = getWsdlDocument().getService(serviceName);
+        if(s==null)     return null;
+        Port port = s.get(portName);
+        if(port==null)     return null;
+        return port.getBinding().getBindingId();
     }
 
     public String getTargetNamespace() {
@@ -133,7 +126,7 @@ public class WSDLContext {
         targetNamespace = tns;
     }
 
-    public Iterable<Port> getPorts(QName serviceName){
+    public Iterable<? extends Port> getPorts(QName serviceName){
         Service service = wsdlDoc.getService(serviceName);
         if (service != null) {
             return service.getPorts();

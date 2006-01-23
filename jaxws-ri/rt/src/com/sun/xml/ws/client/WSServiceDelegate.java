@@ -7,14 +7,13 @@ import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.Port;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
+import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.client.dispatch.rearch.StandalonePipeAssembler;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
@@ -90,14 +89,12 @@ public class WSServiceDelegate extends WSService {
     protected Executor executor;
     private final HashSet<Object> seiProxies = new HashSet<Object>();
 
-    //to get this going just use this--?do we need factory for different assembler types?
-    private static PipelineAssembler assembler = new StandalonePipeAssembler();
-
     /**
      * {@link CatalogResolver} to check META-INF/jax-ws-catalog.xml.
      * Lazily created.
      */
     private EntityResolver entityResolver;
+    private final com.sun.xml.ws.api.model.wsdl.Service wsdlModel;
 
 
     public WSServiceDelegate(ServiceContext scontext) {
@@ -105,23 +102,25 @@ public class WSServiceDelegate extends WSService {
         if (serviceContext.getHandlerResolver() != null) {
             handlerResolver = serviceContext.getHandlerResolver();
         }
-        assembler = new StandalonePipeAssembler();
+        // TODO: can someone check if any of those can be null in some circumstances? - KK
+        wsdlModel = serviceContext.getWsdlContext().getWsdlDocument().getService(serviceContext.getServiceName());
     }
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
-        if (wsdlDocumentLocation != null) {
-            serviceContext = ServiceContextBuilder.build(
-                wsdlDocumentLocation, serviceClass, XmlUtil.createDefaultCatalogResolver());
-
-        } else {
-            serviceContext = new ServiceContext(XmlUtil.createDefaultCatalogResolver());
-            serviceContext.setServiceName(serviceName);
-        }
-        if (serviceContext.getHandlerResolver() != null) {
-            handlerResolver = serviceContext.getHandlerResolver();
-        }
+        this(createServiceContext(wsdlDocumentLocation,serviceName,serviceClass));
         if (ports == null)
             populatePorts();
+    }
+
+    private static ServiceContext createServiceContext(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
+        if (wsdlDocumentLocation != null) {
+            return ServiceContextBuilder.build(
+                wsdlDocumentLocation, serviceClass, XmlUtil.createDefaultCatalogResolver());
+        } else {
+            ServiceContext serviceContext = new ServiceContext(XmlUtil.createDefaultCatalogResolver());
+            serviceContext.setServiceName(serviceName);
+            return serviceContext;
+        }
     }
 
     public URL getWSDLLocation() {
@@ -189,15 +188,18 @@ public class WSServiceDelegate extends WSService {
     public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
         //Note: may not be the most performant way to do this- needs review
         return Stubs.createDispatch(portName, this, getBinding(portName), aClass, mode,
-            createPipeline(portName));
+             createPipeline(wsdlModel.get(portName)));
     }
 
     /**
      * Creates a new pipeline for the given port name.
      */
-    private Pipe createPipeline(QName portName) {
-        return assembler.createClient(
-            getWSDLModel().getBinding(portName),this);
+    private Pipe createPipeline(Port port) {
+        String bindingId = port.getBinding().getBindingId();
+        PipelineAssembler assembler = PipelineAssemblerFactory.create(Thread.currentThread().getContextClassLoader(), bindingId);
+        if(assembler==null)
+            throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
+        return assembler.createClient(port.getBinding(),this);
     }
 
     public String getEndpointAddress(QName qName) {
@@ -214,7 +216,7 @@ public class WSServiceDelegate extends WSService {
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
         return new JAXBDispatch(portName, jaxbContext, mode, this,
-            createPipeline(portName), getBinding(portName));
+            createPipeline(wsdlModel.get(portName)), getBinding(portName));
     }
 
     public QName getServiceName() {
@@ -294,11 +296,6 @@ public class WSServiceDelegate extends WSService {
         return ports;
     }
 
-    private WSDLModel getWSDLModel() {
-        // TODO: can someone check if any of those can be null in some circumstances? - KK
-        return serviceContext.getWsdlContext().getWsdlDocument();
-    }
-
     /**
      * Determines the binding of the given port.
      */
@@ -359,7 +356,7 @@ public class WSServiceDelegate extends WSService {
         PortInterfaceStub pis = new PortInterfaceStub(this,
             createBinding(portName,eif.getBindingID()),
             portInterface,model,
-            createPipeline(portName));
+            createPipeline(wsdlModel.get(portName)));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{
