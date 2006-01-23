@@ -70,7 +70,7 @@ public class WrapperParameter extends ParameterImpl {
      * @return Returns the wrapperChildren.
      */
     public List<Parameter> getWrapperChildren() {
-        return Collections.unmodifiableList(wrapperChildren);
+        return Collections.<Parameter>unmodifiableList(wrapperChildren);
     }
 
     /**
@@ -84,7 +84,7 @@ public class WrapperParameter extends ParameterImpl {
     /**
      * @param wrapperChild
      */
-    public void addWrapperChild(Parameter wrapperChild) {
+    public void addWrapperChild(ParameterImpl wrapperChild) {
         wrapperChildren.add(wrapperChild);
     }
 
@@ -100,5 +100,5 @@ public class WrapperParameter extends ParameterImpl {
         wrapperChildren.clear();
     }
 
-    protected final List<Parameter> wrapperChildren = new ArrayList<Parameter>();
+    protected final List<ParameterImpl> wrapperChildren = new ArrayList<ParameterImpl>();
 }

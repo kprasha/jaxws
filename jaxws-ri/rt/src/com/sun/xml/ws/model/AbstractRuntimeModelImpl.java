@@ -215,8 +215,8 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     private List<TypeReference> getAllTypeReferences() {
         List<TypeReference> types = new ArrayList<TypeReference>();
         Collection<JavaMethodImpl> methods = methodToJM.values();
-        for (JavaMethod m : methods) {
-            fillTypes(m, types);
+        for (JavaMethodImpl m : methods) {
+            fillTypes(m,types);
             fillFaultDetailTypes(m, types);
         }
         return types;
@@ -229,14 +229,14 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         }
     }
 
-    protected void fillTypes(JavaMethod m, List<TypeReference> types) {
-        addTypes(m.getRequestParameters(), types);
-        addTypes(m.getResponseParameters(), types);
+    protected void fillTypes(JavaMethodImpl m, List<TypeReference> types) {
+        addTypes(m.requestParams, types);
+        addTypes(m.responseParams, types);
     }
 
-    private void addTypes(List<Parameter> params, List<TypeReference> types) {
-        for (Parameter p : params) {
-            types.add(p.getBridge().getTypeReference());
+    private void addTypes(List<ParameterImpl> params, List<TypeReference> types) {
+        for (ParameterImpl p : params) {
+            types.add(p.getTypeReference());
         }
     }
 
@@ -349,13 +349,13 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         if(wsdlBinding == null)
             return;
         wsdlBinding.finalizeBinding();
-        for(JavaMethod method : javaMethods){
+        for(JavaMethodImpl method : javaMethods){
             if(method.isAsync())
                 continue;
             QName opName = new QName(wsdlBinding.getPortTypeName().getNamespaceURI());
-            boolean isRpclit = ((com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding()).isRpcLit();
-            List<Parameter> reqParams = method.getRequestParameters();
-            List<Parameter> reqAttachParams = null;
+            boolean isRpclit = method.getBinding().isRpcLit();
+            List<ParameterImpl> reqParams = method.requestParams;
+            List<ParameterImpl> reqAttachParams = null;
             for(Parameter param:reqParams){
                 if(param.isWrapperStyle()){
                     if(isRpclit)
@@ -371,8 +371,8 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                     ((ParameterImpl)param).setInBinding(paramBinding);
             }
 
-            List<Parameter> resAttachParams = null;
-            List<Parameter> resParams = method.getResponseParameters();
+            List<ParameterImpl> resAttachParams = null;
+            List<ParameterImpl> resParams = method.responseParams;
             for(Parameter param:resParams){
                 if(param.isWrapperStyle()){
                     if(isRpclit)
@@ -391,13 +391,13 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                     ((ParameterImpl)param).setOutBinding(paramBinding);
             }
             if(reqAttachParams != null){
-                for(Parameter p : reqAttachParams){
-                    ((JavaMethodImpl)method).addRequestParameter(p);
+                for(ParameterImpl p : reqAttachParams){
+                    method.addRequestParameter(p);
                 }
             }
             if(resAttachParams != null){
-                for(Parameter p : resAttachParams){
-                    ((JavaMethodImpl)method).addResponseParameter(p);
+                for(ParameterImpl p : resAttachParams){
+                    method.addResponseParameter(p);
                 }
             }
 
@@ -416,14 +416,14 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      *
      * Returns attachment parameters if/any.
      */
-    private List<Parameter> applyRpcLitParamBinding(JavaMethod method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
+    private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
         QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
         BoundOperation bo = boundPortType.get(opName);
-        Map<Integer, Parameter> bodyParams = new HashMap<Integer, Parameter>();
-        List<Parameter> unboundParams = new ArrayList<Parameter>();
-        List<Parameter> attachParams = new ArrayList<Parameter>();
-        for(Parameter param:wrapperParameter.getWrapperChildren()){
+        Map<Integer, ParameterImpl> bodyParams = new HashMap<Integer, ParameterImpl>();
+        List<ParameterImpl> unboundParams = new ArrayList<ParameterImpl>();
+        List<ParameterImpl> attachParams = new ArrayList<ParameterImpl>();
+        for(ParameterImpl param : wrapperParameter.wrapperChildren){
             String partName = param.getPartName();
             if(partName == null)
                 continue;
@@ -456,7 +456,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         }
         wrapperParameter.clear();
         for(int i = 0; i <  bodyParams.size();i++){
-            Parameter p = bodyParams.get(i);
+            ParameterImpl p = bodyParams.get(i);
             wrapperParameter.addWrapperChild(p);
             if(((mode == Mode.IN) && p.getInBinding().isBody())||
                     ((mode == Mode.OUT) && p.getOutBinding().isBody())){
@@ -471,7 +471,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         }
 
         //add unbounded parts
-        for(Parameter p:unboundParams){
+        for(ParameterImpl p:unboundParams){
             wrapperParameter.addWrapperChild(p);
         }
         payloadMap.put(wrapperParameter.getName(), payload);

@@ -128,13 +128,13 @@ public class JavaMethodImpl implements JavaMethod {
         }
     }
 
-    void addRequestParameter(Parameter p){
+    void addRequestParameter(ParameterImpl p){
         if (p.isIN() || p.isINOUT()) {
             requestParams.add(p);
         }
     }
 
-    void addResponseParameter(Parameter p){
+    void addResponseParameter(ParameterImpl p){
         if (p.isOUT() || p.isINOUT()) {
             responseParams.add(p);
         }
@@ -223,12 +223,12 @@ public class JavaMethodImpl implements JavaMethod {
 
     private List<CheckedException> exceptions = new ArrayList<CheckedException>();
     private Method method;
-    private final List<Parameter> requestParams = new ArrayList<Parameter>();
-    private final List<Parameter> responseParams = new ArrayList<Parameter>();
+    /*package*/ final List<ParameterImpl> requestParams = new ArrayList<ParameterImpl>();
+    /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
     private final List<Parameter> unmReqParams =
-            Collections.unmodifiableList(requestParams);
+            Collections.<Parameter>unmodifiableList(requestParams);
     private final List<Parameter> unmResParams =
-            Collections.unmodifiableList(responseParams);
+            Collections.<Parameter>unmodifiableList(responseParams);
     private SOAPBinding binding;
     private MEP mep;
     private String operationName;

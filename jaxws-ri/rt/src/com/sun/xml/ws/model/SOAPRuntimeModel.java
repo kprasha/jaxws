@@ -125,13 +125,13 @@ public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
      * @see RuntimeModel#fillTypes(JavaMethod, List)
      */
     @Override
-    protected void fillTypes(JavaMethod m, List<TypeReference> types) {
-        if(!(m.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding)){
+    protected void fillTypes(JavaMethodImpl m, List<TypeReference> types) {
+        if(m.getBinding() == null) {
             //TODO throws exception
             System.out.println("Error: Wrong Binding!");
             return;
         }
-        if(((com.sun.xml.ws.api.model.soap.SOAPBinding)m.getBinding()).isDocLit()){
+        if(m.getBinding().isDocLit()){
             super.fillTypes(m, types);
             return;
         }
