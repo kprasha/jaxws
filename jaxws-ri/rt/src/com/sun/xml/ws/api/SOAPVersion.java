@@ -20,17 +20,18 @@
 
 package com.sun.xml.ws.api;
 
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
-import com.sun.xml.ws.encoding.soap.*;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
 
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.soap.*;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.bind.Marshaller;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.ws.soap.SOAPBinding;
 
 
 /**
@@ -85,10 +86,13 @@ public enum SOAPVersion {
     };
 
     /**
+     * Binding ID for SOAP/HTTP binding of this SOAP version.
+     *
+     * <p>
      * Either {@link SOAPBinding#SOAP11HTTP_BINDING} or
      *  {@link SOAPBinding#SOAP12HTTP_BINDING}
      */
-    public final String binding;
+    public final String httpBindingId;
 
     /**
      * SOAP envelope namespace URI.
@@ -105,8 +109,8 @@ public enum SOAPVersion {
      */
     public final SOAPFactory saajSoapFactory;
 
-    private SOAPVersion(String binding, String nsUri, String saajFactoryString) {
-        this.binding = binding;
+    private SOAPVersion(String httpBindingId, String nsUri, String saajFactoryString) {
+        this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
         try {
             saajFactory = MessageFactory.newInstance(saajFactoryString);
@@ -120,7 +124,7 @@ public enum SOAPVersion {
      * Creates {@link JAXBHeader11} or {@link JAXBHeader12} accordingly.
      *
      * @see JAXBHeader11#JAXBHeader11(Marshaller, Object)
-     * @see JAXBHeader12#JAXBHeader12(Marshaller, Object) 
+     * @see JAXBHeader12#JAXBHeader12(Marshaller, Object)
      */
     public abstract Header createJAXBHeader(Marshaller m, Object o);
 
@@ -132,11 +136,11 @@ public enum SOAPVersion {
     public abstract Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject);
 
     public String toString() {
-        return binding;
+        return httpBindingId;
     }
 
     /**
-     * Returns {@link SOAPVersion} whose {@link #binding} equals to
+     * Returns {@link SOAPVersion} whose {@link #httpBindingId} equals to
      * the given string.
      *
      * This method does not perform input string validation.
@@ -146,11 +150,11 @@ public enum SOAPVersion {
      *      but you really shouldn't be passing null.
      * @return always non-null.
      */
-    public static SOAPVersion fromBinding(String binding) {
+    public static SOAPVersion fromHttpBinding(String binding) {
         if(binding==null)
             return SOAP_11;
 
-        if(binding.equals(SOAP_12.binding))
+        if(binding.equals(SOAP_12.httpBindingId))
             return SOAP_12;
         else
             return SOAP_11;

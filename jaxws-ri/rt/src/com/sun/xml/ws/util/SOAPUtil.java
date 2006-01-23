@@ -68,7 +68,7 @@ public class SOAPUtil {
      *          SOAPFactory for SOAP 1.1
      */
     public static SOAPFactory getSOAPFactory(String bindingId){
-        return SOAPVersion.fromBinding(bindingId).saajSoapFactory;
+        return SOAPVersion.fromHttpBinding(bindingId).saajSoapFactory;
     }
 
     public static SOAPFault createSOAPFault(String bindingId){
@@ -152,6 +152,6 @@ public class SOAPUtil {
     }
 
     public static MessageFactory getMessageFactory(String binding) {
-        return SOAPVersion.fromBinding(binding).saajFactory;
+        return SOAPVersion.fromHttpBinding(binding).saajFactory;
     }
 }

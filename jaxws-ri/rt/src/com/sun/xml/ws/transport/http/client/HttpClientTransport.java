@@ -72,7 +72,7 @@ public class HttpClientTransport extends WSConnectionImpl {
 
         String bindingId = (String)context.get(BINDING_ID_PROPERTY);
         if (bindingId != null)
-            soapVer = SOAPVersion.fromBinding(bindingId);
+            soapVer = SOAPVersion.fromHttpBinding(bindingId);
         else
             soapVer = SOAPVersion.SOAP_11;
 

@@ -389,7 +389,7 @@ public class DispatchBase implements BindingProvider, InternalBindingProvider,
             if (((msg instanceof Source) && _mode == Service.Mode.MESSAGE) &&
                 (!_getBindingId().equals(HTTPBinding.HTTP_BINDING))) {
                 try {
-                    SOAPMessage message = SOAPVersion.fromBinding(_getBindingId()).saajFactory.createMessage();
+                    SOAPMessage message = SOAPVersion.fromHttpBinding(_getBindingId()).saajFactory.createMessage();
                     message.getSOAPPart().setContent((Source) msg);
                     message.saveChanges();
                     msg = message;

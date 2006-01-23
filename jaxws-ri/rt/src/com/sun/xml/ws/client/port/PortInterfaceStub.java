@@ -30,7 +30,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         this.owner = owner;
         this.model = model;
         this.portInterface = portInterface;
-        this.soapVersion = SOAPVersion.fromBinding(binding.getBindingId());
+        this.soapVersion = binding.getSOAPVersion();
 
         this.marshallers = new Pool.Marshaller(model.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());

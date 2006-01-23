@@ -70,7 +70,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
     public SOAPBindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
         super(handlerChain, bindingId, serviceName);
-        soapVersion = SOAPVersion.fromBinding(getBindingId());
+        soapVersion = SOAPVersion.fromHttpBinding(getBindingId());
         setup(getBindingId());
         setupSystemHandlerDelegate(serviceName);
     }

@@ -7,10 +7,8 @@ package com.sun.xml.ws.client.dispatch.rearch.source;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 
@@ -212,7 +210,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 SOAPMessage soapmsg = null;
                 try {
                     //todo:
-                    soapmsg = SOAPVersion.fromBinding(((SOAPBindingImpl) binding).getBindingId()).saajFactory.createMessage();
+                    soapmsg = binding.getSOAPVersion().saajFactory.createMessage();
                     soapmsg.getSOAPPart().setContent(msg);
                     soapmsg.saveChanges();
                 } catch (SOAPException e) {

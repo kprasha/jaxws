@@ -50,7 +50,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         this.portname = port;
         this.mode = mode;
         this.owner = owner;
-        this.soapVersion = SOAPVersion.fromBinding(binding.getBindingId());
+        this.soapVersion = binding.getSOAPVersion();
     }
 
 

@@ -21,17 +21,16 @@ package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.Part;
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
+import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -83,11 +82,11 @@ public class RuntimeModeler {
     private Map<Class, Boolean> classUsesWebMethod = new HashMap<Class, Boolean>();
 
     /**
-     * 
+     *
      */
     public static final String PD_JAXWS_PACKAGE_PD  = ".jaxws.";
     /**
-     * 
+     *
      */
     public static final String JAXWS_PACKAGE_PD     = "jaxws.";
     public static final String RESPONSE             = "Response";
@@ -321,7 +320,7 @@ public class RuntimeModeler {
         }
         defaultBinding = createBinding(soapBinding);
         /*
-         * if clazz != portClass then there is an SEI.  If there is an 
+         * if clazz != portClass then there is an SEI.  If there is an
          * SEI, then all methods should be processed.  However, if there is
          * no SEI, and the implementation class uses at least one
          * WebMethod annotation, then only methods with this annotation
@@ -377,7 +376,7 @@ public class RuntimeModeler {
             Style.DOCUMENT : Style.RPC;
         rtSOAPBinding.setStyle(style);
         //default soap version is 1.1, change it to soap 1.2 if the binding id says so
-        if(SOAPVersion.SOAP_12.binding.equals(bindingId))
+        if(SOAPVersion.SOAP_12.httpBindingId.equals(bindingId))
             rtSOAPBinding.setSOAPVersion(SOAPVersion.SOAP_12);
         return rtSOAPBinding;
     }
@@ -390,7 +389,7 @@ public class RuntimeModeler {
     public static String getNamespace(String packageName) {
         if (packageName == null || packageName.length() == 0)
             return null;
-        
+
         StringTokenizer tokenizer = new StringTokenizer(packageName, ".");
         String[] tokens;
         if (tokenizer.countTokens() == 0) {
@@ -850,7 +849,7 @@ public class RuntimeModeler {
             }
             if (partName.length() == 0) {
                 partName = paramName;
-            }       
+            }
 
             if (!isHeader) {
                 //its rpclit body param, set namespace to ""
@@ -1163,7 +1162,7 @@ public class RuntimeModeler {
         if (webService.serviceName().length() > 0) {
             name = webService.serviceName();
         }
-        String targetNamespace = getNamespace(packageName); 
+        String targetNamespace = getNamespace(packageName);
         if (webService.targetNamespace().length() > 0) {
             targetNamespace = webService.targetNamespace();
         } else if (targetNamespace == null) {
@@ -1196,7 +1195,7 @@ public class RuntimeModeler {
         } else {
             name = implClass.getSimpleName()+PORT;
         }
-        
+
         if (targetNamespace == null) {
             if (webService.targetNamespace().length() > 0) {
                 targetNamespace = webService.targetNamespace();
