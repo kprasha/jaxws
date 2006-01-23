@@ -73,7 +73,7 @@ public final class ServiceImpl extends AbstractExtensibleImpl implements Service
         ports.put(portName, port);
     }
 
-    public void freeze(WSDLModelImpl root) {
+    void freeze(WSDLModelImpl root) {
         for (PortImpl port : ports.values()) {
             port.freeze(root);
         }

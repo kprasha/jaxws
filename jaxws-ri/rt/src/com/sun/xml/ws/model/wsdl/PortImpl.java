@@ -38,7 +38,7 @@ public final class PortImpl extends AbstractExtensibleImpl implements Port {
     private final QName bindingName;
 
     /**
-     * To be set after the WSDL parsing is complete so that
+     * To be set after the WSDL parsing is complete.
      */
     private BoundPortType boundPortType;
 
@@ -64,7 +64,9 @@ public final class PortImpl extends AbstractExtensibleImpl implements Port {
         return boundPortType;
     }
 
-    public void freeze(WSDLModelImpl root) {
+    void freeze(WSDLModelImpl root) {
         boundPortType = root.getBinding(bindingName);
+        // TODO: error check needs to be done for boundPortType==null case.
+        // that's an error in WSDL which needs to be reported
     }
 }
