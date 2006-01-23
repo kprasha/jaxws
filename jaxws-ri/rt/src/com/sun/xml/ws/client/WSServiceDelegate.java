@@ -199,7 +199,7 @@ public class WSServiceDelegate extends WSService {
         PipelineAssembler assembler = PipelineAssemblerFactory.create(Thread.currentThread().getContextClassLoader(), bindingId);
         if(assembler==null)
             throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
-        return assembler.createClient(port.getBinding(),this);
+        return assembler.createClient(port,this);
     }
 
     public String getEndpointAddress(QName qName) {

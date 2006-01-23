@@ -4,14 +4,12 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.Port;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import java.net.URL;
 
 /**
  * Creates a pipeline.
@@ -28,7 +26,7 @@ import java.net.URL;
  * <p>
  * See {@link PipelineAssemblerFactory} for how {@link PipelineAssembler}s
  * are located.
- * 
+ *
  * <p>
  * TODO: the JAX-WS team felt that no {@link Pipe} should be relying
  * on the {@link RuntimeModel}, so it is no longer given to the assembler.
@@ -47,7 +45,7 @@ public interface PipelineAssembler {
      * to create a new pipeline as a part of the initilization.
      *
      * @param wsdlModel
-     *      The created pipeline will be used to serve this port binding.
+     *      The created pipeline will be used to serve this port.
      *      Null if the service isn't associated with any port,
      *      and otherwise non-null.
      *
@@ -65,7 +63,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(BoundPortType wsdlModel, WSService rootOwner);
+    Pipe createClient(Port wsdlModel, WSService rootOwner);
 
     /**
      * Creates a new pipeline for servers.
@@ -81,7 +79,7 @@ public interface PipelineAssembler {
      * from it.
      *
      * @param wsdlModel
-     *      The created pipeline will be used to serve this port binding.
+     *      The created pipeline will be used to serve this port.
      *      Null if the service isn't associated with any port,
      *      and otherwise non-null.
      *
@@ -102,5 +100,5 @@ public interface PipelineAssembler {
      *      the terminal pipe is the one that invokes the user application
      *      or {@link Provider}.)
      */
-    Pipe createServer(BoundPortType wsdlModel, WSEndpoint owner, Pipe terminal);
+    Pipe createServer(Port wsdlModel, WSEndpoint owner, Pipe terminal);
 }
