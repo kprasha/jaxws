@@ -323,6 +323,7 @@ public class RuntimeWSDLParser {
                 }else{
                     bindingOp.setStyle(binding.getStyle());
                 }
+                XMLStreamReaderUtil.next(reader);
             }else{
                 XMLStreamReaderUtil.skipElement(reader);
             }
