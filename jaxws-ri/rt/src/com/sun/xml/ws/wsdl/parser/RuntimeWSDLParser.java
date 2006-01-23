@@ -20,6 +20,7 @@
 
 package com.sun.xml.ws.wsdl.parser;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.server.DocInfo;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
@@ -34,6 +35,7 @@ import com.sun.xml.ws.model.wsdl.ServiceImpl;
 import com.sun.xml.ws.model.wsdl.BoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.Message;
 import com.sun.xml.ws.model.wsdl.PortImpl;
+import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -262,9 +264,22 @@ public class RuntimeWSDLParser {
             QName name = reader.getName();
             if (WSDLConstants.NS_SOAP_BINDING.equals(name)) {
                 binding.setBindingId(SOAPBinding.SOAP11HTTP_BINDING);
+                String style = reader.getAttributeValue(null, "style");
+
+                if((style != null) && (style.equals("rpc")))
+                    binding.setStyle(Style.RPC);
+                else
+                    binding.setStyle(Style.DOCUMENT);
+
                 XMLStreamReaderUtil.next(reader);
             } else if (WSDLConstants.NS_SOAP12_BINDING.equals(name)) {
                 binding.setBindingId(SOAPBinding.SOAP12HTTP_BINDING);
+                String style = reader.getAttributeValue(null, "style");
+                if((style != null) && (style.equals("rpc")))
+                    binding.setStyle(Style.RPC);
+                else
+                    binding.setStyle(Style.DOCUMENT);
+
                 XMLStreamReaderUtil.next(reader);
             } else if (WSDLConstants.QNAME_OPERATION.equals(name)) {
                 parseBindingOperation(reader, binding);
@@ -283,8 +298,9 @@ public class RuntimeWSDLParser {
             return;
         }
 
-        BoundOperationImpl bindingOp = new BoundOperationImpl(bindingOpName);
-        binding.put(new QName(targetNamespace, bindingOpName), bindingOp);
+        QName opName = new QName(binding.getPortTypeName().getNamespaceURI(), bindingOpName);
+        BoundOperationImpl bindingOp = new BoundOperationImpl(opName);
+        binding.put(opName, bindingOp);
 
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -292,6 +308,21 @@ public class RuntimeWSDLParser {
                 parseInputBinding(reader, bindingOp);
             }else if(WSDLConstants.QNAME_OUTPUT.equals(name)){
                 parseOutputBinding(reader, bindingOp);
+            }else if(SOAPConstants.QNAME_OPERATION.equals(name) ||
+                    SOAPConstants.QNAME_SOAP12OPERATION.equals(name)){
+                String style = reader.getAttributeValue(null, "style");
+                /**
+                 *  If style attribute is present set it otherwise set the style as defined
+                 *  on the <soap:binding> element
+                 */
+                if(style != null){
+                    if(style.equals("rpc"))
+                        bindingOp.setStyle(Style.RPC);
+                    else
+                        bindingOp.setStyle(Style.DOCUMENT);
+                }else{
+                    bindingOp.setStyle(binding.getStyle());
+                }
             }else{
                 XMLStreamReaderUtil.skipElement(reader);
             }
