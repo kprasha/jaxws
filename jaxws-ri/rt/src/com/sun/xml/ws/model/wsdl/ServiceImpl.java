@@ -23,7 +23,6 @@ import com.sun.xml.ws.api.model.wsdl.Port;
 import com.sun.xml.ws.api.model.wsdl.Service;
 
 import javax.xml.namespace.QName;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -34,12 +33,12 @@ import java.util.Map;
  */
 public final class ServiceImpl extends AbstractExtensibleImpl implements Service {
     private final QName name;
-    private final Map<QName, Port> ports;
+    private final Map<QName, PortImpl> ports;
 
     public ServiceImpl(QName name) {
         super();
         this.name = name;
-        ports = new LinkedHashMap<QName, Port>();
+        ports = new LinkedHashMap<QName,PortImpl>();
     }
 
     public QName getName() {
@@ -57,7 +56,7 @@ public final class ServiceImpl extends AbstractExtensibleImpl implements Service
             return ports.values().iterator().next();
     }
 
-    public Iterable<Port> getPorts(){
+    public Iterable<PortImpl> getPorts(){
         return ports.values();
     }
 
@@ -68,9 +67,15 @@ public final class ServiceImpl extends AbstractExtensibleImpl implements Service
      * @param port     Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(QName portName, Port port) {
+    public void put(QName portName, PortImpl port) {
         if (portName == null || port == null)
             throw new NullPointerException();
         ports.put(portName, port);
+    }
+
+    public void freeze(WSDLModelImpl root) {
+        for (PortImpl port : ports.values()) {
+            port.freeze(root);
+        }
     }
 }

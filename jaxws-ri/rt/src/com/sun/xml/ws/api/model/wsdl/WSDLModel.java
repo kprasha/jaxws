@@ -79,7 +79,7 @@ public interface WSDLModel {
      *
      * @return an empty Map if the wsdl document has no wsdl:service
      */
-    Map<QName, Service> getServices();
+    Map<QName, ? extends Service> getServices();
 
     /**
      * Gets the bound operation for a service, port and a tag name. the

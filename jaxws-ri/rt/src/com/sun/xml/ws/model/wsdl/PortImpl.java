@@ -22,6 +22,7 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 import com.sun.xml.ws.api.model.wsdl.Port;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 
 import javax.xml.namespace.QName;
 import java.util.HashSet;
@@ -63,7 +64,7 @@ public final class PortImpl extends AbstractExtensibleImpl implements Port {
         return boundPortType;
     }
 
-    public void setBinding(BoundPortType boundPortType) {
-        this.boundPortType = boundPortType;
+    public void freeze(WSDLModelImpl root) {
+        boundPortType = root.getBinding(bindingName);
     }
 }

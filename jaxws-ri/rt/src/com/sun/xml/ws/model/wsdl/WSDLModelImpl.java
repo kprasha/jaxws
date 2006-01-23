@@ -48,15 +48,13 @@ public final class WSDLModelImpl implements WSDLModel {
     private final Map<QName, Message> messages;
     private final Map<QName, PortType> portTypes;
     private final Map<QName, BoundPortType> bindings;
-    private final Map<QName, Service> services;
-    private final Map<QName, Port> ports;
+    private final Map<QName, ServiceImpl> services;
 
     public WSDLModelImpl() {
         messages = new HashMap<QName, Message>();
         portTypes = new HashMap<QName, PortType>();
         bindings = new HashMap<QName, BoundPortType>();
-        services = new LinkedHashMap<QName, Service>();
-        ports = new LinkedHashMap<QName, Port>();
+        services = new LinkedHashMap<QName, ServiceImpl>();
     }
 
     public void addMessage(Message msg){
@@ -83,7 +81,7 @@ public final class WSDLModelImpl implements WSDLModel {
         return bindings.get(name);
     }
 
-    public void addService(Service svc){
+    public void addService(ServiceImpl svc){
         services.put(svc.getName(), svc);
     }
 
@@ -99,19 +97,11 @@ public final class WSDLModelImpl implements WSDLModel {
         return portTypes;
     }
 
-    public Map<QName,Port> getPorts() {
-        return ports;
-    }
-
-    public Port getPort(QName portName) {
-        return ports.get(portName);
-    }
-
     public Map<QName, BoundPortType> getBindings() {
         return bindings;
     }
 
-    public Map<QName, Service> getServices(){
+    public Map<QName, ServiceImpl> getServices(){
         return services;
     }
 
@@ -249,7 +239,8 @@ public final class WSDLModelImpl implements WSDLModel {
      * Invoked at the end of the model construction to fix up references, etc.
      */
     public void freeze() {
-        // TODO
-
+        for (ServiceImpl service : services.values()) {
+            service.freeze(this);
+        }
     }
 }
