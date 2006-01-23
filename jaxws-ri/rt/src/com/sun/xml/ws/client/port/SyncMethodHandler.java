@@ -89,6 +89,7 @@ final class SyncMethodHandler extends MethodHandler {
                         owner.soapVersion,
                         param.getBridge(),
                         getter ));
+                    break;
                 case ATTACHMENT:
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
