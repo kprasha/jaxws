@@ -240,7 +240,7 @@ public final class WSDLModelImpl implements WSDLModel {
             service.freeze(this);
         }
         for (BoundPortTypeImpl bp : bindings.values()) {
-            bp.freeze();
+            bp.freeze(this);
         }
     }
 }
