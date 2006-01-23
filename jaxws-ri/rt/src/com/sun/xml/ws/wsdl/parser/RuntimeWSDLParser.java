@@ -69,6 +69,7 @@ public class RuntimeWSDLParser {
         assert resolver!=null;
         RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver);
         parser.parseWSDL(wsdlLoc);
+        parser.wsdlDoc.freeze();
         return parser.wsdlDoc;
     }
 

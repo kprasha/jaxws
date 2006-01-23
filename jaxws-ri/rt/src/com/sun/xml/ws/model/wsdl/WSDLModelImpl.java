@@ -244,4 +244,12 @@ public final class WSDLModelImpl implements WSDLModel {
             }
         }
     }
+
+    /**
+     * Invoked at the end of the model construction to fix up references, etc.
+     */
+    public void freeze() {
+        // TODO
+
+    }
 }
