@@ -123,6 +123,7 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/../lib/jsr173_1.0_src.zip!/src" />
+          <root url="jar://$MODULE_DIR$/../lib/sjsxp-src.zip!/src" />
         </SOURCES>
       </library>
     </orderEntry>
