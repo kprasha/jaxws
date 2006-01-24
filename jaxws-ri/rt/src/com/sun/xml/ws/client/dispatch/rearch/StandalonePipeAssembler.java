@@ -11,10 +11,18 @@ import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
+import com.sun.xml.ws.util.pipe.DumpPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(Port wsdlModel, WSService service) {
-        return new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
+        Pipe p = createTransport(wsdlModel,service);
+        p = new DumpPipe(System.err,p);
+        return p;
+    }
+
+    protected Pipe createTransport(Port wsdlModel, WSService service) {
+        Pipe p = new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
+        return p;
     }
 
     public Pipe createServer(Port wsdlModel, WSEndpoint endpoint, Pipe terminal) {
