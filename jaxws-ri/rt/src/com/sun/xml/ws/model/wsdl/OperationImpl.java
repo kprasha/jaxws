@@ -45,6 +45,10 @@ public final class OperationImpl extends AbstractExtensibleImpl implements Opera
         return name;
     }
 
+    public String getLocalName() {
+        return name.getLocalPart();
+    }
+
     public String getParameterOrder() {
         return parameterOrder;
     }

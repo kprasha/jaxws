@@ -7,7 +7,10 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.wsdl.Operation;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.util.Pool;
+import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.spi.ServiceDelegate;
@@ -35,15 +38,25 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         this.marshallers = new Pool.Marshaller(model.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());
 
+        Map<BoundOperation,SyncMethodHandler> syncs = new HashMap<BoundOperation, SyncMethodHandler>();
+
         // fill in methodHandlers.
         // first fill in sychronized versions
         for( JavaMethod m : model.getJavaMethods() ) {
             if(!m.getMEP().isAsync) {
-                methodHandlers.put(m.getMethod(),new SyncMethodHandler(this,m));
+                SyncMethodHandler handler = new SyncMethodHandler(this, m);
+                syncs.put(m.getOperation(),handler);
+                methodHandlers.put(m.getMethod(),handler);
             }
         }
 
-        // TODO: fill in asynchronous versions by using the synchronized versions
+        for( JavaMethod jm : model.getJavaMethods() ) {
+            if(jm.getMEP()== MEP.ASYNC_CALLBACK) {
+                Method m = jm.getMethod();
+                methodHandlers.put(m,new CallbackMethodHandler(this,
+                    syncs.get(jm.getOperation()), m.getParameterTypes().length-1));
+            }
+        }
     }
 
     public final RuntimeModel model;

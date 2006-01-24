@@ -17,6 +17,11 @@ public interface Operation extends Extensible {
     QName getName();
 
     /**
+     * Gets the local name portion of {@link #getName()}.
+     */
+    String getLocalName();
+
+    /**
      * Gets {@link QName} the wsdl:portType/wsdl:input@message value.
      */
     QName getInputMessage();

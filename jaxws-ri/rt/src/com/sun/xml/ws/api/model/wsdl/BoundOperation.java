@@ -13,10 +13,14 @@ import java.util.Map;
  */
 public interface BoundOperation extends Extensible {
     /**
-     * Gets wsdl:binding/wsdl:operation@name attribute value as local name and wsdl:definitions@targetNamespace
-     * as the namespace uri.
+     * Short-cut for {@code getOperation().getName()}
      */
     QName getName();
+
+    /**
+     * Short-cut for {@code getOperation().getLocalName()}
+     */
+    String getLocalName();
 
     /**
      * Gets {@link com.sun.xml.ws.api.model.wsdl.Part} for the given wsdl:input or wsdl:output part

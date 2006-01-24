@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.wsdl.BoundPortType;
 import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
@@ -80,6 +81,16 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     }
 
     /**
+     * Link {@link RuntimeModel} to {@link WSDLModel}.
+     * Merge it with {@link #postProcess()}.
+     */
+    void freeze(BoundPortType portType) {
+        for (JavaMethodImpl m : javaMethods) {
+            m.freeze(portType);
+        }
+    }
+
+    /**
      * Populate methodToJM and nameToJM maps.
      */
     protected void populateMaps() {
@@ -95,7 +106,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
         for (JavaMethod jm : getJavaMethods()) {
             MEP mep = jm.getMEP();
             if (mep.isAsync) {
-                String opName = jm.getOperationName();
+                String opName = jm.getOperation().getName().getLocalPart();
                 Method m = jm.getMethod();
                 Class[] params = m.getParameterTypes();
                 if (mep == MEP.ASYNC_CALLBACK) {
@@ -317,7 +328,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     public QName getQNameForJM(JavaMethod jm) {
         for (QName key : nameToJM.keySet()) {
             JavaMethod jmethod = nameToJM.get(key);
-            if (jmethod.getOperationName().equals(jm.getOperationName())){
+            if (jmethod.getOperation()==jm.getOperation()){
                return key;
             }
         }
@@ -418,7 +429,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * Returns attachment parameters if/any.
      */
     private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
-        QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
+        QName opName = method.getOperation().getName();
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
         BoundOperation bo = boundPortType.get(opName);
         Map<Integer, ParameterImpl> bodyParams = new HashMap<Integer, ParameterImpl>();
@@ -433,9 +444,9 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                     partName, mode);
             if(paramBinding != null){
                 if(mode == Mode.IN)
-                    ((ParameterImpl)param).setInBinding(paramBinding);
+                    param.setInBinding(paramBinding);
                 else if(mode == Mode.OUT)
-                    ((ParameterImpl)param).setOutBinding(paramBinding);
+                    param.setOutBinding(paramBinding);
 
                 if(paramBinding.isUnbound()){
                         unboundParams.add(param);

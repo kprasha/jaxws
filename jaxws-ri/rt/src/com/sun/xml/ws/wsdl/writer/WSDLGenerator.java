@@ -327,7 +327,7 @@ public class WSDLGenerator {
      */
     protected void generateSOAPMessages(JavaMethod method, com.sun.xml.ws.api.model.soap.SOAPBinding binding) {
         boolean isDoclit = binding.isDocLit();
-        Message message = portDefinitions.message().name(method.getOperationName());
+        Message message = portDefinitions.message().name(method.getOperation().getName().getLocalPart());
         com.sun.xml.ws.wsdl.writer.document.Part part;
         JAXBRIContext jaxbContext = model.getJAXBContext();
         boolean unwrappable = true;
@@ -355,7 +355,7 @@ public class WSDLGenerator {
             }
         }
         if (method.getMEP() != MEP.ONE_WAY) {
-            message = portDefinitions.message().name(method.getOperationName()+RESPONSE);
+            message = portDefinitions.message().name(method.getOperation().getName().getLocalPart()+RESPONSE);
             if (unwrappable) {
                 for (Parameter param : method.getResponseParameters()) {
                    if (isHeaderParameter(param))
@@ -407,7 +407,7 @@ public class WSDLGenerator {
 
         PortType portType = portDefinitions.portType().name(model.getPortTypeName().getLocalPart());
         for (JavaMethod method : model.getJavaMethods()) {
-            Operation operation = portType.operation().name(method.getOperationName());
+            Operation operation = portType.operation().name(method.getOperation().getLocalName());
             generateParameterOrder(operation, method);
             switch (method.getMEP()) {
                 case REQUEST_RESPONSE:
@@ -659,10 +659,10 @@ public class WSDLGenerator {
      * @param binding 
      */    
     protected void generateBindingOperation(JavaMethod method, Binding binding) {
-        BindingOperationType operation = binding.operation().name(method.getOperationName());
+        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         String targetNamespace = model.getTargetNamespace();
-        QName requestMessage = new QName(targetNamespace, method.getOperationName());
-        QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
+        QName requestMessage = method.getOperation().getName();
+        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
         if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
             List<Parameter> bodyParams = new ArrayList<Parameter>();
             List<Parameter> headerParams = new ArrayList<Parameter>();
@@ -757,10 +757,10 @@ public class WSDLGenerator {
      * @param binding 
      */    
     protected void generateSOAP12BindingOperation(JavaMethod method, Binding binding) {
-        BindingOperationType operation = binding.operation().name(method.getOperationName());
+        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         String targetNamespace = model.getTargetNamespace();
-        QName requestMessage = new QName(targetNamespace, method.getOperationName());
-        QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
+        QName requestMessage = method.getOperation().getName();
+        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
         if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
             ArrayList<Parameter> bodyParams = new ArrayList<Parameter>();
             ArrayList<Parameter> headerParams = new ArrayList<Parameter>();
@@ -925,7 +925,7 @@ public class WSDLGenerator {
      */    
     protected void generateInputMessage(Operation operation, JavaMethod method) {
         ParamType paramType = operation.input();
-        paramType.message(new QName(model.getTargetNamespace(), method.getOperationName()));
+        paramType.message(method.getOperation().getName());
     }
 
     /**
@@ -935,7 +935,7 @@ public class WSDLGenerator {
      */
     protected void generateOutputMessage(Operation operation, JavaMethod method) {
         ParamType paramType = operation.output();
-        paramType.message(new QName(model.getTargetNamespace(), method.getOperationName()+RESPONSE));
+        paramType.message(new QName(model.getTargetNamespace(), method.getOperation().getLocalName()+RESPONSE));
     }
 
     /**

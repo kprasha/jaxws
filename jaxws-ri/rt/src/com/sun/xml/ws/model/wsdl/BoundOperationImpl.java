@@ -74,6 +74,10 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         return name;
     }
 
+    public String getLocalName() {
+        return name.getLocalPart();
+    }
+
     public Part getPart(String partName, Mode mode){
         if(mode.equals(Mode.IN)){
             return inParts.get(partName);

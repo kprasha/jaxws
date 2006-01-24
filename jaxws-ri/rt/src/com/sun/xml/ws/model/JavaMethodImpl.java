@@ -30,7 +30,12 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.wsdl.Operation;
+import com.sun.xml.ws.api.model.wsdl.BoundPortType;
+import com.sun.xml.ws.api.model.wsdl.BoundOperation;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
+
+import javax.xml.namespace.QName;
 
 /**
  * Build this runtime model using java SEI and annotations
@@ -83,16 +88,17 @@ public class JavaMethodImpl implements JavaMethod {
         this.binding = binding;
     }
 
+    public BoundOperation getOperation() {
+        return operation;
+    }
 
-    void setOperationName(String operationName) {
-        this.operationName = operationName;
+    public void setOperationName(String name) {
+        this.operationName = name;
     }
 
     public String getOperationName() {
         return operationName;
     }
-
-
 
     /**
      * @return returns unmodifiable list of request parameters
@@ -221,6 +227,11 @@ public class JavaMethodImpl implements JavaMethod {
         return mep.isAsync;
     }
 
+    /*package*/ void freeze(BoundPortType portType) {
+        this.operation = portType.get(new QName(portType.getName().getNamespaceURI(),operationName));
+        // TODO: error check
+    }
+
     private List<CheckedException> exceptions = new ArrayList<CheckedException>();
     private Method method;
     /*package*/ final List<ParameterImpl> requestParams = new ArrayList<ParameterImpl>();
@@ -232,5 +243,6 @@ public class JavaMethodImpl implements JavaMethod {
     private SOAPBinding binding;
     private MEP mep;
     private String operationName;
+    private BoundOperation operation;
 }
 

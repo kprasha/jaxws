@@ -244,6 +244,13 @@ public class RuntimeModeler {
             throw new RuntimeModelerException("runtime.modeler.no.operations",
                     portClass.getName());
         runtimeModel.postProcess();
+
+        // TODO: this needs to be fixed properly --
+        // when we are building RuntimeModel first before building WSDLModel,
+        // we still need to do this correctyl
+        if(binding!=null)
+            runtimeModel.freeze(binding);
+
         return runtimeModel;
     }
 
@@ -343,6 +350,8 @@ public class RuntimeModeler {
                 !isWebMethod(method, clazz)) {
                 continue;
             }
+            // TODO: binding can be null. We need to figure out how to post-process
+            // RuntimeModel to link to WSDLModel
             processMethod(method, webService);
         }
     }
