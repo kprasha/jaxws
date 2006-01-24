@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @author WS Development Team
  */
-public class LocalMessage {
+public final class LocalMessage {
     ByteArrayBuffer baos;
     Map<String, List<String>> headers;
     
