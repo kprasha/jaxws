@@ -60,9 +60,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * {@link Message} implementation backed by {@link SOAPMessage}.
+ * 
  * @author Vivek Pandey
  */
-
 public class SAAJMessage extends Message {
     private SOAPMessage sm;
     private HeaderList headers;
