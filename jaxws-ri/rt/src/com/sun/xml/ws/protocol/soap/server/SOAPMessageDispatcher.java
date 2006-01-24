@@ -204,7 +204,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
      * Gets SOAPMessage from the connection
      */
     private SOAPMessage getSOAPMessage(MessageInfo messageInfo) {
-        WSConnection con = (WSConnection)messageInfo.getConnection();
+        WSConnection con = messageInfo.getConnection();
         return SOAPConnectionUtil.getSOAPMessage(con, messageInfo, null);
     }
     
@@ -212,7 +212,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
      * Checks against know Content-Type headers
      */
     private void checkContentType(MessageInfo mi) {
-        WSConnection con = (WSConnection)mi.getConnection();
+        WSConnection con = mi.getConnection();
         Map<String, List<String>> headers = con.getHeaders();
         List<String> cts = headers.get("Content-Type");
         if (cts != null && cts.size() > 0) {
@@ -321,7 +321,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
      */
     private void sendResponse(MessageInfo messageInfo, SOAPHandlerContext ctxt) {
         SOAPMessage soapMessage = ctxt.getSOAPMessage();
-        WSConnection con = (WSConnection)messageInfo.getConnection();
+        WSConnection con = messageInfo.getConnection();
         Integer status = MessageContextUtil.getHttpStatusCode(ctxt.getMessageContext());
         int statusCode = (status == null) ? WSConnection.OK : status;
         SOAPConnectionUtil.setStatus(con, statusCode);
@@ -334,7 +334,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
 
     private void sendResponseError(MessageInfo messageInfo, Exception e) {
         e.printStackTrace();
-        WSConnection con = (WSConnection)messageInfo.getConnection();
+        WSConnection con = messageInfo.getConnection();
         Binding binding = MessageInfoUtil.getRuntimeContext(messageInfo).getRuntimeEndpointInfo().getBinding();
         String bindingId = ((SOAPBindingImpl)binding).getBindingId();
         SOAPConnectionUtil.sendResponseError(con, bindingId);
@@ -384,7 +384,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
     private HandlerChainCaller getCallerFromMessageInfo(MessageInfo info) {
         RuntimeContext context = (RuntimeContext) info.getMetaData(
                 BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
-        BindingImpl binding = (BindingImpl)context.getRuntimeEndpointInfo().getBinding();
+        BindingImpl binding = context.getRuntimeEndpointInfo().getBinding();
         if (binding.hasHandlers()) {
             HandlerChainCaller caller = binding.getHandlerChainCaller();
             MessageInfoUtil.setHandlerChainCaller(info, caller);
@@ -445,7 +445,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         MessageInfoUtil.getRuntimeContext(messageInfo).setHandlerContext(context);
         RuntimeEndpointInfo endpointInfo = 
             MessageInfoUtil.getRuntimeContext(messageInfo).getRuntimeEndpointInfo();
-        context.setBindingId(((BindingImpl)endpointInfo.getBinding()).getActualBindingId());
+        context.setBindingId(endpointInfo.getBinding().getActualBindingId());
         WebServiceContext wsContext = endpointInfo.getWebServiceContext();
         if (wsContext != null) {
             context.setMessageContext(wsContext.getMessageContext());
@@ -476,35 +476,32 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         
         public void invoke() throws Exception {
             boolean peekOneWay = false;
-            if (!skipEndpoint) {
-                try {
-                    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-                    SOAPDecoder decoder = eptf.getSOAPDecoder();
-                    
-                    // add handler chain caller to message info
-                    getCallerFromMessageInfo(messageInfo);
-                    peekOneWay = decoder.doMustUnderstandProcessing(soapMessage,
-                            messageInfo, context, true);                
-                    context.setMethod(messageInfo.getMethod());
-                } catch (SOAPFaultException e) {
-                    skipEndpoint = true;
-                    RuntimeEndpointInfo rei = MessageInfoUtil.getRuntimeContext(
-                        messageInfo).getRuntimeEndpointInfo();
-                    String id = ((SOAPBindingImpl)
-                        rei.getBinding()).getBindingId();
-                    InternalMessage internalMessage = null;
-                    if (id.equals(SOAPBinding.SOAP11HTTP_BINDING)) {
-                        internalMessage = SOAPRuntimeModel.createFaultInBody(
-                            e, null, null, null);
-                    } else if (id.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-                        internalMessage = SOAPRuntimeModel.createSOAP12FaultInBody(
-                            e, null, null, null, null);
-                        SOAPRuntimeModel.addHeaders(internalMessage,
-                            messageInfo);
-                    }
-                    context.setInternalMessage(internalMessage);
-                    context.setSOAPMessage(null);
+            if (!skipEndpoint) try {
+                SOAPEPTFactory eptf = (SOAPEPTFactory) messageInfo.getEPTFactory();
+                SOAPDecoder decoder = eptf.getSOAPDecoder();
+
+                // add handler chain caller to message info
+                getCallerFromMessageInfo(messageInfo);
+                peekOneWay = decoder.doMustUnderstandProcessing(soapMessage,
+                    messageInfo, context, true);
+                context.setMethod(messageInfo.getMethod());
+            } catch (SOAPFaultException e) {
+                skipEndpoint = true;
+                RuntimeEndpointInfo rei = MessageInfoUtil.getRuntimeContext(
+                    messageInfo).getRuntimeEndpointInfo();
+                String id = rei.getBinding().getBindingId();
+                InternalMessage internalMessage = null;
+                if (id.equals(SOAPBinding.SOAP11HTTP_BINDING)) {
+                    internalMessage = SOAPRuntimeModel.createFaultInBody(
+                        e, null, null, null);
+                } else if (id.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+                    internalMessage = SOAPRuntimeModel.createSOAP12FaultInBody(
+                        e, null, null, null, null);
+                    SOAPRuntimeModel.addHeaders(internalMessage,
+                        messageInfo);
                 }
+                context.setInternalMessage(internalMessage);
+                context.setSOAPMessage(null);
             }
 
             // Call inbound handlers. It also calls outbound handlers incase of
