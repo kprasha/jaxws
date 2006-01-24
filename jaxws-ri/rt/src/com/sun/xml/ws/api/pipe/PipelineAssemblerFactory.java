@@ -37,6 +37,7 @@ public abstract class PipelineAssemblerFactory {
      * @param bindingId
      *      The binding ID for which a pipeline will be created,
      *      such as {@link SOAPBinding#SOAP11HTTP_BINDING}.
+     *      Must not be null.
      *
      * @return
      *      null if this factory doesn't recognize the given binding ID.
@@ -47,6 +48,9 @@ public abstract class PipelineAssemblerFactory {
      * Locates {@link PipelineAssemblerFactory}s and create
      * a suitable {@link PipelineAssembler}.
      *
+     * @param bindingId
+     *      The binding ID string for which the new {@link PipelineAssembler}
+     *      is created. Must not be null.
      * @return
      *      null if no corresponding {@link PipelineAssemblerFactory}
      *      was found.
