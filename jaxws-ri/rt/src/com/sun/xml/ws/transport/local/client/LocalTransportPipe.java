@@ -36,19 +36,30 @@ import com.sun.xml.ws.transport.local.server.LocalConnectionImpl;
 import javax.xml.ws.WebServiceException;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
 
 /**
+ * Transport {@link Pipe} that routes a message to a service that runs within it.
+ *
+ * <p>
+ * This is useful to test the whole client-server in a single VM. 
  *
  * @author jitu
  */
 public class LocalTransportPipe implements Pipe {
-    
+
     private RuntimeEndpointInfo endpointInfo;
-    private static final Tie tie = new Tie();
-    LocalMessage lm = new LocalMessage();
 
     private final Encoder encoder;
     private final Decoder decoder;
+
+    // per-pipe reusable resources.
+    // we don't really have to reuse anything since this isn't designed for performance,
+    // but nevertheless we do it as an experiement.
+    private static final Tie tie = new Tie();
+    private final LocalMessage lm = new LocalMessage();
+    private final Map<String,List<String>> reqHeaders = new HashMap<String,List<String>>();
 
     public LocalTransportPipe(RuntimeEndpointInfo endpointInfo, Encoder encoder, Decoder decoder) {
         this.endpointInfo = endpointInfo;
@@ -64,18 +75,21 @@ public class LocalTransportPipe implements Pipe {
     }
 
     public Message process(Message msg) {
-        
+
         try {
             // Set up WSConnection with tranport headers, request content
 
-            LocalMessage lm = new LocalMessage();
             WSConnection con = new LocalConnectionImpl(lm);
             // get transport headers from message
             MessageProperties props = msg.getProperties();
-            Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
+            reqHeaders.clear();
+            if(props.httpRequestHeaders!=null)
+                reqHeaders.putAll(props.httpRequestHeaders);
             con.setHeaders(reqHeaders);
 
-            encoder.encode(msg, con.getOutput());
+            String contentType = encoder.encode(msg, con.getOutput());
+
+            reqHeaders.put("Content-Type", Arrays.asList(contentType));
 
             // Set up RuntimeEndpointInfo with MessageContext
 
@@ -86,7 +100,7 @@ public class LocalTransportPipe implements Pipe {
             wsContext.setMessageContext(new MessageContextImpl());
 
             tie.handle(con, endpointInfo);
-            
+
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
             return decoder.decode(con.getInput(), ct);
@@ -96,7 +110,7 @@ public class LocalTransportPipe implements Pipe {
             throw new WebServiceException(ex);
         }
     }
-    
+
     private String getContentType(Map<String, List<String>> headers) {
         return null;
     }
