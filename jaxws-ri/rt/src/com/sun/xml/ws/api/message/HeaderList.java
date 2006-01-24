@@ -20,7 +20,6 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.message.Header;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -79,7 +78,13 @@ public final class HeaderList extends ArrayList<Header> {
      *      if not found.
      */
     public Header get(String nsUri, String localName) {
-        throw new UnsupportedOperationException();
+        int len = size();
+        for( int i=0; i<len; i++ ) {
+            Header h = get(i);
+            if(h.getLocalPart().equals(localName) && h.getNamespaceURI().equals(nsUri))
+                return h;
+        }
+        return null;
     }
 
     /**
