@@ -56,6 +56,10 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
                 methodHandlers.put(m,new CallbackMethodHandler(this,
                     syncs.get(jm.getOperation()), m.getParameterTypes().length-1));
             }
+            if(jm.getMEP()==MEP.ASYNC_POLL) {
+                Method m = jm.getMethod();
+                methodHandlers.put(m,new PollingMethodHandler(this,syncs.get(jm.getOperation())));
+            }
         }
     }
 
