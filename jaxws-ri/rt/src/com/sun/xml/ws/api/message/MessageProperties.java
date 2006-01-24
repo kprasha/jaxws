@@ -66,7 +66,7 @@ import java.util.Set;
  *  <li>this class needs to be cloneable since Message is copiable.
  *  <li>The three live views aren't implemented correctly. It will be
  *      more work to do so, although I'm sure it's possible.
- *  <li>Scope. Can someone shit down with me (Kohsuke) and tell me
+ *  <li>Scope. Can someone sit down with me (Kohsuke) and tell me
  *      how they work?
  * </ol>
  *
