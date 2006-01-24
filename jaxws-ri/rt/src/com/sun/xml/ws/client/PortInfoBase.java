@@ -20,63 +20,34 @@
 package com.sun.xml.ws.client;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
 
 /**
- * JAXWS Development Team
+ * Information about a port dynamically added through {@link Service#addPort(QName, String, String)}.
+ *
+ * @author JAXWS Development Team
  */
-public class PortInfoBase {
+final class PortInfoBase {
 
-    protected String targetEndpoint;
-    protected String defaultNamespace;
-    protected QName name;
-    protected QName portTypeName;
-    protected String bindingId;
-
-    public PortInfoBase(QName name) {
-        this.name = name;
-        targetEndpoint = "";
-        defaultNamespace = "";
-    }
+    private final String targetEndpoint;
+    private final QName portName;
+    private final String bindingId;
 
     public PortInfoBase(String targetEndpoint, QName name, String bindingId) {
         this.targetEndpoint = targetEndpoint;
-        this.name = name;
+        this.portName = name;
         this.bindingId = bindingId;
     }
 
-    void setName(QName nm) {
-        name = nm;
-    }
-
     public QName getName() {
-        return name;
-    }
-
-    void setTargetEndpoint(String endpoint) {
-        targetEndpoint = endpoint;
+        return portName;
     }
 
     public String getTargetEndpoint() {
         return targetEndpoint;
     }
 
-    void setBindingId(String id) {
-        bindingId = id;
-    }
-
     public String getBindingId() {
         return bindingId;
-    }
-
-    void setPortTypeName(QName typeName) {
-        portTypeName = typeName;
-    }
-
-    public QName getPortTypeName() {
-        return portTypeName;
-    }
-
-    void setDefaultNamespace(String namespace) {
-        defaultNamespace = namespace;
     }
 }

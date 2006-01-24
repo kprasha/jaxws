@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -80,7 +81,11 @@ public class WSServiceDelegate extends WSService {
 
     protected HashSet<QName> ports;
 
-    private final HashMap<QName, PortInfoBase> dispatchPorts = new HashMap<QName, PortInfoBase>();
+    /**
+     * Ports dynamically added through {@link #addPort(QName, String, String)}.
+     */
+    private final Map<QName,PortInfoBase> dispatchPorts = new HashMap<QName, PortInfoBase>();
+
     protected HandlerResolver handlerResolver;
 
     protected Object serviceProxy;
@@ -94,6 +99,13 @@ public class WSServiceDelegate extends WSService {
      * Lazily created.
      */
     private EntityResolver entityResolver;
+
+    /**
+     * The WSDL service that this {@link Service} object represents.
+     *
+     * <p>
+     * This field is null iff no WSDL is given to {@link Service}.
+     */
     private final com.sun.xml.ws.api.model.wsdl.Service wsdlModel;
 
 
@@ -187,15 +199,23 @@ public class WSServiceDelegate extends WSService {
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
         //Note: may not be the most performant way to do this- needs review
-        return Stubs.createDispatch(portName, this, getBinding(portName), aClass, mode,
-             createPipeline(wsdlModel.get(portName)));
+        BindingImpl binding = getBinding(portName);
+        return Stubs.createDispatch(portName, this, binding, aClass, mode,
+             createPipeline(portName,binding));
     }
 
     /**
      * Creates a new pipeline for the given port name.
      */
-    private Pipe createPipeline(Port port) {
-        String bindingId = port.getBinding().getBindingId();
+    private Pipe createPipeline(QName portName, BindingImpl binding) {
+        Port port = null;
+        String bindingId = binding.getBindingId();
+
+        if(wsdlModel!=null) {
+            port = wsdlModel.get(portName);
+            // TODO: error check for port==null?
+        }
+
         PipelineAssembler assembler = PipelineAssemblerFactory.create(Thread.currentThread().getContextClassLoader(), bindingId);
         if(assembler==null)
             throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
@@ -215,8 +235,8 @@ public class WSServiceDelegate extends WSService {
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        return new JAXBDispatch(portName, jaxbContext, mode, this,
-            createPipeline(wsdlModel.get(portName)), getBinding(portName));
+        BindingImpl binding = getBinding(portName);
+        return new JAXBDispatch(portName, jaxbContext, mode, this, createPipeline(portName,binding), binding);
     }
 
     public QName getServiceName() {
@@ -265,13 +285,13 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    protected void addPort(QName port) {
+    private void addPort(QName port) {
         if (ports == null)
             populatePorts();
         ports.add(port);
     }
 
-    protected WebServiceException noWsdlException() {
+    private WebServiceException noWsdlException() {
         return new WebServiceException("dii.service.no.wsdl.available");
     }
 
@@ -353,10 +373,8 @@ public class WSServiceDelegate extends WSService {
 
         }
 
-        PortInterfaceStub pis = new PortInterfaceStub(this,
-            createBinding(portName,eif.getBindingID()),
-            portInterface,model,
-            createPipeline(wsdlModel.get(portName)));
+        BindingImpl binding = createBinding(portName, eif.getBindingID());
+        PortInterfaceStub pis = new PortInterfaceStub(this, binding, portInterface,model, createPipeline(portName,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{
