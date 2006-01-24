@@ -72,11 +72,14 @@ public abstract class PipelineAssemblerFactory {
                 logger.fine("Checking "+url+" for an add-on");
 
                 try {
-                    reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                    reader = new BufferedReader(new InputStreamReader(url.openStream(),"UTF-8"));
                     String impl;
                     while((impl = reader.readLine())!=null ) {
                         // try to instanciate the object
                         impl = impl.trim();
+                        if(impl.startsWith("#"))
+                            continue;       // comment line
+
                         if(classNames.add(impl)) {
                             Class implClass = classLoader.loadClass(impl);
                             if(!PipelineAssemblerFactory.class.isAssignableFrom(implClass)) {
