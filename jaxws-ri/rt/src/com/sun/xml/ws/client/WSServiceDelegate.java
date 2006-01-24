@@ -7,6 +7,7 @@ import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
 import com.sun.xml.ws.api.model.wsdl.Port;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
@@ -106,7 +107,7 @@ public class WSServiceDelegate extends WSService {
      * <p>
      * This field is null iff no WSDL is given to {@link Service}.
      */
-    private final com.sun.xml.ws.api.model.wsdl.Service wsdlModel;
+    private final com.sun.xml.ws.api.model.wsdl.Service wsdlService;
 
 
     public WSServiceDelegate(ServiceContext scontext) {
@@ -114,8 +115,8 @@ public class WSServiceDelegate extends WSService {
         if (serviceContext.getHandlerResolver() != null) {
             handlerResolver = serviceContext.getHandlerResolver();
         }
-        // TODO: can someone check if any of those can be null in some circumstances? - KK
-        wsdlModel = serviceContext.getWsdlContext().getWsdlDocument().getService(serviceContext.getServiceName());
+        WSDLModel wsdlModel = serviceContext.getWSDLModel();
+        wsdlService = (wsdlModel != null)?wsdlModel.getService(serviceContext.getServiceName()):null;
     }
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
@@ -211,8 +212,8 @@ public class WSServiceDelegate extends WSService {
         Port port = null;
         String bindingId = binding.getBindingId();
 
-        if(wsdlModel!=null) {
-            port = wsdlModel.get(portName);
+        if(wsdlService !=null) {
+            port = wsdlService.get(portName);
             // TODO: error check for port==null?
         }
 

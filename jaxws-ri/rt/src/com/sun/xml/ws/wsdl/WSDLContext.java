@@ -111,7 +111,7 @@ public class WSDLContext {
     }
 
     public String getBindingID(QName serviceName, QName portName) {
-        Service s = getWsdlDocument().getService(serviceName);
+        Service s = getWSDLModel().getService(serviceName);
         if(s==null)     return null;
         Port port = s.get(portName);
         if(port==null)     return null;
@@ -150,11 +150,7 @@ public class WSDLContext {
 
     public Set<QName> getAllServiceNames() {
         return wsdlDoc.getServices().keySet();
-    }
-
-    public WSDLModel getWsdlDocument() {
-        return wsdlDoc;
-    }
+    }    
 
     public BoundPortType getWsdlBinding(QName service, QName port) {
         if (wsdlDoc == null)

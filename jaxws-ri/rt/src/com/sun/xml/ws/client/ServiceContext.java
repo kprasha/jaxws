@@ -21,6 +21,7 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.wsdl.WSDLContext;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +68,10 @@ public class ServiceContext {
 
     public void setWsdlContext(WSDLContext wsdlContext) {
         this.wsdlContext = wsdlContext;
+    }
+
+    public WSDLModel getWSDLModel(){
+        return (wsdlContext != null)?wsdlContext.getWSDLModel():null;
     }
 
     public HandlerResolverImpl getHandlerResolver() {
