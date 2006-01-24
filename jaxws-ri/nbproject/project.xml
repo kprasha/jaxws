@@ -24,7 +24,7 @@
         <data profile-file-target="" profile-target="" version="0.4" xmlns="http://www.netbeans.org/ns/profiler/1"/>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
             <!--Do not use Project Properties customizer when editing this file manually.-->
-            <name>JAXWS-RI</name>
+            <name>JAXWS-RI-REARCH</name>
             <properties>
                 <property-file>nbproject/project.properties</property-file>
             </properties>
