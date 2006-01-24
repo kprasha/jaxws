@@ -126,6 +126,10 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         return namespaceUri;
     }
 
+    public boolean hasPayload() {
+        return true;
+    }
+
 
     public Source readPayloadAsSource() {
         return src;

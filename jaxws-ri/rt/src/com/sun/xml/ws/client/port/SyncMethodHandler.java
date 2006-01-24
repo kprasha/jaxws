@@ -77,9 +77,9 @@ final class SyncMethodHandler extends MethodHandler {
                 switch(param.getInBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {
-                        bodyBuilder = new BodyBuilder.Wrapped((WrapperParameter)param,owner.model);
+                        bodyBuilder = new BodyBuilder.Wrapped((WrapperParameter)param,owner);
                     } else {
-                        bodyBuilder = new BodyBuilder.Bare(param,owner.model);
+                        bodyBuilder = new BodyBuilder.Bare(param,owner);
                     }
                     break;
                 case HEADER:
@@ -98,7 +98,20 @@ final class SyncMethodHandler extends MethodHandler {
                 }
             }
 
-            assert bodyBuilder!=null;
+            if(bodyBuilder==null) {
+                // no parameter binds to body. we create an empty message
+                switch(owner.soapVersion) {
+                case SOAP_11:
+                    bodyBuilder = BodyBuilder.EMPTY_SOAP11;
+                    break;
+                case SOAP_12:
+                    bodyBuilder = BodyBuilder.EMPTY_SOAP12;
+                    break;
+                default:
+                    throw new AssertionError();
+                }
+            }
+
             this.bodyBuilder = bodyBuilder;
             this.inFillers = fillers.toArray(new MessageFiller[fillers.size()]);
         }
@@ -206,9 +219,7 @@ final class SyncMethodHandler extends MethodHandler {
      *
      */
     private Message createRequestMessage(Object[] args) {
-        Message msg = new JAXBMessage(
-            bodyBuilder.bridge, bodyBuilder.build(args),
-            owner.model.getBridgeContext(), owner.soapVersion );
+        Message msg = bodyBuilder.createMessage(args);
 
         for (MessageFiller filler : inFillers)
             filler.fillIn(args,msg);

@@ -68,6 +68,7 @@ import java.lang.reflect.Proxy;
  *    the payload is streamed, and therefore it can be
  *    only read once (or can be only written to something once.)
  *    once a payload is used, a message is said to be <b>consumed</b>.
+ *    A message {@link #hasPayload() may not have any payload.}
  *
  * <li>
  *    Attachments.
@@ -213,13 +214,35 @@ public abstract class Message {
 
     /**
      * Gets the local name of the payload element.
+     *
+     * @return
+     *      null if a {@link Message} doesn't have any payload.
      */
     public abstract String getPayloadLocalPart();
 
     /**
      * Gets the namespace URI of the payload element.
+     *
+     * @return
+     *      null if a {@link Message} doesn't have any payload.
      */
     public abstract String getPayloadNamespaceURI();
+
+    /**
+     * Returns true if a {@link Message} has a payload.
+     *
+     * <p>
+     * A message without a payload is a SOAP message that looks like:
+     * <pre><xmp>
+     * <S:Envelope>
+     *   <S:Header>
+     *     ...
+     *   </S:Header>
+     *   <S:Body />
+     * </S:Envelope>
+     * </xmp></pre>
+     */
+    public abstract boolean hasPayload();
 
     /**
      * Returns true if this message is a fault.

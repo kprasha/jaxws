@@ -190,6 +190,10 @@ public final class JAXBMessage extends AbstractMessageImpl {
         return nsUri;
     }
 
+    public boolean hasPayload() {
+        return true;
+    }
+
     /**
      * Obtains the tag name of the root element.
      */

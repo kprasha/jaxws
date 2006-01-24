@@ -61,7 +61,7 @@ import java.util.Map;
 
 /**
  * {@link Message} implementation backed by {@link SOAPMessage}.
- * 
+ *
  * @author Vivek Pandey
  */
 public class SAAJMessage extends Message {
@@ -168,6 +168,10 @@ public class SAAJMessage extends Message {
      */
     public String getPayloadNamespaceURI() {
         return payloadNamspace;
+    }
+
+    public boolean hasPayload() {
+        return payloadNamspace!=null;
     }
 
     /**

@@ -129,6 +129,10 @@ public class StreamMessage extends AbstractMessageImpl {
         return payloadNamespaceURI;
     }
 
+    public boolean hasPayload() {
+        return payloadLocalName!=null;
+    }
+
     public Source readPayloadAsSource() {
         return new StAXSource(reader, true);
     }

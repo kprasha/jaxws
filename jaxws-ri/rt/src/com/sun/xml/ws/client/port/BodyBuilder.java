@@ -5,6 +5,10 @@ import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 
 import javax.xml.ws.Holder;
 import java.util.List;
@@ -16,27 +20,59 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 abstract class BodyBuilder {
-    /**
-     * Builds a JAXB object that becomes the payload.
-     */
-    abstract Object build(Object[] methodArgs);
+    abstract Message createMessage(Object[] methodArgs);
+
+    static final BodyBuilder EMPTY_SOAP11 = new Empty(SOAPVersion.SOAP_11);
+    static final BodyBuilder EMPTY_SOAP12 = new Empty(SOAPVersion.SOAP_12);
+
+    private static final class Empty extends BodyBuilder {
+        private final SOAPVersion soapVersion;
+
+        public Empty(SOAPVersion soapVersion) {
+            this.soapVersion = soapVersion;
+        }
+
+        Message createMessage(Object[] methodArgs) {
+            return Messages.createEmptyMessage(soapVersion);
+        }
+    }
 
     /**
-     * This object determines the binding of the object returned
-     * from {@link #build(Object[])}.
+     * Base class for those {@link BodyBuilder}s that build a {@link Message}
+     * from JAXB objects.
      */
-    final Bridge bridge;
+    private static abstract class JAXB extends BodyBuilder {
+        /**
+         * This object determines the binding of the object returned
+         * from {@link #build(Object[])}.
+         */
+        private final Bridge bridge;
+        private final PortInterfaceStub owner;
 
-    protected BodyBuilder(Bridge bridge) {
-        assert bridge!=null;
-        this.bridge = bridge;
+        protected JAXB(Bridge bridge,PortInterfaceStub owner) {
+            assert bridge!=null;
+            this.bridge = bridge;
+            assert owner!=null;
+            this.owner = owner;
+        }
+
+        final Message createMessage(Object[] methodArgs) {
+            return new JAXBMessage(
+                bridge, build(methodArgs),
+                owner.model.getBridgeContext(), owner.soapVersion );
+        }
+
+        /**
+         * Builds a JAXB object that becomes the payload.
+         */
+        abstract Object build(Object[] methodArgs);
     }
 
     /**
      * Used to create a payload JAXB object just by taking
      * one of the parameters.
      */
-    final static class Bare extends BodyBuilder {
+    final static class Bare extends JAXB {
         /**
          * The index of the method invocation parameters that goes into the payload.
          */
@@ -47,8 +83,8 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a bare parameter.
          */
-        Bare(Parameter p, RuntimeModel model) {
-            super(p.getBridge());
+        Bare(Parameter p, PortInterfaceStub owner) {
+            super(p.getBridge(),owner);
             this.methodPos = p.getIndex();
             this.getter = ValueGetter.get(p);
         }
@@ -65,7 +101,7 @@ abstract class BodyBuilder {
      * Used to create a payload JAXB object by wrapping
      * multiple parameters into one bean.
      */
-    final static class Wrapped extends BodyBuilder {
+    final static class Wrapped extends JAXB {
         /**
          * How does each wrapped parameter binds to XML?
          */
@@ -84,8 +120,8 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
-        Wrapped(WrapperParameter wp, RuntimeModel model) {
-            super(model.getBridge(wp.getTypeReference()));
+        Wrapped(WrapperParameter wp, PortInterfaceStub owner) {
+            super(wp.getBridge(),owner);
             // we'll use CompositeStructure to pack requests
             assert wp.getTypeReference().type==CompositeStructure.class;
 
