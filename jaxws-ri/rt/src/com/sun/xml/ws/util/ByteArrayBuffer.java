@@ -146,4 +146,15 @@ public class ByteArrayBuffer extends OutputStream {
     public final InputStream newInputStream(int start, int length) {
         return new ByteArrayInputStream(buf,start,length);
     }
+
+    /**
+     * Decodes the contents of this buffer by the default encoding
+     * and returns it as a string.
+     *
+     * <p>
+     * Meant to aid debugging, but no more.
+     */
+    public String toString() {
+        return new String(buf, 0, count);
+    }
 }

@@ -51,5 +51,9 @@ public class LocalMessage {
     public void setHeaders(Map<String, List<String>> headers) {
         this.headers = headers;
     }
-    
+
+    public String toString() {
+        return headers+"\n"+baos;
+    }
+
 }

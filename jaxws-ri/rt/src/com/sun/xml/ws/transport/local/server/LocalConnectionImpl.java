@@ -66,5 +66,9 @@ public class LocalConnectionImpl extends WSConnectionImpl {
         lm.setOutput(bab);
         return bab;
     }
+
+    public String toString() {
+        return lm.toString();
+    }
 }
 
