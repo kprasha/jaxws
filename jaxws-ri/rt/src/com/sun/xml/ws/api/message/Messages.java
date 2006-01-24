@@ -1,12 +1,14 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.soap.SOAPMessage;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -43,7 +45,20 @@ public abstract class Messages {
      * @param soapVersion
      *      The SOAP version of the message. Must not be null.
      */
-    public static Message createJAXBMessage(Marshaller marshaller, Object jaxbObject, SOAPVersion soapVersion) {
+    public static Message createMessage(Marshaller marshaller, Object jaxbObject, SOAPVersion soapVersion) {
         return new JAXBMessage(marshaller,jaxbObject,soapVersion);
+    }
+
+    /**
+     * Creates a {@link Message} backed by a SAAJ {@link SOAPMessage} object.
+     *
+     * @param saaj
+     *      The SOAP message to be represented as a {@link Message}.
+     *      Must not be null. Once this method is invoked, the created
+     *      {@link Message} will own the {@link SOAPMessage}, so it shall
+     *      never be touched directly.
+     */
+    public static Message createMessage(SOAPMessage saaj) {
+        return new SAAJMessage(saaj);
     }
 }
