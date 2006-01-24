@@ -103,10 +103,10 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     }
 
     protected void populateAsyncExceptions() {
-        for (JavaMethod jm : getJavaMethods()) {
+        for (JavaMethodImpl jm : getJavaMethods()) {
             MEP mep = jm.getMEP();
             if (mep.isAsync) {
-                String opName = jm.getOperation().getName().getLocalPart();
+                String opName = jm.getOperationName();
                 Method m = jm.getMethod();
                 Class[] params = m.getParameterTypes();
                 if (mep == MEP.ASYNC_CALLBACK) {
@@ -117,7 +117,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                     Method om = m.getDeclaringClass().getMethod(opName, params);
                     JavaMethod jm2 = getJavaMethod(om);
                     for (CheckedException ce : jm2.getCheckedExceptions()) {
-                        ((JavaMethodImpl)jm).addException(ce);
+                        jm.addException(ce);
                     }
                 } catch (NoSuchMethodException ex) {
                 }
@@ -327,8 +327,8 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      */
     public QName getQNameForJM(JavaMethod jm) {
         for (QName key : nameToJM.keySet()) {
-            JavaMethod jmethod = nameToJM.get(key);
-            if (jmethod.getOperation()==jm.getOperation()){
+            JavaMethodImpl jmethod = nameToJM.get(key);
+            if (jmethod.getOperationName().equals(((JavaMethodImpl)jm).getOperationName())){
                return key;
             }
         }
@@ -429,7 +429,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * Returns attachment parameters if/any.
      */
     private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
-        QName opName = method.getOperation().getName();
+        QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
         BoundOperation bo = boundPortType.get(opName);
         Map<Integer, ParameterImpl> bodyParams = new HashMap<Integer, ParameterImpl>();
