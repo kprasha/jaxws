@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.xml.ws.WebServiceException;
 import java.util.List;
@@ -67,21 +68,14 @@ public class HttpTransportPipe implements Pipe {
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 ct = encoder.encode(msg, buf);
-                // Set correct Content-Length
-                List<String> clList = new ArrayList<String>();
-                clList.add(""+buf.size());
-                reqHeaders.put("Content-Length", clList);
-                // Set correct Content-Type
-                List<String> ctList = new ArrayList<String>();
-                ctList.add(ct);
-                reqHeaders.put("Content-Type", ctList);
+                // data size is available, set it as Content-Length
+                reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
+                reqHeaders.put("Content-Type", Arrays.asList(ct));
                 con.setHeaders(reqHeaders);
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
-                List<String> ctList = new ArrayList<String>();
-                ctList.add(ct);
-                reqHeaders.put("Content-Type", ctList);
+                reqHeaders.put("Content-Type", Arrays.asList(ct));
                 con.setHeaders(reqHeaders);
                 encoder.encode(msg, con.getOutput());
             }
