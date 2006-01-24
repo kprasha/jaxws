@@ -19,18 +19,17 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.bind.unmarshaller.DOMScanner;
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -40,12 +39,12 @@ import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPBody;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -124,9 +123,11 @@ public class SAAJMessage extends Message {
 
         try {
             SOAPHeader header = sm.getSOAPHeader();
-            Iterator iter = header.examineAllHeaderElements();
-            while (iter.hasNext()) {
-                headers.add(new SAAJHeader((SOAPHeaderElement) iter.next()));
+            if(header!=null) {
+                Iterator iter = header.examineAllHeaderElements();
+                while (iter.hasNext()) {
+                    headers.add(new SAAJHeader((SOAPHeaderElement) iter.next()));
+                }
             }
             parsedHeader = true;
         } catch (SOAPException e) {
