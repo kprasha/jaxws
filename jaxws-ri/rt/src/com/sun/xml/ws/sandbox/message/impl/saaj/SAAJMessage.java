@@ -302,7 +302,9 @@ public class SAAJMessage extends Message {
         try {
             SOAPBody sb = sm.getSOAPPart().getEnvelope().getBody();
             SOAPMessage msg = SOAPVersion.fromNsUri(sb.getNamespaceURI()).saajFactory.createMessage();
-            msg.getSOAPPart().getEnvelope().getBody().getOwnerDocument().importNode(sb, true);
+            SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
+            Node n = newBody.getOwnerDocument().importNode(payload, true);
+            newBody.appendChild(n);
             return new SAAJMessage(getHeaders(), getAttachments(), msg);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
