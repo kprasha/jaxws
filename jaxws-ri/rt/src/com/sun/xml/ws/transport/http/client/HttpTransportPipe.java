@@ -26,6 +26,8 @@ import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.util.ByteArrayBuffer;
+import java.util.ArrayList;
 
 import javax.xml.ws.WebServiceException;
 import java.util.List;
@@ -57,16 +59,36 @@ public class HttpTransportPipe implements Pipe {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
             WSConnection con = new HttpClientTransport(null, msg.getProperties());
-
+            
             // get transport headers from message
             MessageProperties props = msg.getProperties();
             Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
-            con.setHeaders(reqHeaders);
-            encoder.encode(msg, con.getOutput());
+            String ct = encoder.getStaticContentType();
+            if (ct == null) {
+                ByteArrayBuffer buf = new ByteArrayBuffer();
+                ct = encoder.encode(msg, buf);
+                // Set correct Content-Length
+                List<String> clList = new ArrayList<String>();
+                clList.add(""+buf.size());
+                reqHeaders.put("Content-Length", clList);
+                // Set correct Content-Type
+                List<String> ctList = new ArrayList<String>();
+                ctList.add(ct);
+                reqHeaders.put("Content-Type", ctList);
+                con.setHeaders(reqHeaders);
+                buf.writeTo(con.getOutput());
+            } else {
+                // Set static Content-Type
+                List<String> ctList = new ArrayList<String>();
+                ctList.add(ct);
+                reqHeaders.put("Content-Type", ctList);
+                con.setHeaders(reqHeaders);
+                encoder.encode(msg, con.getOutput());
+            }
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
-            String ct = getContentType(respHeaders);
+            ct = getContentType(respHeaders);
             if(msg.getProperties().isOneWay==Boolean.TRUE
             || con.getStatus()==WSConnection.ONEWAY)
                 return null;    // one way. no response given.
