@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * A list of {@link Header}s on a {@link Message}.
@@ -93,8 +94,42 @@ public final class HeaderList extends ArrayList<Header> {
      * @return empty iterator
      *      if not found.
      */
-    public Iterator<Header> getHeaders(String nsUri, String localName) {
-        throw new UnsupportedOperationException();
+    public Iterator<Header> getHeaders(final String nsUri, final String localName) {
+        return new Iterator<Header>() {
+            int idx = 0;
+            Header next;
+            public boolean hasNext() {
+                if(next==null)
+                    fetch();
+                return next!=null;
+            }
+
+            public Header next() {
+                if(next==null) {
+                    fetch();
+                    if(next==null)
+                        throw new NoSuchElementException();
+                }
+
+                Header r = next;
+                next = null;
+                return r;
+            }
+
+            private void fetch() {
+                while(idx<size()) {
+                    Header h = get(idx++);
+                    if(h.getLocalPart().equals(localName) && h.getNamespaceURI().equals(nsUri)) {
+                        next = h;
+                        break;
+                    }
+                }
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     /**
