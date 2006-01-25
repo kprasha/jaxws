@@ -19,13 +19,13 @@
  */
 package com.sun.xml.ws.transport.local.client;
 
-import com.sun.xml.ws.handler.MessageContextImpl;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.Tie;
 import com.sun.xml.ws.spi.runtime.WSConnection;
@@ -34,16 +34,16 @@ import com.sun.xml.ws.transport.local.LocalMessage;
 import com.sun.xml.ws.transport.local.server.LocalConnectionImpl;
 
 import javax.xml.ws.WebServiceException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Arrays;
 
 /**
  * Transport {@link Pipe} that routes a message to a service that runs within it.
- *
- * <p>
- * This is useful to test the whole client-server in a single VM. 
+ * <p/>
+ * <p/>
+ * This is useful to test the whole client-server in a single VM.
  *
  * @author jitu
  */
@@ -59,7 +59,7 @@ public class LocalTransportPipe implements Pipe {
     // but nevertheless we do it as an experiement.
     private static final Tie tie = new Tie();
     private final LocalMessage lm = new LocalMessage();
-    private final Map<String,List<String>> reqHeaders = new HashMap<String,List<String>>();
+    private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
     public LocalTransportPipe(RuntimeEndpointInfo endpointInfo, Encoder encoder, Decoder decoder) {
         this.endpointInfo = endpointInfo;
@@ -71,7 +71,7 @@ public class LocalTransportPipe implements Pipe {
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
     private LocalTransportPipe(LocalTransportPipe that) {
-        this(that.endpointInfo,that.encoder.copy(),that.decoder.copy());
+        this(that.endpointInfo, that.encoder.copy(), that.decoder.copy());
     }
 
     public Message process(Message msg) {
@@ -83,7 +83,7 @@ public class LocalTransportPipe implements Pipe {
             // get transport headers from message
             MessageProperties props = msg.getProperties();
             reqHeaders.clear();
-            if(props.httpRequestHeaders!=null)
+            if (props.httpRequestHeaders != null)
                 reqHeaders.putAll(props.httpRequestHeaders);
             con.setHeaders(reqHeaders);
 
@@ -103,10 +103,15 @@ public class LocalTransportPipe implements Pipe {
 
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
+
+            if (msg.getProperties().isOneWay == Boolean.TRUE
+                || con.getStatus() == WSConnection.ONEWAY)
+                return null;    // one way. no response given.
+
             return decoder.decode(con.getInput(), ct);
-        } catch(WebServiceException wex) {
+        } catch (WebServiceException wex) {
             throw wex;
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new WebServiceException(ex);
         }
     }
