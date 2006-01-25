@@ -33,7 +33,7 @@ abstract class BodyBuilder {
         }
 
         Message createMessage(Object[] methodArgs) {
-            return Messages.createEmptyMessage(soapVersion);
+            return Messages.createEmpty(soapVersion);
         }
     }
 

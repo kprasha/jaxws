@@ -47,7 +47,7 @@ public abstract class Messages {
      * @param soapVersion
      *      The SOAP version of the message. Must not be null.
      */
-    public static Message createMessage(Marshaller marshaller, Object jaxbObject, SOAPVersion soapVersion) {
+    public static Message create(Marshaller marshaller, Object jaxbObject, SOAPVersion soapVersion) {
         return new JAXBMessage(marshaller,jaxbObject,soapVersion);
     }
 
@@ -60,20 +60,20 @@ public abstract class Messages {
      *      {@link Message} will own the {@link SOAPMessage}, so it shall
      *      never be touched directly.
      */
-    public static Message createMessage(SOAPMessage saaj) {
+    public static Message create(SOAPMessage saaj) {
         return new SAAJMessage(saaj);
     }
 
     /**
      * Creates a {@link Message} that doesn't have any payload.
      */
-    public static Message createEmptyMessage(SOAPVersion soapVersion) {
+    public static Message createEmpty(SOAPVersion soapVersion) {
         // TODO: fully implement EmptyMessageImpl
         Message msg = new EmptyMessageImpl();
 
         // for now we'll use an empty SAAJMessage
         try {
-            return createMessage(soapVersion.saajFactory.createMessage());
+            return create(soapVersion.saajFactory.createMessage());
         } catch (SOAPException e) {
             // impossible
             throw new AssertionError(e);

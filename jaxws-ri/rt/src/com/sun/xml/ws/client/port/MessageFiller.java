@@ -3,7 +3,7 @@ package com.sun.xml.ws.client.port;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Headers;
 
 /**
  * Puts a non-payload message parameter to {@link Message}.
@@ -50,7 +50,7 @@ abstract class MessageFiller {
 
         void fillIn(Object[] methodArgs, Message msg) {
             Object value = getter.get(methodArgs[methodPos]);
-            msg.getHeaders().add(ver.createJAXBHeader(
+            msg.getHeaders().add(Headers.create(ver,
                 bridge, owner.owner.bridgeContexts.take(), value));
         }
     }

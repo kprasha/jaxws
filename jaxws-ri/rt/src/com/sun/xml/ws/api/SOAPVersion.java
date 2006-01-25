@@ -20,14 +20,8 @@
 
 package com.sun.xml.ws.api;
 
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader11;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader12;
 
-import javax.xml.bind.Marshaller;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
@@ -65,25 +59,11 @@ import javax.xml.ws.soap.SOAPBinding;
 public enum SOAPVersion {
     SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
             com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE,
-            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL) {
-        public Header createJAXBHeader(Marshaller m, Object o) {
-            return new JAXBHeader11(m,o);
-        }
-        public Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
-            return new JAXBHeader11(bridge,bridgeInfo,jaxbObject);
-        }
-    },
+            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL),
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
-            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL) {
-        public Header createJAXBHeader(Marshaller m, Object o) {
-            return new JAXBHeader12(m,o);
-        }
-        public Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
-            return new JAXBHeader12(bridge,bridgeInfo,jaxbObject);
-        }
-    };
+            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL);
 
     /**
      * Binding ID for SOAP/HTTP binding of this SOAP version.
@@ -120,20 +100,6 @@ public enum SOAPVersion {
         }
     }
 
-    /**
-     * Creates {@link JAXBHeader11} or {@link JAXBHeader12} accordingly.
-     *
-     * @see JAXBHeader11#JAXBHeader11(Marshaller, Object)
-     * @see JAXBHeader12#JAXBHeader12(Marshaller, Object)
-     */
-    public abstract Header createJAXBHeader(Marshaller m, Object o);
-
-    /**
-     * Creates {@link JAXBHeader11} or {@link JAXBHeader12} accordingly.
-     *
-     * @see #createJAXBHeader(Marshaller, Object)
-     */
-    public abstract Header createJAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject);
 
     public String toString() {
         return httpBindingId;
