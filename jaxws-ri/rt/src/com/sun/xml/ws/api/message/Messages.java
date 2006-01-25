@@ -83,4 +83,18 @@ public abstract class Messages {
             throw new AssertionError(e);
         }
     }
+
+    /**
+     * Creates a {@link Message} that represents an exception as a fault.
+     *
+     * <p>
+     * TODO: I'm not too sure if JAX-WS can represent any exception
+     * as a fault --- it probably can't. So the exact signature needs to be
+     * worked out. This method is here just to show the concept of
+     * {@link Messages}.
+     */
+    public static Message create(Throwable t) {
+        // TODO: implement this method later
+        throw new UnsupportedOperationException();
+    }
 }
