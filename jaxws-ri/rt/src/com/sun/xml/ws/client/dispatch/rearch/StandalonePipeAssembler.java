@@ -16,7 +16,6 @@ import com.sun.xml.ws.util.pipe.DumpPipe;
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(Port wsdlModel, WSService service) {
         Pipe p = createTransport(wsdlModel,service);
-        p = new DumpPipe(System.err,p);
         return p;
     }
 
