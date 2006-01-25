@@ -54,6 +54,10 @@ public abstract class Messages {
     /**
      * Creates a {@link Message} backed by a SAAJ {@link SOAPMessage} object.
      *
+     * <p>
+     * If the {@link SOAPMessage} contains headers and attachments, this method
+     * does the right thing.
+     *
      * @param saaj
      *      The SOAP message to be represented as a {@link Message}.
      *      Must not be null. Once this method is invoked, the created
