@@ -22,10 +22,10 @@ import javax.xml.ws.Service;
  * TODO: update javadoc, use sandbox classes where can
  */
 /**
- * The <code>javax.xml.ws.Dispatch</code> interface provides support
+ * The <code>DispatchImpl</code> abstract class provides support
  * for the dynamic invocation of a service endpoint operation using XML
- * constructs or JAXB objects. The <code>javax.xml.ws.Service</code>
- * interface acts as a factory for the creation of <code>Dispatch</code>
+ * constructs, JAXB objects or <code>SOAPMessage</code>. The <code>javax.xml.ws.Service</code>
+ * interface acts as a factory for the creation of <code>DispatchImpl</code>
  * instances.
  *
  * @author WS Development Team

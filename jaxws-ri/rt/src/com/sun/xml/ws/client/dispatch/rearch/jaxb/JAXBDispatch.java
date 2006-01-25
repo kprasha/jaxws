@@ -9,6 +9,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
@@ -18,11 +19,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import javax.xml.transform.Source;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +35,10 @@ import java.util.concurrent.Future;
  */
 
 /**
- * The <code>javax.xml.ws.Dispatch</code> interface provides support
- * for the dynamic invocation of a service endpoint operation using XML
- * constructs or JAXB objects. The <code>javax.xml.ws.Service</code>
- * interface acts as a factory for the creation of <code>Dispatch</code>
+ * The <code>JAXBDispatch</code> class provides support
+ * for the dynamic invocation of a service endpoint operation using
+ * JAXB objects. The <code>javax.xml.ws.Service</code>
+ * interface acts as a factory for the creation of <code>JAXBDispatch</code>
  * instances.
  *
  * @author WS Development Team
@@ -72,17 +73,16 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      * is formed according to the requirements of the protocol binding in use.
      *
      * @param msg An object that will form the payload of
-     *            the message used to invoke the operation. Must be an instance of
-     *            either <code>javax.xml.transform.Source</code> or a JAXB object. If
+     *            the message used to invoke the operation.
+     *            Must be an instance of a JAXB object. If the
      *            <code>msg</code> is an instance of a JAXB object then the request
      *            context must have the <code>javax.xml.ws.binding.context</code>
      *            property set.
      * @return The response to the operation invocation. The object is
-     *         either an instance of <code>javax.xml.transform.Source</code>
-     *         or a JAXB object.
+     *         an instance of a JAB object.
      * @throws javax.xml.ws.WebServiceException
      *          If there is any error in the configuration of
-     *          the <code>Dispatch</code> instance
+     *          the <code>JAXBDispatch</code> instance
      * @throws javax.xml.ws.WebServiceException
      *          If an error occurs when using a supplied
      *          JAXBContext to marshall msg or unmarshall the response. The cause of
@@ -99,15 +99,16 @@ public class JAXBDispatch extends DispatchImpl<Object> {
         Message response = process(message);
         switch (mode) {
             case PAYLOAD:
+
                 try {
-                   return response.<Object>readPayloadAsJAXB(unmarshaller);
-                } catch (Exception e) {
-                    throw new WebServiceException(e);
+                    return response.<Object>readPayloadAsJAXB(unmarshaller);
+                } catch (JAXBException e) {
+                   throw new WebServiceException(e);
                 }
             case MESSAGE: {
                 Source result = response.readEnvelopeAsSource();
                 try {
-                    return (Object)unmarshaller.unmarshal(result);
+                    return (Object) unmarshaller.unmarshal(result);
                 } catch (JAXBException e) {
                     throw new WebServiceException(e);
                 }
@@ -131,24 +132,24 @@ public class JAXBDispatch extends DispatchImpl<Object> {
     }
 
     protected Message createMessage(java.lang.Object msg) {
-            assert(jaxbcontext != null);
-            //todo: use Pool - temp to get going
-            try {
-                marshaller = jaxbcontext.createMarshaller();
-                marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
-                unmarshaller = jaxbcontext.createUnmarshaller();
-            } catch (JAXBException e) {
-                throw new WebServiceException(e);
-            }
-
-            switch (mode) {
-                case PAYLOAD:
-                case MESSAGE:
-                    return new JAXBMessage(marshaller, msg, soapVersion);
-                default:
-                    throw new WebServiceException("Unrecognized message mode");
-            }
+        assert(jaxbcontext != null);
+        //todo: use Pool - temp to get going
+        try {
+            marshaller = jaxbcontext.createMarshaller();
+            marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
+            unmarshaller = jaxbcontext.createUnmarshaller();
+        } catch (JAXBException e) {
+            throw new WebServiceException(e);
         }
+
+        switch (mode) {
+            case PAYLOAD:
+            case MESSAGE:
+                return new JAXBMessage(marshaller, msg, soapVersion);
+            default:
+                throw new WebServiceException("Unrecognized message mode");
+        }
+    }
 
 
     /**
@@ -163,17 +164,14 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      *
      * @param msg An object that, when marshalled, will form the payload of
      *            the message used to invoke the operation. Must be an instance of
-     *            either <code>javax.xml.transform.Source</code> or a JAXB object. If
-     *            <code>msg</code> is an instance of a JAXB object then the request
-     *            context must have the <code>javax.xml.ws.binding.context</code>
-     *            property set.
+     *            of a JAXB object. Given the  <code>msg</code> is an instance of
+     *            a JAXB object then the request context must have the
+     *            <code>javax.xml.ws.binding.context</code> property set.
      * @return The response to the operation invocation. The object
-     *         returned by <code>Response.get()</code> is
-     *         either an instance of <code>javax.xml.transform.Source</code>
-     *         or a JAXB object.
+     *         returned by <code>Response.get()</code> is a JAXB object.
      * @throws javax.xml.ws.WebServiceException
      *          If there is any error in the configuration of
-     *          the <code>Dispatch</code> instance
+     *          the <code>JAXBDispatch</code> instance
      * @throws javax.xml.ws.WebServiceException
      *          If an error occurs when using a supplied
      *          JAXBContext to marshall msg. The cause of
@@ -181,10 +179,9 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      */
     public Response<Object> invokeAsync(Object msg)
         throws WebServiceException {
-         throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
 
     }
-
 
     /**
      * Invoke a service operation asynchronously. The
@@ -198,15 +195,14 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      *
      * @param msg     An object that, when marshalled, will form the payload of
      *                the message used to invoke the operation. Must be an instance of
-     *                either <code>javax.xml.transform.Source</code> or a JAXB object. If
-     *                <code>msg</code> is an instance of a JAXB object then the request
-     *                context must have the <code>javax.xml.ws.binding.context</code>
+     *                a JAXB object. Given the <code>msg</code> is an instance
+     *                of a JAXB object then the request context must have the
+     *                 <code>javax.xml.ws.binding.context</code>
      *                property set.
      * @param handler The handler object that will receive the
      *                response to the operation invocation. The object
      *                returned by <code>Response.get()</code> is
-     *                either an instance of
-     *                <code>javax.xml.transform.Source</code> or a JAXB object.
+     *                an instance of a JAXB object.
      * @return A <code>Future</code> object that may be used to check the status
      *         of the operation invocation. This object must not be used to try to
      *         obtain the results of the operation - the object returned from
@@ -214,14 +210,14 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      *         and any use of it will result in non-portable behaviour.
      * @throws javax.xml.ws.WebServiceException
      *          If there is any error in the configuration of
-     *          the <code>Dispatch</code> instance
+     *          the <code>JAXBDispatch</code> instance
      * @throws javax.xml.ws.WebServiceException
      *          If an error occurs when using a supplied
      *          JAXBContext to marshall msg. The cause of
      *          the WebServiceException is the original JAXBException.
      */
     public Future<?> invokeAsync(Object msg, AsyncHandler<Object> handler) {
-         throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
 
     }
 
@@ -239,30 +235,34 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      *
      * @param msg An object that, when marshalled, will form the payload of
      *            the message used to invoke the operation. Must be an instance of
-     *            either <code>javax.xml.transform.Source</code> or a JAXB object. If
-     *            <code>msg</code> is an instance of a JAXB object then the request
-     *            context must have the <code>javax.xml.ws.binding.context</code>
+     *            of a JAXB object. Given the <code>msg</code> is an instance
+     *            of a JAXB object then the request context must have the
+     *            <code>javax.xml.ws.binding.context</code>
      *            property set.
      * @throws javax.xml.ws.WebServiceException
      *          If there is any error in the configuration of
-     *          the <code>Dispatch</code> instance or if an error occurs during the
+     *          the <code>JAXBDispatch</code> instance or if an error occurs during the
      *          invocation.
      * @throws javax.xml.ws.WebServiceException
      *          If an error occurs when using a supplied
      *          JAXBContext to marshall msg. The cause of
      *          the WebServiceException is the original JAXBException.
      */
-
     public void invokeOneWay(Object msg) {
-         Message message = createMessage(msg);
-        setProperties(message);
-        //todo: temp --where is best place to put this??
-
-        //todo:temp
+        Message message = createMessage(msg);
+        setProperties(message, Boolean.TRUE);
         Message response = process(message);
     }
 
-    @Override
+
+    protected void setProperties(Message msg, boolean oneway){
+        super.setProperties(msg);
+        setHttpRequestHeaders(msg);
+        msg.getProperties().put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
+        if (oneway)
+            msg.getProperties().put(BindingProviderProperties.ONE_WAY_OPERATION,Boolean.TRUE);
+    }
+     @Override
     protected void setProperties(Message msg) {
         super.setProperties(msg);
         setHttpRequestHeaders(msg);
