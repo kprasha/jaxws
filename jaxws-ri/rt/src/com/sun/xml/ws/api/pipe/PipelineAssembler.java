@@ -46,13 +46,16 @@ public interface PipelineAssembler {
      *
      * @param wsdlModel
      *      The created pipeline will be used to serve this port.
-     *      Null if the service isn't associated with any port,
+     *      Null if the service isn't associated with any port definition in WSDL,
      *      and otherwise non-null.
      *
      * @param rootOwner
      *      The pipeline is created for this {@link WSService}.
      *      Always non-null. (To be precise, the newly created pipeline
      *      is owned by a proxy or a dispatch created from thsi {@link WSService}.)
+     *
+     * @param binding
+     *      The binding of the new pipeline to be created.
      *
      * @return
      *      non-null freshly created pipeline.
@@ -63,7 +66,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(WSDLPort wsdlModel, WSService rootOwner);
+    Pipe createClient(WSDLPort wsdlModel, WSService rootOwner, WSBinding binding);
 
     /**
      * Creates a new pipeline for servers.
