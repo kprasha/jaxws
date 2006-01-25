@@ -29,5 +29,8 @@ public interface WSDLService extends Extensible {
      */
     WSDLPort getFirstPort();
 
+    /**
+     * Gives all the {@link WSDLPort} in a wsdl:service {@link WSDLService}
+     */
     Iterable<? extends WSDLPort> getPorts();
 }
