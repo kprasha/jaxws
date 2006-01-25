@@ -32,7 +32,7 @@ import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.MessageContextUtil;
 import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
@@ -157,7 +157,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
             return createRpcLitPayload(context, (WrapperParameter) param, data, result);
         }
         Object obj = createDocLitPayloadValue(context, param, data, result);
-        RuntimeModel model = context.getModel();
+        SEIModel model = context.getModel();
         return new JAXBBridgeInfo(param.getBridge(), obj);
     }
 
@@ -280,7 +280,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                 value = result;
             else
                 value = p.getHolderValue(data[p.getIndex()]);
-            RuntimeModel model = context.getModel();
+            SEIModel model = context.getModel();
             JAXBBridgeInfo bi = new JAXBBridgeInfo(param.getBridge(), value);
             payload.addParameter(bi);
         }
@@ -322,7 +322,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
     protected void addAttachmentPart(RuntimeContext rtContext, InternalMessage im, Object obj, Parameter mimeParam){
         if(obj == null)
             return;
-        RuntimeModel model = rtContext.getModel();
+        SEIModel model = rtContext.getModel();
         String mimeType = mimeParam.getBinding().getMimeType();
         String contentId;
         try {

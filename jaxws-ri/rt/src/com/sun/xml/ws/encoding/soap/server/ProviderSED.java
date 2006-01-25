@@ -25,7 +25,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.encoding.internal.InternalEncoder;
 import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import javax.xml.transform.Source;
@@ -65,10 +65,10 @@ public class ProviderSED implements InternalEncoder {
                     (BindingImpl)rtContext.getRuntimeEndpointInfo().getBinding();
                 String bindingId = bindingImpl.getBindingId();
                 if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING)) {
-                    SOAPRuntimeModel.createFaultInBody(messageInfo.getResponse(),
+                    SOAPSEIModel.createFaultInBody(messageInfo.getResponse(),
                             null, null, internalMessage);
                 } else if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-                    SOAPRuntimeModel.createSOAP12FaultInBody(messageInfo.getResponse(),
+                    SOAPSEIModel.createSOAP12FaultInBody(messageInfo.getResponse(),
                             null, null, null, internalMessage);
                 }
                 break;

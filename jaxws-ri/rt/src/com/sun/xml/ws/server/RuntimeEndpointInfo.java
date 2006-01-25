@@ -21,14 +21,14 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.WSEndpoint;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.spi.runtime.Binding;
@@ -92,7 +92,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     private String urlPattern;
     private List<Source> metadata;
     private BindingImpl binding;
-    private RuntimeModel runtimeModel;
+    private SEIModel seiModel;
     private Object implementor;
     private Class implementorClass;
     private Map<String, DocInfo> docs;      // /WEB-INF/wsdl/xxx.wsdl -> DocInfo
@@ -180,7 +180,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             if (getPortName() != null) {
                 rap.setPortName(getPortName());
             }
-            runtimeModel = rap.buildRuntimeModel();
+            seiModel = rap.buildRuntimeModel();
         }else {
             try {
                 WSDLModel wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
@@ -209,7 +209,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                 if (getPortName() != null) {
                     rap.setPortName(getPortName());
                 }
-                runtimeModel = rap.buildRuntimeModel();
+                seiModel = rap.buildRuntimeModel();
             } catch (IOException e) {
                 throw new ServerRtException("runtime.parser.wsdl", getWsdlUrl().toString());
             } catch (XMLStreamException e) {
@@ -327,10 +327,10 @@ public class RuntimeEndpointInfo extends WSEndpoint
             // Create runtime model for non Provider endpoints
             createModel();
             if (getServiceName() == null) {
-                setServiceName(runtimeModel.getServiceQName());
+                setServiceName(seiModel.getServiceQName());
             }
             if (getPortName() == null) {
-                setPortName(runtimeModel.getPortName());
+                setPortName(seiModel.getPortName());
             }
             if (getBinding().getHandlerChain() == null) {
                 String bindingId = binding.getBindingId();
@@ -348,7 +348,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
             //set momt processing
             if(binding instanceof SOAPBindingImpl){
-                ((SOAPRuntimeModel)runtimeModel).enableMtom(((SOAPBinding)binding).isMTOMEnabled());
+                ((SOAPSEIModel)seiModel).enableMtom(((SOAPBinding)binding).isMTOMEnabled());
             }
         }
         deployed = true;
@@ -389,7 +389,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             setMetadata(new HashMap<String, DocInfo>());
         }
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(getDocMetadata());
-        WSDLGenerator wsdlGen = new WSDLGenerator(runtimeModel, wsdlResolver,
+        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver,
                 binding.getBindingId());
         try {
             wsdlGen.doGeneration();
@@ -460,8 +460,8 @@ public class RuntimeEndpointInfo extends WSEndpoint
         this.metadata = metadata;
     }
 
-    public RuntimeModel getRuntimeModel() {
-        return runtimeModel;
+    public SEIModel getRuntimeModel() {
+        return seiModel;
     }
 
     public Object getImplementor() {

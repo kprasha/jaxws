@@ -39,7 +39,7 @@ import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.handler.HandlerContext;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.XMLReaderException;
@@ -290,7 +290,7 @@ public abstract class SOAPDecoder implements Decoder {
             return;
         }
         BridgeContext bridgeContext = rtCtxt.getBridgeContext();
-        Set<QName> knownHeaders = ((SOAPRuntimeModel) rtCtxt.getModel()).getKnownHeaders();
+        Set<QName> knownHeaders = ((SOAPSEIModel) rtCtxt.getModel()).getKnownHeaders();
         QName name = reader.getName();
         if (knownHeaders != null && knownHeaders.contains(name)) {
             QName headerName = reader.getName();
@@ -565,10 +565,10 @@ public abstract class SOAPDecoder implements Decoder {
         // keep set=null if there are no understood headers
         Set<QName> understoodHeaders = null;
         if (rtCtxt != null) {
-            SOAPRuntimeModel model = (SOAPRuntimeModel) rtCtxt.getModel();
+            SOAPSEIModel model = (SOAPSEIModel) rtCtxt.getModel();
             if (model != null && model.getKnownHeaders() != null) {
                 understoodHeaders = new HashSet<QName>(
-                    ((SOAPRuntimeModel) rtCtxt.getModel()).getKnownHeaders());
+                    ((SOAPSEIModel) rtCtxt.getModel()).getKnownHeaders());
             }
         }
         if (understoodHeaders == null) {

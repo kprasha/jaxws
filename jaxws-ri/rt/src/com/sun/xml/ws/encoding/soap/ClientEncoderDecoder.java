@@ -40,7 +40,7 @@ import com.sun.xml.ws.util.StringUtils;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;
@@ -305,7 +305,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
      */
     public InternalMessage toInternalMessage(MessageInfo mi) {
         RuntimeContext rtContext = (RuntimeContext) mi.getMetaData(BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
-        RuntimeModel model = rtContext.getModel();
+        SEIModel model = rtContext.getModel();
 
         JavaMethod jm = model.getJavaMethod(mi.getMethod());
         Object[] data = mi.getData();

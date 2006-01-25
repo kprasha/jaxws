@@ -26,8 +26,8 @@ import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.wsdl.WSDLContext;
 import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
@@ -167,8 +167,8 @@ public class EndpointIFInvocationHandler
         if (_rtcontext != null && _rtcontext.getModel() != null) {
             javax.xml.ws.soap.SOAPBinding sb = (binding instanceof javax.xml.ws.soap.SOAPBinding) ? (javax.xml.ws.soap.SOAPBinding) binding : null;
             if (sb != null) {
-                RuntimeModel model = _rtcontext.getModel();
-                ((SOAPRuntimeModel)model).enableMtom(sb.isMTOMEnabled());
+                SEIModel model = _rtcontext.getModel();
+                ((SOAPSEIModel)model).enableMtom(sb.isMTOMEnabled());
             }
         }
 

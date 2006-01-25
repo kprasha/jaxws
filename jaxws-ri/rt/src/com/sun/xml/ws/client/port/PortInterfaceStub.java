@@ -6,7 +6,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.pept.presentation.MEP;
@@ -27,7 +27,7 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public final class PortInterfaceStub extends Stub implements InvocationHandler {
-    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, Class portInterface, RuntimeModel model, Pipe master ) {
+    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, Class portInterface, SEIModel model, Pipe master ) {
         super(master,binding);
         this.owner = owner;
         this.model = model;
@@ -62,7 +62,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         }
     }
 
-    public final RuntimeModel model;
+    public final SEIModel model;
 
     public final SOAPVersion soapVersion;
 

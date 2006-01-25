@@ -68,7 +68,7 @@ import java.util.concurrent.Future;
 public class RuntimeModeler {
     private String bindingId;
     private Class portClass;
-    private AbstractRuntimeModelImpl runtimeModel;
+    private AbstractSEIModelImpl runtimeModel;
     private com.sun.xml.ws.model.soap.SOAPBindingImpl defaultBinding;
     private String packageName;
     private String targetNamespace;
@@ -203,8 +203,8 @@ public class RuntimeModeler {
      * builds the runtime model from the <code>portClass</code> using the binding ID <code>bindingId</code>.
      * @return the runtime model for the <code>portClass</code>.
      */
-    public AbstractRuntimeModelImpl buildRuntimeModel() {
-        runtimeModel = new SOAPRuntimeModel();
+    public AbstractSEIModelImpl buildRuntimeModel() {
+        runtimeModel = new SOAPSEIModel();
         Class clazz = portClass;
         WebService webService = getPrivClassAnnotation(portClass, WebService.class);
         if (webService == null) {

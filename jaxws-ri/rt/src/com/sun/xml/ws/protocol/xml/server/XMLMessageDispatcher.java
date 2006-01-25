@@ -33,7 +33,7 @@ import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.handler.HandlerChainCaller.RequestOrResponse;
 import com.sun.xml.ws.handler.XMLHandlerContext;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
@@ -233,7 +233,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
             }
         } catch(Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
-            InternalMessage internalMessage = SOAPRuntimeModel.createFaultInBody(
+            InternalMessage internalMessage = SOAPSEIModel.createFaultInBody(
                     e, null, null, null);
             context.setInternalMessage(internalMessage);
             context.setXMLMessage(null);

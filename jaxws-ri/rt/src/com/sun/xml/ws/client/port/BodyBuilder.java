@@ -4,7 +4,7 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.SOAPVersion;

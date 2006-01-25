@@ -3,7 +3,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 import javax.xml.ws.Dispatch;
@@ -29,7 +29,7 @@ import javax.xml.ws.WebServiceException;
  *
  * <p>
  * TODO: the JAX-WS team felt that no {@link Pipe} should be relying
- * on the {@link RuntimeModel}, so it is no longer given to the assembler.
+ * on the {@link SEIModel}, so it is no longer given to the assembler.
  * Talk to us if you need it.
  *
  *

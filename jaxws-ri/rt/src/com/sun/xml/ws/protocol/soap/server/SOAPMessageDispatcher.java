@@ -38,7 +38,7 @@ import com.sun.xml.ws.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.handler.HandlerChainCaller.RequestOrResponse;
 import com.sun.xml.ws.handler.MessageContextUtil;
 import com.sun.xml.ws.handler.SOAPHandlerContext;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.server.AppMsgContextImpl;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
@@ -283,7 +283,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
             }
         } catch(Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
-            InternalMessage internalMessage = SOAPRuntimeModel.createFaultInBody(
+            InternalMessage internalMessage = SOAPSEIModel.createFaultInBody(
                     e, null, null, null);
             context.setInternalMessage(internalMessage);
             context.setSOAPMessage(null);
@@ -365,7 +365,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
                     context.getMessageContext())) {
                     // don't use the fault, use the exception
                     InternalMessage internalMessage =
-                        SOAPRuntimeModel.createFaultInBody(pe,
+                        SOAPSEIModel.createFaultInBody(pe,
                         null, null, null);
                     context.setInternalMessage(internalMessage);
                     context.setSOAPMessage(null);
@@ -373,7 +373,7 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
             } catch(RuntimeException re) {
                 skipEndpoint = true;
                 InternalMessage internalMessage =
-                    SOAPRuntimeModel.createFaultInBody(re, null, null, null);
+                    SOAPSEIModel.createFaultInBody(re, null, null, null);
                 context.setInternalMessage(internalMessage);
                 context.setSOAPMessage(null);
             }
@@ -492,12 +492,12 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
                 String id = rei.getBinding().getBindingId();
                 InternalMessage internalMessage = null;
                 if (id.equals(SOAPBinding.SOAP11HTTP_BINDING)) {
-                    internalMessage = SOAPRuntimeModel.createFaultInBody(
+                    internalMessage = SOAPSEIModel.createFaultInBody(
                         e, null, null, null);
                 } else if (id.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-                    internalMessage = SOAPRuntimeModel.createSOAP12FaultInBody(
+                    internalMessage = SOAPSEIModel.createSOAP12FaultInBody(
                         e, null, null, null, null);
-                    SOAPRuntimeModel.addHeaders(internalMessage,
+                    SOAPSEIModel.addHeaders(internalMessage,
                         messageInfo);
                 }
                 context.setInternalMessage(internalMessage);

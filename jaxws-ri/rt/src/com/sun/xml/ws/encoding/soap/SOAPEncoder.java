@@ -48,8 +48,8 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import org.w3c.dom.Document;
 
 import javax.xml.soap.SOAPBody;
@@ -458,8 +458,8 @@ public abstract class SOAPEncoder implements Encoder, InternalSoapEncoder {
             writer.writeNamespace("xsd", SOAPNamespaceConstants.XSD);
             int i = 1;
             String prefix;
-            RuntimeModel model = rtCtxt.getModel();
-            for (String namespace : ((SOAPRuntimeModel)model).getKnownNamespaceURIs()) {
+            SEIModel model = rtCtxt.getModel();
+            for (String namespace : ((SOAPSEIModel)model).getKnownNamespaceURIs()) {
                 prefix = "ns" + i++;
                 writer.setPrefix(prefix, namespace);
                 writer.writeNamespace(prefix, namespace);

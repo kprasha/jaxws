@@ -29,7 +29,7 @@ import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
@@ -61,12 +61,12 @@ import java.util.Map;
  *
  * $author: JAXWS Development Team
  */
-public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
+public abstract class AbstractSEIModelImpl implements SEIModel {
 
     /**
      *
      */
-    public AbstractRuntimeModelImpl() {
+    public AbstractSEIModelImpl() {
         super();
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
     }
 
     /**
-     * Link {@link RuntimeModel} to {@link WSDLModel}.
+     * Link {@link SEIModel} to {@link WSDLModel}.
      * Merge it with {@link #postProcess()}.
      */
     void freeze(WSDLBoundPortType portType) {

@@ -3,7 +3,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
 import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
@@ -176,7 +176,7 @@ public abstract class Stubs {
      * @param next
      *      see <a href="#param">common parameters</a>
      */
-    public <T> T createPortProxy( WSService service, WSBinding binding, RuntimeModel model,
+    public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
                                   Class<T> portInterface, Pipe next ) {
 
         PortInterfaceStub ps = new PortInterfaceStub(service,(BindingImpl)binding,portInterface,model,next);

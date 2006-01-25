@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * Represents the relationship between an endpoint interface (SEI) and a {@link WSDLModel}.
+ * Represents abstraction of SEI.
  *
  * <p>
  * This interface would be used to access which Java concepts correspond to
@@ -32,7 +32,7 @@ import java.util.Collection;
  *
  * @author Vivek Pandey
  */
-public interface RuntimeModel {
+public interface SEIModel {
     /**
      * {@link BridgeContext} is not thread safe, the RuntimeModel must return a thread local {@link BridgeContext}
      *
@@ -97,44 +97,44 @@ public interface RuntimeModel {
     JavaMethod getJavaMethod(QName name);
 
     /**
-     * Gives all the {@link JavaMethod} for a wsdl:port for which this {@link RuntimeModel} is
+     * Gives all the {@link JavaMethod} for a wsdl:port for which this {@link SEIModel} is
      * created.
      *
      * @return a {@link Collection} of {@link JavaMethod}
-     *         associated with the {@link RuntimeModel}
+     *         associated with the {@link SEIModel}
      */
     Collection<? extends JavaMethod> getJavaMethods();
 
     /**
-     * Location of the WSDL that defines the port associated with the {@link RuntimeModel}
+     * Location of the WSDL that defines the port associated with the {@link SEIModel}
      *
      * @return wsdl location uri - always non-null
      */
     String getWSDLLocation();
 
     /**
-     * wsdl:service qualified name for the port associated with the {@link RuntimeModel)
+     * wsdl:service qualified name for the port associated with the {@link SEIModel)
      *
      * @return wsdl:service@name value - always non-null
      */
     QName getServiceQName();
 
     /**
-     * Value of the wsdl:port name associated with the {@link RuntimeModel)
+     * Value of the wsdl:port name associated with the {@link SEIModel)
      *
      * @return wsdl:service/wsdl:port@name value, always non-null
      */
     QName getPortName();
 
     /**
-     * Value of wsdl:portType bound to the port associated with the {@link RuntimeModel)
+     * Value of wsdl:portType bound to the port associated with the {@link SEIModel)
      *
      * @return
      */
     QName getPortTypeName();
 
     /**
-     * Namespace of the wsd;:port associated with the {@link RuntimeModel)
+     * Namespace of the wsd;:port associated with the {@link SEIModel)
      */
     String getTargetNamespace();
 }

@@ -27,11 +27,11 @@ import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
-import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.developer.JAXWSProperties;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 /**
  * Entry point for all server requests.
@@ -66,8 +66,8 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
 
         // Create runtime context, runtime model for dynamic runtime
         RuntimeEndpointInfo endpointInfo = (RuntimeEndpointInfo)endpoint;
-        RuntimeModel runtimeModel = endpointInfo.getRuntimeModel();
-        RuntimeContext runtimeContext = new RuntimeContext((AbstractRuntimeModelImpl) runtimeModel);
+        SEIModel seiModel = endpointInfo.getRuntimeModel();
+        RuntimeContext runtimeContext = new RuntimeContext((AbstractSEIModelImpl) seiModel);
         runtimeContext.setRuntimeEndpointInfo(endpointInfo);
 
         // Update MessageContext

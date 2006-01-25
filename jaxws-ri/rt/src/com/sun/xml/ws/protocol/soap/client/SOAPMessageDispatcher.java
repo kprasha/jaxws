@@ -112,8 +112,8 @@ import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 
 
 /**
@@ -753,10 +753,10 @@ public class SOAPMessageDispatcher implements MessageDispatcher {
         }
         RuntimeContext rtContext = (RuntimeContext) messageInfo.getMetaData(BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
         if (rtContext != null) {
-            RuntimeModel model = rtContext.getModel();
+            SEIModel model = rtContext.getModel();
             JavaMethod javaMethod = model.getJavaMethod(messageInfo.getMethod());
             if (javaMethod != null) {
-                QName operationName = ((AbstractRuntimeModelImpl)model).getQNameForJM(javaMethod);
+                QName operationName = ((AbstractSEIModelImpl)model).getQNameForJM(javaMethod);
                 messageContext.put(MessageContext.WSDL_OPERATION, operationName);
             }
             //set handlerContext

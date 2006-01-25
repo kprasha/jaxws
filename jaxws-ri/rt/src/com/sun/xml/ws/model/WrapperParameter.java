@@ -27,7 +27,7 @@ import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.xml.namespace.QName;
 
@@ -52,7 +52,7 @@ public class WrapperParameter extends ParameterImpl {
      * @param tagName
      *      Tag name of the wrapper element.
      */
-    public WrapperParameter(RuntimeModel rtModel, QName tagName, Mode mode, int index) {
+    public WrapperParameter(SEIModel rtModel, QName tagName, Mode mode, int index) {
         super(rtModel, new TypeReference(tagName, CompositeStructure.class), mode, index);
     }
 

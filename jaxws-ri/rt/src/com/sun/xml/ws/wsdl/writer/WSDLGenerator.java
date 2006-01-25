@@ -57,7 +57,7 @@ import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.soap.Use;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -85,7 +85,7 @@ import java.util.Set;
 public class WSDLGenerator {
     private JAXWSOutputSchemaResolver resolver;
     private WSDLOutputResolver wsdlResolver = null;
-    private RuntimeModel model;
+    private SEIModel model;
     private Definitions serviceDefinitions;
     private Definitions portDefinitions;
     private Types types;
@@ -184,13 +184,13 @@ public class WSDLGenerator {
 
     /**
      * Creates the WSDLGenerator
-     * @param model The {@link RuntimeModel} used to generate the WSDL
+     * @param model The {@link SEIModel} used to generate the WSDL
      * @param wsdlResolver The {@link WSDLResolver} to use resovle names while generating the WSDL
      * @param bindingId specifies which {@link javax.xml.ws.BindingType} to generate
      * @param wges A {@link Collection} of {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
      */    
-    public WSDLGenerator(RuntimeModel model, WSDLOutputResolver wsdlResolver, String bindingId) {
+    public WSDLGenerator(SEIModel model, WSDLOutputResolver wsdlResolver, String bindingId) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
         this.wsdlResolver = wsdlResolver;

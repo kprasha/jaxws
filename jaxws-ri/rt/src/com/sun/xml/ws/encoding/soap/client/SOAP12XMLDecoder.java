@@ -36,7 +36,7 @@ import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.MessageInfoUtil;
@@ -253,7 +253,7 @@ public class SOAP12XMLDecoder extends SOAPXMLDecoder {
         InternalMessage msg) {
         RuntimeContext rtCtxt = MessageInfoUtil.getRuntimeContext (messageInfo);
         BridgeContext bridgeContext = rtCtxt.getBridgeContext ();
-        Set<QName> knownHeaders = ((SOAPRuntimeModel) rtCtxt.getModel ()).getKnownHeaders ();
+        Set<QName> knownHeaders = ((SOAPSEIModel) rtCtxt.getModel ()).getKnownHeaders ();
         QName name = reader.getName ();
         if (knownHeaders != null && knownHeaders.contains (name)) {
             QName headerName = reader.getName ();

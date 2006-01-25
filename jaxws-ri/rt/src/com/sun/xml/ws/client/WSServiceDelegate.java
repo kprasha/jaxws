@@ -5,7 +5,7 @@ package com.sun.xml.ws.client;
 
 import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -18,7 +18,7 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
-import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
@@ -366,11 +366,11 @@ public class WSServiceDelegate extends WSService {
         EndpointIFContext eif = completeEndpointIFContext(serviceContext, portName, portInterface);
 
         //apply parameter bindings
-        RuntimeModel model = eif.getRuntimeContext().getModel();
+        SEIModel model = eif.getRuntimeContext().getModel();
         if (portName != null) {
             WSDLBoundPortTypeImpl binding = (WSDLBoundPortTypeImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portName);
             eif.setBindingID(binding.getBindingId());
-            ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
+            ((AbstractSEIModelImpl)model).applyParameterBinding(binding);
 
         }
 

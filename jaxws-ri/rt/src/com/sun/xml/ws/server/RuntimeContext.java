@@ -25,9 +25,9 @@ import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.handler.HandlerContext;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 
 /**
@@ -35,14 +35,14 @@ import com.sun.xml.ws.api.model.RuntimeModel;
  */
 public class RuntimeContext {
 
-    public RuntimeContext(RuntimeModel model) {
+    public RuntimeContext(SEIModel model) {
         this.model = model;
     }
 
     /**
      * @return Returns the model.
      */
-    public RuntimeModel getModel() {
+    public SEIModel getModel() {
         return model;
     }
 
@@ -74,7 +74,7 @@ public class RuntimeContext {
      * @return the <code>Method</code> associated with the operation named name
      */
     public Method getDispatchMethod(QName name){
-        return ((AbstractRuntimeModelImpl)model).getDispatchMethod(name);
+        return ((AbstractSEIModelImpl)model).getDispatchMethod(name);
     }
 
     /**
@@ -83,7 +83,7 @@ public class RuntimeContext {
      */
     public void setMethodAndMEP(QName qname, MessageInfo mi) {
         if (model != null) {
-            mi.setMethod((((AbstractRuntimeModelImpl)model).getDispatchMethod(qname)));
+            mi.setMethod((((AbstractSEIModelImpl)model).getDispatchMethod(qname)));
 
             // if null, default MEP is ok
             if (qname != null && model.getJavaMethod(qname) != null) {
@@ -97,7 +97,7 @@ public class RuntimeContext {
      * @return the decoder Info associated with operation named name
      */
     public Object getDecoderInfo(QName name) {
-        return ((AbstractRuntimeModelImpl)model).getDecoderInfo(name);
+        return ((AbstractSEIModelImpl)model).getDecoderInfo(name);
     }
 
     public BridgeContext getBridgeContext() {
@@ -112,7 +112,7 @@ public class RuntimeContext {
         this.handlerContext = handlerContext;
     }
 
-    private RuntimeModel model;
+    private SEIModel model;
     private HandlerContext handlerContext;
     private RuntimeEndpointInfo endpointInfo;
 }

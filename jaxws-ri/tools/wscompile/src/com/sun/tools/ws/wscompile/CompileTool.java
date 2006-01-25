@@ -49,7 +49,7 @@ import com.sun.xml.ws.util.VersionUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
@@ -585,7 +585,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             rtModeler.setClassLoader(classLoader);
             if (portName != null)
                 rtModeler.setPortName(portName);
-            RuntimeModel rtModel = rtModeler.buildRuntimeModel();
+            SEIModel rtModel = rtModeler.buildRuntimeModel();
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new com.sun.xml.ws.wsdl.writer.WSDLOutputResolver() {
                         public Result getWSDLOutput(String suggestedFilename) {

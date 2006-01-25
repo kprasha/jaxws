@@ -32,14 +32,14 @@ import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.model.SOAPRuntimeModel;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.util.StringUtils;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.RuntimeModel;
+import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.xml.ws.Holder;
 import java.lang.reflect.Field;
@@ -108,7 +108,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
      */
     public Object toInternalMessage(MessageInfo mi) {
         RuntimeContext rtContext = MessageInfoUtil.getRuntimeContext(mi);
-        RuntimeModel model = rtContext.getModel();
+        SEIModel model = rtContext.getModel();
         JavaMethod jm = model.getJavaMethod(mi.getMethod());
         Object[] data = mi.getData();
         Object result = mi.getResponse();
@@ -130,17 +130,17 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
                 JAXBBridgeInfo di = new JAXBBridgeInfo(model.getBridge(ce.getDetailType()), detail);
 
                 if (bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING)) {
-                    SOAPRuntimeModel.createFaultInBody(result, null, di, im);
+                    SOAPSEIModel.createFaultInBody(result, null, di, im);
                 } else if (bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
-                    SOAPRuntimeModel.createSOAP12FaultInBody(result, null, null, di, im);
+                    SOAPSEIModel.createSOAP12FaultInBody(result, null, null, di, im);
                 }
 
                 return im;
             case MessageStruct.UNCHECKED_EXCEPTION_RESPONSE:
                 if (bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING))
-                    SOAPRuntimeModel.createFaultInBody(result, getActor(), null, im);
+                    SOAPSEIModel.createFaultInBody(result, getActor(), null, im);
                 else if (bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING))
-                    SOAPRuntimeModel.createSOAP12FaultInBody(result, null, null, null, im);
+                    SOAPSEIModel.createSOAP12FaultInBody(result, null, null, null, im);
                 return im;
         }
         

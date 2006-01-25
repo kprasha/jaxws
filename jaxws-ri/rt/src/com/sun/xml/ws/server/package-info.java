@@ -117,7 +117,7 @@ inactive(E);
  * method. This method first creates a {@link com.sun.pept.ept.MessageInfo MessageInfo}
  * used to gather inforrmation about the message to be received. A
  * {@link com.sun.xml.ws.server.RuntimeContext RuntimeContext}
- * is then created with the MessageInfo and the {@link com.sun.xml.ws.api.model.RuntimeModel RuntimeModel}
+ * is then created with the MessageInfo and the {@link com.sun.xml.ws.api.model.SEIModel RuntimeModel}
  * retrieved from the RuntimeEndpointInfo. The RuntimeContext is then
  * stored in the MessageInfo. The {@link com.sun.pept.ept.EPTFactory EPTFactory}
  * is retrieved from the {@link com.sun.xml.ws.server.EPTFactoryFactoryBase EPTFactoryFactoryBase}

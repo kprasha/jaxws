@@ -53,7 +53,7 @@ import java.util.Set;
  *
  * @author Vivek Pandey
  */
-public class SOAPRuntimeModel extends AbstractRuntimeModelImpl {
+public class SOAPSEIModel extends AbstractSEIModelImpl {
 
     protected void createDecoderInfo() {
         for (JavaMethod m : getJavaMethods()) {
