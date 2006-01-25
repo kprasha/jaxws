@@ -79,7 +79,7 @@ public class SAAJMessage extends Message {
         properties = new MessageProperties();
 
         this.sm = sm;
-      
+
         try {
             Node body = sm.getSOAPBody();
             payload = body.getFirstChild();
@@ -307,8 +307,10 @@ public class SAAJMessage extends Message {
             SOAPBody sb = sm.getSOAPPart().getEnvelope().getBody();
             SOAPMessage msg = SOAPVersion.fromNsUri(sb.getNamespaceURI()).saajFactory.createMessage();
             SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
-            Node n = newBody.getOwnerDocument().importNode(payload, true);
-            newBody.appendChild(n);
+            if(payload != null){
+                Node n = newBody.getOwnerDocument().importNode(payload, true);
+                newBody.appendChild(n);
+            }
             return new SAAJMessage(getHeaders(), getAttachments(), msg);
         } catch (SOAPException e) {
             throw new WebServiceException(e);

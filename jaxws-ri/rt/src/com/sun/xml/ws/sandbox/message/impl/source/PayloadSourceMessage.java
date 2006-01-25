@@ -44,6 +44,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 
 /**
  * Payloadsource message that can be constructed for the StreamSource, SAXSource and DOMSource.
@@ -61,6 +62,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
 
     private final SOAPVersion soapVersion;
     private Message streamMessage;
+    private byte[] payloadbytes;
 
     public PayloadSourceMessage(HeaderList headers, Source src, SOAPVersion soapVersion) {
         this.headers = headers;
@@ -69,6 +71,12 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         sourceUtils = new SourceUtils(src);
         if(src instanceof StreamSource){
             StreamSource streamSource = (StreamSource)src;
+            try {
+                payloadbytes = ASCIIUtility.getBytes(streamSource.getInputStream());
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            }
+            streamSource.setInputStream(new ByteArrayInputStream(payloadbytes));
             XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
             //move the cursor to the payload element
             XMLStreamReaderUtil.next(reader);
@@ -253,14 +261,12 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         Message msg = null;
         if(sourceUtils.isStreamSource()){
             StreamSource ss = (StreamSource)src;
-            try {
-                byte[] bytes = ASCIIUtility.getBytes(ss.getInputStream());
-                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-                StreamSource newSource = new StreamSource(bis, src.getSystemId());
-                newSource.setReader(ss.getReader());
-            } catch (IOException e) {
-                throw new WebServiceException(e);
-            }
+            //byte[] bytes = ASCIIUtility.getBytes(ss.getInputStream());
+            System.out.println("MESSAGE: " + new String(payloadbytes) + "===END");
+            ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
+            StreamSource newSource = new StreamSource(bis, src.getSystemId());
+            newSource.setReader(ss.getReader());
+            return new PayloadSourceMessage(headers, newSource, soapVersion);
         }else if(sourceUtils.isSaxSource()){
             SAXSource saxSrc = (SAXSource)src;
             InputSource is = saxSrc.getInputSource();
