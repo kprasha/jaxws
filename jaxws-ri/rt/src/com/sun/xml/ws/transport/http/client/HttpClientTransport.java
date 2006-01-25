@@ -406,13 +406,8 @@ public class HttpClientTransport extends WSConnectionImpl {
     }
 
     protected HttpURLConnection createHttpConnection(String endpoint,
-//<<<<<<< HttpClientTransport.java
                                                      MessageProperties context)
             throws IOException {
-//=======
-//                                                     Map<String, Object> context)
-//        throws IOException {
-//>>>>>>> 1.27
 
         boolean verification = false;
         // does the client want client hostname verification by the service
