@@ -108,11 +108,19 @@ public abstract class StreamHeader implements Header {
 
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         // TODO: How can the unmarshaller process this as a fragment?
-        return (T)unmarshaller.unmarshal(_mark.processUsingXMLStreamReader());
+        try {
+            return (T)unmarshaller.unmarshal(_mark.processUsingXMLStreamReader());
+        } catch (XMLStreamException e) {
+            throw new JAXBException(e);
+        }
     }
 
     public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return bridge.unmarshal(context,_mark.processUsingXMLStreamReader());
+        try {
+            return bridge.unmarshal(context,_mark.processUsingXMLStreamReader());
+        } catch (XMLStreamException e) {
+            throw new JAXBException(e);
+        }
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
@@ -145,7 +153,11 @@ public abstract class StreamHeader implements Header {
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        _mark.processUsingSAXContentHandler(contentHandler);
+        try {
+            _mark.processUsingSAXContentHandler(contentHandler);
+        } catch (XMLStreamBufferException e) {
+            throw new SAXException(e);
+        }
     }
 
     protected abstract void processHeaderAttributes(XMLStreamReader reader);
