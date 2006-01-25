@@ -22,29 +22,29 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
-import com.sun.xml.ws.api.model.wsdl.PortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 
 import javax.xml.namespace.QName;
 import java.util.Hashtable;
 import java.util.Map;
 
 /**
- * Implementation of {@link BoundPortType}
+ * Implementation of {@link WSDLBoundPortType}
  *
  * @author Vivek Pandey
  */
-public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements BoundPortType {
+public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implements WSDLBoundPortType {
     private final QName name;
     private final QName portTypeName;
-    private PortType portType;
+    private WSDLPortType portType;
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private final Map<QName,BoundOperationImpl> bindingOperations = new Hashtable<QName,BoundOperationImpl>();
+    private final Map<QName,WSDLBoundOperationImpl> bindingOperations = new Hashtable<QName,WSDLBoundOperationImpl>();
 
-    public BoundPortTypeImpl(QName name, QName portTypeName) {
+    public WSDLBoundPortTypeImpl(QName name, QName portTypeName) {
         this.name = name;
         this.portTypeName = portTypeName;
     }
@@ -53,18 +53,18 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         return name;
     }
 
-    public BoundOperation get(QName operationName) {
+    public WSDLBoundOperation get(QName operationName) {
         return bindingOperations.get(operationName);
     }
 
     /**
-     * Populates the Map that holds operation name as key and {@link BoundOperation} as the value.
+     * Populates the Map that holds operation name as key and {@link WSDLBoundOperation} as the value.
      *
      * @param opName Must be non-null
      * @param ptOp   Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(QName opName, BoundOperationImpl ptOp) {
+    public void put(QName opName, WSDLBoundOperationImpl ptOp) {
         bindingOperations.put(opName,ptOp);
     }
 
@@ -72,11 +72,11 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         return portTypeName;
     }
 
-    public PortType getPortType() {
+    public WSDLPortType getPortType() {
         return portType;
     }
 
-    public Iterable<BoundOperationImpl> getBindingOperations() {
+    public Iterable<WSDLBoundOperationImpl> getBindingOperations() {
         return bindingOperations.values();
     }
 
@@ -93,7 +93,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
     }
 
     /**
-     * sets whether the {@link BoundPortType} is rpc or lit
+     * sets whether the {@link WSDLBoundPortType} is rpc or lit
      */
     private Style style = Style.DOCUMENT;
     public void setStyle(Style style){
@@ -114,7 +114,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
 
 
     public ParameterBinding getBinding(QName operation, String part, Mode mode) {
-        BoundOperation op = get(operation);
+        WSDLBoundOperation op = get(operation);
         if (op == null) {
             //TODO throw exception
             return null;
@@ -126,7 +126,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
     }
 
     public String getMimeType(QName operation, String part, Mode mode) {
-        BoundOperation op = get(operation);
+        WSDLBoundOperation op = get(operation);
         if (Mode.IN == mode)
             return op.getMimeTypeForInputPart(part);
         else
@@ -143,7 +143,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         }
     }
 
-    public BoundOperation getOperation(QName tag){
+    public WSDLBoundOperation getOperation(QName tag){
         /**
          * If the style is rpc then the tag name should be
          * same as operation name so return the operation that matches the tag name.
@@ -155,7 +155,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
         /**
          * For doclit The tag will be the operation that has the same input part descriptor value
          */
-        for(BoundOperationImpl op:bindingOperations.values()){
+        for(WSDLBoundOperationImpl op:bindingOperations.values()){
             QName name = op.getBodyName();
             if((name != null) && name.equals(tag))
                 return op;
@@ -168,7 +168,7 @@ public final class BoundPortTypeImpl extends AbstractExtensibleImpl implements B
     void freeze(WSDLModelImpl owner) {
         portType = owner.getPortType(portTypeName);
         // TODO: error check for null. that's an error in WSDL that needs to be reported
-        for (BoundOperationImpl op : bindingOperations.values()) {
+        for (WSDLBoundOperationImpl op : bindingOperations.values()) {
             op.freeze(this);
         }
     }

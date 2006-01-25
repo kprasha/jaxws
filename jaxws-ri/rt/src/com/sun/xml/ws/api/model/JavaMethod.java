@@ -1,7 +1,7 @@
 package com.sun.xml.ws.api.model;
 
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.pept.presentation.MEP;
 
 import java.lang.reflect.Method;
@@ -31,12 +31,12 @@ public interface JavaMethod {
     Object getBinding();
 
     /**
-     * The {@link BoundOperation} that this method represents.
+     * The {@link WSDLBoundOperation} that this method represents.
      *
      * @return
      *      always non-null.
      */
-    BoundOperation getOperation();
+    WSDLBoundOperation getOperation();
 
     /**
      * Request parameters can be {@link com.sun.xml.ws.api.model.Mode#IN} or

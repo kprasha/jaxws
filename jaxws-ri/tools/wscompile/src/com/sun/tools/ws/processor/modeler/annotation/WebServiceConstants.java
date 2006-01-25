@@ -20,7 +20,6 @@
 package com.sun.tools.ws.processor.modeler.annotation;
 
 
-import javax.xml.ws.Holder;
 /**
  *
  * @author  dkohlert
@@ -49,7 +48,7 @@ public interface WebServiceConstants { //extends RmiConstants {
     public static final char SIGC_UNDERSCORE  = '_';
     
     public static final String DOT = ".";    
-    public static final String PORT = "Port";
+    public static final String PORT = "WSDLPort";
     public static final String BINDING = "Binding";
     public static final String RESPONSE = "Response";
     

@@ -22,22 +22,20 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
-import com.sun.xml.ws.api.model.wsdl.Part;
-import com.sun.xml.ws.api.model.wsdl.Operation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPart;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashSet;
 
 /**
- * Implementation of {@link BoundOperation}
+ * Implementation of {@link WSDLBoundOperation}
  *
  * @author Vivek Pandey
  */
-public final class BoundOperationImpl extends AbstractExtensibleImpl implements BoundOperation {
+public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl implements WSDLBoundOperation {
     private final QName name;
 
     // map of wsdl:part to the binding
@@ -52,22 +50,22 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
     private Boolean emptyInputBody;
     private Boolean emptyOutputBody;
 
-    private final Map<String, Part> inParts;
-    private final Map<String, Part> outParts;
-    private Operation operation;
+    private final Map<String, WSDLPart> inParts;
+    private final Map<String, WSDLPart> outParts;
+    private WSDLOperation operation;
 
     /**
      *
      * @param name wsdl:operation name qualified value
      */
-    public BoundOperationImpl(QName name) {
+    public WSDLBoundOperationImpl(QName name) {
         this.name = name;
         inputParts = new HashMap<String, ParameterBinding>();
         outputParts = new HashMap<String, ParameterBinding>();
         inputMimeTypes = new HashMap<String, String>();
         outputMimeTypes = new HashMap<String, String>();
-        inParts = new HashMap<String, Part>();
-        outParts = new HashMap<String, Part>();
+        inParts = new HashMap<String, WSDLPart>();
+        outParts = new HashMap<String, WSDLPart>();
     }
 
     public QName getName(){
@@ -78,7 +76,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         return name.getLocalPart();
     }
 
-    public Part getPart(String partName, Mode mode){
+    public WSDLPart getPart(String partName, Mode mode){
         if(mode.equals(Mode.IN)){
             return inParts.get(partName);
         }else if(mode.equals(Mode.OUT)){
@@ -87,7 +85,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         return null;
     }
 
-    public void addPart(Part part, Mode mode){
+    public void addPart(WSDLPart part, Mode mode){
         if(mode.equals(Mode.IN))
             inParts.put(part.getName(), part);
         else if(mode.equals(Mode.OUT))
@@ -155,7 +153,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
     /**
      * TODO
      */
-    public Operation getOperation() {
+    public WSDLOperation getOperation() {
         return operation;
     }
 
@@ -180,7 +178,7 @@ public final class BoundOperationImpl extends AbstractExtensibleImpl implements 
         return null;
     }
 
-    void freeze(BoundPortTypeImpl parent) {
+    void freeze(WSDLBoundPortTypeImpl parent) {
         operation = parent.getPortType().get(name.getLocalPart());
     }
 }

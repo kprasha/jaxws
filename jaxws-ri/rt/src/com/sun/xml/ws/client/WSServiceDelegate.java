@@ -6,7 +6,7 @@ package com.sun.xml.ws.client;
 import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.model.wsdl.Port;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
@@ -19,7 +19,7 @@ import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractRuntimeModelImpl;
-import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
 import org.xml.sax.EntityResolver;
@@ -107,7 +107,7 @@ public class WSServiceDelegate extends WSService {
      * <p>
      * This field is null iff no WSDL is given to {@link Service}.
      */
-    private final com.sun.xml.ws.api.model.wsdl.Service wsdlService;
+    private final com.sun.xml.ws.api.model.wsdl.WSDLService wsdlService;
 
 
     public WSServiceDelegate(ServiceContext scontext) {
@@ -192,7 +192,7 @@ public class WSServiceDelegate extends WSService {
             dispatchPorts.put(portName, new PortInfoBase(endpointAddress,
                 portName, bindingId));
         } else
-            throw new WebServiceException("Port " + portName.toString() + " already exists can not create a port with the same name.");
+            throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
         // need to add port to list for HandlerRegistry
         addPort(portName);
     }
@@ -209,7 +209,7 @@ public class WSServiceDelegate extends WSService {
      * Creates a new pipeline for the given port name.
      */
     private Pipe createPipeline(QName portName, BindingImpl binding) {
-        Port port = null;
+        WSDLPort port = null;
         String bindingId = binding.getBindingId();
 
         if(wsdlService !=null) {
@@ -271,7 +271,7 @@ public class WSServiceDelegate extends WSService {
 
         if (wscontext != null) {
             QName serviceName = serviceContext.getServiceName();
-            for (Port port : wscontext.getPorts(serviceName) ) {
+            for (WSDLPort port : wscontext.getPorts(serviceName) ) {
                 QName portName = port.getName();
 
                 addPort(portName);
@@ -305,7 +305,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         if (!serviceContext.getWsdlContext().contains(getServiceName(), portName)) {
-            throw new WebServiceException("Port " + portName + "is not found in service " + serviceContext.getServiceName());
+            throw new WebServiceException("WSDLPort " + portName + "is not found in service " + serviceContext.getServiceName());
         }
 
         return buildEndpointIFProxy(portName, portInterface);
@@ -368,7 +368,7 @@ public class WSServiceDelegate extends WSService {
         //apply parameter bindings
         RuntimeModel model = eif.getRuntimeContext().getModel();
         if (portName != null) {
-            BoundPortTypeImpl binding = (BoundPortTypeImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portName);
+            WSDLBoundPortTypeImpl binding = (WSDLBoundPortTypeImpl) serviceContext.getWsdlContext().getWsdlBinding(serviceContext.getServiceName(), portName);
             eif.setBindingID(binding.getBindingId());
             ((AbstractRuntimeModelImpl)model).applyParameterBinding(binding);
 

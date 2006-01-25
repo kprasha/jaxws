@@ -19,62 +19,62 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.Port;
-import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
 import javax.xml.namespace.QName;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Implementation of {@link Service}
+ * Implementation of {@link WSDLService}
  *
  * @author Vivek Pandey
  */
-public final class ServiceImpl extends AbstractExtensibleImpl implements Service {
+public final class WSDLServiceImpl extends AbstractExtensibleImpl implements WSDLService {
     private final QName name;
-    private final Map<QName, PortImpl> ports;
+    private final Map<QName, WSDLPortImpl> ports;
 
-    public ServiceImpl(QName name) {
+    public WSDLServiceImpl(QName name) {
         super();
         this.name = name;
-        ports = new LinkedHashMap<QName,PortImpl>();
+        ports = new LinkedHashMap<QName,WSDLPortImpl>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public Port get(QName portName) {
+    public WSDLPort get(QName portName) {
         return ports.get(portName);
     }
 
-    public Port getFirstPort() {
+    public WSDLPort getFirstPort() {
         if(ports.isEmpty())
             return null;
         else
             return ports.values().iterator().next();
     }
 
-    public Iterable<PortImpl> getPorts(){
+    public Iterable<WSDLPortImpl> getPorts(){
         return ports.values();
     }
 
     /**
-     * Populates the Map that holds port name as key and {@link Port} as the value.
+     * Populates the Map that holds port name as key and {@link WSDLPort} as the value.
      *
      * @param portName Must be non-null
      * @param port     Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(QName portName, PortImpl port) {
+    public void put(QName portName, WSDLPortImpl port) {
         if (portName == null || port == null)
             throw new NullPointerException();
         ports.put(portName, port);
     }
 
     void freeze(WSDLModelImpl root) {
-        for (PortImpl port : ports.values()) {
+        for (WSDLPortImpl port : ports.values()) {
             port.freeze(root);
         }
     }

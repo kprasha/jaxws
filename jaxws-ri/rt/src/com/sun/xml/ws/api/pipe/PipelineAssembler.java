@@ -4,7 +4,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.model.wsdl.Port;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Provider;
@@ -63,7 +63,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(Port wsdlModel, WSService rootOwner);
+    Pipe createClient(WSDLPort wsdlModel, WSService rootOwner);
 
     /**
      * Creates a new pipeline for servers.
@@ -100,5 +100,5 @@ public interface PipelineAssembler {
      *      the terminal pipe is the one that invokes the user application
      *      or {@link Provider}.)
      */
-    Pipe createServer(Port wsdlModel, WSEndpoint owner, Pipe terminal);
+    Pipe createServer(WSDLPort wsdlModel, WSEndpoint owner, Pipe terminal);
 }

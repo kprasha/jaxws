@@ -330,7 +330,7 @@ public abstract class SOAPDecoder implements Decoder {
         BridgeContext bridgeContext = rtCtxt.getBridgeContext();
         decodeDispatchMethod(reader, response, messageInfo);
         if (reader.getEventType() == START_ELEMENT) {
-            QName name = reader.getName(); // Operation name
+            QName name = reader.getName(); // WSDLOperation name
             if (name.getNamespaceURI().equals(getEnvelopeTag().getNamespaceURI()) &&
                 name.getLocalPart().equals(SOAPNamespaceConstants.TAG_FAULT)) {
                 SOAPFaultInfo soapFaultInfo = decodeFault(reader, response, messageInfo);

@@ -27,15 +27,14 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.model.wsdl.PortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
-import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
-import com.sun.xml.ws.model.wsdl.OperationImpl;
-import com.sun.xml.ws.model.wsdl.ServiceImpl;
-import com.sun.xml.ws.model.wsdl.BoundOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.Message;
-import com.sun.xml.ws.model.wsdl.PortImpl;
-import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -77,7 +76,7 @@ public class RuntimeWSDLParser {
 
     /*
      * Fills DocInfo with Document type(WSDL, or schema),
-     * Service Name, Port Type name, targetNamespace for the document.
+     * Service Name, WSDLPort Type name, targetNamespace for the document.
      * 
      * Don't follow imports
      */
@@ -214,7 +213,7 @@ public class RuntimeWSDLParser {
 
     private void parseService(XMLStreamReader reader) {
         String serviceName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-        ServiceImpl service = new ServiceImpl(new QName(targetNamespace, serviceName));
+        WSDLServiceImpl service = new WSDLServiceImpl(new QName(targetNamespace, serviceName));
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
             if(WSDLConstants.QNAME_PORT.equals(name)){
@@ -228,7 +227,7 @@ public class RuntimeWSDLParser {
         wsdlDoc.addService(service);
     }
 
-    private static void parsePort(XMLStreamReader reader, ServiceImpl service) {
+    private static void parsePort(XMLStreamReader reader, WSDLServiceImpl service) {
         String portName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
         String binding = ParserUtil.getMandatoryNonEmptyAttribute(reader, "binding");
         QName bindingName = ParserUtil.getQName(reader, binding);
@@ -243,7 +242,7 @@ public class RuntimeWSDLParser {
             }
         }
         QName portQName = new QName(service.getName().getNamespaceURI(), portName);
-        service.put(portQName, new PortImpl(portQName, bindingName, location));
+        service.put(portQName, new WSDLPortImpl(portQName, bindingName, location));
     }
 
     private void parseBinding(XMLStreamReader reader) {
@@ -255,7 +254,7 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        BoundPortTypeImpl binding = new BoundPortTypeImpl(new QName(targetNamespace, bindingName),
+        WSDLBoundPortTypeImpl binding = new WSDLBoundPortTypeImpl(new QName(targetNamespace, bindingName),
                 ParserUtil.getQName(reader, portTypeName));
         binding.setWsdlDocument(wsdlDoc);
         wsdlDoc.addBinding(binding);
@@ -289,7 +288,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private void parseBindingOperation(XMLStreamReader reader, BoundPortTypeImpl binding) {
+    private void parseBindingOperation(XMLStreamReader reader, WSDLBoundPortTypeImpl binding) {
         String bindingOpName = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
         if(bindingOpName == null){
             //TODO: throw exception?
@@ -299,7 +298,7 @@ public class RuntimeWSDLParser {
         }
 
         QName opName = new QName(binding.getPortTypeName().getNamespaceURI(), bindingOpName);
-        BoundOperationImpl bindingOp = new BoundOperationImpl(opName);
+        WSDLBoundOperationImpl bindingOp = new WSDLBoundOperationImpl(opName);
         binding.put(opName, bindingOp);
 
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
@@ -330,7 +329,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private static void parseInputBinding(XMLStreamReader reader, BoundOperationImpl bindingOp) {
+    private static void parseInputBinding(XMLStreamReader reader, WSDLBoundOperationImpl bindingOp) {
         boolean bodyFound = false;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -349,7 +348,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private static void parseOutputBinding(XMLStreamReader reader, BoundOperationImpl bindingOp) {
+    private static void parseOutputBinding(XMLStreamReader reader, WSDLBoundOperationImpl bindingOp) {
         boolean bodyFound = false;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -467,7 +466,7 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        PortTypeImpl portType = new PortTypeImpl(new QName(targetNamespace, portTypeName));
+        WSDLPortTypeImpl portType = new WSDLPortTypeImpl(new QName(targetNamespace, portTypeName));
         wsdlDoc.addPortType(portType);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -479,7 +478,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private void parsePortTypeOperation(XMLStreamReader reader, PortTypeImpl portType) {
+    private void parsePortTypeOperation(XMLStreamReader reader, WSDLPortTypeImpl portType) {
         String operationName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
         if(operationName == null){
             //TODO: throw exception?
@@ -489,7 +488,7 @@ public class RuntimeWSDLParser {
         }
 
         QName operationQName = new QName(portType.getName().getNamespaceURI(), operationName);
-        OperationImpl operation = new OperationImpl(operationQName);
+        WSDLOperationImpl operation = new WSDLOperationImpl(operationQName);
         String parameterOrder = ParserUtil.getAttribute(reader, "parameterOrder");
         operation.setParameterOrder(parameterOrder);
         portType.put(operationName, operation);
@@ -505,14 +504,14 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private void parsePortTypeOperationInput(XMLStreamReader reader, OperationImpl operation) {
+    private void parsePortTypeOperationInput(XMLStreamReader reader, WSDLOperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.setInputMessage(msgName);
         goToEnd(reader);
     }
 
-    private void parsePortTypeOperationOutput(XMLStreamReader reader, OperationImpl operation) {
+    private void parsePortTypeOperationOutput(XMLStreamReader reader, WSDLOperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.setOutputMessage(msgName);

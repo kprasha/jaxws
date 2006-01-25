@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
@@ -42,9 +41,7 @@ import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.util.MessageInfoUtil;
-import com.sun.xml.ws.util.SOAPUtil;
 import com.sun.xml.ws.server.*;
-import com.sun.xml.ws.streaming.XMLStreamReaderException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.handler.MessageContext;
 
@@ -139,7 +136,7 @@ public class SOAPXMLDecoder extends SOAPDecoder {
 
     @Override
     public void decodeDispatchMethod(XMLStreamReader reader, InternalMessage request, MessageInfo messageInfo) {
-        // Operation's QName. takes care of <body/>
+        // WSDLOperation's QName. takes care of <body/>
         QName name = (reader.getEventType() == XMLStreamConstants.START_ELEMENT) ? reader.getName() : null;
         MessageContext msgCtxt = MessageInfoUtil.getMessageContext(messageInfo);        
         if (msgCtxt != null) {

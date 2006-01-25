@@ -491,7 +491,7 @@ public class WSServletDelegate {
                 out.println("<table width='100%' border='1'>");
                 out.println("<tr>");
                 out.println("<td>");
-                // out.println("Port Name");
+                // out.println("WSDLPort Name");
                 out.println(
                     localizer.localize(
                         messageFactory.getMessage(

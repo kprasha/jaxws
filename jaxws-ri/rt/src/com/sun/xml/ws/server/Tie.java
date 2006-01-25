@@ -90,7 +90,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
     }
 
     /**
-     * Updates MessageContext object with Service, and Port QNames
+     * Updates MessageContext object with Service, and WSDLPort QNames
      */
     private void updateMessageContext( RuntimeEndpointInfo endpoint,
                                        MessageContext ctxt) {

@@ -19,20 +19,17 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
-import com.sun.xml.ws.api.model.wsdl.Port;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 import javax.xml.namespace.QName;
-import java.util.HashSet;
 
 /**
- * Implementation of {@link Port}
+ * Implementation of {@link WSDLPort}
  *
  * @author Vivek Pandey
  */
-public final class PortImpl extends AbstractExtensibleImpl implements Port {
+public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPort {
     private final QName name;
     private final String address;
     private final QName bindingName;
@@ -40,9 +37,9 @@ public final class PortImpl extends AbstractExtensibleImpl implements Port {
     /**
      * To be set after the WSDL parsing is complete.
      */
-    private BoundPortType boundPortType;
+    private WSDLBoundPortType boundPortType;
 
-    public PortImpl(QName name, QName binding, String address) {
+    public WSDLPortImpl(QName name, QName binding, String address) {
         this.name = name;
         this.bindingName = binding;
         this.address = address;
@@ -60,7 +57,7 @@ public final class PortImpl extends AbstractExtensibleImpl implements Port {
         return address;
     }
 
-    public BoundPortType getBinding() {
+    public WSDLBoundPortType getBinding() {
         return boundPortType;
     }
 

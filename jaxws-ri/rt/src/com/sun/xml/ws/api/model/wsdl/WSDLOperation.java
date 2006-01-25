@@ -9,7 +9,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface Operation extends Extensible {
+public interface WSDLOperation extends Extensible {
     /**
      * Gets the name of the wsdl:portType/wsdl:operation@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

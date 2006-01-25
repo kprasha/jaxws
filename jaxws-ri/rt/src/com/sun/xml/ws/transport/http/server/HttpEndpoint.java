@@ -77,7 +77,7 @@ public class HttpEndpoint {
         }
     }
     
-    // If Port Name is in properties, set it on RuntimeEndpointInfo
+    // If WSDLPort Name is in properties, set it on RuntimeEndpointInfo
     private void setPortName() {
         Map<String, Object> properties = endpointInfo.getProperties();
         if (properties != null) {
@@ -138,13 +138,13 @@ public class HttpEndpoint {
         // set Service Name from properties on RuntimeEndpointInfo
         setServiceName();
         
-        // set Port Name from properties on RuntimeEndpointInfo
+        // set WSDLPort Name from properties on RuntimeEndpointInfo
         setPortName();
         
         // Sets the correct Service Name
         endpointInfo.doServiceNameProcessing();
         
-        // Sets the correct Port Name
+        // Sets the correct WSDLPort Name
         endpointInfo.doPortNameProcessing();
         
         // Sets the PortType Name

@@ -19,25 +19,23 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.Operation;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 
 import javax.xml.namespace.QName;
-import java.util.HashSet;
 
 /**
- * Implementaiton of {@link Operation}
+ * Implementaiton of {@link WSDLOperation}
  *
  * @author Vivek Pandey
  */
-public final class OperationImpl extends AbstractExtensibleImpl implements Operation {
+public final class WSDLOperationImpl extends AbstractExtensibleImpl implements WSDLOperation {
     private final QName name;
     private String parameterOrder;
     private QName inputMessage;
     private QName outputMessage;
     private QName faultMessage;
 
-    public OperationImpl(QName name) {
+    public WSDLOperationImpl(QName name) {
         this.name = name;
     }
 

@@ -20,7 +20,7 @@
 package com.sun.xml.ws.transport.http.servlet;
 
 import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -31,7 +31,7 @@ public class ServletDocInfo implements DocInfo {
     private String resource;
     private String queryString;
     private DOC_TYPE docType;
-    private Service service;
+    private WSDLService service;
     private boolean hasPortType;
     private String tns;
 
@@ -80,11 +80,11 @@ public class ServletDocInfo implements DocInfo {
         return tns;
     }
     
-    public void setService(Service service) {
+    public void setService(WSDLService service) {
         this.service = service;
     }
     
-    public Service getService() {
+    public WSDLService getService() {
         return service;
     }
     

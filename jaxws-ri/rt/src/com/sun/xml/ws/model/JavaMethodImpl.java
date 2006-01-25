@@ -30,9 +30,8 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.wsdl.Operation;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 
 import javax.xml.namespace.QName;
@@ -88,8 +87,8 @@ public class JavaMethodImpl implements JavaMethod {
         this.binding = binding;
     }
 
-    public BoundOperation getOperation() {
-        return operation;
+    public WSDLBoundOperation getOperation() {
+        return wsdlOoperation;
     }
 
     public void setOperationName(String name) {
@@ -227,8 +226,8 @@ public class JavaMethodImpl implements JavaMethod {
         return mep.isAsync;
     }
 
-    /*package*/ void freeze(BoundPortType portType) {
-        this.operation = portType.get(new QName(portType.getName().getNamespaceURI(),operationName));
+    /*package*/ void freeze(WSDLBoundPortType portType) {
+        this.wsdlOoperation = portType.get(new QName(portType.getName().getNamespaceURI(),operationName));
         // TODO: error check
     }
 
@@ -243,6 +242,6 @@ public class JavaMethodImpl implements JavaMethod {
     private SOAPBinding binding;
     private MEP mep;
     private String operationName;
-    private BoundOperation operation;
+    private WSDLBoundOperation wsdlOoperation;
 }
 

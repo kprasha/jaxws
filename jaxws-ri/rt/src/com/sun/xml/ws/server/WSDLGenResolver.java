@@ -22,7 +22,7 @@ package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.wsdl.writer.WSDLOutputResolver;
 
 import javax.xml.transform.Result;
@@ -228,11 +228,11 @@ public class WSDLGenResolver implements WSDLOutputResolver {
             return null;
         }
 
-        public void setService(Service service) {
+        public void setService(WSDLService service) {
 
         }
 
-        public Service getService() {
+        public WSDLService getService() {
             return null;
         }
 

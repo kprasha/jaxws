@@ -7,7 +7,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
  *
  * @author Vivek Pandey
  */
-public interface Part {
+public interface WSDLPart {
     /**
      * Gets wsdl:part@name attribute value.
      */
@@ -27,5 +27,5 @@ public interface Part {
     /**
      * Gives the XML Schema descriptor referenced using either wsdl:part@element or wsdl:part@type.
      */
-    public PartDescriptor getDescriptor();
+    public WSDLPartDescriptor getDescriptor();
 }

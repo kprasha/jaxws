@@ -328,6 +328,6 @@ public class JAXWSBinding extends Extension implements Extensible {
     // portType className
     private CustomName className;
 
-    //portType Operation
+    //portType WSDLOperation
     private CustomName methodName;
 }

@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.server;
-import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -66,15 +66,15 @@ public interface DocInfo {
     /*
      * Sets if the endpoint service is defined in this document
      */
-    public void setService(Service service);
+    public void setService(WSDLService service);
     
     /*
      * returns true if endpoint service is present in this document
      */
-    public Service getService();
+    public WSDLService getService();
     
     /*
-     * Sets if the endpoint Port Type is defined in this document
+     * Sets if the endpoint WSDLPort Type is defined in this document
      */
     public void setPortType(boolean portType);
     

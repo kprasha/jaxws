@@ -7,8 +7,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.model.wsdl.Operation;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.pept.presentation.MEP;
 
@@ -38,7 +37,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         this.marshallers = new Pool.Marshaller(model.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());
 
-        Map<BoundOperation,SyncMethodHandler> syncs = new HashMap<BoundOperation, SyncMethodHandler>();
+        Map<WSDLBoundOperation,SyncMethodHandler> syncs = new HashMap<WSDLBoundOperation, SyncMethodHandler>();
 
         // fill in methodHandlers.
         // first fill in sychronized versions
@@ -68,7 +67,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public final SOAPVersion soapVersion;
 
     /**
-     * Port interface that this proxy implements.
+     * WSDLPort interface that this proxy implements.
      */
     private final Class portInterface;
 

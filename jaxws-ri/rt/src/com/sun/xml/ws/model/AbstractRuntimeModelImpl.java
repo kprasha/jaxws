@@ -30,16 +30,16 @@ import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.RuntimeModel;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
-import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.namespace.QName;
@@ -84,7 +84,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * Link {@link RuntimeModel} to {@link WSDLModel}.
      * Merge it with {@link #postProcess()}.
      */
-    void freeze(BoundPortType portType) {
+    void freeze(WSDLBoundPortType portType) {
         for (JavaMethodImpl m : javaMethods) {
             m.freeze(portType);
         }
@@ -260,7 +260,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
 
     /**
      * @param qname
-     * @return the <code>Method</code> for a given Operation <code>qname</code>
+     * @return the <code>Method</code> for a given WSDLOperation <code>qname</code>
      */
     public Method getDispatchMethod(QName qname) {
         //handle the empty body
@@ -356,7 +356,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      * @param wsdlBinding
      * @deprecated To be removed once client side new architecture is implemented
      */
-    public void applyParameterBinding(BoundPortTypeImpl wsdlBinding){
+    public void applyParameterBinding(WSDLBoundPortTypeImpl wsdlBinding){
         if(wsdlBinding == null)
             return;
         if(wsdlBinding.isRpcLit())
@@ -428,10 +428,10 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
      *
      * Returns attachment parameters if/any.
      */
-    private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, BoundPortType boundPortType, Mode mode) {
+    private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, WSDLBoundPortType boundPortType, Mode mode) {
         QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
-        BoundOperation bo = boundPortType.get(opName);
+        WSDLBoundOperation bo = boundPortType.get(opName);
         Map<Integer, ParameterImpl> bodyParams = new HashMap<Integer, ParameterImpl>();
         List<ParameterImpl> unboundParams = new ArrayList<ParameterImpl>();
         List<ParameterImpl> attachParams = new ArrayList<ParameterImpl>();
@@ -454,7 +454,7 @@ public abstract class AbstractRuntimeModelImpl implements RuntimeModel {
                     attachParams.add(param);
                 }else if(paramBinding.isBody()){
                     if(bo != null){
-                        Part p = bo.getPart(param.getPartName(), mode);
+                        WSDLPart p = bo.getPart(param.getPartName(), mode);
                         if(p != null)
                             bodyParams.put(p.getIndex(), param);
                         else

@@ -115,7 +115,7 @@ public interface JAXWSBindingsConstants {
     public static QName CLASS = new QName(NS_JAXWS_BINDINGS, "class");
 
     /*
-     * PortType Operation
+     * PortType WSDLOperation
      *
      * <jaxws:method name="xs:string">?
      *   <jaxws:javadoc>xs:string</jaxws:javadoc>?
@@ -154,7 +154,7 @@ public interface JAXWSBindingsConstants {
      */
 
     /*
-     * BoundOperation
+     * WSDLBoundOperation
      *
      * <jaxws:enableAdditionalSOAPHeaderMapping>
      *  xs:boolean

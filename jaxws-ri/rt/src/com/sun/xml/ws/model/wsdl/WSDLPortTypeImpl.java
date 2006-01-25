@@ -19,49 +19,47 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.PortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
-import com.sun.xml.ws.api.model.wsdl.Operation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 
 import javax.xml.namespace.QName;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Hashtable;
 
 /**
- * Provides implementation of {@link PortType}
+ * Provides implementation of {@link WSDLPortType}
  *
  * @author Vivek Pandey
  */
-public final class PortTypeImpl  extends AbstractExtensibleImpl implements PortType {
+public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements WSDLPortType {
     private QName name;
-    private final Map<String, Operation> portTypeOperations;
+    private final Map<String, WSDLOperation> portTypeOperations;
 
-    public PortTypeImpl(QName name) {
+    public WSDLPortTypeImpl(QName name) {
         super();
         this.name = name;
-        portTypeOperations = new Hashtable<String, Operation>();
+        portTypeOperations = new Hashtable<String, WSDLOperation>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public Operation get(String operationName) {
+    public WSDLOperation get(String operationName) {
         return portTypeOperations.get(operationName);
     }
 
-    Iterable<Operation> getOperations() {
+    Iterable<WSDLOperation> getOperations() {
         return portTypeOperations.values();
     }
 
     /**
-     * Populates the Map that holds operation name as key and {@link Operation} as the value.
+     * Populates the Map that holds operation name as key and {@link WSDLOperation} as the value.
      * @param opName Must be non-null
      * @param ptOp  Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(String opName, Operation ptOp){
+    public void put(String opName, WSDLOperation ptOp){
         portTypeOperations.put(opName, ptOp);
     }
 }

@@ -5,14 +5,13 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPBinding;
-import java.util.Iterator;
 
 /**
- * {@link PortType} bound with a specific binding.
+ * {@link WSDLPortType} bound with a specific binding.
  *
  * @author Vivek Pandey
  */
-public interface BoundPortType extends Extensible {
+public interface WSDLBoundPortType extends Extensible {
     /**
      * Gets the name of the wsdl:binding@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
@@ -20,27 +19,27 @@ public interface BoundPortType extends Extensible {
     QName getName();
 
     /**
-     * Gets the {@link BoundOperation} for a given operation name
+     * Gets the {@link WSDLBoundOperation} for a given operation name
      *
      * @param operationName non-null operationName
-     * @return null if a {@link BoundOperation} is not found
+     * @return null if a {@link WSDLBoundOperation} is not found
      */
-    public BoundOperation get(QName operationName);
+    public WSDLBoundOperation get(QName operationName);
 
     /**
-     * Gets the wsdl:binding@type value, same as {@link PortType#getName()}
+     * Gets the wsdl:binding@type value, same as {@link WSDLPortType#getName()}
      */
     QName getPortTypeName();
 
     /**
-     * Gets the {@link PortType} associated with the wsdl:binding
+     * Gets the {@link WSDLPortType} associated with the wsdl:binding
      */
-    PortType getPortType();
+    WSDLPortType getPortType();
 
     /**
-     * Gets the {@link BoundOperation}s
+     * Gets the {@link WSDLBoundOperation}s
      */
-    Iterable<? extends BoundOperation> getBindingOperations();
+    Iterable<? extends WSDLBoundOperation> getBindingOperations();
 
     /**
      * Returns {@link SOAPBinding#SOAP11HTTP_BINDING} or {@link SOAPBinding#SOAP12HTTP_BINDING}. This

@@ -24,7 +24,7 @@ package com.sun.tools.ws.processor.model;
 /**
  * @author Vivek Pandey
  *
- * Async Operation type
+ * Async WSDLOperation type
  */
 public final class AsyncOperationType {
 

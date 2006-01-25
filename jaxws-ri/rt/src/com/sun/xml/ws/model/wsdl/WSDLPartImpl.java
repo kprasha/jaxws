@@ -20,15 +20,15 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.Part;
-import com.sun.xml.ws.api.model.wsdl.PartDescriptor;
+import com.sun.xml.ws.api.model.wsdl.WSDLPart;
+import com.sun.xml.ws.api.model.wsdl.WSDLPartDescriptor;
 
 /**
- * Implementation of {@link Part}
+ * Implementation of {@link WSDLPart}
  *
  * @author Vivek Pandey
  */
-public final class PartImpl implements Part {
+public final class WSDLPartImpl implements WSDLPart {
     private final String name;
     private final ParameterBinding binding;
     private final int index;
@@ -40,9 +40,9 @@ public final class PartImpl implements Part {
      * @param name
      * @param binding
      * @param index
-     * @see {@link BoundPortTypeImpl#finalizeRpcLitBinding()}
+     * @see {@link WSDLBoundPortTypeImpl#finalizeRpcLitBinding()}
      */
-    public PartImpl(String name, ParameterBinding binding, int index) {
+    public WSDLPartImpl(String name, ParameterBinding binding, int index) {
         this.name = name;
         this.binding = binding;
         this.index = index;
@@ -61,7 +61,7 @@ public final class PartImpl implements Part {
     }
 
     //TODO
-    public PartDescriptor getDescriptor() {
+    public WSDLPartDescriptor getDescriptor() {
         throw new UnsupportedOperationException();
     }
 }

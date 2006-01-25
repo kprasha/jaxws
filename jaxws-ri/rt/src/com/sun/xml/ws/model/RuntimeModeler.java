@@ -26,10 +26,10 @@ import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.api.model.wsdl.BoundOperation;
-import com.sun.xml.ws.api.model.wsdl.Part;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.wsdl.BoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.jws.Oneway;
@@ -76,7 +76,7 @@ public class RuntimeModeler {
     private boolean usesWebMethod = false;
     private ClassLoader classLoader = null;
     private Object implementor;
-    private BoundPortTypeImpl binding;
+    private WSDLBoundPortTypeImpl binding;
     private QName serviceName;
     private QName portName;
     private Map<Class, Boolean> classUsesWebMethod = new HashMap<Class, Boolean>();
@@ -93,7 +93,7 @@ public class RuntimeModeler {
     public static final String RETURN               = "return";
     public static final String BEAN                 = "Bean";
     public static final String SERVICE              = "Service";
-    public static final String PORT                 = "Port";
+    public static final String PORT                 = "WSDLPort";
     public static final Class HOLDER_CLASS = Holder.class;
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
     public static final Class RPC_LIT_PAYLOAD_CLASS = com.sun.xml.ws.encoding.jaxb.RpcLitPayload.class;
@@ -118,7 +118,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class sei, QName serviceName, BoundPortTypeImpl binding){
+    public RuntimeModeler(Class sei, QName serviceName, WSDLBoundPortTypeImpl binding){
         this.portClass = sei;
         this.serviceName = serviceName;
         this.bindingId = binding.getBindingId();
@@ -150,7 +150,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BoundPortTypeImpl binding) {
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLBoundPortTypeImpl binding) {
         this(portClass, serviceName, binding);
         this.implementor = implementor;
     }
@@ -797,7 +797,7 @@ public class RuntimeModeler {
                 ParameterBinding rb = getBinding(binding, operationName, resultPartName, false, Mode.OUT);
                 returnParameter.setBinding(rb);
                 if(rb.isBody() || rb.isUnbound()){
-                    Part p = getPart(new QName(targetNamespace,operationName), resultPartName, Mode.OUT);
+                    WSDLPart p = getPart(new QName(targetNamespace,operationName), resultPartName, Mode.OUT);
                     if(p == null)
                         resRpcParams.put(resRpcParams.size(), returnParameter);
                     else
@@ -889,7 +889,7 @@ public class RuntimeModeler {
             }
             if(param.getInBinding().isBody()){
                 if(!param.isOUT()){
-                    Part p = getPart(new QName(targetNamespace,operationName), partName, Mode.IN);
+                    WSDLPart p = getPart(new QName(targetNamespace,operationName), partName, Mode.IN);
                     if(p == null)
                         reqRpcParams.put(reqRpcParams.size(), param);
                     else
@@ -902,7 +902,7 @@ public class RuntimeModeler {
                             throw new RuntimeModelerException("runtime.modeler.oneway.operation.no.out.parameters",
                                     new Object[] {portClass.getCanonicalName(), methodName});
                     }
-                    Part p = getPart(new QName(targetNamespace,operationName), partName, Mode.OUT);
+                    WSDLPart p = getPart(new QName(targetNamespace,operationName), partName, Mode.OUT);
                     if(p == null)
                         resRpcParams.put(resRpcParams.size(), param);
                     else
@@ -1287,7 +1287,7 @@ public class RuntimeModeler {
         return null;
     }
 
-    private ParameterBinding getBinding(com.sun.xml.ws.api.model.wsdl.BoundPortType boundPortType, String operation, String part, boolean isHeader, Mode mode){
+    private ParameterBinding getBinding(com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType boundPortType, String operation, String part, boolean isHeader, Mode mode){
         if(boundPortType == null){
             if(isHeader)
                 return ParameterBinding.HEADER;
@@ -1298,9 +1298,9 @@ public class RuntimeModeler {
         return boundPortType.getBinding(opName, part, mode);
     }
 
-    private Part getPart(QName opName, String partName, Mode mode){
+    private WSDLPart getPart(QName opName, String partName, Mode mode){
         if(binding != null){
-            BoundOperation bo = binding.get(opName);
+            WSDLBoundOperation bo = binding.get(opName);
             if(bo != null)
                 return bo.getPart(partName, mode);
         }

@@ -19,9 +19,9 @@
  */
 package com.sun.xml.ws.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.BoundPortType;
-import com.sun.xml.ws.api.model.wsdl.Port;
-import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
@@ -92,10 +92,10 @@ public class WSDLContext {
     public String getEndpoint(QName serviceName) {
         if (serviceName == null)
             throw new WebServiceException("Service unknown, can not identify ports for an unknown Service.");
-        Service service = wsdlDoc.getService(serviceName);
+        WSDLService service = wsdlDoc.getService(serviceName);
         String endpoint = null;
         if (service != null) {
-            Port port = service.getFirstPort();
+            WSDLPort port = service.getFirstPort();
             if (port!=null) {
                 endpoint = port.getAddress();
             }
@@ -111,9 +111,9 @@ public class WSDLContext {
     }
 
     public String getBindingID(QName serviceName, QName portName) {
-        Service s = getWSDLModel().getService(serviceName);
+        WSDLService s = getWSDLModel().getService(serviceName);
         if(s==null)     return null;
-        Port port = s.get(portName);
+        WSDLPort port = s.get(portName);
         if(port==null)     return null;
         return port.getBinding().getBindingId();
     }
@@ -126,8 +126,8 @@ public class WSDLContext {
         targetNamespace = tns;
     }
 
-    public Iterable<? extends Port> getPorts(QName serviceName){
-        Service service = wsdlDoc.getService(serviceName);
+    public Iterable<? extends WSDLPort> getPorts(QName serviceName){
+        WSDLService service = wsdlDoc.getService(serviceName);
         if (service != null) {
             return service.getPorts();
         } else {
@@ -137,7 +137,7 @@ public class WSDLContext {
 
 
     public boolean contains(QName serviceName, QName portName) {
-        Service service = wsdlDoc.getService(serviceName);
+        WSDLService service = wsdlDoc.getService(serviceName);
         if (service != null) {
             return service.get(portName)!=null;
         }
@@ -150,18 +150,18 @@ public class WSDLContext {
 
     public Set<QName> getAllServiceNames() {
         return wsdlDoc.getServices().keySet();
-    }    
+    }
 
-    public BoundPortType getWsdlBinding(QName service, QName port) {
+    public WSDLBoundPortType getWsdlBinding(QName service, QName port) {
         if (wsdlDoc == null)
             return null;
         return wsdlDoc.getBinding(service, port);
     }
 
     public String getEndpoint(QName serviceName, QName portQName) {
-        Service service = wsdlDoc.getService(serviceName);
+        WSDLService service = wsdlDoc.getService(serviceName);
         if (service != null) {
-            Port p = service.get(portQName);
+            WSDLPort p = service.get(portQName);
             if (p != null)
                 return p.getAddress();
             else

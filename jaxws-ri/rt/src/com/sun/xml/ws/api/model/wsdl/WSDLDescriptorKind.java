@@ -6,7 +6,7 @@ package com.sun.xml.ws.api.model.wsdl;
  *
  * @author Vivek Pandey
  */
-public enum DescriptorKind {
+public enum WSDLDescriptorKind {
     /**
      * wsdl:part is defined using element attribute.
      *
@@ -27,7 +27,7 @@ public enum DescriptorKind {
      */
     TYPE(1);
 
-    DescriptorKind(int value) {
+    WSDLDescriptorKind(int value) {
         this.value = value;
     }
 

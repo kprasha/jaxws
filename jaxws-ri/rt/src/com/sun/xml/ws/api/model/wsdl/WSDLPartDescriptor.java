@@ -7,7 +7,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface PartDescriptor {
+public interface WSDLPartDescriptor {
     /**
      * Gives Qualified name of the XML Schema element or type
      */
@@ -16,6 +16,6 @@ public interface PartDescriptor {
     /**
      * Gives whether wsdl:part references a schema type or a global element.
      */
-    public DescriptorKind type();
+    public WSDLDescriptorKind type();
 
 }

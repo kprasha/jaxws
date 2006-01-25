@@ -298,7 +298,7 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     /* (non-Javadoc)
-     * @see WSDLModelerBase#processPort(Port, Service, WSDLDocument)
+     * @see WSDLModelerBase#processPort(WSDLPort, Service, WSDLDocument)
      */
     protected boolean processPort(com.sun.tools.ws.wsdl.document.Port wsdlPort,
             Service service, WSDLDocument document) {
@@ -2373,7 +2373,7 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     /* (non-Javadoc)
-     * @see WSDLModelerBase#createJavaMethodForOperation(Port, Operation, JavaInterface, Set, Set)
+     * @see WSDLModelerBase#createJavaMethodForOperation(WSDLPort, WSDLOperation, JavaInterface, Set, Set)
      */
     protected void createJavaMethodForOperation(Port port, Operation operation, JavaInterface intf) {
         if((operation instanceof AsyncOperation)){

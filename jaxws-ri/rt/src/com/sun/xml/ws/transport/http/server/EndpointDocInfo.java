@@ -20,9 +20,9 @@
 package com.sun.xml.ws.transport.http.server;
 
 import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.model.wsdl.ServiceImpl;
+import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.api.model.wsdl.Service;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -34,7 +34,7 @@ public class EndpointDocInfo implements DocInfo {
     private ByteArrayBuffer buf;
     private DOC_TYPE docType;
     private String tns;
-    private Service service;
+    private WSDLService service;
     private boolean portType;
 
     public EndpointDocInfo(URL resourceUrl, ByteArrayBuffer buf) {
@@ -74,11 +74,11 @@ public class EndpointDocInfo implements DocInfo {
         return tns;
     }
     
-    public void setService(Service service) {
+    public void setService(WSDLService service) {
         this.service = service;
     }
     
-    public Service getService() {
+    public WSDLService getService() {
         return service;
     }
     

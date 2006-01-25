@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author Vivek Pandey
  */
-public interface BoundOperation extends Extensible {
+public interface WSDLBoundOperation extends Extensible {
     /**
      * Short-cut for {@code getOperation().getName()}
      */
@@ -23,13 +23,13 @@ public interface BoundOperation extends Extensible {
     String getLocalName();
 
     /**
-     * Gets {@link com.sun.xml.ws.api.model.wsdl.Part} for the given wsdl:input or wsdl:output part
+     * Gets {@link com.sun.xml.ws.api.model.wsdl.WSDLPart} for the given wsdl:input or wsdl:output part
      *
      * @param partName must be non-null
      * @param mode     must be non-null
      * @return null if no part is found
      */
-    Part getPart(String partName, Mode mode);
+    WSDLPart getPart(String partName, Mode mode);
 
     /**
      * Map of wsdl:input part name and the binding as {@link ParameterBinding}
@@ -92,9 +92,9 @@ public interface BoundOperation extends Extensible {
     String getMimeTypeForOutputPart(String part);
 
     /**
-     * Gets the wsdl:portType/wsdl:operation model - {@link Operation},
+     * Gets the wsdl:portType/wsdl:operation model - {@link WSDLOperation},
      * associated with this binding operation.
-     * @return non-null {@link Operation}
+     * @return non-null {@link WSDLOperation}
      */
-    public Operation getOperation();
+    public WSDLOperation getOperation();
 }
