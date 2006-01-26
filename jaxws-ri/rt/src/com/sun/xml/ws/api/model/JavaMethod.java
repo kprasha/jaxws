@@ -46,7 +46,7 @@ public interface JavaMethod {
      *
      * @return returns unmodifiable list of request parameters
      */
-    List<? extends Parameter> getRequestParameters();
+    List<Parameter> getRequestParameters();
 
     /**
      * Response parameters go in the response message on-the-wire and can be of
@@ -54,7 +54,7 @@ public interface JavaMethod {
      * {@link com.sun.xml.ws.api.model.Mode#INOUT}
      * @return returns unmodifiable list of response parameters
      */
-    List<? extends Parameter> getResponseParameters();
+    List<Parameter> getResponseParameters();
 
     /**
      * @return Returns number of java method parameters - that will be all the
