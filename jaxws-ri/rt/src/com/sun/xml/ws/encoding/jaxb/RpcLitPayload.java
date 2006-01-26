@@ -25,6 +25,10 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
+/**
+ * @deprecated
+ *      no longer in use in the new archtiecture.
+ */
 public class RpcLitPayload {
     private QName operation;
     private List<JAXBBridgeInfo> bridgeParameters;
