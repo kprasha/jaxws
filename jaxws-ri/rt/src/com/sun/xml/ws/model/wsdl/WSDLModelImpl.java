@@ -75,7 +75,7 @@ public final class WSDLModelImpl implements WSDLModel {
         bindings.put(boundPortType.getName(), boundPortType);
     }
 
-    public WSDLBoundPortType getBinding(QName name){
+    public WSDLBoundPortTypeImpl getBinding(QName name){
         return bindings.get(name);
     }
 
@@ -83,7 +83,7 @@ public final class WSDLModelImpl implements WSDLModel {
         services.put(svc.getName(), svc);
     }
 
-    public WSDLService getService(QName name){
+    public WSDLServiceImpl getService(QName name){
         return services.get(name);
     }
 
@@ -177,10 +177,10 @@ public final class WSDLModelImpl implements WSDLModel {
      * @return
      *          WSDLBoundOperation on success otherwise null. throws NPE if any of the parameters null
      */
-    public WSDLBoundPortType getBinding(QName serviceName, QName portName){
-        WSDLService service = services.get(serviceName);
+    public WSDLBoundPortTypeImpl getBinding(QName serviceName, QName portName){
+        WSDLServiceImpl service = services.get(serviceName);
         if(service != null){
-            WSDLPort port = service.get(portName);
+            WSDLPortImpl port = service.get(portName);
             if(port != null)
                 return port.getBinding();
         }

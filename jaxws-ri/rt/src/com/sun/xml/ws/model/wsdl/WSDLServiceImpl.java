@@ -45,7 +45,7 @@ public final class WSDLServiceImpl extends AbstractExtensibleImpl implements WSD
         return name;
     }
 
-    public WSDLPort get(QName portName) {
+    public WSDLPortImpl get(QName portName) {
         return ports.get(portName);
     }
 

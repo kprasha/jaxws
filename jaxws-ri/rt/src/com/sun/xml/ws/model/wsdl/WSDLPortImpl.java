@@ -37,7 +37,7 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     /**
      * To be set after the WSDL parsing is complete.
      */
-    private WSDLBoundPortType boundPortType;
+    private WSDLBoundPortTypeImpl boundPortType;
 
     public WSDLPortImpl(QName name, QName binding, String address) {
         this.name = name;
@@ -57,7 +57,7 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
         return address;
     }
 
-    public WSDLBoundPortType getBinding() {
+    public WSDLBoundPortTypeImpl getBinding() {
         return boundPortType;
     }
 
