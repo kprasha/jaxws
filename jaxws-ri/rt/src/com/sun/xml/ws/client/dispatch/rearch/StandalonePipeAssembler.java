@@ -3,9 +3,10 @@
  */
 package com.sun.xml.ws.client.dispatch.rearch;
 
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
@@ -15,12 +16,15 @@ import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        Pipe p = createTransport(wsdlModel,service);
+        Pipe p = createTransport(wsdlModel,service,binding);
         return p;
     }
 
-    protected Pipe createTransport(WSDLPort wsdlModel, WSService service) {
-        Pipe p = new HttpTransportPipe(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
+    protected Pipe createTransport(WSDLPort wsdlModel, WSService service, WSBinding binding) {
+        Pipe p = new HttpTransportPipe(TestEncoderImpl.INSTANCE,
+            // don't write ugly code like this in the production, but hey, this is a test code
+            binding.getSOAPVersion()== SOAPVersion.SOAP_12
+                ?TestDecoderImpl.INSTANCE12:TestDecoderImpl.INSTANCE11);
         return p;
     }
 
