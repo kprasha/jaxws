@@ -56,6 +56,8 @@ public final class TestDecoderImpl implements Decoder {
             return INSTANCE11;
         case SOAP_12:
             return INSTANCE12;
+        default:
+            throw new AssertionError();
         }
     }
 }
