@@ -24,6 +24,9 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
@@ -66,7 +69,7 @@ public class WSDLContext {
         }
     }
 
-    public WSDLModel getWSDLModel() {
+    public WSDLModelImpl getWSDLModel() {
         return wsdlDoc;
     }
 
@@ -110,14 +113,6 @@ public class WSDLContext {
         return wsdlDoc.getFirstPortName();
     }
 
-    public String getBindingID(QName serviceName, QName portName) {
-        WSDLService s = getWSDLModel().getService(serviceName);
-        if(s==null)     return null;
-        WSDLPort port = s.get(portName);
-        if(port==null)     return null;
-        return port.getBinding().getBindingId();
-    }
-
     public String getTargetNamespace() {
         return targetNamespace;
     }
@@ -126,8 +121,8 @@ public class WSDLContext {
         targetNamespace = tns;
     }
 
-    public Iterable<? extends WSDLPort> getPorts(QName serviceName){
-        WSDLService service = wsdlDoc.getService(serviceName);
+    public Iterable<WSDLPortImpl> getPorts(QName serviceName){
+        WSDLServiceImpl service = wsdlDoc.getService(serviceName);
         if (service != null) {
             return service.getPorts();
         } else {
@@ -150,24 +145,5 @@ public class WSDLContext {
 
     public Set<QName> getAllServiceNames() {
         return wsdlDoc.getServices().keySet();
-    }
-
-    public WSDLBoundPortType getWsdlBinding(QName service, QName port) {
-        if (wsdlDoc == null)
-            return null;
-        return wsdlDoc.getBinding(service, port);
-    }
-
-    public String getEndpoint(QName serviceName, QName portQName) {
-        WSDLService service = wsdlDoc.getService(serviceName);
-        if (service != null) {
-            WSDLPort p = service.get(portQName);
-            if (p != null)
-                return p.getAddress();
-            else
-                throw new WebServiceException("No ports found for service " + serviceName);
-        } else {
-            throw new WebServiceException("Service unknown, can not identify ports for an unknown Service.");
-        }
     }
 }

@@ -19,13 +19,10 @@
  */
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.server.RuntimeContext;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.handler.Handler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -38,7 +35,6 @@ public class EndpointIFContext {
     private QName serviceName;
     private final Class sei;
     private QName portName;
-    private final ArrayList<Handler> handlers = new ArrayList<Handler>();
     private String endpointAddress;
     private String bindingId;
 
@@ -79,10 +75,10 @@ public class EndpointIFContext {
         return endpointAddress;
     }
 
-    public void setPortInfo(QName portQName, String endpoint, String bindingID) {
-        portName = portQName;
-        endpointAddress = endpoint;
-        this.bindingId = bindingID;
+    public void setPortInfo(WSDLPortImpl port) {
+        portName = port.getName();
+        endpointAddress = port.getAddress();
+        bindingId = port.getBinding().getBindingId();
     }
 
     public String getBindingID() {
