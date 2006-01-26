@@ -22,9 +22,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
 
     protected Pipe createTransport(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe p = new HttpTransportPipe(TestEncoderImpl.INSTANCE,
-            // don't write ugly code like this in the production, but hey, this is a test code
-            binding.getSOAPVersion()== SOAPVersion.SOAP_12
-                ?TestDecoderImpl.INSTANCE12:TestDecoderImpl.INSTANCE11);
+            TestDecoderImpl.get(binding.getSOAPVersion()));
         return p;
     }
 

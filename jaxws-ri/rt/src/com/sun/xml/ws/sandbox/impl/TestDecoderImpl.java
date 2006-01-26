@@ -46,4 +46,16 @@ public final class TestDecoderImpl implements Decoder {
 
     public static final Decoder INSTANCE11 = new TestDecoderImpl(SOAPVersion.SOAP_11);
     public static final Decoder INSTANCE12 = new TestDecoderImpl(SOAPVersion.SOAP_12);
+
+    public static Decoder get(SOAPVersion version) {
+        if(version==null)
+            // this decoder is for SOAP, not for XML/HTTP
+            throw new IllegalArgumentException();
+        switch(version) {
+        case SOAP_11:
+            return INSTANCE11;
+        case SOAP_12:
+            return INSTANCE12;
+        }
+    }
 }
