@@ -21,6 +21,8 @@
 package com.sun.xml.ws.transport.http.servlet;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.handler.MessageContextImpl;
+import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
+import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ import javax.xml.ws.http.HTTPBinding;
 public class WSServletDelegate {
     
     private com.sun.xml.ws.server.Tie tie =
-        new com.sun.xml.ws.server.Tie();
+        new com.sun.xml.ws.server.Tie(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
 
     public void init(ServletConfig servletConfig)
         throws ServletException {

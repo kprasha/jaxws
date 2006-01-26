@@ -20,25 +20,48 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.pipe.Acceptor;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
+import com.sun.xml.ws.transport.Headers;
+import java.util.Arrays;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.MessageContext.Scope;
+import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.pept.Delegate;
 import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
-import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
-import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.MessageInfoUtil;
-import com.sun.xml.ws.developer.JAXWSProperties;
-import com.sun.xml.ws.api.model.SEIModel;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Entry point for all server requests.
  *
  * @author WS Development Team
  */
-public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
+public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
+    private final Encoder encoder;
+    private final Decoder decoder;
+    
+    public Tie() {
+        this.encoder = null;
+        this.decoder = null;
+    }
+    
+    public Tie(Encoder encoder, Decoder decoder) {
+        this.encoder = encoder;
+        this.decoder = decoder;
+    }
 
     /**
      * Common entry point for server runtime. <br>
@@ -59,34 +82,66 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
     public void handle(WSConnection connection,
                        com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo endpoint)
     throws Exception {
+      
+        if (encoder != null) {
+            
+            // TODO : only HTTP transport is changed to work with Server Pipe line
+            // Once the server side has EndpointInvokerPipe, everything uses this
+            // codepath
+            
+            System.out.println("****** SERVER SIDE REARCH PATH ******");
+            Map<String, List<String>> headers = connection.getHeaders();
+            String ct = headers.get("Content-Type").get(0);
+            InputStream in = connection.getInput();
+            Message msg = decoder.decode(in, ct);
 
-        // Create MessageInfo. MessageInfo holds all the info for this request
-        Delegate delegate = new DelegateBase();
-        MessageInfo messageInfo = (MessageInfo)delegate.getMessageStruct();
+            Pipe pipe = new ProviderInvokerPipe((RuntimeEndpointInfo)endpoint);
+            msg = pipe.process(msg);
 
-        // Create runtime context, runtime model for dynamic runtime
-        RuntimeEndpointInfo endpointInfo = (RuntimeEndpointInfo)endpoint;
-        SEIModel seiModel = endpointInfo.getRuntimeModel();
-        RuntimeContext runtimeContext = new RuntimeContext((AbstractSEIModelImpl) seiModel);
-        runtimeContext.setRuntimeEndpointInfo(endpointInfo);
+            ct = encoder.getStaticContentType();
+            if (ct == null) {
+                throw new UnsupportedOperationException();
+            } else {
+                //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
+                headers = new Headers();
+                headers.put("Content-Type", Arrays.asList(ct));
+                connection.setHeaders(headers);
+                encoder.encode(msg, connection.getOutput());
+            }
+        } else {
+            
+            // TODO: this will go away. LocalTransport comes here so that client
+            // will become stable
 
-        // Update MessageContext
-        MessageContext msgCtxt =
-            endpointInfo.getWebServiceContext().getMessageContext();
-        updateMessageContext(endpointInfo, msgCtxt);
+            // Create MessageInfo. MessageInfo holds all the info for this request
+            Delegate delegate = new DelegateBase();
+            MessageInfo messageInfo = (MessageInfo)delegate.getMessageStruct();
 
-        // Set runtime context on MessageInfo
-        MessageInfoUtil.setRuntimeContext(messageInfo, runtimeContext);
-        messageInfo.setConnection(connection);
+            // Create runtime context, runtime model for dynamic runtime
+            RuntimeEndpointInfo endpointInfo = (RuntimeEndpointInfo)endpoint;
+            SEIModel seiModel = endpointInfo.getRuntimeModel();
+            RuntimeContext runtimeContext = new RuntimeContext((AbstractSEIModelImpl) seiModel);
+            runtimeContext.setRuntimeEndpointInfo(endpointInfo);
 
-        // Select EPTFactory based on binding, and transport
-        EPTFactory eptFactory = EPTFactoryFactoryBase.getEPTFactory(messageInfo);
-        messageInfo.setEPTFactory(eptFactory);
+            // Update MessageContext
+            MessageContext msgCtxt =
+                endpointInfo.getWebServiceContext().getMessageContext();
+            updateMessageContext(endpointInfo, msgCtxt);
 
-        // MessageDispatcher archestrates the flow
-        MessageDispatcher messageDispatcher =
-            messageInfo.getEPTFactory().getMessageDispatcher(messageInfo);
-        messageDispatcher.receive(messageInfo);
+            // Set runtime context on MessageInfo
+            MessageInfoUtil.setRuntimeContext(messageInfo, runtimeContext);
+            messageInfo.setConnection(connection);
+
+            // Select EPTFactory based on binding, and transport
+            EPTFactory eptFactory = EPTFactoryFactoryBase.getEPTFactory(messageInfo);
+            messageInfo.setEPTFactory(eptFactory);
+
+            // MessageDispatcher archestrates the flow
+            MessageDispatcher messageDispatcher =
+                messageInfo.getEPTFactory().getMessageDispatcher(messageInfo);
+            messageDispatcher.receive(messageInfo);
+        }
+
     }
 
     /**
@@ -101,6 +156,9 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie {
         ctxt.setScope(MessageContext.WSDL_PORT, Scope.APPLICATION);
         ctxt.setScope(JAXWSProperties.MTOM_THRESHOLOD_VALUE, Scope.APPLICATION);
         ctxt.put(JAXWSProperties.MTOM_THRESHOLOD_VALUE, endpoint.getMtomThreshold());
+    }
+
+    public void close() {
     }
 
 }
