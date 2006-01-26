@@ -307,7 +307,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * @param method
      * @return the <code>JavaMethod</code> representing the <code>method</code>
      */
-    public JavaMethod getJavaMethod(Method method) {
+    public JavaMethodImpl getJavaMethod(Method method) {
         return methodToJM.get(method);
     }
 
@@ -316,7 +316,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * @return the <code>JavaMethod</code> associated with the
      * operation named name
      */
-    public JavaMethod getJavaMethod(QName name) {
+    public JavaMethodImpl getJavaMethod(QName name) {
         return nameToJM.get(name);
     }
 
