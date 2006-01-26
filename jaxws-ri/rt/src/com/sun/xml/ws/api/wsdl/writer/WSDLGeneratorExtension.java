@@ -21,24 +21,35 @@ package com.sun.xml.ws.api.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
-import com.sun.xml.ws.wsdl.writer.document.*;
+//import com.sun.xml.ws.wsdl.writer.document.*;
+import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.wsdl.writer.document.Service;
+import com.sun.xml.ws.wsdl.writer.document.Port;
+import com.sun.xml.ws.wsdl.writer.document.PortType;
+import com.sun.xml.ws.wsdl.writer.document.Binding;
+import com.sun.xml.ws.wsdl.writer.document.Operation;
+import com.sun.xml.ws.wsdl.writer.document.BindingOperationType;
+import com.sun.xml.ws.wsdl.writer.document.Message;
+import com.sun.xml.ws.wsdl.writer.document.FaultType;
+
+import java.lang.reflect.Method;
 
 /**
  * This is a callback interface used to extend the WSDLGenerator.  Implementors
  * of this interface can add their own WSDL extensions to the generated WSDL.
- * There are a number of methods that will be invoked allowing the extensions 
+ * There are a number of methods that will be invoked allowing the extensions
  * to be generated on various WSDL elements.
- * 
+ * <p/>
  * The JAX-WS WSDLGenerator uses TXW to serialize the WSDL out to XML.
- * More information about TXW can be located at 
+ * More information about TXW can be located at
  * <a href="http://txw.dev.java.net">http://txw.dev.java.net</a>.
  */
 public interface WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:service</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
+     * <p/>
+     *
      * @param service This is the <code>wsdl:service</code> element that the extension can be added to.
      */
     public void addServiceExtension(Service service);
@@ -46,197 +57,183 @@ public interface WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:port</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
+     * <p/>
+     *
      * @param port This is the wsdl:port element that the extension can be added to.
      */
-    public void addPortExtension(com.sun.xml.ws.wsdl.writer.document.Port port);
-    
+    public void addPortExtension(Port port);
+
     /**
      * This method is invoked so that extensions to a <code>wsdl:portType</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
+     * <p/>
+     *
      * @param portType This is the wsdl:portType element that the extension can be added to.
      */
-    public void addPortTypeExtension(com.sun.xml.ws.wsdl.writer.document.PortType portType);
-    
+    public void addPortTypeExtension(PortType portType);
+
     /**
      * This method is invoked so that extensions to a <code>wsdl:binding</code>
      * element can be generated.
-     * 
+     * <p/>
+     *
      * TODO:  Some other information may need to be passed
+     *
      * @param binding This is the wsdl:binding element that the extension can be added to.
      */
-    public void addBindingExtension(com.sun.xml.ws.wsdl.writer.document.Binding binding);
+    public void addBindingExtension(Binding binding);
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:portType/wsdl:operation</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param operation This is the wsdl:portType/wsdl:operation  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>operation</code> 
+     *
+     * @param operation This is the wsdl:portType/wsdl:operation  element that the
+     *                  extension can be added to.
+     * @param method    Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *                  element on wsdl:operation.
      */
-    public void addOperationExtension(com.sun.xml.ws.wsdl.writer.document.Operation operation, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
-    
+    public void addOperationExtension(Operation operation, Method method);
+
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:binding/wsdl:operation</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param operation This is the wsdl:binding/wsdl:operation  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>operation</code> 
+     * <p/>
+     *
+     * @param operation This is the wsdl:binding/wsdl:operation  element that the
+     *                  extension can be added to.
+     * @param method    {@link java.lang.annotation.Annotation}s from the {@link Method} can be accessed and translated
+     *                  in to WSDL extensibility element on wsdl:operation.
      */
-    public void addBindingOperationExtension(com.sun.xml.ws.wsdl.writer.document.BindingOperationType operation, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
-    
+    public void addBindingOperationExtension(BindingOperationType operation, Method method);
+
     /**
      * This method is invoked so that extensions to an input <code>wsdl:message</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param message This is the input wsdl:message element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod used to generate <code>message</code> 
+     * <p/>
+     *
+     * @param message This is the input wsdl:message element that the
+     *                extension can be added to.
+     * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *                element on wsdl:operation.
      */
-    public void addInputMessageExtension(com.sun.xml.ws.wsdl.writer.document.Message message, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
+    public void addInputMessageExtension(Message message, Method method);
 
     /**
      * This method is invoked so that extensions to an output <code>wsdl:message</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param message This is the output wsdl:message element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod used to generate output <code>message</code> 
+     * <p/>
+     *
+     * @param message This is the output wsdl:message element that the
+     *                extension can be added to.
+     * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *                element on wsdl:operation.
      */
-    public void addOutputMessageExtension(com.sun.xml.ws.wsdl.writer.document.Message message, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
+    public void addOutputMessageExtension(Message message, Method method);
 
-    
+
     /**
-     * This method is invoked so that extensions to a fault <code>wsdl:message</code>
-     * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param message This is the fault wsdl:message element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod that throws the <code>ce</code> 
-     * @param ce This is the CheckedException corresponding to this fault <code>message</code>
-     */
-    public void addFaultMessageExtension(com.sun.xml.ws.wsdl.writer.document.Message message, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod, com.sun.xml.ws.api.model.CheckedException ce);
-    
-    
-    /**
-     * This method is invoked so that extensions to a 
+     * This method is invoked so that extensions to a
      * <code>wsdl:portType/wsdl:operation/wsdl:input</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param input This is the wsdl:portType/wsdl:operation/wsdl:input  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:input</code> 
+     * <p/>
+     *
+     * @param input  This is the wsdl:portType/wsdl:operation/wsdl:input  element that the
+     *               extension can be added to.
+     * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *               element on wsdl:operation.
      */
-    public void addOperationInputExtension(TypedXmlWriter input, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
+    public void addOperationInputExtension(TypedXmlWriter input, Method method);
 
 
     /**
-     * This method is invoked so that extensions to a 
+     * This method is invoked so that extensions to a
      * <code>wsdl:portType/wsdl:operation/wsdl:output</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param output This is the wsdl:portType/wsdl:operation/wsdl:output  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:output</code> 
+     * <p/>
+     *
+     * @param output This is the wsdl:portType/wsdl:operation/wsdl:output  element that the
+     *               extension can be added to.
+     * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *               element on wsdl:operation.
      */
-    public void addOperationOutputExtension(TypedXmlWriter output, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
+    public void addOperationOutputExtension(TypedXmlWriter output, Method method);
 
     /**
-     * This method is invoked so that extensions to a 
-     * <code>wsdl:portType/wsdl:operation/wsdl:fault</code>
-     * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param fault This is the wsdl:portType/wsdl:operation/wsdl:fault  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:fault</code> 
-     * @param ce This is the CheckedException corresponding to the <code>fault</code>
-     */
-    public void addOperationFaultExtension(com.sun.xml.ws.wsdl.writer.document.FaultType fault, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod, com.sun.xml.ws.api.model.CheckedException ce);
-
-
-
-    /**
-     * This method is invoked so that extensions to a 
+     * This method is invoked so that extensions to a
      * <code>wsdl:binding/wsdl:operation/wsdl:input</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param input This is the wsdl:binding/wsdl:operation/wsdl:input  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:input</code> 
+     * <p/>
+     *
+     * @param input  This is the wsdl:binding/wsdl:operation/wsdl:input  element that the
+     *               extension can be added to.
+     * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *               element on wsdl:operation.
      */
-    public void addBindingOperationInputExtension(TypedXmlWriter input, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
+    public void addBindingOperationInputExtension(TypedXmlWriter input, Method method);
 
 
     /**
-     * This method is invoked so that extensions to a 
+     * This method is invoked so that extensions to a
      * <code>wsdl:binding/wsdl:operation/wsdl:output</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param output This is the wsdl:binding/wsdl:operation/wsdl:output  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:output</code> 
+     * <p/>
+     *
+     * @param output This is the wsdl:binding/wsdl:operation/wsdl:output  element that the
+     *               extension can be added to.
+     * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *               element on wsdl:operation.
      */
-    public void addBindingOperationOutputExtension(TypedXmlWriter output, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod);
+    public void addBindingOperationOutputExtension(TypedXmlWriter output, Method method);
 
     /**
-     * This method is invoked so that extensions to a 
+     * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
+     * off checked exception class or detail bean that represents wsdl fault.
+     * <p/>
+     * This method is invoked so that extensions to a
      * <code>wsdl:binding/wsdl:operation/wsdl:fault</code>
      * element can be generated.
-     * 
-     * TODO:  Some other information may need to be passed
-     *        Also, the JavaMethod class will be changed to reflect the unmutable 
-     *        RuntimeModel apis
-     * @param fault This is the wsdl:binding/wsdl:operation/wsdl:fault  element that the 
-     *        extension can be added to.
-     * @param javaMethod This is the JaveMethod represented by <code>wsdl:operation/wsdl:fault</code> 
-     * @param ce This is the CheckedException corresponding to the <code>fault</code>
+     * <p/>
+     *
+     * @param fault  This is the wsdl:binding/wsdl:operation/wsdl:fault  element that the
+     *               extension can be added to.
+     * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *               element on wsdl:operation.
+     * @param ce     This is the CheckedException corresponding to the <code>fault</code>
      */
-    public void addBindingOperationFaultExtension(com.sun.xml.ws.wsdl.writer.document.FaultType fault, 
-            com.sun.xml.ws.api.model.JavaMethod javaMethod, com.sun.xml.ws.api.model.CheckedException ce);
+    public void addBindingOperationFaultExtension(FaultType fault, Method method, CheckedException ce);
+
+    /**
+     * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
+     * off checked exception class or detail bean that represents wsdl fault.
+     * <p/>
+     * This method is invoked so that extensions to a fault <code>wsdl:message</code>
+     * element can be generated.
+     * <p/>
+     *
+     * @param message This is the fault wsdl:message element that the
+     *                extension can be added to.
+     * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *                element on wsdl:operation.
+     * @param ce      This is the CheckedException corresponding to this fault <code>message</code>
+     */
+    public void addFaultMessageExtension(Message message, Method method, CheckedException ce);
+
+    /**
+     * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
+     * off checked exception class or detail bean that represents wsdl fault.
+     * <p/>
+     * This method is invoked so that extensions to a
+     * <code>wsdl:portType/wsdl:operation/wsdl:fault</code>
+     * element can be generated.
+     * <p/>
+     *
+     * @param fault  This is the wsdl:portType/wsdl:operation/wsdl:fault  element that the
+     *               extension can be added to.
+     * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
+     *               element on wsdl:operation.
+     * @param ce     This is the CheckedException corresponding to the <code>fault</code>
+     */
+    public void addOperationFaultExtension(FaultType fault, Method method, CheckedException ce);
+
 }
