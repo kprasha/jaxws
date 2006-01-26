@@ -27,6 +27,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
@@ -507,14 +508,14 @@ public class RuntimeWSDLParser {
     private void parsePortTypeOperationInput(XMLStreamReader reader, WSDLOperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
-        operation.setInputMessage(msgName);
+        operation.setInputMessage(new WSDLMessageImpl(msgName));
         goToEnd(reader);
     }
 
     private void parsePortTypeOperationOutput(XMLStreamReader reader, WSDLOperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
-        operation.setOutputMessage(msgName);
+        operation.setOutputMessage(new WSDLMessageImpl(msgName));
         goToEnd(reader);
     }
 

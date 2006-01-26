@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 
 import javax.xml.namespace.QName;
 
@@ -118,7 +119,7 @@ public final class WSDLModelImpl implements WSDLModel {
             return null;
 
         for(WSDLOperation op: pt.getOperations()){
-            QName msgName = op.getInputMessage();
+            WSDLMessage msgName = op.getInputMessage();
             WSDLMessageImpl msg = messages.get(msgName);
             //TODO
         }
@@ -208,8 +209,9 @@ public final class WSDLModelImpl implements WSDLModel {
         if(pt == null)
             return null;
         for(WSDLOperation op: pt.getOperations()){
-            QName msgName = op.getInputMessage();
+            WSDLMessage msgName = op.getInputMessage();
             WSDLMessageImpl msg = messages.get(msgName);
+            //TODO: implement the rest
         }
         return null;
     }
@@ -224,10 +226,10 @@ public final class WSDLModelImpl implements WSDLModel {
             return;
         for (WSDLBoundOperationImpl bop : boundPortType.getBindingOperations()) {
             WSDLOperation pto = pt.get(bop.getName().getLocalPart());
-            QName inMsgName = pto.getInputMessage();
+            WSDLMessage inMsgName = pto.getInputMessage();
             if(inMsgName == null)
                 continue;
-            WSDLMessageImpl inMsg = messages.get(inMsgName);
+            WSDLMessageImpl inMsg = messages.get(inMsgName.getName());
             int bodyindex = 0;
             if(inMsg != null){
                 for(String name:inMsg){
@@ -238,10 +240,10 @@ public final class WSDLModelImpl implements WSDLModel {
                 }
             }
             bodyindex=0;
-            QName outMsgName = pto.getOutputMessage();
+            WSDLMessage outMsgName = pto.getOutputMessage();
             if(outMsgName == null)
                 continue;
-            WSDLMessageImpl outMsg = messages.get(outMsgName);
+            WSDLMessageImpl outMsg = messages.get(outMsgName.getName());
             if(outMsg!= null){
                 for(String name:outMsg){
                     ParameterBinding pb = bop.getOutputBinding(name);

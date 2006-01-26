@@ -22,14 +22,14 @@ public interface WSDLOperation extends WSDLObject, Extensible {
     String getLocalName();
 
     /**
-     * Gets {@link QName} the wsdl:portType/wsdl:input@message value.
+     * Gets {@link WSDLMessage} the wsdl:portType/wsdl:input@message value.
      */
-    QName getInputMessage();
+    WSDLMessage getInputMessage();
 
     /**
      * Gets {@link QName} the wsdl:portType/wsdl:output@message value.
      */
-    QName getOutputMessage();
+    WSDLMessage getOutputMessage();
 
     /**
      * Gets {@link QName} the wsdl:portType/wsdl:fault@message value.

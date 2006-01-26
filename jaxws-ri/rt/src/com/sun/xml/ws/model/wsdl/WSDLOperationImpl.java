@@ -20,6 +20,7 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 
 import javax.xml.namespace.QName;
 
@@ -31,8 +32,8 @@ import javax.xml.namespace.QName;
 public final class WSDLOperationImpl extends AbstractExtensibleImpl implements WSDLOperation {
     private final QName name;
     private String parameterOrder;
-    private QName inputMessage;
-    private QName outputMessage;
+    private WSDLMessage inputMessage;
+    private WSDLMessage outputMessage;
     private QName faultMessage;
 
     public WSDLOperationImpl(QName name) {
@@ -55,19 +56,19 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         this.parameterOrder = parameterOrder;
     }
 
-    public QName getInputMessage() {
+    public WSDLMessage getInputMessage() {
         return inputMessage;
     }
 
-    public void setInputMessage(QName inputMessage) {
+    public void setInputMessage(WSDLMessage inputMessage) {
         this.inputMessage = inputMessage;
     }
 
-    public QName getOutputMessage() {
+    public WSDLMessage getOutputMessage() {
         return outputMessage;
     }
 
-    public void setOutputMessage(QName outputMessage) {
+    public void setOutputMessage(WSDLMessage outputMessage) {
         this.outputMessage = outputMessage;
     }
 
