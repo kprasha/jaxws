@@ -1,16 +1,18 @@
 package com.sun.xml.ws.client;
 
-import javax.xml.ws.WebServiceClient;
-import javax.xml.ws.WebEndpoint;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.util.JAXWSUtils;
+
 import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebEndpoint;
+import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.net.URL;
-import java.net.MalformedURLException;
 
 /**
  * Represents parsed {@link WebServiceClient} and {@link WebEndpoint}
@@ -30,8 +32,8 @@ final class SCAnnotations {
                 String tns = wsc.targetNamespace();
                 serviceQName = new QName(tns, name);
                 try {
-                    wsdlLocation = new URL(wsc.wsdlLocation());
-                } catch (MalformedURLException e) {
+                    wsdlLocation = JAXWSUtils.getFileOrURL(wsc.wsdlLocation());
+                } catch (IOException e) {
                     // TODO: report a reasonable error message
                     throw new WebServiceException(e);
                 }
