@@ -76,7 +76,7 @@ public class RuntimeModeler {
     private boolean usesWebMethod = false;
     private ClassLoader classLoader = null;
     private Object implementor;
-    private WSDLBoundPortTypeImpl binding;
+    private final WSDLBoundPortTypeImpl binding;
     private QName serviceName;
     private QName portName;
     private Map<Class, Boolean> classUsesWebMethod = new HashMap<Class, Boolean>();
@@ -107,6 +107,7 @@ public class RuntimeModeler {
     public RuntimeModeler(Class portClass, QName serviceName, String bindingId) {
         this.portClass = portClass;
         this.serviceName = serviceName;
+        this.binding = null;
         this.bindingId = bindingId;
     }
 
