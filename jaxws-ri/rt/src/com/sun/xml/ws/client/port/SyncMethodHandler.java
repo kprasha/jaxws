@@ -146,6 +146,8 @@ final class SyncMethodHandler extends MethodHandler {
                 case ATTACHMENT:
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
+                case UNBOUND:
+                    break;
                 default:
                     throw new AssertionError();
                 }
