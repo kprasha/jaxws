@@ -5,12 +5,15 @@ import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
+import com.sun.xml.ws.sandbox.message.impl.source.ProtocolSourceMessage;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
+import javax.xml.transform.Source;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -67,6 +70,38 @@ public abstract class Messages {
     public static Message create(SOAPMessage saaj) {
         return new SAAJMessage(saaj);
     }
+    
+    /**
+     * Creates a {@link Message} using Source as payload.
+     *
+     * @param payload
+     *      Source payload is {@link Message}'s payload
+     *      Must not be null. Once this method is invoked, the created
+     *      {@link Message} will own the {@link Source}, so it shall
+     *      never be touched directly.
+     *
+     * @param soapVersion
+     *      The SOAP version of the message. Must not be null.
+     */
+    public static Message createUsingPayload(Source payload, SOAPVersion ver) {
+        return new PayloadSourceMessage(payload, ver);
+    }
+    
+    /**
+     * Creates a {@link Message} using Source as entire envelope.
+     *
+     * @param envelope
+     *      Source envelope is used to create {@link Message}
+     *      Must not be null. Once this method is invoked, the created
+     *      {@link Message} will own the {@link Source}, so it shall
+     *      never be touched directly.
+     *
+     */
+    public static Message create(Source envelope) {
+        // TODO: Doesn't the ProtocolSourceMessage require SOAPVersion
+        return new ProtocolSourceMessage(envelope);
+    }
+
 
     /**
      * Creates a {@link Message} that doesn't have any payload.
