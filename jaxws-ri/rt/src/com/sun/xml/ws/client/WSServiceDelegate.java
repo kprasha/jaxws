@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.io.IOException;
 
 /**
  * <code>Service</code> objects provide the client view of a Web service.
@@ -151,12 +152,15 @@ public class WSServiceDelegate extends WSService {
             if(wsdlDocumentLocation!=null)
                 wsdlDocumentLocation = serviceCAnnotations.wsdlLocation;
 
+            if(wsdlDocumentLocation!=null)
+                parseWSDL(wsdlDocumentLocation);
+
             for (Class clazz : serviceCAnnotations.classes)
                 addSEI(clazz);
+        } else {
+            if(wsdlDocumentLocation!=null)
+                parseWSDL(wsdlDocumentLocation);
         }
-
-        if(wsdlDocumentLocation!=null)
-            parseWSDL(wsdlDocumentLocation);
     }
 
     /**
@@ -179,9 +183,8 @@ public class WSServiceDelegate extends WSService {
     }
 
     public Executor getExecutor() {
-        if (executor != null)
-        //todo:needs to be decoupled from service at execution
-        {
+        if (executor != null) {
+            //todo:needs to be decoupled from service at execution
             return executor;
         } else
             executor = Executors.newFixedThreadPool(3, new DaemonThreadFactory());
@@ -191,7 +194,6 @@ public class WSServiceDelegate extends WSService {
     public void setExecutor(Executor executor) {
         this.executor = executor;
     }
-
 
     public HandlerResolver getHandlerResolver() {
         return handlerResolver;
@@ -215,9 +217,7 @@ public class WSServiceDelegate extends WSService {
     }
 
 
-    public void addPort(QName portName, String bindingId,
-                        String endpointAddress) throws WebServiceException {
-
+    public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
             ports.put(portName, new PortInfoBase(endpointAddress,
                 portName, bindingId));
@@ -286,14 +286,9 @@ public class WSServiceDelegate extends WSService {
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {
         if (wsdlContext==null) {
-            URL wsdlLocation;
-            try {
-                wsdlLocation = new URL(JAXWSUtils.getFileOrURLName(getWSDLLocation(portInterface)));
-            } catch (MalformedURLException e) {
-                throw new WebServiceException(e);
-            }
-
-            parseWSDL(wsdlLocation);
+            URL wsdlLocation = getWSDLLocation(portInterface);
+            if(wsdlLocation!=null)
+               parseWSDL(wsdlLocation);
         }
 
         if (!seiContext.isEmpty())
@@ -303,7 +298,27 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException("WSDLPort " + portName + "is not found in service " + serviceName);
         }
 
-        return buildEndpointIFProxy(portName, portInterface);
+        EndpointIFContext eif = seiContext.get(portInterface);
+        if (wsdlContext != null) {
+            eif.setServiceName(serviceName);
+            eif.setPortInfo(getPortModel(portName));
+        }
+
+        //apply parameter bindings
+        SEIModel model = eif.getRuntimeContext().getModel();
+        if (portName != null) {
+            WSDLBoundPortTypeImpl binding = getPortModel(portName).getBinding();
+            eif.setBindingID(binding.getBindingId());
+            ((AbstractSEIModelImpl)model).applyParameterBinding(binding);
+        }
+
+        BindingImpl binding = createBinding(portName, eif.getBindingID());
+        PortInterfaceStub pis = new PortInterfaceStub(this, binding, portInterface,model, createPipeline(portName,binding));
+
+        return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
+            new Class[]{
+                portInterface, BindingProvider.class, StubBase.class
+            }, pis));
     }
 
     /**
@@ -344,38 +359,11 @@ public class WSServiceDelegate extends WSService {
      * @return
      *      guaranteed to be non-null.
      */
-    private WSDLPortImpl getPort(QName portName) {
+    private WSDLPortImpl getPortModel(QName portName) {
         WSDLPortImpl port = wsdlService.get(portName);
         if(port==null)
             throw new WebServiceException("No ports found for service " + serviceName);
         return port;
-    }
-
-    private <T> T buildEndpointIFProxy(QName portName, Class<T> portInterface)
-        throws WebServiceException {
-
-        EndpointIFContext eif = seiContext.get(portInterface);
-        if (wsdlContext != null) {
-
-            eif.setServiceName(serviceName);
-            eif.setPortInfo(getPort(portName));
-        }
-
-        //apply parameter bindings
-        SEIModel model = eif.getRuntimeContext().getModel();
-        if (portName != null) {
-            WSDLBoundPortTypeImpl binding = getPort(portName).getBinding();
-            eif.setBindingID(binding.getBindingId());
-            ((AbstractSEIModelImpl)model).applyParameterBinding(binding);
-        }
-
-        BindingImpl binding = createBinding(portName, eif.getBindingID());
-        PortInterfaceStub pis = new PortInterfaceStub(this, binding, portInterface,model, createPipeline(portName,binding));
-
-        return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
-            new Class[]{
-                portInterface, BindingProvider.class, StubBase.class
-            }, pis));
     }
 
     /**
@@ -394,10 +382,8 @@ public class WSServiceDelegate extends WSService {
 
             //toDo:
             QName portName = eifc.getPortName();
-            if (serviceClass != null) {
-                if (portName == null)
-                    portName = getPortName(portInterface);
-            }
+            if (portName == null)
+                portName = guessPortName(portInterface);
 
             if (portName == null) {
                 portName = wsdlContext.getPortName();
@@ -433,8 +419,17 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    private QName getPortName(Class<?> sei) {
-        QName portName = null;
+    /**
+     * Try to obtain the port name of the given SEI by using
+     * {@link WebEndpoint} annotation on {@link #serviceClass}.
+     *
+     * @return
+     *      return null if this method fails to detect the port name.
+     */
+    private QName guessPortName(Class<?> sei) {
+        if (serviceClass == null)
+            return null;
+
         WebServiceClient wsClient = serviceClass.getAnnotation(WebServiceClient.class);
         for (Method method : serviceClass.getMethods()) {
             if (method.getDeclaringClass()!=serviceClass) {
@@ -446,12 +441,11 @@ public class WSServiceDelegate extends WSService {
             }
             if (method.getGenericReturnType()==sei) {
                 if (method.getName().startsWith("get")) {
-                    portName = new QName(wsClient.targetNamespace(), webEndpoint.name());
-                    break;
+                    return new QName(wsClient.targetNamespace(), webEndpoint.name());
                 }
             }
         }
-        return portName;
+        return null;
     }
 
     /**
@@ -460,11 +454,15 @@ public class WSServiceDelegate extends WSService {
      * @return the URL of the location of the WSDL for the sei, or null if none was found.
      */
 //this will change
-    private static String getWSDLLocation(Class<?> sei) {
+    private static URL getWSDLLocation(Class<?> sei) {
         WebService ws = sei.getAnnotation(WebService.class);
         if (ws == null)
             return null;
-        return ws.wsdlLocation();
+        try {
+            return JAXWSUtils.getFileOrURL(ws.wsdlLocation());
+        } catch (IOException e) {
+            throw new WebServiceException(e);
+        }
     }
 
 
