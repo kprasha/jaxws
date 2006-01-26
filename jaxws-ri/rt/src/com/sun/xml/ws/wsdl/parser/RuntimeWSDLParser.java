@@ -33,7 +33,7 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.model.wsdl.Message;
+import com.sun.xml.ws.model.wsdl.WSDLMessageImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -520,7 +520,7 @@ public class RuntimeWSDLParser {
 
     private void parseMessage(XMLStreamReader reader) {
         String msgName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-        Message msg = new Message(new QName(targetNamespace, msgName));
+        WSDLMessageImpl msg = new WSDLMessageImpl(new QName(targetNamespace, msgName));
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
             if (WSDLConstants.QNAME_PART.equals(name)) {

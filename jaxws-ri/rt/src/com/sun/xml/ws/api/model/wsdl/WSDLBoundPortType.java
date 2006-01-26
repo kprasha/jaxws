@@ -11,7 +11,7 @@ import javax.xml.ws.soap.SOAPBinding;
  *
  * @author Vivek Pandey
  */
-public interface WSDLBoundPortType extends Extensible {
+public interface WSDLBoundPortType extends WSDLObject, Extensible {
     /**
      * Gets the name of the wsdl:binding@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

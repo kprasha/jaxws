@@ -9,7 +9,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface WSDLService extends Extensible {
+public interface WSDLService extends WSDLObject, Extensible {
     /**
      * Gets the name of the wsdl:service@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

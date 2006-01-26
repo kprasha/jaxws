@@ -19,22 +19,26 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Provides abstraction for wsdl:message
  * @author Vivek Pandey
  */
-public final class Message extends LinkedHashSet<String>{
+public final class WSDLMessageImpl extends ArrayList<String> implements WSDLMessage {
     private QName name;
 
     /**
      * @param name wsdl:message name attribute value
      */
-    public Message(QName name) {
+    public WSDLMessageImpl(QName name) {
         this.name = name;
     }
 

@@ -10,7 +10,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface WSDLPort extends Extensible {
+public interface WSDLPort extends WSDLObject, Extensible {
     /**
      * Gets wsdl:port@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

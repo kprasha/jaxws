@@ -46,7 +46,7 @@ import java.util.Collections;
  * @author Vivek Pandey
  */
 public final class WSDLModelImpl implements WSDLModel {
-    private final Map<QName, Message> messages = new HashMap<QName, Message>();
+    private final Map<QName, WSDLMessageImpl> messages = new HashMap<QName, WSDLMessageImpl>();
     private final Map<QName, WSDLPortType> portTypes = new HashMap<QName, WSDLPortType>();
     private final Map<QName, WSDLBoundPortTypeImpl> bindings = new HashMap<QName, WSDLBoundPortTypeImpl>();
     private final Map<QName, WSDLServiceImpl> services = new LinkedHashMap<QName, WSDLServiceImpl>();
@@ -54,11 +54,11 @@ public final class WSDLModelImpl implements WSDLModel {
     private final Map<QName,WSDLBoundPortType> unmBindings
         = Collections.<QName,WSDLBoundPortType>unmodifiableMap(bindings);
 
-    public void addMessage(Message msg){
+    public void addMessage(WSDLMessageImpl msg){
         messages.put(msg.getName(), msg);
     }
 
-    public Message getMessage(QName name){
+    public WSDLMessageImpl getMessage(QName name){
         return messages.get(name);
     }
 
@@ -86,7 +86,7 @@ public final class WSDLModelImpl implements WSDLModel {
         return services.get(name);
     }
 
-    public Map<QName, Message> getMessages() {
+    public Map<QName, WSDLMessageImpl> getMessages() {
         return messages;
     }
 
@@ -119,7 +119,7 @@ public final class WSDLModelImpl implements WSDLModel {
 
         for(WSDLOperation op: pt.getOperations()){
             QName msgName = op.getInputMessage();
-            Message msg = messages.get(msgName);
+            WSDLMessageImpl msg = messages.get(msgName);
             //TODO
         }
         return bpt.get(tag);
@@ -209,7 +209,7 @@ public final class WSDLModelImpl implements WSDLModel {
             return null;
         for(WSDLOperation op: pt.getOperations()){
             QName msgName = op.getInputMessage();
-            Message msg = messages.get(msgName);
+            WSDLMessageImpl msg = messages.get(msgName);
         }
         return null;
     }
@@ -227,7 +227,7 @@ public final class WSDLModelImpl implements WSDLModel {
             QName inMsgName = pto.getInputMessage();
             if(inMsgName == null)
                 continue;
-            Message inMsg = messages.get(inMsgName);
+            WSDLMessageImpl inMsg = messages.get(inMsgName);
             int bodyindex = 0;
             if(inMsg != null){
                 for(String name:inMsg){
@@ -241,7 +241,7 @@ public final class WSDLModelImpl implements WSDLModel {
             QName outMsgName = pto.getOutputMessage();
             if(outMsgName == null)
                 continue;
-            Message outMsg = messages.get(outMsgName);
+            WSDLMessageImpl outMsg = messages.get(outMsgName);
             if(outMsg!= null){
                 for(String name:outMsg){
                     ParameterBinding pb = bop.getOutputBinding(name);
