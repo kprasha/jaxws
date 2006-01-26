@@ -63,13 +63,6 @@ import java.util.Map;
  */
 public abstract class AbstractSEIModelImpl implements SEIModel {
 
-    /**
-     *
-     */
-    public AbstractSEIModelImpl() {
-        super();
-    }
-
     void postProcess() {
         // should be called only once.
         if (jaxbContext != null)

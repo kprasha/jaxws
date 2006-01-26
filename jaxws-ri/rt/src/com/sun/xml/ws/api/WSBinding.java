@@ -14,6 +14,8 @@ public interface WSBinding extends Binding {
     /**
      * Gets the SOAP version of this binding.
      *
+     * TODO: clarify what to do with XML/HTTP binding
+     *
      * @return
      *      If the binding is using SOAP, this method returns
      *      a {@link SOAPVersion} constant.

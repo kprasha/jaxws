@@ -56,7 +56,7 @@ public class WSDLContext {
 
         orgWsdlLocation = wsdlDocumentLocation;
         try {
-            wsdlDoc = (WSDLModelImpl) RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver);
+            wsdlDoc = RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver);
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {

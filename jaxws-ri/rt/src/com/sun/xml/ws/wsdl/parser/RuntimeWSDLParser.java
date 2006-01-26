@@ -67,7 +67,7 @@ public class RuntimeWSDLParser {
      */
     private final EntityResolver resolver;
 
-    public static WSDLModel parse(URL wsdlLoc, EntityResolver resolver) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver) throws IOException, XMLStreamException, SAXException {
         assert resolver!=null;
         RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver);
         parser.parseWSDL(wsdlLoc);

@@ -36,16 +36,15 @@ public class EndpointIFContext {
     private RuntimeContext runtimeContext; //from annotationPro ess
     private Class serviceInterface;    //prop can take out
     private QName serviceName;
-    private Class sei;
+    private final Class sei;
     private QName portName;
-    private ArrayList<Handler> handlers;
+    private final ArrayList<Handler> handlers = new ArrayList<Handler>();
     private String endpointAddress;
     private String bindingId;
 
 
     public EndpointIFContext(Class sei) {
         this.sei = sei;
-        handlers = new ArrayList();
     }
 
     public RuntimeContext getRuntimeContext() {
@@ -66,10 +65,6 @@ public class EndpointIFContext {
 
     public Class getSei() {
         return sei;
-    }
-
-    public void setSei(Class sei) {
-        this.sei = sei;
     }
 
     public QName getPortName() {

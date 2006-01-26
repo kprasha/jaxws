@@ -19,47 +19,49 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.handler.HandlerResolverImpl;
-import com.sun.xml.ws.wsdl.WSDLContext;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.sun.xml.ws.handler.HandlerResolverImpl;
+import com.sun.xml.ws.handler.PortInfoImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.server.RuntimeContext;
+import com.sun.xml.ws.util.HandlerAnnotationInfo;
+import com.sun.xml.ws.util.HandlerAnnotationProcessor;
+import com.sun.xml.ws.wsdl.WSDLContext;
+import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
-
-import org.xml.sax.EntityResolver;
+import javax.xml.ws.WebEndpoint;
+import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
  * $author: WS Development Team
  */
-public class ServiceContext {
+final class ServiceContext {
     private WSDLContext wsdlContext; //from wsdlParsing
-    
+
     private Class serviceClass;
     private HandlerResolverImpl handlerResolver;
     private QName serviceName; //supplied on creation of service
-    private SCAnnotations SCAnnotations;
-    private final HashSet<EndpointIFContext> seiContext = new HashSet<EndpointIFContext>();
+    /**
+     * Service endpoint interface keyed by their interface type.
+     */
+    private final Map<Class,EndpointIFContext> seiContext = new HashMap<Class,EndpointIFContext>();
     /**
      * To be used to resolve WSDL resources.
      */
     private final EntityResolver entityResolver;
     private HashMap<QName,Set<String>> rolesMap = new HashMap<QName,Set<String>>();
+
+
     public ServiceContext(EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
-    }
-
-    public SCAnnotations getSCAnnotations() {
-        return SCAnnotations;
-    }
-
-    public void setSCAnnotations(SCAnnotations SCAnnotations) {
-        this.SCAnnotations = SCAnnotations;
     }
 
     public WSDLContext getWsdlContext() {
@@ -81,39 +83,25 @@ public class ServiceContext {
     public void setHandlerResolver(HandlerResolverImpl resolver) {
         this.handlerResolver = resolver;
     }
-    
+
     public Set<String> getRoles(QName portName) {
         return rolesMap.get(portName);
     }
-    
+
     public void setRoles(QName portName,Set<String> roles) {
         rolesMap.put(portName,roles);
     }
 
     public EndpointIFContext getEndpointIFContext(Class sei) {
-        for (EndpointIFContext eif: seiContext){
-            if (eif.getSei()==sei){
-                //this is the one
-                return eif;
-            }
-        }
-        return null;
+        return seiContext.get(sei);
     }
 
-    public HashSet<EndpointIFContext> getEndpointIFContext() {
-            return seiContext;
-        }
-
-    public void addEndpointIFContext(EndpointIFContext eifContext) {
-        this.seiContext.add(eifContext);
+    public boolean hasSEI() {
+        return !seiContext.isEmpty();
     }
 
-     public void addEndpointIFContext(List<EndpointIFContext> eifContexts) {
-        this.seiContext.addAll(eifContexts);
-    }
-
-    public Class getServiceClass() {
-        return serviceClass;
+    private void addEndpointIFContext(EndpointIFContext eifContext) {
+        this.seiContext.put(eifContext.getSei(),eifContext);
     }
 
     public void setServiceClass(Class serviceClass) {
@@ -138,22 +126,100 @@ public class ServiceContext {
         return entityResolver;
     }
 
+    //todo: valid port in wsdl
+    void addPort(Class portInterface) throws WebServiceException {
+        EndpointIFContext eifc = getEndpointIFContext(portInterface);
+        if ((eifc == null) || (eifc.getRuntimeContext() == null)) {
+
+            if (eifc == null) {
+                eifc = new EndpointIFContext(portInterface);
+                addEndpointIFContext(eifc);
+            }
+
+            //toDo:
+            QName serviceName = getServiceName();
+            QName portName = eifc.getPortName();
+            if (serviceClass != null) {
+                if (serviceName == null)
+                    serviceName = getServiceName(serviceClass);
+                if (portName == null)
+                    portName = getPortName(portInterface, serviceClass);
+            }
+
+            if (portName == null) {
+                portName = wsdlContext.getPortName();
+            }
+
+            //todo:use SCAnnotations and put in map
+            String bindingId = wsdlContext.getBindingID(
+                serviceName, portName);
+            RuntimeModeler modeler = new RuntimeModeler(portInterface,
+                serviceName, bindingId);
+            modeler.setPortName(portName);
+            AbstractSEIModelImpl model = modeler.buildRuntimeModel();
+
+            eifc.setRuntimeContext(new RuntimeContext(model));
+
+            // get handler information
+            HandlerAnnotationInfo chainInfo =
+                HandlerAnnotationProcessor.buildHandlerInfo(portInterface,
+                    model.getServiceQName(), model.getPortName(), bindingId);
+
+            if (chainInfo != null) {
+                if(handlerResolver==null)
+                    handlerResolver = new HandlerResolverImpl();
+                handlerResolver.setHandlerChain(new PortInfoImpl(
+                    bindingId,
+                    model.getPortName(),
+                    model.getServiceQName()),
+                    chainInfo.getHandlers());
+                setRoles(portName,chainInfo.getRoles());
+
+            }
+        }
+    }
+
+    private static QName getServiceName(Class<?> serviceInterface) {
+        WebServiceClient wsClient = serviceInterface.getAnnotation(WebServiceClient.class);
+        QName serviceName = null;
+        if (wsClient != null) {
+            String name = wsClient.name();
+            String namespace = wsClient.targetNamespace();
+            serviceName = new QName(namespace, name);
+        }
+        return serviceName;
+    }
+
+    private static QName getPortName(Class<?> portInterface, Class<?> serviceInterface) {
+        QName portName = null;
+        WebServiceClient wsClient = serviceInterface.getAnnotation(WebServiceClient.class);
+        for (Method method : serviceInterface.getMethods()) {
+            if (method.getDeclaringClass()!=serviceInterface) {
+                continue;
+            }
+            WebEndpoint webEndpoint = method.getAnnotation(WebEndpoint.class);
+            if (webEndpoint == null) {
+                continue;
+            }
+            if (method.getGenericReturnType()==portInterface) {
+                if (method.getName().startsWith("get")) {
+                    portName = new QName(wsClient.targetNamespace(), webEndpoint.name());
+                    break;
+                }
+            }
+        }
+        return portName;
+    }
+
+
     public String toString() {
         return "ServiceContext{" +
             "wsdlContext=" + wsdlContext +
             ", handleResolver=" + handlerResolver +
             ", serviceClass=" + serviceClass +
             ", serviceName=" + serviceName +
-            ", SCAnnotations=" + SCAnnotations +
             ", seiContext=" + seiContext +
             ", entityResolver=" + entityResolver +
             "}";
     }
-}
-class SCAnnotations {
-    String tns;
-    QName serviceQName;
-    ArrayList<QName> portQNames = new ArrayList<QName>();
-    final ArrayList<Class> classes = new ArrayList<Class>();
-    String wsdlLocation;
 }

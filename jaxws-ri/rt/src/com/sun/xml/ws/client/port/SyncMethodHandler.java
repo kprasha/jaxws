@@ -15,10 +15,13 @@ import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.StringWriter;
 
 /**
  * {@link MethodHandler} that handles synchronous method invocations.
@@ -47,7 +50,7 @@ final class SyncMethodHandler extends MethodHandler {
     private final MessageFiller[] inFillers;
 
     private final String soapAction;
-    
+
     private final Boolean isOneWay;
 
     /**
@@ -196,7 +199,15 @@ final class SyncMethodHandler extends MethodHandler {
 
             if(reply.isFault()) {
                 // TODO: data-bind fault into exception
-                throw new UnsupportedOperationException();
+                try {
+                    StringWriter w = new StringWriter();
+                    XMLStreamWriter sw = XMLOutputFactory.newInstance().createXMLStreamWriter(w);
+                    reply.writeTo(sw);
+                    sw.close();
+                    throw new UnsupportedOperationException("Fault not implemented yet\n"+w.toString());
+                } catch (XMLStreamException e) {
+                    throw new Error(e);
+                }
             } else {
                 BridgeContext context = owner.bridgeContexts.take();
                 try {

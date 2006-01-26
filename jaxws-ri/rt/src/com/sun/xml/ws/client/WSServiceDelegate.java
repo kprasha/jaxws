@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
@@ -77,8 +78,6 @@ import java.util.concurrent.ThreadFactory;
  */
 public class WSServiceDelegate extends WSService {
 
-    protected static final String GET = "get";
-
 
     protected HashSet<QName> ports;
 
@@ -90,16 +89,16 @@ public class WSServiceDelegate extends WSService {
     protected HandlerResolver handlerResolver;
 
     protected Object serviceProxy;
-    protected URL wsdlLocation;
-    protected ServiceContext serviceContext;
-    protected Executor executor;
+    private final ServiceContext serviceContext;
+
+    private Executor executor;
+
     private final HashSet<Object> seiProxies = new HashSet<Object>();
 
     /**
      * {@link CatalogResolver} to check META-INF/jax-ws-catalog.xml.
-     * Lazily created.
      */
-    private EntityResolver entityResolver;
+    private final EntityResolver entityResolver = XmlUtil.createDefaultCatalogResolver();
 
     /**
      * The WSDL service that this {@link Service} object represents.
@@ -107,43 +106,25 @@ public class WSServiceDelegate extends WSService {
      * <p>
      * This field is null iff no WSDL is given to {@link Service}.
      */
-    private final com.sun.xml.ws.api.model.wsdl.WSDLService wsdlService;
+    private final WSDLService wsdlService;
 
 
-    public WSServiceDelegate(ServiceContext scontext) {
-        serviceContext = scontext;
+    public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class<? extends Service> serviceClass) {
+        if (wsdlDocumentLocation != null) {
+            serviceContext = ServiceContextBuilder.build(
+                wsdlDocumentLocation, serviceName, serviceClass, XmlUtil.createDefaultCatalogResolver());
+        } else {
+            // KK: this is effectively no-op
+            serviceContext = new ServiceContext(XmlUtil.createDefaultCatalogResolver());
+            serviceContext.setServiceName(serviceName);
+        }
         if (serviceContext.getHandlerResolver() != null) {
             handlerResolver = serviceContext.getHandlerResolver();
         }
         WSDLModel wsdlModel = serviceContext.getWSDLModel();
-        wsdlService = (wsdlModel != null)?wsdlModel.getService(serviceContext.getServiceName()):null;
-    }
+        wsdlService = (wsdlModel!=null)?wsdlModel.getService(serviceName):null;
 
-    public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
-        this(createServiceContext(wsdlDocumentLocation,serviceName,serviceClass));
-        if (ports == null)
-            populatePorts();
-    }
-
-    private static ServiceContext createServiceContext(URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
-        if (wsdlDocumentLocation != null) {
-            return ServiceContextBuilder.build(
-                wsdlDocumentLocation, serviceClass, XmlUtil.createDefaultCatalogResolver());
-        } else {
-            ServiceContext serviceContext = new ServiceContext(XmlUtil.createDefaultCatalogResolver());
-            serviceContext.setServiceName(serviceName);
-            return serviceContext;
-        }
-    }
-
-    public URL getWSDLLocation() {
-        if (wsdlLocation == null)
-            setWSDLLocation(getWsdlLocation());
-        return wsdlLocation;
-    }
-
-    public void setWSDLLocation(URL location) {
-        wsdlLocation = location;
+        populatePorts();
     }
 
     public Executor getExecutor() {
@@ -262,12 +243,6 @@ public class WSServiceDelegate extends WSService {
             ports = new HashSet<QName>();
 
         WSDLContext wscontext = serviceContext.getWsdlContext();
-
-        if (serviceContext.getServiceName() == null) {
-            if (wscontext != null) {
-                serviceContext.setServiceName(wscontext.getFirstServiceName());
-            }
-        }
 
         if (wscontext != null) {
             QName serviceName = serviceContext.getServiceName();
