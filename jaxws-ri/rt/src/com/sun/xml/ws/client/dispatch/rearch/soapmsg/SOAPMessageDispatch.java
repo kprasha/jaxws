@@ -128,9 +128,11 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      *          If there is any error in the configuration of
      *          the <code>SOAPMessageDispatch</code> instance
      */
+    @Override
     public Response<SOAPMessage> invokeAsync(SOAPMessage msg)
         throws WebServiceException {
-        throw new UnsupportedOperationException();
+        return super.invokeAsync(msg);
+        //throw new UnsupportedOperationException();
     }
 
 
@@ -161,6 +163,7 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      *          the <code>Dispatch</code> instance
      */
     public Future<?> invokeAsync(SOAPMessage msg, AsyncHandler<SOAPMessage> handler) {
+        //return super.invokeAsync(msg, handler);
         throw new UnsupportedOperationException();
     }
 

@@ -17,6 +17,10 @@ import com.sun.xml.ws.client.dispatch.DispatchContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
+import javax.xml.ws.Response;
+import javax.xml.ws.AsyncHandler;
+import java.util.concurrent.*;
+import java.util.Map;
 
 /**
  * TODO: update javadoc, use sandbox classes where can
@@ -58,6 +62,44 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
 
     //todo: temp just to get something working
+
+    private final Executor exec = Executors.newCachedThreadPool(); /* or whatever */
+
+    public Response<T> invokeAsync(final T param) {
+        ResponseImpl<T> ft = new ResponseImpl<T>(new Callable() {
+            public T call() throws Exception {
+                return invoke(param);
+            }
+        });
+
+        exec.execute(ft);
+        return ft;
+    }
+
+    public Future<?> invokeAsync(final T param, final AsyncHandler<T> asyncHandler) {
+        final ResponseImpl<T>[] r = new ResponseImpl[1];
+        r[0] = new ResponseImpl<T>(new Callable() {
+            public T call() throws Exception {
+                T t = invoke(param);
+                asyncHandler.handleResponse(r[0]);
+                return t;
+            }
+        });
+
+        exec.execute(r[0]);
+        return r[0];
+    }
+
+    private static class ResponseImpl<T> extends FutureTask<T> implements Response<T> {
+        protected ResponseImpl(Callable<T> callable) {
+            super(callable);
+        }
+
+        public Map<String, Object> getContext() {
+            // TODO
+            throw new UnsupportedOperationException();
+        }
+    }
 
     /**
      *

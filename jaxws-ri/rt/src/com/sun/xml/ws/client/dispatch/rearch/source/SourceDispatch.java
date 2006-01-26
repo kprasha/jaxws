@@ -70,7 +70,14 @@ public class SourceDispatch extends DispatchImpl<Source> {
         Message message = createMessage(msg);
         setProperties(message);
         Message response = process(message);
-        return response.readPayloadAsSource();
+        switch (mode){
+            case PAYLOAD:
+                return response.readPayloadAsSource();
+            case MESSAGE:
+                return response.readEnvelopeAsSource();
+            default:
+                throw new WebServiceException("Unrecognized dispatch mode");
+        }       
     }
 
     /**
@@ -98,7 +105,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
      */
     public Response<Source> invokeAsync(Source msg)
         throws WebServiceException {
-        throw new UnsupportedOperationException();
+        return super.invokeAsync(msg);
 
     }
 
@@ -131,6 +138,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
      *          the <code>SourceDispatch</code> instance
      */
     public Future<?> invokeAsync(Source msg, AsyncHandler<Source> handler) {
+        //return super.invokeAsync(msg, handler);
         throw new UnsupportedOperationException();
 
     }

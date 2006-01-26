@@ -179,7 +179,7 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      */
     public Response<Object> invokeAsync(Object msg)
         throws WebServiceException {
-        throw new UnsupportedOperationException();
+        return super.invokeAsync(msg);
 
     }
 
@@ -217,8 +217,8 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      *          the WebServiceException is the original JAXBException.
      */
     public Future<?> invokeAsync(Object msg, AsyncHandler<Object> handler) {
+        //return super.invokeAsync(msg, handler);
         throw new UnsupportedOperationException();
-
     }
 
     /**
