@@ -88,7 +88,8 @@ public class JavaMethodImpl implements JavaMethod {
     }
 
     public WSDLBoundOperation getOperation() {
-        return wsdlOoperation;
+        assert wsdlOperation!=null;
+        return wsdlOperation;
     }
 
     public void setOperationName(String name) {
@@ -227,8 +228,10 @@ public class JavaMethodImpl implements JavaMethod {
     }
 
     /*package*/ void freeze(WSDLBoundPortType portType) {
-        this.wsdlOoperation = portType.get(new QName(portType.getName().getNamespaceURI(),operationName));
-        // TODO: error check
+        this.wsdlOperation = portType.get(new QName(portType.getName().getNamespaceURI(),operationName));
+        // TODO: replace this with proper error handling
+        if(wsdlOperation ==null)
+            throw new Error("Undefined operation name "+operationName);
     }
 
     private List<CheckedException> exceptions = new ArrayList<CheckedException>();
@@ -242,6 +245,6 @@ public class JavaMethodImpl implements JavaMethod {
     private SOAPBinding binding;
     private MEP mep;
     private String operationName;
-    private WSDLBoundOperation wsdlOoperation;
+    private WSDLBoundOperation wsdlOperation;
 }
 
