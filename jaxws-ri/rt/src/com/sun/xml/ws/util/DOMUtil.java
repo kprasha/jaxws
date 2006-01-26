@@ -20,10 +20,9 @@
 
 package com.sun.xml.ws.util;
 
-import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -31,13 +30,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
-import java.io.InputStream;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * $author: JAXWS Development Team
@@ -92,21 +88,21 @@ public class DOMUtil {
      * @param writer
      */
     public static void serializeNode(Node node, XMLStreamWriter writer) throws XMLStreamException {
-        String prefix = node.getPrefix();
-        if( prefix == null)
-            prefix ="";
-
-        writer.writeStartElement(prefix, node.getLocalName(), node.getNamespaceURI());
+        writer.writeStartElement(
+            fixNull(node.getPrefix()),
+            node.getLocalName(),
+            fixNull(node.getNamespaceURI()));
 
         if (node.hasAttributes()){
             NamedNodeMap attrs = node.getAttributes();
             int numOfAttributes = attrs.getLength();
             for(int i = 0; i < numOfAttributes; i++){
                 Node attr = attrs.item(i);
-                prefix = attr.getPrefix();
-                if(prefix == null)
-                    prefix = "";
-                writer.writeAttribute(prefix, attr.getNamespaceURI(), attr.getLocalName(), attr.getNodeValue());
+                writer.writeAttribute(
+                    fixNull(attr.getPrefix()),
+                    fixNull(attr.getNamespaceURI()),
+                    attr.getLocalName(),
+                    attr.getNodeValue());
             }
         }
 
@@ -135,5 +131,10 @@ public class DOMUtil {
             }
         }
         writer.writeEndElement();
+    }
+
+    private static String fixNull(String s) {
+        if(s==null)     return "";
+        else            return s;
     }
 }
