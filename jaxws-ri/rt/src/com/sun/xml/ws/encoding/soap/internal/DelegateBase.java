@@ -32,7 +32,6 @@ import com.sun.xml.ws.client.ContextMap;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.ContactInfoBase;
-import com.sun.xml.ws.client.ContactInfoListImpl;
 import com.sun.xml.ws.encoding.soap.SOAPEncoder;
 import com.sun.xml.ws.client.WSServiceDelegate;
 
