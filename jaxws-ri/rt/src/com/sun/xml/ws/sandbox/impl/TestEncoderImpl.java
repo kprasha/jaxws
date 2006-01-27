@@ -50,7 +50,7 @@ public final class TestEncoderImpl implements Encoder {
     }
 
     public static final Encoder INSTANCE11 = new TestEncoderImpl("text/xml");
-    public static final Encoder INSTANCE12 = new TestEncoderImpl("application/xml+soap");
+    public static final Encoder INSTANCE12 = new TestEncoderImpl("application/soap+xml");
 
     public static Encoder get(SOAPVersion version) {
         if(version==null)
