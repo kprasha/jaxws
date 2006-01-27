@@ -14,14 +14,14 @@ import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.StringWriter;
 
 /**
  * {@link MethodHandler} that handles synchronous method invocations.
@@ -210,6 +210,12 @@ final class SyncMethodHandler extends MethodHandler {
                 } catch (XMLStreamException e) {
                     throw new Error(e);
                 }
+                //try {
+                //    throw new SOAPFaultException(reply.readAsSOAPMessage().getSOAPBody().getFault());
+                //} catch (SOAPException e) {
+                //    // TODO: i18n
+                //    throw new WebServiceException("Unable to read in a SOAP fault message",e);
+                //}
             } else {
                 BridgeContext context = owner.bridgeContexts.take();
                 try {
