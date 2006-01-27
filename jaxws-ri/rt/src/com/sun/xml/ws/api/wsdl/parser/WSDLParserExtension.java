@@ -3,7 +3,9 @@ package com.sun.xml.ws.api.wsdl.parser;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.Extensible;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.stream.XMLStreamReader;
@@ -48,11 +50,14 @@ import javax.xml.ws.WebServiceException;
  * <p>
  * For each callback, the corresponding WSDL model object is passed in,
  * so that {@link WSDLParserExtension} can relate what it's parsing
- * to the {@link WSDLModel}. Note that since the {@link WSDLModel} itself
+ * to the {@link WSDLModel}. Most likely, extensions can use
+ * {@link Extensible} interface to hook the parsed data into {@link WSDLModel}.
+ *
+ * Note that since the {@link WSDLModel} itself
  * is being built, {@link WSDLParserExtension} may not invoke any of
- * the methods on it. Those references are passed just so that
- * {@link WSDLParserExtension} can hold on to those references,
- * not to query WSDL models.
+ * the query methods on the WSDL model. Those references are passed just so that
+ * {@link WSDLParserExtension} can hold on to those references, or put
+ * {@link Extensible} objects into the model, not to query it.
  *
  * <p>
  * If {@link WSDLParserExtension} needs to query {@link WSDLModel},
@@ -73,12 +78,19 @@ import javax.xml.ws.WebServiceException;
  * This exception will be propagated to the user, so it should have
  * detailed error messages pointing at the problem.
  *
+ * <h2>Discovery</h2>
+ * <p>
+ * The JAX-WS RI locates the implementation of {@link WSDLParserExtension}s
+ * by using the standard service look up mechanism, in particular looking for
+ * <tt>META-INF/services/com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension</tt>
+ *
+ *
  * <h2>TODO</h2>
  * <p>
- * How {@link RuntimeWSDLParser} finds {@link WSDLParserExtension}s
- * need to be determined. It needs to be done in such a way that
- * {@link WSDLParserExtension} can carry the parsed state and use
- * it when pipeline is constructed.
+ * As it's designed today, extensions cannot access to any of the environmental
+ * information before the parsing begins (such as what {@link WSService} this
+ * WSDL is being parsed for, etc.) We might need to reconsider this aspect.
+ * The JAX-WS team waits for feedback on this topic.
  *
  * @author Kohsuke Kawaguchi
  */
