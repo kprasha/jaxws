@@ -8,6 +8,7 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Extends the WSDL parsing process.
@@ -63,6 +64,15 @@ import javax.xml.stream.XMLStreamConstants;
  * This interface is not designed for having multiple {@link WSDLParserExtension}s
  * parse the same extension element.
  *
+ *
+ * <h2>Error Handling</h2>
+ * <p>
+ * For usability, {@link WSDLParserExtension}s are expected to check possible
+ * errors in the extension elements that it parses. When an error is found,
+ * it may throw a {@link WebServiceException} to abort the parsing of the WSDL.
+ * This exception will be propagated to the user, so it should have
+ * detailed error messages pointing at the problem.
+ *
  * <h2>TODO</h2>
  * <p>
  * How {@link RuntimeWSDLParser} finds {@link WSDLParserExtension}s
@@ -76,7 +86,7 @@ public abstract class WSDLParserExtension {
     public abstract boolean service(WSDLService service, XMLStreamReader reader);
     public abstract boolean port(WSDLPort port, XMLStreamReader reader);
 
-    // TODO: define more methods
+    // TODO: complete the rest of the callback
 
     /**
      * Called when the parsing of a set of WSDL documents are all done.
