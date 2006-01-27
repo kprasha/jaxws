@@ -27,11 +27,9 @@ import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.spi.runtime.StubBase;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
-import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
 
-import javax.jws.WebService;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -47,7 +45,6 @@ import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +55,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.io.IOException;
 
 /**
  * <code>Service</code> objects provide the client view of a Web service.
@@ -285,12 +281,6 @@ public class WSServiceDelegate extends WSService {
     }
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {
-        if (wsdlContext==null) {
-            URL wsdlLocation = getWSDLLocation(portInterface);
-            if(wsdlLocation!=null)
-               parseWSDL(wsdlLocation);
-        }
-
         if (!seiContext.isEmpty())
             addSEI(portInterface);  // KK: this if block doesn't make sense to me. why not just always call addSEI?
 
@@ -447,24 +437,6 @@ public class WSServiceDelegate extends WSService {
         }
         return null;
     }
-
-    /**
-     * Utility method to get wsdlLocation attribute from @WebService annotation on sei.
-     *
-     * @return the URL of the location of the WSDL for the sei, or null if none was found.
-     */
-//this will change
-    private static URL getWSDLLocation(Class<?> sei) {
-        WebService ws = sei.getAnnotation(WebService.class);
-        if (ws == null)
-            return null;
-        try {
-            return JAXWSUtils.getFileOrURL(ws.wsdlLocation());
-        } catch (IOException e) {
-            throw new WebServiceException(e);
-        }
-    }
-
 
     class DaemonThreadFactory implements ThreadFactory {
         public Thread newThread(Runnable r) {
