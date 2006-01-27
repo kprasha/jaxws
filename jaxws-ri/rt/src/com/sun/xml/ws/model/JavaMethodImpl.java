@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.model.soap.SOAPBindingImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
@@ -227,8 +228,8 @@ public class JavaMethodImpl implements JavaMethod {
         return mep.isAsync;
     }
 
-    /*package*/ void freeze(WSDLBoundPortType portType) {
-        this.wsdlOperation = portType.get(new QName(portType.getPortTypeName().getNamespaceURI(),operationName));
+    /*package*/ void freeze(WSDLPortImpl portType) {
+        this.wsdlOperation = portType.getBinding().get(new QName(portType.getBinding().getPortType().getName().getNamespaceURI(),operationName));
         // TODO: replace this with proper error handling
         if(wsdlOperation ==null)
             throw new Error("Undefined operation name "+operationName);

@@ -8,6 +8,8 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+
+import javax.xml.ws.Holder;
 import java.util.List;
 
 /**
@@ -56,7 +58,7 @@ abstract class BodyBuilder {
         final Message createMessage(Object[] methodArgs) {
             return new JAXBMessage(
                 bridge, build(methodArgs),
-                owner.model.getBridgeContext(), owner.soapVersion );
+                owner.seiModel.getBridgeContext(), owner.soapVersion );
         }
 
         /**

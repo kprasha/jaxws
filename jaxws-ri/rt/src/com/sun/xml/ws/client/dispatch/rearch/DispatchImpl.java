@@ -42,6 +42,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     protected Class<T> clazz;
     protected final WSServiceDelegate owner;
     protected final SOAPVersion soapVersion;
+    private final String endpointAddress;
 
 
     protected DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
@@ -55,6 +56,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         this.mode = mode;
         this.owner = owner;
         this.soapVersion = binding.getSOAPVersion();
+        this.endpointAddress = owner.getEndpointAddress(portname);
     }
 
 
@@ -109,7 +111,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
         MessageProperties props = msg.getProperties();
         props.proxy = this;
-        props.put(ENDPOINT_ADDRESS_PROPERTY, owner.getEndpointAddress(portname));
+        props.endpointAddress = endpointAddress;
 
         props.put(BINDING_ID_PROPERTY, binding.getBindingId());
 

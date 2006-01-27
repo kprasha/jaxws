@@ -5,23 +5,23 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
-import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
-import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
-import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
-import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
+import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
+import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
+import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
+import com.sun.xml.ws.client.port.PortInterfaceStub;
+import com.sun.xml.ws.model.SOAPSEIModel;
 
+import javax.activation.DataSource;
+import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Source;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Source;
-import javax.xml.bind.JAXBContext;
-import javax.activation.DataSource;
 import java.lang.reflect.Proxy;
 
 /**
@@ -179,7 +179,7 @@ public abstract class Stubs {
     public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
                                   Class<T> portInterface, Pipe next ) {
 
-        PortInterfaceStub ps = new PortInterfaceStub(service,(BindingImpl)binding,portInterface,model,next);
+        PortInterfaceStub ps = new PortInterfaceStub(service,(BindingImpl)binding,portInterface,(SOAPSEIModel)model,next);
         return portInterface.cast(
             Proxy.newProxyInstance( portInterface.getClassLoader(),
                 new Class[]{portInterface,BindingProvider.class}, ps ));

@@ -31,6 +31,8 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
@@ -184,13 +186,13 @@ public class RuntimeEndpointInfo extends WSEndpoint
             seiModel = rap.buildRuntimeModel();
         }else {
             try {
-                WSDLModel wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
-                WSDLBoundPortTypeImpl wsdlBinding = null;
+                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
+                WSDLPortImpl wsdlPort = null;
                 if(serviceName == null)
                     serviceName = RuntimeModeler.getServiceName(getImplementorClass());
                 if(getPortName() != null){
-                    wsdlBinding = (WSDLBoundPortTypeImpl) wsdlDoc.getBinding(getServiceName(), getPortName());
-                    if(wsdlBinding == null)
+                    wsdlPort = wsdlDoc.getService(getServiceName()).get(getPortName());
+                    if(wsdlPort == null)
                         throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", new Object[]{serviceName, portName, getWsdlUrl()});
                 }else{
                     WSDLService service = wsdlDoc.getService(serviceName);
@@ -206,7 +208,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                         throw new ServerRtException("runtime.parser.wsdl.multiplebinding", new Object[]{bindingId, serviceName, getWsdlUrl()});
                 }
                 //now we got the Binding so lets build the model
-                RuntimeModeler rap = new RuntimeModeler(getImplementorClass(), getImplementor(), getServiceName(), wsdlBinding);
+                RuntimeModeler rap = new RuntimeModeler(getImplementorClass(), getImplementor(), getServiceName(), wsdlPort);
                 if (getPortName() != null) {
                     rap.setPortName(getPortName());
                 }

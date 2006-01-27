@@ -5,6 +5,7 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
@@ -38,14 +39,14 @@ public interface SEIModel {
      *
      * @return the <code>{@link BridgeContext}</code>
      */
-//    BridgeContext getBridgeContext();
+    BridgeContext getBridgeContext();
 
     /**
      * JAXBContext that will be used to marshall/unmarshall the java classes found in the SEI.
      *
      * @return the <code>{@link JAXBRIContext}</code>
      */
-//    JAXBRIContext getJAXBContext();
+    JAXBRIContext getJAXBContext();
 
     /**
      * Get the Bridge associated with the {@link TypeReference}
@@ -118,6 +119,11 @@ public interface SEIModel {
      * @return wsdl:service@name value - always non-null
      */
     QName getServiceQName();
+
+    /**
+     * Gets the {@link WSDLPort} that represents the port that this SEI binds to.
+     */
+    WSDLPort getPort();
 
     /**
      * Value of the wsdl:port name associated with the {@link SEIModel)

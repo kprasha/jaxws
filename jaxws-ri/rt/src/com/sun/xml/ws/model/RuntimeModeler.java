@@ -29,7 +29,7 @@ import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.jws.Oneway;
@@ -76,7 +76,7 @@ public class RuntimeModeler {
     private boolean usesWebMethod = false;
     private ClassLoader classLoader = null;
     private Object implementor;
-    private final WSDLBoundPortTypeImpl binding;
+    private final WSDLPortImpl binding;
     private QName serviceName;
     private QName portName;
     private Map<Class, Boolean> classUsesWebMethod = new HashMap<Class, Boolean>();
@@ -119,10 +119,10 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class sei, QName serviceName, WSDLBoundPortTypeImpl binding){
+    public RuntimeModeler(Class sei, QName serviceName, WSDLPortImpl binding){
         this.portClass = sei;
         this.serviceName = serviceName;
-        this.bindingId = binding.getBindingId();
+        this.bindingId = binding.getBinding().getBindingId();
         this.binding = binding;
     }
 
@@ -151,7 +151,7 @@ public class RuntimeModeler {
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
      * <code>sei</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLBoundPortTypeImpl binding) {
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLPortImpl binding) {
         this(portClass, serviceName, binding);
         this.implementor = implementor;
     }
@@ -736,8 +736,8 @@ public class RuntimeModeler {
         //build ordered list
         Map<Integer, ParameterImpl> resRpcParams = new HashMap<Integer, ParameterImpl>();
         Map<Integer, ParameterImpl> reqRpcParams = new HashMap<Integer, ParameterImpl>();
-        if(binding != null && binding.isRpcLit()){
-            binding.finalizeRpcLitBinding();
+        if(binding != null && binding.getBinding().isRpcLit()){
+            binding.getBinding().finalizeRpcLitBinding();
         }
 
         if (!isOneway) {
@@ -798,7 +798,7 @@ public class RuntimeModeler {
                 returnParameter.setBinding(ParameterBinding.HEADER);
                 javaMethod.addParameter(returnParameter);
             }else{
-                ParameterBinding rb = getBinding(binding, operationName, resultPartName, false, Mode.OUT);
+                ParameterBinding rb = getBinding(operationName, resultPartName, false, Mode.OUT);
                 returnParameter.setBinding(rb);
                 if(rb.isBody() || rb.isUnbound()){
                     WSDLPart p = getPart(new QName(targetNamespace,operationName), resultPartName, Mode.OUT);
@@ -879,15 +879,15 @@ public class RuntimeModeler {
             param.setPartName(partName);
 
             if(paramMode == Mode.INOUT){
-                ParameterBinding pb = getBinding(binding, operationName, partName, isHeader, Mode.IN);
+                ParameterBinding pb = getBinding(operationName, partName, isHeader, Mode.IN);
                 param.setInBinding(pb);
-                pb = getBinding(binding, operationName, partName, isHeader, Mode.OUT);
+                pb = getBinding(operationName, partName, isHeader, Mode.OUT);
                 param.setOutBinding(pb);
             }else{
                 if (isHeader) {
                     param.setBinding(ParameterBinding.HEADER);
                 } else {
-                    ParameterBinding pb = getBinding(binding, operationName, partName, false, paramMode);
+                    ParameterBinding pb = getBinding(operationName, partName, false, paramMode);
                     param.setBinding(pb);
                 }
             }
@@ -1032,7 +1032,7 @@ public class RuntimeModeler {
                 if(isResultHeader){
                     returnParameter.setBinding(ParameterBinding.HEADER);
                 }else{
-                    ParameterBinding rb = getBinding(binding, operationName, resultPartName, false, Mode.OUT);
+                    ParameterBinding rb = getBinding(operationName, resultPartName, false, Mode.OUT);
                     returnParameter.setBinding(rb);
                 }
                 javaMethod.addParameter(returnParameter);
@@ -1099,15 +1099,15 @@ public class RuntimeModeler {
             }
             param.setPartName(partName);
             if(paramMode == Mode.INOUT){
-                ParameterBinding pb = getBinding(binding, operationName, partName, isHeader, Mode.IN);
+                ParameterBinding pb = getBinding(operationName, partName, isHeader, Mode.IN);
                 param.setInBinding(pb);
-                pb = getBinding(binding, operationName, partName, isHeader, Mode.OUT);
+                pb = getBinding(operationName, partName, isHeader, Mode.OUT);
                 param.setOutBinding(pb);
             }else{
                 if (isHeader){
                     param.setBinding(ParameterBinding.HEADER);
                 }else{
-                    ParameterBinding pb = getBinding(binding, operationName, partName, false, paramMode);
+                    ParameterBinding pb = getBinding(operationName, partName, false, paramMode);
                     param.setBinding(pb);
                 }
             }
@@ -1291,20 +1291,20 @@ public class RuntimeModeler {
         return null;
     }
 
-    private ParameterBinding getBinding(com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType boundPortType, String operation, String part, boolean isHeader, Mode mode){
-        if(boundPortType == null){
+    private ParameterBinding getBinding(String operation, String part, boolean isHeader, Mode mode){
+        if(binding == null){
             if(isHeader)
                 return ParameterBinding.HEADER;
             else
                 return ParameterBinding.BODY;
         }
-        QName opName = new QName(boundPortType.getPortType().getName().getNamespaceURI(), operation);
-        return boundPortType.getBinding(opName, part, mode);
+        QName opName = new QName(binding.getBinding().getPortType().getName().getNamespaceURI(), operation);
+        return binding.getBinding().getBinding(opName, part, mode);
     }
 
     private WSDLPart getPart(QName opName, String partName, Mode mode){
         if(binding != null){
-            WSDLBoundOperation bo = binding.get(opName);
+            WSDLBoundOperation bo = binding.getBinding().get(opName);
             if(bo != null)
                 return bo.getPart(partName, mode);
         }

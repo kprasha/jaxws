@@ -122,6 +122,21 @@ public class MessageProperties implements MessageContext {
     public Object proxy;
 
     /**
+     * The endpoint address to which this message is sent to.
+     *
+     * <p>
+     * The JAX-WS spec allows this to be changed for each message,
+     * so it's designed to be a property.
+     *
+     * <p>
+     * TODO: isn't this a part of {@link #requestContext}?
+     * Or more generally, what's the relationship between
+     * {@link MessageProperties} and {@link #requestContext}?
+     */
+    @ContextProperty(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
+    public String endpointAddress;
+
+    /**
      * The client appliation configures this map through
      * {@link BindingProvider#getRequestContext()}.
      */

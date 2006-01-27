@@ -6,6 +6,7 @@ import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
 import javax.xml.bind.JAXBException;
@@ -171,8 +172,8 @@ interface ResponseBuilder {
             // TODO: we no longer use wrapper beans
             assert wp.getTypeReference().type== CompositeStructure.class;
 
-            List<Parameter> children = wp.getWrapperChildren();
-            for (Parameter p : children) {
+            List<ParameterImpl> children = wp.getWrapperChildren();
+            for (ParameterImpl p : children) {
                 parts.put( p.getName(), new PartBuilder(
                     p.getBridge(), ValueSetter.get(p)
                 ));

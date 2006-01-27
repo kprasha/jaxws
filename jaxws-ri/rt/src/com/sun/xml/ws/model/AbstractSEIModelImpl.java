@@ -32,14 +32,16 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPart;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.namespace.QName;
@@ -77,9 +79,10 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * Link {@link SEIModel} to {@link WSDLModel}.
      * Merge it with {@link #postProcess()}.
      */
-    void freeze(WSDLBoundPortType portType) {
+    void freeze(WSDLPortImpl port) {
+        this.port = port;
         for (JavaMethodImpl m : javaMethods) {
-            m.freeze(portType);
+            m.freeze(port);
         }
     }
 
@@ -520,6 +523,10 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         return serviceName;
     }
 
+    public WSDLPort getPort() {
+        return port;
+    }
+
     public QName getPortName() {
         return portName;
     }
@@ -601,4 +608,5 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private String targetNamespace = "";
     private final Map<Integer, RawAccessor> rawAccessorMap = new HashMap<Integer, RawAccessor>();
     private List<String> knownNamespaceURIs = null;
+    private WSDLPort port;
 }

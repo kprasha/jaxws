@@ -33,6 +33,10 @@ import com.sun.xml.ws.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.model.SOAPSEIModel;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.util.StringUtils;
@@ -40,6 +44,7 @@ import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.soap.SOAPBinding;
 
 import javax.xml.ws.Holder;
 import java.lang.reflect.Field;
@@ -68,19 +73,19 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
         RuntimeContext rtContext = (RuntimeContext) mi.getMetaData(BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
 
         BodyBlock bodyBlock = im.getBody();
-        JavaMethod jm = rtContext.getModel().getJavaMethod(mi.getMethod());
+        JavaMethodImpl jm = rtContext.getModel().getJavaMethod(mi.getMethod());
         mi.setMEP(jm.getMEP());
         List<HeaderBlock> headers = im.getHeaders();
         Map<String, AttachmentBlock> attachments = im.getAttachments();
 
-        Iterator<Parameter> iter = jm.getRequestParameters().iterator();
+        Iterator<ParameterImpl> iter = jm.getRequestParameters().iterator();
         Object bodyValue = (bodyBlock == null) ? null :  bodyBlock.getValue();
 
         int numInputParams = jm.getInputParametersCount();
         Object data[] = new Object[numInputParams];
         com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
         while (iter.hasNext()) {
-            Parameter param = iter.next();
+            ParameterImpl param = iter.next();
             ParameterBinding paramBinding = param.getInBinding();
             Object obj = null;
             if (paramBinding.isBody()) {
@@ -93,7 +98,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
             }
             fillData(rtContext, param, obj, data, soapBinding, paramBinding);
         }
-        Iterator<Parameter> resIter = jm.getResponseParameters().iterator();
+        Iterator<ParameterImpl> resIter = jm.getResponseParameters().iterator();
         while(resIter.hasNext()){
             Parameter p = resIter.next();
             createOUTHolders(p, data);
@@ -108,13 +113,13 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
      */
     public Object toInternalMessage(MessageInfo mi) {
         RuntimeContext rtContext = MessageInfoUtil.getRuntimeContext(mi);
-        SEIModel model = rtContext.getModel();
-        JavaMethod jm = model.getJavaMethod(mi.getMethod());
+        AbstractSEIModelImpl model = rtContext.getModel();
+        JavaMethodImpl jm = model.getJavaMethod(mi.getMethod());
         Object[] data = mi.getData();
         Object result = mi.getResponse();
         InternalMessage im = new InternalMessage();
         BindingImpl bindingImpl = 
-            (BindingImpl)rtContext.getRuntimeEndpointInfo().getBinding();
+            rtContext.getRuntimeEndpointInfo().getBinding();
         String bindingId = bindingImpl.getBindingId();
 
         switch (mi.getResponseType()) {
@@ -122,7 +127,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
                 if(!(result instanceof java.lang.Exception)){
                     throw new SerializationException("exception.incorrectType", result.getClass().toString());
                 }
-                CheckedException ce = jm.getCheckedException(result.getClass());
+                CheckedExceptionImpl ce = jm.getCheckedException(result.getClass());
                 if(ce == null){
                     throw new SerializationException("exception.notfound", result.getClass().toString());
                 }
@@ -144,10 +149,10 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
                 return im;
         }
         
-        com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
-        Iterator<Parameter> iter = jm.getResponseParameters().iterator();
+        SOAPBinding soapBinding = jm.getBinding();
+        Iterator<ParameterImpl> iter = jm.getResponseParameters().iterator();
         while (iter.hasNext()) {
-            Parameter param = iter.next();
+            ParameterImpl param = iter.next();
             ParameterBinding paramBinding = param.getOutBinding();
             Object obj = createPayload(rtContext, param, data, result, soapBinding, paramBinding);
             if (paramBinding.isBody()) {
@@ -161,7 +166,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
         return im;
     }
 
-    private Object getDetail(CheckedException ce, Object exception) {
+    private Object getDetail(CheckedExceptionImpl ce, Object exception) {
         if(ce.getExceptionType().equals(ExceptionType.UserDefined)){
             return createDetailFromUserDefinedException(ce, exception);
         }
@@ -173,7 +178,7 @@ public class ServerEncoderDecoder extends EncoderDecoder implements InternalEnco
         }
     }
 
-    private Object createDetailFromUserDefinedException(CheckedException ce, Object exception) {
+    private Object createDetailFromUserDefinedException(CheckedExceptionImpl ce, Object exception) {
         Class detailBean = ce.getDetailBean();
         Field[] fields = detailBean.getDeclaredFields();
         try {

@@ -19,6 +19,7 @@ import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
@@ -294,7 +295,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         //apply parameter bindings
-        AbstractSEIModelImpl model = eif.getRuntimeContext().getModel();
+        SOAPSEIModel model = eif.getRuntimeContext().getModel();
         if (portName != null) {
             WSDLBoundPortTypeImpl binding = getPortModel(portName).getBinding();
             eif.setBindingID(binding.getBindingId());
@@ -379,7 +380,7 @@ public class WSServiceDelegate extends WSService {
             }
 
             //todo:use SCAnnotations and put in map
-            WSDLBoundPortTypeImpl wsdlPort = wsdlService.get(portName).getBinding();
+            WSDLPortImpl wsdlPort = wsdlService.get(portName);
             // TODO: error check against wsdlPort==null
             RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort);
             modeler.setPortName(portName);
@@ -390,7 +391,7 @@ public class WSServiceDelegate extends WSService {
             // get handler information
             HandlerAnnotationInfo chainInfo =
                 HandlerAnnotationProcessor.buildHandlerInfo(portInterface,
-                    model.getServiceQName(), model.getPortName(), wsdlPort.getBindingId());
+                    model.getServiceQName(), model.getPortName(), wsdlPort.getBinding().getBindingId());
 
             if (chainInfo != null) {
                 if(handlerResolver==null)
@@ -399,7 +400,7 @@ public class WSServiceDelegate extends WSService {
                 // the following cast to HandlerResolverImpl always succeed, as the addPort method
                 // is only used during the construction of WSServiceDelegate
                 ((HandlerResolverImpl)handlerResolver).setHandlerChain(new PortInfoImpl(
-                    wsdlPort.getBindingId(),
+                    wsdlPort.getBinding().getBindingId(),
                     model.getPortName(),
                     model.getServiceQName()),
                     chainInfo.getHandlers());

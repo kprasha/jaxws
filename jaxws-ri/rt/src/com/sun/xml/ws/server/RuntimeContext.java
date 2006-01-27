@@ -26,6 +26,7 @@ import javax.xml.namespace.QName;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.handler.HandlerContext;
 //import com.sun.xml.ws.api.model.SEIModel;
 
@@ -36,13 +37,13 @@ import com.sun.xml.ws.handler.HandlerContext;
 public class RuntimeContext {
 
     public RuntimeContext(AbstractSEIModelImpl model) {
-        this.model = model;
+        this.model = (SOAPSEIModel)model;
     }
 
     /**
      * @return Returns the model.
      */
-    public AbstractSEIModelImpl getModel() {
+    public SOAPSEIModel getModel() {
         return model;
     }
 
@@ -74,7 +75,7 @@ public class RuntimeContext {
      * @return the <code>Method</code> associated with the operation named name
      */
     public Method getDispatchMethod(QName name){
-        return ((AbstractSEIModelImpl)model).getDispatchMethod(name);
+        return model.getDispatchMethod(name);
     }
 
     /**
@@ -83,7 +84,7 @@ public class RuntimeContext {
      */
     public void setMethodAndMEP(QName qname, MessageInfo mi) {
         if (model != null) {
-            mi.setMethod((((AbstractSEIModelImpl)model).getDispatchMethod(qname)));
+            mi.setMethod((model.getDispatchMethod(qname)));
 
             // if null, default MEP is ok
             if (qname != null && model.getJavaMethod(qname) != null) {
@@ -97,7 +98,7 @@ public class RuntimeContext {
      * @return the decoder Info associated with operation named name
      */
     public Object getDecoderInfo(QName name) {
-        return ((AbstractSEIModelImpl)model).getDecoderInfo(name);
+        return model.getDecoderInfo(name);
     }
 
     public BridgeContext getBridgeContext() {
@@ -112,7 +113,7 @@ public class RuntimeContext {
         this.handlerContext = handlerContext;
     }
 
-    private AbstractSEIModelImpl model;
+    private SOAPSEIModel model;
     private HandlerContext handlerContext;
     private RuntimeEndpointInfo endpointInfo;
 }

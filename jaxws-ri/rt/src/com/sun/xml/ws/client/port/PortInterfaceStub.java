@@ -8,8 +8,11 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.SOAPSEIModel;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.spi.ServiceDelegate;
@@ -27,21 +30,21 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public final class PortInterfaceStub extends Stub implements InvocationHandler {
-    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, Class portInterface, SEIModel model, Pipe master ) {
+    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, Class portInterface, SOAPSEIModel seiModel, Pipe master ) {
         super(master,binding);
         this.owner = owner;
-        this.model = model;
+        this.seiModel = seiModel;
         this.portInterface = portInterface;
         this.soapVersion = binding.getSOAPVersion();
 
-        this.marshallers = new Pool.Marshaller(model.getJAXBContext());
-        this.bridgeContexts = new Pool.BridgeContext(model.getJAXBContext());
+        this.marshallers = new Pool.Marshaller(seiModel.getJAXBContext());
+        this.bridgeContexts = new Pool.BridgeContext(seiModel.getJAXBContext());
 
         Map<WSDLBoundOperation,SyncMethodHandler> syncs = new HashMap<WSDLBoundOperation, SyncMethodHandler>();
 
         // fill in methodHandlers.
         // first fill in sychronized versions
-        for( JavaMethod m : model.getJavaMethods() ) {
+        for( JavaMethodImpl m : seiModel.getJavaMethods() ) {
             if(!m.getMEP().isAsync) {
                 SyncMethodHandler handler = new SyncMethodHandler(this, m);
                 syncs.put(m.getOperation(),handler);
@@ -49,7 +52,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
             }
         }
 
-        for( JavaMethod jm : model.getJavaMethods() ) {
+        for( JavaMethodImpl jm : seiModel.getJavaMethods() ) {
             if(jm.getMEP()== MEP.ASYNC_CALLBACK) {
                 Method m = jm.getMethod();
                 methodHandlers.put(m,new CallbackMethodHandler(this,
@@ -62,7 +65,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         }
     }
 
-    public final SEIModel model;
+    public final SOAPSEIModel seiModel;
 
     public final SOAPVersion soapVersion;
 
