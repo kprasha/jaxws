@@ -29,7 +29,7 @@ import com.sun.xml.ws.model.soap.SOAPBindingImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
@@ -103,14 +103,14 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @return returns unmodifiable list of request parameters
      */
-    public List<Parameter> getRequestParameters() {
+    public List<ParameterImpl> getRequestParameters() {
         return unmReqParams;
     }
 
     /**
      * @return returns unmodifiable list of response parameters
      */
-    public List<Parameter> getResponseParameters() {
+    public List<ParameterImpl> getResponseParameters() {
         return unmResParams;
     }
 
@@ -152,7 +152,7 @@ public class JavaMethodImpl implements JavaMethod {
      */
     public int getInputParametersCount() {
         int count = 0;
-        for (Parameter param : requestParams) {
+        for (ParameterImpl param : requestParams) {
             if (param.isWrapperStyle()) {
                 count += ((WrapperParameter) param).getWrapperChildren().size();
             } else {
@@ -160,9 +160,9 @@ public class JavaMethodImpl implements JavaMethod {
             }
         }
 
-        for (Parameter param : responseParams) {
+        for (ParameterImpl param : responseParams) {
             if (param.isWrapperStyle()) {
-                for (Parameter wc : ((WrapperParameter) param).getWrapperChildren()) {
+                for (ParameterImpl wc : ((WrapperParameter) param).getWrapperChildren()) {
                     if (!wc.isResponse() && wc.isOUT()) {
                         count++;
                     }
@@ -178,7 +178,7 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @param ce
      */
-    void addException(CheckedException ce) {
+    void addException(CheckedExceptionImpl ce) {
         if (!exceptions.contains(ce))
             exceptions.add(ce);
     }
@@ -188,8 +188,8 @@ public class JavaMethodImpl implements JavaMethod {
      * @return CheckedException corresponding to the exceptionClass. Returns
      *         null if not found.
      */
-    public CheckedException getCheckedException(Class exceptionClass) {
-        for (CheckedException ce : exceptions) {
+    public CheckedExceptionImpl getCheckedException(Class exceptionClass) {
+        for (CheckedExceptionImpl ce : exceptions) {
             if (ce.getExcpetionClass().equals(exceptionClass))
                 return ce;
         }
@@ -199,7 +199,7 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @return a list of checked Exceptions thrown by this method
      */
-    public List<CheckedException> getCheckedExceptions(){
+    public List<CheckedExceptionImpl> getCheckedExceptions(){
         return Collections.unmodifiableList(exceptions);
     }
     /**
@@ -207,8 +207,8 @@ public class JavaMethodImpl implements JavaMethod {
      * @return Gets the CheckedException corresponding to detailType. Returns
      *         null if no CheckedExcpetion with the detailType found.
      */
-    public CheckedException getCheckedException(TypeReference detailType) {
-        for (CheckedException ce : exceptions) {
+    public CheckedExceptionImpl getCheckedException(TypeReference detailType) {
+        for (CheckedExceptionImpl ce : exceptions) {
             TypeReference actual = ce.getDetailType();
             if (actual.tagName.equals(detailType.tagName)
                     && actual.type.getClass().getName()
@@ -228,20 +228,20 @@ public class JavaMethodImpl implements JavaMethod {
     }
 
     /*package*/ void freeze(WSDLBoundPortType portType) {
-        this.wsdlOperation = portType.get(new QName(portType.getName().getNamespaceURI(),operationName));
+        this.wsdlOperation = portType.get(new QName(portType.getPortTypeName().getNamespaceURI(),operationName));
         // TODO: replace this with proper error handling
         if(wsdlOperation ==null)
             throw new Error("Undefined operation name "+operationName);
     }
 
-    private List<CheckedException> exceptions = new ArrayList<CheckedException>();
+    private List<CheckedExceptionImpl> exceptions = new ArrayList<CheckedExceptionImpl>();
     private Method method;
     /*package*/ final List<ParameterImpl> requestParams = new ArrayList<ParameterImpl>();
     /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
-    private final List<Parameter> unmReqParams =
-            Collections.<Parameter>unmodifiableList(requestParams);
-    private final List<Parameter> unmResParams =
-            Collections.<Parameter>unmodifiableList(responseParams);
+    private final List<ParameterImpl> unmReqParams =
+            Collections.<ParameterImpl>unmodifiableList(requestParams);
+    private final List<ParameterImpl> unmResParams =
+            Collections.<ParameterImpl>unmodifiableList(responseParams);
     private SOAPBinding binding;
     private MEP mep;
     private String operationName;

@@ -27,7 +27,7 @@ import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.handler.HandlerContext;
-import com.sun.xml.ws.api.model.SEIModel;
+//import com.sun.xml.ws.api.model.SEIModel;
 
 
 /**
@@ -35,14 +35,14 @@ import com.sun.xml.ws.api.model.SEIModel;
  */
 public class RuntimeContext {
 
-    public RuntimeContext(SEIModel model) {
+    public RuntimeContext(AbstractSEIModelImpl model) {
         this.model = model;
     }
 
     /**
      * @return Returns the model.
      */
-    public SEIModel getModel() {
+    public AbstractSEIModelImpl getModel() {
         return model;
     }
 
@@ -112,7 +112,7 @@ public class RuntimeContext {
         this.handlerContext = handlerContext;
     }
 
-    private SEIModel model;
+    private AbstractSEIModelImpl model;
     private HandlerContext handlerContext;
     private RuntimeEndpointInfo endpointInfo;
 }

@@ -50,7 +50,7 @@ import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.client.HttpClientTransportFactory;
 import com.sun.xml.ws.util.XMLConnectionUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.model.JavaMethodImpl;
 
 import javax.activation.DataSource;
 import javax.xml.bind.JAXBContext;
@@ -278,7 +278,7 @@ public class XMLMessageDispatcher implements MessageDispatcher {
         // SOAPAction: MIME header
         RuntimeContext runtimeContext = (RuntimeContext) messageInfo.getMetaData(JAXWS_RUNTIME_CONTEXT);
         if (runtimeContext != null) {
-            JavaMethod javaMethod = runtimeContext.getModel().getJavaMethod(messageInfo.getMethod());
+            JavaMethodImpl javaMethod = runtimeContext.getModel().getJavaMethod(messageInfo.getMethod());
             if (javaMethod != null) {
                 String soapAction = ((com.sun.xml.ws.api.model.soap.SOAPBinding) javaMethod.getBinding()).getSOAPAction();
                 header.clear();

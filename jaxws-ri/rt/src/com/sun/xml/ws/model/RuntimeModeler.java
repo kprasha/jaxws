@@ -93,7 +93,7 @@ public class RuntimeModeler {
     public static final String RETURN               = "return";
     public static final String BEAN                 = "Bean";
     public static final String SERVICE              = "Service";
-    public static final String PORT                 = "WSDLPort";
+    public static final String PORT                 = "Port";
     public static final Class HOLDER_CLASS = Holder.class;
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
     public static final Class RPC_LIT_PAYLOAD_CLASS = com.sun.xml.ws.encoding.jaxb.RpcLitPayload.class;
@@ -233,7 +233,6 @@ public class RuntimeModeler {
 
         if (portName == null)
             portName = new QName(serviceName.getNamespaceURI(), portLocalName);
-
         if (!portName.getNamespaceURI().equals(serviceName.getNamespaceURI())) {
             throw new RuntimeModelerException("runtime.modeler.portname.servicename.namespace.mismatch",
                     new Object[] {serviceName, portName});
@@ -583,15 +582,17 @@ public class RuntimeModeler {
         }
         resElementName = new QName(resNamespace, resName);
 
-        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, reqElementName,
+        TypeReference typeRef =
+                new TypeReference(reqElementName, requestClass, new Annotation[0]);
+        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, typeRef,
             Mode.IN, 0);
         requestWrapper.setBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
-            //typeRef = new TypeReference(resElementName, responseClass,
-            //                            new Annotation[0]);
-            responseWrapper = new WrapperParameter(runtimeModel, resElementName,
+            typeRef = new TypeReference(resElementName, responseClass,
+                                        new Annotation[0]);
+            responseWrapper = new WrapperParameter(runtimeModel, typeRef,
                 Mode.OUT, -1);
             javaMethod.addParameter(responseWrapper);
             responseWrapper.setBinding(ParameterBinding.BODY);
@@ -692,7 +693,7 @@ public class RuntimeModeler {
                 }
             }
             paramQName = new QName(paramNamespace, paramName);
-            TypeReference typeRef =
+            typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
             param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
             if (isHeader) {
@@ -743,14 +744,16 @@ public class RuntimeModeler {
             resElementName = new QName(targetNamespace, operationName+RESPONSE);
         }
 
-        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, reqElementName, Mode.IN, 0);
+        TypeReference typeRef =
+                new TypeReference(reqElementName, RPC_LIT_PAYLOAD_CLASS, new Annotation[0]);
+        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.IN, 0);
         requestWrapper.setInBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
-            //typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS,
-            //                            new Annotation[0]);
-            responseWrapper = new WrapperParameter(runtimeModel, resElementName, Mode.OUT, -1);
+            typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS,
+                                        new Annotation[0]);
+            responseWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.OUT, -1);
             responseWrapper.setOutBinding(ParameterBinding.BODY);
             javaMethod.addParameter(responseWrapper);
         }
@@ -869,7 +872,7 @@ public class RuntimeModeler {
                     paramNamespace = targetNamespace;
                 paramQName = new QName(paramNamespace, paramName);
             }
-            TypeReference typeRef =
+            typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
 
             param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
@@ -958,7 +961,7 @@ public class RuntimeModeler {
             QName faultName = new QName(namespace, name);
             TypeReference typeRef = new TypeReference(faultName, exceptionBean,
                 anns);
-            CheckedException checkedException =
+            CheckedExceptionImpl checkedException =
                 new CheckedExceptionImpl(exceptionClass, typeRef, exceptionType);
             javaMethod.addException(checkedException);
         }

@@ -31,9 +31,11 @@ import com.sun.xml.ws.encoding.soap.message.*;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.MessageInfoUtil;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.CheckedException;
+//import com.sun.xml.ws.api.model.JavaMethod;
+//import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
+//import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Mode;
 
@@ -56,13 +58,13 @@ import java.util.Set;
 public class SOAPSEIModel extends AbstractSEIModelImpl {
 
     protected void createDecoderInfo() {
-        for (JavaMethod m : getJavaMethods()) {
+        for (JavaMethodImpl m : getJavaMethods()) {
             if(m.isAsync())
                 continue;
             com.sun.xml.ws.api.model.soap.SOAPBinding binding = (com.sun.xml.ws.api.model.soap.SOAPBinding) m.getBinding();
             setDecoderInfo(m.getRequestParameters(), binding, Mode.IN);
             setDecoderInfo(m.getResponseParameters(), binding, Mode.OUT);
-            for(CheckedException ce:m.getCheckedExceptions()){
+            for(CheckedExceptionImpl ce:m.getCheckedExceptions()){
                 JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(ce.getDetailType()));
                 addDecoderInfo(ce.getDetailType().tagName, bi);
             }
@@ -70,13 +72,13 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
 
     }
 
-    private void setDecoderInfo(List<Parameter> params, com.sun.xml.ws.api.model.soap.SOAPBinding binding, Mode mode){
-        for (Parameter param : params) {
+    private void setDecoderInfo(List<ParameterImpl> params, com.sun.xml.ws.api.model.soap.SOAPBinding binding, Mode mode){
+        for (ParameterImpl param : params) {
             ParameterBinding paramBinding = (mode == Mode.IN)?param.getInBinding():param.getOutBinding();
             if (paramBinding.isBody() && binding.isRpcLit()) {
                 RpcLitPayload payload = new RpcLitPayload(param.getName());
                 WrapperParameter wp = (WrapperParameter) param;
-                for (Parameter p : wp.getWrapperChildren()) {
+                for (ParameterImpl p : wp.getWrapperChildren()) {
                     if(p.getBinding().isUnbound())
                         continue;
                     JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(),
@@ -85,8 +87,15 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
                 }
                 addDecoderInfo(param.getName(), payload);
             } else {
-                JAXBBridgeInfo bi = new JAXBBridgeInfo(getBridge(param.getBridge().getTypeReference()),
-                    null);
+                JAXBBridgeInfo bi;
+                if (param instanceof WrapperParameter) {
+                    WrapperParameter wp = (WrapperParameter)param;
+                     bi = new JAXBBridgeInfo(wp.getWrapperBridge(),
+                        null);
+                }
+                else
+                    bi = new JAXBBridgeInfo(getBridge(param.getBridge().getTypeReference()),
+                        null);
                 addDecoderInfo(param.getName(), bi);
             }
         }
@@ -101,7 +110,7 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
         for(JavaMethodImpl jm : getJavaMethods()){
             put(jm.getMethod(), jm);
             boolean bodyFound = false;
-            for(Parameter p:jm.getRequestParameters()){
+            for(ParameterImpl p:jm.getRequestParameters()){
                 ParameterBinding binding = p.getBinding();
                 if(binding.isBody()){
                     put(p.getName(), jm);
@@ -146,14 +155,14 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
      * @param types
      * @param mode
      */
-    private void addTypes(List<Parameter> params, List<TypeReference> types, Mode mode) {
-        for(Parameter p:params){
+    private void addTypes(List<ParameterImpl> params, List<TypeReference> types, Mode mode) {
+        for(ParameterImpl p:params){
             ParameterBinding binding = (mode == Mode.IN)?p.getInBinding():p.getOutBinding();
             if(!p.isWrapperStyle()){
                 types.add(p.getBridge().getTypeReference());
             }else if(binding.isBody()){
-                List<Parameter> wcParams = ((WrapperParameter)p).getWrapperChildren();
-                for(Parameter wc:wcParams){
+                List<ParameterImpl> wcParams = ((WrapperParameter)p).getWrapperChildren();
+                for(ParameterImpl wc:wcParams){
                     types.add(wc.getBridge().getTypeReference());
                 }
             }
@@ -165,7 +174,7 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
         Set<QName> headers = new HashSet<QName>();
         for (JavaMethodImpl method : getJavaMethods()) {
             // fill in request headers
-            Iterator<Parameter> params = method.getRequestParameters().iterator();
+            Iterator<ParameterImpl> params = method.getRequestParameters().iterator();
             fillHeaders(params, headers, Mode.IN);
 
             // fill in response headers
@@ -179,9 +188,9 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
      * @param params
      * @param headers
      */
-    private void fillHeaders(Iterator<Parameter> params, Set<QName> headers, Mode mode) {
+    private void fillHeaders(Iterator<ParameterImpl> params, Set<QName> headers, Mode mode) {
         while (params.hasNext()) {
-            Parameter param = params.next();
+            ParameterImpl param = params.next();
             ParameterBinding binding = (mode == Mode.IN)?param.getInBinding():param.getOutBinding();
             QName name = param.getName();
             if (binding.isHeader() && !headers.contains(name)) {

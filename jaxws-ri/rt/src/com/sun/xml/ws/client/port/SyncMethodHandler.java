@@ -4,8 +4,10 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.Parameter;
+//import com.sun.xml.ws.api.model.JavaMethod;
+//import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
@@ -62,19 +64,19 @@ final class SyncMethodHandler extends MethodHandler {
 
     private final ResponseBuilder responseBuilder;
 
-    public SyncMethodHandler(PortInterfaceStub owner, JavaMethod method) {
+    public SyncMethodHandler(PortInterfaceStub owner, JavaMethodImpl method) {
         super(owner);
 
         this.soapAction = '"'+((SOAPBinding)method.getBinding()).getSOAPAction()+'"';
 
         {// prepare objects for creating messages
-            List<Parameter> rp = method.getRequestParameters();
+            List<ParameterImpl> rp = method.getRequestParameters();
 
             BodyBuilder bodyBuilder = null;
             List<MessageFiller> fillers = new ArrayList<MessageFiller>();
             valueGetters = new ValueGetter[rp.size()];
 
-            for (Parameter param : rp) {
+            for (ParameterImpl param : rp) {
                 ValueGetter getter = ValueGetter.get(param);
 
                 switch(param.getInBinding().kind) {
@@ -120,10 +122,10 @@ final class SyncMethodHandler extends MethodHandler {
         }
 
         {// prepare objects for processing response
-            List<Parameter> rp = method.getResponseParameters();
+            List<ParameterImpl> rp = method.getResponseParameters();
             List<ResponseBuilder> builders = new ArrayList<ResponseBuilder>();
 
-            for( Parameter param : rp ) {
+            for( ParameterImpl param : rp ) {
                 ValueSetter setter = ValueSetter.get(param);
                 switch(param.getOutBinding().kind) {
                 case BODY:

@@ -3,14 +3,11 @@ package com.sun.xml.ws.client.port;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-
-import javax.xml.ws.Holder;
 import java.util.List;
 
 /**
@@ -83,7 +80,7 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a bare parameter.
          */
-        Bare(Parameter p, PortInterfaceStub owner) {
+        Bare(ParameterImpl p, PortInterfaceStub owner) {
             super(p.getBridge(),owner);
             this.methodPos = p.getIndex();
             this.getter = ValueGetter.get(p);
@@ -125,7 +122,7 @@ abstract class BodyBuilder {
             // we'll use CompositeStructure to pack requests
             assert wp.getTypeReference().type==CompositeStructure.class;
 
-            List<Parameter> children = wp.getWrapperChildren();
+            List<ParameterImpl> children = wp.getWrapperChildren();
 
             parameterBridges = new Bridge[children.size()];
             for( int i=0; i<parameterBridges.length; i++ )
@@ -134,7 +131,7 @@ abstract class BodyBuilder {
             indices = new int[children.size()];
             getters = new ValueGetter[children.size()];
             for( int i=0; i<indices.length; i++ ) {
-                Parameter p = children.get(i);
+                ParameterImpl p = children.get(i);
                 indices[i] = p.getIndex();
                 getters[i] = ValueGetter.get(p);
             }

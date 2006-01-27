@@ -38,14 +38,14 @@ public interface SEIModel {
      *
      * @return the <code>{@link BridgeContext}</code>
      */
-    BridgeContext getBridgeContext();
+//    BridgeContext getBridgeContext();
 
     /**
      * JAXBContext that will be used to marshall/unmarshall the java classes found in the SEI.
      *
      * @return the <code>{@link JAXBRIContext}</code>
      */
-    JAXBRIContext getJAXBContext();
+//    JAXBRIContext getJAXBContext();
 
     /**
      * Get the Bridge associated with the {@link TypeReference}
@@ -53,7 +53,7 @@ public interface SEIModel {
      * @param type
      * @return the <code>{@link Bridge}</code> for the <code>type</code>
      */
-    Bridge getBridge(TypeReference type);
+//    Bridge getBridge(TypeReference type);
 
     /**
      * Its a known fault if the exception thrown by {@link Method} is annotated with the
@@ -64,7 +64,7 @@ public interface SEIModel {
      * @return true if <code>name</code> is the name
      *         of a known fault name for the <code>method</code>
      */
-    boolean isKnownFault(QName name, Method method);
+//    boolean isKnownFault(QName name, Method method);
 
     /**
      * Checks if the {@link JavaMethod} for the {@link Method} knowns the exception class.
@@ -74,7 +74,7 @@ public interface SEIModel {
      * @return true if <code>ex</code> is a Checked Exception
      *         for <code>m</code>
      */
-    boolean isCheckedException(Method m, Class ex);
+//    boolean isCheckedException(Method m, Class ex);
 
     /**
      * This method will be useful to get the {@link JavaMethod} corrrespondiong to

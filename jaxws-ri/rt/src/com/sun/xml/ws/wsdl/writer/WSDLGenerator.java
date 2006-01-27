@@ -30,10 +30,7 @@ import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
-import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.api.model.soap.Use;
 import com.sun.xml.ws.wsdl.parser.SOAPConstants;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import com.sun.xml.ws.wsdl.writer.document.Binding;
@@ -54,13 +51,23 @@ import com.sun.xml.ws.wsdl.writer.document.soap.BodyType;
 import com.sun.xml.ws.wsdl.writer.document.soap.Header;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPAddress;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.SEIModel;
+//import com.sun.xml.ws.api.model.JavaMethod;
+//import com.sun.xml.ws.api.model.Parameter;
+//import com.sun.xml.ws.api.model.CheckedException;
+//import com.sun.xml.ws.api.model.AbstractSEIModelImpl;
+//import com.sun.xml.ws.api.model.soap.Style;
+//import com.sun.xml.ws.api.model.soap.Use;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.SOAPVersion;
+
+
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.soap.Use;
-import com.sun.xml.ws.api.SOAPVersion;
+
 
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;
@@ -85,7 +92,7 @@ import java.util.Set;
 public class WSDLGenerator {
     private JAXWSOutputSchemaResolver resolver;
     private WSDLOutputResolver wsdlResolver = null;
-    private SEIModel model;
+    private AbstractSEIModelImpl model;
     private Definitions serviceDefinitions;
     private Definitions portDefinitions;
     private Types types;
@@ -184,13 +191,13 @@ public class WSDLGenerator {
 
     /**
      * Creates the WSDLGenerator
-     * @param model The {@link SEIModel} used to generate the WSDL
+     * @param model The {@link AbstractSEIModelImpl} used to generate the WSDL
      * @param wsdlResolver The {@link WSDLResolver} to use resovle names while generating the WSDL
      * @param bindingId specifies which {@link javax.xml.ws.BindingType} to generate
      * @param wges A {@link Collection} of {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
      */    
-    public WSDLGenerator(SEIModel model, WSDLOutputResolver wsdlResolver, String bindingId) {
+    public WSDLGenerator(AbstractSEIModelImpl model, WSDLOutputResolver wsdlResolver, String bindingId) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
         this.wsdlResolver = wsdlResolver;
@@ -204,7 +211,6 @@ public class WSDLGenerator {
         XmlSerializer serviceWriter;
         XmlSerializer portWriter = null;
         String fileName = JAXBRIContext.mangleNameToClassName(model.getServiceQName().getLocalPart());
-//        System.out.println("concrete name: "+ fileName);
         Result result = wsdlResolver.getWSDLOutput(fileName+DOT_WSDL);
         if (result == null)
             return;
@@ -217,13 +223,9 @@ public class WSDLGenerator {
             String wsdlName = JAXBRIContext.mangleNameToClassName(model.getPortTypeName().getLocalPart());
             if (wsdlName.equals(fileName))
                 wsdlName += "PortType";
-//            System.out.println("abstract name: "+ wsdlName);
             Holder<String> absWSDLName = new Holder<String>();
             absWSDLName.value = wsdlName+DOT_WSDL;
-//            System.out.println("absWSDLName.value: "+ absWSDLName.value);
             result = wsdlResolver.getAbstractWSDLOutput(absWSDLName);
-//            System.out.println("absWSDLName.value: "+ absWSDLName.value);
-//             schemaPrefix = model.getJAXBContext().mangleNameToClassName(portWSDLID)+"_";
           
             if (result != null) {
                 portWSDLID = result.getSystemId();
@@ -240,9 +242,6 @@ public class WSDLGenerator {
             if (idx > 0)
                 schemaPrefix = schemaPrefix.substring(0, idx);
             schemaPrefix = JAXBRIContext.mangleNameToClassName(schemaPrefix)+"_";
-//            System.out.println("portWSDLID: "+ portWSDLID);
-//            schemaPrefix = model.getJAXBContext().mangleNameToClassName(portWSDLID)+"_";
-//            System.out.println("schemaPrefix: "+ schemaPrefix);
         }    
         generateDocument(serviceWriter, portWriter);
     }
@@ -314,7 +313,7 @@ public class WSDLGenerator {
      * Generates the WSDL messages
      */
     protected void generateMessages() {
-        for (JavaMethod method : model.getJavaMethods()) {
+        for (JavaMethodImpl method : model.getJavaMethods()) {
             if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding)
                 generateSOAPMessages(method, (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding());
         }
@@ -325,13 +324,14 @@ public class WSDLGenerator {
      * @param method The {@link JavaMethod} to generate messages for
      * @param binding The {@link com.sun.xml.ws.api.model.soap.SOAPBinding} to add the generated messages to
      */
-    protected void generateSOAPMessages(JavaMethod method, com.sun.xml.ws.api.model.soap.SOAPBinding binding) {
+    protected void generateSOAPMessages(JavaMethodImpl method, com.sun.xml.ws.api.model.soap.SOAPBinding binding) {
         boolean isDoclit = binding.isDocLit();
-        Message message = portDefinitions.message().name(method.getOperation().getName().getLocalPart());
+//        Message message = portDefinitions.message().name(method.getOperation().getName().getLocalPart());
+        Message message = portDefinitions.message().name(method.getOperationName());
         com.sun.xml.ws.wsdl.writer.document.Part part;
         JAXBRIContext jaxbContext = model.getJAXBContext();
         boolean unwrappable = true;
-        for (Parameter param : method.getRequestParameters()) {
+        for (ParameterImpl param : method.getRequestParameters()) {
             if (isDoclit) {
                 if (isHeaderParameter(param))
                     unwrappable = false;
@@ -344,7 +344,7 @@ public class WSDLGenerator {
                 }
             } else {
                 if (param.isWrapperStyle()) {
-                    for (Parameter childParam : ((WrapperParameter)param).getWrapperChildren()) {
+                    for (ParameterImpl childParam : ((WrapperParameter)param).getWrapperChildren()) {
                         part = message.part().name(childParam.getPartName());
                         part.type(jaxbContext.getTypeName(childParam.getBridge().getTypeReference()));
                     }
@@ -355,15 +355,16 @@ public class WSDLGenerator {
             }
         }
         if (method.getMEP() != MEP.ONE_WAY) {
-            message = portDefinitions.message().name(method.getOperation().getName().getLocalPart()+RESPONSE);
+//            message = portDefinitions.message().name(method.getOperation().getName().getLocalPart()+RESPONSE);
+            message = portDefinitions.message().name(method.getOperationName()+RESPONSE);
             if (unwrappable) {
-                for (Parameter param : method.getResponseParameters()) {
+                for (ParameterImpl param : method.getResponseParameters()) {
                    if (isHeaderParameter(param))
                        unwrappable = false;
                 }
             }
 
-            for (Parameter param : method.getResponseParameters()) {
+            for (ParameterImpl param : method.getResponseParameters()) {
                 if (isDoclit) {
                     if (param.isWrapperStyle()) {
                         // if its not really wrapper style dont use the same name as input message
@@ -378,7 +379,7 @@ public class WSDLGenerator {
                     }
                 } else {
                     if (param.isWrapperStyle()) {
-                        for (Parameter childParam : ((WrapperParameter)param).getWrapperChildren()) {
+                        for (ParameterImpl childParam : ((WrapperParameter)param).getWrapperChildren()) {
                             part = message.part().name(childParam.getPartName());
                             part.type(jaxbContext.getTypeName(childParam.getBridge().getTypeReference()));
                         }
@@ -389,7 +390,7 @@ public class WSDLGenerator {
                 }
             }
         }
-        for (CheckedException exception : method.getCheckedExceptions()) {
+        for (CheckedExceptionImpl exception : ((List<CheckedExceptionImpl>)method.getCheckedExceptions())) {
             QName tagName = exception.getDetailType().tagName;
             if (processedExceptions.contains(tagName))
                 continue;
@@ -406,8 +407,9 @@ public class WSDLGenerator {
     protected void generatePortType() {
 
         PortType portType = portDefinitions.portType().name(model.getPortTypeName().getLocalPart());
-        for (JavaMethod method : model.getJavaMethods()) {
-            Operation operation = portType.operation().name(method.getOperation().getLocalName());
+        for (JavaMethodImpl method : model.getJavaMethods()) {
+//            Operation operation = portType.operation().name(method.getOperation().getLocalName());
+            Operation operation = portType.operation().name(method.getOperationName());
             generateParameterOrder(operation, method);
             switch (method.getMEP()) {
                 case REQUEST_RESPONSE:
@@ -421,7 +423,7 @@ public class WSDLGenerator {
                     break;
             }
             // faults
-            for (CheckedException exception : method.getCheckedExceptions()) {
+            for (CheckedExceptionImpl exception : ((List<CheckedExceptionImpl>)method.getCheckedExceptions())) {
                 QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
                 FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
@@ -434,9 +436,9 @@ public class WSDLGenerator {
      * @param method The {@link JavaMethod} to check if it is wrapper style
      * @return true if the method is wrapper style, otherwise, false.
      */    
-    protected boolean isWrapperStyle(JavaMethod method) {
+    protected boolean isWrapperStyle(JavaMethodImpl method) {
         if (method.getRequestParameters().size() > 0) {
-            Parameter param = method.getRequestParameters().iterator().next();
+            ParameterImpl param = method.getRequestParameters().iterator().next();
             return param.isWrapperStyle();
         }
         return false;
@@ -447,7 +449,7 @@ public class WSDLGenerator {
      * @param method The method to check
      * @return true if method is rpc/literal, otherwise, false
      */    
-    protected boolean isRpcLit(JavaMethod method) {
+    protected boolean isRpcLit(JavaMethodImpl method) {
         if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
             if (((com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding()).getStyle().equals(Style.RPC))
                 return true;
@@ -460,7 +462,7 @@ public class WSDLGenerator {
      * @param operation The operation to generate the parameterOrder for
      * @param method The {@link JavaMethod} to generate the parameterOrder from
      */    
-    protected void generateParameterOrder(Operation operation, JavaMethod method) {
+    protected void generateParameterOrder(Operation operation, JavaMethodImpl method) {
         if (method.getMEP() == MEP.ONE_WAY)
             return;
         if (isRpcLit(method))
@@ -474,13 +476,13 @@ public class WSDLGenerator {
      * @param operation the operation to generate the parameterOrder for
      * @param method the {@link JavaMethod} to generate the parameterOrder from
      */    
-    protected void generateRpcParameterOrder(Operation operation, JavaMethod method) {
+    protected void generateRpcParameterOrder(Operation operation, JavaMethodImpl method) {
         String partName;
         StringBuffer paramOrder = new StringBuffer();
         Set<String> partNames = new HashSet<String>();
-        List<Parameter> sortedParams = sortMethodParameters(method);
+        List<ParameterImpl> sortedParams = sortMethodParameters(method);
         int i = 0;
-        for (Parameter parameter : sortedParams) {
+        for (ParameterImpl parameter : sortedParams) {
             if (parameter.getIndex() >= 0) {
                partName = parameter.getPartName();
                 if (!partNames.contains(partName)) {
@@ -500,14 +502,14 @@ public class WSDLGenerator {
      * @param operation the operation to generate the parameterOrder for
      * @param method the {@link JavaMetho} to generate the parameterOrder from
      */    
-    protected void generateDocumentParameterOrder(Operation operation, JavaMethod method) {
+    protected void generateDocumentParameterOrder(Operation operation, JavaMethodImpl method) {
         String partName;
         StringBuffer paramOrder = new StringBuffer();
         Set<String> partNames = new HashSet<String>();
-        List<Parameter> sortedParams = sortMethodParameters(method);
+        List<ParameterImpl> sortedParams = sortMethodParameters(method);
         boolean isWrapperStyle = isWrapperStyle(method);
         int i = 0;
-        for (Parameter parameter : sortedParams) {
+        for (ParameterImpl parameter : sortedParams) {
 //            System.out.println("param: "+parameter.getIndex()+" name: "+parameter.getName().getLocalPart());
             if (parameter.getIndex() < 0)
                 continue;
@@ -539,18 +541,18 @@ public class WSDLGenerator {
      * @param method the {@link JavaMethod} used to sort the parameters
      * @return the sorted {@link List} of parameters
      */    
-    protected List<Parameter> sortMethodParameters(JavaMethod method) {
-        Set<Parameter> paramSet = new HashSet<Parameter>();
-        List<Parameter> sortedParams = new ArrayList<Parameter>();
+    protected List<ParameterImpl> sortMethodParameters(JavaMethodImpl method) {
+        Set<ParameterImpl> paramSet = new HashSet<ParameterImpl>();
+        List<ParameterImpl> sortedParams = new ArrayList<ParameterImpl>();
         if (isRpcLit(method)) {
-            for (Parameter param : method.getRequestParameters()) {
+            for (ParameterImpl param : method.getRequestParameters()) {
                 if (param instanceof WrapperParameter) {
                     paramSet.addAll(((WrapperParameter)param).getWrapperChildren());
                 } else {
                     paramSet.add(param);
                 }
             }
-            for (Parameter param : method.getResponseParameters()) {
+            for (ParameterImpl param : method.getResponseParameters()) {
                 if (param instanceof WrapperParameter) {
                     paramSet.addAll(((WrapperParameter)param).getWrapperChildren());
                 } else {
@@ -561,12 +563,12 @@ public class WSDLGenerator {
             paramSet.addAll(method.getRequestParameters());
             paramSet.addAll(method.getResponseParameters());
         }
-        Iterator<Parameter>params = paramSet.iterator();
+        Iterator<ParameterImpl>params = paramSet.iterator();
         if (paramSet.size() == 0)
             return sortedParams;
-        Parameter param = params.next();
+        ParameterImpl param = params.next();
         sortedParams.add(param);
-        Parameter sortedParam;
+        ParameterImpl sortedParam;
         int pos;
         for (int i=1; i<paramSet.size();i++) {
             param = params.next();
@@ -589,7 +591,7 @@ public class WSDLGenerator {
      * @param parameter the parameter to check
      * @return true if the parameter is a <code>body</code> parameter
      */    
-    protected boolean isBodyParameter(Parameter parameter) {
+    protected boolean isBodyParameter(ParameterImpl parameter) {
         ParameterBinding paramBinding = parameter.getBinding();
         return paramBinding.isBody();
     }
@@ -599,7 +601,7 @@ public class WSDLGenerator {
      * @param parameter 
      * @return 
      */    
-    protected boolean isHeaderParameter(Parameter parameter) {
+    protected boolean isHeaderParameter(ParameterImpl parameter) {
         ParameterBinding paramBinding = parameter.getBinding();
         return paramBinding.isHeader();
     }
@@ -609,7 +611,7 @@ public class WSDLGenerator {
      * @param parameter 
      * @return 
      */
-    protected boolean isAttachmentParameter(Parameter parameter) {
+    protected boolean isAttachmentParameter(ParameterImpl parameter) {
         ParameterBinding paramBinding = parameter.getBinding();
         return paramBinding.isAttachment();
     }
@@ -622,7 +624,7 @@ public class WSDLGenerator {
         Binding binding = serviceDefinitions.binding().name(model.getPortName().getLocalPart()+BINDING);
         binding.type(model.getPortTypeName());
         boolean first = true;
-        for (JavaMethod method : model.getJavaMethods()) {
+        for (JavaMethodImpl method : model.getJavaMethods()) {
             if (first) {
                 if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
                     com.sun.xml.ws.api.model.soap.SOAPBinding sBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
@@ -658,14 +660,17 @@ public class WSDLGenerator {
      * @param method 
      * @param binding 
      */    
-    protected void generateBindingOperation(JavaMethod method, Binding binding) {
-        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
+    protected void generateBindingOperation(JavaMethodImpl method, Binding binding) {
+//        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
+        BindingOperationType operation = binding.operation().name(method.getOperationName());
         String targetNamespace = model.getTargetNamespace();
-        QName requestMessage = method.getOperation().getName();
-        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
+//        QName requestMessage = method.getOperation().getName();
+//        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
+        QName requestMessage = new QName(targetNamespace, method.getOperationName());
+        QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
         if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-            List<Parameter> bodyParams = new ArrayList<Parameter>();
-            List<Parameter> headerParams = new ArrayList<Parameter>();
+            List<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
+            List<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
             splitParameters(bodyParams, headerParams, method.getRequestParameters());
             com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
             operation.soapOperation().soapAction(soapBinding.getSOAPAction());
@@ -677,11 +682,11 @@ public class WSDLGenerator {
             if (soapBinding.getUse().equals(Use.LITERAL)) {
                 body.use(LITERAL);
                 if (headerParams.size() > 0) {
-                    Parameter param = bodyParams.iterator().next();
+                    ParameterImpl param = bodyParams.iterator().next();
                     if (isRpc) {
                         StringBuffer parts = new StringBuffer();
                         int i=0;
-                        for (Parameter parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
                             if (i++>0)
                                 parts.append(' ');
                             parts.append(parameter.getPartName());
@@ -713,11 +718,11 @@ public class WSDLGenerator {
                 body = output._element(Body.class);
                 body.use(LITERAL);
                 if (headerParams.size() > 0) {
-                    Parameter param = bodyParams.iterator().hasNext() ? bodyParams.iterator().next() : null;
+                    ParameterImpl param = bodyParams.iterator().hasNext() ? bodyParams.iterator().next() : null;
                     String parts = "";
                     if (isRpc) {
                         int i=0;
-                        for (Parameter parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
                             if (i++>0)
                                 parts += " ";
                             parts += parameter.getPartName();
@@ -742,7 +747,7 @@ public class WSDLGenerator {
                     body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
                 }
             }
-            for (CheckedException exception : method.getCheckedExceptions()) {
+            for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
                 QName tagName = exception.getDetailType().tagName;
                 Fault fault = operation.fault().name(tagName.getLocalPart());
                 SOAPFault soapFault = fault._element(SOAPFault.class).name(tagName.getLocalPart());
@@ -756,14 +761,14 @@ public class WSDLGenerator {
      * @param method 
      * @param binding 
      */    
-    protected void generateSOAP12BindingOperation(JavaMethod method, Binding binding) {
+    protected void generateSOAP12BindingOperation(JavaMethodImpl method, Binding binding) {
         BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         String targetNamespace = model.getTargetNamespace();
         QName requestMessage = method.getOperation().getName();
         QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
         if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-            ArrayList<Parameter> bodyParams = new ArrayList<Parameter>();
-            ArrayList<Parameter> headerParams = new ArrayList<Parameter>();
+            ArrayList<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
+            ArrayList<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
             splitParameters(bodyParams, headerParams, method.getRequestParameters());
             com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
             operation.soap12Operation().soapAction(soapBinding.getSOAPAction());
@@ -776,11 +781,11 @@ public class WSDLGenerator {
             if (soapBinding.getUse().equals(Use.LITERAL)) {
                 body.use(LITERAL);
                 if (headerParams.size() > 0) {
-                    Parameter param = bodyParams.iterator().next();
+                    ParameterImpl param = bodyParams.iterator().next();
                     if (isRpc) {
                         StringBuffer parts = new StringBuffer();
                         int i=0;
-                        for (Parameter parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
                             if (i++>0)
                                 parts.append(' ');
                             parts.append(parameter.getPartName());
@@ -812,11 +817,11 @@ public class WSDLGenerator {
                 body = output._element(com.sun.xml.ws.wsdl.writer.document.soap12.Body.class);
                 body.use(LITERAL);
                 if (headerParams.size() > 0) {
-                    Parameter param = bodyParams.iterator().next();
+                    ParameterImpl param = bodyParams.iterator().next();
                     if (isRpc) {
                         String parts = "";
                         int i=0;
-                        for (Parameter parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
                             if (i++>0)
                                 parts += " ";
                             parts += parameter.getPartName();
@@ -837,7 +842,7 @@ public class WSDLGenerator {
                     body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
                 }
             }
-            for (CheckedException exception : method.getCheckedExceptions()) {
+            for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
                 QName tagName = exception.getDetailType().tagName;
                 Fault fault = operation.fault().name(tagName.getLocalPart());
                 com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault soapFault = fault._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault.class).name(tagName.getLocalPart());
@@ -852,8 +857,8 @@ public class WSDLGenerator {
      * @param headerParams 
      * @param params 
      */    
-    protected void splitParameters(List<Parameter> bodyParams, List<Parameter>headerParams, List<Parameter>params) {
-        for (Parameter parameter : params) {
+    protected void splitParameters(List<ParameterImpl> bodyParams, List<ParameterImpl>headerParams, List<ParameterImpl>params) {
+        for (ParameterImpl parameter : params) {
             if (isBodyParameter(parameter)) {
                 bodyParams.add(parameter);
             } else {
@@ -868,9 +873,9 @@ public class WSDLGenerator {
      * @param parameters 
      * @param message 
      */    
-    protected void generateSOAPHeaders(TypedXmlWriter writer, List<Parameter> parameters, QName message) {
+    protected void generateSOAPHeaders(TypedXmlWriter writer, List<ParameterImpl> parameters, QName message) {
 
-        for (Parameter headerParam : parameters) {
+        for (ParameterImpl headerParam : parameters) {
             Header header = writer._element(Header.class);
             header.message(message);
             header.part(headerParam.getPartName());
@@ -884,9 +889,9 @@ public class WSDLGenerator {
      * @param parameters 
      * @param message 
      */
-    protected void generateSOAP12Headers(TypedXmlWriter writer, List<Parameter> parameters, QName message) {
+    protected void generateSOAP12Headers(TypedXmlWriter writer, List<ParameterImpl> parameters, QName message) {
 
-        for (Parameter headerParam : parameters) {
+        for (ParameterImpl headerParam : parameters) {
             com.sun.xml.ws.wsdl.writer.document.soap12.Header header = writer._element(com.sun.xml.ws.wsdl.writer.document.soap12.Header.class);
             header.message(message);
 
@@ -923,9 +928,10 @@ public class WSDLGenerator {
      * @param operation 
      * @param method 
      */    
-    protected void generateInputMessage(Operation operation, JavaMethod method) {
+    protected void generateInputMessage(Operation operation, JavaMethodImpl method) {
         ParamType paramType = operation.input();
-        paramType.message(method.getOperation().getName());
+//        paramType.message(method.getOperation().getName());
+        paramType.message(new QName(model.getTargetNamespace(), method.getOperationName()));
     }
 
     /**
@@ -933,9 +939,10 @@ public class WSDLGenerator {
      * @param operation 
      * @param method 
      */
-    protected void generateOutputMessage(Operation operation, JavaMethod method) {
+    protected void generateOutputMessage(Operation operation, JavaMethodImpl method) {
         ParamType paramType = operation.output();
-        paramType.message(new QName(model.getTargetNamespace(), method.getOperation().getLocalName()+RESPONSE));
+//        paramType.message(new QName(model.getTargetNamespace(), method.getOperation().getLocalName()+RESPONSE));
+        paramType.message(new QName(model.getTargetNamespace(), method.getOperationName()+RESPONSE));
     }
 
     /**

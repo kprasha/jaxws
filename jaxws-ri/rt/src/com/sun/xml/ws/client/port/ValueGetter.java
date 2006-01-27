@@ -1,7 +1,8 @@
 package com.sun.xml.ws.client.port;
 
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.Parameter;
+//import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.model.ParameterImpl;
 
 import javax.xml.ws.Holder;
 
@@ -55,7 +56,7 @@ enum ValueGetter {
     /**
      * Returns a {@link ValueGetter} suitable for the given {@link Parameter}.
      */
-    static ValueGetter get(Parameter p) {
+    static ValueGetter get(ParameterImpl p) {
         if(p.getMode()== Mode.IN)
             return PLAIN;
         else

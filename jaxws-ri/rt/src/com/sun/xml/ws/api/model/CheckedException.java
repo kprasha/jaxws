@@ -28,7 +28,7 @@ public interface CheckedException {
      * @return
      *      always non-null same object.
      */
-    Class<? extends RemoteException> getExcpetionClass();
+//    Class<? extends RemoteException> getExcpetionClass();
 
     /**
      * The detail bean is serialized inside the detail entry in the SOAP message.
@@ -37,12 +37,12 @@ public interface CheckedException {
      *
      * @return the detail bean
      */
-    Class getDetailBean();
+//    Class getDetailBean();
 
     /**
      * {@link TypeReference} associated with the dettail bean.
      */
-    TypeReference getDetailType();
+//    TypeReference getDetailType();
 
     /**
      * Tells whether the exception class is a userdefined or a WSDL exception.
@@ -55,5 +55,5 @@ public interface CheckedException {
      *
      * <code>public FaultBean getFaultInfo();</code>     
      */
-    ExceptionType getExceptionType();
+//    ExceptionType getExceptionType();
 }

@@ -37,10 +37,14 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.util.StringUtils;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.SEIModel;
+//import com.sun.xml.ws.api.model.JavaMethod;
+//import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
+//import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
+//import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;
@@ -67,7 +71,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
         InternalMessage im = (InternalMessage) intMessage;
         BodyBlock bodyBlock = im.getBody();
         RuntimeContext rtContext = (RuntimeContext) mi.getMetaData(BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
-        JavaMethod jm = rtContext.getModel().getJavaMethod(mi.getMethod());
+        JavaMethodImpl jm = rtContext.getModel().getJavaMethod(mi.getMethod());
         mi.setMEP(jm.getMEP());
 
         Object bodyValue  = (bodyBlock == null) ? null : bodyBlock.getValue();
@@ -82,7 +86,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
                 return;
             }
             JAXBBridgeInfo bi = (JAXBBridgeInfo)detail;
-            CheckedException ce = jm.getCheckedException(bi.getType());
+            CheckedExceptionImpl ce = jm.getCheckedException(bi.getType());
             Exception ex = createCheckedException(sfi.getString(), ce, bi.getValue());
             mi.setResponseType(MessageStruct.CHECKED_EXCEPTION_RESPONSE);
             mi.setResponse(ex);
@@ -109,7 +113,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
                 return;
             }
             JAXBBridgeInfo bi = (JAXBBridgeInfo)detail;
-            CheckedException ce = jm.getCheckedException(bi.getType());
+            CheckedExceptionImpl ce = jm.getCheckedException(bi.getType());
             String reason = null;
             List<FaultReasonText> frt = sfi.getReasons().getFaultReasonTexts();
             //for now we pickup onkly the first Reason Text
@@ -215,7 +219,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
         }
 
 
-        for (Parameter param : jm.getResponseParameters()) {
+        for (ParameterImpl param : jm.getResponseParameters()) {
             Object obj = null;
             ParameterBinding paramBinding = param.getOutBinding();
             if (paramBinding.isBody()) {
@@ -240,12 +244,12 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
         }
     }
 
-    private Object createAsyncResponseClass(Parameter parameter) {
+    private Object createAsyncResponseClass(ParameterImpl parameter) {
         Class asyncWrapper = (Class)parameter.getBridge().getTypeReference().type;
         if(RpcLitPayload.class.isAssignableFrom(asyncWrapper)){
             WrapperParameter wp = (WrapperParameter)parameter;
             if(wp.getWrapperChildren().size() > 0){
-                Parameter p = wp.getWrapperChildren().get(0);
+                ParameterImpl p = wp.getWrapperChildren().get(0);
                 asyncWrapper = (Class) p.getBridge().getTypeReference().type;
             }
         }
@@ -257,7 +261,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
         }
     }
 
-    private Exception createCheckedException(String message, CheckedException ce, Object detail) {
+    private Exception createCheckedException(String message, CheckedExceptionImpl ce, Object detail) {
         if(ce.getExceptionType().equals(ExceptionType.UserDefined)){
             return createUserDefinedException(message, ce, detail);
 
@@ -277,7 +281,7 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
      * @param ce
      * @param detail
      */
-    private Exception createUserDefinedException(String message, CheckedException ce, Object detail) {
+    private Exception createUserDefinedException(String message, CheckedExceptionImpl ce, Object detail) {
         Class exceptionClass = ce.getExcpetionClass();
         try {
             Constructor constructor = exceptionClass.getConstructor(new Class[]{String.class});
@@ -305,15 +309,16 @@ public class ClientEncoderDecoder extends EncoderDecoder implements InternalEnco
      */
     public InternalMessage toInternalMessage(MessageInfo mi) {
         RuntimeContext rtContext = (RuntimeContext) mi.getMetaData(BindingProviderProperties.JAXWS_RUNTIME_CONTEXT);
-        SEIModel model = rtContext.getModel();
+        AbstractSEIModelImpl model = rtContext.getModel();
 
-        JavaMethod jm = model.getJavaMethod(mi.getMethod());
+        JavaMethodImpl jm = model.getJavaMethod(mi.getMethod());
         Object[] data = mi.getData();
         InternalMessage im = new InternalMessage();
-        Iterator<Parameter> iter = jm.getRequestParameters().iterator();
+//        Iterator<ParameterImpl> iter = jm.getRequestParameters().iterator();
         com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)jm.getBinding();
-        while (iter.hasNext()) {
-            Parameter param = iter.next();
+//        while (iter.hasNext()) {
+        for (ParameterImpl param : jm.getRequestParameters()) {
+//            ParameterImpl param = iter.next();
             ParameterBinding paramBinding = param.getInBinding();
             Object obj = createPayload(rtContext, param, data, null, soapBinding, paramBinding);
             if (paramBinding.isBody()) {

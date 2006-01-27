@@ -20,8 +20,9 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.WSEndpoint;
-import com.sun.xml.ws.api.model.SEIModel;
+//import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -92,7 +93,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     private String urlPattern;
     private List<Source> metadata;
     private BindingImpl binding;
-    private SEIModel seiModel;
+    private AbstractSEIModelImpl seiModel;
     private Object implementor;
     private Class implementorClass;
     private Map<String, DocInfo> docs;      // /WEB-INF/wsdl/xxx.wsdl -> DocInfo
@@ -460,7 +461,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         this.metadata = metadata;
     }
 
-    public SEIModel getRuntimeModel() {
+    public AbstractSEIModelImpl getRuntimeModel() {
         return seiModel;
     }
 

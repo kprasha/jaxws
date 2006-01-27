@@ -4,7 +4,6 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -295,11 +294,11 @@ public class WSServiceDelegate extends WSService {
         }
 
         //apply parameter bindings
-        SEIModel model = eif.getRuntimeContext().getModel();
+        AbstractSEIModelImpl model = eif.getRuntimeContext().getModel();
         if (portName != null) {
             WSDLBoundPortTypeImpl binding = getPortModel(portName).getBinding();
             eif.setBindingID(binding.getBindingId());
-            ((AbstractSEIModelImpl)model).applyParameterBinding(binding);
+            model.applyParameterBinding(binding);
         }
 
         BindingImpl binding = createBinding(portName, eif.getBindingID());

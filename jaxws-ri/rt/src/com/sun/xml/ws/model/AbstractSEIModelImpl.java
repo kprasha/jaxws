@@ -24,10 +24,10 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.JavaMethod;
+//import com.sun.xml.ws.api.model.CheckedException;
+//import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.Parameter;
+//import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -89,7 +89,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     protected void populateMaps() {
         for (JavaMethodImpl jm : getJavaMethods()) {
             put(jm.getMethod(), jm);
-            for (Parameter p : jm.getRequestParameters()) {
+            for (ParameterImpl p : jm.getRequestParameters()) {
                 put(p.getName(), jm);
             }
         }
@@ -108,8 +108,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                 }
                 try {
                     Method om = m.getDeclaringClass().getMethod(opName, params);
-                    JavaMethod jm2 = getJavaMethod(om);
-                    for (CheckedException ce : jm2.getCheckedExceptions()) {
+                    JavaMethodImpl jm2 = getJavaMethod(om);
+                    for (CheckedExceptionImpl ce : jm2.getCheckedExceptions()) {
                         jm.addException(ce);
                     }
                 } catch (NoSuchMethodException ex) {
@@ -226,8 +226,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         return types;
     }
 
-    private void fillFaultDetailTypes(JavaMethod m, List<TypeReference> types) {
-        for (CheckedException ce : m.getCheckedExceptions()) {
+    private void fillFaultDetailTypes(JavaMethodImpl m, List<TypeReference> types) {
+        for (CheckedExceptionImpl ce : m.getCheckedExceptions()) {
             types.add(ce.getDetailType());
 //            addGlobalType(ce.getDetailType());
         }
@@ -240,7 +240,15 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
 
     private void addTypes(List<ParameterImpl> params, List<TypeReference> types) {
         for (ParameterImpl p : params) {
-            types.add(p.getTypeReference());
+//            types.add(p.getTypeReference());
+            if (p instanceof WrapperParameter) {
+                WrapperParameter wp = (WrapperParameter) p;
+                types.add(wp.wrapperType);
+                types.add(p.getTypeReference());
+//                addTypes( wp.wrapperChildren, types );
+            } else {
+                types.add(p.getTypeReference());
+            }
         }
     }
 
@@ -259,7 +267,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         //handle the empty body
         if (qname == null)
             qname = emptyBodyName;
-        JavaMethod jm = getJavaMethod(qname);
+        JavaMethodImpl jm = getJavaMethod(qname);
         if (jm != null) {
             return jm.getMethod();
         }
@@ -273,8 +281,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * of a known fault name for the <code>Method method</code>
      */
     public boolean isKnownFault(QName name, Method method) {
-        JavaMethod m = getJavaMethod(method);
-        for (CheckedException ce : m.getCheckedExceptions()) {
+        JavaMethodImpl m = getJavaMethod(method);
+        for (CheckedExceptionImpl ce : m.getCheckedExceptions()) {
             if (ce.getDetailType().tagName.equals(name))
                 return true;
         }
@@ -288,8 +296,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * for <code>Method m</code>
      */
     public boolean isCheckedException(Method m, Class ex) {
-        JavaMethod jm = getJavaMethod(m);
-        for (CheckedException ce : jm.getCheckedExceptions()) {
+        JavaMethodImpl jm = getJavaMethod(m);
+        for (CheckedExceptionImpl ce : jm.getCheckedExceptions()) {
             if (ce.getExcpetionClass().equals(ex))
                 return true;
         }
@@ -318,7 +326,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * @return the <code>QName</code> associated with the
      * JavaMethod jm
      */
-    public QName getQNameForJM(JavaMethod jm) {
+    public QName getQNameForJM(JavaMethodImpl jm) {
         for (QName key : nameToJM.keySet()) {
             JavaMethodImpl jmethod = nameToJM.get(key);
             if (jmethod.getOperationName().equals(((JavaMethodImpl)jm).getOperationName())){
@@ -361,7 +369,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             boolean isRpclit = method.getBinding().isRpcLit();
             List<ParameterImpl> reqParams = method.requestParams;
             List<ParameterImpl> reqAttachParams = null;
-            for(Parameter param:reqParams){
+            for(ParameterImpl param:reqParams){
                 if(param.isWrapperStyle()){
                     if(isRpclit)
                         reqAttachParams = applyRpcLitParamBinding(method, (WrapperParameter)param, wsdlBinding, Mode.IN);
@@ -378,7 +386,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
 
             List<ParameterImpl> resAttachParams = null;
             List<ParameterImpl> resParams = method.responseParams;
-            for(Parameter param:resParams){
+            for(ParameterImpl param:resParams){
                 if(param.isWrapperStyle()){
                     if(isRpclit)
                         resAttachParams = applyRpcLitParamBinding(method, (WrapperParameter)param, wsdlBinding, Mode.OUT);
@@ -470,7 +478,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             }
         }
 
-        for(Parameter p : attachParams){
+        for(ParameterImpl p : attachParams){
             JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(), null);
             payloadMap.put(p.getName(), bi);
         }

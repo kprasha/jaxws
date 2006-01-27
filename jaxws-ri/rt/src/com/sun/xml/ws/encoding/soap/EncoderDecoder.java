@@ -31,7 +31,7 @@ import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.MessageContextUtil;
-import com.sun.xml.ws.api.model.Parameter;
+//import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.activation.DataHandler;
@@ -64,11 +64,11 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      * @param data
      * @return if the parameter is a return
      */
-    protected Object fillData(RuntimeContext context, Parameter param, Object obj, Object[] data,
+    protected Object fillData(RuntimeContext context, ParameterImpl param, Object obj, Object[] data,
                               com.sun.xml.ws.api.model.soap.SOAPBinding binding, ParameterBinding paramBinding) {
         if (param.isWrapperStyle()) {
             Object resp = null;
-            for (Parameter p : ((WrapperParameter) param).getWrapperChildren()) {
+            for (ParameterImpl p : ((WrapperParameter) param).getWrapperChildren()) {
                 QName name = p.getName();
                 Object value = null;
                 if (binding.isDocLit()){
@@ -143,7 +143,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      *            incase of outgoing client message.
      * @return Payload - decided by the binding used
      */
-    protected Object createPayload(RuntimeContext context, Parameter param, Object[] data,
+    protected Object createPayload(RuntimeContext context, ParameterImpl param, Object[] data,
                                    Object result, com.sun.xml.ws.api.model.soap.SOAPBinding binding, ParameterBinding paramBinding) {
         if(paramBinding.isAttachment()){
             Object obj = null;
@@ -185,7 +185,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      * @param data
      * @param result
      */
-    private Object createDocLitPayloadValue(RuntimeContext context, Parameter param, Object[] data, Object result) {
+    private Object createDocLitPayloadValue(RuntimeContext context, ParameterImpl param, Object[] data, Object result) {
         if (param.isWrapperStyle()) {
             return createJAXBBeanPayload(context, (WrapperParameter) param, data, result);
         }
@@ -218,7 +218,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      *         the parameter index, takes care of Holder.value.
      * 
      */
-    private Object getBarePayload(Parameter param, Object[] data, Object result) {
+    private Object getBarePayload(ParameterImpl param, Object[] data, Object result) {
         Object obj = null;
         if (param.isResponse()) {
             obj = result;
@@ -243,7 +243,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
         Class bean = (Class) param.getTypeReference().type;
         try {
             Object obj = bean.newInstance();
-            for( Parameter p : param.getWrapperChildren() ) {
+            for( ParameterImpl p : param.getWrapperChildren() ) {
                 Object value;
                 if (p.isResponse())
                     value = result;
@@ -272,7 +272,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                                        Object[] data, Object result) {
         RpcLitPayload payload = new RpcLitPayload(param.getName());
 
-        for  (Parameter p : param.getWrapperChildren()) {
+        for  (ParameterImpl p : param.getWrapperChildren()) {
             if(p.getBinding().isUnbound())
                 continue;
             Object value = null;
@@ -288,7 +288,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
     }
 
     protected Object getAttachment(RuntimeContext rtContext, Map<String, AttachmentBlock> attachments,
-                                   Parameter param, ParameterBinding paramBinding){
+                                   ParameterImpl param, ParameterBinding paramBinding){
         try {
             for (Map.Entry<String,AttachmentBlock> entry : attachments.entrySet()) {
                 AttachmentBlock ab = entry.getValue();
@@ -319,7 +319,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
         }
     }
 
-    protected void addAttachmentPart(RuntimeContext rtContext, InternalMessage im, Object obj, Parameter mimeParam){
+    protected void addAttachmentPart(RuntimeContext rtContext, InternalMessage im, Object obj, ParameterImpl mimeParam){
         if(obj == null)
             return;
         SEIModel model = rtContext.getModel();

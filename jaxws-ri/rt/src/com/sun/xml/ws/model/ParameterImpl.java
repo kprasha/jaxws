@@ -53,12 +53,12 @@ public class ParameterImpl implements Parameter {
     private final Mode mode;
     private final TypeReference typeReference;
     private final QName name;
-    private final SEIModel model;
+    private final AbstractSEIModelImpl model;
 
     /**
      * 
      */
-    public ParameterImpl(SEIModel model, TypeReference type, Mode mode, int index) {
+    public ParameterImpl(AbstractSEIModelImpl model, TypeReference type, Mode mode, int index) {
         this.typeReference = type;
         this.name = type.tagName;
         this.mode = mode;
@@ -66,6 +66,14 @@ public class ParameterImpl implements Parameter {
         this.model = model;
     }
 
+    
+    /**
+     * 
+     */
+    public ParameterImpl(TypeReference type, Mode mode, int index) {
+        this(null, type, mode, index);
+    }
+    
     /**
      * @return Returns the name.
      */
@@ -77,6 +85,10 @@ public class ParameterImpl implements Parameter {
         return model.getBridge(typeReference);
     }
 
+    protected Bridge getBridge(TypeReference typeRef) {
+        return model.getBridge(typeRef);
+    }
+    
     /**
      * TODO: once the model gets JAXBContext, shouldn't {@link Bridge}s
      * be made available from model objects?

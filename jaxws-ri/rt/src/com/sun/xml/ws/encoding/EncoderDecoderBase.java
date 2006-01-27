@@ -113,7 +113,7 @@ public abstract class EncoderDecoderBase {
     }
 
     private RawAccessor getRawAccessor(RuntimeContext context, Class wrapperBean, String nsURI, String localName){
-        SEIModel model = context.getModel();
+        AbstractSEIModelImpl model = context.getModel();
         Map<Integer, RawAccessor> map = ((AbstractSEIModelImpl)model).getRawAccessorMap();
         int id  = getHashCode(wrapperBean, nsURI, localName);
         RawAccessor ra = map.get(id);

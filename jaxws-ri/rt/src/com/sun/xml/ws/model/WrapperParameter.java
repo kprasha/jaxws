@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
-import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.SEIModel;
+//import com.sun.xml.ws.api.model.SEIModel;
 
 import javax.xml.namespace.QName;
 
@@ -52,10 +53,16 @@ public class WrapperParameter extends ParameterImpl {
      * @param tagName
      *      Tag name of the wrapper element.
      */
-    public WrapperParameter(SEIModel rtModel, QName tagName, Mode mode, int index) {
-        super(rtModel, new TypeReference(tagName, CompositeStructure.class), mode, index);
+    public WrapperParameter(AbstractSEIModelImpl rtModel, TypeReference wrapperType, Mode mode, int index) {
+        super(rtModel, new TypeReference(wrapperType.tagName, CompositeStructure.class), mode, index);
+        this.wrapperType = wrapperType;
+    }    
+
+    public Bridge getWrapperBridge() {
+        return getBridge(wrapperType);
     }
 
+    
     /**
      *
      * @deprecated
@@ -65,12 +72,20 @@ public class WrapperParameter extends ParameterImpl {
     public boolean isWrapperStyle() {
         return true;
     }
-
+    
+    /**
+     * @return Returns the @Line(TypeReference} for the wrapper type
+     */
+    
+    public TypeReference getWrapperType() {
+        return wrapperType;
+    }
+    
     /**
      * @return Returns the wrapperChildren.
      */
-    public List<Parameter> getWrapperChildren() {
-        return Collections.<Parameter>unmodifiableList(wrapperChildren);
+    public List<ParameterImpl> getWrapperChildren() {
+        return Collections.<ParameterImpl>unmodifiableList(wrapperChildren);
     }
 
     /**
@@ -92,7 +107,7 @@ public class WrapperParameter extends ParameterImpl {
      * removes the wrapper child from the given index
      * @param index
      */
-    public Parameter removeWrapperChild(int index){
+    public ParameterImpl removeWrapperChild(int index){
         return wrapperChildren.remove(index);
     }
 
@@ -101,4 +116,5 @@ public class WrapperParameter extends ParameterImpl {
     }
 
     protected final List<ParameterImpl> wrapperChildren = new ArrayList<ParameterImpl>();
+    protected TypeReference wrapperType;
 }
