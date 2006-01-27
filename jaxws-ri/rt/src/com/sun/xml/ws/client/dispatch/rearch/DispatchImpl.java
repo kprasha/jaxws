@@ -108,7 +108,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     protected void setProperties(Message msg) {
 
         MessageProperties props = msg.getProperties();
-        props.put(JAXWS_CLIENT_HANDLE_PROPERTY, this);
+        props.proxy = this;
         props.put(ENDPOINT_ADDRESS_PROPERTY, owner.getEndpointAddress(portname));
 
         props.put(BINDING_ID_PROPERTY, binding.getBindingId());
@@ -118,7 +118,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         if (clazz != null)
             props.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
         props.put("SOAPVersion", soapVersion);
-        props.put(JAXWS_CONTEXT_PROPERTY, getRequestContext());
+        props.requestContext = getRequestContext();
     }
 
 }
