@@ -63,9 +63,6 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
 
-    // empty string per section 9.2.1.3
-    private static final String HANDLER_CHAIN_NAME = "";
-
     public SeiGenerator() {
     }
 
@@ -436,7 +433,6 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         if(nl.getLength() > 0){
             Element hn = (Element)nl.item(0);
             String fName = getHandlerConfigFileName(fullName);
-            handlerChainAnn.param("name", HANDLER_CHAIN_NAME);
             handlerChainAnn.param("file", fName);
             generateHandlerChainFile(e, fullName);
         }
@@ -450,9 +446,6 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private void writeWebServiceAnnotation(Service service, Port port, JAnnotationUse wsa) {
         String serviceName = service.getName().getLocalPart();
         QName name = (QName) port.getProperty(ModelProperties.PROPERTY_WSDL_PORT_TYPE_NAME);
-//        serviceNS = service.getName().getNamespaceURI();
-//        wsa.param("serviceName", serviceName);
-//        wsa.param("targetNamespace", serviceNS);
         wsa.param("name", name.getLocalPart());
         wsa.param("targetNamespace", name.getNamespaceURI());
         wsa.param("wsdlLocation", wsdlLocation);
