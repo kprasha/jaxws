@@ -28,6 +28,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
@@ -45,6 +46,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -52,6 +54,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
+/**
+ * Parses WSDL and builds {@link WSDLModel}.
+ *
+ * @author Vivek Pandey
+ */
 public class RuntimeWSDLParser {
     private final WSDLModelImpl wsdlDoc = new WSDLModelImpl();
     /**
@@ -66,10 +73,14 @@ public class RuntimeWSDLParser {
      * Must not be null.
      */
     private final EntityResolver resolver;
+    /**
+     * The {@link WSDLParserExtension}. Always non-null.
+     */
+    private final WSDLParserExtension extension;
 
-    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver!=null;
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver,extensions);
         parser.parseWSDL(wsdlLoc);
         parser.wsdlDoc.freeze();
         return parser.wsdlDoc;
@@ -139,8 +150,9 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private RuntimeWSDLParser(EntityResolver resolver) {
+    private RuntimeWSDLParser(EntityResolver resolver, WSDLParserExtension... extensions) {
         this.resolver = resolver;
+        this.extension = new WSDLParserExtensionFacade(extensions);
     }
 
     /**
@@ -222,16 +234,20 @@ public class RuntimeWSDLParser {
                 if(reader.getEventType() != XMLStreamConstants.END_ELEMENT)
                     XMLStreamReaderUtil.next(reader);
             }else{
-                XMLStreamReaderUtil.skipElement(reader);
+                extension.service(service,reader);
             }
         }
         wsdlDoc.addService(service);
     }
 
-    private static void parsePort(XMLStreamReader reader, WSDLServiceImpl service) {
+    private void parsePort(XMLStreamReader reader, WSDLServiceImpl service) {
         String portName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
         String binding = ParserUtil.getMandatoryNonEmptyAttribute(reader, "binding");
+
         QName bindingName = ParserUtil.getQName(reader, binding);
+        QName portQName = new QName(service.getName().getNamespaceURI(), portName);
+        WSDLPortImpl port = new WSDLPortImpl(portQName, bindingName);
+
         String location = null;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -239,11 +255,13 @@ public class RuntimeWSDLParser {
                 location = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_LOCATION);
                 XMLStreamReaderUtil.next(reader);
             }else{
-                XMLStreamReaderUtil.skipElement(reader);
+                extension.port(port,reader);
             }
         }
-        QName portQName = new QName(service.getName().getNamespaceURI(), portName);
-        service.put(portQName, new WSDLPortImpl(portQName, bindingName, location));
+        if(location==null)
+            throw new WebServiceException("No address specified for port "+portQName);
+        port.setAddress(location);
+        service.put(portQName, port);
     }
 
     private void parseBinding(XMLStreamReader reader) {
@@ -251,7 +269,8 @@ public class RuntimeWSDLParser {
         String portTypeName = ParserUtil.getMandatoryNonEmptyAttribute(reader, "type");
         if((bindingName == null) || (portTypeName == null)){
             //TODO: throw exception?
-            //skip wsdl:binding element for now
+            //
+            //  wsdl:binding element for now
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }

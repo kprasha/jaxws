@@ -36,7 +36,7 @@ import javax.xml.stream.XMLStreamReader;
 /**
  * @author WS Development Team
  */
-public class ParserUtil {
+class ParserUtil {
     public static String getAttribute(XMLStreamReader reader, String name) {
         return reader.getAttributeValue(null, name);
     }
