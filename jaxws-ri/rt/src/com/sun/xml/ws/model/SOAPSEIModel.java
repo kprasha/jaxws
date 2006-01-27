@@ -159,11 +159,11 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
         for(ParameterImpl p:params){
             ParameterBinding binding = (mode == Mode.IN)?p.getInBinding():p.getOutBinding();
             if(!p.isWrapperStyle()){
-                types.add(p.getBridge().getTypeReference());
+                types.add(p.getTypeReference());
             }else if(binding.isBody()){
                 List<ParameterImpl> wcParams = ((WrapperParameter)p).getWrapperChildren();
                 for(ParameterImpl wc:wcParams){
-                    types.add(wc.getBridge().getTypeReference());
+                    types.add(wc.getTypeReference());
                 }
             }
         }
