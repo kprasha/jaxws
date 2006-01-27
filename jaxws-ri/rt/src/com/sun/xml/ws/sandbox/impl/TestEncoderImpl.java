@@ -1,7 +1,9 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamException;
@@ -17,8 +19,15 @@ import java.nio.channels.WritableByteChannel;
  * @author Jitu
  */
 public final class TestEncoderImpl implements Encoder {
+
+    private final String contentType;
+
+    private TestEncoderImpl(String contentType) {
+        this.contentType = contentType;
+    }
+
     public String getStaticContentType() {
-        return "text/xml";
+        return contentType;
     }
 
     public String encode(Message message, OutputStream out) {
@@ -28,7 +37,7 @@ public final class TestEncoderImpl implements Encoder {
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
-        return "text/xml";
+        return contentType;
     }
 
     public String encode(Message message, WritableByteChannel buffer) {
@@ -40,5 +49,20 @@ public final class TestEncoderImpl implements Encoder {
         return this;
     }
 
-    public static final Encoder INSTANCE = new TestEncoderImpl();
+    public static final Encoder INSTANCE11 = new TestEncoderImpl("text/xml");
+    public static final Encoder INSTANCE12 = new TestEncoderImpl("application/xml+soap");
+
+    public static Encoder get(SOAPVersion version) {
+        if(version==null)
+            // this decoder is for SOAP, not for XML/HTTP
+            throw new IllegalArgumentException();
+        switch(version) {
+        case SOAP_11:
+            return INSTANCE11;
+        case SOAP_12:
+            return INSTANCE12;
+        default:
+            throw new AssertionError();
+        }
+    }
 }

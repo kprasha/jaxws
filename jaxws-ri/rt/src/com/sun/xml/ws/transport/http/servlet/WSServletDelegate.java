@@ -66,7 +66,7 @@ import javax.xml.ws.http.HTTPBinding;
 public class WSServletDelegate {
     
     private com.sun.xml.ws.server.Tie tie =
-        new com.sun.xml.ws.server.Tie(TestEncoderImpl.INSTANCE, TestDecoderImpl.INSTANCE11);
+        new com.sun.xml.ws.server.Tie(TestEncoderImpl.INSTANCE11, TestDecoderImpl.INSTANCE11);
 
     public void init(ServletConfig servletConfig)
         throws ServletException {
