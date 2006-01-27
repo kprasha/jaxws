@@ -359,22 +359,22 @@ major-version=${release.impl.version}
     <copy    todir="${dist20.home}/docs">
       <fileset dir="${build.home}/docs"/>
     </copy>
-  	
-  	<copy todir="${dist20.home}/samples">
-        <fileset dir="samples" includes="**" excludes="**/CVS/**" />
-        <filterset begintoken="@@" endtoken="@@">
-          <filter token="SPEC_VERSION" 
-                  value="${release.spec.version}" />
-          <filter token="IMPL_VERSION"
-                  value="${release.impl.version}"/>
-          <filter token="IMPL_VERSION_SUFFIX"
-                  value="${release.impl.version.suffix}"/>
-          <!--filter token="@@JWSDP_VERSION@@"
-                  value="${jwsdp.impl.version}"/>
-          <filter token="@@JWSDP_ROOTDIR@@" 
-                  value="${jwsdp.root.directory}"/-->
-        </filterset>
-	</copy>
+
+    <copy todir="${dist20.home}/samples">
+      <fileset dir="samples" includes="**" excludes="**/common_resources/**,**/CVS/**" />
+      <filterset begintoken="@@" endtoken="@@">
+        <filter token="SPEC_VERSION" 
+                value="${release.spec.version}" />
+        <filter token="IMPL_VERSION"
+                value="${release.impl.version}"/>
+        <filter token="IMPL_VERSION_SUFFIX"
+                value="${release.impl.version.suffix}"/>
+        <!--filter token="@@JWSDP_VERSION@@"
+                value="${jwsdp.impl.version}"/>
+        <filter token="@@JWSDP_ROOTDIR@@" 
+                value="${jwsdp.root.directory}"/-->
+    </filterset>
+    </copy>
   	
     <copy todir="${dist20.home}">
   	<fileset dir="${build.home}" includes="*.txt"/>
@@ -526,7 +526,6 @@ major-version=${release.impl.version}
     </target>
 
 
-
   <!-- =====================
        SVR4 DISTRIBUTION 
        ===================== -->
@@ -543,7 +542,7 @@ major-version=${release.impl.version}
     <ant antfile="build-pkg.xml" target="create.rpm" inheritrefs="true"/>
   </target>
 
-  <!-- =======================
+  <!-- =====================
        ZIP FILE DISTRIBUTION 
        ======================= -->
   <!-- assumes the dist target has been called -->
