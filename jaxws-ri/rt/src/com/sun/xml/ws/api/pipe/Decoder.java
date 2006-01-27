@@ -83,6 +83,17 @@ public interface Decoder {
      */
     Message decode( ReadableByteChannel in, String contentType );
 
+    /*
+     * The following methods need to be documented and implemented.
+     *
+     * Such methods will be used by a server side
+     * transport pipe that can support the invocation of methods on a
+     * ServerEdgePipe.
+     *
+    XMLStreamReaderMessage decode( InputStream in, String contentType ) throws IOException;
+    XMLStreamReaderMessage decode( ReadableByteChannel in, String contentType );
+    */
+    
     /**
      * Creates a copy of this {@link Decoder}.
      *

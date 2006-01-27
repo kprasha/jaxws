@@ -100,6 +100,16 @@ public interface Encoder {
      * an adapter that wraps {@link WritableByteChannel} to {@link OutputStream}.
      */
     String encode( Message message, WritableByteChannel buffer );
+    
+    /*
+     * The following methods need to be documented and implemented.
+     *
+     * Such methods will be used by a client side
+     * transport pipe that implements the ClientEdgePipe.
+     *
+    String encode( InputStreamMessage message, OutputStream out ) throws IOException;
+    String encode( InputStreamMessage message, WritableByteChannel buffer );
+    */
 
     /**
      * Creates a copy of this {@link Encoder}.
