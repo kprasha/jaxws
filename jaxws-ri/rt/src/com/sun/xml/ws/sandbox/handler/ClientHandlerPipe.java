@@ -72,8 +72,9 @@ public class ClientHandlerPipe extends HandlerPipe{
         // TODO: MessageContext.MESSAGE_OUTBOUND_PROPERTY should be true
         // TODO: This is taken from SOAPMessageDispatcher.Make sure this is done somewhere before HandlerPipe is called.
         //       this is needed so that attachments are compied from RESPONSE_MESSAGE_ATTACHMEMTN PROPERTY
-        //TODO: How do you know if its Oneway?
+        
         boolean isOneWay = msg.getProperties().isOneWay;
+        MessageContextImpl msgCxt = new MessageContextImpl(msg);
         boolean handlerResult = true;
         if(hcaller.hasHandlers()) {
             try {
@@ -81,7 +82,7 @@ public class ClientHandlerPipe extends HandlerPipe{
             } catch (ProtocolException pe) {
                 handlerResult = false;
                 if (MessageContextUtil.ignoreFaultInMessage(
-                        msg.getProperties())) {
+                        msgCxt)) {
                     // ignore fault in this case and use exception
                     //RELOOK: code taken from SMD, should n't PE be deirectly given to client, why wrapping?
                     throw new WebServiceException(pe);

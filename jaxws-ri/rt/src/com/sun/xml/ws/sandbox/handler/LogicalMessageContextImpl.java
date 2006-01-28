@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.handler.*;
+import com.sun.xml.ws.sandbox.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import java.util.Collection;
 import java.util.Iterator;
@@ -51,14 +52,14 @@ import javax.xml.ws.soap.SOAPBinding;
  */
 public class LogicalMessageContextImpl implements LogicalMessageContext {
     private Message msg;
-    private MessageProperties ctxt;
+    private MessageContextImpl ctxt;
     private LogicalMessageImpl lm;
     private BindingImpl binding;
     
     public LogicalMessageContextImpl(BindingImpl binding, Message msg) {
         this.binding = binding;
         this.msg = msg;
-        this.ctxt = msg.getProperties();
+        this.ctxt = new MessageContextImpl(msg);
     }
 
     public LogicalMessage getMessage() {

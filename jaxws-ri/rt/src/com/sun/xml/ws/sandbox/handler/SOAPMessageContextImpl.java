@@ -28,6 +28,7 @@ import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
+import com.sun.xml.ws.sandbox.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.xml.bind.JAXBContext;
@@ -65,14 +66,14 @@ import org.xml.sax.InputSource;
 public class SOAPMessageContextImpl implements SOAPMessageContext {
 
     private Message msg;
-    private MessageProperties ctxt;
+    private MessageContextImpl ctxt;
     private Set<String> roles;
     protected SOAPMessage soapMsg = null;
     private BindingImpl binding;
     public SOAPMessageContextImpl(BindingImpl binding, Message msg) {
         this.binding = binding;
         this.msg = msg;
-        this.ctxt = msg.getProperties();
+        this.ctxt = new MessageContextImpl(msg);
         
     }
 
