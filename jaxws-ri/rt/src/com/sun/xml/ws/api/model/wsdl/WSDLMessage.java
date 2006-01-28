@@ -7,7 +7,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface WSDLMessage {
+public interface WSDLMessage extends WSDLObject, Extensible{
     /**
      * Gives wsdl:message@name value.
      */
