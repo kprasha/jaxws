@@ -6,6 +6,7 @@ import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.api.SOAPVersion;
 
 import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -28,7 +29,9 @@ public final class TestDecoderImpl implements Decoder {
 
     public Message decode(InputStream in, String contentType) throws IOException {
         try {
-            return new SAAJMessage(factory.createMessage(null,in));
+            MimeHeaders headers = new MimeHeaders();
+            headers.addHeader("Content-Type", contentType);
+            return new SAAJMessage(factory.createMessage(headers,in));
         } catch (SOAPException e) {
             throw new WebServiceException("Unable to parse a message",e);
         }
