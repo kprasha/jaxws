@@ -22,6 +22,7 @@ package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 //import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
@@ -39,6 +40,8 @@ import com.sun.xml.ws.spi.runtime.WebServiceContext;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
+import com.sun.xml.ws.util.ServiceConfigurationError;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
@@ -54,6 +57,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceProvider;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
@@ -186,7 +190,8 @@ public class RuntimeEndpointInfo extends WSEndpoint
             seiModel = rap.buildRuntimeModel();
         }else {
             try {
-                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver());
+                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(getWsdlUrl(), getWsdlResolver(),
+                    ServiceFinder.find(WSDLParserExtension.class).toArray());
                 WSDLPortImpl wsdlPort = null;
                 if(serviceName == null)
                     serviceName = RuntimeModeler.getServiceName(getImplementorClass());
@@ -214,12 +219,13 @@ public class RuntimeEndpointInfo extends WSEndpoint
                 }
                 seiModel = rap.buildRuntimeModel();
             } catch (IOException e) {
-                throw new ServerRtException("runtime.parser.wsdl", getWsdlUrl().toString());
+                throw new ServerRtException("runtime.parser.wsdl", getWsdlUrl().toString(),e);
             } catch (XMLStreamException e) {
-                throw new ServerRtException("runtime.saxparser.exception",
-                        new Object[]{e.getMessage(), e.getLocation()});
+                throw new ServerRtException("runtime.saxparser.exception", e.getMessage(), e.getLocation(), e);
             } catch (SAXException e) {
-                throw new ServerRtException("runtime.parser.wsdl", getWsdlUrl().toString());
+                throw new ServerRtException("runtime.parser.wsdl", getWsdlUrl().toString(),e);
+            } catch (ServiceConfigurationError e) {
+                throw new ServerRtException("runtime.parser.wsdl", getWsdlUrl().toString(),e);
             }
         }
     }

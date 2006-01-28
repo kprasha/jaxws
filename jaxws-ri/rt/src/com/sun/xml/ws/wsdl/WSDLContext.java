@@ -23,17 +23,21 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.xml.ws.util.ServiceConfigurationError;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
+import javax.jws.WebService;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -59,12 +63,15 @@ public class WSDLContext {
 
         orgWsdlLocation = wsdlDocumentLocation;
         try {
-            wsdlDoc = RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver);
+            wsdlDoc = RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver,
+                ServiceFinder.find(WSDLParserExtension.class).toArray());
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         } catch (SAXException e) {
+            throw new WebServiceException(e);
+        } catch (ServiceConfigurationError e) {
             throw new WebServiceException(e);
         }
     }

@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Arrays;
+import java.lang.reflect.Array;
 
 
 /**
@@ -101,7 +103,7 @@ import java.util.TreeSet;
  * <p/>
  * <pre>
  *   CharEncoder getEncoder(String encodingName) {
- *       for( CharCodec cc : new ServiceFinder(CharCodec.class) ) {
+ *       for( CharCodec cc : ServiceFinder.find(CharCodec.class) ) {
  *           CharEncoder ce = cc.getEncoder(encodingName);
  *           if (ce != null)
  *               return ce;
@@ -148,11 +150,10 @@ public final class ServiceFinder<T> implements Iterable<T> {
      *                be used
      * @throws ServiceConfigurationError If a provider-configuration file violates the specified format
      *                                   or names a provider class that cannot be found and instantiated
-     * @see #ServiceFinder(Class)
+     * @see #find(Class)
      */
-    public ServiceFinder(Class<T> service, ClassLoader loader) {
-        this.serviceClass = service;
-        this.classLoader = loader;
+    public static <T> ServiceFinder<T> find(Class<T> service, ClassLoader loader) {
+        return new ServiceFinder<T>(service,loader);
     }
 
     /**
@@ -169,14 +170,19 @@ public final class ServiceFinder<T> implements Iterable<T> {
      *
      * @throws ServiceConfigurationError If a provider-configuration file violates the specified format
      *                                   or names a provider class that cannot be found and instantiated
-     * @see #ServiceFinder(Class, ClassLoader)
+     * @see #find(Class, ClassLoader)
      */
-    public ServiceFinder(Class<T> service) {
-        this(service,Thread.currentThread().getContextClassLoader());
+    public static <T> ServiceFinder<T> find(Class<T> service) {
+        return find(service,Thread.currentThread().getContextClassLoader());
+    }
+
+    private ServiceFinder(Class<T> service, ClassLoader loader) {
+        this.serviceClass = service;
+        this.classLoader = loader;
     }
 
     /**
-     * Returns discovered objects.
+     * Returns discovered objects incrementally.
      *
      * @return An <tt>Iterator</tt> that yields provider objects for the given
      *         service, in some arbitrary order.  The iterator will throw a
@@ -186,6 +192,22 @@ public final class ServiceFinder<T> implements Iterable<T> {
      */
     public Iterator<T> iterator() {
         return new LazyIterator<T>(serviceClass,classLoader);
+    }
+
+    /**
+     * Returns discovered objects all at once.
+     *
+     * @return
+     *      can be empty but never null.
+     *
+     * @throws ServiceConfigurationError
+     */
+    public T[] toArray() {
+        List<T> result = new ArrayList<T>();
+        for (T t : this) {
+            result.add(t);
+        }
+        return result.toArray((T[])Array.newInstance(serviceClass,result.size()));
     }
 
     private static void fail(Class service, String msg, Throwable cause)
