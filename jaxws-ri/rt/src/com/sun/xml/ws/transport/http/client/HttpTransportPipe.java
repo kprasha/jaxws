@@ -91,7 +91,7 @@ public class HttpTransportPipe implements Pipe {
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
-            ct = getContentType(respHeaders);
+            ct = getContentType(respHeaders);            
             if(msg.getProperties().isOneWay==Boolean.TRUE
             || con.getStatus()==WSConnection.ONEWAY)
                 return null;    // one way. no response given.
@@ -105,7 +105,7 @@ public class HttpTransportPipe implements Pipe {
     }
 
     private String getContentType(Map<String, List<String>> headers) {
-        return "text/xml";
+        return headers.get("Content-Type").get(0);
     }
 
     public void preDestroy() {
