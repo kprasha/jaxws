@@ -247,8 +247,10 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             if (p instanceof WrapperParameter) {
                 WrapperParameter wp = (WrapperParameter) p;
                 types.add(wp.wrapperType);
-                types.add(p.getTypeReference());
-//                addTypes( wp.wrapperChildren, types );
+                //Commented out the code below.
+                // we shouldnt be adding CopositeStructure.class to the types!
+//                types.add(p.getTypeReference());
+                addTypes( wp.wrapperChildren, types );
             } else {
                 types.add(p.getTypeReference());
             }
