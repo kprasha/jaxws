@@ -20,6 +20,7 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -32,17 +33,26 @@ import java.util.ArrayList;
  * Provides abstraction for wsdl:message
  * @author Vivek Pandey
  */
-public final class WSDLMessageImpl extends ArrayList<String> implements WSDLMessage {
-    private QName name;
-
+public final class WSDLMessageImpl extends AbstractExtensibleImpl implements WSDLMessage {
+    private final QName name;
+    private final ArrayList<String> parts;
     /**
      * @param name wsdl:message name attribute value
      */
     public WSDLMessageImpl(QName name) {
         this.name = name;
+        this.parts = new ArrayList<String>();
     }
 
     public QName getName() {
         return name;
+    }
+
+    public void add(String part){
+        parts.add(part);
+    }
+
+    Iterable<String> parts(){
+        return parts;
     }
 }

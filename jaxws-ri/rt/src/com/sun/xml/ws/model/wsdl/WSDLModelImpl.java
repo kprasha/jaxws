@@ -232,7 +232,7 @@ public final class WSDLModelImpl implements WSDLModel {
             WSDLMessageImpl inMsg = messages.get(inMsgName.getName());
             int bodyindex = 0;
             if(inMsg != null){
-                for(String name:inMsg){
+                for(String name:inMsg.parts()){
                     ParameterBinding pb = bop.getInputBinding(name);
                     if(pb.isBody()){
                         bop.addPart(new WSDLPartImpl(name, pb, bodyindex++), Mode.IN);
@@ -245,7 +245,7 @@ public final class WSDLModelImpl implements WSDLModel {
                 continue;
             WSDLMessageImpl outMsg = messages.get(outMsgName.getName());
             if(outMsg!= null){
-                for(String name:outMsg){
+                for(String name:outMsg.parts()){
                     ParameterBinding pb = bop.getOutputBinding(name);
                     if(pb.isBody()){
                         bop.addPart(new WSDLPartImpl(name, pb, bodyindex++), Mode.OUT);
