@@ -240,7 +240,8 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      */
     private Object createJAXBBeanPayload(RuntimeContext context, WrapperParameter param,
                                          Object[] data, Object result) {
-        Class bean = (Class) param.getTypeReference().type;
+//        Class bean = (Class) param.getTypeReference().type;
+        Class bean = (Class) param.getWrapperType().type;
         try {
             Object obj = bean.newInstance();
             for( ParameterImpl p : param.getWrapperChildren() ) {

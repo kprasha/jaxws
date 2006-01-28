@@ -38,7 +38,7 @@ import java.rmi.RemoteException;
  * @author Vivek Pandey
  */
 public final class CheckedExceptionImpl implements CheckedException {
-    private final Class<? extends RemoteException> exceptionClass;
+    private final Class exceptionClass;
     private final TypeReference detail;
     private final ExceptionType exceptionType;
 
@@ -52,7 +52,7 @@ public final class CheckedExceptionImpl implements CheckedException {
      *            either ExceptionType.UserDefined or
      *            ExceptionType.WSDLException
      */
-    public CheckedExceptionImpl(Class<? extends RemoteException> exceptionClass, TypeReference detail, ExceptionType exceptionType) {
+    public CheckedExceptionImpl(Class exceptionClass, TypeReference detail, ExceptionType exceptionType) {
         this.detail = detail;
         this.exceptionType = exceptionType;
         this.exceptionClass = exceptionClass;
@@ -62,7 +62,7 @@ public final class CheckedExceptionImpl implements CheckedException {
      * @return the <code>Class</clode> for this object
      * 
      */
-    public Class<? extends RemoteException> getExcpetionClass() {
+    public Class getExcpetionClass() {
         return exceptionClass;
     }
 

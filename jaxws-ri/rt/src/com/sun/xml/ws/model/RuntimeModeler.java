@@ -599,14 +599,15 @@ public class RuntimeModeler {
         }
 
         // return value
-        String resultName = null;
+        String resultName = RETURN;
         String resultTNS = "";
         QName resultQName = null;
         WebResult webResult = method.getAnnotation(WebResult.class);
         Class returnType = method.getReturnType();
         boolean isResultHeader = false;
         if (webResult != null) {
-            resultName = webResult.name();
+            if (webResult.name().length() > 0)
+                resultName = webResult.name();
             resultTNS = webResult.targetNamespace();
             isResultHeader = webResult.header();
             if (resultTNS.length() == 0 && webResult.header()) {
@@ -931,13 +932,9 @@ public class RuntimeModeler {
      * @param method the <code>method</code> from which to find the exceptions to model
      */
     protected void processExceptions(JavaMethodImpl javaMethod, Method method) {
-        for (Class<?> exception : method.getExceptionTypes()) {
+        for (Class exception : method.getExceptionTypes()) {
             if (REMOTE_EXCEPTION_CLASS.isAssignableFrom(exception))
                 continue;
-
-            Class<? extends RemoteException> exceptionClass
-                = exception.asSubclass(REMOTE_EXCEPTION_CLASS);
-
             Class exceptionBean;
             Annotation[] anns;
             Method faultInfoMethod = getWSDLExceptionFaultInfo(exception);
@@ -951,7 +948,7 @@ public class RuntimeModeler {
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
-                WebFault webFault = exceptionClass.getAnnotation(WebFault.class);
+                WebFault webFault = (WebFault)exception.getAnnotation(WebFault.class);
                 exceptionBean = faultInfoMethod.getReturnType();
                 anns = faultInfoMethod.getAnnotations();
                 if (webFault.targetNamespace().length() > 0)
@@ -962,7 +959,7 @@ public class RuntimeModeler {
             TypeReference typeRef = new TypeReference(faultName, exceptionBean,
                 anns);
             CheckedExceptionImpl checkedException =
-                new CheckedExceptionImpl(exceptionClass, typeRef, exceptionType);
+                new CheckedExceptionImpl(exception, typeRef, exceptionType);
             javaMethod.addException(checkedException);
         }
     }

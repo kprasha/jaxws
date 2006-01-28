@@ -176,11 +176,14 @@ interface ResponseBuilder {
          * {@link PartBuilder} keyed by the element name (inside the wrapper element.)
          */
         private final Map<QName,PartBuilder> parts = new HashMap<QName,PartBuilder>();
+        
+        private QName wrapperName;
 
         public Wrapped(WrapperParameter wp) {
             // TODO: we no longer use wrapper beans
             assert wp.getTypeReference().type== CompositeStructure.class;
-
+            
+            wrapperName = wp.getWrapperType().tagName;
             List<ParameterImpl> children = wp.getWrapperChildren();
             for (ParameterImpl p : children) {
                 parts.put( p.getName(), new PartBuilder(
@@ -193,7 +196,11 @@ interface ResponseBuilder {
             Object retVal = null;
 
             XMLStreamReader reader = msg.readPayload();
-            while(reader.nextTag()==XMLStreamReader.START_ELEMENT) {
+            if (reader.nextTag() == XMLStreamReader.START_ELEMENT &&
+                !reader.getName().equals(wrapperName)) {
+                // TODO this should be an error;
+            }
+            while(reader.hasNext() && reader.next()==XMLStreamReader.START_ELEMENT) {
                 // TODO: QName has a performance issue
                 PartBuilder part = parts.get(reader.getName());
                 if(part==null) {

@@ -249,7 +249,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                 types.add(wp.wrapperType);
                 //Commented out the code below.
                 // we shouldnt be adding CopositeStructure.class to the types!
-//                types.add(p.getTypeReference());
+                types.add(p.getTypeReference());
 //                addTypes( wp.wrapperChildren, types );
             } else {
                 types.add(p.getTypeReference());

@@ -59,6 +59,10 @@ public class ParameterImpl implements Parameter {
      * 
      */
     public ParameterImpl(AbstractSEIModelImpl model, TypeReference type, Mode mode, int index) {
+        assert type != null;
+        assert type.tagName != null;
+        assert type.tagName.getLocalPart().length() > 0;
+
         this.typeReference = type;
         this.name = type.tagName;
         this.mode = mode;
@@ -67,12 +71,6 @@ public class ParameterImpl implements Parameter {
     }
 
     
-    /**
-     * 
-     */
-    public ParameterImpl(TypeReference type, Mode mode, int index) {
-        this(null, type, mode, index);
-    }
     
     /**
      * @return Returns the name.
