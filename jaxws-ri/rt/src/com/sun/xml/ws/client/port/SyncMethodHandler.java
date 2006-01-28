@@ -182,6 +182,7 @@ final class SyncMethodHandler extends MethodHandler {
             props.requestContext = rc;
             props.soapAction = soapAction;
             props.isOneWay = isOneWay;
+            props.endpointAddress = owner.endpointAddress;
 
             // TODO: fill in MessageProperties
             ////set mtom threshold value to

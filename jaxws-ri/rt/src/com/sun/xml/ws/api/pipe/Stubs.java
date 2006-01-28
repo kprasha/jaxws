@@ -179,7 +179,7 @@ public abstract class Stubs {
     public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
                                   Class<T> portInterface, Pipe next ) {
 
-        PortInterfaceStub ps = new PortInterfaceStub(service,(BindingImpl)binding,portInterface,(SOAPSEIModel)model,next);
+        PortInterfaceStub ps = new PortInterfaceStub(service,(BindingImpl)binding, (SOAPSEIModel)model,next);
         return portInterface.cast(
             Proxy.newProxyInstance( portInterface.getClassLoader(),
                 new Class[]{portInterface,BindingProvider.class}, ps ));

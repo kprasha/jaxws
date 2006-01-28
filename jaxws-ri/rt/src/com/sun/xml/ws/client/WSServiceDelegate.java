@@ -303,7 +303,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         BindingImpl binding = createBinding(portName, eif.getBindingID());
-        PortInterfaceStub pis = new PortInterfaceStub(this, binding, portInterface,model, createPipeline(portName,binding));
+        PortInterfaceStub pis = new PortInterfaceStub(this, binding, model, createPipeline(portName,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{

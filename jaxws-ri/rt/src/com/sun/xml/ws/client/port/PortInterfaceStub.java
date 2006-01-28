@@ -1,18 +1,15 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
+import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.util.Pool;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.spi.ServiceDelegate;
@@ -30,12 +27,12 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public final class PortInterfaceStub extends Stub implements InvocationHandler {
-    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, Class portInterface, SOAPSEIModel seiModel, Pipe master ) {
+    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Pipe master) {
         super(master,binding);
         this.owner = owner;
         this.seiModel = seiModel;
-        this.portInterface = portInterface;
         this.soapVersion = binding.getSOAPVersion();
+        this.endpointAddress = seiModel.getPort().getAddress();
 
         this.marshallers = new Pool.Marshaller(seiModel.getJAXBContext());
         this.bridgeContexts = new Pool.BridgeContext(seiModel.getJAXBContext());
@@ -70,9 +67,9 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public final SOAPVersion soapVersion;
 
     /**
-     * WSDLPort interface that this proxy implements.
+     * Cached value of {@code seiModel.getPort().getAddress()} for quicker access.
      */
-    private final Class portInterface;
+    public final String endpointAddress;
 
     /**
      * The {@link ServiceDelegate} object that owns us.
@@ -80,7 +77,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public final ServiceDelegate owner;
 
     /**
-     * For each method on the {@link #portInterface} we have
+     * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
      */
     private final Map<Method,MethodHandler> methodHandlers = new HashMap<Method,MethodHandler>();
