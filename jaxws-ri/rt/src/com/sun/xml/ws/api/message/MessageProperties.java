@@ -73,17 +73,17 @@ import java.util.Set;
  * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings({"SuspiciousMethodCalls"})
-public class MessageProperties implements MessageContext {
+public class MessageProperties extends TypedMap implements Map<String,Object> {
     /**
      * Value of {@link #HTTP_REQUEST_HEADERS} property.
      */
-    @ContextProperty(HTTP_REQUEST_HEADERS)
+    @ContextProperty(MessageContext.HTTP_REQUEST_HEADERS)
     public Map<String, List<String>> httpRequestHeaders;
     
     /**
      * Value of {@link #HTTP_RESPONSE_HEADERS} property.
      */
-    @ContextProperty(HTTP_RESPONSE_HEADERS)
+    @ContextProperty(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> httpResponseHeaders;
 
     /**
@@ -92,13 +92,13 @@ public class MessageProperties implements MessageContext {
     // TODO: do not compute these values eagerly.
     // allow ContextProperty to be on a method so that
     // this can be computed lazily
-    @ContextProperty(INBOUND_MESSAGE_ATTACHMENTS)
+    @ContextProperty(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)
     public Map<String, DataHandler> inboundMessageAttachments;
 
     /**
      * Value of {@link #OUTBOUND_MESSAGE_ATTACHMENTS} property
      */
-    @ContextProperty(OUTBOUND_MESSAGE_ATTACHMENTS)
+    @ContextProperty(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS)
     public Map<String, DataHandler> outboundMessageAttachments;
 
     /**
@@ -345,17 +345,7 @@ public class MessageProperties implements MessageContext {
         return values;
     }
 
-    public void setScope(String endpointURL, Scope scope) {
-        // TODO
-        throw new UnsupportedOperationException();
-    }
-
-    public Scope getScope(String endpointURL) {
-        // TODO
-        throw new UnsupportedOperationException();
-    }
-
-
+    
     /**
      * Model of {@link MessageProperties} class.
      */
