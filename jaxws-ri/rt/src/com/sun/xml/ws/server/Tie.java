@@ -39,6 +39,8 @@ import com.sun.xml.ws.pept.Delegate;
 import com.sun.xml.ws.pept.ept.EPTFactory;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.pept.protocol.MessageDispatcher;
+import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
+import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import java.io.InputStream;
 import java.util.List;
@@ -90,6 +92,11 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
             // codepath
             
             System.out.println("****** SERVER SIDE REARCH PATH ******");
+            
+            RuntimeEndpointInfo endpointInfo = (RuntimeEndpointInfo)endpoint;
+            Encoder encoder = TestEncoderImpl.get(endpointInfo.getBinding().getSOAPVersion());
+            Decoder decoder = TestDecoderImpl.get(endpointInfo.getBinding().getSOAPVersion());
+            
             Map<String, List<String>> headers = connection.getHeaders();
             String ct = headers.get("Content-Type").get(0);
             InputStream in = connection.getInput();
@@ -98,7 +105,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
             Pipe pipe = new ProviderInvokerPipe((RuntimeEndpointInfo)endpoint);
             msg = pipe.process(msg);
 
-            ct = encoder.getStaticContentType();
+            ct = encoder.getStaticContentType();          
             if (ct == null) {
                 throw new UnsupportedOperationException();
             } else {
