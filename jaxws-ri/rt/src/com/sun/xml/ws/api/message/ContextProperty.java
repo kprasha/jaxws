@@ -44,8 +44,8 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-@interface ContextProperty {
+@Target({ElementType.FIELD,ElementType.METHOD})
+public @interface ContextProperty {
     /**
      * Name of the property.
      */
