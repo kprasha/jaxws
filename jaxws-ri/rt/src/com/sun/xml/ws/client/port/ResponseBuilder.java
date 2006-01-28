@@ -54,8 +54,17 @@ interface ResponseBuilder {
     static final ResponseBuilder NONE = new None();
 
     static final class None implements ResponseBuilder {
+        private final ValueSetter setter;
+
+        public None() {
+            this.setter = null;
+        }
+
+        public None(ValueSetter setter){
+            this.setter = setter;
+        }
         public Object readResponse(Message msg, Object[] args, BridgeContext context) {
-            return null;
+            return setter.put(null, args);
         }
     }
 

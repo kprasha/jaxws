@@ -149,6 +149,7 @@ final class SyncMethodHandler extends MethodHandler {
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
                 case UNBOUND:
+                    builders.add(new ResponseBuilder.None(setter));
                     break;
                 default:
                     throw new AssertionError();
