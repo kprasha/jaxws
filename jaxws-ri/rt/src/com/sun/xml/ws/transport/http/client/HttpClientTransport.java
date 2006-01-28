@@ -85,7 +85,7 @@ public class HttpClientTransport extends WSConnectionImpl {
 
 //<<<<<<< HttpClientTransport.java
         _messageFactory = soapVer.saajFactory;
-        endpoint = (String)context.get(ENDPOINT_ADDRESS_PROPERTY);
+        endpoint = ((MessageProperties)context).endpointAddress;
 //=======
 //            if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING))
 //                _messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
@@ -450,6 +450,7 @@ public class HttpClientTransport extends WSConnectionImpl {
         // for xml/http binding other methods are allowed.
         // for Soap 1.2 "GET" is allowed.
         String method = "POST";
+        /*
         String requestMethod = (String) context.get(MessageContext.HTTP_REQUEST_METHOD);
         if (context.get(BindingProviderProperties.BINDING_ID_PROPERTY).equals(HTTPBinding.HTTP_BINDING)){
             method = (requestMethod != null)?requestMethod:method;            
@@ -458,6 +459,7 @@ public class HttpClientTransport extends WSConnectionImpl {
             "GET".equalsIgnoreCase(requestMethod)) {
             method = (requestMethod != null)?requestMethod:method;
         }
+         */
         ((HttpURLConnection)httpConnection).setRequestMethod(method);
 
         // set the properties on HttpURLConnection
