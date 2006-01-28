@@ -20,6 +20,7 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
@@ -35,6 +36,9 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
+import com.sun.xml.ws.server.provider.XMLProviderEndpointModel;
+import com.sun.xml.ws.server.provider.ProviderEndpointModel;
+import com.sun.xml.ws.server.provider.SOAPProviderEndpointModel;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
 import com.sun.xml.ws.spi.runtime.Container;
@@ -100,6 +104,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
     private List<Source> metadata;
     private BindingImpl binding;
     private AbstractSEIModelImpl seiModel;
+    private ProviderEndpointModel providerModel;
     private Object implementor;
     private Class implementorClass;
     private Map<String, DocInfo> docs;      // /WEB-INF/wsdl/xxx.wsdl -> DocInfo
@@ -332,6 +337,14 @@ public class RuntimeEndpointInfo extends WSEndpoint
 
         if (isProviderEndpoint()) {
             deployProvider();
+            SOAPVersion soapVersion = getBinding().getSOAPVersion();
+            if (soapVersion != null) {
+                providerModel = new SOAPProviderEndpointModel(getImplementorClass(),
+                    soapVersion);
+            } else {
+                providerModel = new XMLProviderEndpointModel(getImplementorClass());
+            }
+            providerModel.createModel();
         } else {
             // Create runtime model for non Provider endpoints
             createModel();
@@ -853,6 +866,10 @@ public class RuntimeEndpointInfo extends WSEndpoint
             docInfo.setQueryString("xsd="+(xsdnum++));
         }
         endpointInfo.updateQuery2DocInfo();
+    }
+
+    public ProviderEndpointModel getProviderModel() {
+        return providerModel;
     }
 
 }
