@@ -214,7 +214,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
 
     public int size() {
         int sz = otherProperties.size();
-        for (StaticProperty sp : props.values()) {
+        for (Property sp : props.values()) {
             if(sp.hasValue(this))
                 sz++;
         }
@@ -225,7 +225,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
         int sz = otherProperties.size();
         if(sz>0)    return false;
 
-        for (StaticProperty sp : props.values()) {
+        for (Property sp : props.values()) {
             if(sp.hasValue(this))
                 return false;
         }
@@ -241,7 +241,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
     }
 
     public Object get(Object key) {
-        StaticProperty sp = props.get(key);
+        Property sp = props.get(key);
         if(sp!=null)
             return sp.get(this);
 
@@ -262,7 +262,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
      * @see ContextProperty
      */
     public Object put(String key, Object value) {
-        StaticProperty sp = props.get(key);
+        Property sp = props.get(key);
         if(sp!=null) {
             Object old = sp.get(this);
             sp.set(this,value);
@@ -273,7 +273,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
     }
 
     public Object remove(Object key) {
-        StaticProperty sp = props.get(key);
+        Property sp = props.get(key);
         if(sp!=null) {
             Object old = sp.get(this);
             sp.set(this,null);
@@ -291,7 +291,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
     public void clear() {
         // TODO: is this even allowed?
         otherProperties.clear();
-        for (StaticProperty sp : props.values())
+        for (Property sp : props.values())
             sp.set(this,null);
     }
 
@@ -299,7 +299,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
         // TODO: implement it correctly. this needs to be a live view
         Set<String> keys = new HashSet<String>();
         keys.addAll(otherProperties.keySet());
-        for (StaticProperty sp : props.values()) {
+        for (Property sp : props.values()) {
             if(sp.hasValue(this))
                 keys.add(sp.getName());
         }
@@ -311,7 +311,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
         Set<Object> values = new HashSet<Object>();
         values.addAll(otherProperties.values());
 
-        for (StaticProperty sp : props.values()) {
+        for (Property sp : props.values()) {
             if(sp.hasValue(this))
                 values.add(sp.get(this));
         }
@@ -324,7 +324,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
 
         values.addAll(otherProperties.entrySet());
 
-        for (final StaticProperty sp : props.values()) {
+        for (final Property sp : props.values()) {
             if(sp.hasValue(this))
                 values.add(new Entry<String,Object>() {
                     public String getKey() {
@@ -345,60 +345,9 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
         return values;
     }
 
-    
-    /**
-     * Model of {@link MessageProperties} class.
-     */
-    private static final Map<String,StaticProperty> props;
-
     static {
-        props = new HashMap<String,StaticProperty>();
-        for (Field f : MessageProperties.class.getFields()) {
-            ContextProperty cp = f.getAnnotation(ContextProperty.class);
-            if(cp!=null)
-                props.put(cp.value(), new StaticProperty(f, cp));
-        }
+        parse(MessageProperties.class);
     }
 
-
-    /**
-     * Represents a field that has {@link ContextProperty} annotation.
-     */
-    static final class StaticProperty {
-        /**
-         * Field with the annotation.
-         */
-        private final Field f;
-
-        /**
-         * {@link ContextProperty} annotation on {@link #f}.
-         */
-        final ContextProperty annotation;
-
-        public StaticProperty(Field f, ContextProperty annotation) {
-            this.f = f;
-            this.annotation = annotation;
-        }
-
-        String getName() {
-            return annotation.value();
-        }
-        boolean hasValue(MessageProperties props) {
-            return get(props)!=null;
-        }
-        Object get(MessageProperties props) {
-            try {
-                return f.get(props);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError();
-            }
-        }
-        void set(MessageProperties props, Object value) {
-            try {
-                f.set(props,value);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError();
-            }
-        }
-    }
+    
 }
