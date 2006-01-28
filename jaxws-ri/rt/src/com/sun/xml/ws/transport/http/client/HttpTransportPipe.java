@@ -33,6 +33,7 @@ import java.util.Arrays;
 import javax.xml.ws.WebServiceException;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  *
@@ -60,10 +61,14 @@ public class HttpTransportPipe implements Pipe {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
             WSConnection con = new HttpClientTransport(null, msg.getProperties());
-            
+
             // get transport headers from message
             MessageProperties props = msg.getProperties();
             Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
+            //assign empty map if its null
+            if(reqHeaders == null){
+                reqHeaders = new HashMap<String, List<String>>();
+            }
             String ct = encoder.getStaticContentType();
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
