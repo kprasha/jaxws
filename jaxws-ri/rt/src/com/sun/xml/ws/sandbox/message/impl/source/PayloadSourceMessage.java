@@ -80,7 +80,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
             XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
             //move the cursor to the payload element
             XMLStreamReaderUtil.next(reader);
-            streamMessage = new StreamMessage(null, reader, SOAPVersion.fromNsUri(SOAPNamespaceConstants.ENVELOPE));
+            streamMessage = new StreamMessage(null, reader, soapVersion);
         }
     }
 
