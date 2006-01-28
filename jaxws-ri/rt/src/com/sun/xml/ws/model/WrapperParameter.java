@@ -57,6 +57,17 @@ public class WrapperParameter extends ParameterImpl {
         super(rtModel, new TypeReference(wrapperType.tagName, CompositeStructure.class), mode, index);
         this.wrapperType = wrapperType;
     }    
+    
+    /**
+     *
+     * @param tagName
+     *      Tag name of the wrapper element.
+     */
+    public WrapperParameter(AbstractSEIModelImpl rtModel, QName tagName, Mode mode, int index) {
+        super(rtModel, new TypeReference(tagName, CompositeStructure.class), mode, index);
+        this.wrapperType = this.getTypeReference();
+    }    
+    
 
     public Bridge getWrapperBridge() {
         return getBridge(wrapperType);

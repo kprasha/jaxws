@@ -745,16 +745,16 @@ public class RuntimeModeler {
             resElementName = new QName(targetNamespace, operationName+RESPONSE);
         }
 
-        TypeReference typeRef =
-                new TypeReference(reqElementName, RPC_LIT_PAYLOAD_CLASS, new Annotation[0]);
-        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.IN, 0);
+        TypeReference typeRef;
+//                new TypeReference(reqElementName, RPC_LIT_PAYLOAD_CLASS, new Annotation[0]);
+        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, reqElementName, Mode.IN, 0);
         requestWrapper.setInBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
-            typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS,
-                                        new Annotation[0]);
-            responseWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.OUT, -1);
+//            typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS,
+//                                        new Annotation[0]);
+            responseWrapper = new WrapperParameter(runtimeModel, resElementName, Mode.OUT, -1);
             responseWrapper.setOutBinding(ParameterBinding.BODY);
             javaMethod.addParameter(responseWrapper);
         }

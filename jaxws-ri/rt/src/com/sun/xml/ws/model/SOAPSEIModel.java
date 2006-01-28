@@ -161,6 +161,7 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
             if(!p.isWrapperStyle()){
                 types.add(p.getTypeReference());
             }else if(binding.isBody()){
+                types.add(p.getTypeReference());
                 List<ParameterImpl> wcParams = ((WrapperParameter)p).getWrapperChildren();
                 for(ParameterImpl wc:wcParams){
                     types.add(wc.getTypeReference());
