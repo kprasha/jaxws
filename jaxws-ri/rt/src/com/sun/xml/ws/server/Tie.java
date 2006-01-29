@@ -45,6 +45,7 @@ import com.sun.xml.ws.util.MessageInfoUtil;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import javax.xml.ws.Provider;
 
 /**
  * Entry point for all server requests.
@@ -102,7 +103,12 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
             InputStream in = connection.getInput();
             Message msg = decoder.decode(in, ct);
 
-            Pipe pipe = new ProviderInvokerPipe((RuntimeEndpointInfo)endpoint);
+            Pipe pipe;
+            if (endpointInfo.getImplementor() instanceof Provider) {
+                pipe = new ProviderInvokerPipe(endpointInfo);
+            } else {
+                pipe = new EndpointInvokerPipe(endpointInfo);
+            }
             msg = pipe.process(msg);
 
             ct = encoder.getStaticContentType();          
