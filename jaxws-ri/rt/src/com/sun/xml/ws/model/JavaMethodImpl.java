@@ -38,8 +38,22 @@ import java.util.List;
  *
  * @author Vivek Pandey
  */
-public class JavaMethodImpl implements JavaMethod {
-    public JavaMethodImpl(Method method) {
+public final class JavaMethodImpl implements JavaMethod {
+
+    private final List<CheckedExceptionImpl> exceptions = new ArrayList<CheckedExceptionImpl>();
+    private final Method method;
+    /*package*/ final List<ParameterImpl> requestParams = new ArrayList<ParameterImpl>();
+    /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
+    private final List<ParameterImpl> unmReqParams = Collections.unmodifiableList(requestParams);
+    private final List<ParameterImpl> unmResParams = Collections.unmodifiableList(responseParams);
+    private SOAPBinding binding;
+    private MEP mep;
+    private String operationName;
+    private WSDLBoundOperation wsdlOperation;
+    /*package*/ final AbstractSEIModelImpl owner;
+
+    public JavaMethodImpl(AbstractSEIModelImpl owner, Method method) {
+        this.owner = owner;
         this.method = method;
     }
 
@@ -220,18 +234,5 @@ public class JavaMethodImpl implements JavaMethod {
         if(wsdlOperation ==null)
             throw new Error("Undefined operation name "+operationName);
     }
-
-    private final List<CheckedExceptionImpl> exceptions = new ArrayList<CheckedExceptionImpl>();
-    private Method method;
-    /*package*/ final List<ParameterImpl> requestParams = new ArrayList<ParameterImpl>();
-    /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
-    private final List<ParameterImpl> unmReqParams =
-            Collections.<ParameterImpl>unmodifiableList(requestParams);
-    private final List<ParameterImpl> unmResParams =
-            Collections.<ParameterImpl>unmodifiableList(responseParams);
-    private SOAPBinding binding;
-    private MEP mep;
-    private String operationName;
-    private WSDLBoundOperation wsdlOperation;
 }
 

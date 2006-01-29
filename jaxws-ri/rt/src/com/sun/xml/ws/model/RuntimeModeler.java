@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -67,7 +68,7 @@ import java.util.concurrent.Future;
 public class RuntimeModeler {
     private String bindingId;
     private Class portClass;
-    private AbstractSEIModelImpl runtimeModel;
+    private AbstractSEIModelImpl model;
     private com.sun.xml.ws.model.soap.SOAPBindingImpl defaultBinding;
     private String packageName;
     private String targetNamespace;
@@ -95,7 +96,7 @@ public class RuntimeModeler {
     public static final String PORT                 = "Port";
     public static final Class HOLDER_CLASS = Holder.class;
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
-    public static final Class RPC_LIT_PAYLOAD_CLASS = com.sun.xml.ws.encoding.jaxb.RpcLitPayload.class;
+    public static final Class RPC_LIT_PAYLOAD_CLASS = RpcLitPayload.class;
 
     /**
      * creates an instance of RunTimeModeler given a <code>portClass</code> and <code>bindingId</code>
@@ -204,7 +205,7 @@ public class RuntimeModeler {
      * @return the runtime model for the <code>portClass</code>.
      */
     public AbstractSEIModelImpl buildRuntimeModel() {
-        runtimeModel = new SOAPSEIModel();
+        model = new SOAPSEIModel();
         Class clazz = portClass;
         WebService webService = getPrivClassAnnotation(portClass, WebService.class);
         if (webService == null) {
@@ -221,7 +222,7 @@ public class RuntimeModeler {
         }
         if (serviceName == null)
             serviceName = getServiceName(portClass);
-        runtimeModel.setServiceQName(serviceName);
+        model.setServiceQName(serviceName);
 
         String portLocalName  = portClass.getSimpleName()+PORT;
         if (webService.portName().length() >0) {
@@ -236,21 +237,21 @@ public class RuntimeModeler {
             throw new RuntimeModelerException("runtime.modeler.portname.servicename.namespace.mismatch",
                     new Object[] {serviceName, portName});
         }
-        runtimeModel.setPortName(portName);
+        model.setPortName(portName);
 
         processClass(clazz);
-        if (runtimeModel.getJavaMethods().size() == 0)
+        if (model.getJavaMethods().size() == 0)
             throw new RuntimeModelerException("runtime.modeler.no.operations",
                     portClass.getName());
-        runtimeModel.postProcess();
+        model.postProcess();
 
         // TODO: this needs to be fixed properly --
         // when we are building RuntimeModel first before building WSDLModel,
         // we still need to do this correctyl
         if(binding!=null)
-            runtimeModel.freeze(binding);
+            model.freeze(binding);
 
-        return runtimeModel;
+        return model;
     }
 
     /**
@@ -314,10 +315,10 @@ public class RuntimeModeler {
         if (targetNamespace.length() == 0) {
             targetNamespace = getNamespace(packageName);
         }
-        runtimeModel.setTargetNamespace(targetNamespace);
+        model.setTargetNamespace(targetNamespace);
         QName portTypeName = new QName(targetNamespace, portTypeLocalName);
-        runtimeModel.setPortTypeName(portTypeName);
-        runtimeModel.setWSDLLocation(webService.wsdlLocation());
+        model.setPortTypeName(portTypeName);
+        model.setWSDLLocation(webService.wsdlLocation());
 
         javax.jws.soap.SOAPBinding soapBinding = getPrivClassAnnotation(clazz, javax.jws.soap.SOAPBinding.class);
         if (soapBinding != null) {
@@ -442,12 +443,12 @@ public class RuntimeModeler {
         Class implementorClass = (implementor != null)
             ? implementor.getClass() : portClass;
         if (method.getDeclaringClass()==implementorClass) {
-            javaMethod = new JavaMethodImpl(method);
+            javaMethod = new JavaMethodImpl(model,method);
         } else {
             try {
                 Method tmpMethod = implementorClass.getMethod(method.getName(),
                     method.getParameterTypes());
-                javaMethod = new JavaMethodImpl(tmpMethod);
+                javaMethod = new JavaMethodImpl(model,tmpMethod);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeModelerException("runtime.modeler.method.not.found",
                     new Object[] {method.getName(), portClass.getName()});
@@ -503,7 +504,7 @@ public class RuntimeModeler {
             processRpcMethod(javaMethod, methodName, webMethod, operationName,
                 method, webService);
         }
-        runtimeModel.addJavaMethod(javaMethod);
+        model.addJavaMethod(javaMethod);
     }
 
     private MEP getMEP(Method m){
@@ -578,14 +579,14 @@ public class RuntimeModeler {
 
         TypeReference typeRef =
                 new TypeReference(reqElementName, requestClass);
-        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, typeRef,
+        WrapperParameter requestWrapper = new WrapperParameter(javaMethod, typeRef,
             Mode.IN, 0);
         requestWrapper.setBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
             typeRef = new TypeReference(resElementName, responseClass);
-            responseWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.OUT, -1);
+            responseWrapper = new WrapperParameter(javaMethod, typeRef, Mode.OUT, -1);
             javaMethod.addParameter(responseWrapper);
             responseWrapper.setBinding(ParameterBinding.BODY);
         }
@@ -622,7 +623,7 @@ public class RuntimeModeler {
             Annotation[] rann = method.getAnnotations();
             if (resultQName.getLocalPart() != null) {
                 TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
-                ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
+                ParameterImpl returnParameter = new ParameterImpl(javaMethod, rTypeReference, Mode.OUT, -1);
                 if (isResultHeader) {
                     returnParameter.setBinding(ParameterBinding.HEADER);
                     javaMethod.addParameter(returnParameter);
@@ -680,7 +681,7 @@ public class RuntimeModeler {
             QName paramQName = new QName(paramNamespace, paramName);
             typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
-            ParameterImpl param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
+            ParameterImpl param = new ParameterImpl(javaMethod, typeRef, paramMode, pos++);
 
             if (isHeader) {
                 param.setBinding(ParameterBinding.HEADER);
@@ -731,13 +732,13 @@ public class RuntimeModeler {
         }
 
         TypeReference typeRef = new TypeReference(reqElementName, RPC_LIT_PAYLOAD_CLASS);
-        WrapperParameter requestWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.IN, 0);
+        WrapperParameter requestWrapper = new WrapperParameter(javaMethod, typeRef, Mode.IN, 0);
         requestWrapper.setInBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
             typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS);
-            responseWrapper = new WrapperParameter(runtimeModel, typeRef, Mode.OUT, -1);
+            responseWrapper = new WrapperParameter(javaMethod, typeRef, Mode.OUT, -1);
             responseWrapper.setOutBinding(ParameterBinding.BODY);
             javaMethod.addParameter(responseWrapper);
         }
@@ -776,7 +777,7 @@ public class RuntimeModeler {
         if (!isOneway && returnType!=null && returnType!=void.class) {
             Annotation[] rann = method.getAnnotations();
             TypeReference rTypeReference = new TypeReference(resultQName, returnType, rann);
-            ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
+            ParameterImpl returnParameter = new ParameterImpl(javaMethod, rTypeReference, Mode.OUT, -1);
             returnParameter.setPartName(resultPartName);
             if(isResultHeader){
                 returnParameter.setBinding(ParameterBinding.HEADER);
@@ -858,7 +859,7 @@ public class RuntimeModeler {
             typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
 
-            ParameterImpl param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
+            ParameterImpl param = new ParameterImpl(javaMethod, typeRef, paramMode, pos++);
             param.setPartName(partName);
 
             if(paramMode == Mode.INOUT){
@@ -999,7 +1000,7 @@ public class RuntimeModeler {
             if (resultName != null) {
                 QName responseQName = new QName(resultTNS, resultName);
                 TypeReference rTypeReference = new TypeReference(responseQName, returnType, rann);
-                ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
+                ParameterImpl returnParameter = new ParameterImpl(javaMethod, rTypeReference, Mode.OUT, -1);
 
                 if(resultPartName == null || (resultPartName.length() == 0)){
                     resultPartName = resultName;
@@ -1062,7 +1063,7 @@ public class RuntimeModeler {
                 new TypeReference(requestQName, clazzType,
                     pannotations[pos]);
 
-            ParameterImpl param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
+            ParameterImpl param = new ParameterImpl(javaMethod, typeRef, paramMode, pos++);
             if(partName == null || (partName.length() == 0)){
                 partName = paramName;
             }

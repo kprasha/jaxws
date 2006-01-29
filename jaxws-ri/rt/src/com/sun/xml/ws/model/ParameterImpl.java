@@ -53,9 +53,9 @@ public class ParameterImpl implements Parameter {
     private final Mode mode;
     private final TypeReference typeReference;
     private final QName name;
-    private final AbstractSEIModelImpl model;
+    private final JavaMethodImpl parent;
 
-    public ParameterImpl(AbstractSEIModelImpl model, TypeReference type, Mode mode, int index) {
+    public ParameterImpl(JavaMethodImpl parent, TypeReference type, Mode mode, int index) {
         assert type != null;
         assert type.tagName != null;
         assert type.tagName.getLocalPart().length() > 0;
@@ -64,15 +64,15 @@ public class ParameterImpl implements Parameter {
         this.name = type.tagName;
         this.mode = mode;
         this.index = index;
-        this.model = model;
+        this.parent = parent;
     }
 
     //public ParameterImpl(TypeReference type, Mode mode, int index) {
     //    this(null, type, mode, index);
     //}
 
-    public SEIModel getOwner() {
-        return model;
+    public AbstractSEIModelImpl getOwner() {
+        return parent.owner;
     }
 
     /**
@@ -83,11 +83,11 @@ public class ParameterImpl implements Parameter {
     }
 
     public Bridge getBridge() {
-        return model.getBridge(typeReference);
+        return getOwner().getBridge(typeReference);
     }
 
     protected Bridge getBridge(TypeReference typeRef) {
-        return model.getBridge(typeRef);
+        return getOwner().getBridge(typeRef);
     }
     
     /**

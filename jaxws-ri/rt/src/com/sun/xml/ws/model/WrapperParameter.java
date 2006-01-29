@@ -42,8 +42,8 @@ import java.util.List;
  */
 public class WrapperParameter extends ParameterImpl {
     // TODO: wrapper parameter doesn't use 'typeRef' --- it only uses tag name.
-    public WrapperParameter(AbstractSEIModelImpl rtModel, TypeReference typeRef, Mode mode, int index) {
-        super(rtModel, typeRef, mode, index);
+    public WrapperParameter(JavaMethodImpl parent, TypeReference typeRef, Mode mode, int index) {
+        super(parent, typeRef, mode, index);
     }
 
     /**

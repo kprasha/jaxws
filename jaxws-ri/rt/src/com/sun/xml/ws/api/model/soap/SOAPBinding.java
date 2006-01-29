@@ -1,12 +1,15 @@
 package com.sun.xml.ws.api.model.soap;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.model.JavaMethod;
+
 import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;
+import javax.jws.WebMethod;
 
 /**
  * Models soap:binding in a WSDL document or a {@link javax.jws.soap.SOAPBinding} annotation. This
- * can be the return of {@link com.sun.xml.ws.api.model.JavaMethod#getBinding()}.
+ * can be the return of {@link JavaMethod#getBinding()}.
  *
  * @author Vivek Pandey
  */
@@ -53,7 +56,7 @@ abstract public class SOAPBinding {
 
     /**
      * Value of <code>wsdl:binding/wsdl:operation/soap:operation@soapAction</code> attribute or
-     * {@link javax.jws.WebMethod#action()} annotation.
+     * {@link WebMethod#action()} annotation.
      * <pre>
      * For example:
      * &lt;wsdl:binding name="HelloBinding" type="tns:Hello">

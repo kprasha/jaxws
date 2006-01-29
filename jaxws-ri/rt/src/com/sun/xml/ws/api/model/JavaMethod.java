@@ -1,11 +1,12 @@
 package com.sun.xml.ws.api.model;
 
-import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.pept.presentation.MEP;
 
+import javax.jws.WebParam;
+import javax.jws.WebParam.Mode;
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * Abstracts the annotated {@link Method} of a SEI.
@@ -24,11 +25,11 @@ public interface JavaMethod {
     MEP getMEP();
 
     /**
-     * Binding object - a {@link com.sun.xml.ws.api.model.soap.SOAPBinding} isntance.
+     * Binding object - a {@link SOAPBinding} isntance.
      *
      * @return the Binding object
      */
-//    Object getBinding();
+    SOAPBinding getBinding();
 
     /**
      * The {@link WSDLBoundOperation} that this method represents.
@@ -39,8 +40,8 @@ public interface JavaMethod {
 //    WSDLBoundOperation getOperation();
 
     /**
-     * Request parameters can be {@link com.sun.xml.ws.api.model.Mode#IN} or
-     * {@link com.sun.xml.ws.api.model.Mode#INOUT} and these parameters go in a request message on-the-wire.
+     * Request parameters can be {@link Mode#IN} or
+     * {@link Mode#INOUT} and these parameters go in a request message on-the-wire.
      * Further a Parameter can be instance of {@link com.sun.xml.ws.model.WrapperParameter} when
      * the operation is wrapper style.
      *
@@ -50,8 +51,7 @@ public interface JavaMethod {
 
     /**
      * Response parameters go in the response message on-the-wire and can be of
-     * {@link com.sun.xml.ws.api.model.Mode#OUT} or
-     * {@link com.sun.xml.ws.api.model.Mode#INOUT}
+     * {@link Mode#OUT} or {@link Mode#INOUT}
      * @return returns unmodifiable list of response parameters
      */
 //    List<? extends Parameter> getResponseParameters();
