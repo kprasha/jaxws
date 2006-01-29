@@ -21,29 +21,28 @@ package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.messaging.saaj.soap.SOAPVersionMismatchException;
+import com.sun.xml.ws.api.model.Mode;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.encoding.soap.message.*;
+import com.sun.xml.ws.encoding.soap.message.FaultCode;
+import com.sun.xml.ws.encoding.soap.message.FaultCodeEnum;
+import com.sun.xml.ws.encoding.soap.message.FaultReason;
+import com.sun.xml.ws.encoding.soap.message.FaultReasonText;
+import com.sun.xml.ws.encoding.soap.message.FaultSubcode;
+import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
+import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.MessageInfoUtil;
-//import com.sun.xml.ws.api.model.JavaMethod;
-//import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.model.ParameterImpl;
-//import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.Mode;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.soap.SOAPFault;
-
-import java.util.Collection;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -61,7 +60,7 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
         for (JavaMethodImpl m : getJavaMethods()) {
             if(m.isAsync())
                 continue;
-            com.sun.xml.ws.api.model.soap.SOAPBinding binding = (com.sun.xml.ws.api.model.soap.SOAPBinding) m.getBinding();
+            com.sun.xml.ws.api.model.soap.SOAPBinding binding = m.getBinding();
             setDecoderInfo(m.getRequestParameters(), binding, Mode.IN);
             setDecoderInfo(m.getResponseParameters(), binding, Mode.OUT);
             for(CheckedExceptionImpl ce:m.getCheckedExceptions()){
@@ -87,15 +86,7 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
                 }
                 addDecoderInfo(param.getName(), payload);
             } else {
-                JAXBBridgeInfo bi;
-                if (param instanceof WrapperParameter) {
-                    WrapperParameter wp = (WrapperParameter)param;
-                     bi = new JAXBBridgeInfo(wp.getWrapperBridge(),
-                        null);
-                }
-                else
-                    bi = new JAXBBridgeInfo(getBridge(param.getBridge().getTypeReference()),
-                        null);
+                JAXBBridgeInfo bi = new JAXBBridgeInfo(param.getBridge(),null);
                 addDecoderInfo(param.getName(), bi);
             }
         }
@@ -136,9 +127,8 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
     @Override
     protected void fillTypes(JavaMethodImpl m, List<TypeReference> types) {
         if(m.getBinding() == null) {
-            //TODO throws exception
-            System.out.println("Error: Wrong Binding!");
-            return;
+            // TODO: implement this later
+            throw new UnsupportedOperationException("Error: Wrong Binding!");
         }
         if(m.getBinding().isDocLit()){
             super.fillTypes(m, types);
@@ -158,15 +148,7 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
     private void addTypes(List<ParameterImpl> params, List<TypeReference> types, Mode mode) {
         for(ParameterImpl p:params){
             ParameterBinding binding = (mode == Mode.IN)?p.getInBinding():p.getOutBinding();
-            if(!p.isWrapperStyle()){
-                types.add(p.getTypeReference());
-            }else if(binding.isBody()){
-                types.add(p.getTypeReference());
-                List<ParameterImpl> wcParams = ((WrapperParameter)p).getWrapperChildren();
-                for(ParameterImpl wc:wcParams){
-                    types.add(wc.getTypeReference());
-                }
-            }
+            types.add(p.getTypeReference());
         }
     }
 

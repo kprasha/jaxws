@@ -23,6 +23,11 @@ import javax.jws.WebParam;
  */
 public interface Parameter {
     /**
+     * Gets the root {@link SEIModel} that owns this model.
+     */
+    SEIModel getOwner();
+
+    /**
      * @return Returns the {@link QName} of the payload/infoset of a SOAP body or header.
      */
     QName getName();

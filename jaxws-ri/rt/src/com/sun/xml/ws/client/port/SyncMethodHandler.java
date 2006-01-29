@@ -203,6 +203,10 @@ final class SyncMethodHandler extends MethodHandler {
             // process the message
             Message reply = owner.doProcess(msg);
 
+            if(reply==null)
+                // no reply. must have been one-way
+                return null;
+
             if(reply.isFault()) {
                 // TODO: data-bind fault into exception
                 try {

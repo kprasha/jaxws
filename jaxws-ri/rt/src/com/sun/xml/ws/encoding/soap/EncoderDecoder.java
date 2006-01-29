@@ -19,20 +19,19 @@
  */
 package com.sun.xml.ws.encoding.soap;
 
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.encoding.EncoderDecoderBase;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.internal.AttachmentBlock;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.MessageContextUtil;
-//import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.model.ParameterImpl;
+import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.ws.server.RuntimeContext;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
@@ -240,8 +239,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
      */
     private Object createJAXBBeanPayload(RuntimeContext context, WrapperParameter param,
                                          Object[] data, Object result) {
-//        Class bean = (Class) param.getTypeReference().type;
-        Class bean = (Class) param.getWrapperType().type;
+        Class bean = (Class) param.getTypeReference().type;
         try {
             Object obj = bean.newInstance();
             for( ParameterImpl p : param.getWrapperChildren() ) {
@@ -276,12 +274,11 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
         for  (ParameterImpl p : param.getWrapperChildren()) {
             if(p.getBinding().isUnbound())
                 continue;
-            Object value = null;
+            Object value;
             if (p.isResponse())
                 value = result;
             else
                 value = p.getHolderValue(data[p.getIndex()]);
-            SEIModel model = context.getModel();
             JAXBBridgeInfo bi = new JAXBBridgeInfo(param.getBridge(), value);
             payload.addParameter(bi);
         }

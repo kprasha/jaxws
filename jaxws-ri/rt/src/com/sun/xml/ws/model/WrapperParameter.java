@@ -19,18 +19,11 @@
  */
 package com.sun.xml.ws.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.bind.api.CompositeStructure;
-import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.api.model.Mode;
-//import com.sun.xml.ws.api.model.SEIModel;
 
-import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link ParameterImpl} that represents a wrapper,
@@ -48,32 +41,11 @@ import javax.xml.namespace.QName;
  * @author Vivek Pandey
  */
 public class WrapperParameter extends ParameterImpl {
-    /**
-     *
-     * @param tagName
-     *      Tag name of the wrapper element.
-     */
-    public WrapperParameter(AbstractSEIModelImpl rtModel, TypeReference wrapperType, Mode mode, int index) {
-        super(rtModel, new TypeReference(wrapperType.tagName, CompositeStructure.class), mode, index);
-        this.wrapperType = wrapperType;
-    }    
-    
-    /**
-     *
-     * @param tagName
-     *      Tag name of the wrapper element.
-     */
-    public WrapperParameter(AbstractSEIModelImpl rtModel, QName tagName, Mode mode, int index) {
-        super(rtModel, new TypeReference(tagName, CompositeStructure.class), mode, index);
-        this.wrapperType = this.getTypeReference();
-    }    
-    
-
-    public Bridge getWrapperBridge() {
-        return getBridge(wrapperType);
+    // TODO: wrapper parameter doesn't use 'typeRef' --- it only uses tag name.
+    public WrapperParameter(AbstractSEIModelImpl rtModel, TypeReference typeRef, Mode mode, int index) {
+        super(rtModel, typeRef, mode, index);
     }
 
-    
     /**
      *
      * @deprecated
@@ -83,20 +55,12 @@ public class WrapperParameter extends ParameterImpl {
     public boolean isWrapperStyle() {
         return true;
     }
-    
-    /**
-     * @return Returns the @Line(TypeReference} for the wrapper type
-     */
-    
-    public TypeReference getWrapperType() {
-        return wrapperType;
-    }
-    
+
     /**
      * @return Returns the wrapperChildren.
      */
     public List<ParameterImpl> getWrapperChildren() {
-        return Collections.<ParameterImpl>unmodifiableList(wrapperChildren);
+        return wrapperChildren;
     }
 
     /**
@@ -114,18 +78,9 @@ public class WrapperParameter extends ParameterImpl {
         wrapperChildren.add(wrapperChild);
     }
 
-    /**
-     * removes the wrapper child from the given index
-     * @param index
-     */
-    public ParameterImpl removeWrapperChild(int index){
-        return wrapperChildren.remove(index);
-    }
-
     public void clear(){
         wrapperChildren.clear();
     }
 
     protected final List<ParameterImpl> wrapperChildren = new ArrayList<ParameterImpl>();
-    protected TypeReference wrapperType;
 }

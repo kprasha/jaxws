@@ -1,23 +1,22 @@
 package com.sun.xml.ws.client.port;
 
+import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.api.CompositeStructure;
+import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.model.WrapperParameter;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Reads a response {@link Message}, disassembles it, and moves obtained Java values
@@ -175,45 +174,57 @@ interface ResponseBuilder {
         /**
          * {@link PartBuilder} keyed by the element name (inside the wrapper element.)
          */
-        private final Map<QName,PartBuilder> parts = new HashMap<QName,PartBuilder>();
-        
-        private QName wrapperName;
+        private final PartBuilder[] parts;
+
+        private final Bridge wrapper;
 
         public Wrapped(WrapperParameter wp) {
-            // TODO: we no longer use wrapper beans
-            assert wp.getTypeReference().type== CompositeStructure.class;
-            
-            wrapperName = wp.getWrapperType().tagName;
+            wrapper = wp.getBridge();
+            Class wrapperType = (Class) wrapper.getTypeReference().type;
+
+            List<PartBuilder> parts = new ArrayList<PartBuilder>();
+
             List<ParameterImpl> children = wp.getWrapperChildren();
             for (ParameterImpl p : children) {
-                parts.put( p.getName(), new PartBuilder(
-                    p.getBridge(), ValueSetter.get(p)
-                ));
+                if(p.isIN())
+                    continue;
+                QName name = p.getName();
+                try {
+                    parts.add( new PartBuilder(
+                        wp.getOwner().getJAXBContext().getElementPropertyAccessor(
+                            wrapperType,
+                            name.getNamespaceURI(),
+                            p.getName().getLocalPart()),
+                        ValueSetter.get(p)
+                    ));
+                } catch (JAXBException e) {
+                    throw new WebServiceException(  // TODO: i18n
+                        wrapperType+" do not have a property of the name "+name,e);
+                }
             }
+
+            this.parts = parts.toArray(new PartBuilder[parts.size()]);
         }
 
         public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
             Object retVal = null;
 
             XMLStreamReader reader = msg.readPayload();
-            if (reader.nextTag() == XMLStreamReader.START_ELEMENT &&
-                !reader.getName().equals(wrapperName)) {
-                // TODO this should be an error;
-            }
-            while(reader.hasNext() && reader.next()==XMLStreamReader.START_ELEMENT) {
-                // TODO: QName has a performance issue
-                PartBuilder part = parts.get(reader.getName());
-                if(part==null) {
-                    // no corresponding part found. ignore
-                    XMLStreamReaderUtil.skipElement(reader);
-                } else {
-                    Object o = part.readResponse(args,reader,context);
+            Object wrapperBean = wrapper.unmarshal(context, reader);
+
+            try {
+                for (PartBuilder part : parts) {
+                    Object o = part.readResponse(args,wrapperBean);
                     // there's only at most one ResponseBuilder that returns a value.
+                    // TODO: reorder parts so that the return value comes at the end.
                     if(o!=null) {
                         assert retVal==null;
                         retVal = o;
                     }
                 }
+            } catch (AccessorException e) {
+                // this can happen when the set method throw a checked exception or something like that
+                throw new WebServiceException(e);    // TODO:i18n
             }
 
             // we are done with the body
@@ -227,22 +238,23 @@ interface ResponseBuilder {
          * to the expected place.
          */
         static final class PartBuilder {
-            private final Bridge bridge;
+            private final RawAccessor accessor;
             private final ValueSetter setter;
 
             /**
-             * @param bridge
-             *      specifies how the part is unmarshalled.
+             * @param accessor
+             *      specifies which portion of the wrapper bean to obtain the value from.
              * @param setter
              *      specifies how the obtained value is returned to the client.
              */
-            public PartBuilder(Bridge bridge, ValueSetter setter) {
-                this.bridge = bridge;
+            public PartBuilder(RawAccessor accessor, ValueSetter setter) {
+                this.accessor = accessor;
                 this.setter = setter;
+                assert accessor!=null && setter!=null;
             }
 
-            final Object readResponse( Object[] args, XMLStreamReader r, BridgeContext context ) throws JAXBException {
-                Object obj = bridge.unmarshal(context,r);
+            final Object readResponse( Object[] args, Object wrapperBean ) throws AccessorException {
+                Object obj = accessor.get(wrapperBean);
                 return setter.put(obj,args);
             }
 

@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
+import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
@@ -237,9 +238,15 @@ public class SAAJMessage extends Message {
      * <p/>
      * This consumes the message.
      */
-    public XMLStreamReader readPayload() {
-        return (payload != null) ?
-                SourceReaderFactory.createSourceReader(new DOMSource(payload), true) : null;
+    public XMLStreamReader readPayload() throws XMLStreamException {
+        if(payload==null)
+            return null;
+
+        DOMStreamReader dss = new DOMStreamReader();
+        dss.setCurrentNode(payload);
+        dss.nextTag();
+        assert dss.getEventType()==XMLStreamReader.START_ELEMENT;
+        return dss;
     }
 
     /**

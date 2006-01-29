@@ -24,10 +24,7 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
-//import com.sun.xml.ws.api.model.CheckedException;
-//import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Mode;
-//import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -35,6 +32,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
@@ -155,8 +153,10 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * @param type
      * @return the <code>Bridge</code> for the <code>type</code>
      */
-    public Bridge getBridge(TypeReference type) {
-        return bridgeMap.get(type);
+    public final Bridge getBridge(TypeReference type) {
+        Bridge b = bridgeMap.get(type);
+        assert b!=null; // we should have created Bridge for all TypeReferences known to this model
+        return b;
     }
 
     /**
@@ -237,23 +237,13 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     protected void fillTypes(JavaMethodImpl m, List<TypeReference> types) {
-        addTypes(m.requestParams, types);
-        addTypes(m.responseParams, types);
+        fillTypes(m.requestParams, types);
+        fillTypes(m.responseParams, types);
     }
 
-    private void addTypes(List<ParameterImpl> params, List<TypeReference> types) {
+    private void fillTypes(List<ParameterImpl> params, List<TypeReference> types) {
         for (ParameterImpl p : params) {
-//            types.add(p.getTypeReference());
-            if (p instanceof WrapperParameter) {
-                WrapperParameter wp = (WrapperParameter) p;
-                types.add(wp.wrapperType);
-                //Commented out the code below.
-                // we shouldnt be adding CopositeStructure.class to the types!
-                types.add(p.getTypeReference());
-//                addTypes( wp.wrapperChildren, types );
-            } else {
-                types.add(p.getTypeReference());
-            }
+            types.add(p.getTypeReference());
         }
     }
 
@@ -334,7 +324,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     public QName getQNameForJM(JavaMethodImpl jm) {
         for (QName key : nameToJM.keySet()) {
             JavaMethodImpl jmethod = nameToJM.get(key);
-            if (jmethod.getOperationName().equals(((JavaMethodImpl)jm).getOperationName())){
+            if (jmethod.getOperationName().equals(jm.getOperationName())){
                return key;
             }
         }
@@ -355,7 +345,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * Used from {@link com.sun.xml.ws.client.WSServiceDelegate#buildEndpointIFProxy(javax.xml.namespace.QName, Class)}}
+     * Used from {@link WSServiceDelegate}
      * to apply the binding information from WSDL after the model is created frm SEI class on the client side. On the server
      * side all the binding information is available before modeling and this method is not used.
      *
@@ -386,7 +376,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                 ParameterBinding paramBinding = wsdlBinding.getBinding(opName,
                         partName, Mode.IN);
                 if(paramBinding != null)
-                    ((ParameterImpl)param).setInBinding(paramBinding);
+                    param.setInBinding(paramBinding);
             }
 
             List<ParameterImpl> resAttachParams = null;
@@ -406,7 +396,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                 ParameterBinding paramBinding = wsdlBinding.getBinding(opName,
                         partName, Mode.OUT);
                 if(paramBinding != null)
-                    ((ParameterImpl)param).setOutBinding(paramBinding);
+                    param.setOutBinding(paramBinding);
             }
             if(reqAttachParams != null){
                 for(ParameterImpl p : reqAttachParams){

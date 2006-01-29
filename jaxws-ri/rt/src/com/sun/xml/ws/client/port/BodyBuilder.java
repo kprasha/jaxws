@@ -1,15 +1,20 @@
 package com.sun.xml.ws.client.port;
 
+import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.CompositeStructure;
-import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.bind.api.RawAccessor;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.ParameterImpl;
+import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
 import java.util.List;
 
 /**
@@ -104,7 +109,7 @@ abstract class BodyBuilder {
         /**
          * How does each wrapped parameter binds to XML?
          */
-        private final Bridge[] parameterBridges;
+        private final RawAccessor[] accessors;
 
         /**
          * Where in the method argument list do they come from?
@@ -117,18 +122,32 @@ abstract class BodyBuilder {
         private final ValueGetter[] getters;
 
         /**
+         * Wrapper bean.
+         */
+        private final Class wrapper;
+
+        /**
          * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
         Wrapped(WrapperParameter wp, PortInterfaceStub owner) {
             super(wp.getBridge(),owner);
-            // we'll use CompositeStructure to pack requests
-            assert wp.getTypeReference().type==CompositeStructure.class;
+
+            wrapper = (Class)wp.getBridge().getTypeReference().type;
 
             List<ParameterImpl> children = wp.getWrapperChildren();
 
-            parameterBridges = new Bridge[children.size()];
-            for( int i=0; i<parameterBridges.length; i++ )
-                parameterBridges[i] = children.get(i).getBridge();
+            accessors = new RawAccessor[children.size()];
+            for( int i=0; i<accessors.length; i++ ) {
+                ParameterImpl p = children.get(i);
+                QName name = p.getName();
+                try {
+                    accessors[i] = p.getOwner().getJAXBContext().getElementPropertyAccessor(
+                        wrapper, name.getNamespaceURI(), name.getLocalPart() );
+                } catch (JAXBException e) {
+                    throw new WebServiceException(  // TODO: i18n
+                        wrapper+" do not have a property of the name "+name,e);
+                }
+            }
 
             indices = new int[children.size()];
             getters = new ValueGetter[children.size()];
@@ -140,18 +159,32 @@ abstract class BodyBuilder {
         }
 
         /**
-         * Packs a bunch of arguments intoa {@link CompositeStructure}.
+         * Packs a bunch of arguments into a {@link CompositeStructure}.
          */
-        CompositeStructure build(Object[] methodArgs) {
-            CompositeStructure cs = new CompositeStructure();
-            cs.bridges = parameterBridges;
-            cs.values = new Object[parameterBridges.length];
+        Object build(Object[] methodArgs) {
+            try {
+                Object bean = wrapper.newInstance();
 
-            // fill in wrapped parameters from methodArgs
-            for( int i=indices.length-1; i>=0; i-- )
-                cs.values[i] = getters[i].get(methodArgs[indices[i]]);
+                // fill in wrapped parameters from methodArgs
+                for( int i=indices.length-1; i>=0; i-- ) {
+                    accessors[i].set(bean,getters[i].get(methodArgs[indices[i]]));
+                }
 
-            return cs;
+                return bean;
+            } catch (InstantiationException e) {
+                // this is irrecoverable
+                Error x = new InstantiationError(e.getMessage());
+                x.initCause(e);
+                throw x;
+            } catch (IllegalAccessException e) {
+                // this is irrecoverable
+                Error x = new IllegalAccessError(e.getMessage());
+                x.initCause(e);
+                throw x;
+            } catch (AccessorException e) {
+                // this can happen when the set method throw a checked exception or something like that
+                throw new WebServiceException(e);    // TODO:i18n
+            }
         }
     }
 }

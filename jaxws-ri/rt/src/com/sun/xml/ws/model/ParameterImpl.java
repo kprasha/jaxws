@@ -55,9 +55,6 @@ public class ParameterImpl implements Parameter {
     private final QName name;
     private final AbstractSEIModelImpl model;
 
-    /**
-     * 
-     */
     public ParameterImpl(AbstractSEIModelImpl model, TypeReference type, Mode mode, int index) {
         assert type != null;
         assert type.tagName != null;
@@ -70,8 +67,14 @@ public class ParameterImpl implements Parameter {
         this.model = model;
     }
 
-    
-    
+    //public ParameterImpl(TypeReference type, Mode mode, int index) {
+    //    this(null, type, mode, index);
+    //}
+
+    public SEIModel getOwner() {
+        return model;
+    }
+
     /**
      * @return Returns the name.
      */
@@ -172,7 +175,7 @@ public class ParameterImpl implements Parameter {
      * If true, this parameter maps to the return value of a method invocation.
      *
      * <p>
-     * {@link com.sun.xml.ws.api.model.JavaMethod#getResponseParameters()} is guaranteed to have
+     * {@link JavaMethodImpl#getResponseParameters()} is guaranteed to have
      * at most one such {@link ParameterImpl}. Note that there coule be none,
      * in which case the method returns <tt>void</tt>.
      */
