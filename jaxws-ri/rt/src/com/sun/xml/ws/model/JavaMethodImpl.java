@@ -19,23 +19,19 @@
  */
 package com.sun.xml.ws.model;
 
+import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.soap.SOAPBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.model.soap.SOAPBindingImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.pept.presentation.MEP;
+
+import javax.xml.namespace.QName;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.model.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.pept.presentation.MEP;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.model.CheckedExceptionImpl;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.soap.SOAPBinding;
-
-import javax.xml.namespace.QName;
 
 /**
  * Build this runtime model using java SEI and annotations
@@ -43,9 +39,6 @@ import javax.xml.namespace.QName;
  * @author Vivek Pandey
  */
 public class JavaMethodImpl implements JavaMethod {
-    /**
-     *
-     */
     public JavaMethodImpl(Method method) {
         this.method = method;
     }
@@ -115,22 +108,15 @@ public class JavaMethodImpl implements JavaMethod {
         return unmResParams;
     }
 
-    /**
-     * @param p
-     */
     void addParameter(ParameterImpl p) {
         if (p.isIN() || p.isINOUT()) {
-            if (requestParams.contains(p)) {
-                // TODO throw exception
-            }
+            assert !requestParams.contains(p);
             requestParams.add(p);
         }
 
         if (p.isOUT() || p.isINOUT()) {
             // this check is only for out parameters
-            if (requestParams.contains(p)) {
-                // TODO throw exception
-            }
+            assert !requestParams.contains(p);
             responseParams.add(p);
         }
     }
@@ -150,6 +136,8 @@ public class JavaMethodImpl implements JavaMethod {
     /**
      * @return Returns number of java method parameters - that will be all the
      *         IN, INOUT and OUT holders
+     *
+     * @deprecated no longer use in the new architecture
      */
     public int getInputParametersCount() {
         int count = 0;
@@ -191,7 +179,7 @@ public class JavaMethodImpl implements JavaMethod {
      */
     public CheckedExceptionImpl getCheckedException(Class exceptionClass) {
         for (CheckedExceptionImpl ce : exceptions) {
-            if (ce.getExcpetionClass().equals(exceptionClass))
+            if (ce.getExcpetionClass()==exceptionClass)
                 return ce;
         }
         return null;
@@ -211,9 +199,7 @@ public class JavaMethodImpl implements JavaMethod {
     public CheckedExceptionImpl getCheckedException(TypeReference detailType) {
         for (CheckedExceptionImpl ce : exceptions) {
             TypeReference actual = ce.getDetailType();
-            if (actual.tagName.equals(detailType.tagName)
-                    && actual.type.getClass().getName()
-                            .equals(detailType.type.getClass().getName())) {
+            if (actual.tagName.equals(detailType.tagName) && actual.type==detailType.type) {
                 return ce;
             }
         }
@@ -235,7 +221,7 @@ public class JavaMethodImpl implements JavaMethod {
             throw new Error("Undefined operation name "+operationName);
     }
 
-    private List<CheckedExceptionImpl> exceptions = new ArrayList<CheckedExceptionImpl>();
+    private final List<CheckedExceptionImpl> exceptions = new ArrayList<CheckedExceptionImpl>();
     private Method method;
     /*package*/ final List<ParameterImpl> requestParams = new ArrayList<ParameterImpl>();
     /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
