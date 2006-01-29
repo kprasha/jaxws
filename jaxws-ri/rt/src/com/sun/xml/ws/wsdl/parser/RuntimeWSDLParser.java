@@ -20,14 +20,12 @@
 
 package com.sun.xml.ws.wsdl.parser;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.server.DocInfo;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
@@ -41,6 +39,7 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;

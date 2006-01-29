@@ -1,11 +1,11 @@
 package com.sun.xml.ws.api.model;
 
-import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.Bridge;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 import javax.jws.WebParam;
+import javax.jws.WebParam.Mode;
 
 /**
  * Runtime Parameter that abstracts the annotated java parameter

@@ -20,7 +20,7 @@
 package com.sun.xml.ws.model.soap;
 
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
-import com.sun.xml.ws.api.model.soap.Style;
+import javax.jws.soap.SOAPBinding.Style;
 import com.sun.xml.ws.api.SOAPVersion;
 
 /**

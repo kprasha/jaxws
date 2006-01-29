@@ -1,6 +1,6 @@
 package com.sun.xml.ws.api.model.wsdl;
 
-import com.sun.xml.ws.api.model.Mode;
+import javax.jws.WebParam.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 
 import javax.xml.namespace.QName;

@@ -20,12 +20,12 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.Mode;
-import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 
+import javax.jws.soap.SOAPBinding.Style;
+import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,18 +77,18 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     }
 
     public WSDLPart getPart(String partName, Mode mode){
-        if(mode.equals(Mode.IN)){
+        if(mode==Mode.IN){
             return inParts.get(partName);
-        }else if(mode.equals(Mode.OUT)){
+        }else if(mode==Mode.OUT){
             return outParts.get(partName);
         }
         return null;
     }
 
     public void addPart(WSDLPart part, Mode mode){
-        if(mode.equals(Mode.IN))
+        if(mode==Mode.IN)
             inParts.put(part.getName(), part);
-        else if(mode.equals(Mode.OUT))
+        else if(mode==Mode.OUT)
             outParts.put(part.getName(), part);
     }
 

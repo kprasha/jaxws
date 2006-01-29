@@ -1,7 +1,6 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.ws.api.model.Mode;
-//import com.sun.xml.ws.api.model.Parameter;
+import javax.jws.WebParam.Mode;
 import com.sun.xml.ws.model.ParameterImpl;
 
 import javax.xml.ws.Holder;

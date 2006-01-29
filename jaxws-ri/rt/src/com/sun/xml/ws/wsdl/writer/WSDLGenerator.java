@@ -58,6 +58,7 @@ import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
 //import com.sun.xml.ws.api.model.soap.Style;
 //import com.sun.xml.ws.api.model.soap.Use;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.SOAPVersion;
 
 
@@ -65,8 +66,8 @@ import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.api.model.soap.Style;
-import com.sun.xml.ws.api.model.soap.Use;
+import javax.jws.soap.SOAPBinding.Use;
+import javax.jws.soap.SOAPBinding.Style;
 
 
 import javax.xml.bind.SchemaOutputResolver;
@@ -450,10 +451,8 @@ public class WSDLGenerator {
      * @return true if method is rpc/literal, otherwise, false
      */    
     protected boolean isRpcLit(JavaMethodImpl method) {
-        if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-            if (((com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding()).getStyle().equals(Style.RPC))
-                return true;
-        }
+        if (method.getBinding().getStyle()==Style.RPC)
+            return true;
         return false;
     }
 

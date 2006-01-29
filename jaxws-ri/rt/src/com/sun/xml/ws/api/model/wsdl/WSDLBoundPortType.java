@@ -1,10 +1,10 @@
 package com.sun.xml.ws.api.model.wsdl;
 
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.jws.WebParam.Mode;
 
 /**
  * {@link WSDLPortType} bound with a specific binding.

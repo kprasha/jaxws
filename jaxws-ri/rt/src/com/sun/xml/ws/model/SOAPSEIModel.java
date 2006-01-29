@@ -21,7 +21,6 @@ package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.messaging.saaj.soap.SOAPVersionMismatchException;
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
@@ -43,6 +42,7 @@ import com.sun.xml.ws.util.MessageInfoUtil;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.soap.SOAPFaultException;
+import javax.jws.WebParam.Mode;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;

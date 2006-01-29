@@ -24,7 +24,6 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -44,6 +43,7 @@ import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
+import javax.jws.WebParam.Mode;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;

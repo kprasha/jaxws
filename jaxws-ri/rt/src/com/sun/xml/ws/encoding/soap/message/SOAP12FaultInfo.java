@@ -20,19 +20,19 @@
 
 package com.sun.xml.ws.encoding.soap.message;
 
-import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPEncoder;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
+import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.util.SOAPUtil;
+import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.Detail;
@@ -42,12 +42,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Locale;
-
-import org.w3c.dom.Node;
 
 /**
  * SOAP 1.2 soap soapFault info class

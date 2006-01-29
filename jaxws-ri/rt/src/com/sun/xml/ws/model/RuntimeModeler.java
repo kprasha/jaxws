@@ -22,9 +22,7 @@ package com.sun.xml.ws.model;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
@@ -34,9 +32,11 @@ import com.sun.xml.ws.pept.presentation.MEP;
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import javax.jws.WebParam.Mode;
 import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
+import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.BindingType;
@@ -379,9 +379,7 @@ public class RuntimeModeler {
     protected com.sun.xml.ws.model.soap.SOAPBindingImpl createBinding(javax.jws.soap.SOAPBinding soapBinding) {
         com.sun.xml.ws.model.soap.SOAPBindingImpl rtSOAPBinding =
             new com.sun.xml.ws.model.soap.SOAPBindingImpl();
-        Style style = (soapBinding == null ||
-            soapBinding.style().equals(javax.jws.soap.SOAPBinding.Style.DOCUMENT)) ?
-            Style.DOCUMENT : Style.RPC;
+        Style style = soapBinding!=null ? soapBinding.style() : Style.DOCUMENT;
         rtSOAPBinding.setStyle(style);
         //default soap version is 1.1, change it to soap 1.2 if the binding id says so
         if(SOAPVersion.SOAP_12.httpBindingId.equals(bindingId))
@@ -456,8 +454,6 @@ public class RuntimeModeler {
             }
         }
         String methodName = method.getName();
-        int modifier = method.getModifiers();
-        //use for checking
 
         //set MEP -oneway, async, req/resp
         MEP mep = getMEP(method);
@@ -539,7 +535,7 @@ public class RuntimeModeler {
         String beanPackage = packageName + PD_JAXWS_PACKAGE_PD;
         if (packageName.length() == 0)
             beanPackage = JAXWS_PACKAGE_PD;
-        String requestClassName = null;
+        String requestClassName;
         if(reqWrapper != null && reqWrapper.className().length()>0){
             requestClassName = reqWrapper.className();
         }else{
@@ -547,7 +543,7 @@ public class RuntimeModeler {
         }
 
 
-        String responseClassName = null;
+        String responseClassName;
         if(resWrapper != null && resWrapper.className().length()>0){
             responseClassName = resWrapper.className();
         }else{
@@ -567,7 +563,6 @@ public class RuntimeModeler {
         QName reqElementName = new QName(reqNamespace, reqName);
 
         Class responseClass = null;
-        QName resElementName = null;
         String resName = operationName+"Response";
         String resNamespace = targetNamespace;
         if (!isOneway) {
@@ -579,7 +574,7 @@ public class RuntimeModeler {
                     resName = resWrapper.localName();
             }
         }
-        resElementName = new QName(resNamespace, resName);
+        QName resElementName = new QName(resNamespace, resName);
 
         TypeReference typeRef =
                 new TypeReference(reqElementName, requestClass);
@@ -643,10 +638,8 @@ public class RuntimeModeler {
         Type[] genericParameterTypes = method.getGenericParameterTypes();
         Annotation[][] pannotations = getPrivParameterAnnotations(method);
         int pos = 0;
-        QName paramQName = null;
         for (Class clazzType : parameterTypes) {
             String partName=null;
-            ParameterImpl param = null;
             String paramName = "arg"+pos;
             String paramNamespace = "";
             boolean isHeader = false;
@@ -662,12 +655,10 @@ public class RuntimeModeler {
                     clazzType = Navigator.REFLECTION.erasure(((ParameterizedType)genericParameterTypes[pos]).getActualTypeArguments()[0]);
                 }
             }
-            Mode paramMode = isHolder ?
-                Mode.INOUT :
-                Mode.IN;
+            Mode paramMode = isHolder ? Mode.INOUT : Mode.IN;
             for (Annotation annotation : pannotations[pos]) {
-                if (annotation.annotationType() == javax.jws.WebParam.class) {
-                    javax.jws.WebParam webParam = (javax.jws.WebParam) annotation;
+                if (annotation.annotationType() == WebParam.class) {
+                    WebParam webParam = (WebParam) annotation;
                     if (webParam.name().length() > 0)
                         paramName = webParam.name();
                     isHeader = webParam.header();
@@ -680,19 +671,16 @@ public class RuntimeModeler {
                     if (!webParam.targetNamespace().equals("")) {
                         paramNamespace = webParam.targetNamespace();
                     }
-                    WebParam.Mode mode = webParam.mode();
-                    if (isHolder && mode == javax.jws.WebParam.Mode.IN)
-                        mode = javax.jws.WebParam.Mode.INOUT;
-                    paramMode = (mode == javax.jws.WebParam.Mode.IN) ? Mode.IN :
-                        (mode == javax.jws.WebParam.Mode.INOUT) ? Mode.INOUT :
-                        Mode.OUT;
+                    paramMode = webParam.mode();
+                    if (isHolder && paramMode == Mode.IN)
+                        paramMode = Mode.INOUT;
                     break;
                 }
             }
-            paramQName = new QName(paramNamespace, paramName);
+            QName paramQName = new QName(paramNamespace, paramName);
             typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
-            param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
+            ParameterImpl param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
 
             if (isHeader) {
                 param.setBinding(ParameterBinding.HEADER);
@@ -758,7 +746,6 @@ public class RuntimeModeler {
         String resultName = RETURN;
         String resultTNS = targetNamespace;
         String resultPartName = resultName;
-        QName resultQName = null;
         boolean isResultHeader = false;
         WebResult webResult = method.getAnnotation(WebResult.class);
 
@@ -776,6 +763,7 @@ public class RuntimeModeler {
                 resultTNS = webResult.targetNamespace();
             isResultHeader = webResult.header();
         }
+        QName resultQName;
         if (isResultHeader)
             resultQName = new QName(resultTNS, resultName);
         else
@@ -814,9 +802,7 @@ public class RuntimeModeler {
         Type[] genericParameterTypes = method.getGenericParameterTypes();
         Annotation[][] pannotations = getPrivParameterAnnotations(method);
         int pos = 0;
-        QName paramQName = null;
         for (Class clazzType : parameterTypes) {
-            ParameterImpl param = null;
             String paramName = "";
             String paramNamespace = "";
             String partName = "";
@@ -841,9 +827,9 @@ public class RuntimeModeler {
                     isHeader = webParam.header();
                     WebParam.Mode mode = webParam.mode();
                     paramNamespace = webParam.targetNamespace();
-                    if (isHolder && mode == javax.jws.WebParam.Mode.IN)
-                        mode = javax.jws.WebParam.Mode.INOUT;
-                    paramMode = Mode.from(mode);
+                    if (isHolder && mode == Mode.IN)
+                        mode = Mode.INOUT;
+                    paramMode = mode;
                     break;
                 }
             }
@@ -860,6 +846,7 @@ public class RuntimeModeler {
                 partName = paramName;
             }
 
+            QName paramQName;
             if (!isHeader) {
                 //its rpclit body param, set namespace to ""
                 paramQName = new QName("", paramName);
@@ -871,7 +858,7 @@ public class RuntimeModeler {
             typeRef =
                 new TypeReference(paramQName, clazzType, pannotations[pos]);
 
-            param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
+            ParameterImpl param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
             param.setPartName(partName);
 
             if(paramMode == Mode.INOUT){
@@ -927,7 +914,7 @@ public class RuntimeModeler {
      * @param method the <code>method</code> from which to find the exceptions to model
      */
     protected void processExceptions(JavaMethodImpl javaMethod, Method method) {
-        for (Class exception : method.getExceptionTypes()) {
+        for (Class<?> exception : method.getExceptionTypes()) {
             if (REMOTE_EXCEPTION_CLASS.isAssignableFrom(exception))
                 continue;
             Class exceptionBean;
@@ -969,8 +956,7 @@ public class RuntimeModeler {
         if (!exception.isAnnotationPresent(WebFault.class))
             return null;
         try {
-            Method getFaultInfo = exception.getMethod("getFaultInfo", new Class[0]);
-            return getFaultInfo;
+            return exception.getMethod("getFaultInfo", new Class[0]);
         } catch (NoSuchMethodException e) {
             return null;
         }
@@ -1008,11 +994,10 @@ public class RuntimeModeler {
             returnType = getAsyncReturnType(method, returnType);
         }
 
-        QName responseQName = null;
         if ((returnType != null) && (!returnType.getName().equals("void"))) {
             Annotation[] rann = method.getAnnotations();
             if (resultName != null) {
-                responseQName = new QName(resultTNS, resultName);
+                QName responseQName = new QName(resultTNS, resultName);
                 TypeReference rTypeReference = new TypeReference(responseQName, returnType, rann);
                 ParameterImpl returnParameter = new ParameterImpl(runtimeModel, rTypeReference, Mode.OUT, -1);
 
@@ -1034,10 +1019,8 @@ public class RuntimeModeler {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Type[] genericParameterTypes = method.getGenericParameterTypes();
         Annotation[][] pannotations = getPrivParameterAnnotations(method);
-        QName requestQName = null;
         int pos = 0;
         for (Class clazzType : parameterTypes) {
-            ParameterImpl param = null;
             String paramName = operationName; //method.getName();
             String partName = null;
             String requestNamespace = targetNamespace;
@@ -1055,9 +1038,7 @@ public class RuntimeModeler {
                     clazzType = Navigator.REFLECTION.erasure(((ParameterizedType)genericParameterTypes[pos]).getActualTypeArguments()[0]);
             }
 
-            Mode paramMode = isHolder ?
-                Mode.INOUT :
-                Mode.IN;
+            Mode paramMode = isHolder ? Mode.INOUT : Mode.IN;
             for (Annotation annotation : pannotations[pos]) {
                 if (annotation.annotationType() == javax.jws.WebParam.class) {
                     javax.jws.WebParam webParam = (javax.jws.WebParam) annotation;
@@ -1068,25 +1049,22 @@ public class RuntimeModeler {
                         requestNamespace = webParam.targetNamespace();
                     }
                     isHeader = webParam.header();
-                    WebParam.Mode mode = webParam.mode();
-                    if (isHolder && mode == javax.jws.WebParam.Mode.IN)
-                        mode = javax.jws.WebParam.Mode.INOUT;
-                    paramMode = (mode == javax.jws.WebParam.Mode.IN) ? Mode.IN :
-                        (mode == javax.jws.WebParam.Mode.INOUT) ? Mode.INOUT :
-                        Mode.OUT;
+                    paramMode = webParam.mode();
+                    if (isHolder && paramMode == Mode.IN)
+                        paramMode = Mode.INOUT;
                     break;
                 }
             }
 
-            requestQName = new QName(requestNamespace, paramName);
+            QName requestQName = new QName(requestNamespace, paramName);
             //doclit/wrapped
             TypeReference typeRef = //operationName with upper 1 char
                 new TypeReference(requestQName, clazzType,
                     pannotations[pos]);
 
-            param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
+            ParameterImpl param = new ParameterImpl(runtimeModel, typeRef, paramMode, pos++);
             if(partName == null || (partName.length() == 0)){
-                    partName = paramName;
+                partName = paramName;
             }
             param.setPartName(partName);
             if(paramMode == Mode.INOUT){
@@ -1191,7 +1169,7 @@ public class RuntimeModeler {
             throw new RuntimeModelerException("runtime.modeler.no.webservice.annotation",
                 new Object[] {implClass.getCanonicalName()});
         }
-        String name = null;
+        String name;
         if (webService.portName().length() > 0) {
             name = webService.portName();
         } else if (webService.name().length() > 0) {
@@ -1228,13 +1206,12 @@ public class RuntimeModeler {
     public static QName getPortTypeName(Class<?> implOrSeiClass){
         assert(implOrSeiClass != null);
         Class<?> clazz = implOrSeiClass;
-        WebService webService = null;
         if (!implOrSeiClass.isAnnotationPresent(WebService.class))
                 throw new RuntimeModelerException("runtime.modeler.no.webservice.annotation",
                                            implOrSeiClass.getCanonicalName());
 
         if (!implOrSeiClass.isInterface()) {
-            webService = implOrSeiClass.getAnnotation(WebService.class);
+            WebService webService = implOrSeiClass.getAnnotation(WebService.class);
             String epi = webService.endpointInterface();
             if (epi.length() > 0) {
                 try {
@@ -1249,7 +1226,7 @@ public class RuntimeModeler {
             }
         }
 
-        webService = clazz.getAnnotation(WebService.class);
+        WebService webService = clazz.getAnnotation(WebService.class);
         String name = webService.name();
         if(name.length() == 0){
             name = clazz.getSimpleName();

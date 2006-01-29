@@ -20,7 +20,7 @@
 package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.api.model.Mode;
+import javax.jws.WebParam.Mode;
 
 import java.util.ArrayList;
 import java.util.List;

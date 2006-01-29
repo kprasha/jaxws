@@ -21,7 +21,6 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -32,6 +31,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 
 import javax.xml.namespace.QName;
+import javax.jws.WebParam.Mode;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -19,14 +19,15 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.soap.Style;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 
 import javax.xml.namespace.QName;
+import javax.jws.WebParam.Mode;
+import javax.jws.soap.SOAPBinding;
+import javax.jws.soap.SOAPBinding.Style;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -100,16 +101,16 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         this.style = style;
     }
 
-    public Style getStyle() {
+    public SOAPBinding.Style getStyle() {
         return style;
     }
 
     public boolean isRpcLit(){
-        return Style.RPC.equals(style);
+        return Style.RPC==style;
     }
 
     public boolean isDoclit(){
-        return Style.DOCUMENT.equals(style);
+        return Style.DOCUMENT==style;
     }
 
 
@@ -148,7 +149,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
          * If the style is rpc then the tag name should be
          * same as operation name so return the operation that matches the tag name.
          */
-        if(style.equals(Style.RPC)){
+        if(style==Style.RPC) {
            return bindingOperations.get(tag);
         }
 
