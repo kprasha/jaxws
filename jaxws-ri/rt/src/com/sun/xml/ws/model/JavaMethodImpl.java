@@ -116,7 +116,7 @@ public class JavaMethodImpl implements JavaMethod {
 
         if (p.isOUT() || p.isINOUT()) {
             // this check is only for out parameters
-            assert !requestParams.contains(p);
+            assert !responseParams.contains(p);
             responseParams.add(p);
         }
     }
