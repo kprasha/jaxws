@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.model;
 
-import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.messaging.saaj.soap.SOAPVersionMismatchException;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
@@ -39,10 +38,10 @@ import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.MessageInfoUtil;
 
+import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.soap.SOAPFaultException;
-import javax.jws.WebParam.Mode;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -119,39 +118,6 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
 //            System.out.println("Error: Unqiue signature violation - more than 1 empty body!");
         }
     }
-
-
-    /* 
-     * @see RuntimeModel#fillTypes(JavaMethod, List)
-     */
-    @Override
-    protected void fillTypes(JavaMethodImpl m, List<TypeReference> types) {
-        if(m.getBinding() == null) {
-            // TODO: implement this later
-            throw new UnsupportedOperationException("Error: Wrong Binding!");
-        }
-        if(m.getBinding().isDocLit()){
-            super.fillTypes(m, types);
-            return;
-        }
-        
-        //else is rpclit
-        addTypes(m.getRequestParameters(), types, Mode.IN);
-        addTypes(m.getResponseParameters(), types, Mode.OUT);
-    }
-        
-    /**
-     * @param params
-     * @param types
-     * @param mode
-     */
-    private void addTypes(List<ParameterImpl> params, List<TypeReference> types, Mode mode) {
-        for(ParameterImpl p:params){
-            ParameterBinding binding = (mode == Mode.IN)?p.getInBinding():p.getOutBinding();
-            types.add(p.getTypeReference());
-        }
-    }
-
 
     public Set<QName> getKnownHeaders() {
         Set<QName> headers = new HashSet<QName>();

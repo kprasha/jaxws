@@ -21,6 +21,7 @@ package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.model.soap.SOAPBindingImpl;
@@ -55,6 +56,10 @@ public final class JavaMethodImpl implements JavaMethod {
     public JavaMethodImpl(AbstractSEIModelImpl owner, Method method) {
         this.owner = owner;
         this.method = method;
+    }
+
+    public SEIModel getOwner() {
+        return owner;
     }
 
     /**
@@ -234,5 +239,21 @@ public final class JavaMethodImpl implements JavaMethod {
         if(wsdlOperation ==null)
             throw new Error("Undefined operation name "+operationName);
     }
+
+    final void fillTypes(List<TypeReference> types) {
+        fillTypes(requestParams, types);
+        fillTypes(responseParams, types);
+
+        for (CheckedExceptionImpl ce : exceptions) {
+            types.add(ce.getDetailType());
+        }
+    }
+
+    private void fillTypes(List<ParameterImpl> params, List<TypeReference> types) {
+        for (ParameterImpl p : params) {
+            p.fillTypes(types);
+        }
+    }
+
 }
 

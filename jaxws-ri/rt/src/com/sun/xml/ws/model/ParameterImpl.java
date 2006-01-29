@@ -20,15 +20,16 @@
 
 package com.sun.xml.ws.model;
 
-import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.SEIModel;
 
+import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
-import javax.jws.WebParam.Mode;
+import java.util.List;
 
 /**
  * runtime Parameter that abstracts the annotated java parameter
@@ -75,6 +76,10 @@ public class ParameterImpl implements Parameter {
         return parent.owner;
     }
 
+    public JavaMethod getParent() {
+        return parent;
+    }
+
     /**
      * @return Returns the name.
      */
@@ -89,7 +94,7 @@ public class ParameterImpl implements Parameter {
     protected Bridge getBridge(TypeReference typeRef) {
         return getOwner().getBridge(typeRef);
     }
-    
+
     /**
      * TODO: once the model gets JAXBContext, shouldn't {@link Bridge}s
      * be made available from model objects?
@@ -228,5 +233,10 @@ public class ParameterImpl implements Parameter {
 
     public void setPartName(String partName) {
         this.partName = partName;
+    }
+
+
+    void fillTypes(List<TypeReference> types) {
+        types.add(getTypeReference());
     }
 }

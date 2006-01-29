@@ -4,9 +4,11 @@ import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.RawAccessor;
+import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
@@ -17,6 +19,8 @@ import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Reads a response {@link Message}, disassembles it, and moves obtained Java values
@@ -170,7 +174,7 @@ interface ResponseBuilder {
      * Treats a payload as multiple parts wrapped into one element,
      * and processes all such wrapped parts.
      */
-    static final class Wrapped implements ResponseBuilder {
+    static final class DocLit implements ResponseBuilder {
         /**
          * {@link PartBuilder} keyed by the element name (inside the wrapper element.)
          */
@@ -178,7 +182,7 @@ interface ResponseBuilder {
 
         private final Bridge wrapper;
 
-        public Wrapped(WrapperParameter wp) {
+        public DocLit(WrapperParameter wp) {
             wrapper = wp.getBridge();
             Class wrapperType = (Class) wrapper.getTypeReference().type;
 
@@ -255,6 +259,88 @@ interface ResponseBuilder {
 
             final Object readResponse( Object[] args, Object wrapperBean ) throws AccessorException {
                 Object obj = accessor.get(wrapperBean);
+                return setter.put(obj,args);
+            }
+
+
+        }
+    }
+
+    /**
+     * Treats a payload as multiple parts wrapped into one element,
+     * and processes all such wrapped parts.
+     */
+    static final class RpcLit implements ResponseBuilder {
+        /**
+         * {@link PartBuilder} keyed by the element name (inside the wrapper element.)
+         */
+        private final Map<QName,PartBuilder> parts = new HashMap<QName,PartBuilder>();
+
+        private QName wrapperName;
+
+        public RpcLit(WrapperParameter wp) {
+            assert wp.getTypeReference().type== CompositeStructure.class;
+
+            wrapperName = wp.getName();
+            List<ParameterImpl> children = wp.getWrapperChildren();
+            for (ParameterImpl p : children) {
+                parts.put( p.getName(), new PartBuilder(
+                    p.getBridge(), ValueSetter.get(p)
+                ));
+            }
+        }
+
+        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+            Object retVal = null;
+
+            XMLStreamReader reader = msg.readPayload();
+            if (!reader.getName().equals(wrapperName))
+                throw new WebServiceException( // TODO: i18n
+                    "Unexpected response element "+reader.getName()+" expected: "+wrapperName);
+
+            while(reader.hasNext() && reader.nextTag()==XMLStreamReader.START_ELEMENT) {
+                // TODO: QName has a performance issue
+                PartBuilder part = parts.get(reader.getName());
+                if(part==null) {
+                    // no corresponding part found. ignore
+                    XMLStreamReaderUtil.skipElement(reader);
+                } else {
+                    Object o = part.readResponse(args,reader,context);
+                    // there's only at most one ResponseBuilder that returns a value.
+                    if(o!=null) {
+                        assert retVal==null;
+                        retVal = o;
+                    }
+                }
+            }
+
+            // we are done with the body
+            reader.close();
+
+            return retVal;
+        }
+
+        /**
+         * Unmarshals each wrapped part into a JAXB object and moves it
+         * to the expected place.
+         */
+        static final class PartBuilder {
+            private final Bridge bridge;
+            private final ValueSetter setter;
+
+            /**
+             * @param bridge
+             *      specifies how the part is unmarshalled.
+             * @param setter
+             *      specifies how the obtained value is returned to the client.
+             */
+            public PartBuilder(Bridge bridge, ValueSetter setter) {
+                this.bridge = bridge;
+                this.setter = setter;
+            }
+
+            final Object readResponse( Object[] args, XMLStreamReader r, BridgeContext context ) throws JAXBException {
+                Object obj = bridge.unmarshal(context,r);
                 return setter.put(obj,args);
             }
 

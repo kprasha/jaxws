@@ -4,7 +4,6 @@ import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.pept.presentation.MEP;
 
-import javax.jws.WebParam;
 import javax.jws.WebParam.Mode;
 import java.lang.reflect.Method;
 
@@ -14,6 +13,12 @@ import java.lang.reflect.Method;
  * @author Vivek Pandey
  */
 public interface JavaMethod {
+
+    /**
+     * Gets the root {@link SEIModel} that owns this model.
+     */
+    SEIModel getOwner();
+
     /**
      * @return Returns the java {@link Method}
      */

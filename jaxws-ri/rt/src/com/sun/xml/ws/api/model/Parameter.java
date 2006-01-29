@@ -28,6 +28,11 @@ public interface Parameter {
     SEIModel getOwner();
 
     /**
+     * Gets the parent {@link JavaMethod} to which this parameter belongs.
+     */
+    JavaMethod getParent();
+
+    /**
      * @return Returns the {@link QName} of the payload/infoset of a SOAP body or header.
      */
     QName getName();

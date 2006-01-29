@@ -223,28 +223,9 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         List<TypeReference> types = new ArrayList<TypeReference>();
         Collection<JavaMethodImpl> methods = methodToJM.values();
         for (JavaMethodImpl m : methods) {
-            fillTypes(m,types);
-            fillFaultDetailTypes(m, types);
+            m.fillTypes(types);
         }
         return types;
-    }
-
-    private void fillFaultDetailTypes(JavaMethodImpl m, List<TypeReference> types) {
-        for (CheckedExceptionImpl ce : m.getCheckedExceptions()) {
-            types.add(ce.getDetailType());
-//            addGlobalType(ce.getDetailType());
-        }
-    }
-
-    protected void fillTypes(JavaMethodImpl m, List<TypeReference> types) {
-        fillTypes(m.requestParams, types);
-        fillTypes(m.responseParams, types);
-    }
-
-    private void fillTypes(List<ParameterImpl> params, List<TypeReference> types) {
-        for (ParameterImpl p : params) {
-            types.add(p.getTypeReference());
-        }
     }
 
     private void createBridgeMap(List<TypeReference> types) {

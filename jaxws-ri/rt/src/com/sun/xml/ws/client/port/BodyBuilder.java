@@ -101,25 +101,47 @@ abstract class BodyBuilder {
         }
     }
 
+
     /**
-     * Used to create a payload JAXB object by wrapping
-     * multiple parameters into one bean.
+     * Used to handle a 'wrapper' style request.
+     * Common part of rpc/lit and doc/lit.
      */
-    final static class Wrapped extends JAXB {
-        /**
-         * How does each wrapped parameter binds to XML?
-         */
-        private final RawAccessor[] accessors;
+    abstract static class Wrapped extends JAXB {
 
         /**
          * Where in the method argument list do they come from?
          */
-        private final int[] indices;
+        protected final int[] indices;
 
         /**
          * Abstracts away the {@link Holder} handling when touching method arguments.
          */
-        private final ValueGetter[] getters;
+        protected final ValueGetter[] getters;
+
+        protected Wrapped(WrapperParameter wp, PortInterfaceStub owner) {
+            super(wp.getBridge(), owner);
+
+            List<ParameterImpl> children = wp.getWrapperChildren();
+
+            indices = new int[children.size()];
+            getters = new ValueGetter[children.size()];
+            for( int i=0; i<indices.length; i++ ) {
+                ParameterImpl p = children.get(i);
+                indices[i] = p.getIndex();
+                getters[i] = ValueGetter.get(p);
+            }
+        }
+    }
+
+    /**
+     * Used to create a payload JAXB object by wrapping
+     * multiple parameters into one "wrapper bean".
+     */
+    final static class DocLit extends Wrapped {
+        /**
+         * How does each wrapped parameter binds to XML?
+         */
+        private final RawAccessor[] accessors;
 
         /**
          * Wrapper bean.
@@ -129,8 +151,8 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
-        Wrapped(WrapperParameter wp, PortInterfaceStub owner) {
-            super(wp.getBridge(),owner);
+        DocLit(WrapperParameter wp, PortInterfaceStub owner) {
+            super(wp,owner);
 
             wrapper = (Class)wp.getBridge().getTypeReference().type;
 
@@ -149,13 +171,6 @@ abstract class BodyBuilder {
                 }
             }
 
-            indices = new int[children.size()];
-            getters = new ValueGetter[children.size()];
-            for( int i=0; i<indices.length; i++ ) {
-                ParameterImpl p = children.get(i);
-                indices[i] = p.getIndex();
-                getters[i] = ValueGetter.get(p);
-            }
         }
 
         /**
@@ -185,6 +200,52 @@ abstract class BodyBuilder {
                 // this can happen when the set method throw a checked exception or something like that
                 throw new WebServiceException(e);    // TODO:i18n
             }
+        }
+    }
+
+
+    /**
+     * Used to create a payload JAXB object by wrapping
+     * multiple parameters into a {@link CompositeStructure}.
+     *
+     * <p>
+     * This is used for rpc/lit, as we don't have a wrapper bean for it.
+     * (TODO: Why don't we have a wrapper bean for this, when doc/lit does!?)
+     */
+    final static class RpcLit extends Wrapped {
+        /**
+         * How does each wrapped parameter binds to XML?
+         */
+        private final Bridge[] parameterBridges;
+
+        /**
+         * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
+         */
+        RpcLit(WrapperParameter wp, PortInterfaceStub owner) {
+            super(wp,owner);
+            // we'll use CompositeStructure to pack requests
+            assert wp.getTypeReference().type==CompositeStructure.class;
+
+            List<ParameterImpl> children = wp.getWrapperChildren();
+
+            parameterBridges = new Bridge[children.size()];
+            for( int i=0; i<parameterBridges.length; i++ )
+                parameterBridges[i] = children.get(i).getBridge();
+        }
+
+        /**
+         * Packs a bunch of arguments intoa {@link CompositeStructure}.
+         */
+        CompositeStructure build(Object[] methodArgs) {
+            CompositeStructure cs = new CompositeStructure();
+            cs.bridges = parameterBridges;
+            cs.values = new Object[parameterBridges.length];
+
+            // fill in wrapped parameters from methodArgs
+            for( int i=indices.length-1; i>=0; i-- )
+                cs.values[i] = getters[i].get(methodArgs[indices[i]]);
+
+            return cs;
         }
     }
 }

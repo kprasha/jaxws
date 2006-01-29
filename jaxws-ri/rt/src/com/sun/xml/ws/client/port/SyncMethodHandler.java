@@ -4,13 +4,10 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-//import com.sun.xml.ws.api.model.JavaMethod;
-//import com.sun.xml.ws.api.model.Parameter;
-import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 
@@ -67,7 +64,7 @@ final class SyncMethodHandler extends MethodHandler {
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethodImpl method) {
         super(owner);
 
-        this.soapAction = '"'+((SOAPBinding)method.getBinding()).getSOAPAction()+'"';
+        this.soapAction = '"'+method.getBinding().getSOAPAction()+'"';
 
         {// prepare objects for creating messages
             List<ParameterImpl> rp = method.getRequestParameters();
@@ -82,7 +79,10 @@ final class SyncMethodHandler extends MethodHandler {
                 switch(param.getInBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {
-                        bodyBuilder = new BodyBuilder.Wrapped((WrapperParameter)param,owner);
+                        if(param.getParent().getBinding().isRpcLit())
+                            bodyBuilder = new BodyBuilder.RpcLit((WrapperParameter)param,owner);
+                        else
+                            bodyBuilder = new BodyBuilder.DocLit((WrapperParameter)param,owner);
                     } else {
                         bodyBuilder = new BodyBuilder.Bare(param,owner);
                     }
@@ -130,7 +130,10 @@ final class SyncMethodHandler extends MethodHandler {
                 switch(param.getOutBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {
-                        builders.add(new ResponseBuilder.Wrapped((WrapperParameter)param));
+                        if(param.getParent().getBinding().isRpcLit())
+                            builders.add(new ResponseBuilder.RpcLit((WrapperParameter)param));
+                        else
+                            builders.add(new ResponseBuilder.DocLit((WrapperParameter)param));
                     } else {
                         builders.add(new ResponseBuilder.Body(
                             param.getBridge(),

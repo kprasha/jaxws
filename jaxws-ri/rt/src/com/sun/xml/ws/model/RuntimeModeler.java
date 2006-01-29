@@ -20,6 +20,7 @@
 package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ParameterBinding;
@@ -28,7 +29,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
-import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -96,7 +96,6 @@ public class RuntimeModeler {
     public static final String PORT                 = "Port";
     public static final Class HOLDER_CLASS = Holder.class;
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
-    public static final Class RPC_LIT_PAYLOAD_CLASS = RpcLitPayload.class;
 
     /**
      * creates an instance of RunTimeModeler given a <code>portClass</code> and <code>bindingId</code>
@@ -731,13 +730,13 @@ public class RuntimeModeler {
             resElementName = new QName(targetNamespace, operationName+RESPONSE);
         }
 
-        TypeReference typeRef = new TypeReference(reqElementName, RPC_LIT_PAYLOAD_CLASS);
+        TypeReference typeRef = new TypeReference(reqElementName, CompositeStructure.class);
         WrapperParameter requestWrapper = new WrapperParameter(javaMethod, typeRef, Mode.IN, 0);
         requestWrapper.setInBinding(ParameterBinding.BODY);
         javaMethod.addParameter(requestWrapper);
         WrapperParameter responseWrapper = null;
         if (!isOneway) {
-            typeRef = new TypeReference(resElementName, RPC_LIT_PAYLOAD_CLASS);
+            typeRef = new TypeReference(resElementName, CompositeStructure.class);
             responseWrapper = new WrapperParameter(javaMethod, typeRef, Mode.OUT, -1);
             responseWrapper.setOutBinding(ParameterBinding.BODY);
             javaMethod.addParameter(responseWrapper);
@@ -931,7 +930,7 @@ public class RuntimeModeler {
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
-                WebFault webFault = (WebFault)exception.getAnnotation(WebFault.class);
+                WebFault webFault = exception.getAnnotation(WebFault.class);
                 exceptionBean = faultInfoMethod.getReturnType();
                 anns = faultInfoMethod.getAnnotations();
                 if (webFault.targetNamespace().length() > 0)
