@@ -26,7 +26,7 @@ import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
 import com.sun.tools.ws.wsdl.framework.Kind;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
-import com.sun.xml.ws.api.model.Mode;
+import javax.jws.WebParam.Mode;
 
 /**
  * Entity corresponding to a WSDL message part.

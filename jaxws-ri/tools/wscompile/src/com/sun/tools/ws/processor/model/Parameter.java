@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.tools.ws.processor.model.java.JavaParameter;
-import com.sun.xml.ws.api.model.Mode;
+import javax.jws.WebParam.Mode;
 
 /**
  *

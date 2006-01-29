@@ -709,10 +709,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             mode = webParam.mode();
         
         if (holderType != null) {
-            if (mode != null &&  mode.equals(WebParam.Mode.IN))
+            if (mode != null &&  mode==WebParam.Mode.IN)
                 builder.onError(param.getPosition(), "webserviceap.holder.parameters.must.not.be.in.only",
                         new Object[] {typeDecl.getQualifiedName(), method.toString(), paramIndex});
-        } else if (mode != null && !mode.equals(WebParam.Mode.IN)) {
+        } else if (mode != null && mode!=WebParam.Mode.IN) {
             builder.onError(param.getPosition(), "webserviceap.non.in.parameters.must.be.holder",
                     new Object[] {typeDecl.getQualifiedName(), method.toString(), paramIndex});
         }
@@ -782,13 +782,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     protected boolean isEquivalentModes(WebParam.Mode mode1, WebParam.Mode mode2) {
         if (mode1.equals(mode2))
             return true;
-        assert(mode1.equals(WebParam.Mode.IN) ||
-                mode1.equals(WebParam.Mode.OUT));
-        if (mode1.equals(WebParam.Mode.IN) &&
-                !(mode2.equals(WebParam.Mode.OUT)))
+        assert mode1==WebParam.Mode.IN || mode1==WebParam.Mode.OUT;
+        if (mode1==WebParam.Mode.IN && mode2!=WebParam.Mode.OUT)
             return true;
-        if (mode1.equals(WebParam.Mode.OUT) &&
-                !(mode2.equals(WebParam.Mode.IN)))
+        if (mode1==WebParam.Mode.OUT && mode2!=WebParam.Mode.IN)
             return true;
         return false;
     }
@@ -873,8 +870,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         WebParam webParam;
         for (ParameterDeclaration param : method.getParameters()) {
             webParam = (WebParam)param.getAnnotation(WebParam.class);
-            if (webParam != null &&
-                    !webParam.mode().equals(WebParam.Mode.IN)) {
+            if (webParam != null && webParam.mode()!=WebParam.Mode.IN) {
                 return param;
             }
         }

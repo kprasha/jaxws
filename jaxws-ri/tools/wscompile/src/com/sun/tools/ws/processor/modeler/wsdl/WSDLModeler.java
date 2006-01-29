@@ -94,10 +94,10 @@ import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.tools.xjc.api.TypeAndAnnotation;
 import com.sun.tools.xjc.api.XJC;
 import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.ws.api.model.Mode;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.InputSource;
 
+import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1604,7 +1604,7 @@ public class WSDLModeler extends WSDLModelerBase {
                 if(part.isIN() || part.isINOUT()){
                     params = ModelerUtils.createUnwrappedParameters(jaxbStructType, block);
                     int index = 0;
-                    Mode mode = (part.isINOUT())?Mode.INOUT:Mode.IN;
+                    Mode mode = part.isINOUT()?Mode.INOUT:Mode.IN;
                     for(Parameter param: params){
                         param.setParameterIndex(index++);
                         param.setMode(mode);
