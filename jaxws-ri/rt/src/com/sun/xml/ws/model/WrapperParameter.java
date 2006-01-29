@@ -21,6 +21,7 @@ package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
+import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 
 import javax.jws.WebParam.Mode;
 
@@ -88,13 +89,21 @@ public class WrapperParameter extends ParameterImpl {
 
     @Override
     void fillTypes(List<TypeReference> types) {
-        super.fillTypes(types);
-        if(getParent().getBinding().isRpcLit()) {
-            // for rpc/lit, we need to individually marshal/unmarshal wrapped values,
-            // so their TypeReference needs to be collected
-            assert getTypeReference().type== CompositeStructure.class;
+        // RpcLitPayload is for supporting legacy server-side code.
+        // this code should be cleaned up once the server moves to the new architecture
+        if(getTypeReference().type == RpcLitPayload.class) {
+            // legacy support. to be removed eventually
             for (ParameterImpl p : wrapperChildren)
                 p.fillTypes(types);
-        }
+        } else {
+            super.fillTypes(types);
+            if(getParent().getBinding().isRpcLit()) {
+                // for rpc/lit, we need to individually marshal/unmarshal wrapped values,
+                // so their TypeReference needs to be collected
+                assert getTypeReference().type==CompositeStructure.class;
+                for (ParameterImpl p : wrapperChildren)
+                    p.fillTypes(types);
+            }
+    }
     }
 }

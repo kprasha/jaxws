@@ -382,7 +382,7 @@ public class WSServiceDelegate extends WSService {
             //todo:use SCAnnotations and put in map
             WSDLPortImpl wsdlPort = wsdlService.get(portName);
             // TODO: error check against wsdlPort==null
-            RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort);
+            RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort,false);
             modeler.setPortName(portName);
             AbstractSEIModelImpl model = modeler.buildRuntimeModel();
 

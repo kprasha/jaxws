@@ -297,13 +297,15 @@ interface ResponseBuilder {
             if (!reader.getName().equals(wrapperName))
                 throw new WebServiceException( // TODO: i18n
                     "Unexpected response element "+reader.getName()+" expected: "+wrapperName);
+            reader.nextTag();
 
-            while(reader.hasNext() && reader.nextTag()==XMLStreamReader.START_ELEMENT) {
+            while(reader.getEventType()==XMLStreamReader.START_ELEMENT) {
                 // TODO: QName has a performance issue
                 PartBuilder part = parts.get(reader.getName());
                 if(part==null) {
                     // no corresponding part found. ignore
                     XMLStreamReaderUtil.skipElement(reader);
+                    reader.nextTag();
                 } else {
                     Object o = part.readResponse(args,reader,context);
                     // there's only at most one ResponseBuilder that returns a value.

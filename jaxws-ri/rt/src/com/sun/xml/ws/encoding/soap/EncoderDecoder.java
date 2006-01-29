@@ -279,7 +279,7 @@ public abstract class EncoderDecoder extends EncoderDecoderBase {
                 value = result;
             else
                 value = p.getHolderValue(data[p.getIndex()]);
-            JAXBBridgeInfo bi = new JAXBBridgeInfo(param.getBridge(), value);
+            JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(), value);
             payload.addParameter(bi);
         }
         return payload;

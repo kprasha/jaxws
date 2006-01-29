@@ -188,7 +188,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         // bindings or need to look in the WSDL
         if(wsdlUrl == null){
             RuntimeModeler rap = new RuntimeModeler(getImplementorClass(),
-                getImplementor(), getServiceName(), binding.getBindingId());
+                getImplementor(), getServiceName(), binding.getBindingId(),true);
             if (getPortName() != null) {
                 rap.setPortName(getPortName());
             }
@@ -218,7 +218,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
                         throw new ServerRtException("runtime.parser.wsdl.multiplebinding", new Object[]{bindingId, serviceName, getWsdlUrl()});
                 }
                 //now we got the Binding so lets build the model
-                RuntimeModeler rap = new RuntimeModeler(getImplementorClass(), getImplementor(), getServiceName(), wsdlPort);
+                RuntimeModeler rap = new RuntimeModeler(getImplementorClass(), getImplementor(), getServiceName(), wsdlPort, true);
                 if (getPortName() != null) {
                     rap.setPortName(getPortName());
                 }

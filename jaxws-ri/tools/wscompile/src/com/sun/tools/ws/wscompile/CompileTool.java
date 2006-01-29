@@ -581,7 +581,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                     bindingID = bindingType.value();
             }
             com.sun.xml.ws.model.RuntimeModeler rtModeler =
-                    new com.sun.xml.ws.model.RuntimeModeler(endpointClass, serviceName, bindingID);
+                    new com.sun.xml.ws.model.RuntimeModeler(endpointClass, serviceName, bindingID, true);
             rtModeler.setClassLoader(classLoader);
             if (portName != null)
                 rtModeler.setPortName(portName);

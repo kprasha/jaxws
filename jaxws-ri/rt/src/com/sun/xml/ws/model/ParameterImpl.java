@@ -58,8 +58,6 @@ public class ParameterImpl implements Parameter {
 
     public ParameterImpl(JavaMethodImpl parent, TypeReference type, Mode mode, int index) {
         assert type != null;
-        assert type.tagName != null;
-        assert type.tagName.getLocalPart().length() > 0;
 
         this.typeReference = type;
         this.name = type.tagName;
