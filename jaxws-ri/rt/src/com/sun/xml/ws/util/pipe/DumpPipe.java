@@ -42,17 +42,20 @@ public class DumpPipe implements Pipe {
 
     private void dump(String header, Message msg) {
         out.println("====["+header+"]====");
-        try {
-            XMLStreamWriter writer = staxOut.createXMLStreamWriter(new PrintStream(out) {
-                public void close() {
-                    // noop
-                }
-            });
-            msg.copy().writeTo(writer);
-            writer.close();
-        } catch (XMLStreamException e) {
-            e.printStackTrace(out);
-        }
+        if(msg==null)
+            out.println("(none)");
+        else
+            try {
+                XMLStreamWriter writer = staxOut.createXMLStreamWriter(new PrintStream(out) {
+                    public void close() {
+                        // noop
+                    }
+                });
+                msg.copy().writeTo(writer);
+                writer.close();
+            } catch (XMLStreamException e) {
+                e.printStackTrace(out);
+            }
         out.println("============");
     }
 
