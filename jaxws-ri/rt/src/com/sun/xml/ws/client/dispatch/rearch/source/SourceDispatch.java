@@ -8,8 +8,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.BindingProviderProperties;
-import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
 import com.sun.xml.ws.client.dispatch.rearch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
@@ -213,7 +211,6 @@ public class SourceDispatch extends DispatchImpl<Source> {
     protected void setProperties(Message msg, boolean oneway){
         super.setProperties(msg);
         //setHttpRequestHeaders(msg);
-        if (oneway)
-            msg.getProperties().put(BindingProviderProperties.ONE_WAY_OPERATION,Boolean.TRUE);
+        msg.getProperties().isOneWay = oneway;
     }
 }

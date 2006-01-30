@@ -158,141 +158,16 @@ public class MessageContextImpl extends TypedMap implements MessageContext {
      * TODO: allocate this instance lazily.
      */
     private Map<String,Object> otherProperties = new HashMap<String, Object>();
-    
+
+
+
+    private static final Map<String,Property> model;
+
     static {
-        parse(MessageContextImpl.class);
-    }
-    
-    public int size() {
-        int sz = otherProperties.size();
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                sz++;
-        }
-        return sz;
+        model = parse(MessageContextImpl.class);
     }
 
-    public boolean isEmpty() {
-        int sz = otherProperties.size();
-        if(sz>0)    return false;
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                return false;
-        }
-        return true;
+    protected Map<String, Property> getPropertyMap() {
+        return model;
     }
-
-    public boolean containsKey(Object key) {
-        return get(key)!=null;
-    }
-
-    public boolean containsValue(Object value) {
-        return values().contains(value);
-    }
-
-    public Object get(Object key) {
-        Property sp = props.get(key);
-        if(sp!=null)
-            return sp.get(this);
-        return otherProperties.get(key);
-    }
-
-    /**
-     * Sets a property.
-     *
-     * <h3>Implementation Note</h3>
-     * This method is slow. Code inside JAX-WS should define strongly-typed
-     * fields in this class and access them directly, instead of using this.
-     *
-     * @throws IllegalArgumentException
-     *      if the given key is an alias of a strongly-typed field,
-     *      and if the value object given is not assignable to the field.
-     *
-     * @see ContextProperty
-     */
-    public Object put(String key, Object value) {
-        Property sp = props.get(key);
-        if(sp!=null) {
-            Object old = sp.get(this);
-            sp.set(this,value);
-            return old;
-        } else {
-            return otherProperties.put(key,value);
-        }
-    }
-
-    public Object remove(Object key) {
-        Property sp = props.get(key);
-        if(sp!=null) {
-            Object old = sp.get(this);
-            sp.set(this,null);
-            return old;
-        } else {
-            return otherProperties.remove(key);
-        }
-    }
-
-    public void putAll(Map<? extends String, ? extends Object> t) {
-        for (Entry<? extends String, ? extends Object> e : t.entrySet())
-            put(e.getKey(),e.getValue());
-    }
-
-    public void clear() {
-        // TODO: is this even allowed?
-        otherProperties.clear();
-        for (Property sp : props.values())
-            sp.set(this,null);
-    }
-
-    public Set<String> keySet() {
-        // TODO: implement it correctly. this needs to be a live view
-        Set<String> keys = new HashSet<String>();
-        keys.addAll(otherProperties.keySet());
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                keys.add(sp.getName());
-        }
-        return keys;
-    }
-
-    public Collection<Object> values() {
-        // TODO: implement it correctly. this needs to be a live view
-        Set<Object> values = new HashSet<Object>();
-        values.addAll(otherProperties.values());
-
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                values.add(sp.get(this));
-        }
-        return values;
-    }
-
-    public Set<Entry<String,Object>> entrySet() {
-        // TODO: implement it correctly. this needs to be a live view
-        Set<Entry<String,Object>> values = new HashSet<Entry<String,Object>>();
-
-        values.addAll(otherProperties.entrySet());
-
-        for (final Property sp : props.values()) {
-            if(sp.hasValue(this))
-                values.add(new Entry<String,Object>() {
-                    public String getKey() {
-                        return sp.getName();
-                    }
-
-                    public Object getValue() {
-                        return sp.get(MessageContextImpl.this);
-                    }
-
-                    public Object setValue(Object value) {
-                        Object old = sp.get(MessageContextImpl.this);
-                        sp.set(MessageContextImpl.this,value);
-                        return old;
-                    }
-                });
-        }
-        return values;
-    }
-    
-
 }

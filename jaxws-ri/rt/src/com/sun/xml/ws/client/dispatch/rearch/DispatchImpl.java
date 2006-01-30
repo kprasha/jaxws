@@ -9,10 +9,8 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
-import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
@@ -20,7 +18,11 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TODO: update javadoc, use sandbox classes where can
@@ -88,11 +90,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     //todo: temp just to get something working
 
 
-    /**
-     *
-     * @param param
-     * @return
-     */
     public Response<T> invokeAsync(final T param) {
         ResponseImpl<T> ft = new ResponseImpl<T>(new Callable() {
             public T call() throws Exception {
@@ -105,16 +102,9 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         return ft;
     }
 
-    /**
-     *
-     * @param param
-     * @param asyncHandler
-     * @return
-     */
-
     /* todo: Not sure that this meets the needs of tango for async callback */
     /* todo: Need to review with team                                       */
-    
+
     public Future<?> invokeAsync(final T param, final AsyncHandler<T> asyncHandler) {
         final ResponseImpl<T>[] r = new ResponseImpl[1];
         r[0] = new ResponseImpl<T>(new Callable() {
@@ -181,33 +171,21 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             }
         }
 
-
-        /**
-         *
-         * @return
-         */
         public Map<String, Object> getContext() {
             // TODO
             throw new UnsupportedOperationException();
         }
     }
 
-    /**
-     * @param msg
-     */
     protected void setProperties(Message msg) {
 
         MessageProperties props = msg.getProperties();
         props.proxy = this;
         props.endpointAddress = endpointAddress;
 
-        props.put(BINDING_ID_PROPERTY, binding.getBindingId());
-
-        //not needed but leave for now --maybe mode is needed
-        props.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
-        if (clazz != null)
-            props.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
-        props.put("SOAPVersion", soapVersion);
-        props.requestContext = getRequestContext();
+        ////not needed but leave for now --maybe mode is needed
+        //props.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
+        //if (clazz != null)
+        //    props.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
     }
 }

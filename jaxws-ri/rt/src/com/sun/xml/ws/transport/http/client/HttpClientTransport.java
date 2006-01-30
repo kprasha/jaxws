@@ -20,25 +20,17 @@
 
 package com.sun.xml.ws.transport.http.client;
 
+import com.sun.xml.ws.api.message.MessageProperties;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
-import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.MessageProperties;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
-import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
-import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,44 +51,9 @@ public class HttpClientTransport extends WSConnectionImpl {
     int statusCode;
     private Map<String, List<String>> respHeaders = null;
 
-    public HttpClientTransport() {
-        this(null, new MessageProperties());
-    }
-
-    public HttpClientTransport(OutputStream logStream, Map<String,Object> context) {
-        this.context = (MessageProperties)context;
+    public HttpClientTransport(OutputStream logStream, MessageProperties properties) {
         _logStream = logStream;
-
-//<<<<<<< HttpClientTransport.java
-        SOAPVersion soapVer;
-
-        String bindingId = (String)context.get(BINDING_ID_PROPERTY);
-        if (bindingId != null)
-            soapVer = SOAPVersion.fromHttpBinding(bindingId);
-        else
-            soapVer = SOAPVersion.SOAP_11;
-
-//=======
-//        String bindingId = (String) context.get(BINDING_ID_PROPERTY);
-//        try {
-//            if (bindingId == null)
-//                bindingId = SOAPBinding.SOAP11HTTP_BINDING;
-//>>>>>>> 1.27
-
-//<<<<<<< HttpClientTransport.java
-        _messageFactory = soapVer.saajFactory;
-        endpoint = ((MessageProperties)context).endpointAddress;
-//=======
-//            if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING))
-//                _messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-//            else
-//                _messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
-//
-//            endpoint = (String) context.get(ENDPOINT_ADDRESS_PROPERTY);
-//        } catch (Exception e) {
-//            throw new ClientTransportException("http.client.cannotCreateMessageFactory");
-//        }
-//>>>>>>> 1.27
+        endpoint = properties.endpointAddress;
     }
 
     /**
@@ -378,19 +335,17 @@ public class HttpClientTransport extends WSConnectionImpl {
 
     protected CookieJar sendCookieAsNeeded() {
         Boolean shouldMaintainSessionProperty =
-            (Boolean) context.get(SESSION_MAINTAIN_PROPERTY);
+            (Boolean) context.otherProperties.get(SESSION_MAINTAIN_PROPERTY);
         if (shouldMaintainSessionProperty == null) {
             return null;
         }
-        if (shouldMaintainSessionProperty.booleanValue()) {
-            CookieJar cookieJar = (CookieJar) context.get(HTTP_COOKIE_JAR);
+        if (shouldMaintainSessionProperty) {
+            CookieJar cookieJar = (CookieJar) context.otherProperties.get(HTTP_COOKIE_JAR);
             if (cookieJar == null) {
                 cookieJar = new CookieJar();
 
                 // need to store in binding's context so it is not lost
-                BindingProvider bp =
-                    (BindingProvider) context.get(JAXWS_CLIENT_HANDLE_PROPERTY);
-                bp.getRequestContext().put(HTTP_COOKIE_JAR, cookieJar);
+                context.proxy.getRequestContext().put(HTTP_COOKIE_JAR, cookieJar);
             }
             cookieJar.applyRelevantCookies(httpConnection);
             return cookieJar;
@@ -412,7 +367,7 @@ public class HttpClientTransport extends WSConnectionImpl {
         boolean verification = false;
         // does the client want client hostname verification by the service
         String verificationProperty =
-            (String) context.get(HOSTNAME_VERIFICATION_PROPERTY);
+            (String) context.otherProperties.get(HOSTNAME_VERIFICATION_PROPERTY);
         if (verificationProperty != null) {
             if (verificationProperty.equalsIgnoreCase("true"))
                 verification = true;
@@ -420,7 +375,7 @@ public class HttpClientTransport extends WSConnectionImpl {
 
         // does the client want request redirection to occur
         String redirectProperty =
-            (String) context.get(REDIRECT_REQUEST_PROPERTY);
+            (String) context.otherProperties.get(REDIRECT_REQUEST_PROPERTY);
         if (redirectProperty != null) {
             if (redirectProperty.equalsIgnoreCase("false"))
                 redirect = false;
@@ -460,7 +415,7 @@ public class HttpClientTransport extends WSConnectionImpl {
             method = (requestMethod != null)?requestMethod:method;
         }
          */
-        ((HttpURLConnection)httpConnection).setRequestMethod(method);
+        httpConnection.setRequestMethod(method);
 
         // set the properties on HttpURLConnection
         for (Map.Entry entry : super.getHeaders().entrySet()) {
@@ -503,7 +458,6 @@ public class HttpClientTransport extends WSConnectionImpl {
         }
     }
 
-    private MessageFactory _messageFactory;
     HttpURLConnection httpConnection = null;
     String endpoint = null;
     MessageProperties context = null;

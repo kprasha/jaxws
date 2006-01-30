@@ -84,10 +84,6 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
         }
     }
 
-    /**
-     * @param arg
-     * @return
-     */
     protected Message createMessage(SOAPMessage arg) {
         MimeHeaders mhs = arg.getMimeHeaders();
         mhs.addHeader("Content-Type", "text/xml");
@@ -191,14 +187,13 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
     public void invokeOneWay(SOAPMessage msg) {
         //todo:not complete
         Message message = createMessage(msg);
-        setProperties(message,Boolean.TRUE);
+        setProperties(message,true);
         Message result = process(message);
 
     }
 
     protected void setProperties(Message msg,boolean oneway){
         super.setProperties(msg);
-        if (oneway)
-            msg.getProperties().put(BindingProviderProperties.ONE_WAY_OPERATION, Boolean.TRUE);
+        msg.getProperties().isOneWay = oneway;
     }
 }

@@ -28,6 +28,8 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import static com.sun.xml.ws.client.BindingProviderProperties.BINDING_ID_PROPERTY;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
+import com.sun.xml.ws.api.message.MessageProperties;
+
 import java.util.HashMap;
 
 /**
@@ -56,7 +58,7 @@ public class HttpClientTransportFactory implements ClientTransportFactory {
     /**
      * Binding Id, Endpoint address and other metadata is in the property bag
      */
-    public WSConnection create(Map<String, Object> context) {
+    public WSConnection create(MessageProperties context) {
         return new HttpClientTransport(_logStream, context);
     }
 

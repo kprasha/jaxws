@@ -184,8 +184,7 @@ final class SyncMethodHandler extends MethodHandler {
             Message msg = createRequestMessage(args);
 
             MessageProperties props = msg.getProperties();
-            props.proxy = proxy;
-            props.requestContext = rc;
+            props.proxy = owner;
             props.soapAction = soapAction;
             props.isOneWay = isOneWay;
             props.endpointAddress = owner.endpointAddress;

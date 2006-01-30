@@ -249,22 +249,20 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      */
     public void invokeOneWay(Object msg) {
         Message message = createMessage(msg);
-        setProperties(message, Boolean.TRUE);
-        Message response = process(message);
+        setProperties(message,true);
+        process(message);
     }
 
 
     protected void setProperties(Message msg, boolean oneway){
-        super.setProperties(msg);
-        setHttpRequestHeaders(msg);
-        msg.getProperties().put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
-        if (oneway)
-            msg.getProperties().put(BindingProviderProperties.ONE_WAY_OPERATION,Boolean.TRUE);
+        setProperties(msg);
+        msg.getProperties().isOneWay = oneway;
     }
-     @Override
+
+    @Override
     protected void setProperties(Message msg) {
         super.setProperties(msg);
         setHttpRequestHeaders(msg);
-        msg.getProperties().put(JAXB_CONTEXT_PROPERTY, jaxbcontext);
+        msg.getProperties().otherProperties.put(JAXB_CONTEXT_PROPERTY, jaxbcontext); // KK - do we really need this?
     }
 }

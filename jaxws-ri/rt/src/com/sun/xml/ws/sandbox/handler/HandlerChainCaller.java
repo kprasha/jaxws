@@ -22,6 +22,9 @@ package com.sun.xml.ws.sandbox.handler;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.handler.HandlerException;
+import com.sun.xml.ws.handler.XMLHandlerContext;
+import com.sun.xml.ws.handler.HandlerContext;
+
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPEnvelope;
@@ -95,13 +98,13 @@ public class HandlerChainCaller {
 
     private Set<QName> understoodHeaders;
     private List<Handler> handlers; // may be logical/soap mixed
-    
+
     private List<LogicalHandler> logicalHandlers;
     private List<SOAPHandler> soapHandlers;
-    
+
     private Set<String> roles;
     private WSBinding binding;
-    
+
 
     /**
      * The handlers that are passed in will be sorted into
@@ -123,7 +126,7 @@ public class HandlerChainCaller {
         sortHandlers();
         this.binding = binding;
     }
-    
+
     /**
      * This list may be different than the chain that is passed
      * in since the logical and protocol handlers must be separated.
@@ -155,7 +158,7 @@ public class HandlerChainCaller {
     public Set<String> getRoles() {
         return roles;
     }
-    
+
     /**
      * Returns the headers understood by the handlers. This set
      * is created when the handler chain caller is instantiated and
@@ -205,7 +208,7 @@ public class HandlerChainCaller {
      */
     private void insertFaultMessage(ContextHolder holder,
         ProtocolException exception) {
-        
+
         try {
             SOAPMessageContext context = holder.getSMC();
             if (context == null) { // non-soap case
@@ -215,7 +218,7 @@ public class HandlerChainCaller {
                 }
                 return;
             }
-            
+
             SOAPMessage message = context.getMessage();
             SOAPEnvelope envelope = message.getSOAPPart().getEnvelope();
             SOAPBody body = envelope.getBody();
@@ -233,13 +236,13 @@ public class HandlerChainCaller {
             if (exception instanceof SOAPFaultException) {
                 SOAPFaultException sfe = (SOAPFaultException) exception;
                 SOAPFault userFault = sfe.getFault();
-                
+
                 QName faultCode = userFault.getFaultCodeAsQName();
                 if (faultCode == null) {
                     faultCode = determineFaultCode(context);
                 }
                 fault.setFaultCode(faultCode);
-                
+
                 String faultString = userFault.getFaultString();
                 if (faultString == null) {
                     if (sfe.getMessage() != null) {
@@ -249,13 +252,13 @@ public class HandlerChainCaller {
                     }
                 }
                 fault.setFaultString(faultString);
-                
+
                 String faultActor = userFault.getFaultActor();
                 if (faultActor == null) {
                     faultActor = "";
                 }
                 fault.setFaultActor(faultActor);
-                
+
                 if (userFault.getDetail() != null) {
                     fault.addChildElement(userFault.getDetail());
                 }
@@ -292,7 +295,7 @@ public class HandlerChainCaller {
         LogicalMessageContext context = holder.getLMC();
         context.put(IGNORE_FAULT_PROPERTY, Boolean.TRUE);
     }
-    
+
     /**
      * <p>Figure out if the fault code local part is client,
      * server, sender, receiver, etc. This is called by
@@ -304,7 +307,7 @@ public class HandlerChainCaller {
      * a fault. So this method can use the MESSAGE_OUTBOUND_PROPERTY
      * to determine whether it is being called on the client
      * or the server side. If this changes in the spec, then
-     * something else will need to be passed to the method 
+     * something else will need to be passed to the method
      * to determine whether the fault code is client or server.
      *
      * <p>For determining soap version, start checking with the
@@ -312,11 +315,11 @@ public class HandlerChainCaller {
      */
     private QName determineFaultCode(SOAPMessageContext context)
         throws SOAPException {
-        
+
         SOAPEnvelope envelope =
             context.getMessage().getSOAPPart().getEnvelope();
         String uri = envelope.getNamespaceURI();
-        
+
         // client case
         if ((Boolean) context.get(
             MessageContext.MESSAGE_OUTBOUND_PROPERTY)) {
@@ -325,17 +328,17 @@ public class HandlerChainCaller {
             }
             return SOAPConstants.FAULT_CODE_CLIENT;
         }
-        
+
         //server case
         if (uri.equals(SOAP12NamespaceConstants.ENVELOPE)) {
             return SOAP12Constants.FAULT_CODE_SERVER;
         }
         return SOAPConstants.FAULT_CODE_SERVER;
     }
-    
+
     /**
      * <p>Method used to call handlers to process a Message.
-     * Before calling the handlers, the handler chain caller will 
+     * Before calling the handlers, the handler chain caller will
      * set the outbound property and the roles on the message context.
      *
      * <p>Besides the context object passed in, the other information
@@ -353,7 +356,7 @@ public class HandlerChainCaller {
      * @return True in the normal case, false if a handler
      * returned false. This normally means that the runtime
      * should reverse direction if called during a request.
-     * 
+     *
      * The callLogicalHandlers and callProtocolHandlers methods will
      * take care of execution once called and return true or false or
      * throw an exception.
@@ -362,17 +365,21 @@ public class HandlerChainCaller {
         RequestOrResponse messageType,
         Message msg,
         boolean responseExpected) {
-       
+
         // set outbound property
-        msg.getProperties().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY,
-            (direction == Direction.OUTBOUND));
-        
+
+        // KK - why are you putting this in MessageProperties?
+        assert false;
+        //msg.getProperties().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY,
+        //    (direction == Direction.OUTBOUND));
+        // KK - until here
+
         ContextHolder ch = new ContextHolder(binding,msg);
         // if there is as soap message context, set roles
         if (ch.getSMC() != null) {
             ((SOAPMessageContextImpl) ch.getSMC()).setRoles(getRoles());
         }
-        
+
         // call handlers
         if (direction == Direction.OUTBOUND) {
             if (callLogicalHandlers(ch, direction, messageType,
@@ -523,7 +530,7 @@ public class HandlerChainCaller {
                 logger.log(Level.FINER, "exception in handler chain", re);
                 if (responseExpected && re instanceof ProtocolException) {
                     insertFaultMessage(holder, (ProtocolException) re);
-                    
+
                     // reverse direction and handle fault
                     try {
                         // if i==size-1, no more logical handlers to call
@@ -732,7 +739,7 @@ public class HandlerChainCaller {
      */
     private boolean callLogicalHandleFault(ContextHolder holder,
             int start, int end) {
-        
+
         return callGenericHandleFault(logicalHandlers,
             holder.getLMC(), start, end);
     }
@@ -818,16 +825,16 @@ public class HandlerChainCaller {
 
     private void closeProtocolHandlers(ContextHolder holder,
         int start, int end) {
-        
+
         closeGenericHandlers(soapHandlers, holder.getSMC(), start, end);
     }
 
     private void closeLogicalHandlers(ContextHolder holder,
         int start, int end) {
-        
+
         closeGenericHandlers(logicalHandlers, holder.getLMC(), start, end);
     }
-    
+
     /**
      * Calls close on the handlers from the starting
      * index through the ending index (inclusive). Made indices
@@ -835,7 +842,7 @@ public class HandlerChainCaller {
      */
     private void closeGenericHandlers(List<? extends Handler> handlerList,
         MessageContext context, int start, int end) {
-        
+
         if (handlerList.isEmpty()) {
             return;
         }
@@ -863,20 +870,20 @@ public class HandlerChainCaller {
     /**
      * Used to hold the context objects that are used to get
      * and set the current message.
-     * 
+     *
      */
     static class ContextHolder {
 
         boolean logicalOnly;
         WSBinding binding;
         Message msg;
-        
+
         ContextHolder(WSBinding binding, Message msg) {
             logicalOnly = isLogicalOnly(binding);
             this.binding = binding;
-            this.msg = msg;            
+            this.msg = msg;
         }
-                
+
         /**
          * This method determines whether to process ProtocolHandlers or not
          */

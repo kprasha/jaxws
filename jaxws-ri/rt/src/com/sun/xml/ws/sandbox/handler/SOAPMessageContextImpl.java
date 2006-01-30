@@ -98,8 +98,13 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     protected Message getNewMessage() {
         //Check if SOAPMessage has changed, if so construct new one, set MessageProperties
         if(soapMsg != null) {
-            msg = new SAAJMessage(soapMsg); 
-            msg.getProperties().putAll(ctxt);            
+            msg = new SAAJMessage(soapMsg);
+
+            // the code below isn't correct, since MessageContext may contain
+            // application scope properties or properties associated with strongly-typed fields.
+            // I think MessageContext needs to update MessageProperties live.
+            throw new UnsupportedOperationException();
+            // msg.getProperties().putAll(ctxt);
         }
         return msg;
         

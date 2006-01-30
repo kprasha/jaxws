@@ -21,15 +21,12 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
-import com.sun.xml.ws.client.RequestContext;
 
-import javax.activation.DataHandler;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import java.lang.reflect.Field;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,25 +37,38 @@ import java.util.Set;
  * Properties associated with a {@link Message}.
  *
  * <p>
- * This implements {@link MessageContext}, as we want this object to
- * be returned where user applications expect {@link MessageContext}.
+ * This object holds information about a {@link Message} that doesn't go
+ * on the wire. Information frequently used inside the JAX-WS RI
+ * is stored in the strongly-typed fields. Other information is stored
+ * in terms of a generic {@link Map} (see {@link #otherProperties} and
+ * {@link #invocationProperties}.)
  *
  * <p>
+ * Some properties need to be retained between request and response,
+ * some don't. For strongly typed fields, this characteristic is
+ * statically known for each of them, and propagation happens accordingly.
+ * For generic information stored in {@link Map}, {@link #otherProperties}
+ * stores per-message scope information (which don't carry over to
+ * response {@link MessageProperties}), and {@link #invocationProperties}
+ * stores per-invocation scope information (which carries over to
+ * the response.)
+ *
+ * <p>
+ * This object is used as the backing store of {@link MessageContext}, and
  * {@link LogicalMessageContext} and {@link SOAPMessageContext} will
- * be implemented as a delegate to this object, since those interfaces
- * may replace the {@link Message} object.
+ * be delegating to this object for storing/retrieving values.
+ *
+ *
+ * <h3>Relationship to request/response context</h3>
+ * <p>
+ * Request context is used to seed the initial values of {@link MessageProperties},
+ * and many of the properties are available in the strongly-typed fields.
+ * Other ones go to {@link #invocationProperties}, as they need to be retained
+ * in the reply message.
  *
  * <p>
- * If there are properties known the JAX-WS statically, they should be
- * present on this class as fields with {@link ContextProperty} annotation.
- *
- * <h3>Implementation Note</h3>
- * <p>
- * This implementation is designed to favor access through fields, although
- * it still allows access through {@link Map} methods. This is based on
- * the assumption that most of time no user code really cares about
- * properties in {@link MessageContext}, and even those who does will
- * just use a few {@link #get(Object)} method at most.
+ * Similarly, response context is constructed from {@link MessageProperties}.
+ * (Or rather it's just a view of {@link MessageProperties}.)
  *
  *
  * <h3>TODO</h3>
@@ -66,40 +76,25 @@ import java.util.Set;
  *  <li>this class needs to be cloneable since Message is copiable.
  *  <li>The three live views aren't implemented correctly. It will be
  *      more work to do so, although I'm sure it's possible.
- *  <li>Scope. Can someone sit down with me (Kohsuke) and tell me
- *      how they work?
+ *  <li>{@link ContextProperty} annotation is to make it easy
+ *      for {@link MessageContext} to export properties on this object,
+ *      but it probably needs some clean up.
  * </ol>
  *
  * @author Kohsuke Kawaguchi
  */
-@SuppressWarnings({"SuspiciousMethodCalls"})
-public class MessageProperties extends TypedMap implements Map<String,Object> {
+public final class MessageProperties {
     /**
      * Value of {@link #HTTP_REQUEST_HEADERS} property.
      */
     @ContextProperty(MessageContext.HTTP_REQUEST_HEADERS)
     public Map<String, List<String>> httpRequestHeaders;
-    
+
     /**
      * Value of {@link #HTTP_RESPONSE_HEADERS} property.
      */
     @ContextProperty(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> httpResponseHeaders;
-
-    /**
-     * Value of {@link #INBOUND_MESSAGE_ATTACHMENTS} property
-     */
-    // TODO: do not compute these values eagerly.
-    // allow ContextProperty to be on a method so that
-    // this can be computed lazily
-    @ContextProperty(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)
-    public Map<String, DataHandler> inboundMessageAttachments;
-
-    /**
-     * Value of {@link #OUTBOUND_MESSAGE_ATTACHMENTS} property
-     */
-    @ContextProperty(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS)
-    public Map<String, DataHandler> outboundMessageAttachments;
 
     /**
      * True if this message came from a transport (IOW inbound),
@@ -119,7 +114,7 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
      * TODO: who's using this property? 
      */
     @ContextProperty(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
-    public Object proxy;
+    public BindingProvider proxy;
 
     /**
      * The endpoint address to which this message is sent to.
@@ -127,21 +122,9 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
      * <p>
      * The JAX-WS spec allows this to be changed for each message,
      * so it's designed to be a property.
-     *
-     * <p>
-     * TODO: isn't this a part of {@link #requestContext}?
-     * Or more generally, what's the relationship between
-     * {@link MessageProperties} and {@link #requestContext}?
      */
     @ContextProperty(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
     public String endpointAddress;
-
-    /**
-     * The client appliation configures this map through
-     * {@link BindingProvider#getRequestContext()}.
-     */
-    @ContextProperty(BindingProviderProperties.JAXWS_CONTEXT_PROPERTY)
-    public RequestContext requestContext;
 
     /**
      * The value of the SOAPAction header associated with the message.
@@ -207,147 +190,46 @@ public class MessageProperties extends TypedMap implements Map<String,Object> {
      * Bag to capture "other" properties that do not have
      * strongly-typed presence on this object.
      *
+     * Properties in this map will have the same life span
+     * as the Message itself.
+     *
      * TODO: allocate this instance lazily.
      */
-    private Map<String,Object> otherProperties = new HashMap<String, Object>();
-
-
-    public int size() {
-        int sz = otherProperties.size();
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                sz++;
-        }
-        return sz;
-    }
-
-    public boolean isEmpty() {
-        int sz = otherProperties.size();
-        if(sz>0)    return false;
-
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                return false;
-        }
-        return true;
-    }
-
-    public boolean containsKey(Object key) {
-        return get(key)!=null;
-    }
-
-    public boolean containsValue(Object value) {
-        return values().contains(value);
-    }
-
-    public Object get(Object key) {
-        Property sp = props.get(key);
-        if(sp!=null)
-            return sp.get(this);
-
-        return otherProperties.get(key);
-    }
+    public final Map<String,Object> otherProperties = new HashMap<String,Object>();
 
     /**
-     * Sets a property.
+     * Bag to capture properties that are available for the whole
+     * message invocation (namely on both requests and responses.)
      *
-     * <h3>Implementation Note</h3>
-     * This method is slow. Code inside JAX-WS should define strongly-typed
-     * fields in this class and access them directly, instead of using this.
-     *
-     * @throws IllegalArgumentException
-     *      if the given key is an alias of a strongly-typed field,
-     *      and if the value object given is not assignable to the field.
-     *
-     * @see ContextProperty
+     * <p>
+     * These properties are copied from a request to a response.
+     * This is where we keep properties that are set by handlers.
      */
-    public Object put(String key, Object value) {
-        Property sp = props.get(key);
-        if(sp!=null) {
-            Object old = sp.get(this);
-            sp.set(this,value);
-            return old;
-        } else {
-            return otherProperties.put(key,value);
+    public final Map<String,Object> invocationProperties = new HashMap<String,Object>();
+
+    /**
+     * Gets a {@link Set} that stores application-scope properties.
+     *
+     * These properties will be exposed to the response context.
+     *
+     * @param readOnly
+     *      Return true if the caller only intends to read the value of this set.
+     *      Internally, the {@link Set} is allocated lazily, and this flag helps
+     *      optimizing the strategy.
+     *
+     * @return
+     *      always non-null, possibly empty set that stores property names.
+     */
+    public final Set<String> getApplicationScopes( boolean readOnly ) {
+        Set<String> o = (Set<String>) invocationProperties.get(SCOPE_PROPERTY);
+        if(o==null) {
+            if(readOnly)
+                return Collections.emptySet();
+            o = new HashSet<String>();
+            invocationProperties.put(SCOPE_PROPERTY,o);
         }
+        return o;
     }
 
-    public Object remove(Object key) {
-        Property sp = props.get(key);
-        if(sp!=null) {
-            Object old = sp.get(this);
-            sp.set(this,null);
-            return old;
-        } else {
-            return otherProperties.remove(key);
-        }
-    }
-
-    public void putAll(Map<? extends String, ? extends Object> t) {
-        for (Entry<? extends String, ? extends Object> e : t.entrySet())
-            put(e.getKey(),e.getValue());
-    }
-
-    public void clear() {
-        // TODO: is this even allowed?
-        otherProperties.clear();
-        for (Property sp : props.values())
-            sp.set(this,null);
-    }
-
-    public Set<String> keySet() {
-        // TODO: implement it correctly. this needs to be a live view
-        Set<String> keys = new HashSet<String>();
-        keys.addAll(otherProperties.keySet());
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                keys.add(sp.getName());
-        }
-        return keys;
-    }
-
-    public Collection<Object> values() {
-        // TODO: implement it correctly. this needs to be a live view
-        Set<Object> values = new HashSet<Object>();
-        values.addAll(otherProperties.values());
-
-        for (Property sp : props.values()) {
-            if(sp.hasValue(this))
-                values.add(sp.get(this));
-        }
-        return values;
-    }
-
-    public Set<Entry<String,Object>> entrySet() {
-        // TODO: implement it correctly. this needs to be a live view
-        Set<Entry<String,Object>> values = new HashSet<Entry<String,Object>>();
-
-        values.addAll(otherProperties.entrySet());
-
-        for (final Property sp : props.values()) {
-            if(sp.hasValue(this))
-                values.add(new Entry<String,Object>() {
-                    public String getKey() {
-                        return sp.getName();
-                    }
-
-                    public Object getValue() {
-                        return sp.get(MessageProperties.this);
-                    }
-
-                    public Object setValue(Object value) {
-                        Object old = sp.get(MessageProperties.this);
-                        sp.set(MessageProperties.this,value);
-                        return old;
-                    }
-                });
-        }
-        return values;
-    }
-
-    static {
-        parse(MessageProperties.class);
-    }
-
-    
+    private static final String SCOPE_PROPERTY = "com.sun.xml.ws.HandlerScope";
 }
