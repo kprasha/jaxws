@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.util.exception.XMLStreamException2;
 
 import javax.xml.stream.XMLStreamException;
 import javax.activation.DataHandler;
@@ -26,7 +27,7 @@ public abstract class AbstractXMLStreamWriterExImpl implements XMLStreamWriterEx
             stream.write(data.getInputStream());
             stream.close();
         } catch (IOException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
     public OutputStream writeBinary(String contentType) throws XMLStreamException {

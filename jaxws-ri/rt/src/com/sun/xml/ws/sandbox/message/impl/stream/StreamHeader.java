@@ -19,12 +19,13 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -128,7 +129,7 @@ public abstract class StreamHeader implements Header {
             // TODO what about in-scope namespaces
             _mark.processUsingXMLStreamWriter(w);
         } catch (XMLStreamBufferException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 

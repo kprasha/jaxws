@@ -23,6 +23,7 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.Util;
+import com.sun.xml.ws.util.exception.XMLStreamException2;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.Attributes;
@@ -174,7 +175,7 @@ abstract class JAXBHeader implements Header {
             }
             return infoset.processUsingXMLStreamReader();
         } catch (JAXBException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
@@ -192,7 +193,7 @@ abstract class JAXBHeader implements Header {
         try {
             bridge.marshal(context,jaxbObject,w);
         } catch (JAXBException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 

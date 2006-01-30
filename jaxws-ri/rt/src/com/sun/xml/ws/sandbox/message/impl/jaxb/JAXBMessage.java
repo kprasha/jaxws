@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -232,7 +233,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
             }
             return infoset.processUsingXMLStreamReader();
         } catch (JAXBException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
@@ -286,7 +287,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
             // TODO: wrap this into a fragment filter
             bridge.marshal(context,jaxbObject,w);
         } catch (JAXBException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
         w.writeEndElement();
         w.writeEndElement();
@@ -313,7 +314,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
             // TODO: XOP handling
             bridge.marshal(context,jaxbObject,sw);
         } catch (JAXBException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 

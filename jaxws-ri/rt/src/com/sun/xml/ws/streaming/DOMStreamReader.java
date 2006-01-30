@@ -33,6 +33,8 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
 
+import com.sun.xml.ws.util.exception.XMLStreamException2;
+
 /**
  *
  * Create an XMLStreamReader on top of a DOM level 2 tree. It a DOM level
@@ -633,7 +635,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
             eventType = next();
         }
         if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
-            throw new XMLStreamException("DOMStreamReader: Expected start or end tag");
+            throw new XMLStreamException2("DOMStreamReader: Expected start or end tag");
         }
         return eventType;
     }
@@ -642,13 +644,13 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         throws javax.xml.stream.XMLStreamException
     {
         if (type != _state) {
-            throw new XMLStreamException("DOMStreamReader: Required event type not found");
+            throw new XMLStreamException2("DOMStreamReader: Required event type not found");
         }
         if (namespaceURI != null && !namespaceURI.equals(getNamespaceURI())) {
-            throw new XMLStreamException("DOMStreamReader: Required namespaceURI not found");
+            throw new XMLStreamException2("DOMStreamReader: Required namespaceURI not found");
         }
         if (localName != null && !localName.equals(getLocalName())) {
-            throw new XMLStreamException("DOMStreamReader: Required localName not found");
+            throw new XMLStreamException2("DOMStreamReader: Required localName not found");
         }
     }
 

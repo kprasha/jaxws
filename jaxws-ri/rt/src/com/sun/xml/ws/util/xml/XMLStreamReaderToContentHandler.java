@@ -10,6 +10,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
+import com.sun.xml.ws.util.exception.XMLStreamException2;
 
 /**
  * This is a simple utility class that adapts StAX events from an
@@ -128,7 +129,7 @@ public class XMLStreamReaderToContentHandler {
 
             handleEndDocument();
         } catch (SAXException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
@@ -160,7 +161,7 @@ public class XMLStreamReaderToContentHandler {
                 staxStreamReader.getPITarget(),
                 staxStreamReader.getPIData());
         } catch (SAXException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
@@ -171,7 +172,7 @@ public class XMLStreamReaderToContentHandler {
                 staxStreamReader.getTextStart(),
                 staxStreamReader.getTextLength() );
         } catch (SAXException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
@@ -195,7 +196,7 @@ public class XMLStreamReaderToContentHandler {
                 saxHandler.endPrefixMapping(prefix);
             }
         } catch (SAXException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
@@ -225,7 +226,7 @@ public class XMLStreamReaderToContentHandler {
                 rawname,
                 attrs);
         } catch (SAXException e) {
-            throw new XMLStreamException(e);
+            throw new XMLStreamException2(e);
         }
     }
 
