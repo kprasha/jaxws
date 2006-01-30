@@ -21,7 +21,7 @@ package com.sun.xml.ws.sandbox.handler;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.handler.*;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
@@ -69,8 +69,8 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     private MessageContextImpl ctxt;
     private Set<String> roles;
     protected SOAPMessage soapMsg = null;
-    private BindingImpl binding;
-    public SOAPMessageContextImpl(BindingImpl binding, Message msg) {
+    private WSBinding binding;
+    public SOAPMessageContextImpl(WSBinding binding, Message msg) {
         this.binding = binding;
         this.msg = msg;
         this.ctxt = new MessageContextImpl(msg);

@@ -20,7 +20,7 @@
 package com.sun.xml.ws.sandbox.handler;
 
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.handler.HandlerException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
@@ -100,7 +100,7 @@ public class HandlerChainCaller {
     private List<SOAPHandler> soapHandlers;
     
     private Set<String> roles;
-    private BindingImpl binding;
+    private WSBinding binding;
     
 
     /**
@@ -112,7 +112,7 @@ public class HandlerChainCaller {
      * @param chain A list of handler objects, which can
      * be protocol or logical handlers.
      */
-    public HandlerChainCaller(BindingImpl binding, List<Handler> chain) {
+    public HandlerChainCaller(WSBinding binding, List<Handler> chain) {
         if (chain == null) { // should only happen in testing
             chain = new ArrayList<Handler>();
         }
@@ -868,10 +868,10 @@ public class HandlerChainCaller {
     static class ContextHolder {
 
         boolean logicalOnly;
-        BindingImpl binding;
+        WSBinding binding;
         Message msg;
         
-        ContextHolder(BindingImpl binding, Message msg) {
+        ContextHolder(WSBinding binding, Message msg) {
             logicalOnly = isLogicalOnly(binding);
             this.binding = binding;
             this.msg = msg;            
@@ -880,7 +880,7 @@ public class HandlerChainCaller {
         /**
          * This method determines whether to process ProtocolHandlers or not
          */
-        public boolean isLogicalOnly(BindingImpl binding) {
+        public boolean isLogicalOnly(WSBinding binding) {
             if(binding.getSOAPVersion()!=null) {
                 return false;
             }

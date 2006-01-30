@@ -23,7 +23,7 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.handler.*;
 import com.sun.xml.ws.sandbox.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
@@ -54,9 +54,9 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     private Message msg;
     private MessageContextImpl ctxt;
     private LogicalMessageImpl lm;
-    private BindingImpl binding;
+    private WSBinding binding;
     
-    public LogicalMessageContextImpl(BindingImpl binding, Message msg) {
+    public LogicalMessageContextImpl(WSBinding binding, Message msg) {
         this.binding = binding;
         this.msg = msg;
         this.ctxt = new MessageContextImpl(msg);

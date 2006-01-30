@@ -20,7 +20,8 @@
 
 package com.sun.xml.ws.sandbox.handler;
 
-import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.MessageContextUtil;
@@ -47,17 +48,18 @@ import javax.xml.ws.soap.SOAPFaultException;
  * @author WS Development Team
  */
 public class ClientHandlerPipe extends HandlerPipe{
-    private BindingImpl binding;
+    private WSBinding binding;
     private HandlerChainCaller hcaller;
-    
+    private Pipe nextPipe;
     /** Creates a new instance of ClientHandlerPipe */
-    public ClientHandlerPipe(BindingImpl binding) {
+    public ClientHandlerPipe(WSBinding binding, Pipe nextPipe) {
         this.binding = binding;
         hcaller = new HandlerChainCaller(binding,binding.getHandlerChain());
         if(binding.getSOAPVersion() != null) {
             //set roles on HandlerChainCaller, if it is SOAP binding
             hcaller.setRoles(((SOAPBindingImpl)binding).getRoles());
         }
+        this.nextPipe = nextPipe;
     }
     
     public HandlerChainCaller getHandlerChainCaller() {
@@ -75,6 +77,7 @@ public class ClientHandlerPipe extends HandlerPipe{
         
         boolean isOneWay = msg.getProperties().isOneWay;
         MessageContextImpl msgCxt = new MessageContextImpl(msg);
+        msgCxt.messageOutBound = true;
         boolean handlerResult = true;
         if(hcaller.hasHandlers()) {
             try {
@@ -94,9 +97,10 @@ public class ClientHandlerPipe extends HandlerPipe{
                 return msg;
             }
         }
-        /*        
+                
         try {
             // Call next Pipe.process() on msg        
+            nextPipe.process(msg);
             // Next Pipe Should be MUHeaderPipe
             // TODO: Do MUHeader Processing
         } catch (WebServiceException wse) { 
@@ -108,10 +112,11 @@ public class ClientHandlerPipe extends HandlerPipe{
             hcaller.forceCloseHandlers(msg);
             throw re;
         }
-        */
+        
         // Who sets this?
         // TODO: MessageContext.MESSAGE_OUTBOUND_PROPERTY should be false
         // TODO: Make sure MessageContext.INBOUND_MESSAGE_ATTACHMENTS is populated.
+        msgCxt.messageOutBound = false;
         if (hcaller.hasHandlers()) {
             callHandlersOnResponse(msg);
         }
