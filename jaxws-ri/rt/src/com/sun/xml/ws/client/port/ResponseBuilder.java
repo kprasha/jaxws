@@ -177,7 +177,7 @@ abstract class ResponseBuilder {
                 param.getTypeReference().tagName,
                 param.getBridge(),
                 setter);
-            assert param.getBinding()== ParameterBinding.HEADER;
+            assert param.getOutBinding()== ParameterBinding.HEADER;
         }
 
         public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
