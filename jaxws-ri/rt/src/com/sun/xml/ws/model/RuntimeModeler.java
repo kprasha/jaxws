@@ -61,6 +61,9 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.TreeMap;
 import java.util.concurrent.Future;
 
 /**
@@ -740,9 +743,13 @@ public class RuntimeModeler {
         QName reqElementName = new QName(targetNamespace, operationName);
         QName resElementName = null;
 
-        //build ordered list
-        Map<Integer, ParameterImpl> resRpcParams = new HashMap<Integer, ParameterImpl>();
-        Map<Integer, ParameterImpl> reqRpcParams = new HashMap<Integer, ParameterImpl>();
+        // use Map to build parameters in the part order when they are known.
+        // if part is unbound, we just put them at the end, and for that we
+        // use a large index (10000+) to avoid colliding with ordered ones.
+        // this assumes that there's no operation with # of parameters > 10000,
+        // but I think it's a pretty safe assumption - KK.
+        Map<Integer, ParameterImpl> resRpcParams = new TreeMap<Integer, ParameterImpl>();
+        Map<Integer, ParameterImpl> reqRpcParams = new TreeMap<Integer, ParameterImpl>();
         if(binding != null && binding.getBinding().isRpcLit()){
             binding.getBinding().finalizeRpcLitBinding();
         }
@@ -806,13 +813,12 @@ public class RuntimeModeler {
             }else{
                 ParameterBinding rb = getBinding(operationName, resultPartName, false, Mode.OUT);
                 returnParameter.setBinding(rb);
-                if(rb.isBody() || rb.isUnbound()){
+                if(rb.isBody()){
                     WSDLPart p = getPart(new QName(targetNamespace,operationName), resultPartName, Mode.OUT);
                     if(p == null)
-                        resRpcParams.put(resRpcParams.size(), returnParameter);
+                        resRpcParams.put(resRpcParams.size()+10000, returnParameter);
                     else
                         resRpcParams.put(p.getIndex(), returnParameter);
-                    //responseWrapper.addWrapperChild(returnParameter);
                 }else{
                     javaMethod.addParameter(returnParameter);
                 }
@@ -900,10 +906,9 @@ public class RuntimeModeler {
                 if(!param.isOUT()){
                     WSDLPart p = getPart(new QName(targetNamespace,operationName), partName, Mode.IN);
                     if(p == null)
-                        reqRpcParams.put(reqRpcParams.size(), param);
+                        reqRpcParams.put(reqRpcParams.size()+10000, param);
                     else
                         reqRpcParams.put(p.getIndex(), param);
-                    //requestWrapper.addWrapperChild(param);
                 }
 
                 if(!param.isIN()){
@@ -913,19 +918,18 @@ public class RuntimeModeler {
                     }
                     WSDLPart p = getPart(new QName(targetNamespace,operationName), partName, Mode.OUT);
                     if(p == null)
-                        resRpcParams.put(resRpcParams.size(), param);
+                        resRpcParams.put(resRpcParams.size()+10000, param);
                     else
                         resRpcParams.put(p.getIndex(), param);
-//                        responseWrapper.addWrapperChild(param);
                 }
             }else{
                 javaMethod.addParameter(param);
             }
         }
-        for(int i = 0; i < reqRpcParams.size();i++)
-            requestWrapper.addWrapperChild(reqRpcParams.get(i));
-        for(int i = 0; i < resRpcParams.size();i++)
-            responseWrapper.addWrapperChild(resRpcParams.get(i));
+        for (ParameterImpl p : reqRpcParams.values())
+            requestWrapper.addWrapperChild(p);
+        for (ParameterImpl p : resRpcParams.values())
+            responseWrapper.addWrapperChild(p);
         processExceptions(javaMethod, method);
     }
 
