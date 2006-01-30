@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.sandbox.message.impl.source.SourceUtils;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -270,16 +271,38 @@ public class SAAJMessage extends Message {
      * <p/>
      * This consumes the message.
      */
-    public void writeTo(XMLStreamWriter sw) {
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
+
+        String soapNsUri = null;
         try {
-            SOAPEnvelope se = sm.getSOAPPart().getEnvelope();
-            DOMUtil.serializeNode(se, sw);
-            sw.flush();            
+            soapNsUri = sm.getSOAPBody().getNamespaceURI();
         } catch (SOAPException e) {
-            throw new WebServiceException(e);
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        w.writeStartDocument();
+       // w.writeNamespace("S",soapNsUri);
+        w.writeStartElement("S","Envelope",soapNsUri);
+        w.writeNamespace("S",soapNsUri);
+
+        //write soapenv:Header
+        w.writeStartElement("S","Header",soapNsUri);
+        if(hasHeaders()) {
+            int len = headers.size();
+            for( int i=0; i<len; i++ ) {
+                headers.get(i).writeTo(w);
+            }
+        }
+        w.writeEndElement();
+
+        // write the body
+        w.writeStartElement("S","Body",soapNsUri);
+        DOMUtil.serializeNode(payload, w);
+        w.writeEndElement();
+
+        w.writeEndElement();
+        w.writeEndDocument();
+        w.flush();
+        w.close();        
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
