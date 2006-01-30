@@ -98,6 +98,8 @@ final class SyncMethodHandler extends MethodHandler {
                 case ATTACHMENT:
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
+                case UNBOUND:
+                    break;
                 default:
                     throw new AssertionError(); // impossible
                 }
@@ -152,7 +154,7 @@ final class SyncMethodHandler extends MethodHandler {
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
                 case UNBOUND:
-                    builders.add(new ResponseBuilder.None(setter));
+                    builders.add(new ResponseBuilder.NullSetter(setter));
                     break;
                 default:
                     throw new AssertionError();
@@ -161,7 +163,7 @@ final class SyncMethodHandler extends MethodHandler {
 
             switch(builders.size()) {
             case 0:
-                responseBuilder = ResponseBuilder.NONE;
+                responseBuilder = ResponseBuilder.NULL_BUILDER;
                 break;
             case 1:
                 responseBuilder = builders.get(0);

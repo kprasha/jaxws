@@ -54,16 +54,24 @@ interface ResponseBuilder {
      * The singleton instance that produces no response value.
      * Used for operations that doesn't have any output.
      */
-    static final ResponseBuilder NONE = new None();
+    static final ResponseBuilder NULL_BUILDER = new NullBuilder();
 
-    static final class None implements ResponseBuilder {
+    static final class NullBuilder implements ResponseBuilder {
+        private NullBuilder(){
+        }
+        public Object readResponse(Message msg, Object[] args, BridgeContext context) {
+            return null;
+        }
+    }
+
+    /**
+     * {@link ResponseBuilder} that sets null.
+     */
+    static final class NullSetter implements ResponseBuilder {
         private final ValueSetter setter;
 
-        public None() {
-            this.setter = null;
-        }
-
-        public None(ValueSetter setter){
+        public NullSetter(ValueSetter setter){
+            assert setter!=null;
             this.setter = setter;
         }
         public Object readResponse(Message msg, Object[] args, BridgeContext context) {
