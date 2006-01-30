@@ -1,8 +1,8 @@
 package com.sun.xml.ws.client.port;
 
-//import com.sun.xml.ws.api.model.Parameter;
-
+import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.model.ParameterImpl;
+
 import javax.xml.ws.Holder;
 
 /**
@@ -55,7 +55,7 @@ abstract class ValueSetter {
     }
 
     /**
-     * Returns a {@link ValueSetter} suitable for the given {@link Parameter{.
+     * Returns a {@link ValueSetter} suitable for the given {@link Parameter}.
      */
     public static ValueSetter get(ParameterImpl p) {
         int idx = p.getIndex();
