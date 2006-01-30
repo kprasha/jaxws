@@ -19,19 +19,20 @@
  */
 package com.sun.xml.ws.model;
 
-import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
+import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 
 import javax.jws.WebParam.Mode;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * {@link ParameterImpl} that represents a wrapper,
  * which is a parameter that consists of multiple nested {@link ParameterImpl}s
- * within.
+ * within, which together form a body part.
  *
  * <p>
  * Java method parameters represented by nested {@link ParameterImpl}s will be
@@ -39,7 +40,9 @@ import java.util.List;
  * body.
  *
  * <p>
- * This parameter is only used for the {@link com.sun.xml.ws.api.model.ParameterBinding#BODY} binding.
+ * This parameter is only used for the {@link ParameterBinding#BODY} binding.
+ * Other parameters that bind to other parts (such as headers or unbound)
+ * will show up directly under {@link JavaMethod}.
  * 
  * @author Vivek Pandey
  */
@@ -69,18 +72,14 @@ public class WrapperParameter extends ParameterImpl {
     }
 
     /**
-     * @param wrapperChildren
-     *            The wrapperChildren to set.
-     */
-    public void addWrapperChildren(List<ParameterImpl> wrapperChildren) {
-        this.wrapperChildren.addAll(wrapperChildren);
-    }
-
-    /**
+     * Adds a new child parameter.
+     * 
      * @param wrapperChild
      */
     public void addWrapperChild(ParameterImpl wrapperChild) {
         wrapperChildren.add(wrapperChild);
+        // must bind to body. see class javadoc
+        assert wrapperChild.getBinding()== ParameterBinding.BODY;
     }
 
     public void clear(){
@@ -104,6 +103,6 @@ public class WrapperParameter extends ParameterImpl {
                 for (ParameterImpl p : wrapperChildren)
                     p.fillTypes(types);
             }
-    }
+        }
     }
 }
