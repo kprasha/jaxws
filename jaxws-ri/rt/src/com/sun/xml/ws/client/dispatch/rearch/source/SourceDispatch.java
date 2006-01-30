@@ -138,8 +138,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
      *          the <code>SourceDispatch</code> instance
      */
     public Future<?> invokeAsync(Source msg, AsyncHandler<Source> handler) {
-        //return super.invokeAsync(msg, handler);
-        throw new UnsupportedOperationException();
+        return super.invokeAsync(msg, handler);
+        //throw new UnsupportedOperationException();
 
     }
 

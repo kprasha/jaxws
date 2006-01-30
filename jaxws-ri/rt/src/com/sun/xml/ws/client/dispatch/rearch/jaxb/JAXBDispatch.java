@@ -99,7 +99,6 @@ public class JAXBDispatch extends DispatchImpl<Object> {
         Message response = process(message);
         switch (mode) {
             case PAYLOAD:
-
                 try {
                     return response.<Object>readPayloadAsJAXB(unmarshaller);
                 } catch (JAXBException e) {
@@ -217,8 +216,8 @@ public class JAXBDispatch extends DispatchImpl<Object> {
      *          the WebServiceException is the original JAXBException.
      */
     public Future<?> invokeAsync(Object msg, AsyncHandler<Object> handler) {
-        //return super.invokeAsync(msg, handler);
-        throw new UnsupportedOperationException();
+        return super.invokeAsync(msg, handler);
+        //throw new UnsupportedOperationException();
     }
 
     /**

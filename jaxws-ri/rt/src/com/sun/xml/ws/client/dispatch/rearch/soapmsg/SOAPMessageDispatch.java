@@ -163,8 +163,8 @@ public class SOAPMessageDispatch extends DispatchImpl<SOAPMessage> {
      *          the <code>Dispatch</code> instance
      */
     public Future<?> invokeAsync(SOAPMessage msg, AsyncHandler<SOAPMessage> handler) {
-        //return super.invokeAsync(msg, handler);
-        throw new UnsupportedOperationException();
+        return super.invokeAsync(msg, handler);
+        //throw new UnsupportedOperationException();
     }
 
     /**

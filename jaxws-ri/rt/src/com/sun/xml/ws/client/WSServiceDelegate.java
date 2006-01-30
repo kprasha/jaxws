@@ -183,7 +183,7 @@ public class WSServiceDelegate extends WSService {
             //todo:needs to be decoupled from service at execution
             return executor;
         } else
-            executor = Executors.newFixedThreadPool(3, new DaemonThreadFactory());
+            executor = Executors.newCachedThreadPool(new DaemonThreadFactory());
         return executor;
     }
 
