@@ -40,10 +40,13 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.util.Pool;
 
+import javax.jws.WebParam.Mode;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-import javax.jws.WebParam.Mode;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -123,16 +126,12 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * @return the <code>BridgeContext</code> for this <code>RuntimeModel</code>
      */
     public BridgeContext getBridgeContext() {
-        if (jaxbContext == null)
-            return null;
-        BridgeContext bc = bridgeContext.get();
-        if (bc == null) {
-            bc = jaxbContext.createBridgeContext();
-            bc.setAttachmentMarshaller(new JAXWSAttachmentMarshaller(enableMtom));
-            bc.setAttachmentUnmarshaller(new JAXWSAttachmentUnmarshaller());
-            bridgeContext.set(bc);
-        }
-        return bc;
+        assert jaxbContext!=null;
+        return bridgeContext.get();
+    }
+
+    public Pool.Marshaller getMarshallerPool() {
+        return marshallers;
     }
 
     /**
@@ -212,6 +211,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                     knownNamespaceURIs.add(namespace);
             }
         }
+
+        marshallers = new Pool.Marshaller(jaxbContext);
 
         return jaxbContext;
     }
@@ -566,7 +567,24 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     protected abstract void createDecoderInfo();
 
     private boolean enableMtom = false;
-    private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>();
+    private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {
+        protected BridgeContext initialValue() {
+            BridgeContext bc = jaxbContext.createBridgeContext();
+            bc.setAttachmentMarshaller(new JAXWSAttachmentMarshaller(enableMtom));
+            bc.setAttachmentUnmarshaller(new JAXWSAttachmentUnmarshaller());
+            return bc;
+        }
+    };
+    //private ThreadLocal<Marshaller> marshallers = new ThreadLocal<Marshaller>() {
+    //    protected Marshaller initialValue() {
+    //        try {
+    //            return jaxbContext.createMarshaller();
+    //        } catch (JAXBException e) {
+    //            throw new Error(e);     // impossible
+    //        }
+    //    }
+    //};
+    private Pool.Marshaller marshallers;
     protected JAXBRIContext jaxbContext;
     private String wsdlLocation;
     private QName serviceName;

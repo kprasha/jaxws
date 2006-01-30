@@ -3,12 +3,14 @@ package com.sun.xml.ws.client.port;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.util.Pool;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -51,6 +53,8 @@ final class SyncMethodHandler extends MethodHandler {
 
     private final Boolean isOneWay;
 
+    private final SEIModel seiModel;
+
     /**
      * Used to get a value from method invocation parameter.
      *
@@ -64,6 +68,7 @@ final class SyncMethodHandler extends MethodHandler {
         super(owner);
 
         this.soapAction = '"'+method.getBinding().getSOAPAction()+'"';
+        this.seiModel = owner.seiModel;
 
         {// prepare objects for creating messages
             List<ParameterImpl> rp = method.getRequestParameters();
@@ -88,7 +93,7 @@ final class SyncMethodHandler extends MethodHandler {
                     break;
                 case HEADER:
                     fillers.add(new MessageFiller.Header(
-                        this,
+                        owner.seiModel,
                         param.getIndex(),
                         owner.soapVersion,
                         param.getBridge(),
@@ -171,7 +176,9 @@ final class SyncMethodHandler extends MethodHandler {
 
     public Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException {
 
-        Marshaller m = owner.marshallers.take();
+        Pool.Marshaller pool = seiModel.getMarshallerPool();
+
+        Marshaller m = pool.take();
 
         try {
             Message msg = createRequestMessage(args);
@@ -223,19 +230,17 @@ final class SyncMethodHandler extends MethodHandler {
                 //    throw new WebServiceException("Unable to read in a SOAP fault message",e);
                 //}
             } else {
-                BridgeContext context = owner.bridgeContexts.take();
+                BridgeContext context = seiModel.getBridgeContext();
                 try {
                     return responseBuilder.readResponse(reply,args,context);
                 } catch (JAXBException e) {
                     throw new DeserializationException("failed.to.read.response",e);
                 } catch (XMLStreamException e) {
                     throw new DeserializationException("failed.to.read.response",e);
-                } finally {
-                    owner.bridgeContexts.recycle(context);
                 }
             }
         } finally {
-            owner.marshallers.recycle(m);
+            pool.recycle(m);
         }
     }
 

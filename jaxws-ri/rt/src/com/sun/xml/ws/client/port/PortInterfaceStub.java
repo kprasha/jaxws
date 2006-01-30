@@ -34,9 +34,6 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         this.soapVersion = binding.getSOAPVersion();
         this.endpointAddress = seiModel.getPort().getAddress();
 
-        this.marshallers = new Pool.Marshaller(seiModel.getJAXBContext());
-        this.bridgeContexts = new Pool.BridgeContext(seiModel.getJAXBContext());
-
         Map<WSDLBoundOperation,SyncMethodHandler> syncs = new HashMap<WSDLBoundOperation, SyncMethodHandler>();
 
         // fill in methodHandlers.
@@ -81,16 +78,6 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
      * a {@link MethodHandler} that processes it.
      */
     private final Map<Method,MethodHandler> methodHandlers = new HashMap<Method,MethodHandler>();
-
-    /**
-     * JAXB marshaller pool.
-     *
-     * TODO: this pool can be shared across {@link Stub}s.
-     */
-    public final Pool.Marshaller marshallers;
-
-    // TODO: ditto
-    public final Pool.BridgeContext bridgeContexts;
 
     public Object invoke(Object proxy, Method method, Object[] args) throws WebServiceException, Throwable {
         MethodHandler handler = methodHandlers.get(method);

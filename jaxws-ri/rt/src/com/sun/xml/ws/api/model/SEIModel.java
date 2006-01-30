@@ -6,6 +6,7 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.util.Pool;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
@@ -35,11 +36,18 @@ import java.util.Collection;
  */
 public interface SEIModel {
     /**
-     * {@link BridgeContext} is not thread safe, the RuntimeModel must return a thread local {@link BridgeContext}
+     * {@link BridgeContext} is not thread safe, the {@link SEIModel} returns a thread
+     * local {@link BridgeContext}.
      *
-     * @return the <code>{@link BridgeContext}</code>
+     * @return the <code>{@link BridgeContext}</code>.
+     *
+     * TODO: this is broken, as one thread may legally use two bridges concurrently,
+     * such as marshalling object to unmarshal it into another form.
+     * We shall move this to JAXB and let it deal with pooling.
      */
     BridgeContext getBridgeContext();
+
+    Pool.Marshaller getMarshallerPool();
 
     /**
      * JAXBContext that will be used to marshall/unmarshall the java classes found in the SEI.
