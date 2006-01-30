@@ -6,6 +6,7 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -21,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.lang.reflect.Type;
 
 /**
  * Reads a response {@link Message}, disassembles it, and moves obtained Java values
@@ -28,7 +30,7 @@ import java.util.HashMap;
  *
  * @author Kohsuke Kawaguchi
  */
-interface ResponseBuilder {
+abstract class ResponseBuilder {
     /**
      * Reads a response {@link Message}, disassembles it, and moves obtained Java values
      * to the expected places.
@@ -48,16 +50,10 @@ interface ResponseBuilder {
      * @throws XMLStreamException
      *      if there's an error during unmarshalling the reply message.
      */
-    Object readResponse( Message reply, Object[] args, BridgeContext context ) throws JAXBException, XMLStreamException;
+    abstract Object readResponse( Message reply, Object[] args, BridgeContext context ) throws JAXBException, XMLStreamException;
 
-    /**
-     * The singleton instance that produces no response value.
-     * Used for operations that doesn't have any output.
-     */
-    static final ResponseBuilder NULL_BUILDER = new NullBuilder();
-
-    static final class NullBuilder implements ResponseBuilder {
-        private NullBuilder(){
+    static final class None extends ResponseBuilder {
+        private None(){
         }
         public Object readResponse(Message msg, Object[] args, BridgeContext context) {
             return null;
@@ -65,17 +61,50 @@ interface ResponseBuilder {
     }
 
     /**
-     * {@link ResponseBuilder} that sets null.
+     * The singleton instance that produces null return value.
+     * Used for operations that doesn't have any output.
      */
-    static final class NullSetter implements ResponseBuilder {
-        private final ValueSetter setter;
+    public static ResponseBuilder NONE = new None();
 
-        public NullSetter(ValueSetter setter){
+    /**
+     * Returns the 'uninitialized' value for the given type.
+     *
+     * <p>
+     * For primitive types, it's '0', and for reference types, it's null.
+     */
+    public static Object getVMUninitializedValue(Type type) {
+        // if this map returns null, that means the 'type' is a reference type,
+        // in which case 'null' is the correct null value, so this code is correct.
+        return primitiveUninitializedValues.get(type);
+    }
+
+    private static final Map<Class,Object> primitiveUninitializedValues = new HashMap<Class, Object>();
+
+    static {
+        Map<Class, Object> m = primitiveUninitializedValues;
+        m.put(int.class,(int)0);
+        m.put(char.class,(char)0);
+        m.put(byte.class,(byte)0);
+        m.put(short.class,(short)0);
+        m.put(long.class,(long)0);
+        m.put(float.class,(float)0);
+        m.put(double.class,(double)0);
+    }
+
+    /**
+     * {@link ResponseBuilder} that sets the VM uninitialized value to the type.
+     */
+    static final class NullSetter extends ResponseBuilder {
+        private final ValueSetter setter;
+        private final Object nullValue;
+
+        public NullSetter(ValueSetter setter, Object nullValue){
             assert setter!=null;
+            this.nullValue = nullValue;
             this.setter = setter;
         }
         public Object readResponse(Message msg, Object[] args, BridgeContext context) {
-            return setter.put(null, args);
+            return setter.put(nullValue, args);
         }
     }
 
@@ -94,7 +123,7 @@ interface ResponseBuilder {
      * return a value as a return value (and everything else has to go to
      * {@link Holder}s.)
      */
-    static final class Composite implements ResponseBuilder {
+    static final class Composite extends ResponseBuilder {
         private final ResponseBuilder[] builders;
 
         public Composite(ResponseBuilder... builders) {
@@ -124,7 +153,7 @@ interface ResponseBuilder {
     /**
      * Reads a header into a JAXB object.
      */
-    static final class Header implements ResponseBuilder {
+    static final class Header extends ResponseBuilder {
         private final Bridge<?> bridge;
         private final ValueSetter setter;
         private final QName headerName;
@@ -143,6 +172,14 @@ interface ResponseBuilder {
             this.setter = setter;
         }
 
+        public Header(ParameterImpl param, ValueSetter setter) {
+            this(
+                param.getTypeReference().tagName,
+                param.getBridge(),
+                setter);
+            assert param.getBinding()== ParameterBinding.HEADER;
+        }
+
         public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
             com.sun.xml.ws.api.message.Header header =
                 msg.getHeaders().get(headerName.getNamespaceURI(), headerName.getLocalPart());
@@ -158,7 +195,7 @@ interface ResponseBuilder {
     /**
      * Reads the whole payload into a single JAXB bean.
      */
-    static final class Body implements ResponseBuilder {
+    static final class Body extends ResponseBuilder {
         private final Bridge<?> bridge;
         private final ValueSetter setter;
 
@@ -182,7 +219,7 @@ interface ResponseBuilder {
      * Treats a payload as multiple parts wrapped into one element,
      * and processes all such wrapped parts.
      */
-    static final class DocLit implements ResponseBuilder {
+    static final class DocLit extends ResponseBuilder {
         /**
          * {@link PartBuilder} keyed by the element name (inside the wrapper element.)
          */
@@ -209,6 +246,9 @@ interface ResponseBuilder {
                             p.getName().getLocalPart()),
                         ValueSetter.get(p)
                     ));
+                    // wrapper parameter itself always bind to body, and
+                    // so do all its children
+                    assert p.getBinding()== ParameterBinding.BODY;
                 } catch (JAXBException e) {
                     throw new WebServiceException(  // TODO: i18n
                         wrapperType+" do not have a property of the name "+name,e);
@@ -278,7 +318,7 @@ interface ResponseBuilder {
      * Treats a payload as multiple parts wrapped into one element,
      * and processes all such wrapped parts.
      */
-    static final class RpcLit implements ResponseBuilder {
+    static final class RpcLit extends ResponseBuilder {
         /**
          * {@link PartBuilder} keyed by the element name (inside the wrapper element.)
          */
@@ -295,6 +335,9 @@ interface ResponseBuilder {
                 parts.put( p.getName(), new PartBuilder(
                     p.getBridge(), ValueSetter.get(p)
                 ));
+                // wrapper parameter itself always bind to body, and
+                // so do all its children
+                assert p.getBinding()== ParameterBinding.BODY;
             }
         }
 

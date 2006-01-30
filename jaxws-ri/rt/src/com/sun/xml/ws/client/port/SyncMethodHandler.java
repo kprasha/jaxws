@@ -1,6 +1,5 @@
 package com.sun.xml.ws.client.port;
 
-import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
@@ -137,24 +136,18 @@ final class SyncMethodHandler extends MethodHandler {
                         else
                             builders.add(new ResponseBuilder.DocLit((WrapperParameter)param));
                     } else {
-                        builders.add(new ResponseBuilder.Body(
-                            param.getBridge(),
-                            setter));
+                        builders.add(new ResponseBuilder.Body(param.getBridge(),setter));
                     }
                     break;
                 case HEADER:
-                    Bridge br = param.getBridge();
-                    builders.add(new ResponseBuilder.Header(
-                        br.getTypeReference().tagName,
-                        br,
-                        setter
-                    ));
+                    builders.add(new ResponseBuilder.Header(param, setter));
                     break;
                 case ATTACHMENT:
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
                 case UNBOUND:
-                    builders.add(new ResponseBuilder.NullSetter(setter));
+                    builders.add(new ResponseBuilder.NullSetter(setter,
+                        ResponseBuilder.getVMUninitializedValue(param.getTypeReference().type)));
                     break;
                 default:
                     throw new AssertionError();
@@ -163,7 +156,7 @@ final class SyncMethodHandler extends MethodHandler {
 
             switch(builders.size()) {
             case 0:
-                responseBuilder = ResponseBuilder.NULL_BUILDER;
+                responseBuilder = ResponseBuilder.NONE;
                 break;
             case 1:
                 responseBuilder = builders.get(0);
