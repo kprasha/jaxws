@@ -1,13 +1,15 @@
 package com.sun.xml.ws.sandbox.fault;
 
 
+import com.sun.xml.bind.api.TypeReference;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.AccessType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlTransient;
-import java.net.URI;
+import javax.xml.namespace.QName;
 
 /**
  * SOAP 1.2 Fault class that can be marshalled/unmarshalled by JAXB
@@ -47,7 +49,7 @@ import java.net.URI;
     "Role",
     "Detail"
 })
-public class SOAP12Fault {
+public class SOAP12Fault extends SOAPFaultBuilder {
     @XmlTransient
     public static final String ns = "http://www.w3.org/2003/05/soap-envelope";
 
@@ -65,6 +67,22 @@ public class SOAP12Fault {
 
     //@XmlElement(namespace = ns, nillable = true)
     public DetailType Detail;
+
+    @Override
+    public DetailType getDetail() {
+        return Detail;
+    }
+    @Override
+    public String getFaultString() {
+        return Reason.text.get(0).text;
+    }
+
+    public static TypeReference getTypeReference() {
+        return typeReference;
+    }
+
+    private static final TypeReference typeReference = new TypeReference(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Fault"),
+            SOAP11Fault.class, SOAP11Fault.class.getAnnotations());
 
 }
 

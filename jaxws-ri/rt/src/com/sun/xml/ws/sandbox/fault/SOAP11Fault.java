@@ -1,17 +1,20 @@
 package com.sun.xml.ws.sandbox.fault;
 
+import com.sun.xml.bind.api.TypeReference;
+
+import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.AccessType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 
 /**
  * This class represents SOAP1.1 Fault. This class will be used to marshall/unmarshall a soap fault using JAXB.
  * <p/>
  * <pre>
  * Example:
- *
+ * <p/>
  *     &lt;soap:Fault xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' >
  *         &lt;faultcode>soap:Client&lt;/faultcode>
  *         &lt;faultstring>Invalid message format&lt;/faultstring>
@@ -33,12 +36,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "Fault", namespace = "http://schemas.xmlsoap.org/soap/envelope/")
 @XmlAccessorType(AccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "faultcode",
-    "faultstring",
-    "faultactor",
-    "detail"
-})
-public class SOAP11Fault {
+        "faultcode",
+        "faultstring",
+        "faultactor",
+        "detail"
+        })
+public class SOAP11Fault extends SOAPFaultBuilder {
     @XmlElement(namespace = "")
     private String faultcode;
 
@@ -80,7 +83,8 @@ public class SOAP11Fault {
         this.faultcode = faultcode;
     }
 
-    public String getFaultstring() {
+    @Override
+    public String getFaultString() {
         return faultstring;
     }
 
@@ -99,6 +103,7 @@ public class SOAP11Fault {
     /**
      * returns a java type T - this could be a {@link javax.xml.soap.Detail} or a JAXB object
      */
+    @Override
     public DetailType getDetail() {
         return detail;
     }
@@ -109,4 +114,11 @@ public class SOAP11Fault {
     public void setDetail(DetailType detail) {
         this.detail = detail;
     }
+
+    public static TypeReference getTypeReference() {
+        return typeReference;
+    }
+
+    private static final TypeReference typeReference = new TypeReference(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Fault"),
+            SOAP11Fault.class, SOAP11Fault.class.getAnnotations());
 }
