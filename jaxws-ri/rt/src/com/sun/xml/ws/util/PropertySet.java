@@ -29,8 +29,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * A set of "properties" that can be accessed via strongly-typed fields
@@ -91,8 +95,6 @@ public abstract class PropertySet {
 
         for (Method m : clazz.getClass().getMethods()) {
             Property cp = m.getAnnotation(Property.class);
-            // TODO: implement this later
-            throw new UnsupportedOperationException();
             // if(cp!=null) props.put(cp.value(), new MethodProperty(m, cp));
         }
 
@@ -107,7 +109,6 @@ public abstract class PropertySet {
         boolean hasValue(PropertySet props);
         Object get(PropertySet props);
         void set(PropertySet props, Object value);
-
     }
 
     static final class FieldAccessor implements Accessor {
@@ -152,11 +153,11 @@ public abstract class PropertySet {
     }
 
 
-    public boolean containsKey(String key) {
+    public boolean containsKey(Object key) {
         return get(key)!=null;
     }
 
-    public Object get(String key) {
+    public Object get(Object key) {
         Accessor sp = getPropertyMap().get(key);
         if(sp!=null)
             return sp.get(this);
@@ -203,5 +204,46 @@ public abstract class PropertySet {
         } else {
             throw new IllegalArgumentException("Undefined property "+key);
         }
+    }
+
+    /**
+     * Creates a {@link Map} view of this {@link PropertySet}.
+     *
+     * <p>
+     * This map is live, in the sense that values you set to it
+     * will be reflected to {@link PropertySet}, and changes made
+     * to {@link PropertySet} externally would still see through
+     * the map view.
+     *
+     * @return
+     *      always non-null valid instance.
+     */
+    public Map<String,Object> createMapView() {
+        final Set<Map.Entry<String,Object>> core = new HashSet<Entry<String, Object>>();
+
+        for (final Entry<String, Accessor> e : getPropertyMap().entrySet()) {
+            core.add(new Entry<String, Object>() {
+                public String getKey() {
+                    return e.getKey();
+                }
+
+                public Object getValue() {
+                    return e.getValue().get(PropertySet.this);
+                }
+
+                public Object setValue(Object value) {
+                    Accessor acc = e.getValue();
+                    Object old = acc.get(PropertySet.this);
+                    acc.set(PropertySet.this,value);
+                    return old;
+                }
+            });
+        }
+
+        return new AbstractMap<String, Object>() {
+            public Set<Entry<String,Object>> entrySet() {
+                return core;
+            }
+        };
     }
 }
