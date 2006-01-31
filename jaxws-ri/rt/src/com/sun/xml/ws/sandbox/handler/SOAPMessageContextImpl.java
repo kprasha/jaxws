@@ -79,7 +79,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     }
 
     public SOAPMessage getMessage() {
-        if(soapMsg != null) {
+        if(soapMsg == null) {
             try {
                 soapMsg = msg.readAsSOAPMessage();
             } catch (SOAPException e) {
