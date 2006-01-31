@@ -226,9 +226,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         for (JavaMethodImpl m : methods) {
             m.fillTypes(types);
         }
-        //Add the SOAP 11 and 1.2 jaxb fault classes so that the JAXBContext is aware of these
-        types.add(SOAP11Fault.getTypeReference());
-        types.add(SOAP12Fault.getTypeReference());
         return types;
     }
 

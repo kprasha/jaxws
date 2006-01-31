@@ -13,14 +13,17 @@ import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.fault.SOAP11Fault;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.sandbox.fault.SOAP12Fault;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,8 +69,8 @@ final class SyncMethodHandler extends MethodHandler {
     /*package*/ final ValueGetter[] valueGetters;
 
     private final ResponseBuilder responseBuilder;
-    private final ResponseBuilder faultBuilder;
     private final Map<QName, CheckedExceptionImpl> checkedExceptions;
+    private final JAXBContext faultJAXBContext;
 
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethodImpl method) {
         super(owner);
@@ -76,6 +79,11 @@ final class SyncMethodHandler extends MethodHandler {
         this.checkedExceptions = new HashMap<QName, CheckedExceptionImpl>();
         for(CheckedExceptionImpl ce : method.getCheckedExceptions()){
             checkedExceptions.put(ce.getBridge().getTypeReference().tagName, ce);
+        }
+        try {
+            this.faultJAXBContext = JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
+        } catch (JAXBException e) {
+            throw new WebServiceException(e);
         }
 
         this.soapAction = '"'+method.getBinding().getSOAPAction()+'"';
@@ -181,9 +189,7 @@ final class SyncMethodHandler extends MethodHandler {
                 responseBuilder = new ResponseBuilder.Composite(builders);
             }
         }
-
         this.isOneWay = method.getMEP().isOneWay();
-        faultBuilder = new ResponseBuilder.Fault(owner.seiModel.getBridge(SOAP11Fault.getTypeReference()), null);
     }
 
     public Object invoke(Object proxy, Object[] args) throws Throwable {
@@ -219,10 +225,9 @@ final class SyncMethodHandler extends MethodHandler {
                 // no reply. must have been one-way
                 return null;
 
-            BridgeContext context = seiModel.getBridgeContext();
             if(reply.isFault()) {
                 try {
-                    SOAPFaultBuilder faultBuilder = (SOAPFaultBuilder) this.faultBuilder.readResponse(reply,args,context);
+                    SOAPFaultBuilder faultBuilder = reply.readPayloadAsJAXB(faultJAXBContext.createUnmarshaller());
                     throw faultBuilder.createException(checkedExceptions, reply);
                 } catch (JAXBException e) {
                     throw new DeserializationException("failed.to.read.response",e);
@@ -230,6 +235,7 @@ final class SyncMethodHandler extends MethodHandler {
                     throw new DeserializationException("failed.to.read.response",e);
                 }
             } else {
+                BridgeContext context = seiModel.getBridgeContext();
                 try {
                     return responseBuilder.readResponse(reply,args,context);
                 } catch (JAXBException e) {
