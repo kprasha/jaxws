@@ -89,10 +89,11 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Gets an iteration of headers {@link Header} of the specified name.
+     * Gets all the {@link Header}s of the specified name,
+     * including duplicates (if any.)
      *
      * @return empty iterator
-     *      if not found.
+     *      if not found, but never null.
      */
     public Iterator<Header> getHeaders(final String nsUri, final String localName) {
         return new Iterator<Header>() {
@@ -133,10 +134,11 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Gets an iteration of headers {@link Header} in the specified namespace.
+     * Gets an iteration of headers {@link Header} in the specified namespace,
+     * including duplicates (if any.)
      *
      * @return empty iterator
-     *      if not found.
+     *      if not found. But never null.
      */
     public Iterator<Header> getHeaders(final String nsUri) {
         return new Iterator<Header>() {
