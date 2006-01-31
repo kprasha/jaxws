@@ -17,6 +17,9 @@ import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -87,10 +90,12 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      */
     protected abstract Message createMessage(T msg);
 
-    //todo: temp just to get something working
+    /**
+     * Obtains the value to return from the response message.
+     */
+    protected abstract T toReturnValue(Message response);
 
-
-    public Response<T> invokeAsync(final T param) {
+    public final Response<T> invokeAsync(final T param) {
         ResponseImpl<T> ft = new ResponseImpl<T>(new Callable() {
             public T call() throws Exception {
                 return invoke(param);
@@ -105,7 +110,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     /* todo: Not sure that this meets the needs of tango for async callback */
     /* todo: Need to review with team                                       */
 
-    public Future<?> invokeAsync(final T param, final AsyncHandler<T> asyncHandler) {
+    public final Future<?> invokeAsync(final T param, final AsyncHandler<T> asyncHandler) {
         final ResponseImpl<T>[] r = new ResponseImpl[1];
         r[0] = new ResponseImpl<T>(new Callable() {
             public T call() throws Exception {
@@ -130,32 +135,32 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         return r[0];
     }
 
-    /**
-     *
-     */
+    public final T invoke(T in) {
+        Message message = createMessage(in);
+        setProperties(message.getProperties(),false);
+        Message response = process(message);
+        return toReturnValue(response);
+    }
+
+    public final void invokeOneWay(T in) {
+        Message message = createMessage(in);
+        setProperties(message.getProperties(),true);
+        Message response = process(message);
+    }
+
+
     private static class ResponseImpl<T> extends FutureTask<T> implements Response<T> {
 
         private AsyncHandler<T> handler;
 
-        /**
-         *
-         * @param callable
-         */
         protected ResponseImpl(Callable<T> callable) {
             super(callable);
         }
 
-        /**
-         *
-         * @param handler
-         */
         private void setHandler(AsyncHandler<T> handler) {
             this.handler = handler;
         }
 
-        /**
-         *
-         */
         @Override
         protected void done() {
             if (handler == null)
@@ -177,11 +182,10 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    protected void setProperties(Message msg) {
-
-        MessageProperties props = msg.getProperties();
+    protected void setProperties(MessageProperties props, boolean isOneWay) {
         props.proxy = this;
         props.endpointAddress = endpointAddress;
+        props.isOneWay = isOneWay;
 
         ////not needed but leave for now --maybe mode is needed
         //props.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);

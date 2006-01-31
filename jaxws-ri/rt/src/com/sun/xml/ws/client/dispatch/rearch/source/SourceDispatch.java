@@ -46,28 +46,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
         super(port, aClass, mode, owner, pipe, binding);
     }
 
-
-    /**
-     * Invoke a service operation synchronously.
-     * <p/>
-     * The client is responsible for ensuring that the <code>Source</code> msg
-     * is formed according to the requirements of the protocol binding in use.
-     *
-     * @param msg An object that will form the payload of
-     *            the message used to invoke the operation. Must be an instance of
-     *            either <code>javax.xml.transform.Source</code>.
-     * @return The response to the operation invocation. The object is
-     *         either an instance of <code>javax.xml.transform.Source</code>
-     *         or a JAXB object.
-     * @throws javax.xml.ws.WebServiceException
-     *          If there is any error in the configuration of
-     *          the <code>SourceDispatch</code> instance
-     */
-    public Source invoke(Source msg)
-        throws WebServiceException {
-        Message message = createMessage(msg);
-        setProperties(message);
-        Message response = process(message);
+    protected Source toReturnValue(Message response) {
         switch (mode){
             case PAYLOAD:
                 return response.readPayloadAsSource();
@@ -75,110 +54,18 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 return response.readEnvelopeAsSource();
             default:
                 throw new WebServiceException("Unrecognized dispatch mode");
-        }       
+        }
     }
-
-    /**
-     * Invoke a service operation asynchronously.  The
-     * method returns without waiting for the response to the operation
-     * invocation, the results of the operation are obtained by polling the
-     * returned <code>Response</code>.
-     * <p/>
-     * The client is responsible for ensuring that the <code>msg</code>
-     * <code>javax.xml.transform.Source<code> when marshalled is formed
-     * according to the requirements of the protocol
-     * binding in use.
-     *
-     * @param msg A <code>javax.xml.transform.Source</code> that, when
-     *            marshalled, will form the payload of the message used to
-     *            invoke the operation. Must be an instance of
-     *            either <code>javax.xml.transform.Source</code>. If
-     * @return The response to the operation invocation. The object
-     *         returned by <code>Response.get()</code> is
-     *         either an instance of <code>javax.xml.transform.Source</code>
-     *         object.
-     * @throws javax.xml.ws.WebServiceException
-     *          If there is any error in the configuration of
-     *          the <code>SourceDispatch</code> instance
-     */
-    public Response<Source> invokeAsync(Source msg)
-        throws WebServiceException {
-        return super.invokeAsync(msg);
-
-    }
-
-
-    /**
-     * Invoke a service operation asynchronously. The
-     * method returns without waiting for the response to the operation
-     * invocation, the results of the operation are communicated to the client
-     * via the passed in handler.
-     * <p/>
-     * The client is responsible for ensuring that the <code>Source</code> msg
-     * when marshalled is formed according to the requirements of the protocol
-     * binding in use.
-     *
-     * @param msg     An <code>Source</code> that, when marshalled, will form the payload of
-     *                the message used to invoke the operation. Must be an instance of
-     *                either <code>javax.xml.transform.Source</code>.
-     * @param handler The handler object that will receive the
-     *                response to the operation invocation. The object
-     *                returned by <code>Response.get()</code> is
-     *                either an instance of
-     *                <code>javax.xml.transform.Source</code>.
-     * @return A <code>Future</code> object that may be used to check the status
-     *         of the operation invocation. This object must not be used to try to
-     *         obtain the results of the operation - the object returned from
-     *         <code>Future<?>.get()</code> is implementation dependent
-     *         and any use of it will result in non-portable behaviour.
-     * @throws javax.xml.ws.WebServiceException
-     *          If there is any error in the configuration of
-     *          the <code>SourceDispatch</code> instance
-     */
-    public Future<?> invokeAsync(Source msg, AsyncHandler<Source> handler) {
-        return super.invokeAsync(msg, handler);
-        //throw new UnsupportedOperationException();
-
-    }
-
-    /**
-     * Invokes a service operation using the one-way
-     * interaction mode. The operation invocation is logically non-blocking,
-     * subject to the capabilities of the underlying protocol, no results
-     * are returned. When
-     * the protocol in use is SOAP/HTTP, this method must block until
-     * an HTTP response code has been received or an error occurs.
-     * <p/>
-     * The client is responsible for ensuring that the <code>Source</code> msg
-     * when marshalled is formed according to the requirements of the protocol
-     * binding in use.
-     *
-     * @param msg An object that, when marshalled, will form the payload of
-     *            the message used to invoke the operation. Must be an instance of
-     *            either <code>javax.xml.transform.Source</code>.
-     * @throws javax.xml.ws.WebServiceException
-     *          If there is any error in the configuration of
-     *          the <code>SourceDispatch</code> instance or if an error occurs
-     *          during the invocation.
-     */
-
-    public void invokeOneWay(Source msg) throws
-        WebServiceException {
-       Message message = createMessage(msg);
-       setProperties(message, Boolean.TRUE);
-       Message response = process(message);
-    }
-
 
     protected Message createMessage(Source msg) {
-        Message message = null;
+        Message message;
         switch (mode) {
             case PAYLOAD:
                 message = new PayloadSourceMessage(msg, soapVersion);
                 break;
             case MESSAGE:
                 //Todo: temporary until protocol message is done
-                SOAPMessage soapmsg = null;
+                SOAPMessage soapmsg;
                 try {
                     //todo:
                     soapmsg = binding.getSOAPVersion().saajFactory.createMessage();
@@ -206,11 +93,5 @@ public class SourceDispatch extends DispatchImpl<Source> {
         message.getProperties().httpRequestHeaders = ch;
 
         return message;
-    }
-
-    protected void setProperties(Message msg, boolean oneway){
-        super.setProperties(msg);
-        //setHttpRequestHeaders(msg);
-        msg.getProperties().isOneWay = oneway;
     }
 }
