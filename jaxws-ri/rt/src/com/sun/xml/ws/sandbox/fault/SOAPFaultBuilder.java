@@ -4,6 +4,7 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.ExceptionType;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.util.StringUtils;
 import org.w3c.dom.Node;
@@ -24,7 +25,6 @@ import java.util.Map;
  * an Exception from a received messge.
  *
  * <p>
- * TODO: Add methods to create {@link SOAP11Fault} or (@link SOAP12Fault} from an {@link Exception)
  *
  * @author Vivek Pandey
  */
@@ -34,12 +34,12 @@ public abstract class SOAPFaultBuilder {
      * Gives the {@link DetailType} for a Soap 1.1 or Soap 1.2 message that can be used to create either a checked exception or
      * a protocol specific exception
      */
-    abstract public DetailType getDetail();
+    abstract DetailType getDetail();
 
     /**
      * gives the fault string that can be used to create an {@link Exception}
      */
-    abstract public String getFaultString();
+    abstract String getFaultString();
 
 
     /**
@@ -72,6 +72,38 @@ public abstract class SOAPFaultBuilder {
         } catch (Exception e) {
             throw new WebServiceException(e);
         }
+    }
+
+    /**
+     * TODO
+     * Creates a {@link Message} from a given {@link Throwable} exception. The Message would be a {@link Message}
+     * thats constructed using {@link SOAP11Fault} bean. These beans are constructed as per the
+     * rules specified in JSR 224.
+     *
+     * This method would be called by the server side runtime to turn an exception in to SOAP fault.
+     *
+     * @param exceptions {@link CheckedExceptionImpl} model
+     * @param ex An exception thrown by the endpoint
+     * @return a non-null {@link Message}
+     */
+    public static Message createSOAP11FaultMessage(Iterable<CheckedExceptionImpl> exceptions, Throwable ex){
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * TODO
+     * Creates a {@link Message} from a given {@link Throwable} exception. The Message would be a {@link Message}
+     * thats constructed using {@link SOAP12Fault} bean. These beans are constructed as per the
+     * rules specified in JSR 224.
+     *
+     * This method would be called by the server side runtime to turn an exception in to SOAP fault.
+     *
+     * @param exceptions {@link CheckedExceptionImpl} model
+     * @param ex An exception thrown by the endpoint
+     * @return a non-null {@link Message}
+     */
+    public static Message createSOAP12FaultMessage(Iterable<CheckedExceptionImpl> exceptions, Throwable ex){
+        throw new UnsupportedOperationException();
     }
 
     private Throwable getProtocolException(Message msg) {
