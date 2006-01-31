@@ -216,6 +216,30 @@ abstract class ResponseBuilder {
     }
 
     /**
+     * Reads the whole payload into a single JAXB bean.
+     */
+    static final class Fault extends ResponseBuilder {
+        private final Bridge<?> bridge;
+        private final ValueSetter setter;
+
+        /**
+         * @param bridge
+         *      specifies how to unmarshal the payload into a JAXB object.
+         * @param setter
+         *      specifies how the obtained value is returned to the client.
+         */
+        public Fault(Bridge<?> bridge, ValueSetter setter) {
+            this.bridge = bridge;
+            this.setter = setter;
+        }
+
+        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
+            return msg.readPayloadAsJAXB(bridge,context);
+        }
+    }
+
+
+    /**
      * Treats a payload as multiple parts wrapped into one element,
      * and processes all such wrapped parts.
      */
