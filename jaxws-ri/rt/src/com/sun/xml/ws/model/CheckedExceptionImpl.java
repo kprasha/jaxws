@@ -21,9 +21,11 @@
 package com.sun.xml.ws.model;
 
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.model.CheckedException;
-
-import java.rmi.RemoteException;
+import com.sun.xml.ws.api.model.ExceptionType;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.JavaMethod;
 
 /**
  * CheckedException class. Holds the exception class - class that has public
@@ -41,8 +43,10 @@ public final class CheckedExceptionImpl implements CheckedException {
     private final Class exceptionClass;
     private final TypeReference detail;
     private final ExceptionType exceptionType;
+    private final JavaMethodImpl javaMethod;
 
     /**
+     * @param jm {@link JavaMethodImpl} that throws this exception
      * @param exceptionClass
      *            Userdefined or WSDL exception class that extends
      *            java.lang.Exception.
@@ -50,12 +54,20 @@ public final class CheckedExceptionImpl implements CheckedException {
      *            detail or exception bean's TypeReference
      * @param exceptionType
      *            either ExceptionType.UserDefined or
-     *            ExceptionType.WSDLException
      */
-    public CheckedExceptionImpl(Class exceptionClass, TypeReference detail, ExceptionType exceptionType) {
+    public CheckedExceptionImpl(JavaMethodImpl jm, Class exceptionClass, TypeReference detail, ExceptionType exceptionType) {
         this.detail = detail;
         this.exceptionType = exceptionType;
         this.exceptionClass = exceptionClass;
+        this.javaMethod = jm;
+    }
+
+    public AbstractSEIModelImpl getOwner() {
+        return javaMethod.owner;
+    }
+
+    public JavaMethod getParent() {
+        return javaMethod;
     }
 
     /**
@@ -68,6 +80,10 @@ public final class CheckedExceptionImpl implements CheckedException {
 
     public Class getDetailBean() {
         return (Class) detail.type;
+    }
+
+    public Bridge getBridge() {
+        return getOwner().getBridge(detail);
     }
 
     public TypeReference getDetailType() {

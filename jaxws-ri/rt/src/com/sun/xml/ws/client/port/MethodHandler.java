@@ -39,5 +39,5 @@ public abstract class MethodHandler {
      * @return
      *      a return value from the method invocation. may be null.
      */
-    public abstract Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException;
+    public abstract Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException, Throwable;
 }

@@ -32,7 +32,7 @@ import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.encoding.soap.message.FaultReasonText;
 import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
-import com.sun.xml.ws.model.ExceptionType;
+import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.server.RuntimeContext;
@@ -51,7 +51,6 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

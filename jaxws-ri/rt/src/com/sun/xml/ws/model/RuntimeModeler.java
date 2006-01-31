@@ -22,10 +22,10 @@ package com.sun.xml.ws.model;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.v2.model.nav.Navigator;
-import com.sun.xml.bind.v2.model.impl.RuntimeModelBuilder;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
@@ -61,8 +61,6 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.concurrent.Future;
 
@@ -966,7 +964,7 @@ public class RuntimeModeler {
             QName faultName = new QName(namespace, name);
             TypeReference typeRef = new TypeReference(faultName, exceptionBean, anns);
             CheckedExceptionImpl checkedException =
-                new CheckedExceptionImpl(exception, typeRef, exceptionType);
+                new CheckedExceptionImpl(javaMethod, exception, typeRef, exceptionType);
             javaMethod.addException(checkedException);
         }
     }

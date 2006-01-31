@@ -21,6 +21,7 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
@@ -67,6 +68,10 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
 
     public WSDLBoundPortTypeImpl getBinding() {
         return boundPortType;
+    }
+
+    public SOAPVersion getSOAPVersion(){
+        return boundPortType.getSOAPVersion();
     }
 
     void freeze(WSDLModelImpl root) {

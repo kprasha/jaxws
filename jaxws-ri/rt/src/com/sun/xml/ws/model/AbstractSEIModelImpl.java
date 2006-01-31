@@ -40,11 +40,11 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.xml.ws.sandbox.fault.SOAP11Fault;
+import com.sun.xml.ws.sandbox.fault.SOAP12Fault;
 import com.sun.xml.ws.util.Pool;
 
 import javax.jws.WebParam.Mode;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Method;
@@ -226,6 +226,9 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         for (JavaMethodImpl m : methods) {
             m.fillTypes(types);
         }
+        //Add the SOAP 11 and 1.2 jaxb fault classes so that the JAXBContext is aware of these
+        types.add(SOAP11Fault.getTypeReference());
+        types.add(SOAP12Fault.getTypeReference());
         return types;
     }
 
@@ -599,5 +602,5 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private String targetNamespace = "";
     private final Map<Integer, RawAccessor> rawAccessorMap = new HashMap<Integer, RawAccessor>();
     private List<String> knownNamespaceURIs = null;
-    private WSDLPort port;
+    private WSDLPortImpl port;
 }

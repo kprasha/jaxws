@@ -5,6 +5,7 @@ import com.sun.xml.ws.client.ResponseImpl;
 
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
+import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Callable;
 
 /**
@@ -30,7 +31,11 @@ abstract class AsyncMethodHandler extends MethodHandler {
 
         ResponseImpl<Object> ft = new ResponseImpl<Object>(new Callable<Object>() {
             public Object call() throws Exception {
-                return core.invoke(proxy,args,snapshot);
+                try {
+                    return core.invoke(proxy,args,snapshot);
+                } catch (Throwable throwable) {
+                    throw new WebServiceException(throwable);
+                }
             }
         },handler);
 

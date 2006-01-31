@@ -1,7 +1,6 @@
 package com.sun.xml.ws.api.model;
 
-import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.model.ExceptionType;
+import com.sun.xml.bind.api.Bridge;
 
 import javax.xml.ws.WebFault;
 import java.rmi.RemoteException;
@@ -23,12 +22,22 @@ import java.rmi.RemoteException;
  */
 public interface CheckedException {
     /**
+     * Gets the root {@link SEIModel} that owns this model.
+     */
+    SEIModel getOwner();
+
+    /**
+     * Gets the parent {@link JavaMethod} to which this checked exception belongs.
+     */
+    JavaMethod getParent();
+
+    /**
      * The returned exception class would be userdefined or WSDL exception class.
      *
      * @return
      *      always non-null same object.
      */
-//    Class<? extends RemoteException> getExcpetionClass();
+    Class<? extends RemoteException> getExcpetionClass();
 
     /**
      * The detail bean is serialized inside the detail entry in the SOAP message.
@@ -37,12 +46,12 @@ public interface CheckedException {
      *
      * @return the detail bean
      */
-//    Class getDetailBean();
+    Class getDetailBean();
 
     /**
-     * {@link TypeReference} associated with the dettail bean.
+     * Gives the {@link com.sun.xml.bind.api.Bridge} associated with the detail
      */
-//    TypeReference getDetailType();
+    Bridge getBridge();
 
     /**
      * Tells whether the exception class is a userdefined or a WSDL exception.
@@ -55,5 +64,5 @@ public interface CheckedException {
      *
      * <code>public FaultBean getFaultInfo();</code>     
      */
-//    ExceptionType getExceptionType();
+    ExceptionType getExceptionType();
 }
