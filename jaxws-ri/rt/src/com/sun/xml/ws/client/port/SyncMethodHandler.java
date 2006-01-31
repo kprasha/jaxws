@@ -225,24 +225,18 @@ final class SyncMethodHandler extends MethodHandler {
                 // no reply. must have been one-way
                 return null;
 
-            if(reply.isFault()) {
-                try {
+            try {
+                if(reply.isFault()) {
                     SOAPFaultBuilder faultBuilder = reply.readPayloadAsJAXB(faultJAXBContext.createUnmarshaller());
                     throw faultBuilder.createException(checkedExceptions, reply);
-                } catch (JAXBException e) {
-                    throw new DeserializationException("failed.to.read.response",e);
-                } catch (XMLStreamException e) {
-                    throw new DeserializationException("failed.to.read.response",e);
-                }
-            } else {
-                BridgeContext context = seiModel.getBridgeContext();
-                try {
+                } else {
+                    BridgeContext context = seiModel.getBridgeContext();
                     return responseBuilder.readResponse(reply,args,context);
-                } catch (JAXBException e) {
-                    throw new DeserializationException("failed.to.read.response",e);
-                } catch (XMLStreamException e) {
-                    throw new DeserializationException("failed.to.read.response",e);
                 }
+            } catch (JAXBException e) {
+                throw new DeserializationException("failed.to.read.response",e);
+            } catch (XMLStreamException e) {
+                throw new DeserializationException("failed.to.read.response",e);
             }
         } finally {
             pool.recycle(m);
