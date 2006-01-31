@@ -87,13 +87,13 @@ public abstract class PropertySet {
      */
     protected static Map<String,Accessor> parse(Class clazz) {
         Map<String,Accessor> props = new HashMap<String,Accessor>();
-        for (Field f : clazz.getClass().getFields()) {
+        for (Field f : clazz.getFields()) {
             Property cp = f.getAnnotation(Property.class);
             if(cp!=null)
                 props.put(cp.value(), new FieldAccessor(f, cp));
         }
 
-        for (Method m : clazz.getClass().getMethods()) {
+        for (Method m : clazz.getMethods()) {
             Property cp = m.getAnnotation(Property.class);
             // if(cp!=null) props.put(cp.value(), new MethodProperty(m, cp));
         }
