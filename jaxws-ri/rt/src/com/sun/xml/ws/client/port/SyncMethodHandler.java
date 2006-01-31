@@ -85,11 +85,11 @@ final class SyncMethodHandler extends MethodHandler {
                 case BODY:
                     if(param.isWrapperStyle()) {
                         if(param.getParent().getBinding().isRpcLit())
-                            bodyBuilder = new BodyBuilder.RpcLit((WrapperParameter)param,owner);
+                            bodyBuilder = new BodyBuilder.RpcLit((WrapperParameter)param, seiModel, owner.soapVersion);
                         else
-                            bodyBuilder = new BodyBuilder.DocLit((WrapperParameter)param,owner);
+                            bodyBuilder = new BodyBuilder.DocLit((WrapperParameter)param, seiModel, owner.soapVersion);
                     } else {
-                        bodyBuilder = new BodyBuilder.Bare(param,owner);
+                        bodyBuilder = new BodyBuilder.Bare(param, seiModel, owner.soapVersion);
                     }
                     break;
                 case HEADER:
