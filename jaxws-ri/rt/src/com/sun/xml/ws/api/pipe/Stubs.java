@@ -6,10 +6,8 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.dispatch.rearch.datasource.DataSourceDispatch;
-import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
-import com.sun.xml.ws.client.dispatch.rearch.soapmsg.SOAPMessageDispatch;
-import com.sun.xml.ws.client.dispatch.rearch.source.SourceDispatch;
+import com.sun.xml.ws.client.dispatch.DataSourceDispatch;
+import com.sun.xml.ws.client.dispatch.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.model.SOAPSEIModel;
 
@@ -72,7 +70,7 @@ public abstract class Stubs {
      * </pre>
      */
     public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
-        return new SOAPMessageDispatch(portName, SOAPMessage.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+        return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, SOAPMessage.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
     /**
@@ -96,7 +94,7 @@ public abstract class Stubs {
      * </pre>
      */
     public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
-        return new SourceDispatch(portName, Source.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+        return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, Source.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
     /**

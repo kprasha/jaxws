@@ -13,7 +13,6 @@ import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.client.dispatch.rearch.jaxb.JAXBDispatch;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
@@ -260,7 +259,7 @@ public class WSServiceDelegate extends WSService {
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
         BindingImpl binding = getBinding(portName);
-        return new JAXBDispatch(portName, jaxbContext, mode, this, createPipeline(portName,binding), binding);
+        return Stubs.createJAXBDispatch(portName, (WSServiceDelegate)this, binding, jaxbContext, mode,createPipeline(portName,binding));        
     }
 
     public QName getServiceName() {

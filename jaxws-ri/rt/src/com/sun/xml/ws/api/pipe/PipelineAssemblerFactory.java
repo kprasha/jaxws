@@ -1,6 +1,5 @@
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.client.dispatch.rearch.StandalonePipeAssembler;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.soap.SOAPBinding;
@@ -59,7 +58,7 @@ public abstract class PipelineAssemblerFactory {
 
         // default binding IDs that are known
         // TODO: replace this with proper ones
-        return new StandalonePipeAssembler();
+        return new com.sun.xml.ws.client.dispatch.StandalonePipeAssembler();
     }
 
     private static final Logger logger = Logger.getLogger(PipelineAssemblerFactory.class.getName());
