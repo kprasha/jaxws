@@ -7,6 +7,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.pept.presentation.MEP;
@@ -76,7 +77,7 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws WebServiceException, Throwable {
         MethodHandler handler = methodHandlers.get(method);
         if(handler!=null) {
-            return handler.invoke(proxy, args, getRequestContext());
+            return handler.invoke(proxy,args);
         } else {
             // we handle the other method invocations by ourselves
             try {
@@ -92,8 +93,8 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         }
     }
 
-    public final Message doProcess(Message msg, RequestContext rc) {
-        return super.process(msg,rc);
+    public final Message doProcess(Message msg, RequestContext rc, ResponseContextReceiver receiver) {
+        return super.process(msg,rc,receiver);
     }
 
     /**

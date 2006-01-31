@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
@@ -20,7 +21,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
-import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -186,7 +186,20 @@ final class SyncMethodHandler extends MethodHandler {
         faultBuilder = new ResponseBuilder.Fault(owner.seiModel.getBridge(SOAP11Fault.getTypeReference()), null);
     }
 
-    public Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException, Throwable {
+    public Object invoke(Object proxy, Object[] args) throws Throwable {
+        return invoke(proxy,args,owner.getRequestContext(),owner);
+    }
+
+    /**
+     * Invokes synchronously, but with the given {@link RequestContext}
+     * and {@link ResponseContextReceiver}.
+     *
+     * @param rc
+     *      This {@link RequestContext} is used for invoking this method.
+     *      We take this as a separate parameter because of the async invocation
+     *      handling, which requires a separate copy.
+     */
+    public Object invoke(Object proxy, Object[] args, RequestContext rc, ResponseContextReceiver receiver) throws Throwable {
 
         Pool.Marshaller pool = seiModel.getMarshallerPool();
 
@@ -200,7 +213,7 @@ final class SyncMethodHandler extends MethodHandler {
             props.isOneWay = isOneWay;
 
             // process the message
-            Message reply = owner.doProcess(msg,rc);
+            Message reply = owner.doProcess(msg,rc,receiver);
 
             if(reply==null)
                 // no reply. must have been one-way
@@ -215,7 +228,7 @@ final class SyncMethodHandler extends MethodHandler {
                     throw new DeserializationException("failed.to.read.response",e);
                 } catch (XMLStreamException e) {
                     throw new DeserializationException("failed.to.read.response",e);
-                }                
+                }
             } else {
                 try {
                     return responseBuilder.readResponse(reply,args,context);

@@ -18,15 +18,15 @@ final class CallbackMethodHandler extends AsyncMethodHandler {
      */
     private final int handlerPos;
 
-    public CallbackMethodHandler(PortInterfaceStub owner, MethodHandler core, int handlerPos) {
+    public CallbackMethodHandler(PortInterfaceStub owner, SyncMethodHandler core, int handlerPos) {
         super(owner,core);
         this.handlerPos = handlerPos;
     }
 
-    public Future<?> invoke(final Object proxy, final Object[] args, RequestContext rc) throws WebServiceException {
+    public Future<?> invoke(Object proxy, Object[] args) throws WebServiceException {
         // the spec requires the last argument
         final AsyncHandler handler = (AsyncHandler)args[handlerPos];
 
-        return doInvoke(proxy, args, rc, handler);
+        return doInvoke(proxy, args, handler);
     }
 }

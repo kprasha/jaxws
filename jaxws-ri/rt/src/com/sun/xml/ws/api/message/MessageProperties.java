@@ -220,7 +220,7 @@ public final class MessageProperties extends PropertySet {
      * @return
      *      always non-null, possibly empty set that stores property names.
      */
-    public final Set<String> getApplicationScopes( boolean readOnly ) {
+    public final Set<String> getApplicationScopePropertyNames( boolean readOnly ) {
         Set<String> o = (Set<String>) invocationProperties.get(SCOPE_PROPERTY);
         if(o==null) {
             if(readOnly)

@@ -9,10 +9,11 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.ResponseContextReceiver;
+import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.RequestContext;
-import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.namespace.QName;
@@ -20,11 +21,9 @@ import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -94,9 +93,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     protected abstract T toReturnValue(Message response);
 
     public final Response<T> invokeAsync(T param) {
-        ResponseImpl<T> ft = new ResponseImpl<T>(new Invoker(param),null);
-        owner.getExecutor().execute(ft);
+        Invoker invoker = new Invoker(param);
+        ResponseImpl<T> ft = new ResponseImpl<T>(invoker,null);
+        invoker.setReceiver(ft);
 
+        owner.getExecutor().execute(ft);
         return ft;
     }
 
@@ -104,7 +105,9 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     /* todo: Need to review with team                                       */
 
     public final Future<?> invokeAsync(T param, AsyncHandler<T> asyncHandler) {
-        ResponseImpl<T> ft = new ResponseImpl<T>(new Invoker(param),asyncHandler);
+        Invoker invoker = new Invoker(param);
+        ResponseImpl<T> ft = new ResponseImpl<T>(invoker,asyncHandler);
+        invoker.setReceiver(ft);
 
         // temp needed so that unit tests run and complete otherwise they may
         //not. Need a way to put this in the test harness or other way to do this
@@ -122,24 +125,24 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     /**
      * Synchronously invokes a service.
      *
-     * See {@link #process(Message, RequestContext)} on
-     * why it takes a {@link RequestContext} as a parameter.
+     * See {@link #process(Message, RequestContext, ResponseContextReceiver)} on
+     * why it takes a {@link RequestContext} and {@link ResponseContextReceiver} as a parameter.
      */
-    public final T doInvoke(T in, RequestContext rc) {
+    public final T doInvoke(T in, RequestContext rc, ResponseContextReceiver receiver) {
         Message message = createMessage(in);
         setProperties(message.getProperties(),false);
-        Message response = process(message,rc);
+        Message response = process(message,rc,receiver);
         return toReturnValue(response);
     }
 
     public final T invoke(T in) {
-        return doInvoke(in,getRequestContext());
+        return doInvoke(in,getRequestContext(),this);
     }
 
     public final void invokeOneWay(T in) {
         Message message = createMessage(in);
         setProperties(message.getProperties(),true);
-        Message response = process(message,getRequestContext());
+        Message response = process(message,getRequestContext(),this);
     }
 
     protected void setProperties(MessageProperties props, boolean isOneWay) {
@@ -152,7 +155,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     /**
-     * Calls {@link DispatchImpl#doInvoke(Object,RequestContext)}.
+     * Calls {@link DispatchImpl#doInvoke(Object,RequestContext,ResponseContextReceiver)}.
      */
     private class Invoker implements Callable {
         private final T param;
@@ -160,12 +163,22 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         // and is required by the spec
         private final RequestContext rc = getRequestContext().copy();
 
-        public Invoker(T param) {
+        /**
+         * Because of the object instantiation order,
+         * we can't take this as a constructor parameter.
+         */
+        private ResponseContextReceiver receiver;
+
+        Invoker(T param) {
             this.param = param;
         }
 
         public T call() throws Exception {
-            return doInvoke(param,rc);
+            return doInvoke(param,rc,receiver);
+        }
+
+        void setReceiver(ResponseContextReceiver receiver) {
+            this.receiver = receiver;
         }
     }
 }

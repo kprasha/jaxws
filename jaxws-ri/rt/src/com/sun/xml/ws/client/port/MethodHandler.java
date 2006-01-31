@@ -31,13 +31,14 @@ public abstract class MethodHandler {
      *      without array reallocation, this aray is allowed to be longer than the
      *      actual number of arguments to the method. Additional array space should be
      *      simply ignored.
-     *
-     * @param rc
-     *      This {@link RequestContext} is used for invoking this method.
-     *      We take this as a separate parameter because of the async invocation
-     *      handling, which requires a separate copy.
      * @return
      *      a return value from the method invocation. may be null.
+     *
+     * @throws WebServiceException
+     *      If used on the client side, a {@link WebServiceException} signals an error
+     *      during the service invocation.
+     * @throws Throwable
+     *      if used on the server side, the user code may throw any exception.
      */
-    public abstract Object invoke(Object proxy, Object[] args, RequestContext rc) throws WebServiceException, Throwable;
+    public abstract Object invoke(Object proxy, Object[] args) throws WebServiceException, Throwable;
 }

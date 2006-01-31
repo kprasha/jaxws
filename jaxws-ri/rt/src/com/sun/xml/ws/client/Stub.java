@@ -22,7 +22,7 @@ import java.util.Map.Entry;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Stub implements BindingProvider {
+public abstract class Stub implements BindingProvider, ResponseContextReceiver {
 
     /**
      * Reuse pipelines as it's expensive to create.
@@ -53,6 +53,10 @@ public abstract class Stub implements BindingProvider {
     private final String defaultEndPointAddress;
 
     private RequestContext requestContext = new RequestContext(this);
+
+    /**
+     * {@link ResponseContext} from the last synchronous operation.
+     */
     private ResponseContext responseContext;
 
     /**
@@ -84,11 +88,16 @@ public abstract class Stub implements BindingProvider {
      *      The message to be sent to the server
      * @param requestContext
      *      The {@link RequestContext} when this invocation is originally scheduled.
-     *      This should be the same object as {@link #requestContext} for synchronous
+     *      This must be the same object as {@link #requestContext} for synchronous
      *      invocations, but for asynchronous invocations, it needs to be a snapshot
      *      captured at the point of invocation, to correctly satisfy the spec requirement.
+     * @param receiver
+     *      Receives the {@link ResponseContext}. Since the spec requires
+     *      that the asynchronous invocations must not update response context,
+     *      depending on the mode of invocation they have to go to different places.
+     *      So we take a setter that abstracts that away. 
      */
-    protected final Message process(Message msg, RequestContext requestContext) {
+    protected final Message process(Message msg, RequestContext requestContext, ResponseContextReceiver receiver) {
         {// fill in MessageProperties
             MessageProperties props = msg.getProperties();
 
@@ -106,13 +115,21 @@ public abstract class Stub implements BindingProvider {
             }
         }
 
+        Message reply;
+
         // then send it away!
         Pipe pipe = pipes.take();
         try {
-            return pipe.process(msg);
+            reply = pipe.process(msg);
         } finally {
             pipes.recycle(pipe);
         }
+
+        // not that MessageProperties can still be updated after
+        // ResponseContext is created.
+        receiver.setResponseContext(new ResponseContext(reply));
+
+        return reply;
     }
 
     public final Binding getBinding() {
@@ -125,5 +142,9 @@ public abstract class Stub implements BindingProvider {
 
     public final ResponseContext getResponseContext() {
         return responseContext;
+    }
+
+    public void setResponseContext(ResponseContext rc) {
+        this.responseContext = rc;
     }
 }

@@ -1,10 +1,9 @@
 package com.sun.xml.ws.client;
 
-import javax.xml.ws.Response;
 import javax.xml.ws.AsyncHandler;
-import java.util.concurrent.FutureTask;
+import javax.xml.ws.Response;
 import java.util.concurrent.Callable;
-import java.util.Map;
+import java.util.concurrent.FutureTask;
 
 /**
  * {@link Response} implementation.
@@ -12,13 +11,14 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  * @author Kathy Walsh
  */
-public final class ResponseImpl<T> extends FutureTask<T> implements Response<T> {
+public final class ResponseImpl<T> extends FutureTask<T> implements Response<T>, ResponseContextReceiver {
 
     /**
      * Optional {@link AsyncHandler} that gets invoked
      * at the completion of the task.
      */
     private final AsyncHandler<T> handler;
+    private ResponseContext responseContext;
 
     /**
      *
@@ -46,8 +46,11 @@ public final class ResponseImpl<T> extends FutureTask<T> implements Response<T> 
         }
     }
 
-    public Map<String, Object> getContext() {
-        // TODO
-        throw new UnsupportedOperationException();
+    public ResponseContext getContext() {
+        return responseContext;
+    }
+
+    public void setResponseContext(ResponseContext rc) {
+        responseContext = rc;
     }
 }

@@ -11,11 +11,11 @@ import javax.xml.ws.WebServiceException;
  */
 final class PollingMethodHandler extends AsyncMethodHandler {
 
-    public PollingMethodHandler(PortInterfaceStub owner, MethodHandler core) {
+    public PollingMethodHandler(PortInterfaceStub owner, SyncMethodHandler core) {
         super(owner,core);
     }
 
-    public Response<?> invoke(final Object proxy, final Object[] args, RequestContext rc) throws WebServiceException {
-        return doInvoke(proxy, args, rc, null);
+    public Response<?> invoke(Object proxy, Object[] args) throws WebServiceException {
+        return doInvoke(proxy,args,null);
     }
 }
