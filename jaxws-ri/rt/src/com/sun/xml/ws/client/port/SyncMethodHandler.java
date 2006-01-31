@@ -22,7 +22,6 @@ import javax.xml.ws.WebServiceException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 /**
  * {@link MethodHandler} that handles synchronous method invocations.

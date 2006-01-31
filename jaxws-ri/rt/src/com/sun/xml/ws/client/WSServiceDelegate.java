@@ -180,7 +180,6 @@ public class WSServiceDelegate extends WSService {
 
     public Executor getExecutor() {
         if (executor != null) {
-            //todo:needs to be decoupled from service at execution
             return executor;
         } else
             executor = Executors.newCachedThreadPool(new DaemonThreadFactory());

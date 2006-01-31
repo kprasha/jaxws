@@ -12,6 +12,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.namespace.QName;
@@ -92,39 +93,19 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      */
     protected abstract T toReturnValue(Message response);
 
-    public final Response<T> invokeAsync(final T param) {
-        // snapshot the context now. this is necessary to avoid concurrency issue, and is required by the spec
-        final RequestContext rc = getRequestContext().copy();
-
-        ResponseImpl<T> ft = new ResponseImpl<T>(new Callable() {
-            public T call() throws Exception {
-                return doInvoke(param,rc);
-            }
-        });
-        //executor used needs to be one set by client or default on Service
-        //todo: site spec requirement
+    public final Response<T> invokeAsync(T param) {
+        ResponseImpl<T> ft = new ResponseImpl<T>(new Invoker(param),null);
         owner.getExecutor().execute(ft);
+
         return ft;
     }
 
     /* todo: Not sure that this meets the needs of tango for async callback */
     /* todo: Need to review with team                                       */
 
-    public final Future<?> invokeAsync(final T param, final AsyncHandler<T> asyncHandler) {
-        // snapshot the context now. this is necessary to avoid concurrency issue, and is required by the spec
-        final RequestContext rc = getRequestContext().copy();
+    public final Future<?> invokeAsync(T param, AsyncHandler<T> asyncHandler) {
+        ResponseImpl<T> ft = new ResponseImpl<T>(new Invoker(param),asyncHandler);
 
-        final ResponseImpl<T>[] r = new ResponseImpl[1];
-        r[0] = new ResponseImpl<T>(new Callable() {
-            public T call() throws Exception {
-                T t = doInvoke(param,rc);
-                //doesn't work as r[0] result t has not been set
-                //asynhandler will block indefinately
-                //asyncHandler.handleResponse(r[0]);
-                return t;
-            }
-        });
-        r[0].setHandler(asyncHandler);
         // temp needed so that unit tests run and complete otherwise they may
         //not. Need a way to put this in the test harness or other way to do this
         //todo: as above
@@ -134,10 +115,16 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        exec.execute(r[0]);
-        return r[0];
+        exec.execute(ft);
+        return ft;
     }
 
+    /**
+     * Synchronously invokes a service.
+     *
+     * See {@link #process(Message, RequestContext)} on
+     * why it takes a {@link RequestContext} as a parameter.
+     */
     public final T doInvoke(T in, RequestContext rc) {
         Message message = createMessage(in);
         setProperties(message.getProperties(),false);
@@ -155,40 +142,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         Message response = process(message,getRequestContext());
     }
 
-
-    private static class ResponseImpl<T> extends FutureTask<T> implements Response<T> {
-
-        private AsyncHandler<T> handler;
-
-        protected ResponseImpl(Callable<T> callable) {
-            super(callable);
-        }
-
-        private void setHandler(AsyncHandler<T> handler) {
-            this.handler = handler;
-        }
-
-        @Override
-        protected void done() {
-            if (handler == null)
-                return;
-
-            try {
-                if (!isCancelled())
-                    handler.handleResponse(this);
-            } catch (Throwable e) {
-                super.setException(e);
-            } finally {
-                handler = null;
-            }
-        }
-
-        public Map<String, Object> getContext() {
-            // TODO
-            throw new UnsupportedOperationException();
-        }
-    }
-
     protected void setProperties(MessageProperties props, boolean isOneWay) {
         props.isOneWay = isOneWay;
 
@@ -196,5 +149,23 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         props.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
         if (clazz != null)
             props.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
+    }
+
+    /**
+     * Calls {@link DispatchImpl#doInvoke(Object,RequestContext)}.
+     */
+    private class Invoker implements Callable {
+        private final T param;
+        // snapshot the context now. this is necessary to avoid concurrency issue,
+        // and is required by the spec
+        private final RequestContext rc = getRequestContext().copy();
+
+        public Invoker(T param) {
+            this.param = param;
+        }
+
+        public T call() throws Exception {
+            return doInvoke(param,rc);
+        }
     }
 }

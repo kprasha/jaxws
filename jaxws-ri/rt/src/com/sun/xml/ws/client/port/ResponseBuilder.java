@@ -3,8 +3,8 @@ package com.sun.xml.ws.client.port;
 import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.CompositeStructure;
+import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.ParameterImpl;
@@ -17,12 +17,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.lang.reflect.Type;
 
 /**
  * Reads a response {@link Message}, disassembles it, and moves obtained Java values
