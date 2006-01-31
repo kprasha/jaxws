@@ -47,6 +47,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
             case PAYLOAD:
                 return response.readPayloadAsSource();
             case MESSAGE:
+                //todo: uncomment when Pa
+                //return
                 return response.readEnvelopeAsSource();
             default:
                 throw new WebServiceException("Unrecognized dispatch mode");
@@ -60,7 +62,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 message = new PayloadSourceMessage(msg, soapVersion);
                 break;
             case MESSAGE:
-                //Todo: temporary until protocol message is done
+                //Todo: temporary until ProtocolSourceMessage is done
                 SOAPMessage soapmsg;
                 try {
                     //todo:
@@ -71,6 +73,9 @@ public class SourceDispatch extends DispatchImpl<Source> {
                     throw new WebServiceException(e);
                 }
                 message = new SAAJMessage(soapmsg);
+                //todo:temp until ProtocolSourceMessage implemented
+                //message = new ProtocolSourceMessage(msg);
+                //todo: uncomment above when ProtocolSourceMessage is done
                 break;
             default:
                 throw new WebServiceException("Unrecognized message mode");
