@@ -9,6 +9,7 @@ import com.sun.xml.ws.util.StringUtils;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.WebServiceException;
@@ -43,7 +44,7 @@ public abstract class SOAPFaultBuilder {
     /**
      * This should be called from the client side to throw an {@link Exception} for a given soap mesage
      */
-    public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions, Message msg) {
+    public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions, Message msg) throws JAXBException {
         DetailType dt = getDetail();
         if ((dt == null) || (dt.detailEntry.size() != 1)) {
             // No soap detail, doesnt look like its a checked exception
@@ -104,5 +105,5 @@ public abstract class SOAPFaultBuilder {
 
     private String getWriteMethod(Field f) {
         return "set" + StringUtils.capitalize(f.getName());
-    }
+    }          
 }
