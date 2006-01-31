@@ -55,12 +55,24 @@ public class ClientHandlerPipe extends HandlerPipe{
     /** Creates a new instance of ClientHandlerPipe */
     public ClientHandlerPipe(WSBinding binding, Pipe nextPipe) {
         this.binding = binding;
+        this.nextPipe = nextPipe;
+        /*
+         *Reason for commenting:
+         * Client can set a new HandlerChain on Binding after the ClientPipe is 
+         * created.
+         * When a chain is changed , the handler pipe should use new chain, by 
+         * calling getHandlerChainCaller on the binding. HandlerChainCaller in
+         * BindingImpl, SOAPBindingImpl is fromt he old pacakge and server-runtime
+         * depends on it.
+         * After server-runtime uses new handler runtime, it can change there and
+         * HandlerChainCaller will be taken from BindingImpl, befor processing
+         */
+        /*
         hcaller = new HandlerChainCaller(binding,binding.getHandlerChain());
         if(binding.getSOAPVersion() != null) {
             //set roles on HandlerChainCaller, if it is SOAP binding
             hcaller.setRoles(((SOAPBindingImpl)binding).getRoles());
-        }
-        this.nextPipe = nextPipe;
+        } */
     }
     
     public HandlerChainCaller getHandlerChainCaller() {
@@ -71,6 +83,18 @@ public class ClientHandlerPipe extends HandlerPipe{
     }
     
     public Message process(Message msg) {
+        /*
+         *Remove this code and put it in constructor, after Server Runtime is changed.
+         *See constructor
+         */
+        hcaller = new HandlerChainCaller(binding,binding.getHandlerChain());
+        if(binding.getSOAPVersion() != null) {
+            //set roles on HandlerChainCaller, if it is SOAP binding
+            hcaller.setRoles(((SOAPBindingImpl)binding).getRoles());
+        }
+        
+        
+        
         // This is client-side pipe, so it should be request ( OUTBOUND Message).
         boolean isOneWay = msg.getProperties().isOneWay;
         ContextHolder ch = new ContextHolder(binding,msg);
