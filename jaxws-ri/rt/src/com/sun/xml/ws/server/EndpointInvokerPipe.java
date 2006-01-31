@@ -19,37 +19,20 @@
  */
 package com.sun.xml.ws.server;
 
-import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.api.model.soap.SOAPBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.port.MethodHandler;
-import com.sun.xml.ws.client.port.PortInterfaceStub;
-import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.ws.client.port.ServerMethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.util.Pool.BridgeContext;
-import com.sun.xml.ws.util.Pool.Marshaller;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -66,35 +49,19 @@ public class EndpointInvokerPipe implements Pipe {
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
      */
-    private final Map<Method,MethodHandler> methodHandlers = new HashMap<Method,MethodHandler>();
-
-    /**
-     * JAXB marshaller pool.
-     *
-     * TODO: this pool can be shared across {@link Stub}s.
-     */
-    public final Pool.Marshaller marshallers;
-
-    // TODO: ditto
-    public final Pool.BridgeContext bridgeContexts;
+    private final Map<Method,ServerMethodHandler> methodHandlers = new HashMap<Method, ServerMethodHandler>();
     
     public EndpointInvokerPipe(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;
 
         AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();
-        this.marshallers = new Pool.Marshaller(seiModel.getJAXBContext());
-        this.bridgeContexts = new Pool.BridgeContext(seiModel.getJAXBContext());
-        /*
-        Map<WSDLBoundOperation,SyncMethodHandler> syncs = new HashMap<WSDLBoundOperation, SyncMethodHandler>();
 
         // fill in methodHandlers.
         // first fill in sychronized versions
         for( JavaMethodImpl m : seiModel.getJavaMethods() ) {
-            SyncMethodHandler handler = new SyncMethodHandler(m);
-            syncs.put(m.getOperation(),handler);
+            ServerMethodHandler handler = new ServerMethodHandler(endpointInfo, m);
             methodHandlers.put(m.getMethod(),handler);
         }
-         */
     }
 
     /*
@@ -103,41 +70,21 @@ public class EndpointInvokerPipe implements Pipe {
      * invoke() is used to create a new {@link Message} that traverses
      * through the Pipeline to transport.
      */
-    public Message process(Message msg) {
+    public Message process(Message req) {
         // TODO need find dispatch method using different mechanisms
         // TODO need to define an API
         
-        String localPart = msg.getPayloadLocalPart();
-        String nsURI = msg.getPayloadNamespaceURI();
+        String localPart = req.getPayloadLocalPart();
+        String nsURI = req.getPayloadNamespaceURI();
         QName opName = new QName(nsURI, localPart);
         
         AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();
         JavaMethodImpl javaMethod = seiModel.getJavaMethod(opName);
-        
-        Object[] args = null;
-        Object servant = endpointInfo.getImplementor();
-        logger.fine("Invoking SEI based Endpoint "+servant);
         Method method = javaMethod.getMethod();
-        try {
-            Object returnValue = method.invoke(servant, args);
-        } catch (IllegalArgumentException e) {
-            throw new WebServiceException(e);
-        } catch (IllegalAccessException e) {
-            throw new WebServiceException(e);
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                if (!(cause instanceof RuntimeException) && cause instanceof Exception ) {
-                    // Service specific exception
-                } else {
-                    throw new WebServiceException(e);
-                }
-            } else {
-                throw new WebServiceException(e);
-            }
-        }
-        Message response = null;
-        return response;
+        
+        ServerMethodHandler handler = methodHandlers.get(method);
+        Object servant = endpointInfo.getImplementor();
+        return handler.invoke(servant, req);
     }
 
     public void preDestroy() {
