@@ -8,7 +8,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 
