@@ -49,7 +49,7 @@ import javax.xml.namespace.QName;
     "Role",
     "Detail"
 })
-public class SOAP12Fault extends SOAPFaultBuilder {
+class SOAP12Fault extends SOAPFaultBuilder {
     @XmlTransient
     private static final String ns = "http://www.w3.org/2003/05/soap-envelope";
 
@@ -68,10 +68,10 @@ public class SOAP12Fault extends SOAPFaultBuilder {
     @XmlElement(namespace = ns, nillable = true)
     private DetailType Detail;
 
-    public SOAP12Fault() {
+    SOAP12Fault() {
     }
 
-    public SOAP12Fault(CodeType code, ReasonType reason, String node, String role, DetailType detail) {
+    SOAP12Fault(CodeType code, ReasonType reason, String node, String role, DetailType detail) {
         Code = code;
         Reason = reason;
         Node = node;
@@ -79,37 +79,29 @@ public class SOAP12Fault extends SOAPFaultBuilder {
         Detail = detail;
     }
 
-    public CodeType getCode() {
+    CodeType getCode() {
         return Code;
     }
 
-    public ReasonType getReason() {
+    ReasonType getReason() {
         return Reason;
     }
 
-    public String getNode() {
+    String getNode() {
         return Node;
     }
 
-    public String getRole() {
+    String getRole() {
         return Role;
     }
 
     @Override
-    public DetailType getDetail() {
+    DetailType getDetail() {
         return Detail;
     }
     @Override
-    public String getFaultString() {
+    String getFaultString() {
         return Reason.text.get(0).text;
     }
-
-    public static TypeReference getTypeReference() {
-        return typeReference;
-    }
-
-    private static final TypeReference typeReference = new TypeReference(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Fault"),
-            SOAP12Fault.class, SOAP12Fault.class.getAnnotations());
-
 }
 

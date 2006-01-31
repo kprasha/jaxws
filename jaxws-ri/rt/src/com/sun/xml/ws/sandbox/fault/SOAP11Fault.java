@@ -29,7 +29,6 @@ import javax.xml.namespace.QName;
  * Java object otherwise it should be deserialized as {@link javax.xml.soap.Detail}
  * </pre>
  * <p/>
- * TODO: Add any missing annotation
  *
  * @author Vivek Pandey
  */
@@ -41,7 +40,7 @@ import javax.xml.namespace.QName;
         "faultactor",
         "detail"
         })
-public class SOAP11Fault extends SOAPFaultBuilder {
+class SOAP11Fault extends SOAPFaultBuilder {
     @XmlElement(namespace = "")
     private String faultcode;
 
@@ -56,7 +55,7 @@ public class SOAP11Fault extends SOAPFaultBuilder {
     @XmlElement(namespace = "")
     private DetailType detail;
 
-    public SOAP11Fault() {
+    SOAP11Fault() {
     }
 
     /**
@@ -68,35 +67,35 @@ public class SOAP11Fault extends SOAPFaultBuilder {
      * @param actor
      * @param detail
      */
-    public SOAP11Fault(String code, String reason, String actor, DetailType detail) {
+    SOAP11Fault(String code, String reason, String actor, DetailType detail) {
         this.faultcode = code;
         this.faultstring = reason;
         this.faultactor = actor;
         this.detail = detail;
     }
 
-    public String getFaultcode() {
+    String getFaultcode() {
         return faultcode;
     }
 
-    public void setFaultcode(String faultcode) {
+    void setFaultcode(String faultcode) {
         this.faultcode = faultcode;
     }
 
     @Override
-    public String getFaultString() {
+    String getFaultString() {
         return faultstring;
     }
 
-    public void setFaultstring(String faultstring) {
+    void setFaultstring(String faultstring) {
         this.faultstring = faultstring;
     }
 
-    public String getFaultactor() {
+    String getFaultactor() {
         return faultactor;
     }
 
-    public void setFaultactor(String faultactor) {
+    void setFaultactor(String faultactor) {
         this.faultactor = faultactor;
     }
 
@@ -104,21 +103,14 @@ public class SOAP11Fault extends SOAPFaultBuilder {
      * returns a java type T - this could be a {@link javax.xml.soap.Detail} or a JAXB object
      */
     @Override
-    public DetailType getDetail() {
+    DetailType getDetail() {
         return detail;
     }
 
     /**
      * @param detail could be {@link javax.xml.soap.Detail} or a JAXB object
      */
-    public void setDetail(DetailType detail) {
+    void setDetail(DetailType detail) {
         this.detail = detail;
     }
-
-    public static TypeReference getTypeReference() {
-        return typeReference;
-    }
-
-    private static final TypeReference typeReference = new TypeReference(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Fault"),
-            SOAP11Fault.class, SOAP11Fault.class.getAnnotations());
 }
