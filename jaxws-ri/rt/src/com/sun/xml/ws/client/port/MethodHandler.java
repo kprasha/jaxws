@@ -38,7 +38,7 @@ public abstract class MethodHandler {
      *      If used on the client side, a {@link WebServiceException} signals an error
      *      during the service invocation.
      * @throws Throwable
-     *      if used on the server side, the user code may throw any exception.
+     *      some exceptions are thrown in terms of checked exceptions.
      */
     public abstract Object invoke(Object proxy, Object[] args) throws WebServiceException, Throwable;
 }
