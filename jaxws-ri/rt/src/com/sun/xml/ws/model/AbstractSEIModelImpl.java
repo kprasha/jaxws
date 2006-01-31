@@ -40,8 +40,6 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
-import com.sun.xml.ws.sandbox.fault.SOAP11Fault;
-import com.sun.xml.ws.sandbox.fault.SOAP12Fault;
 import com.sun.xml.ws.util.Pool;
 
 import javax.jws.WebParam.Mode;
