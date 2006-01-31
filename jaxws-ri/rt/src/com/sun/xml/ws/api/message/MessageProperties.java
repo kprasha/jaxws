@@ -21,6 +21,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.LogicalMessageContext;
@@ -76,24 +77,24 @@ import java.util.Set;
  *  <li>this class needs to be cloneable since Message is copiable.
  *  <li>The three live views aren't implemented correctly. It will be
  *      more work to do so, although I'm sure it's possible.
- *  <li>{@link ContextProperty} annotation is to make it easy
+ *  <li>{@link Property} annotation is to make it easy
  *      for {@link MessageContext} to export properties on this object,
  *      but it probably needs some clean up.
  * </ol>
  *
  * @author Kohsuke Kawaguchi
  */
-public final class MessageProperties {
+public final class MessageProperties extends PropertySet {
     /**
      * Value of {@link #HTTP_REQUEST_HEADERS} property.
      */
-    @ContextProperty(MessageContext.HTTP_REQUEST_HEADERS)
+    @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public Map<String, List<String>> httpRequestHeaders;
 
     /**
      * Value of {@link #HTTP_RESPONSE_HEADERS} property.
      */
-    @ContextProperty(MessageContext.HTTP_RESPONSE_HEADERS)
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> httpResponseHeaders;
 
     /**
@@ -113,7 +114,7 @@ public final class MessageProperties {
      *
      * TODO: who's using this property? 
      */
-    @ContextProperty(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
+    @Property(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
     public BindingProvider proxy;
 
     /**
@@ -123,7 +124,7 @@ public final class MessageProperties {
      * The JAX-WS spec allows this to be changed for each message,
      * so it's designed to be a property.
      */
-    @ContextProperty(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
+    @Property(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
     public String endpointAddress;
 
     /**
@@ -150,7 +151,7 @@ public final class MessageProperties {
      * header is present (See {@BP R2744} and {@BP R2745}.) For SOAP 1.2,
      * this is moved to the parameter of the "application/soap+xml".
      */
-    @ContextProperty(BindingProviderProperties.SOAP_ACTION_PROPERTY)
+    @Property(BindingProviderProperties.SOAP_ACTION_PROPERTY)
     public String soapAction;
 
     /**
@@ -183,7 +184,7 @@ public final class MessageProperties {
      * <p>
      * No other {@link Boolean} instances are allowed.
      */
-    @ContextProperty(BindingProviderProperties.ONE_WAY_OPERATION)
+    @Property(BindingProviderProperties.ONE_WAY_OPERATION)
     public Boolean isOneWay;
 
     /**
@@ -232,4 +233,16 @@ public final class MessageProperties {
     }
 
     private static final String SCOPE_PROPERTY = "com.sun.xml.ws.HandlerScope";
+
+
+// completes TypedMap
+    private static final Map<String,Accessor> model;
+
+    static {
+        model = parse(MessageProperties.class);
+    }
+
+    protected Map<String, Accessor> getPropertyMap() {
+        return model;
+    }
 }

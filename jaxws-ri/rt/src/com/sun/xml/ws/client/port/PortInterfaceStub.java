@@ -5,11 +5,11 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.pept.presentation.MEP;
-import com.sun.xml.ws.util.Pool;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.spi.ServiceDelegate;
@@ -28,11 +28,10 @@ import java.util.concurrent.Executor;
  */
 public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Pipe master) {
-        super(master,binding);
+        super(master,binding,seiModel.getPort().getAddress());
         this.owner = owner;
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
-        this.endpointAddress = seiModel.getPort().getAddress();
 
         Map<WSDLBoundOperation,SyncMethodHandler> syncs = new HashMap<WSDLBoundOperation, SyncMethodHandler>();
 
@@ -64,11 +63,6 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
     public final SOAPVersion soapVersion;
 
     /**
-     * Cached value of {@code seiModel.getPort().getAddress()} for quicker access.
-     */
-    public final String endpointAddress;
-
-    /**
      * The {@link ServiceDelegate} object that owns us.
      */
     public final ServiceDelegate owner;
@@ -98,8 +92,8 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         }
     }
 
-    public final Message doProcess(Message msg) {
-        return super.process(msg);
+    public final Message doProcess(Message msg, RequestContext rc) {
+        return super.process(msg,rc);
     }
 
     /**

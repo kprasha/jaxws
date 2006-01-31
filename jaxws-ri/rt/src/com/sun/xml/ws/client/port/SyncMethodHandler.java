@@ -22,6 +22,7 @@ import javax.xml.ws.WebServiceException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * {@link MethodHandler} that handles synchronous method invocations.
@@ -184,28 +185,11 @@ final class SyncMethodHandler extends MethodHandler {
             Message msg = createRequestMessage(args);
 
             MessageProperties props = msg.getProperties();
-            props.proxy = owner;
             props.soapAction = soapAction;
             props.isOneWay = isOneWay;
-            props.endpointAddress = owner.endpointAddress;
-
-            // TODO: fill in MessageProperties
-            ////set mtom threshold value to
-            //Object mtomThreshold = requestContext.get(MTOM_THRESHOLOD_VALUE);
-            //messageStruct.setMetaData(MTOM_THRESHOLOD_VALUE, mtomThreshold);
-            //// Initialize content negotiation property
-            //ContentNegotiation.initialize(requestContext, messageStruct);
-
-            //// Set MTOM processing for XML requests only
-            //if (_rtcontext != null && _rtcontext.getModel() != null) {
-            //    javax.xml.ws.soap.SOAPBinding sb = (binding instanceof javax.xml.ws.soap.SOAPBinding) ? (javax.xml.ws.soap.SOAPBinding) binding : null;
-            //    if (sb != null) {
-            //        _rtcontext.getModel().enableMtom(sb.isMTOMEnabled());
-            //    }
-            //}
 
             // process the message
-            Message reply = owner.doProcess(msg);
+            Message reply = owner.doProcess(msg,rc);
 
             if(reply==null)
                 // no reply. must have been one-way

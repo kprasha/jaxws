@@ -11,6 +11,8 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
@@ -46,7 +48,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     protected final WSServiceDelegate owner;
     protected final SOAPVersion soapVersion;
     protected static final long AWAIT_TERMINATION_TIME = 800L;
-    private final String endpointAddress;
 
     /**
      *
@@ -71,12 +72,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
     protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
-        super(pipe, binding);
+        super(pipe, binding, owner.getEndpointAddress(port));
         this.portname = port;
         this.mode = mode;
         this.owner = owner;
         this.soapVersion = binding.getSOAPVersion();
-        this.endpointAddress = owner.getEndpointAddress(portname);
     }
 
     /**
@@ -93,9 +93,12 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     protected abstract T toReturnValue(Message response);
 
     public final Response<T> invokeAsync(final T param) {
+        // snapshot the context now. this is necessary to avoid concurrency issue, and is required by the spec
+        final RequestContext rc = getRequestContext().copy();
+
         ResponseImpl<T> ft = new ResponseImpl<T>(new Callable() {
             public T call() throws Exception {
-                return invoke(param);
+                return doInvoke(param,rc);
             }
         });
         //executor used needs to be one set by client or default on Service
@@ -108,10 +111,13 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     /* todo: Need to review with team                                       */
 
     public final Future<?> invokeAsync(final T param, final AsyncHandler<T> asyncHandler) {
+        // snapshot the context now. this is necessary to avoid concurrency issue, and is required by the spec
+        final RequestContext rc = getRequestContext().copy();
+
         final ResponseImpl<T>[] r = new ResponseImpl[1];
         r[0] = new ResponseImpl<T>(new Callable() {
             public T call() throws Exception {
-                T t = invoke(param);
+                T t = doInvoke(param,rc);
                 //doesn't work as r[0] result t has not been set
                 //asynhandler will block indefinately
                 //asyncHandler.handleResponse(r[0]);
@@ -132,17 +138,21 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         return r[0];
     }
 
-    public final T invoke(T in) {
+    public final T doInvoke(T in, RequestContext rc) {
         Message message = createMessage(in);
         setProperties(message.getProperties(),false);
-        Message response = process(message);
+        Message response = process(message,rc);
         return toReturnValue(response);
+    }
+
+    public final T invoke(T in) {
+        return doInvoke(in,getRequestContext());
     }
 
     public final void invokeOneWay(T in) {
         Message message = createMessage(in);
         setProperties(message.getProperties(),true);
-        Message response = process(message);
+        Message response = process(message,getRequestContext());
     }
 
 
@@ -180,13 +190,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     protected void setProperties(MessageProperties props, boolean isOneWay) {
-        props.proxy = this;
-        props.endpointAddress = endpointAddress;
         props.isOneWay = isOneWay;
 
-        ////not needed but leave for now --maybe mode is needed
-        //props.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
-        //if (clazz != null)
-        //    props.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
+        //not needed but leave for now --maybe mode is needed
+        props.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
+        if (clazz != null)
+            props.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
     }
 }

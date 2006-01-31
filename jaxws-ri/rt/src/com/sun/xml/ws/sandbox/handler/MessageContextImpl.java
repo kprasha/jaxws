@@ -20,17 +20,14 @@
 
 package com.sun.xml.ws.sandbox.handler;
 
-import com.sun.xml.ws.api.message.TypedMap;
+import com.sun.xml.ws.util.PropertySet;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.api.message.ContextProperty;
-import java.lang.reflect.Field;
-import java.util.Collection;
+
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.MessageContext;
@@ -39,12 +36,12 @@ import javax.xml.ws.handler.MessageContext;
  *
  * @author WS Development Team
  */
-public class MessageContextImpl extends TypedMap implements MessageContext {
+public class MessageContextImpl extends PropertySet implements MessageContext {
     
     /**
      * Value of {@link #MESSAGE_OUTBOUND_PROPERTY} property.
      */
-    @ContextProperty(MessageContext.MESSAGE_OUTBOUND_PROPERTY)
+    @Property(MessageContext.MESSAGE_OUTBOUND_PROPERTY)
     public boolean messageOutBound;
     
     /**
@@ -53,87 +50,87 @@ public class MessageContextImpl extends TypedMap implements MessageContext {
     // TODO: do not compute these values eagerly.
     // allow ContextProperty to be on a method so that
     // this can be computed lazily
-    @ContextProperty(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)
+    @Property(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)
     public Map<String, DataHandler> inboundMessageAttachments;
 
     /**
      * Value of {@link #OUTBOUND_MESSAGE_ATTACHMENTS} property
      */
-    @ContextProperty(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS)
+    @Property(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS)
     public Map<String, DataHandler> outboundMessageAttachments;
     
     
     /**
      * Value of {@link #WSDL_DESCRIPTION} property.
      */
-    @ContextProperty(MessageContext.WSDL_DESCRIPTION)
+    @Property(MessageContext.WSDL_DESCRIPTION)
     public org.xml.sax.InputSource wsdlDescription;
     
     /**
      * Value of {@link #WSDL_SERVICE} property.
      */
-    @ContextProperty(MessageContext.WSDL_SERVICE)
+    @Property(MessageContext.WSDL_SERVICE)
     public QName wsdlService;
 
     /**
      * Value of {@link #WSDL_PORT} property.
      */
-    @ContextProperty(MessageContext.WSDL_PORT)
+    @Property(MessageContext.WSDL_PORT)
     public QName wsdlPort;
     
     /**
      * Value of {@link #WSDL_INTERFACE} property.
      */
-    @ContextProperty(MessageContext.WSDL_INTERFACE)
+    @Property(MessageContext.WSDL_INTERFACE)
     public QName wsdlInterface;
     
     /**
      * Value of {@link #WSDL_OPERATION} property.
      */
-    @ContextProperty(MessageContext.WSDL_OPERATION)
+    @Property(MessageContext.WSDL_OPERATION)
     public QName wsdlOperation;
     
     /**
      * Value of {@link #HTTP_RESPONSE_CODE} property.
      */
-    @ContextProperty(MessageContext.HTTP_RESPONSE_CODE)
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public Integer httpResponseCode;
      
     /**
      * Value of {@link #HTTP_REQUEST_HEADERS} property.
      */
-    @ContextProperty(MessageContext.HTTP_REQUEST_HEADERS)
+    @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public Map<String, List<String>> httpRequestHeaders;
     
     /**
      * Value of {@link #HTTP_RESPONSE_HEADERS} property.
      */
-    @ContextProperty(MessageContext.HTTP_RESPONSE_HEADERS)
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> httpResponseHeaders;
 
     /**
      * Value of {@link #HTTP_REQUEST_METHOD} property.
      */
-    @ContextProperty(MessageContext.HTTP_REQUEST_METHOD)
+    @Property(MessageContext.HTTP_REQUEST_METHOD)
     public String httpRequestMethod;
     
     /**
      * Value of {@link #SERVLET_REQUEST} property.
      */
-    @ContextProperty(MessageContext.SERVLET_REQUEST)
+    @Property(MessageContext.SERVLET_REQUEST)
     public javax.servlet.http.HttpServletRequest servletRequest;
     
     /**
      * Value of {@link #SERVLET_RESPONSE} property.
      */
-    @ContextProperty(MessageContext.SERVLET_RESPONSE)
+    @Property(MessageContext.SERVLET_RESPONSE)
     public javax.servlet.http.HttpServletResponse servletResponse;
     
         
     /**
      * Value of {@link #SERVLET_CONTEXT} property.
      */
-    @ContextProperty(MessageContext.SERVLET_CONTEXT)
+    @Property(MessageContext.SERVLET_CONTEXT)
     public javax.servlet.ServletContext servletContext;
     
     /** Creates a new instance of MessageContextImpl */
@@ -161,13 +158,64 @@ public class MessageContextImpl extends TypedMap implements MessageContext {
 
 
 
-    private static final Map<String,Property> model;
+    private static final Map<String,Accessor> model;
 
     static {
         model = parse(MessageContextImpl.class);
     }
 
-    protected Map<String, Property> getPropertyMap() {
+    protected Map<String, Accessor> getPropertyMap() {
         return model;
+    }
+
+
+    public int size() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isEmpty() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean containsKey(Object key) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean containsValue(Object value) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public Object get(Object key) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public void putAll(Map<? extends String, ? extends Object> t) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public void clear() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public Set<String> keySet() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public Collection<Object> values() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public Set<Entry<String, Object>> entrySet() {
+        // TODO
+        throw new UnsupportedOperationException();
     }
 }
