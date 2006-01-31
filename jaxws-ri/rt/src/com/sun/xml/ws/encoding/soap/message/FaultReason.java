@@ -42,7 +42,7 @@ public class FaultReason {
     private List<FaultReasonText> texts;
 
     public FaultReason(FaultReasonText... texts) {
-        assert(texts == null);
+        assert(texts != null);
         this.texts = Arrays.asList(texts);
     }
 
