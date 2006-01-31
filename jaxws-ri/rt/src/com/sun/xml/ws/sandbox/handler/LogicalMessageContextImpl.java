@@ -70,16 +70,11 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     protected Message getNewMessage() {
         //Check if LogicalMessageImpl has changed, if so construct new one
         //TODO: Attachments are not used
+        // MessageProperties are handled through MessageContext 
         if(lm.payloadSrc != null){
             HeaderList headers = msg.getHeaders();
             AttachmentSet attchments = msg.getAttachments();
-            msg = new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion());
-            //TODO: Fix this, this is no longer required.
-            // the code below isn't correct, since MessageContext may contain
-            // application scope properties or properties associated with strongly-typed fields.
-            // I think MessageContext needs to update MessageProperties live.
-            throw new UnsupportedOperationException();
-            // msg.getProperties().putAll(ctxt);
+            msg = new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion());            
         }
         return msg;
         

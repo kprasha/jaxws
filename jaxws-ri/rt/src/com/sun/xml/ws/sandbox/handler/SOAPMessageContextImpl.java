@@ -97,18 +97,12 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         }
     }
     protected Message getNewMessage() {
-        //Check if SOAPMessage has changed, if so construct new one, set MessageProperties
+        //Check if SOAPMessage has changed, if so construct new one,
+        // MessageProperties are handled through MessageContext        
         if(soapMsg != null) {
             msg = new SAAJMessage(soapMsg);
-            //TODO: FIX this, think this is no longer required. 
-            // the code below isn't correct, since MessageContext may contain
-            // application scope properties or properties associated with strongly-typed fields.
-            // I think MessageContext needs to update MessageProperties live.
-            throw new UnsupportedOperationException();
-            // msg.getProperties().putAll(ctxt);
         }
-        return msg;
-        
+        return msg;        
     }
     
     public Object[] getHeaders(QName header, JAXBContext jaxbContext, boolean allRoles) {

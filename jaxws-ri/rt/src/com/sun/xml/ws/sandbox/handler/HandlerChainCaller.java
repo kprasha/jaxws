@@ -868,6 +868,9 @@ public class HandlerChainCaller {
         WSBinding binding;
         Message msg;
         MessageContext cxt;
+        // smc and lmc are mutually exclusive, one of them should be null anytime
+        SOAPMessageContextImpl smc;
+        LogicalMessageContextImpl lmc;
         ContextHolder(WSBinding binding, Message msg) {
             logicalOnly = isLogicalOnly(binding);
             this.binding = binding;
@@ -886,11 +889,26 @@ public class HandlerChainCaller {
         }
         
         LogicalMessageContext getLMC() {
-            return new LogicalMessageContextImpl(binding, msg, cxt);
+            if(lmc == null) {
+                if(smc != null) {
+                    msg = smc.getNewMessage();
+                    smc = null;
+                }
+                lmc = new LogicalMessageContextImpl(binding, msg, cxt);
+                
+            }
+            return lmc;
         }
         
         SOAPMessageContext getSMC() {
-            return (logicalOnly ? null : new SOAPMessageContextImpl(binding, msg, cxt));
+            if(smc == null) {
+                if(lmc != null) {
+                    msg = lmc.getNewMessage();
+                    lmc = null;
+                }
+                smc = (logicalOnly ? null : new SOAPMessageContextImpl(binding, msg, cxt));                
+            }
+            return smc;
         }
         
         MessageContext getMC() {
