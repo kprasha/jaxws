@@ -2,7 +2,7 @@
  * Copyright (c) 2006 Sun Microsystems Corporation. All Rights Reserved.
  */
 
-package com.sun.xml.ws.client.dispatch.rearch;
+package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
@@ -17,10 +17,7 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.AsyncHandler;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.Response;
-import javax.xml.ws.Service;
+import javax.xml.ws.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -42,12 +39,12 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
-    protected final Service.Mode mode;
-    protected final QName portname;
-    protected Class<T> clazz;
-    protected final WSServiceDelegate owner;
-    protected final SOAPVersion soapVersion;
-    protected static final long AWAIT_TERMINATION_TIME = 800L;
+    final Service.Mode mode;
+    final QName portname;
+    Class<T> clazz;
+    final WSServiceDelegate owner;
+    final SOAPVersion soapVersion;
+    static final long AWAIT_TERMINATION_TIME = 800L;
 
     /**
      *
@@ -85,12 +82,12 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @return  The Message created returned as the Interface in actuallity a
      *          concrete Message Type
      */
-    protected abstract Message createMessage(T msg);
+    abstract Message createMessage(T msg);
 
     /**
      * Obtains the value to return from the response message.
      */
-    protected abstract T toReturnValue(Message response);
+    abstract T toReturnValue(Message response);
 
     public final Response<T> invokeAsync(T param) {
         Invoker invoker = new Invoker(param);
@@ -116,7 +113,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         try {
             exec.awaitTermination(AWAIT_TERMINATION_TIME, TimeUnit.MICROSECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new WebServiceException(e);
         }
         exec.execute(ft);
         return ft;
@@ -145,7 +142,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         Message response = process(message,getRequestContext(),this);
     }
 
-    protected void setProperties(MessageProperties props, boolean isOneWay) {
+    void setProperties(MessageProperties props, boolean isOneWay) {
         props.isOneWay = isOneWay;
 
         //not needed but leave for now --maybe mode is needed

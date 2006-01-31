@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006 Your Corporation. All Rights Reserved.
  */
-package com.sun.xml.ws.client.dispatch.rearch;
+package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSEndpoint;
