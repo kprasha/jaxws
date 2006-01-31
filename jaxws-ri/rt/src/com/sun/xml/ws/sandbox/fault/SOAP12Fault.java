@@ -1,15 +1,12 @@
 package com.sun.xml.ws.sandbox.fault;
 
 
-import com.sun.xml.bind.api.TypeReference;
-
+import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.AccessType;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.namespace.QName;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * SOAP 1.2 Fault class that can be marshalled/unmarshalled by JAXB
