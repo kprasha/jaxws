@@ -138,8 +138,42 @@ public final class HeaderList extends ArrayList<Header> {
      * @return empty iterator
      *      if not found.
      */
-    public Iterator<Header> getHeaders(String nsUri) {
-        throw new UnsupportedOperationException();
+    public Iterator<Header> getHeaders(final String nsUri) {
+        return new Iterator<Header>() {
+            int idx = 0;
+            Header next;
+            public boolean hasNext() {
+                if(next==null)
+                    fetch();
+                return next!=null;
+            }
+
+            public Header next() {
+                if(next==null) {
+                    fetch();
+                    if(next==null)
+                        throw new NoSuchElementException();
+                }
+
+                Header r = next;
+                next = null;
+                return r;
+            }
+
+            private void fetch() {
+                while(idx<size()) {
+                    Header h = get(idx++);
+                    if(h.getNamespaceURI().equals(nsUri)) {
+                        next = h;
+                        break;
+                    }
+                }
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     /**
