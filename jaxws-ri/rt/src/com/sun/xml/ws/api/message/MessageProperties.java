@@ -62,10 +62,9 @@ import java.util.Set;
  *
  * <h3>Relationship to request/response context</h3>
  * <p>
- * Request context is used to seed the initial values of {@link MessageProperties},
- * and many of the properties are available in the strongly-typed fields.
- * Other ones go to {@link #invocationProperties}, as they need to be retained
- * in the reply message.
+ * Request context is used to seed the initial values of {@link MessageProperties}.
+ * Some of those values go to strongly-typed fields, and others go to
+ * {@link #invocationProperties}, as they need to be retained in the reply message.
  *
  * <p>
  * Similarly, response context is constructed from {@link MessageProperties}.
