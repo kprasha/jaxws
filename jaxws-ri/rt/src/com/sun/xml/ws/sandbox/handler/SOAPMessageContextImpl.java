@@ -66,14 +66,15 @@ import org.xml.sax.InputSource;
 public class SOAPMessageContextImpl implements SOAPMessageContext {
 
     private Message msg;
-    private MessageContextImpl ctxt;
+    private MessageContext ctxt;
     private Set<String> roles;
     protected SOAPMessage soapMsg = null;
     private WSBinding binding;
-    public SOAPMessageContextImpl(WSBinding binding, Message msg) {
+     
+    public SOAPMessageContextImpl(WSBinding binding, Message msg, MessageContext ctxt) {
         this.binding = binding;
         this.msg = msg;
-        this.ctxt = new MessageContextImpl(msg);
+        this.ctxt = ctxt;
         
     }
 
@@ -99,7 +100,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         //Check if SOAPMessage has changed, if so construct new one, set MessageProperties
         if(soapMsg != null) {
             msg = new SAAJMessage(soapMsg);
-
+            //TODO: FIX this, think this is no longer required. 
             // the code below isn't correct, since MessageContext may contain
             // application scope properties or properties associated with strongly-typed fields.
             // I think MessageContext needs to update MessageProperties live.

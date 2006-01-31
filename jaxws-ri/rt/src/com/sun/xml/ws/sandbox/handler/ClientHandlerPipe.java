@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.MessageContextUtil;
+import com.sun.xml.ws.sandbox.handler.HandlerChainCaller.ContextHolder;
 import com.sun.xml.ws.sandbox.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.sandbox.handler.HandlerChainCaller.RequestOrResponse;
 import java.io.IOException;
@@ -71,64 +72,57 @@ public class ClientHandlerPipe extends HandlerPipe{
     
     public Message process(Message msg) {
         // This is client-side pipe, so it should be request ( OUTBOUND Message).
-        // TODO: MessageContext.MESSAGE_OUTBOUND_PROPERTY should be true
-        // TODO: This is taken from SOAPMessageDispatcher.Make sure this is done somewhere before HandlerPipe is called.
-        //       this is needed so that attachments are compied from RESPONSE_MESSAGE_ATTACHMEMTN PROPERTY
-        
         boolean isOneWay = msg.getProperties().isOneWay;
-        MessageContextImpl msgCxt = new MessageContextImpl(msg);
-        msgCxt.messageOutBound = true;
+        ContextHolder ch = new ContextHolder(binding,msg);
         boolean handlerResult = true;
+        Message reply = null;
         if(hcaller.hasHandlers()) {
             try {
-                handlerResult = callHandlersOnRequest(msg);
+                handlerResult = callHandlersOnRequest(ch);
             } catch (ProtocolException pe) {
                 handlerResult = false;
                 if (MessageContextUtil.ignoreFaultInMessage(
-                        msgCxt)) {
+                        ch.getMC())) {
                     // ignore fault in this case and use exception
-                    //RELOOK: code taken from SMD, should n't PE be deirectly given to client, why wrapping?
-                    throw new WebServiceException(pe);
+                    
+                    //RELOOK: code taken from SMD, old code wraps in WSE, is it needed?
+                    //        Changed to throw PE directly
+                    throw pe;
                 }
             }
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
                 //RELOOK: 
-                return msg;
+                return ch.getMessage();
             }
         }
-                
-        try {
-            // Call next Pipe.process() on msg        
-            nextPipe.process(msg);
+        
+        // Call next Pipe.process() on msg                
+        try {            
+            reply = nextPipe.process(ch.getMessage());
             // Next Pipe Should be MUHeaderPipe
             // TODO: Do MUHeader Processing
         } catch (WebServiceException wse) { 
             //RELOOK: changed from SMD code
-            hcaller.forceCloseHandlers(msg);
+            hcaller.forceCloseHandlers(ch);
              throw wse;
         } catch (RuntimeException re) {
             //RELOOK: changed from SMD code
-            hcaller.forceCloseHandlers(msg);
+            hcaller.forceCloseHandlers(ch);
             throw re;
         }
-        
-        // Who sets this?
-        // TODO: MessageContext.MESSAGE_OUTBOUND_PROPERTY should be false
-        // TODO: Make sure MessageContext.INBOUND_MESSAGE_ATTACHMENTS is populated.
-        msgCxt.messageOutBound = false;
+        ch = new ContextHolder(binding,reply);
         if (hcaller.hasHandlers()) {
-            callHandlersOnResponse(msg);
+            callHandlersOnResponse(ch);
         }
         
-        return null;
-        
+        return ch.getMessage();        
     }
     
-    protected boolean callHandlersOnRequest(Message msg) {
+    protected boolean callHandlersOnRequest(ContextHolder ch) {
         HandlerChainCaller caller = getHandlerChainCaller();
-        boolean responseExpected = msg.getProperties().isOneWay;
-        return caller.callHandlers(Direction.OUTBOUND, RequestOrResponse.REQUEST, msg,
+        boolean responseExpected = ch.getMessage().getProperties().isOneWay;
+        return caller.callHandlers(Direction.OUTBOUND, RequestOrResponse.REQUEST, ch,
                 responseExpected);
     }
     
@@ -138,12 +132,13 @@ public class ClientHandlerPipe extends HandlerPipe{
      * here because the main catch clause assumes that WebServiceExceptions
      * are already wrapped.
      */
-    protected boolean callHandlersOnResponse(Message msg) {
+    protected boolean callHandlersOnResponse(ContextHolder ch) {
         HandlerChainCaller caller = getHandlerChainCaller();
         try {
             return caller.callHandlers(Direction.INBOUND,
-                    RequestOrResponse.RESPONSE, msg, false);
+                    RequestOrResponse.RESPONSE, ch, false);
         } catch (WebServiceException wse) {
+            //RELOOK: why wrapping?
             throw new WebServiceException(wse);
         }
     }

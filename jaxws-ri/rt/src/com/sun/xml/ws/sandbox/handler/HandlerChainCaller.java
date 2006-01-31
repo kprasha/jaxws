@@ -363,18 +363,9 @@ public class HandlerChainCaller {
      */
     public boolean callHandlers(Direction direction,
         RequestOrResponse messageType,
-        Message msg,
+        ContextHolder ch,
         boolean responseExpected) {
 
-        // set outbound property
-
-        // KK - why are you putting this in MessageProperties?
-        assert false;
-        //msg.getProperties().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY,
-        //    (direction == Direction.OUTBOUND));
-        // KK - until here
-
-        ContextHolder ch = new ContextHolder(binding,msg);
         // if there is as soap message context, set roles
         if (ch.getSMC() != null) {
             ((SOAPMessageContextImpl) ch.getSMC()).setRoles(getRoles());
@@ -815,8 +806,7 @@ public class HandlerChainCaller {
      * by the client when an MU fault occurs since the handler chain
      * never gets invoked. Either way, the direction is an inbound message.
      */
-    public void forceCloseHandlers(Message msg) {
-        ContextHolder ch = new ContextHolder(binding,msg);
+    public void forceCloseHandlers(ContextHolder ch) {
         // only called after an inbound request
         ch.getSMC().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         ((SOAPMessageContextImpl) ch.getSMC()).setRoles(getRoles());
@@ -877,11 +867,12 @@ public class HandlerChainCaller {
         boolean logicalOnly;
         WSBinding binding;
         Message msg;
-
+        MessageContext cxt;
         ContextHolder(WSBinding binding, Message msg) {
             logicalOnly = isLogicalOnly(binding);
             this.binding = binding;
             this.msg = msg;
+            this.cxt = new MessageContextImpl(msg);            
         }
 
         /**
@@ -895,12 +886,24 @@ public class HandlerChainCaller {
         }
         
         LogicalMessageContext getLMC() {
-            return new LogicalMessageContextImpl(binding, msg);
+            return new LogicalMessageContextImpl(binding, msg, cxt);
         }
         
         SOAPMessageContext getSMC() {
-            return (logicalOnly ? null : new SOAPMessageContextImpl(binding,msg));
+            return (logicalOnly ? null : new SOAPMessageContextImpl(binding, msg, cxt));
         }
+        
+        MessageContext getMC() {
+            return cxt;
+        }
+        //TODO: 
+        Message getMessage() {
+            //TODO: for now give the msg, need to update with latest message
+            // Need to build a Message and set properties from MessageContext
+            return msg;
+        }
+        
+        
     }
     
 }

@@ -52,14 +52,14 @@ import javax.xml.ws.soap.SOAPBinding;
  */
 public class LogicalMessageContextImpl implements LogicalMessageContext {
     private Message msg;
-    private MessageContextImpl ctxt;
+    private MessageContext ctxt;
     private LogicalMessageImpl lm;
     private WSBinding binding;
     
-    public LogicalMessageContextImpl(WSBinding binding, Message msg) {
+    public LogicalMessageContextImpl(WSBinding binding, Message msg, MessageContext cxt) {
         this.binding = binding;
         this.msg = msg;
-        this.ctxt = new MessageContextImpl(msg);
+        this.ctxt = ctxt;
     }
 
     public LogicalMessage getMessage() {
@@ -74,7 +74,7 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
             HeaderList headers = msg.getHeaders();
             AttachmentSet attchments = msg.getAttachments();
             msg = new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion());
-
+            //TODO: Fix this, this is no longer required.
             // the code below isn't correct, since MessageContext may contain
             // application scope properties or properties associated with strongly-typed fields.
             // I think MessageContext needs to update MessageProperties live.
