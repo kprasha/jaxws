@@ -22,7 +22,8 @@ import java.util.Map;
 /**
  * Base class that represents SOAP 1.1 or SOAP 1.2 fault. This class can be used by the invocation handlers to create
  * an Exception from a received messge.
- * <p/>
+ *
+ * <p>
  * TODO: Add methods to create {@link SOAP11Fault} or (@link SOAP12Fault} from an {@link Exception)
  *
  * @author Vivek Pandey
@@ -105,5 +106,30 @@ public abstract class SOAPFaultBuilder {
 
     private String getWriteMethod(Field f) {
         return "set" + StringUtils.capitalize(f.getName());
-    }          
+    }
+
+    /**
+     * Parses a fault {@link Message} and returns it as a {@link SOAPFaultBuilder}.
+     *
+     * @throws JAXBException
+     *      if the parsing fails.
+     * @return
+     *      always non-null valid object.
+     */
+    public static SOAPFaultBuilder create(Message msg) throws JAXBException {
+        return msg.readPayloadAsJAXB(JAXB_CONTEXT.createUnmarshaller());
+    }
+
+    /**
+     * This {@link JAXBContext} can handle SOAP 1.1/1.2 faults.
+     */
+    public static final JAXBContext JAXB_CONTEXT;
+
+    static {
+        try {
+            JAXB_CONTEXT = JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
+        } catch (JAXBException e) {
+            throw new Error(e); // this must be a bug in our code
+        }
+    }
 }

@@ -11,19 +11,15 @@ import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.sandbox.fault.SOAP11Fault;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.sandbox.fault.SOAP12Fault;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
-import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +66,6 @@ final class SyncMethodHandler extends MethodHandler {
 
     private final ResponseBuilder responseBuilder;
     private final Map<QName, CheckedExceptionImpl> checkedExceptions;
-    private final JAXBContext faultJAXBContext;
 
     public SyncMethodHandler(PortInterfaceStub owner, JavaMethodImpl method) {
         super(owner);
@@ -79,11 +74,6 @@ final class SyncMethodHandler extends MethodHandler {
         this.checkedExceptions = new HashMap<QName, CheckedExceptionImpl>();
         for(CheckedExceptionImpl ce : method.getCheckedExceptions()){
             checkedExceptions.put(ce.getBridge().getTypeReference().tagName, ce);
-        }
-        try {
-            this.faultJAXBContext = JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
-        } catch (JAXBException e) {
-            throw new WebServiceException(e);
         }
 
         this.soapAction = '"'+method.getBinding().getSOAPAction()+'"';
@@ -227,7 +217,7 @@ final class SyncMethodHandler extends MethodHandler {
 
             try {
                 if(reply.isFault()) {
-                    SOAPFaultBuilder faultBuilder = reply.readPayloadAsJAXB(faultJAXBContext.createUnmarshaller());
+                    SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(reply);
                     throw faultBuilder.createException(checkedExceptions, reply);
                 } else {
                     BridgeContext context = seiModel.getBridgeContext();
