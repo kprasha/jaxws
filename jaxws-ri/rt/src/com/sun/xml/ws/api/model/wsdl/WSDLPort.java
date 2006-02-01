@@ -1,7 +1,7 @@
 package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.Extensible;
+import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
 
 import javax.xml.namespace.QName;
 
@@ -10,7 +10,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface WSDLPort extends WSDLObject, Extensible {
+public interface WSDLPort extends WSDLObject, WSDLExtensible {
     /**
      * Gets wsdl:port@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

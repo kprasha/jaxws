@@ -11,7 +11,7 @@ import javax.jws.WebParam.Mode;
  *
  * @author Vivek Pandey
  */
-public interface WSDLBoundPortType extends WSDLObject, Extensible {
+public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
     /**
      * Gets the name of the wsdl:binding@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

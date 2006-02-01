@@ -1,6 +1,6 @@
 package com.sun.xml.ws.api.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.Extensible;
+import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
 
 import javax.xml.namespace.QName;
 
@@ -9,7 +9,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface WSDLOperation extends WSDLObject, Extensible {
+public interface WSDLOperation extends WSDLObject, WSDLExtensible {
     /**
      * Gets the name of the wsdl:portType/wsdl:operation@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

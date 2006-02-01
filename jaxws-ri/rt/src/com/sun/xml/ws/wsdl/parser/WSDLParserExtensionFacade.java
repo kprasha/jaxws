@@ -7,8 +7,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
 import javax.xml.stream.XMLStreamReader;
-import java.util.Collection;
-import java.util.Arrays;
 
 /**
  * {@link WSDLParserExtension} that delegates to
@@ -32,22 +30,32 @@ final class WSDLParserExtensionFacade extends WSDLParserExtension {
         this.extensions = extensions;
     }
 
-    public boolean service(WSDLService service, XMLStreamReader reader) {
+    public boolean serviceElements(WSDLService service, XMLStreamReader reader) {
         for (WSDLParserExtension e : extensions) {
-            if(e.service(service,reader))
+            if(e.serviceElements(service,reader))
                 return true;
         }
         XMLStreamReaderUtil.skipElement(reader);
         return true;
     }
 
-    public boolean port(WSDLPort port, XMLStreamReader reader) {
+    public void serviceAttributes(WSDLService service, XMLStreamReader reader) {
+        for (WSDLParserExtension e : extensions)
+            e.serviceAttributes(service,reader);
+    }
+
+    public boolean portElements(WSDLPort port, XMLStreamReader reader) {
         for (WSDLParserExtension e : extensions) {
-            if(e.port(port,reader))
+            if(e.portElements(port,reader))
                 return true;
         }
         XMLStreamReaderUtil.skipElement(reader);
         return true;
+    }
+
+    public void portAttributes(WSDLPort port, XMLStreamReader reader) {
+        for (WSDLParserExtension e : extensions)
+            e.portAttributes(port,reader);
     }
 
     public void finished(WSDLModel model) {

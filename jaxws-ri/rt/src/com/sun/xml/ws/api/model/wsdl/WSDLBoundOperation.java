@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author Vivek Pandey
  */
-public interface WSDLBoundOperation extends WSDLObject, Extensible {
+public interface WSDLBoundOperation extends WSDLObject, WSDLExtensible {
     /**
      * Short-cut for {@code getOperation().getName()}
      */

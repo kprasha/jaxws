@@ -233,7 +233,7 @@ public class RuntimeWSDLParser {
                 if(reader.getEventType() != XMLStreamConstants.END_ELEMENT)
                     XMLStreamReaderUtil.next(reader);
             }else{
-                extension.service(service,reader);
+                extension.serviceElements(service,reader);
             }
         }
         wsdlDoc.addService(service);
@@ -254,7 +254,7 @@ public class RuntimeWSDLParser {
                 location = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_LOCATION);
                 XMLStreamReaderUtil.next(reader);
             }else{
-                extension.port(port,reader);
+                extension.portElements(port,reader);
             }
         }
         if(location==null)
