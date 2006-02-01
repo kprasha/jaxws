@@ -21,7 +21,6 @@ package com.sun.xml.ws.api.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
-//import com.sun.xml.ws.wsdl.writer.document.*;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.wsdl.writer.document.Service;
 import com.sun.xml.ws.wsdl.writer.document.Port;

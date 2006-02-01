@@ -40,15 +40,17 @@ import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
 import com.sun.tools.ws.processor.util.GeneratedFileInfo;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.processor.util.ProcessorEnvironmentBase;
-import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.tools.ws.util.JavaCompilerHelper;
 import com.sun.tools.ws.util.ToolBase;
 import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.ToolVersion;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.util.JAXWSUtils;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.VersionUtil;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.localization.Localizable;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 
 import javax.xml.namespace.QName;
@@ -612,7 +614,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);
                         }
-                    }, bindingID);
+                    }, bindingID, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();        
         }
     }

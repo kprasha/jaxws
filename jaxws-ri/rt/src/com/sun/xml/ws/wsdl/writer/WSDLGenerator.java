@@ -28,6 +28,7 @@ import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.txw2.output.ResultFactory;
 import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.model.WrapperParameter;
@@ -51,12 +52,6 @@ import com.sun.xml.ws.wsdl.writer.document.soap.BodyType;
 import com.sun.xml.ws.wsdl.writer.document.soap.Header;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPAddress;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
-//import com.sun.xml.ws.api.model.JavaMethod;
-//import com.sun.xml.ws.api.model.Parameter;
-//import com.sun.xml.ws.api.model.CheckedException;
-//import com.sun.xml.ws.api.model.AbstractSEIModelImpl;
-//import com.sun.xml.ws.api.model.soap.Style;
-//import com.sun.xml.ws.api.model.soap.Use;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -188,6 +183,7 @@ public class WSDLGenerator {
     private String wsdlLocation;
     private String portWSDLID;
     private String schemaPrefix;
+    private WSDLGeneratorExtension extension;
 
 
     /**
@@ -195,14 +191,16 @@ public class WSDLGenerator {
      * @param model The {@link AbstractSEIModelImpl} used to generate the WSDL
      * @param wsdlResolver The {@link WSDLResolver} to use resovle names while generating the WSDL
      * @param bindingId specifies which {@link javax.xml.ws.BindingType} to generate
-     * @param wges A {@link Collection} of {@link WSDLGeneratorExtension} that will 
+     * @param extensions an array {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
      */    
-    public WSDLGenerator(AbstractSEIModelImpl model, WSDLOutputResolver wsdlResolver, String bindingId) {
+    public WSDLGenerator(AbstractSEIModelImpl model, WSDLOutputResolver wsdlResolver, String bindingId,
+            WSDLGeneratorExtension... extensions) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
         this.wsdlResolver = wsdlResolver;
         this.bindingId = bindingId;
+        this.extension = new WSDLGeneratorExtensionFacade(extensions);
     }
 
      /**
@@ -329,6 +327,7 @@ public class WSDLGenerator {
         boolean isDoclit = binding.isDocLit();
 //        Message message = portDefinitions.message().name(method.getOperation().getName().getLocalPart());
         Message message = portDefinitions.message().name(method.getOperationName());
+        extension.addInputMessageExtension(message, method.getMethod());
         com.sun.xml.ws.wsdl.writer.document.Part part;
         JAXBRIContext jaxbContext = model.getJAXBContext();
         boolean unwrappable = true;
@@ -358,6 +357,7 @@ public class WSDLGenerator {
         if (method.getMEP() != MEP.ONE_WAY) {
 //            message = portDefinitions.message().name(method.getOperation().getName().getLocalPart()+RESPONSE);
             message = portDefinitions.message().name(method.getOperationName()+RESPONSE);
+            extension.addOutputMessageExtension(message, method.getMethod());
             if (unwrappable) {
                 for (ParameterImpl param : method.getResponseParameters()) {
                    if (isHeaderParameter(param))
@@ -396,6 +396,7 @@ public class WSDLGenerator {
             if (processedExceptions.contains(tagName))
                 continue;
             message = portDefinitions.message().name(tagName.getLocalPart());
+            extension.addFaultMessageExtension(message, method.getMethod(), exception);
             part = message.part().name(tagName.getLocalPart());
             part.element(tagName);
             processedExceptions.add(tagName);
@@ -408,6 +409,7 @@ public class WSDLGenerator {
     protected void generatePortType() {
 
         PortType portType = portDefinitions.portType().name(model.getPortTypeName().getLocalPart());
+        extension.addPortTypeExtension(portType);
         for (JavaMethodImpl method : model.getJavaMethods()) {
 //            Operation operation = portType.operation().name(method.getOperation().getLocalName());
             Operation operation = portType.operation().name(method.getOperationName());
@@ -428,6 +430,7 @@ public class WSDLGenerator {
                 QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
                 FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
+                extension.addOperationFaultExtension(paramType, method.getMethod(), exception);        
             }
         }
     }
@@ -621,6 +624,7 @@ public class WSDLGenerator {
      */    
     protected void generateBinding() {
         Binding binding = serviceDefinitions.binding().name(model.getPortName().getLocalPart()+BINDING);
+        extension.addBindingExtension(binding);
         binding.type(model.getPortTypeName());
         boolean first = true;
         for (JavaMethodImpl method : model.getJavaMethods()) {
@@ -662,6 +666,7 @@ public class WSDLGenerator {
     protected void generateBindingOperation(JavaMethodImpl method, Binding binding) {
 //        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         BindingOperationType operation = binding.operation().name(method.getOperationName());
+        extension.addBindingOperationExtension(operation, method.getMethod());
         String targetNamespace = model.getTargetNamespace();
 //        QName requestMessage = method.getOperation().getName();
 //        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
@@ -676,6 +681,7 @@ public class WSDLGenerator {
 
             // input
             TypedXmlWriter input = operation.input();
+            extension.addBindingOperationInputExtension(input, method.getMethod());
             BodyType body = input._element(Body.class);
             boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
             if (soapBinding.getUse().equals(Use.LITERAL)) {
@@ -714,6 +720,7 @@ public class WSDLGenerator {
                 splitParameters(bodyParams, headerParams, method.getResponseParameters());
                 unwrappable = unwrappable ? headerParams.size() == 0 : unwrappable;
                 TypedXmlWriter output = operation.output();
+                extension.addBindingOperationOutputExtension(output, method.getMethod());
                 body = output._element(Body.class);
                 body.use(LITERAL);
                 if (headerParams.size() > 0) {
@@ -750,6 +757,7 @@ public class WSDLGenerator {
                 QName tagName = exception.getDetailType().tagName;
                 Fault fault = operation.fault().name(tagName.getLocalPart());
                 SOAPFault soapFault = fault._element(SOAPFault.class).name(tagName.getLocalPart());
+//                extension.addBindingOperationFaultExtension(fault, method.getMethod(), exception);
                 soapFault.use(LITERAL);
             }
         }
@@ -907,8 +915,10 @@ public class WSDLGenerator {
         QName portQName = model.getPortName();
         QName serviceQName = model.getServiceQName();
         Service service = serviceDefinitions.service().name(serviceQName.getLocalPart());
+        extension.addServiceExtension(service);
         Port port = service.port().name(portQName.getLocalPart());
         port.binding(new QName(serviceQName.getNamespaceURI(), portQName.getLocalPart()+BINDING));
+        extension.addPortExtension(port);
         if (model.getJavaMethods().size() == 0)
             return;
         if (model.getJavaMethods().iterator().next().getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
@@ -929,6 +939,7 @@ public class WSDLGenerator {
      */    
     protected void generateInputMessage(Operation operation, JavaMethodImpl method) {
         ParamType paramType = operation.input();
+        extension.addOperationInputExtension(paramType, method.getMethod());
 //        paramType.message(method.getOperation().getName());
         paramType.message(new QName(model.getTargetNamespace(), method.getOperationName()));
     }
@@ -940,6 +951,7 @@ public class WSDLGenerator {
      */
     protected void generateOutputMessage(Operation operation, JavaMethodImpl method) {
         ParamType paramType = operation.output();
+        extension.addOperationOutputExtension(paramType, method.getMethod());
 //        paramType.message(new QName(model.getTargetNamespace(), method.getOperation().getLocalName()+RESPONSE));
         paramType.message(new QName(model.getTargetNamespace(), method.getOperationName()+RESPONSE));
     }

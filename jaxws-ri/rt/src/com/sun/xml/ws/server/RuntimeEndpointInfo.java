@@ -24,7 +24,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-//import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -412,7 +412,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         }
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(getDocMetadata());
         WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver,
-                binding.getBindingId());
+                binding.getBindingId(), ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
         try {
             wsdlGen.doGeneration();
         } catch(Exception e) {
