@@ -1,0 +1,91 @@
+package com.sun.xml.ws.server;
+
+import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.model.ParameterImpl;
+
+import javax.xml.ws.Holder;
+
+/**
+ * Moves a Java value unmarshalled from a response message
+ * to the right place.
+ *
+ * <p>
+ * Sometimes values are returned as a return value, and
+ * others are returned in the {@link Holder} value. Instances
+ * of this interface abstracts this detail.
+ *
+ * <p>
+ * {@link EndpointValueSetter} is a stateless behavior encapsulation.
+ *
+ * @author Jitendra Kotamraju
+ */
+abstract class EndpointValueSetter {
+    private EndpointValueSetter() {}
+
+    /**
+     * Moves the value to the expected place.
+     *
+     * @param obj
+     *      The unmarshalled object.
+     * @param args
+     *      The arguments that need to be given to the Java method invocation. If <tt>obj</tt>
+     *      is supposed to be returned as a {@link Holder} value, a suitable
+     *      {@link Holder} is obtained from this argument list and <tt>obj</tt>
+     *      is set.
+     *
+     */
+    abstract void put(Object obj, Object[] args);
+
+    /**
+     * {@link Param}s with small index numbers are used often,
+     * so we pool them to reduce the footprint.
+     */
+    private static final EndpointValueSetter[] POOL = new EndpointValueSetter[16];
+
+    static {
+        for( int i=0; i<POOL.length; i++ )
+            POOL[i] = new Param(i);
+    }
+
+    /**
+     * Returns a {@link EndpointValueSetter} suitable for the given {@link Parameter}.
+     */
+    public static EndpointValueSetter get(ParameterImpl p) {
+        int idx = p.getIndex();
+
+        if(idx<POOL.length)
+            return POOL[idx];
+        else
+            return new Param(idx);
+    }
+
+    static final class Param extends EndpointValueSetter {
+        /**
+         * Index of the argument to put the value to.
+         */
+        private final int idx;
+
+        public Param(int idx) {
+            this.idx = idx;
+        }
+
+        void put(Object obj, Object[] args) {
+            if (obj != null) {
+                args[idx] = obj;
+            }
+            /*
+            Object arg = args[idx];
+            if(arg!=null) {
+                // we build model in such a way that this is guaranteed
+                assert arg instanceof Holder;
+                ((Holder)arg).value = obj;
+            }
+            // else {
+            //   if null is given as a Holder, there's no place to return
+            //   the value, so just ignore.
+            // }
+             */
+
+        }
+    }
+}

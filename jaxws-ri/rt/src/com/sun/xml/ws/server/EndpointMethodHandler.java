@@ -1,4 +1,4 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.server;
 
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -11,7 +11,6 @@ import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.util.Pool;
 import java.lang.reflect.Method;
 
@@ -25,6 +24,7 @@ import javax.xml.ws.WebServiceException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.jws.WebParam.Mode;
 
 /**
  *
@@ -39,16 +39,16 @@ import java.util.List;
  *
  * <h2>Creating {@link JAXBMessage}</h2>
  * <p>
- * At the construction time, we prepare {@link BodyBuilder} and {@link MessageFiller}s
+ * At the construction time, we prepare {@link EndpointResponseMessageBuilder} and {@link MessageFiller}s
  * that know how to move arguments into a {@link Message}.
  * Some arguments go to the payload, some go to headers, still others go to attachments.
  *
  * @author Jitendra Kotamraju
  */
-public final class ServerMethodHandler {
+public final class EndpointMethodHandler {
 
     // these objects together create a message from method parameters
-    private final BodyBuilder bodyBuilder;
+    private final EndpointResponseMessageBuilder bodyBuilder;
     private final MessageFiller[] inFillers;
 
     private final Boolean isOneWay;
@@ -64,9 +64,9 @@ public final class ServerMethodHandler {
      */
     /*package*/ final ValueGetter[] valueGetters;
 
-    private final ResponseBuilder responseBuilder;
+    private final EndpointArgumentsBuilder responseBuilder;
 
-    public ServerMethodHandler(RuntimeEndpointInfo endpointInfo, JavaMethodImpl method) {
+    public EndpointMethodHandler(RuntimeEndpointInfo endpointInfo, JavaMethodImpl method) {
 
         this.seiModel = endpointInfo.getRuntimeModel();
         soapVersion = endpointInfo.getBinding().getSOAPVersion();
@@ -75,7 +75,7 @@ public final class ServerMethodHandler {
         {// prepare objects for creating messages
             List<ParameterImpl> rp = method.getResponseParameters();
 
-            BodyBuilder bodyBuilder = null;
+            EndpointResponseMessageBuilder bodyBuilder = null;
             List<MessageFiller> fillers = new ArrayList<MessageFiller>();
             valueGetters = new ValueGetter[rp.size()];
 
@@ -86,11 +86,11 @@ public final class ServerMethodHandler {
                 case BODY:
                     if(param.isWrapperStyle()) {
                         if(param.getParent().getBinding().isRpcLit())
-                            bodyBuilder = new BodyBuilder.RpcLit((WrapperParameter)param, seiModel, soapVersion);
+                            bodyBuilder = new EndpointResponseMessageBuilder.RpcLit((WrapperParameter)param, seiModel, soapVersion);
                         else
-                            bodyBuilder = new BodyBuilder.DocLit((WrapperParameter)param, seiModel, soapVersion);
+                            bodyBuilder = new EndpointResponseMessageBuilder.DocLit((WrapperParameter)param, seiModel, soapVersion);
                     } else {
-                        bodyBuilder = new BodyBuilder.Bare(param, seiModel, soapVersion);
+                        bodyBuilder = new EndpointResponseMessageBuilder.Bare(param, seiModel, soapVersion);
                     }
                     break;
                 case HEADER:
@@ -115,10 +115,10 @@ public final class ServerMethodHandler {
                 // no parameter binds to body. we create an empty message
                 switch(soapVersion) {
                 case SOAP_11:
-                    bodyBuilder = BodyBuilder.EMPTY_SOAP11;
+                    bodyBuilder = EndpointResponseMessageBuilder.EMPTY_SOAP11;
                     break;
                 case SOAP_12:
-                    bodyBuilder = BodyBuilder.EMPTY_SOAP12;
+                    bodyBuilder = EndpointResponseMessageBuilder.EMPTY_SOAP12;
                     break;
                 default:
                     throw new AssertionError();
@@ -131,30 +131,30 @@ public final class ServerMethodHandler {
 
         {// prepare objects for processing request
             List<ParameterImpl> rp = method.getRequestParameters();
-            List<ResponseBuilder> builders = new ArrayList<ResponseBuilder>();
+            List<EndpointArgumentsBuilder> builders = new ArrayList<EndpointArgumentsBuilder>();
 
             for( ParameterImpl param : rp ) {
-                ValueSetter setter = ValueSetter.get(param);
+                EndpointValueSetter setter = EndpointValueSetter.get(param);
                 switch(param.getOutBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {
                         if(param.getParent().getBinding().isRpcLit())
-                            builders.add(new ResponseBuilder.RpcLit((WrapperParameter)param));
+                            builders.add(new EndpointArgumentsBuilder.RpcLit((WrapperParameter)param));
                         else
-                            builders.add(new ResponseBuilder.DocLit((WrapperParameter)param));
+                            builders.add(new EndpointArgumentsBuilder.DocLit((WrapperParameter)param, Mode.OUT));
                     } else {
-                        builders.add(new ResponseBuilder.Body(param.getBridge(),setter));
+                        builders.add(new EndpointArgumentsBuilder.Body(param.getBridge(),setter));
                     }
                     break;
                 case HEADER:
-                    builders.add(new ResponseBuilder.Header(param, setter));
+                    builders.add(new EndpointArgumentsBuilder.Header(param, setter));
                     break;
                 case ATTACHMENT:
                     // TODO: implement this later
                     throw new UnsupportedOperationException();
                 case UNBOUND:
-                    builders.add(new ResponseBuilder.NullSetter(setter,
-                        ResponseBuilder.getVMUninitializedValue(param.getTypeReference().type)));
+                    builders.add(new EndpointArgumentsBuilder.NullSetter(setter,
+                        EndpointArgumentsBuilder.getVMUninitializedValue(param.getTypeReference().type)));
                     break;
                 default:
                     throw new AssertionError();
@@ -163,13 +163,13 @@ public final class ServerMethodHandler {
 
             switch(builders.size()) {
             case 0:
-                responseBuilder = ResponseBuilder.NONE;
+                responseBuilder = EndpointArgumentsBuilder.NONE;
                 break;
             case 1:
                 responseBuilder = builders.get(0);
                 break;
             default:
-                responseBuilder = new ResponseBuilder.Composite(builders);
+                responseBuilder = new EndpointArgumentsBuilder.Composite(builders);
             }
         }
 
@@ -191,13 +191,14 @@ public final class ServerMethodHandler {
             } catch (XMLStreamException e) {
                 throw new DeserializationException("failed.to.read.response",e);
             }
+            Object ret = null;
             try {
-                Object ret = method.invoke(proxy, args);
+                ret = method.invoke(proxy, args);
             } catch(Exception e) {
                 e.printStackTrace();
             }
             // TODO with return value
-            return createResponseMessage(args);
+            return createResponseMessage(args, ret);
         } finally {
             pool.recycle(m);
         }
@@ -207,8 +208,8 @@ public final class ServerMethodHandler {
      * Creates a response {@link JAXBMessage} from method arguments.
      *
      */
-    private Message createResponseMessage(Object[] args) {
-        Message msg = bodyBuilder.createMessage(args);
+    private Message createResponseMessage(Object[] args, Object returnValue) {
+        Message msg = bodyBuilder.createMessage(args, returnValue);
 
         for (MessageFiller filler : inFillers)
             filler.fillIn(args,msg);

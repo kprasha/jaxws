@@ -23,7 +23,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.client.port.MethodHandler;
-import com.sun.xml.ws.client.port.ServerMethodHandler;
+import com.sun.xml.ws.server.EndpointMethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.util.Pool;
@@ -49,7 +49,7 @@ public class EndpointInvokerPipe implements Pipe {
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
      */
-    private final Map<Method,ServerMethodHandler> methodHandlers = new HashMap<Method, ServerMethodHandler>();
+    private final Map<Method, EndpointMethodHandler> methodHandlers = new HashMap<Method, EndpointMethodHandler>();
     
     public EndpointInvokerPipe(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;
@@ -59,7 +59,7 @@ public class EndpointInvokerPipe implements Pipe {
         // fill in methodHandlers.
         // first fill in sychronized versions
         for( JavaMethodImpl m : seiModel.getJavaMethods() ) {
-            ServerMethodHandler handler = new ServerMethodHandler(endpointInfo, m);
+            EndpointMethodHandler handler = new EndpointMethodHandler(endpointInfo, m);
             methodHandlers.put(m.getMethod(),handler);
         }
     }
@@ -82,7 +82,7 @@ public class EndpointInvokerPipe implements Pipe {
         JavaMethodImpl javaMethod = seiModel.getJavaMethod(opName);
         Method method = javaMethod.getMethod();
         
-        ServerMethodHandler handler = methodHandlers.get(method);
+        EndpointMethodHandler handler = methodHandlers.get(method);
         Object servant = endpointInfo.getImplementor();
         return handler.invoke(servant, req);
     }
