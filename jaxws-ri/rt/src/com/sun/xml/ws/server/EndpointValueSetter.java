@@ -41,63 +41,58 @@ abstract class EndpointValueSetter {
      * so we pool them to reduce the footprint.
      */
     private static final EndpointValueSetter[] POOL = new EndpointValueSetter[16];
-/*
+
     static {
         for( int i=0; i<POOL.length; i++ )
             POOL[i] = new Param(i);
     }
- */
 
     /**
      * Returns a {@link EndpointValueSetter} suitable for the given {@link Parameter}.
      */
     public static EndpointValueSetter get(ParameterImpl p) {
         int idx = p.getIndex();
-/*
-        if(idx<POOL.length)
-            return POOL[idx];
-        else
- */
-            return new Param(p, idx);
+        if (p.isIN()) {
+            if (idx<POOL.length) {
+                return POOL[idx];
+            } else {
+                return new Param(idx);
+            }
+        } else {
+            return new HolderParam(idx);
+        }
     }
 
-    static final class Param extends EndpointValueSetter {
+    static class Param extends EndpointValueSetter {
         /**
          * Index of the argument to put the value to.
          */
-        private final int idx;
-        private final ParameterImpl p;
+        protected final int idx;
 
-        public Param(ParameterImpl p, int idx) {
-            this.p = p;
+        public Param(int idx) {
             this.idx = idx;
         }
 
         void put(Object obj, Object[] args) {
-            if (p.isIN()) {
-                if (obj != null) {
-                    args[idx] = obj;
-                } 
-            } else {
-                Holder holder = new Holder();
-                if (obj != null) {
-                    holder.value = obj;
-                }
-                args[idx] = holder;
+            if (obj != null) {
+                args[idx] = obj;
             }
-            /*
-            Object arg = args[idx];
-            if(arg!=null) {
-                // we build model in such a way that this is guaranteed
-                assert arg instanceof Holder;
-                ((Holder)arg).value = obj;
-            }
-            // else {
-            //   if null is given as a Holder, there's no place to return
-            //   the value, so just ignore.
-            // }
-             */
+        }
+    }
+    
+    static final class HolderParam extends Param {
 
+        public HolderParam(int idx) {
+            super(idx);
+        }
+
+        @Override
+        void put(Object obj, Object[] args) {
+            Holder holder = new Holder();
+            if (obj != null) {
+                holder.value = obj;
+            }
+            args[idx] = holder;
         }
     }
 }
