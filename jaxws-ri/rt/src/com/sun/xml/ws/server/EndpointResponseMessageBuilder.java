@@ -272,8 +272,13 @@ abstract class EndpointResponseMessageBuilder {
             cs.values = new Object[parameterBridges.length];
 
             // fill in wrapped parameters from methodArgs
-            for( int i=indices.length-1; i>=0; i-- )
-                cs.values[i] = getters[i].get(methodArgs[indices[i]]);
+            for( int i=indices.length-1; i>=0; i-- ) {
+                if (indices[i] == -1) {
+                    cs.values[i] = getters[i].get(returnValue);
+                } else {
+                    cs.values[i] = getters[i].get(methodArgs[indices[i]]);
+                }
+            }
 
             return cs;
         }

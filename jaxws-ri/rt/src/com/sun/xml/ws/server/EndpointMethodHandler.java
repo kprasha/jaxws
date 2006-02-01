@@ -82,7 +82,7 @@ public final class EndpointMethodHandler {
             for (ParameterImpl param : rp) {
                 ValueGetter getter = ValueGetter.get(param);
 
-                switch(param.getInBinding().kind) {
+                switch(param.getOutBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {
                         if(param.getParent().getBinding().isRpcLit())
@@ -135,7 +135,7 @@ public final class EndpointMethodHandler {
 
             for( ParameterImpl param : rp ) {
                 EndpointValueSetter setter = EndpointValueSetter.get(param);
-                switch(param.getOutBinding().kind) {
+                switch(param.getInBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {
                         if(param.getParent().getBinding().isRpcLit())
