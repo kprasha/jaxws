@@ -118,6 +118,9 @@ abstract class EndpointResponseMessageBuilder {
          * Picks up an object from the method arguments and uses it.
          */
         Object build(Object[] methodArgs, Object returnValue) {
+            if (methodPos == -1) {
+                return returnValue;
+            }
             return getter.get(methodArgs[methodPos]);
         }
     }
