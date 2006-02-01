@@ -23,8 +23,11 @@ import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
+import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.sandbox.message.impl.DOMHeader;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -43,28 +46,26 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * {@link Header} for {@link SOAPHeaderElement}.
+ *
  * @author Vivek Pandey
  */
+public final class SAAJHeader extends DOMHeader<SOAPHeaderElement> {
 
-public class SAAJHeader implements Header{
-
-    private SOAPHeaderElement header;
     private boolean isMustUnderstood;
     private String role;
     private boolean relay;
     private int flags;
-    private String localName;
-    private String namespaceUri;
 
-    protected static final int FLAG_ACTOR            = 0x0001;
-    protected static final int FLAG_MUST_UNDERSTAND   = 0x0002;
-    protected static final int FLAG_RELAY             = 0x0004;
+    private static final int FLAG_ACTOR            = 0x0001;
+    private static final int FLAG_MUST_UNDERSTAND   = 0x0002;
+    private static final int FLAG_RELAY             = 0x0004;
 
 
     public SAAJHeader(SOAPHeaderElement header) {
-        this.header = header;
-        localName = header.getLocalName();
-        namespaceUri = header.getNamespaceURI();
+        // we won't rely on any of the super class method that uses SOAPVersion,
+        // so we can just pass in a dummy version
+        super(SOAPVersion.SOAP_11,header);
     }
 
     /**
@@ -76,7 +77,7 @@ public class SAAJHeader implements Header{
         if(isSet(FLAG_MUST_UNDERSTAND))
             return isMustUnderstood;
 
-        isMustUnderstood = header.getMustUnderstand();
+        isMustUnderstood = node.getMustUnderstand();
         set(FLAG_MUST_UNDERSTAND);
         return isMustUnderstood;
     }
@@ -104,7 +105,7 @@ public class SAAJHeader implements Header{
         if(isSet(FLAG_ACTOR))
             return role;
 
-        role = header.getActor();
+        role = node.getActor();
 
         //SAAJ may return null, lets return the default value in that case
         //TODO: findout SOAP version
@@ -138,105 +139,12 @@ public class SAAJHeader implements Header{
         //SAAJ throws UnsupportedOperationException if its SOAP 1.1 version
         //Ideally this method should always throw false for SOAP 1.1
         try{
-            relay = header.getRelay();
+            relay = node.getRelay();
         }catch(UnsupportedOperationException e){
             relay = false;
         }
+        set(FLAG_RELAY);
         return relay;
-    }
-
-    /**
-     * Gets the namespace URI of this header element.
-     *
-     * @return never null.
-     *         this string must be interned.
-     */
-    public String getNamespaceURI() {
-        return namespaceUri;
-    }
-
-    /**
-     * Gets the local name of this header element.
-     *
-     * @return never null.
-     *         this string must be interned.
-     */
-    public String getLocalPart() {
-        return localName;
-    }
-
-    /**
-     * Reads the header as a {@link javax.xml.stream.XMLStreamReader}.
-     * <p/>
-     * <p/>
-     * <h3>Performance Expectation</h3>
-     * <p/>
-     * For some {@link com.sun.xml.ws.api.message.Header} implementations, this operation
-     * is a non-trivial operation. Therefore, use of this method
-     * is discouraged unless the caller is interested in reading
-     * the whole header.
-     * <p/>
-     * <p/>
-     * Similarly, if the caller wants to use this method only to do
-     * the API conversion (such as simply firing SAX events from
-     * {@link javax.xml.stream.XMLStreamReader}), then the JAX-WS team requests
-     * that you talk to us.
-     *
-     * @return must not null.
-     */
-    public XMLStreamReader readHeader() throws XMLStreamException {
-        return SourceReaderFactory.createSourceReader(new DOMSource(header), true);
-    }
-
-    /**
-     * Reads the header as a JAXB object by using the given unmarshaller.
-     */
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
-        try {
-            return (T) unmarshaller.unmarshal(header);
-        } catch (JAXBException e) {
-            throw new WebServiceException(e);
-        }
-    }
-
-    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return bridge.unmarshal(context,header);
-    }
-
-    /**
-     * Writes out the header.
-     *
-     * @throws javax.xml.stream.XMLStreamException
-     *          if the operation fails for some reason. This leaves the
-     *          writer to an undefined state.
-     */
-    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        try {
-            DOMUtil.serializeNode(header, w);
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
-        }
-    }
-
-    /**
-     * Writes out the header to the given SOAPMessage.
-     *
-     * When will we need this method?
-     *
-     * @throws javax.xml.soap.SOAPException if the operation fails for some reason. This leaves the
-     *                                      writer to an undefined state.
-     */
-    public void writeTo(SOAPMessage saaj) throws SOAPException {
-        // TODO: check if this is really fast enough
-        SOAPHeader header = saaj.getSOAPHeader();
-        Node node = header.getOwnerDocument().importNode(this.header, true);
-        header.appendChild(node);
-    }
-
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        DOMScanner ds = new DOMScanner();
-        ds.setContentHandler(contentHandler);
-        ds.scan(header);
     }
 
     protected boolean isSet(int flag){

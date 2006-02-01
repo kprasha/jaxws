@@ -20,10 +20,15 @@
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.sandbox.message.impl.Util;
+import com.sun.xml.bind.v2.util.FinalArrayList;
 
 import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamException;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * {@link StreamHeader} for SOAP 1.1.
@@ -31,21 +36,27 @@ import javax.xml.stream.XMLStreamReader;
  * @author Paul.Sandoz@Sun.Com
  */
 public class StreamHeader11 extends StreamHeader {
-    
+
     public StreamHeader11(XMLStreamReader reader, XMLStreamBufferMark mark) {
         super(reader, mark);
     }
-    
-    protected final void processHeaderAttributes(XMLStreamReader reader) {
+
+    public StreamHeader11(XMLStreamReader reader) throws XMLStreamBufferException, XMLStreamException {
+        super(reader);
+    }
+
+    protected final FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader) {
+        FinalArrayList<Attribute> atts = null;
+
         for (int i = 0; i < reader.getAttributeCount(); i++) {
             final String localName = reader.getAttributeLocalName(i);
             final String namespaceURI = reader.getAttributeNamespace(i);
+            final String value = reader.getAttributeValue(i);
 
             if (namespaceURI == SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE) {
                 if (localName == SOAP_1_1_MUST_UNDERSTAND) {
-                    _isMustUnderstand = Util.parseBool(reader.getAttributeValue(i));
+                    _isMustUnderstand = Util.parseBool(value);
                 } else if (localName == SOAP_1_1_ROLE) {
-                    final String value = reader.getAttributeValue(i);
                     if (value != null && value.length() > 0) {
                         if (!_role.equals(SOAPConstants.URI_SOAP_ACTOR_NEXT)) {
                             _role = value;
@@ -56,6 +67,13 @@ public class StreamHeader11 extends StreamHeader {
                     }
                 }
             }
+
+            if(atts==null) {
+                atts = new FinalArrayList<Attribute>();
+            }
+            atts.add(new Attribute(namespaceURI,localName,value));
         }
+
+        return atts;
     }
 }

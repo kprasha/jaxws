@@ -24,8 +24,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Vivek Pandey
  */
-
-public class SourceUtils {
+final class SourceUtils {
 
     int srcType;
 

@@ -138,6 +138,23 @@ public interface Header {
     public String getLocalPart();
 
     /**
+     * Gets the attribute value on the header element.
+     *
+     * @param nsUri
+     *      The namespace URI of the attribute. Can be empty but never null.
+     * @param localName
+     *      The local name of the attribute. Must not be null.
+     *
+     * @return
+     *      if the attribute is found, return the whitespace normalized value.
+     *      (meaning no leading/trailing space, no consequtive whitespaces in-between.)
+     *      Otherwise null. Note that the XML parsers are responsible for
+     *      whitespace-normalizing attributes, so {@link Header} implementation
+     *      doesn't have to do anything.
+     */
+    String getAttribute(String nsUri, String localName);
+
+    /**
      * Reads the header as a {@link XMLStreamReader}.
      *
      * <p>

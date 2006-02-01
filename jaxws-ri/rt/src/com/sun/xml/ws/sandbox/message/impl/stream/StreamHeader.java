@@ -21,9 +21,11 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.v2.util.FinalArrayList;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Node;
@@ -43,6 +45,7 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
+import java.util.List;
 
 
 /**
@@ -60,7 +63,7 @@ public abstract class StreamHeader implements Header {
 
     protected static final String SOAP_1_2_RELAY = "relay";
 
-    protected final XMLStreamBufferMark _mark;
+    protected final XMLStreamBuffer _mark;
 
     protected boolean _isMustUnderstand;
 
@@ -72,12 +75,65 @@ public abstract class StreamHeader implements Header {
 
     protected String _namespaceURI;
 
-    public StreamHeader(XMLStreamReader reader, XMLStreamBufferMark mark) {
+    /**
+     * Keep the information about an attribute on the header element.
+     *
+     * TODO: this whole attribute handling could be done better, I think.
+     */
+    protected static final class Attribute {
+        final String nsUri;
+        final String localName;
+        final String value;
+
+        public Attribute(String nsUri, String localName, String value) {
+            this.nsUri = nsUri;
+            this.localName = localName;
+            this.value = value;
+        }
+    }
+
+    /**
+     * The attributes on the header element.
+     * We expect there to be only a small number of them,
+     * so the use of {@link List} would be justified.
+     *
+     * Null if no attribute is present.
+     */
+    private final FinalArrayList<Attribute> attributes;
+
+    /**
+     * Creates a {@link StreamHeader}.
+     *
+     * @param reader
+     *      The parser pointing at the start of the mark.
+     *      Technically this information is redundant,
+     *      but it achieves a better performance.
+     * @param mark
+     *      The start of the buffered header content.
+     */
+    protected StreamHeader(XMLStreamReader reader, XMLStreamBufferMark mark) {
+        assert reader!=null && mark!=null;
         _mark = mark;
         _localName = reader.getLocalName();
         _namespaceURI = reader.getNamespaceURI();
+        attributes = processHeaderAttributes(reader);
+    }
 
-        processHeaderAttributes(reader);
+    /**
+     * Creates a {@link StreamHeader}.
+     *
+     * @param reader
+     *      The parser that points to the start tag of the header.
+     *      By the end of this method, the parser will point at
+     *      the end tag of this element.
+     */
+    protected StreamHeader(XMLStreamReader reader) throws XMLStreamBufferException, XMLStreamException {
+        _localName = reader.getLocalName();
+        _namespaceURI = reader.getNamespaceURI();
+        attributes = processHeaderAttributes(reader);
+        // cache the body
+        _mark = new XMLStreamBuffer();
+        _mark.createFromXMLStreamReader(reader);
     }
 
     public boolean isMustUnderstood() {
@@ -98,6 +154,17 @@ public abstract class StreamHeader implements Header {
 
     public String getLocalPart() {
         return _localName;
+    }
+
+    public String getAttribute(String nsUri, String localName) {
+        if(attributes!=null) {
+            for(int i=attributes.size()-1; i>=0; i-- ) {
+                Attribute a = attributes.get(i);
+                if(a.localName.equals(localName) && a.nsUri.equals(nsUri))
+                    return a.value;
+            }
+        }
+        return null;
     }
 
     /**
@@ -161,5 +228,5 @@ public abstract class StreamHeader implements Header {
         }
     }
 
-    protected abstract void processHeaderAttributes(XMLStreamReader reader);
+    protected abstract FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader);
 }

@@ -34,13 +34,27 @@ public final class RootElementSniffer extends DefaultHandler {
     private String localName = "##error";
     private Attributes atts;
 
+    private final boolean parseAttributes;
+
+    public RootElementSniffer(boolean parseAttributes) {
+        this.parseAttributes = parseAttributes;
+    }
+
+    public RootElementSniffer() {
+        this(true);
+    }
+
     public void startElement(String uri, String localName, String qName, Attributes a) throws SAXException {
         this.nsUri = uri;
         this.localName = localName;
-        if(a.getLength()==0)    // often there's no attribute
-            this.atts = EMPTY_ATTRIBUTES;
-        else
-            this.atts = new AttributesImpl(a);
+        
+        if(parseAttributes) {
+            if(a.getLength()==0)    // often there's no attribute
+                this.atts = EMPTY_ATTRIBUTES;
+            else
+                this.atts = new AttributesImpl(a);
+        }
+
         // no need to parse any further.
         throw aSAXException;
     }

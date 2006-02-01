@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
+import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.xml.sax.Attributes;
@@ -199,7 +200,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
      * Obtains the tag name of the root element.
      */
     private void sniff() {
-        RootElementSniffer sniffer = new RootElementSniffer();
+        RootElementSniffer sniffer = new RootElementSniffer(false);
         try {
             bridge.marshal(context,jaxbObject,sniffer);
         } catch (JAXBException e) {
@@ -209,8 +210,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
             // if it's due to error in the object, the same error will be reported
             // when the readHeader() method is used, so we don't have to report
             // an error right now.
-            nsUri = sniffer.nsUri;
-            localName = sniffer.localName;
+            nsUri = sniffer.getNsUri();
+            localName = sniffer.getLocalName();
         }
     }
 

@@ -28,10 +28,8 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.ws.sandbox.message.impl.source.SourceUtils;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -436,12 +434,10 @@ public class SAAJMessage extends Message {
 
     private class SAAJAttachmentSet implements AttachmentSet {
 
-        private SOAPMessage sm;
         private Map<String, Attachment> attMap;
         private Iterator attIter;
 
         public SAAJAttachmentSet(SOAPMessage sm) {
-            this.sm = sm;
             attIter = sm.getAttachments();
         }
 
