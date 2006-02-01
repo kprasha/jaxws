@@ -41,22 +41,24 @@ abstract class EndpointValueSetter {
      * so we pool them to reduce the footprint.
      */
     private static final EndpointValueSetter[] POOL = new EndpointValueSetter[16];
-
+/*
     static {
         for( int i=0; i<POOL.length; i++ )
             POOL[i] = new Param(i);
     }
+ */
 
     /**
      * Returns a {@link EndpointValueSetter} suitable for the given {@link Parameter}.
      */
     public static EndpointValueSetter get(ParameterImpl p) {
         int idx = p.getIndex();
-
+/*
         if(idx<POOL.length)
             return POOL[idx];
         else
-            return new Param(idx);
+ */
+            return new Param(p, idx);
     }
 
     static final class Param extends EndpointValueSetter {
@@ -64,14 +66,24 @@ abstract class EndpointValueSetter {
          * Index of the argument to put the value to.
          */
         private final int idx;
+        private final ParameterImpl p;
 
-        public Param(int idx) {
+        public Param(ParameterImpl p, int idx) {
+            this.p = p;
             this.idx = idx;
         }
 
         void put(Object obj, Object[] args) {
-            if (obj != null) {
-                args[idx] = obj;
+            if (p.isIN()) {
+                if (obj != null) {
+                    args[idx] = obj;
+                } 
+            } else {
+                Holder holder = new Holder();
+                if (obj != null) {
+                    holder.value = obj;
+                }
+                args[idx] = holder;
             }
             /*
             Object arg = args[idx];
