@@ -808,21 +808,23 @@ public class HandlerChainCaller {
      */
     public void forceCloseHandlers(ContextHolder ch) {
         // only called after an inbound request
-        ch.getSMC().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
-        ((SOAPMessageContextImpl) ch.getSMC()).setRoles(getRoles());
+        ch.getMC().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
+        //RELOOK: Why setRoles() in old code?, while clsoing handler have access
+        //        to only MessageContext
+        //((SOAPMessageContextImpl) ch.getSMC()).setRoles(getRoles());
         closeHandlers(ch);
     }
 
     private void closeProtocolHandlers(ContextHolder holder,
         int start, int end) {
 
-        closeGenericHandlers(soapHandlers, holder.getSMC(), start, end);
+        closeGenericHandlers(soapHandlers, holder.getMC(), start, end);
     }
 
     private void closeLogicalHandlers(ContextHolder holder,
         int start, int end) {
 
-        closeGenericHandlers(logicalHandlers, holder.getLMC(), start, end);
+        closeGenericHandlers(logicalHandlers, holder.getMC(), start, end);
     }
 
     /**
@@ -916,8 +918,12 @@ public class HandlerChainCaller {
         }
         //TODO: 
         Message getMessage() {
-            //TODO: for now give the msg, need to update with latest message
-            // Need to build a Message and set properties from MessageContext
+            //TODO: Need to build a Message and set properties from MessageContext
+            if(lmc != null) {
+                msg = lmc.getNewMessage();
+            } else if(smc != null) {
+                msg = smc.getNewMessage();
+            }
             return msg;
         }
         
