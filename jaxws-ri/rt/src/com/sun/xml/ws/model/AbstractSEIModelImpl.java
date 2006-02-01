@@ -421,7 +421,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             if(paramBinding != null){
                 if(mode == Mode.IN)
                     param.setInBinding(paramBinding);
-                else if(mode == Mode.OUT)
+                else if(mode == Mode.OUT || mode == Mode.INOUT)
                     param.setOutBinding(paramBinding);
 
                 if(paramBinding.isUnbound()){
