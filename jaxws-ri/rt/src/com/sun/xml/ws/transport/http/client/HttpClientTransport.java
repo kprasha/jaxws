@@ -54,6 +54,7 @@ public class HttpClientTransport extends WSConnectionImpl {
     public HttpClientTransport(OutputStream logStream, MessageProperties properties) {
         _logStream = logStream;
         endpoint = properties.endpointAddress;
+        context = properties;
     }
 
     /**
