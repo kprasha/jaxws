@@ -212,7 +212,7 @@ public final class EndpointMethodHandler {
         Message msg = bodyBuilder.createMessage(args, returnValue);
 
         for (MessageFiller filler : inFillers)
-            filler.fillIn(args,msg);
+            filler.fillIn(args, returnValue, msg);
 
         return msg;
     }

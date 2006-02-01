@@ -30,7 +30,7 @@ abstract class MessageFiller {
     /**
      * Moves an argument of a method invocation into a {@link Message}.
      */
-    abstract void fillIn(Object[] methodArgs, Message msg);
+    abstract void fillIn(Object[] methodArgs, Object returnValue, Message msg);
 
     /**
      * Adds a parameter as an header.
@@ -49,8 +49,8 @@ abstract class MessageFiller {
             this.getter = getter;
         }
 
-        void fillIn(Object[] methodArgs, Message msg) {
-            Object value = getter.get(methodArgs[methodPos]);
+        void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
+            Object value = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
             msg.getHeaders().add(Headers.create(ver,
                 bridge, model.getBridgeContext(), value));
         }
