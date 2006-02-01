@@ -294,7 +294,8 @@ public class SAAJMessage extends Message {
 
         // write the body
         w.writeStartElement("S","Body",soapNsUri);
-        DOMUtil.serializeNode(payload, w);
+        if (payload != null)
+            DOMUtil.serializeNode(payload, w);
         w.writeEndElement();
 
         w.writeEndElement();
