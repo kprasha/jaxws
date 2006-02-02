@@ -1,9 +1,9 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
@@ -33,6 +33,7 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
     private StreamMessage sm;
 
     public ProtocolSourceMessage(Source source) {
+        super((SOAPVersion)null);
         this.src = source;
         SourceUtils sourceUtils = new SourceUtils(src);
         if (sourceUtils.isStreamSource()) {
@@ -86,7 +87,7 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
         throw new UnsupportedOperationException();
     }
 
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         throw new UnsupportedOperationException();
     }
 

@@ -39,15 +39,20 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
      */
     private boolean begining = true;
 
-    int[] bcs = new int[256];
+    private final int[] bcs = new int[256];
     int[] gss = null;
     private static final int BUFFER_SIZE = 4096;
     private byte[] buffer = new byte[BUFFER_SIZE];
     private byte[] prevBuffer = new byte[BUFFER_SIZE];
 //    private List<MimeBodyPart> parts;
 
-    public AttachmentStreamSOAPDecoder() {
+    /**
+     * This guy can decode the SOAP part.
+     */
+    private final StreamSOAPDecoder streamDecoder;
 
+    public AttachmentStreamSOAPDecoder(StreamSOAPDecoder streamDecoder) {
+        this.streamDecoder = streamDecoder;
     }
 
     /**
@@ -136,10 +141,6 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     private ByteOutputStream parseMessage() throws IOException {
             return getNextPart(in);
     }
@@ -511,12 +512,6 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
         return bufferLength;
     }
 
-    /**
-     *
-     * @param in
-     * @param contentType
-     * @return
-     */
     public Packet decode(ReadableByteChannel in, String contentType) {
         throw new UnsupportedOperationException();
     }

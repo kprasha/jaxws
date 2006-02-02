@@ -13,6 +13,7 @@ import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.sandbox.handler.ClientHandlerPipe;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
+import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
@@ -28,7 +29,8 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     protected Pipe createTransport(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe p = new HttpTransportPipe(
             TestEncoderImpl.get(binding.getSOAPVersion()),
-            TestDecoderImpl.get(binding.getSOAPVersion()));
+            // TestDecoderImpl.get(binding.getSOAPVersion()));
+            StreamSOAPDecoder.create(binding.getSOAPVersion()));
         return p;
     }
 

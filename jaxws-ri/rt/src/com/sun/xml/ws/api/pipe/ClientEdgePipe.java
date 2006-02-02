@@ -20,8 +20,13 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.stream.InputStreamMessage;
 import com.sun.xml.ws.api.message.stream.XMLStreamReaderMessage;
+
+import javax.xml.ws.WebServiceException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.InputStream;
 
 /**
  * Abstraction of the last pipe (the edge, networking facing, pipe) in the 
@@ -37,8 +42,8 @@ import com.sun.xml.ws.api.message.stream.XMLStreamReaderMessage;
  * The next to last {@link Pipe} can take on the role of
  * an {@link Encoder} and/or {@link Decoder} and in doing so optimize
  * the encoding of a {@link Message} to a stream-based message, 
- * represented as an {@link java.io.InputStream}, and the decoding of a 
- * stream-based message, represented as an {@link javax.xml.stream.XMLStreamReader}, to
+ * represented as an {@link InputStream}, and the decoding of a
+ * stream-based message, represented as an {@link XMLStreamReader}, to
  * a {@link Message}. Such optimizations would be dependent
  * on the processing semantics of the {@link Pipe}.
  *
@@ -49,26 +54,26 @@ import com.sun.xml.ws.api.message.stream.XMLStreamReaderMessage;
  * pipe being transport pipe. 
  * When producing a secure request message the security pipe can utilize, in 
  * certain cases, optimizations that produce an encoded message 
- * (encoded as an {@link java.io.InputStream}). This encoded message can then
+ * (encoded as an {@link InputStream}). This encoded message can then
  * be passed directly to the transport pipe, which does not perform any 
  * encoding.
  * When processing a secure response message the security pipe can
  * utilize, in certain cases, optimizations that operate on the direct 
- * infoset (decoded as an {@link javax.xml.stream.XMLStreamReader}). The pipe can process this
+ * infoset (decoded as an {@link XMLStreamReader}). The pipe can process this
  * infoset to produce a verified {@link Message} with all the security header
  * block information removed and encrypted information decrypted.
  *
  */
 public interface ClientEdgePipe {
     /**
-     * Sends a {@link Message} and returns a response {@link javax.xml.stream.XMLStreamReader} 
+     * Sends a {@link Message} and returns a response {@link XMLStreamReader}
      * to it.
      *
      * @throws WebServiceException
-     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
+     *      see {@link Pipe#process(Packet)}.
      *
      * @throws RuntimeException
-     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
+     *      see {@link Pipe#process(Packet)}.
      *
      * @param msg
      *      always a non-null valid unconsumed {@link Message} that
@@ -80,7 +85,7 @@ public interface ClientEdgePipe {
      * @return
      *      If this method returns a non-null value, it must be
      *      a valid unconsumed {@link XMLStreamReaderMessage}. 
-     *      This message represents a response (as an {@link javax.xml.stream.XMLStreamReader}) 
+     *      This message represents a response (as an {@link XMLStreamReader})
      *      to the request message passed as a parameter.
      *      <p>
      *      This method is also allowed to return null, which indicates
@@ -90,14 +95,14 @@ public interface ClientEdgePipe {
     XMLStreamReaderMessage processStreamReader(Message msg);
 
     /**
-     * Sends a {@link java.io.InputStream} and returns a response {@link javax.xml.stream.XMLStreamReader} 
+     * Sends a {@link InputStream} and returns a response {@link XMLStreamReader}
      * to it.
      *
      * @throws WebServiceException
-     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
+     *      see {@link Pipe#process(Packet)}.
      *
      * @throws RuntimeException
-     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
+     *      see {@link Pipe#process(Packet)}.
      *
      * @param msg
      *      always a non-null unconsumed {@link InputStreamMessage} that
@@ -106,7 +111,7 @@ public interface ClientEdgePipe {
      * @return
      *      If this method returns a non-null value, it must be
      *      a valid unconsumed {@link XMLStreamReaderMessage}. 
-     *      This message represents a response (as an {@link javax.xml.stream.XMLStreamReader}) 
+     *      This message represents a response (as an {@link XMLStreamReader})
      *      to the request message passed as a parameter.
      *      <p>
      *      This method is also allowed to return null, which indicates
@@ -116,14 +121,14 @@ public interface ClientEdgePipe {
     XMLStreamReaderMessage processStreamReader(InputStreamMessage msg);
 
     /**
-     * Sends a {@link java.io.InputStream} and returns a response {@link Message} 
+     * Sends a {@link InputStream} and returns a response {@link Message}
      * to it.
      *
      * @throws WebServiceException
-     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
+     *      see {@link Pipe#process(Packet)}.
      *
      * @throws RuntimeException
-     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
+     *      see {@link Pipe#process(Packet)}.
      *
      * @param msg
      *      always a non-null unconsumed {@link InputStreamMessage} that

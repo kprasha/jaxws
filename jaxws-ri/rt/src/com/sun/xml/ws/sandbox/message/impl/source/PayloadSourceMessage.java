@@ -3,10 +3,9 @@ package com.sun.xml.ws.sandbox.message.impl.source;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
@@ -57,14 +56,13 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     private HeaderList headers;
     private SourceUtils sourceUtils;
 
-    private final SOAPVersion soapVersion;
     private Message streamMessage;
     private byte[] payloadbytes;
 
     public PayloadSourceMessage(HeaderList headers, Source src, SOAPVersion soapVersion) {
+        super(soapVersion);
         this.headers = headers;
         this.src = src;
-        this.soapVersion = soapVersion;
         sourceUtils = new SourceUtils(src);
         if(src instanceof StreamSource){
             StreamSource streamSource = (StreamSource)src;
@@ -146,36 +144,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         return msg;
     }
 
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException{
-        if(sourceUtils.isStreamSource()){
-            streamMessage.writeTo(contentHandler, errorHandler);
-            return;
-        }
-
-        String soapNsUri = soapVersion.nsUri;
-        contentHandler.setDocumentLocator(NULL_LOCATOR);
-        contentHandler.startDocument();
-        contentHandler.startPrefixMapping("S",soapNsUri);
-        contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
-        contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
-        if(hasHeaders()) {
-            int len = headers.size();
-            for( int i=0; i<len; i++ ) {
-                // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
-                headers.get(i).writeTo(contentHandler,errorHandler);
-            }
-        }
-        contentHandler.endElement(soapNsUri,"Header","S:Header");
-
-        // write the body
-        contentHandler.startElement(soapNsUri,"Body","S:Body",EMPTY_ATTS);
-
-        writePayloadTo(contentHandler, errorHandler);
-        contentHandler.endElement(soapNsUri,"Body","S:Body");
-        contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
-    }
-
-    private void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException{
+    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException{
         SAXResult sr = new SAXResult(contentHandler);
         try {
             Transformer transformer = XmlUtil.newTransformer();

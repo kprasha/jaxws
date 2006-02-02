@@ -1,18 +1,17 @@
 package com.sun.xml.ws.api.message;
 
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
-import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.ProtocolSourceMessage;
 
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
 import javax.xml.transform.Source;
 
 /**
@@ -107,16 +106,7 @@ public abstract class Messages {
      * Creates a {@link Message} that doesn't have any payload.
      */
     public static Message createEmpty(SOAPVersion soapVersion) {
-        // TODO: fully implement EmptyMessageImpl
-        Message msg = new EmptyMessageImpl();
-
-        // for now we'll use an empty SAAJMessage
-        try {
-            return create(soapVersion.saajFactory.createMessage());
-        } catch (SOAPException e) {
-            // impossible
-            throw new AssertionError(e);
-        }
+        return new EmptyMessageImpl(soapVersion);
     }
 
     /**

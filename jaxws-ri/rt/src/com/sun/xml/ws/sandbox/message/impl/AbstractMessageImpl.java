@@ -20,6 +20,8 @@
 package com.sun.xml.ws.sandbox.message.impl;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 
@@ -27,6 +29,16 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.helpers.LocatorImpl;
 
 /**
  * Partial {@link Message} implementation.
@@ -45,6 +57,27 @@ import javax.xml.transform.sax.SAXSource;
  * @author Kohsuke Kawaguchi
  */
 public abstract class AbstractMessageImpl extends Message {
+    /**
+     * SOAP version of this message.
+     * Used to implement some of the methods, but nothing more than that.
+     *
+     * <p>
+     * So if you aren't using those methods that use this field,
+     * this can be null.
+     */
+    protected final SOAPVersion soapVersion;
+
+    protected AbstractMessageImpl(SOAPVersion soapVersion) {
+        this.soapVersion = soapVersion;
+    }
+
+    /**
+     * Copy constructor.
+     */
+    protected AbstractMessageImpl(AbstractMessageImpl that) {
+        this.soapVersion = that.soapVersion;
+    }
+
     public Source readEnvelopeAsSource() {
         return new SAXSource(new XMLReaderImpl(this), XMLReaderImpl.THE_SOURCE);
     }
@@ -57,5 +90,68 @@ public abstract class AbstractMessageImpl extends Message {
         return bridge.unmarshal(context,readPayloadAsSource());
     }
 
-    // TODO: expand
+    /**
+     * Default implementation that relies on {@link #writePayloadTo(XMLStreamWriter)}
+     */
+    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
+        String soapNsUri = soapVersion.nsUri;
+        w.writeStartDocument();
+        w.writeStartElement("S","Envelope",soapNsUri);
+        w.writeNamespace("S",soapNsUri);
+        w.writeStartElement("S","Header",soapNsUri);
+        if(hasHeaders()) {
+            HeaderList headers = getHeaders();
+            int len = headers.size();
+            for( int i=0; i<len; i++ ) {
+                headers.get(i).writeTo(w);
+            }
+        }
+        w.writeEndElement();
+        // write the body
+        w.writeStartElement("S","Body",soapNsUri);
+
+        writePayloadTo(w);
+
+        w.writeEndElement();
+        w.writeEndElement();
+        w.writeEndDocument();
+        w.flush();
+        w.close();
+    }
+
+    /**
+     * Writes the whole envelope as SAX events.
+     */
+    public void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
+        String soapNsUri = soapVersion.nsUri;
+
+        contentHandler.setDocumentLocator(NULL_LOCATOR);
+        contentHandler.startDocument();
+        contentHandler.startPrefixMapping("S",soapNsUri);
+        contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
+        contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
+        if(hasHeaders()) {
+            HeaderList headers = getHeaders();
+            int len = headers.size();
+            for( int i=0; i<len; i++ ) {
+                // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
+                headers.get(i).writeTo(contentHandler,errorHandler);
+            }
+        }
+        contentHandler.endElement(soapNsUri,"Header","S:Header");
+        // write the body
+        contentHandler.startElement(soapNsUri,"Body","S:Body",EMPTY_ATTS);
+        writePayloadTo(contentHandler,errorHandler);
+        contentHandler.endElement(soapNsUri,"Body","S:Body");
+        contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
+    }
+
+    /**
+     * Writes the payload to SAX events.
+     */
+    protected abstract void writePayloadTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException;
+
+
+    protected static final Attributes EMPTY_ATTS = new AttributesImpl();
+    protected static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }

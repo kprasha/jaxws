@@ -260,6 +260,9 @@ public abstract class Message {
      * Returns the payload as a {@link Source} object.
      *
      * This consumes the message.
+     *
+     * @return
+     *      if there's no payload, this method returns null.
      */
     public abstract Source readPayloadAsSource();
 
@@ -300,7 +303,8 @@ public abstract class Message {
      * This consumes the message.
      *
      * @return
-     *      always non-null valid {@link XMLStreamReader} that points to
+     *      If there's no payload, this method returns null.
+     *      Otherwise always non-null valid {@link XMLStreamReader} that points to
      *      the payload tag name.
      */
     public abstract XMLStreamReader readPayload() throws XMLStreamException;
@@ -310,6 +314,9 @@ public abstract class Message {
      *
      * This method writes just the payload of the message to the writer.
      * This consumes the message.
+     *
+     * <p>
+     * If there's no payload, this method is no-op.
      *
      * @throws XMLStreamException
      *      If the {@link XMLStreamWriter} reports an error,

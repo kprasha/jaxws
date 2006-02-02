@@ -1,19 +1,19 @@
 package com.sun.xml.ws.sandbox.message.impl;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Packet;
-
-import javax.xml.transform.Source;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
+import com.sun.xml.ws.api.message.Message;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Source;
 
 /**
  * {@link Message} that has no body.
@@ -30,14 +30,16 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
      */
     private final HeaderList headers;
 
-    public EmptyMessageImpl() {
-        headers = new HeaderList();
+    public EmptyMessageImpl(SOAPVersion version) {
+        super(version);
+        this.headers = new HeaderList();
     }
 
     /**
      * Copy constructor.
      */
     private EmptyMessageImpl(EmptyMessageImpl that) {
+        super(that);
         this.headers = new HeaderList(that.headers);
     }
 
@@ -62,33 +64,27 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
     }
 
     public Source readPayloadAsSource() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        // TODO
-        throw new UnsupportedOperationException();
+        SOAPMessage msg = soapVersion.saajFactory.createMessage();
+        for (Header header : headers) {
+            header.writeTo(msg);
+        }
+        return msg;
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {
-        // TODO
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
-        // TODO
-        throw new UnsupportedOperationException();
+        // noop
     }
 
-    public void writeTo(XMLStreamWriter sw) throws XMLStreamException {
-        // TODO
-        throw new UnsupportedOperationException();
-    }
-
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        // TODO
-        throw new UnsupportedOperationException();
+    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        // noop
     }
 
     public Message copy() {

@@ -19,15 +19,14 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -64,8 +63,6 @@ public class StreamMessage extends AbstractMessageImpl {
 
     private final String payloadNamespaceURI;
 
-    private final SOAPVersion soapVersion;
-
     /**
      * Creates a {@link StreamMessage} from a {@link XMLStreamReader}
      * that points at the start element of the payload, and headers.
@@ -80,11 +77,11 @@ public class StreamMessage extends AbstractMessageImpl {
      *      must not be null.
      */
     public StreamMessage(HeaderList headers, XMLStreamReader reader, SOAPVersion soapVersion) {
+        super(soapVersion);
         this.headers = headers;
         this.reader = reader;
         this.payloadLocalName = reader.getLocalName();
         this.payloadNamespaceURI = reader.getNamespaceURI();
-        this.soapVersion = soapVersion;
         isPayload = true;
     }
 
@@ -101,6 +98,7 @@ public class StreamMessage extends AbstractMessageImpl {
      */
     public StreamMessage(XMLStreamReader reader) {
         // TODO: implement this method later
+        super((SOAPVersion)null);
         throw new UnsupportedOperationException();
     }
 
@@ -314,7 +312,7 @@ public class StreamMessage extends AbstractMessageImpl {
         writer.writeEndElement();
     }
 
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         throw new UnsupportedOperationException();
     }
 
