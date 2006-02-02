@@ -37,23 +37,23 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *
  * <h2>What is a {@link Pipe}?</h2>
  * <p>
- * Transport is a kind of pipe. It sends the {@link Message}
- * through, say, HTTP connection, and receives the data back into another {@link Message}.
+ * Transport is a kind of pipe. It sends the {@link Packet}
+ * through, say, HTTP connection, and receives the data back into another {@link Packet}.
  *
  * <p>
- * More often, a pipe is a filter. It acts on a message,
- * and then it passes the message into another pipe. It can
+ * More often, a pipe is a filter. It acts on a packet,
+ * and then it passes the packet into another pipe. It can
  * do the same on the way back.
  *
  * <p>
  * For example, XWSS will be a {@link Pipe}
- * that delegates to another {@link Pipe}, and it can wrap a {@link Message} into
- * another {@link Message} to encrypt the body and add a header, for example.
+ * that delegates to another {@link Pipe}, and it can wrap a {@link Packet} into
+ * another {@link Packet} to encrypt the body and add a header, for example.
  *
  * <p>
  * Yet another kind of filter pipe is those that wraps {@link LogicalHandler}
  * and {@link SOAPHandler}. These pipes are heavy-weight; they often consume
- * a message and create a new one, and then pass it to the next pipe.
+ * a message in a packet and create a new one, and then pass it to the next pipe.
  * For performance reason it probably makes sense to have one {@link Pipe}
  * instance that invokes a series of {@link LogicalHandler}s, another one
  * for {@link SOAPHandler}.
@@ -100,9 +100,9 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * state in easily accessible fashion.
  *
  *
- * <h3>Per-message state</h3>
+ * <h3>Per-packet state</h3>
  * <p>
- * Any information that changes from a message to message should be
+ * Any information that changes from a packet to packet should be
  * stored in {@link Packet}. This includes information like
  * transport-specific headers.
  *
@@ -182,16 +182,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *
  *
  * <pre>
- * TODO: needs more thinking about how channel pipe is created.
- * it's different between the client and the server.
- *
- * TODO: in one-way we want to send reply before the processing starts.
- *
- * TODO: do we need to distinguish between inbound and outbound?
- *       this relates to the point of should we have different representations
- *       for a message that is created and a message that is processed?
- *
- * TODO: Possible types of channel:
+ * TODO: Possible types of pipe:
  *      creator: create message from wire
  *          to SAAJ SOAP message
  *          to cached representation
@@ -212,7 +203,7 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  */
 public interface Pipe {
     /**
-     * Sends a {@link Message} and returns a response {@link Message} to it.
+     * Sends a {@link Packet} and returns a response {@link Packet} to it.
      *
      * @throws WebServiceException
      *      On the server side, this signals an error condition where
@@ -221,12 +212,15 @@ public interface Pipe {
      *      This frees each {@link Pipe} from try/catching a
      *      {@link WebServiceException} in every layer.
      *
-     *      Note that this method is also allowed to return a {@link Message}
+     *      Note that this method is also allowed to return a {@link Packet}
      *      that has a fault as the payload.
      *
+     *      <p>
      *      On the client side, the {@link WebServiceException} thrown
      *      will be propagated all the way back to the calling client
-     *      applications.
+     *      applications. (The consequence of that is that if you are
+     *      a filtering {@link Pipe}, you must not catch the exception
+     *      that your next {@link Pipe} threw.
      *
      * @throws RuntimeException
      *      Other runtime exception thrown by this method must
@@ -248,13 +242,23 @@ public interface Pipe {
      *      and wrapped into a {@link WebServiceException}.
      *
      * @param packet
+     *      The packet that represents a request message. Must not be null.
+     *      If the packet has a non-null message, it must be a valid
+     *      unconsumed {@link Message}. This message represents the
+     *      SOAP message to be sent as a request.
+     *      <p>
+     *      The packet is also allowed to carry no message, which indicates
+     *      that this is an output-only request.
+     *      (that's called "solicit", right? - KK)
+     *
      * @return
-     *      If this method returns a non-null value, it must be
+     *      The packet that represents a response message. Must not be null.
+     *      If the packet has a non-null message, it must be
      *      a valid unconsumed {@link Message}. This message represents
      *      a response to the request message passed as a parameter.
      *      <p>
-     *      This method is also allowed to return null, which indicates
-     *      that there's no response. This is used for things like
+     *      The packet is also allowed to carry no message, which indicates
+     *      that there was no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
     Packet process( Packet packet );
