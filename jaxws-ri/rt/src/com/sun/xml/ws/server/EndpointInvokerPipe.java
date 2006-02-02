@@ -86,7 +86,7 @@ public class EndpointInvokerPipe implements Pipe {
 
         EndpointMethodHandler handler = methodHandlers.get(method);
         Object servant = endpointInfo.getImplementor();
-        return new Packet(handler.invoke(servant, msg));
+        return handler.invoke(servant, msg);
         // TODO: some properties need to be copied from request packet to the response packet
     }
 

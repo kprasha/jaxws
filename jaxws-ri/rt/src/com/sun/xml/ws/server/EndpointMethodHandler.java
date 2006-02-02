@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
@@ -171,7 +172,7 @@ public final class EndpointMethodHandler {
         this.isOneWay = method.getMEP().isOneWay();
     }
 
-    public Message invoke(Object proxy, Message req) {
+    public Packet invoke(Object proxy, Message req) {
 
         Pool.Marshaller pool = seiModel.getMarshallerPool();
         Marshaller m = pool.take();
@@ -202,7 +203,9 @@ public final class EndpointMethodHandler {
             } catch (Exception e) {
                 responseMessage = createFaultMessageForOtherException(e);
             }
-            return responseMessage;
+            Packet respPacket = new Packet(responseMessage);
+            respPacket.isOneWay = isOneWay;
+            return respPacket;
         } finally {
             pool.recycle(m);
         }
