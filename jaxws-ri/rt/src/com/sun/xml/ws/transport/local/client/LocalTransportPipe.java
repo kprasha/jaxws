@@ -103,8 +103,11 @@ public class LocalTransportPipe implements Pipe {
             String ct = getContentType(respHeaders);
 
             if (packet.isOneWay == Boolean.TRUE
-                || con.getStatus() == WSConnection.ONEWAY)
-                return null;    // one way. no response given.
+                || con.getStatus() == WSConnection.ONEWAY) {
+                packet = new Packet(null);    // one way. no response given.
+                packet.isOneWay = true;
+                return packet;
+            }
 
             return decoder.decode(con.getInput(), ct);
         } catch (WebServiceException wex) {
