@@ -10,6 +10,7 @@ import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.xml.bind.JAXBException;
@@ -186,13 +187,22 @@ public final class EndpointMethodHandler {
                 throw new DeserializationException("failed.to.read.response",e);
             }
             Object ret = null;
+            Message responseMessage = null;
             try {
                 ret = method.invoke(proxy, args);
-            } catch(Exception e) {
-                e.printStackTrace();
+                responseMessage = isOneWay ? null : createResponseMessage(args, ret);
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
+                    // Service specific exception
+                    responseMessage = createFaultMessageForServiceException(e);
+                } else {
+                    responseMessage = createFaultMessageForOtherException(e);
+                }
+            } catch (Exception e) {
+                responseMessage = createFaultMessageForOtherException(e);
             }
-            // TODO with return value
-            return createResponseMessage(args, ret);
+            return responseMessage;
         } finally {
             pool.recycle(m);
         }
@@ -209,5 +219,19 @@ public final class EndpointMethodHandler {
             filler.fillIn(args, returnValue, msg);
 
         return msg;
+    }
+    
+    /**
+     * Creates a response {@link JAXBMessage} from method arguments.
+     *
+     */
+    private Message createFaultMessageForServiceException(Exception e) {
+ 
+        return null;
+    }
+    
+    private Message createFaultMessageForOtherException(Exception e) {
+
+        return null;
     }
 }
