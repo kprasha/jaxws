@@ -20,6 +20,7 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Acceptor;
@@ -86,7 +87,9 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
                        com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo endpoint)
     throws Exception {
       
+        /*
         if (encoder != null) {
+         */
             
             // TODO : only HTTP transport is changed to work with Server Pipe line
             // Once the server side has EndpointInvokerPipe, everything uses this
@@ -119,8 +122,13 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
                 headers = new Headers();
                 headers.put("Content-Type", Arrays.asList(ct));
                 connection.setHeaders(headers);
+                if (packet.isOneWay) {
+                    // TODO need to be done before invoking endpoint
+                    connection.setStatus(WSConnection.ONEWAY);
+                }
                 encoder.encode(packet, connection.getOutput());
             }
+            /*
         } else {
             
             // TODO: this will go away. LocalTransport comes here so that client
@@ -154,6 +162,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
                 messageInfo.getEPTFactory().getMessageDispatcher(messageInfo);
             messageDispatcher.receive(messageInfo);
         }
+             */
 
     }
 
