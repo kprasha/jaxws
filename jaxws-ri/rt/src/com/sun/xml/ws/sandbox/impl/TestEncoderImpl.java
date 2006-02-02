@@ -30,11 +30,13 @@ public final class TestEncoderImpl implements Encoder {
     }
 
     public String encode(Packet packet, OutputStream out) {
-        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
-        try {
-            packet.getMessage().writeTo(writer);
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
+        if (packet.getMessage() != null) {
+            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
+            try {
+                packet.getMessage().writeTo(writer);
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
         }
         return contentType;
     }
