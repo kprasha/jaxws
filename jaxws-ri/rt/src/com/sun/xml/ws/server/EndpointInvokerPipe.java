@@ -48,6 +48,7 @@ public class EndpointInvokerPipe implements Pipe {
      * a {@link MethodHandler} that processes it.
      */
     private final Map<Method, EndpointMethodHandler> methodHandlers = new HashMap<Method, EndpointMethodHandler>();
+    private static final QName EMPTY_QNAME = new QName("");
 
     public EndpointInvokerPipe(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;
@@ -75,8 +76,9 @@ public class EndpointInvokerPipe implements Pipe {
         Message msg = req.getMessage();
 
         String localPart = msg.getPayloadLocalPart();
-        String nsURI = msg.getPayloadNamespaceURI();
-        QName opName = new QName(nsURI, localPart);
+        QName opName = (localPart == null)
+            ? EMPTY_QNAME
+            : new QName(msg.getPayloadNamespaceURI(), localPart);
 
         AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();
         JavaMethodImpl javaMethod = seiModel.getJavaMethod(opName);
