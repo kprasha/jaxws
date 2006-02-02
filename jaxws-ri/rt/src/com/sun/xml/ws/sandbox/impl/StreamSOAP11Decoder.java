@@ -6,6 +6,7 @@ import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader11;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.pipe.Decoder;
 
 import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamReader;
@@ -15,7 +16,7 @@ import javax.xml.stream.XMLStreamReader;
  *
  * @author Paul.Sandoz@Sun.Com
  */
-public class StreamSOAP11Decoder extends StreamSOAPDecoder{
+final class StreamSOAP11Decoder extends StreamSOAPDecoder{
     
     public StreamSOAP11Decoder() {
         super(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE);
