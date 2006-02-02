@@ -20,6 +20,10 @@ import java.util.logging.Logger;
  * TODO: is bindingId really extensible? for this to be extensible,
  * someone seems to need to hook into WSDL parsing.
  *
+ * <p>
+ * TODO: JAX-WSA might not define its own binding ID -- it may just go to an extension element
+ * of WSDL. So this abstraction might need to be worked on.
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class PipelineAssemblerFactory {
