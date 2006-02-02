@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the "License").  You may not use this file except
  * in compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://jwsdp.dev.java.net/CDDLv1.0.html
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * HEADER in each file and include the License file at
  * https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
@@ -19,14 +19,8 @@
  */
 package com.sun.tools.ws.ant;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.sun.tools.ws.wscompile.CompileTool;
+import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
@@ -38,12 +32,15 @@ import org.apache.tools.ant.types.Commandline;
 import org.apache.tools.ant.types.CommandlineJava;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.XMLCatalog;
 
-import com.sun.tools.ws.wscompile.CompileTool;
-import org.apache.tools.ant.AntClassLoader;
-import org.xml.sax.EntityResolver;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * wscompile task for use with the JAXWS project.
@@ -104,7 +101,7 @@ public class WsImport extends MatchingTask {
     public Commandline.Argument createJvmarg() {
         return cmd.createVmArgument();
     }
-    
+
     /********************  -extensions option **********************/
     protected boolean extension;
 
@@ -116,8 +113,8 @@ public class WsImport extends MatchingTask {
     /** Sets the "extension" flag. **/
     public void setExtension(boolean extension) {
         this.extension = extension;
-    }    
-    
+    }
+
     /*************************  -keep option *************************/
     private boolean keep = false;
 
@@ -236,6 +233,74 @@ public class WsImport extends MatchingTask {
         return includeJavaRuntime;
     }
 
+    /**
+     * Files used to determine whether XJC should run or not.
+     */
+    private final ArrayList<File> dependsSet = new ArrayList<File>();
+    private final ArrayList<File> producesSet = new ArrayList<File>();
+
+    /**
+     * Set to true once the &lt;produces> element is used.
+     * This flag is used to issue a suggestion to users.
+     */
+    private boolean producesSpecified = false;
+
+    /** Nested &lt;depends> element. */
+    public void addConfiguredDepends( FileSet fs ) {
+        addIndividualFilesTo( fs, dependsSet );
+    }
+
+    /** Nested &lt;produces> element. */
+    public void addConfiguredProduces( FileSet fs ) {
+        producesSpecified = true;
+        if( !fs.getDir(getProject()).exists() ) {
+            log(
+                fs.getDir(getProject()).getAbsolutePath()+" is not found and thus excluded from the dependency check",
+                Project.MSG_INFO );
+        } else
+            addIndividualFilesTo( fs, producesSet );
+    }
+
+    /**
+     * Extracts {@link File} objects that the given {@link FileSet}
+     * represents and adds them all to the given {@link java.util.List}.
+     */
+    private void addIndividualFilesTo( FileSet fs, List<File> lst ) {
+        DirectoryScanner ds = fs.getDirectoryScanner(getProject());
+        String[] includedFiles = ds.getIncludedFiles();
+        File baseDir = ds.getBasedir();
+
+        for (String value : includedFiles) {
+            lst.add(new File(baseDir, value));
+        }
+    }
+
+    /**
+     * Determines the timestamp of the newest/oldest file in the given set.
+     */
+    private long computeTimestampFor( List<File> files, boolean findNewest ) {
+
+        long lastModified = findNewest?Long.MIN_VALUE:Long.MAX_VALUE;
+
+        for( File file : files ) {
+            log("Checking timestamp of "+file.toString(), Project.MSG_VERBOSE );
+
+            if( findNewest )
+                lastModified = Math.max( lastModified, file.lastModified() );
+            else
+                lastModified = Math.min( lastModified, file.lastModified() );
+        }
+
+        if( lastModified == Long.MIN_VALUE ) // no file was found
+            return Long.MAX_VALUE;  // force re-run
+
+        if( lastModified == Long.MAX_VALUE ) // no file was found
+            return Long.MIN_VALUE;  // force re-run
+
+        return lastModified;
+    }
+
+
     private String binding;
     /**
      * @return Returns the binding.
@@ -248,6 +313,7 @@ public class WsImport extends MatchingTask {
      */
     public void setBinding(String binding) {
         this.binding = binding;
+        dependsSet.add(new File(binding));
     }
 
     /**
@@ -276,15 +342,17 @@ public class WsImport extends MatchingTask {
      */
     public void setWsdl(String wsdl) {
         this.wsdl = wsdl;
+        dependsSet.add(new File(wsdl));
     }
 
     public void addConfiguredBinding( FileSet fs ) {
         DirectoryScanner ds = fs.getDirectoryScanner(project);
         String[] includedFiles = ds.getIncludedFiles();
         File baseDir = ds.getBasedir();
-        for (int i = 0; i < includedFiles.length; ++i) {
-            bindingFiles.add(new File(baseDir, includedFiles[i]));
+        for (String includedFile : includedFiles) {
+            bindingFiles.add(new File(baseDir, includedFile));
         }
+        addIndividualFilesTo( fs, dependsSet );
     }
 
     private void setupWsimportForkCommand() {
@@ -297,7 +365,7 @@ public class WsImport extends MatchingTask {
         cmd.createClasspath(getProject()).append(classpath);
         cmd.setClassname("com.sun.tools.ws.WsImport");
         //setupWsimportArgs();
-        //cmd.createArgument(true).setLine(forkCmd.toString());        
+        //cmd.createArgument(true).setLine(forkCmd.toString());
     }
 
     private void setupWsimportArgs() {
@@ -311,7 +379,7 @@ public class WsImport extends MatchingTask {
         if (getExtension()) {
             cmd.createArgument().setValue("-extension");
         }
-        
+
         // g option
         if (getDebug()) {
             cmd.createArgument().setValue("-g");
@@ -382,6 +450,22 @@ public class WsImport extends MatchingTask {
         LogOutputStream logstr = null;
         boolean ok = false;
         try {
+            if( !producesSpecified ) {
+                log("Consider using <depends>/<produces> so that wsimport won't do unnecessary compilation",Project.MSG_INFO);
+            }
+
+            // up to date check
+            long srcTime = computeTimestampFor(dependsSet,true);
+            long dstTime = computeTimestampFor(producesSet,false);
+            log("the last modified time of the inputs is  "+srcTime, Project.MSG_VERBOSE);
+            log("the last modified time of the outputs is "+dstTime, Project.MSG_VERBOSE);
+
+            if( srcTime < dstTime ) {
+                log("files are up to date");
+                return;
+            }
+
+
             if(fork){
                 setupWsimportForkCommand();
             } else {
@@ -395,7 +479,7 @@ public class WsImport extends MatchingTask {
                     log("command line: "+"wsimport "+cmd.toString());
                 }
                 int status = run(cmd.getCommandline());
-                ok = (status == 0) ? true : false;
+                ok = (status == 0);
             } else {
                 if (verbose) {
                     log("command line: "+"wsimport "+cmd.getJavaCommand().toString());
@@ -450,11 +534,9 @@ public class WsImport extends MatchingTask {
      * Executes the given classname with the given arguments in a separate VM.
      */
     private int run(String[] command) throws BuildException {
-        FileOutputStream fos = null;
-        Execute exe = null;
         LogStreamHandler logstr = new LogStreamHandler(this,
             Project.MSG_INFO, Project.MSG_WARN);
-        exe = new Execute(logstr);
+        Execute exe = new Execute(logstr);
         exe.setAntRun(project);
         exe.setCommandline(command);
         try {
