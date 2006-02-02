@@ -261,26 +261,28 @@ abstract class ResponseBuilder {
         public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
             Object retVal = null;
 
-            XMLStreamReader reader = msg.readPayload();
-            Object wrapperBean = wrapper.unmarshal(context, reader);
+            if(parts.length>0) {
+                XMLStreamReader reader = msg.readPayload();
+                Object wrapperBean = wrapper.unmarshal(context, reader);
 
-            try {
-                for (PartBuilder part : parts) {
-                    Object o = part.readResponse(args,wrapperBean);
-                    // there's only at most one ResponseBuilder that returns a value.
-                    // TODO: reorder parts so that the return value comes at the end.
-                    if(o!=null) {
-                        assert retVal==null;
-                        retVal = o;
+                try {
+                    for (PartBuilder part : parts) {
+                        Object o = part.readResponse(args,wrapperBean);
+                        // there's only at most one ResponseBuilder that returns a value.
+                        // TODO: reorder parts so that the return value comes at the end.
+                        if(o!=null) {
+                            assert retVal==null;
+                            retVal = o;
+                        }
                     }
+                } catch (AccessorException e) {
+                    // this can happen when the set method throw a checked exception or something like that
+                    throw new WebServiceException(e);    // TODO:i18n
                 }
-            } catch (AccessorException e) {
-                // this can happen when the set method throw a checked exception or something like that
-                throw new WebServiceException(e);    // TODO:i18n
-            }
 
-            // we are done with the body
-            reader.close();
+                // we are done with the body
+                reader.close();
+            }
 
             return retVal;
         }
