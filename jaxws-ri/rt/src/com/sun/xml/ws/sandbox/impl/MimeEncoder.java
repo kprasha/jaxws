@@ -5,6 +5,7 @@ import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamException;
@@ -31,7 +32,8 @@ public class MimeEncoder implements Encoder {
     // TODO: preencode String literals to byte[] so that they don't have to
     // go through char[]->byte[] conversion at runtime.
 
-    public String encode(Message message, OutputStream out) throws IOException {
+    public String encode(Packet packet, OutputStream out) throws IOException {
+        Message msg = packet.getMessage();
 
         String primaryCid = null;           // TODO
         String primaryCt = null;           // TODO
@@ -50,7 +52,7 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeln(out);                    // write \r\n
         XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         try {
-            message.writeTo(writer);
+            msg.writeTo(writer);
             writer.close();       // TODO Does this close stream ??
         } catch (XMLStreamException xe) {
             throw new WebServiceException(xe);
@@ -58,7 +60,7 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeln(out);                        // write \r\n
 
         // Encode all the attchments
-        for (Attachment att : message.getAttachments()) {
+        for (Attachment att : msg.getAttachments()) {
             OutputUtil.writeln(startBoundary, out);     // write --boundary\r\n
             OutputUtil.writeln("Content-Id: " + att.getContentId(), out);
             OutputUtil.writeln("Content-Type: " + att.getContentType(), out);
@@ -73,7 +75,7 @@ public class MimeEncoder implements Encoder {
         return "multipart/related";
     }
 
-    public String encode(Message message, WritableByteChannel buffer) {
+    public String encode(Packet packet, WritableByteChannel buffer) {
         //TODO: not yet implemented
         throw new UnsupportedOperationException();
     }

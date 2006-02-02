@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.transport.local.client;
 
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
 import com.sun.xml.ws.spi.runtime.WSConnection;
@@ -49,7 +49,7 @@ public class LocalClientTransportFactory implements ClientTransportFactory {
         return create(null);        
     }
     
-    public WSConnection create(MessageProperties context) {
+    public WSConnection create(Packet context) {
         return new LocalClientTransport(endpointInfo, logStream);
     }
 

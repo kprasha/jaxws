@@ -5,6 +5,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
@@ -41,7 +42,7 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
         super(port, aClass, mode, owner, pipe, binding);
     }
 
-    Message createMessage(SOAPMessage arg) {
+    Packet createPacket(SOAPMessage arg) {
         MimeHeaders mhs = arg.getMimeHeaders();
         mhs.addHeader("Content-Type", "text/xml");
         mhs.addHeader("Content-Transfer-Encoding", "binary");
@@ -56,14 +57,14 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
             ch.put(mh.getName(), h);
         }
 
-        Message msg = new SAAJMessage(arg);
-        msg.getProperties().httpRequestHeaders = ch;
+        Packet msg = new Packet(new SAAJMessage(arg));
+        msg.httpRequestHeaders = ch;
         return msg;
     }
 
-    SOAPMessage toReturnValue(Message response) {
+    SOAPMessage toReturnValue(Packet response) {
         try {
-            return response.readAsSOAPMessage();
+            return response.getMessage().readAsSOAPMessage();
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }

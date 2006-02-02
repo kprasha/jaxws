@@ -5,9 +5,8 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
@@ -44,7 +43,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 
 /**
  * Payloadsource message that can be constructed for the StreamSource, SAXSource and DOMSource.
@@ -57,7 +55,6 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     private String localName;
     private String namespaceUri;
     private HeaderList headers;
-    private MessageProperties properties;
     private SourceUtils sourceUtils;
 
     private final SOAPVersion soapVersion;
@@ -98,12 +95,6 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         if(headers == null)
             headers = new HeaderList();
         return headers;
-    }
-
-    public MessageProperties getProperties() {
-        if(properties == null)
-            return properties = new MessageProperties();
-        return properties;
     }
 
     public String getPayloadLocalPart() {

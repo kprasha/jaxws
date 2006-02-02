@@ -20,40 +20,25 @@
 package com.sun.xml.ws.sandbox.handler;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.handler.*;
-import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
-import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.sandbox.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
-import javax.xml.soap.Name;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.xml.sax.InputSource;
 
 /**
  * Implementation of SOAPMessageContext. This class is used at runtime
@@ -65,23 +50,23 @@ import org.xml.sax.InputSource;
  */
 public class SOAPMessageContextImpl implements SOAPMessageContext {
 
-    private Message msg;
+    private Packet packet;
     private MessageContext ctxt;
     private Set<String> roles;
     protected SOAPMessage soapMsg = null;
     private WSBinding binding;
-     
-    public SOAPMessageContextImpl(WSBinding binding, Message msg, MessageContext ctxt) {
+
+    public SOAPMessageContextImpl(WSBinding binding, Packet packet, MessageContext ctxt) {
         this.binding = binding;
-        this.msg = msg;
+        this.packet = packet;
         this.ctxt = ctxt;
-        
+
     }
 
     public SOAPMessage getMessage() {
         if(soapMsg == null) {
             try {
-                soapMsg = msg.readAsSOAPMessage();
+                soapMsg = packet.getMessage().readAsSOAPMessage();
             } catch (SOAPException e) {
                 throw new WebServiceException(e);
             }
@@ -91,24 +76,23 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
 
     public void setMessage(SOAPMessage soapMsg) {
         try {
-            this.soapMsg = soapMsg;    
+            this.soapMsg = soapMsg;
         } catch(Exception e) {
             throw new WebServiceException(e);
         }
     }
-    protected Message getNewMessage() {
+    protected void updatePacket() {
         //Check if SOAPMessage has changed, if so construct new one,
-        // MessageProperties are handled through MessageContext        
+        // Packet are handled through MessageContext
         if(soapMsg != null) {
-            msg = new SAAJMessage(soapMsg);
+            packet.setMessage(new SAAJMessage(soapMsg));
         }
-        return msg;        
     }
-    
+
     public Object[] getHeaders(QName header, JAXBContext jaxbContext, boolean allRoles) {
         List<Object> beanList = new ArrayList<Object>();
         try {
-            Iterator<Header> itr = msg.getHeaders().getHeaders(header.getNamespaceURI(),header.getLocalPart());
+            Iterator<Header> itr = packet.getMessage().getHeaders().getHeaders(header.getNamespaceURI(),header.getLocalPart());
             if(allRoles) {
                 while(itr.hasNext()) {
                     beanList.add(itr.next().readAsJAXB(jaxbContext.createUnmarshaller()));
@@ -120,9 +104,9 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
                     // Also Add if there is no role or actor
                     if((soapHeader.getRole()== null) || getRoles().contains(soapHeader.getRole())) {
                         beanList.add(soapHeader.readAsJAXB(jaxbContext.createUnmarshaller()));
-                    }    
+                    }
                 }
-            }    
+            }
             return beanList.toArray();
         } catch(Exception e) {
             throw new WebServiceException(e);
@@ -146,7 +130,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     }
 
     /* java.util.Map methods below here */
-    
+
     public void clear() {
         ctxt.clear();
     }
@@ -194,5 +178,5 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     public Collection<Object> values() {
         return ctxt.values();
     }
-    
+
 }

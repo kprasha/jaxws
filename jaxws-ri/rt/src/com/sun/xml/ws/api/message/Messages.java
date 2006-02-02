@@ -80,7 +80,7 @@ public abstract class Messages {
      *      {@link Message} will own the {@link Source}, so it shall
      *      never be touched directly.
      *
-     * @param soapVersion
+     * @param ver
      *      The SOAP version of the message. Must not be null.
      */
     public static Message createUsingPayload(Source payload, SOAPVersion ver) {

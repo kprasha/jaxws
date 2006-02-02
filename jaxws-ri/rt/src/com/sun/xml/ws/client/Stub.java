@@ -1,7 +1,6 @@
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -80,11 +79,11 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      * Passes a message to a pipe for processing.
      *
      * <p>
-     * Unlike {@link Pipe#process(Message)},
+     * Unlike {@link Pipe#process(Packet)},
      * this method is thread-safe and can be invoked from
      * multiple threads concurrently.
      *
-     * @param msg
+     * @param packet
      *      The message to be sent to the server
      * @param requestContext
      *      The {@link RequestContext} when this invocation is originally scheduled.
@@ -97,35 +96,34 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      *      depending on the mode of invocation they have to go to different places.
      *      So we take a setter that abstracts that away. 
      */
-    protected final Message process(Message msg, RequestContext requestContext, ResponseContextReceiver receiver) {
-        {// fill in MessageProperties
-            MessageProperties props = msg.getProperties();
+    protected final Packet process(Packet packet, RequestContext requestContext, ResponseContextReceiver receiver) {
+        {// fill in Packet
 
-            props.proxy = this;
-            props.endpointAddress = defaultEndPointAddress;
+            packet.proxy = this;
+            packet.endpointAddress = defaultEndPointAddress;
 
             if(!requestContext.isEmpty()) {
                 for (Entry<String, Object> entry : requestContext.entrySet()) {
                     String key = entry.getKey();
-                    if(props.supports(key))
-                        props.put(key,entry.getValue());
+                    if(packet.supports(key))
+                        packet.put(key,entry.getValue());
                     else
-                        props.invocationProperties.put(key,entry.getValue());
+                        packet.invocationProperties.put(key,entry.getValue());
                 }
             }
         }
 
-        Message reply;
+        Packet reply;
 
         // then send it away!
         Pipe pipe = pipes.take();
         try {
-            reply = pipe.process(msg);
+            reply = pipe.process(packet);
         } finally {
             pipes.recycle(pipe);
         }
 
-        // not that MessageProperties can still be updated after
+        // not that Packet can still be updated after
         // ResponseContext is created.
         receiver.setResponseContext(new ResponseContext(reply));
 

@@ -21,6 +21,7 @@
 package com.sun.xml.ws.sandbox.handler;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.encoding.soap.SerializationException;
 import com.sun.xml.ws.handler.*;
@@ -50,19 +51,19 @@ import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 * DOMSource : changes made should be reflected, StreamSource or SAXSource, Give copy
 */
 public class LogicalMessageImpl implements LogicalMessage {
-    private Message msg;    
+    private Packet packet;
     // This holds the (modified)payload set by User
     protected Source payloadSrc = null; 
     
     /** Creates a new instance of LogicalMessageImplRearch */
-    public LogicalMessageImpl(Message msg) {
+    public LogicalMessageImpl(Packet packet) {
         // don't create extract payload until Users wants it.
-        this.msg = msg;
+        this.packet = packet;
     }
     
     public Source getPayload() {                
         if(payloadSrc == null) {
-            payloadSrc = msg.readPayloadAsSource();            
+            payloadSrc = packet.getMessage().readPayloadAsSource();
         }
         return payloadSrc;
     }
@@ -74,7 +75,7 @@ public class LogicalMessageImpl implements LogicalMessage {
     public Object getPayload(JAXBContext context) {
         try {
             if(payloadSrc == null) {
-                payloadSrc = msg.readPayloadAsSource();                
+                payloadSrc = packet.getMessage().readPayloadAsSource();
             } 
             return JAXBTypeSerializer.deserialize(payloadSrc, context);   
         } catch (DeserializationException e){

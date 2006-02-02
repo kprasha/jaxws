@@ -3,7 +3,7 @@
  */
 package com.sun.xml.ws.handler;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 
@@ -30,11 +30,7 @@ public class HandlerPipe implements Pipe {
     /**
      * Sends a {@link com.sun.xml.ws.api.message.Message} and returns a response {@link com.sun.xml.ws.api.message.Message} to it.
      *
-     * @param msg always a non-null valid unconsumed {@link com.sun.xml.ws.api.message.Message} that
-     *            represents a request.
-     *            The callee may consume a {@link com.sun.xml.ws.api.message.Message} (and in fact
-     *            most of the time it will), and therefore once a {@link com.sun.xml.ws.api.message.Message}
-     *            is given to a {@link com.sun.xml.ws.api.pipe.Pipe}.
+     * @param packet
      * @return If this method returns a non-null value, it must be
      *         a valid unconsumed {@link com.sun.xml.ws.api.message.Message}. This message represents
      *         a response to the request message passed as a parameter.
@@ -73,7 +69,7 @@ public class HandlerPipe implements Pipe {
      *                          is *not* a bug in the JAX-WS implementation, it must be catched
      *                          and wrapped into a {@link javax.xml.ws.WebServiceException}.
      */
-    public Message process(Message msg) {
+    public Packet process(Packet packet) {
         return null;
     }
 

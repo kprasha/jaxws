@@ -22,6 +22,7 @@ package com.sun.xml.ws.sandbox.handler;
 
 import com.sun.xml.ws.util.PropertySet;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -134,7 +135,7 @@ public class MessageContextImpl extends PropertySet implements MessageContext {
     public javax.servlet.ServletContext servletContext;
     
     /** Creates a new instance of MessageContextImpl */
-    public MessageContextImpl(Message msg) {
+    public MessageContextImpl(Packet packet) {
        //msgProps = msg.getProperties();
     }
     

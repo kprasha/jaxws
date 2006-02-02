@@ -19,8 +19,7 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.api.message.MessageProperties;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Implements "response context" on top of {@link MessageProperties}.
+ * Implements "response context" on top of {@link Packet}.
  *
  * <p>
  * This class creates a read-only {@link Map} view that
@@ -59,7 +58,7 @@ import java.util.Set;
  */
 @SuppressWarnings({"SuspiciousMethodCalls"})    // IDE doesn't like me calling Map methods with key typed as Object
 public class ResponseContext extends AbstractMap<String,Object> {
-    private final MessageProperties props;
+    private final Packet packet;
 
     /**
      * Lazily computed.
@@ -67,42 +66,34 @@ public class ResponseContext extends AbstractMap<String,Object> {
     private Set<Map.Entry<String,Object>> entrySet;
 
     /**
-     * @param props
-     *      The {@link MessageProperties} to wrap.
+     * @param packet
+     *      The {@link Packet} to wrap.
      */
-    public ResponseContext(MessageProperties props) {
-        this.props = props;
-    }
-
-    /**
-     * @param reply
-     *      The {@link Message} whose properties we wrap.
-     */
-    public ResponseContext(Message reply) {
-        this(reply.getProperties());
+    public ResponseContext(Packet packet) {
+        this.packet = packet;
     }
 
     public boolean containsKey(Object key) {
-        if(props.containsKey(key))
+        if(packet.containsKey(key))
             return true;    // strongly typed
 
-        if(props.invocationProperties.containsKey(key) || props.otherProperties.containsKey(key))
-            return props.getApplicationScopePropertyNames(true).contains(key);
+        if(packet.invocationProperties.containsKey(key) || packet.otherProperties.containsKey(key))
+            return packet.getApplicationScopePropertyNames(true).contains(key);
 
         return false;
     }
 
     public Object get(Object key) {
-        if(props.containsKey(key))
-            return props.get(key);    // strongly typed
+        if(packet.containsKey(key))
+            return packet.get(key);    // strongly typed
 
-        if(!props.getApplicationScopePropertyNames(true).contains(key))
+        if(!packet.getApplicationScopePropertyNames(true).contains(key))
             return null;            // no such application-scope property
 
-        Object v = props.invocationProperties.get(key);
+        Object v = packet.invocationProperties.get(key);
         if(v!=null)     return v;
 
-        return props.otherProperties.get(key);
+        return packet.otherProperties.get(key);
     }
 
     public Object put(String key, Object value) {
@@ -134,13 +125,13 @@ public class ResponseContext extends AbstractMap<String,Object> {
             Map<String,Object> r = new HashMap<String,Object>();
 
             // export application-scope properties
-            for (String key : props.getApplicationScopePropertyNames(true)) {
+            for (String key : packet.getApplicationScopePropertyNames(true)) {
                 if(containsKey(key))
                     r.put(key,get(key));
             }
 
             // and all strongly typed ones
-            r.putAll(props.createMapView());
+            r.putAll(packet.createMapView());
 
             entrySet = Collections.unmodifiableSet(r.entrySet());
         }

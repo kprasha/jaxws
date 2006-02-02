@@ -22,62 +22,54 @@ package com.sun.xml.ws.sandbox.handler;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.handler.*;
-import com.sun.xml.ws.sandbox.handler.MessageContextImpl;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 
 /**
  * Implementation of LogicalMessageContext. This class is used at runtime
  * to pass to the handlers for processing logical messages.
  *
- * <p>This Class delegates most of the fuctionality to MessageProperties
+ * <p>This Class delegates most of the fuctionality to Packet
  *
- * @see MessageProperties
+ * @see Packet
  *
  * @author WS Development Team
  */
 public class LogicalMessageContextImpl implements LogicalMessageContext {
-    private Message msg;
+    private Packet packet;
     private MessageContext ctxt;
     private LogicalMessageImpl lm;
     private WSBinding binding;
-    
-    public LogicalMessageContextImpl(WSBinding binding, Message msg, MessageContext cxt) {
+
+    public LogicalMessageContextImpl(WSBinding binding, Packet packet, MessageContext cxt) {
         this.binding = binding;
-        this.msg = msg;
+        this.packet = packet;
         this.ctxt = ctxt;
     }
 
     public LogicalMessage getMessage() {
-        lm = new LogicalMessageImpl(msg);
+        lm = new LogicalMessageImpl(packet);
         return lm;
     }
-    
-    protected Message getNewMessage() {
+
+    protected void updatePacket() {
         //Check if LogicalMessageImpl has changed, if so construct new one
         //TODO: Attachments are not used
-        // MessageProperties are handled through MessageContext 
+        // Packet are handled through MessageContext
         if(lm.payloadSrc != null){
+            Message msg = packet.getMessage();
             HeaderList headers = msg.getHeaders();
             AttachmentSet attchments = msg.getAttachments();
-            msg = new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion());            
+            packet.setMessage(new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion()));
         }
-        return msg;
-        
     }
     public void setScope(String name, Scope scope) {
         ctxt.setScope(name, scope);
@@ -88,7 +80,7 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     }
 
     /* java.util.Map methods below here */
-    
+
     public void clear() {
         ctxt.clear();
     }

@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
@@ -83,13 +84,13 @@ public final class WsaActionDispatchPipe implements Pipe {
             receivers.put(e.getKey(), cloner.copy(e.getValue()));
     }
 
-    public Message process(Message msg) {
-        Header actionHeader = msg.getHeaders().get(
+    public Packet process(Packet packet) {
+        Header actionHeader = packet.getMessage().getHeaders().get(
             "http://schemas.xmlsoap.org/ws/2004/08/addressing/", "Action");
 
         if(actionHeader==null)
             // no action header. pass through to the next pipe
-            return next.process(msg);
+            return next.process(packet);
 
         String action = parseAction(actionHeader).trim();
 
@@ -97,11 +98,11 @@ public final class WsaActionDispatchPipe implements Pipe {
         Pipe pipe = receivers.get(action);
         if(pipe==null)
             // nobody showed interest. pass through.
-            return next.process(msg);
+            return next.process(packet);
 
         // terminate the normal message processing
         // and give it to the pipe that volunteered.
-        return pipe.process(msg);
+        return pipe.process(packet);
     }
 
     /**

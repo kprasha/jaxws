@@ -20,10 +20,8 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
 import com.sun.xml.ws.api.message.stream.InputStreamMessage;
 import com.sun.xml.ws.api.message.stream.XMLStreamReaderMessage;
-import javax.xml.stream.XMLStreamReader;
 
 /**
  * Abstraction of the second pipe (next to the first or edge, network facing, 
@@ -67,10 +65,10 @@ public interface ServerEdgePipe {
      * to it.
      *
      * @throws WebServiceException
-     *      see {@link Pipe#process(Message)}.
+     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
      *
      * @throws RuntimeException
-     *      see {@link Pipe#process(Message)}.
+     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
      *
      * @param msg
      *      always a non-null unconsumed {@link XMLStreamReaderMessage} that
@@ -84,7 +82,7 @@ public interface ServerEdgePipe {
      *      This method is also allowed to return null, which indicates
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
-     */    
+     */
     Message processMessage(XMLStreamReaderMessage msg);
 
     /**
@@ -92,10 +90,10 @@ public interface ServerEdgePipe {
      * {@link java.io.InputStream} to it.
      *
      * @throws WebServiceException
-     *      see {@link Pipe#process(Message)}.
+     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
      *
      * @throws RuntimeException
-     *      see {@link Pipe#process(Message)}.
+     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
      *
      * @param msg
      *      always a non-null unconsumed {@link XMLStreamReaderMessage} that
@@ -110,7 +108,7 @@ public interface ServerEdgePipe {
      *      This method is also allowed to return null, which indicates
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
-     */    
+     */
     InputStreamMessage processInputStream(XMLStreamReaderMessage msg);
 
     /**
@@ -118,10 +116,10 @@ public interface ServerEdgePipe {
      * {@link java.io.InputStream} to it.
      *
      * @throws WebServiceException
-     *      see {@link Pipe#process(Message)}.
+     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
      *
      * @throws RuntimeException
-     *      see {@link Pipe#process(Message)}.
+     *      see {@link Pipe#process(com.sun.xml.ws.api.message.Packet)}.
      *
      * @param msg
      *      always a non-null valid unconsumed {@link Message} that
@@ -139,8 +137,8 @@ public interface ServerEdgePipe {
      *      This method is also allowed to return null, which indicates
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
-     */    
-    InputStreamMessage processInputStream(Message msg);    
+     */
+    InputStreamMessage processInputStream(Message msg);
 
     /**
      * Request response type enumerations.
@@ -151,7 +149,7 @@ public interface ServerEdgePipe {
         XML_STREAM_READER_REQUEST_INPUT_STREAM_RESPONSE,
         MESSAGE_REQUEST_INPUT_STREAM_RESPONSE;
     };
-    
+
     /**
      * Gets the request response type.
      *

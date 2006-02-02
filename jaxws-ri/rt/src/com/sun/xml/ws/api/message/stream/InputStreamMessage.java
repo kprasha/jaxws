@@ -20,7 +20,7 @@
 package com.sun.xml.ws.api.message.stream;
 
 import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import java.io.InputStream;
 
 /**
@@ -51,7 +51,7 @@ public class InputStreamMessage extends StreamBasedMessage {
      *      always a non-null unconsumed {@link InputStream} that
      *      represents a request.
      */
-    public InputStreamMessage(MessageProperties properties, String contentType, InputStream msg) {
+    public InputStreamMessage(Packet properties, String contentType, InputStream msg) {
         super(properties);
         
         this.contentType = contentType;
@@ -74,7 +74,7 @@ public class InputStreamMessage extends StreamBasedMessage {
      *      always a non-null unconsumed {@link InputStream} that
      *      represents a request.
      */
-    public InputStreamMessage(MessageProperties properties, AttachmentSet attachments, 
+    public InputStreamMessage(Packet properties, AttachmentSet attachments,
             String contentType, InputStream msg) {
         super(properties, attachments);
         

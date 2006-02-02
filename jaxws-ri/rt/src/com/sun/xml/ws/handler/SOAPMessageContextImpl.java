@@ -21,12 +21,10 @@ package com.sun.xml.ws.handler;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
-import javax.xml.soap.Name;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
@@ -199,7 +197,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         try {
             return ctxt.put(name, value);
         } catch (IllegalArgumentException e) {
-            // MessageProperties throws this exception if the type doesn't match
+            // Packet throws this exception if the type doesn't match
             throw new HandlerException("handler.messageContext.invalid.class",
                     new Object[] { value, name });
         }

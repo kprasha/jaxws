@@ -3,7 +3,7 @@ package com.sun.xml.ws.sandbox.impl;
 import com.sun.xml.stream.PropertyManager;
 import com.sun.xml.stream.writers.XMLStreamWriterImpl;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Encoder;
 
 import javax.activation.DataHandler;
@@ -60,11 +60,11 @@ public class XOPEncoder extends XMLStreamWriterImpl implements Encoder {
         }
     }
 
-    public String encode(Message message, OutputStream out) throws IOException {
+    public String encode(Packet packet, OutputStream out) throws IOException {
         throw new UnsupportedOperationException();
     }
 
-    public String encode(Message message, WritableByteChannel buffer) {
+    public String encode(Packet packet, WritableByteChannel buffer) {
         throw new UnsupportedOperationException();
     }
 

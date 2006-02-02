@@ -19,17 +19,18 @@
  */
 package com.sun.xml.ws.server.provider;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import java.lang.reflect.Method;
-import javax.xml.ws.Provider;
-import javax.xml.ws.WebServiceException;
-import java.util.logging.Logger;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 
+import javax.xml.ws.Provider;
+import javax.xml.ws.WebServiceException;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
+
 /**
- * This pipe is used to invoke the {@linke Provider} endpoints. 
+ * This pipe is used to invoke the {@link Provider} endpoints.
  *
  * @author Jitendra Kotamraju
  */
@@ -59,16 +60,23 @@ public class ProviderInvokerPipe implements Pipe {
      * invoke() is used to create a new {@link Message} that traverses
      * through the Pipeline to transport.
      */
-    public Message process(Message msg) {
+    public Packet process(Packet packet) {
         ProviderEndpointModel model = endpointInfo.getProviderModel();
-        Object parameter = model.getParameter(msg);
+        Object parameter = model.getParameter(packet.getMessage());
         Provider servant = (Provider)endpointInfo.getImplementor();
         logger.fine("Invoking Provider Endpoint "+servant);
         Object returnValue = servant.invoke(parameter);
-        Message response = model.getResponseMessage(returnValue);
-        if (returnValue == null) {
-            response.getProperties().isOneWay = true;
-        }
+
+        Packet response;
+        if(returnValue==null)
+            response = new Packet(null);
+        else
+            response = new Packet(model.getResponseMessage(returnValue));
+
+        // KK - see javadoc of isOneWay. It's only for clients, so shouldn't be used on the server
+        //if (returnValue == null) {
+        //    response.isOneWay = true;
+        //}
         return response;
     }
 

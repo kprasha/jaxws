@@ -1,8 +1,7 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
@@ -30,17 +29,17 @@ public final class TestEncoderImpl implements Encoder {
         return contentType;
     }
 
-    public String encode(Message message, OutputStream out) {
+    public String encode(Packet packet, OutputStream out) {
         XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         try {
-            message.writeTo(writer);
+            packet.getMessage().writeTo(writer);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
         return contentType;
     }
 
-    public String encode(Message message, WritableByteChannel buffer) {
+    public String encode(Packet packet, WritableByteChannel buffer) {
         //TODO: not yet implemented
         throw new UnsupportedOperationException();
     }

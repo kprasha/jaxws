@@ -20,6 +20,7 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,13 +76,13 @@ public interface Decoder {
      * @throws IOException
      *      if {@link InputStream} throws an exception.
      */
-    Message decode( InputStream in, String contentType ) throws IOException;
+    Packet decode( InputStream in, String contentType ) throws IOException;
 
     /**
      *
      * @see #decode(InputStream, String)
      */
-    Message decode( ReadableByteChannel in, String contentType );
+    Packet decode( ReadableByteChannel in, String contentType );
 
     /*
      * The following methods need to be documented and implemented.

@@ -19,8 +19,7 @@
  */
 package com.sun.xml.ws.transport.local.client;
 
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -74,20 +73,19 @@ public class LocalTransportPipe implements Pipe {
         this(that.endpointInfo, that.encoder.copy(), that.decoder.copy());
     }
 
-    public Message process(Message msg) {
+    public Packet process(Packet packet) {
 
         try {
             // Set up WSConnection with tranport headers, request content
 
             WSConnection con = new LocalConnectionImpl(lm);
             // get transport headers from message
-            MessageProperties props = msg.getProperties();
             reqHeaders.clear();
-            if (props.httpRequestHeaders != null)
-                reqHeaders.putAll(props.httpRequestHeaders);
+            if (packet.httpRequestHeaders != null)
+                reqHeaders.putAll(packet.httpRequestHeaders);
             con.setHeaders(reqHeaders);
 
-            String contentType = encoder.encode(msg, con.getOutput());
+            String contentType = encoder.encode(packet, con.getOutput());
 
             reqHeaders.put("Content-Type", Arrays.asList(contentType));
 
@@ -96,7 +94,7 @@ public class LocalTransportPipe implements Pipe {
             // TODO: need to this somewhere once per RuntimeEndpointInfo
             WebServiceContext wsContext = endpointInfo.getWebServiceContext();
             // Set a MessageContext per invocation
-            // TODO: Instead of MessageContextImpl use concrete class of MessageProperties
+            // TODO: Instead of MessageContextImpl use concrete class of Packet
             wsContext.setMessageContext(new MessageContextImpl());
 
             tie.handle(con, endpointInfo);
@@ -104,7 +102,7 @@ public class LocalTransportPipe implements Pipe {
             Map<String, List<String>> respHeaders = con.getHeaders();
             String ct = getContentType(respHeaders);
 
-            if (msg.getProperties().isOneWay == Boolean.TRUE
+            if (packet.isOneWay == Boolean.TRUE
                 || con.getStatus() == WSConnection.ONEWAY)
                 return null;    // one way. no response given.
 

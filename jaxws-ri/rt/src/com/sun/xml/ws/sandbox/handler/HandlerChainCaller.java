@@ -19,11 +19,15 @@
  */
 package com.sun.xml.ws.sandbox.handler;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.encoding.soap.SOAPConstants;
+import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
+import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.handler.XMLHandlerContext;
-import com.sun.xml.ws.handler.HandlerContext;
+import com.sun.xml.ws.handler.MessageContextUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
@@ -40,17 +44,12 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
-import com.sun.xml.ws.encoding.soap.SOAP12Constants;
-import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 
 /**
  * The class stores the actual "chain" of handlers that is called
@@ -411,8 +410,8 @@ public class HandlerChainCaller {
      * handlers have been called during the request and so all are
      * closed.
      */
-    public boolean callHandleFault(Message msg) {
-        ContextHolder ch = new ContextHolder(binding, msg);
+    public boolean callHandleFault(Packet packet) {
+        ContextHolder ch = new ContextHolder(binding, packet);
         ch.getSMC().put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, true);
         ((SOAPMessageContextImpl) ch.getSMC()).setRoles(getRoles());
 
@@ -868,15 +867,15 @@ public class HandlerChainCaller {
 
         boolean logicalOnly;
         WSBinding binding;
-        Message msg;
+        Packet packet;
         MessageContext cxt;
         // smc and lmc are mutually exclusive, one of them should be null anytime
         SOAPMessageContextImpl smc;
         LogicalMessageContextImpl lmc;
-        ContextHolder(WSBinding binding, Message msg) {
+        ContextHolder(WSBinding binding, Packet msg) {
             logicalOnly = isLogicalOnly(binding);
             this.binding = binding;
-            this.msg = msg;
+            this.packet = msg;
             this.cxt = new MessageContextImpl(msg);            
         }
 
@@ -893,10 +892,10 @@ public class HandlerChainCaller {
         LogicalMessageContext getLMC() {
             if(lmc == null) {
                 if(smc != null) {
-                    msg = smc.getNewMessage();
+                    smc.updatePacket();
                     smc = null;
                 }
-                lmc = new LogicalMessageContextImpl(binding, msg, cxt);
+                lmc = new LogicalMessageContextImpl(binding, packet, cxt);
                 
             }
             return lmc;
@@ -905,10 +904,10 @@ public class HandlerChainCaller {
         SOAPMessageContext getSMC() {
             if(smc == null) {
                 if(lmc != null) {
-                    msg = lmc.getNewMessage();
+                    lmc.updatePacket();
                     lmc = null;
                 }
-                smc = (logicalOnly ? null : new SOAPMessageContextImpl(binding, msg, cxt));                
+                smc = (logicalOnly ? null : new SOAPMessageContextImpl(binding, packet, cxt));
             }
             return smc;
         }
@@ -916,15 +915,16 @@ public class HandlerChainCaller {
         MessageContext getMC() {
             return cxt;
         }
-        //TODO: 
-        Message getMessage() {
+        //TODO:
+        // TODO: rename this method for me, please - KK
+        Packet getMessage() {
             //TODO: Need to build a Message and set properties from MessageContext
             if(lmc != null) {
-                msg = lmc.getNewMessage();
+                lmc.updatePacket();
             } else if(smc != null) {
-                msg = smc.getNewMessage();
+                smc.updatePacket();
             }
-            return msg;
+            return packet;
         }
         
         

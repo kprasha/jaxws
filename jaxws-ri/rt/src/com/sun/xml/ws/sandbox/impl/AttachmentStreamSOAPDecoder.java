@@ -7,7 +7,7 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.ASCIIUtility;
 
 import javax.xml.ws.WebServiceException;
@@ -57,7 +57,7 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
      * @return
      * @throws IOException
      */
-    public Message decode(InputStream in, String contentType) throws IOException {
+    public Packet decode(InputStream in, String contentType) throws IOException {
         //InputStream MUST support mark()
         if(!this.in.markSupported()){
             this.in = new BufferedInputStream(in);
@@ -517,7 +517,7 @@ public class AttachmentStreamSOAPDecoder implements Decoder{
      * @param contentType
      * @return
      */
-    public Message decode(ReadableByteChannel in, String contentType) {
+    public Packet decode(ReadableByteChannel in, String contentType) {
         throw new UnsupportedOperationException();
     }
 

@@ -5,8 +5,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
@@ -82,12 +81,12 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @return  The Message created returned as the Interface in actuallity a
      *          concrete Message Type
      */
-    abstract Message createMessage(T msg);
+    abstract Packet createPacket(T msg);
 
     /**
      * Obtains the value to return from the response message.
      */
-    abstract T toReturnValue(Message response);
+    abstract T toReturnValue(Packet response);
 
     public final Response<T> invokeAsync(T param) {
         Invoker invoker = new Invoker(param);
@@ -122,13 +121,13 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     /**
      * Synchronously invokes a service.
      *
-     * See {@link #process(Message, RequestContext, ResponseContextReceiver)} on
+     * See {@link #process(Packet, RequestContext, ResponseContextReceiver)} on
      * why it takes a {@link RequestContext} and {@link ResponseContextReceiver} as a parameter.
      */
     public final T doInvoke(T in, RequestContext rc, ResponseContextReceiver receiver) {
-        Message message = createMessage(in);
-        setProperties(message.getProperties(),false);
-        Message response = process(message,rc,receiver);
+        Packet message = createPacket(in);
+        setProperties(message,false);
+        Packet response = process(message,rc,receiver);
         return toReturnValue(response);
     }
 
@@ -137,18 +136,18 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     public final void invokeOneWay(T in) {
-        Message message = createMessage(in);
-        setProperties(message.getProperties(),true);
-        Message response = process(message,getRequestContext(),this);
+        Packet request = createPacket(in);
+        setProperties(request,true);
+        Packet response = process(request,getRequestContext(),this);
     }
 
-    void setProperties(MessageProperties props, boolean isOneWay) {
-        props.isOneWay = isOneWay;
+    void setProperties(Packet packet, boolean isOneWay) {
+        packet.isOneWay = isOneWay;
 
         //not needed but leave for now --maybe mode is needed
-        props.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
+        packet.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
         if (clazz != null)
-            props.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
+            packet.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
     }
 
     /**

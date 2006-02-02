@@ -19,22 +19,19 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.xml.ws.WebServiceException;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  *
@@ -57,15 +54,14 @@ public class HttpTransportPipe implements Pipe {
         this( that.encoder.copy(), that.decoder.copy() );
     }
 
-    public Message process(Message msg) {
+    public Packet process(Packet packet) {
         try {
             // Set up WSConnection with tranport headers, request content
             // TODO: remove WSConnection based HttpClienTransport
-            WSConnection con = new HttpClientTransport(null, msg.getProperties());
+            WSConnection con = new HttpClientTransport(null, packet);
 
             // get transport headers from message
-            MessageProperties props = msg.getProperties();
-            Map<String, List<String>> reqHeaders = props.httpRequestHeaders;
+            Map<String, List<String>> reqHeaders = packet.httpRequestHeaders;
             //assign empty map if its null
             if(reqHeaders == null){
                 reqHeaders = new HashMap<String, List<String>>();
@@ -73,7 +69,7 @@ public class HttpTransportPipe implements Pipe {
             String ct = encoder.getStaticContentType();
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
-                ct = encoder.encode(msg, buf);
+                ct = encoder.encode(packet, buf);
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
                 reqHeaders.put("Content-Type", Arrays.asList(ct));
@@ -86,13 +82,13 @@ public class HttpTransportPipe implements Pipe {
                 }
                 reqHeaders.put("Content-Type", Arrays.asList(ct));
                 con.setHeaders(reqHeaders);
-                encoder.encode(msg, con.getOutput());
+                encoder.encode(packet, con.getOutput());
             }
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
-            ct = getContentType(respHeaders);            
-            if(msg.getProperties().isOneWay==Boolean.TRUE
+            ct = getContentType(respHeaders);
+            if(packet.isOneWay==Boolean.TRUE
             || con.getStatus()==WSConnection.ONEWAY)
                 return null;    // one way. no response given.
 

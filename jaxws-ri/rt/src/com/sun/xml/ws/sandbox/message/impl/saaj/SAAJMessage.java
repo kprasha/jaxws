@@ -27,7 +27,7 @@ import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Node;
@@ -65,9 +65,8 @@ import java.util.Map;
  * @author Vivek Pandey
  */
 public class SAAJMessage extends Message {
-    private SOAPMessage sm;
+    private final SOAPMessage sm;
     private HeaderList headers;
-    private MessageProperties properties;
     private String payloadLocalName;
     private String payloadNamspace;
     private AttachmentSet attSet;
@@ -76,8 +75,6 @@ public class SAAJMessage extends Message {
     private boolean parsedHeader;
 
     public SAAJMessage(SOAPMessage sm) {
-        properties = new MessageProperties();
-
         this.sm = sm;
 
         try {
@@ -135,15 +132,6 @@ public class SAAJMessage extends Message {
             e.printStackTrace();
         }
         return headers;
-    }
-
-    /**
-     * Returns the properties of this message.
-     *
-     * @return always return the same object. Never null.
-     */
-    public MessageProperties getProperties() {
-        return properties;
     }
 
     /**

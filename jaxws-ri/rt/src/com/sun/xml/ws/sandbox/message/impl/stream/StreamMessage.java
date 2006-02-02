@@ -22,7 +22,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
@@ -42,8 +42,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 
 public class StreamMessage extends AbstractMessageImpl {
-    private final MessageProperties props = new MessageProperties();
-
     /**
      * flag that tells whether StreamMessage is created with the
      * XMLStreamReader that points to the payload or soapenv:Envelop
@@ -115,10 +113,6 @@ public class StreamMessage extends AbstractMessageImpl {
             headers = new HeaderList();
         }
         return headers;
-    }
-
-    public MessageProperties getProperties() {
-        return props;
     }
 
     public String getPayloadLocalPart() {

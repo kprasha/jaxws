@@ -5,7 +5,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
@@ -60,14 +60,15 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
     }
 
 
-    Object toReturnValue(Message response) {
+    Object toReturnValue(Packet response) {
         try {
             Unmarshaller unmarshaller = jaxbcontext.createUnmarshaller();
+            Message msg = response.getMessage();
             switch (mode) {
                 case PAYLOAD:
-                    return response.<Object>readPayloadAsJAXB(unmarshaller);
+                    return msg.<Object>readPayloadAsJAXB(unmarshaller);
                 case MESSAGE:
-                    Source result = response.readEnvelopeAsSource();
+                    Source result = msg.readEnvelopeAsSource();
                     return unmarshaller.unmarshal(result);
                 default:
                     throw new WebServiceException("Unrecognized dispatch mode");
@@ -77,7 +78,7 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
         }
     }
 
-    private void setHttpRequestHeaders(MessageProperties props) {
+    private void setHttpRequestHeaders(Packet props) {
         Map<String, List<String>> ch = new HashMap<String, List<String>>();
 
         List<String> ct = new ArrayList<String>();
@@ -91,23 +92,23 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
         props.httpRequestHeaders = ch;
     }
 
-    Message createMessage(Object msg) {
+    Packet createPacket(Object msg) {
         assert jaxbcontext != null;
         //todo: use Pool - temp to get going
         try {
             Marshaller marshaller = jaxbcontext.createMarshaller();
             marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
-            return new JAXBMessage(marshaller, msg, soapVersion);
+            return new Packet(new JAXBMessage(marshaller, msg, soapVersion));
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
     }
 
     @Override
-    void setProperties(MessageProperties props, boolean isOneWay) {
-        super.setProperties(props, isOneWay);
+    void setProperties(Packet packet, boolean isOneWay) {
+        super.setProperties(packet, isOneWay);
 
-        setHttpRequestHeaders(props);
-        props.otherProperties.put(JAXB_CONTEXT_PROPERTY, jaxbcontext); // KK - do we really need this?
+        setHttpRequestHeaders(packet);
+        packet.otherProperties.put(JAXB_CONTEXT_PROPERTY, jaxbcontext); // KK - do we really need this?
     }
 }

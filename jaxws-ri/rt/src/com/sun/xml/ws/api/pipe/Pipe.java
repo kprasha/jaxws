@@ -20,7 +20,7 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.Dispatch;
@@ -103,13 +103,13 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * <h3>Per-message state</h3>
  * <p>
  * Any information that changes from a message to message should be
- * stored in {@link MessageProperties}. This includes information like
+ * stored in {@link Packet}. This includes information like
  * transport-specific headers.
  *
  * <h3>Per-thread state</h3>
  * <p>
  * Any expensive objects that are non-reentrant can be stored in
- * instance variables of a {@link Pipe}, since {@link #process(Message)} is
+ * instance variables of a {@link Pipe}, since {@link #process(Packet)} is
  * non reentrant. When a pipe is copied, new instances should be allocated
  * so that two {@link Pipe} instances don't share thread-unsafe resources.
  * This includes things like canonicalizers, JAXB unmarshallers, buffers,
@@ -247,13 +247,7 @@ public interface Pipe {
      *      is *not* a bug in the JAX-WS implementation, it must be catched
      *      and wrapped into a {@link WebServiceException}.
      *
-     * @param msg
-     *      always a non-null valid unconsumed {@link Message} that
-     *      represents a request.
-     *      The callee may consume a {@link Message} (and in fact
-     *      most of the time it will), and therefore once a {@link Message}
-     *      is given to a {@link Pipe}.
-     *
+     * @param packet
      * @return
      *      If this method returns a non-null value, it must be
      *      a valid unconsumed {@link Message}. This message represents
@@ -263,7 +257,7 @@ public interface Pipe {
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
-    Message process( Message msg );
+    Packet process( Packet packet );
 
     /**
      * Invoked before the last copy of the pipeline is about to be discarded,
@@ -297,7 +291,7 @@ public interface Pipe {
      *
      * <p>
      * Note that this method might be invoked by one thread while another
-     * thread is executing the {@link #process(Message)} method. See
+     * thread is executing the {@link #process(Packet)} method. See
      * the {@link Encoder#copy()} for more discussion about this.
      *
      * @param cloner

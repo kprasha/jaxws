@@ -2,6 +2,7 @@ package com.sun.xml.ws.client.port;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -93,8 +94,8 @@ public final class PortInterfaceStub extends Stub implements InvocationHandler {
         }
     }
 
-    public final Message doProcess(Message msg, RequestContext rc, ResponseContextReceiver receiver) {
-        return super.process(msg,rc,receiver);
+    public final Packet doProcess(Packet request, RequestContext rc, ResponseContextReceiver receiver) {
+        return super.process(request,rc,receiver);
     }
 
     /**

@@ -5,6 +5,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
@@ -29,12 +30,12 @@ public class DataSourceDispatch extends DispatchImpl<DataSource> {
        super(port, clazz, mode, service, pipe, binding);
     }
 
-    Message createMessage(DataSource arg) {
+    Packet createPacket(DataSource arg) {
         // TODO
         throw new UnsupportedOperationException();
     }
 
-    DataSource toReturnValue(Message response) {
+    DataSource toReturnValue(Packet response) {
         // TODO
         throw new UnsupportedOperationException();
     }

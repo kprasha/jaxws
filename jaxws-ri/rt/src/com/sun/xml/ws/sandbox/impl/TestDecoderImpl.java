@@ -1,7 +1,7 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.api.SOAPVersion;
 
@@ -27,17 +27,17 @@ public final class TestDecoderImpl implements Decoder {
         factory = soapVersion.saajFactory;
     }
 
-    public Message decode(InputStream in, String contentType) throws IOException {
+    public Packet decode(InputStream in, String contentType) throws IOException {
         try {
             MimeHeaders headers = new MimeHeaders();
             headers.addHeader("Content-Type", contentType);
-            return new SAAJMessage(factory.createMessage(headers,in));
+            return new Packet(new SAAJMessage(factory.createMessage(headers,in)));
         } catch (SOAPException e) {
             throw new WebServiceException("Unable to parse a message",e);
         }
     }
 
-    public Message decode(ReadableByteChannel in, String contentType) {
+    public Packet decode(ReadableByteChannel in, String contentType) {
         // TODO
         throw new UnsupportedOperationException();
     }

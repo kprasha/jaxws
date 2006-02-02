@@ -40,7 +40,7 @@ import java.lang.reflect.Proxy;
  *
  * <h3>Pipe next</h3>
  * <p>
- * Stubs turn a method invocation into a {@link Pipe#process(Message)} invocation,
+ * Stubs turn a method invocation into a {@link Pipe#process(com.sun.xml.ws.api.message.Packet)} invocation,
  * and this pipe passed in as the <tt>next</tt> parameter will receive a {@link Message}
  * from newly created stub.
  *

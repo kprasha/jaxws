@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.WSConnectionImpl;
@@ -51,10 +51,10 @@ public class HttpClientTransport extends WSConnectionImpl {
     int statusCode;
     private Map<String, List<String>> respHeaders = null;
 
-    public HttpClientTransport(OutputStream logStream, MessageProperties properties) {
+    public HttpClientTransport(OutputStream logStream, Packet packet) {
         _logStream = logStream;
-        endpoint = properties.endpointAddress;
-        context = properties;
+        endpoint = packet.endpointAddress;
+        context = packet;
     }
 
     /**
@@ -362,7 +362,7 @@ public class HttpClientTransport extends WSConnectionImpl {
     }
 
     protected HttpURLConnection createHttpConnection(String endpoint,
-                                                     MessageProperties context)
+                                                     Packet context)
             throws IOException {
 
         boolean verification = false;
@@ -461,7 +461,7 @@ public class HttpClientTransport extends WSConnectionImpl {
 
     HttpURLConnection httpConnection = null;
     String endpoint = null;
-    MessageProperties context = null;
+    Packet context = null;
     CookieJar cookieJar = null;
     boolean isFailure = false;
     OutputStream _logStream = null;

@@ -28,21 +28,10 @@ import com.sun.xml.ws.handler.MessageContextUtil;
 import com.sun.xml.ws.sandbox.handler.HandlerChainCaller.ContextHolder;
 import com.sun.xml.ws.sandbox.handler.HandlerChainCaller.Direction;
 import com.sun.xml.ws.sandbox.handler.HandlerChainCaller.RequestOrResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.soap.SOAPException;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.handler.Handler;
-import java.util.Set;
 import com.sun.xml.ws.api.message.Message;
-import javax.xml.ws.handler.LogicalHandler;
-import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
-import javax.xml.ws.soap.SOAPFaultException;
+import com.sun.xml.ws.api.message.Packet;
 
 /**
  * Dummy ClientHandlerPipe
@@ -74,15 +63,15 @@ public class ClientHandlerPipe extends HandlerPipe{
             hcaller.setRoles(((SOAPBindingImpl)binding).getRoles());
         } */
     }
-    
+
     public HandlerChainCaller getHandlerChainCaller() {
         return hcaller;
     }
     public void setHandlerChainCaller(HandlerChainCaller hcaller) {
         this.hcaller= hcaller;
     }
-    
-    public Message process(Message msg) {
+
+    public Packet process(Packet packet) {
         /*
          *Remove this code and put it in constructor, after Server Runtime is changed.
          *See constructor
@@ -92,14 +81,13 @@ public class ClientHandlerPipe extends HandlerPipe{
             //set roles on HandlerChainCaller, if it is SOAP binding
             hcaller.setRoles(((SOAPBindingImpl)binding).getRoles());
         }
-        
-        
-        
+
+
+
         // This is client-side pipe, so it should be request ( OUTBOUND Message).
-        boolean isOneWay = msg.getProperties().isOneWay;
-        ContextHolder ch = new ContextHolder(binding,msg);
+        boolean isOneWay = packet.isOneWay;
+        ContextHolder ch = new ContextHolder(binding,packet);
         boolean handlerResult = true;
-        Message reply = null;
         if(hcaller.hasHandlers()) {
             try {
                 handlerResult = callHandlersOnRequest(ch);
@@ -108,7 +96,7 @@ public class ClientHandlerPipe extends HandlerPipe{
                 if (MessageContextUtil.ignoreFaultInMessage(
                         ch.getMC())) {
                     // ignore fault in this case and use exception
-                    
+
                     //RELOOK: code taken from SMD, old code wraps in WSE, is it needed?
                     //        Changed to throw PE directly
                     throw pe;
@@ -120,13 +108,14 @@ public class ClientHandlerPipe extends HandlerPipe{
                 return ch.getMessage();
             }
         }
-        
-        // Call next Pipe.process() on msg                
-        try {            
+
+        // Call next Pipe.process() on msg
+        Packet reply;
+        try {
             reply = nextPipe.process(ch.getMessage());
             // Next Pipe Should be MUHeaderPipe
             // TODO: Do MUHeader Processing
-        } catch (WebServiceException wse) { 
+        } catch (WebServiceException wse) {
             //RELOOK: changed from SMD code
             hcaller.forceCloseHandlers(ch);
              throw wse;
@@ -139,23 +128,24 @@ public class ClientHandlerPipe extends HandlerPipe{
         if (hcaller.hasHandlers()) {
             callHandlersOnResponse(ch);
         }
-        
-        return ch.getMessage();        
+
+        return ch.getMessage();
     }
-    
+
     protected boolean callHandlersOnRequest(ContextHolder ch) {
         HandlerChainCaller caller = getHandlerChainCaller();
-        boolean responseExpected = ch.getMessage().getProperties().isOneWay;
+        // TODO: isOneWay may null. This code can't be right - KK
+        boolean responseExpected = ch.getMessage().isOneWay;
         return caller.callHandlers(Direction.OUTBOUND, RequestOrResponse.REQUEST, ch,
                 responseExpected);
     }
-    
+
     /*
-     * Because a user's handler can throw a web service exception
-     * (e.g., a ProtocolException), we need to wrap any such exceptions
-     * here because the main catch clause assumes that WebServiceExceptions
-     * are already wrapped.
-     */
+    * Because a user's handler can throw a web service exception
+    * (e.g., a ProtocolException), we need to wrap any such exceptions
+    * here because the main catch clause assumes that WebServiceExceptions
+    * are already wrapped.
+    */
     protected boolean callHandlersOnResponse(ContextHolder ch) {
         HandlerChainCaller caller = getHandlerChainCaller();
         try {
@@ -166,7 +156,7 @@ public class ClientHandlerPipe extends HandlerPipe{
             throw new WebServiceException(wse);
         }
     }
-    
-    
-    
+
+
+
 }

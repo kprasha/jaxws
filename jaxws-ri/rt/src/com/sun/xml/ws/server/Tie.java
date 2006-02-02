@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Acceptor;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -101,7 +101,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
             Map<String, List<String>> headers = connection.getHeaders();
             String ct = headers.get("Content-Type").get(0);
             InputStream in = connection.getInput();
-            Message msg = decoder.decode(in, ct);
+            Packet packet = decoder.decode(in, ct);
 
             Pipe pipe;
             if (endpointInfo.getImplementor() instanceof Provider) {
@@ -109,7 +109,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
             } else {
                 pipe = new EndpointInvokerPipe(endpointInfo);
             }
-            msg = pipe.process(msg);
+            packet = pipe.process(packet);
 
             ct = encoder.getStaticContentType();          
             if (ct == null) {
@@ -119,7 +119,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
                 headers = new Headers();
                 headers.put("Content-Type", Arrays.asList(ct));
                 connection.setHeaders(headers);
-                encoder.encode(msg, connection.getOutput());
+                encoder.encode(packet, connection.getOutput());
             }
         } else {
             

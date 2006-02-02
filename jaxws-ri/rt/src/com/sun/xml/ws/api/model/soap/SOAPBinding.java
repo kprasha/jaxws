@@ -68,7 +68,7 @@ abstract public class SOAPBinding {
      * It's always non-null. soap message serializer needs to generated SOAPAction HTTP header with
      * the return of this method enclosed in quotes("").
      *
-     * @see com.sun.xml.ws.api.message.MessageProperties#soapAction
+     * @see com.sun.xml.ws.api.message.Packet#soapAction
      */
     public String getSOAPAction() {
         return soapAction;

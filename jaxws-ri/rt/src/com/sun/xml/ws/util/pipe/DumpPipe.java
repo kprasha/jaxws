@@ -1,8 +1,8 @@
 package com.sun.xml.ws.util.pipe;
 
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -33,16 +33,16 @@ public class DumpPipe implements Pipe {
         this.staxOut = XMLOutputFactory.newInstance();
     }
 
-    public Message process(Message msg) {
-        dump("request",msg);
-        Message reply = next.process(msg);
+    public Packet process(Packet packet) {
+        dump("request",packet);
+        Packet reply = next.process(packet);
         dump("response",reply);
         return reply;
     }
 
-    private void dump(String header, Message msg) {
+    private void dump(String header, Packet packet) {
         out.println("====["+header+"]====");
-        if(msg==null)
+        if(packet.getMessage()==null)
             out.println("(none)");
         else
             try {
@@ -51,7 +51,7 @@ public class DumpPipe implements Pipe {
                         // noop
                     }
                 });
-                msg.copy().writeTo(writer);
+                packet.getMessage().copy().writeTo(writer);
                 writer.close();
             } catch (XMLStreamException e) {
                 e.printStackTrace(out);

@@ -19,6 +19,7 @@
  */
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
@@ -26,14 +27,11 @@ import com.sun.xml.ws.client.port.MethodHandler;
 import com.sun.xml.ws.server.EndpointMethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.util.Pool;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
 
 /**
  * This pipe is used to invoke SEI based endpoints. 
@@ -50,7 +48,7 @@ public class EndpointInvokerPipe implements Pipe {
      * a {@link MethodHandler} that processes it.
      */
     private final Map<Method, EndpointMethodHandler> methodHandlers = new HashMap<Method, EndpointMethodHandler>();
-    
+
     public EndpointInvokerPipe(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;
 
@@ -70,21 +68,24 @@ public class EndpointInvokerPipe implements Pipe {
      * invoke() is used to create a new {@link Message} that traverses
      * through the Pipeline to transport.
      */
-    public Message process(Message req) {
+    public Packet process(Packet req) {
         // TODO need find dispatch method using different mechanisms
         // TODO need to define an API
-        
-        String localPart = req.getPayloadLocalPart();
-        String nsURI = req.getPayloadNamespaceURI();
+
+        Message msg = req.getMessage();
+
+        String localPart = msg.getPayloadLocalPart();
+        String nsURI = msg.getPayloadNamespaceURI();
         QName opName = new QName(nsURI, localPart);
-        
+
         AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();
         JavaMethodImpl javaMethod = seiModel.getJavaMethod(opName);
         Method method = javaMethod.getMethod();
-        
+
         EndpointMethodHandler handler = methodHandlers.get(method);
         Object servant = endpointInfo.getImplementor();
-        return handler.invoke(servant, req);
+        return new Packet(handler.invoke(servant, msg));
+        // TODO: some properties need to be copied from request packet to the response packet
     }
 
     public void preDestroy() {
@@ -93,7 +94,7 @@ public class EndpointInvokerPipe implements Pipe {
     public Pipe copy(PipeCloner cloner) {
         return this;
     }
-    
+
 
 
 }

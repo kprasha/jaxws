@@ -20,6 +20,7 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
@@ -78,6 +79,7 @@ public interface Encoder {
      * Internally, this method is most likely invoke {@link Message#writeTo(XMLStreamWriter)}
      * to turn the message into infoset.
      *
+     * @param packet
      * @param out
      *      Must not be null. The caller is responsible for closing the stream,
      *      not the callee.
@@ -89,17 +91,17 @@ public interface Encoder {
      * @throws IOException
      *      if a {@link OutputStream} throws {@link IOException}.
      */
-    String encode( Message message, OutputStream out ) throws IOException;
+    String encode( Packet packet, OutputStream out ) throws IOException;
 
     /**
-     * The version of {@link #encode(Message, OutputStream)}
+     * The version of {@link #encode(Packet,OutputStream)}
      * that writes to NIO {@link ByteBuffer}.
      *
      * <p>
      * TODO: for the convenience of implementation, write
      * an adapter that wraps {@link WritableByteChannel} to {@link OutputStream}.
      */
-    String encode( Message message, WritableByteChannel buffer );
+    String encode( Packet packet, WritableByteChannel buffer );
     
     /*
      * The following methods need to be documented and implemented.

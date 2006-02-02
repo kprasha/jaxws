@@ -27,7 +27,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -61,7 +61,6 @@ import javax.xml.transform.Source;
  */
 public final class JAXBMessage extends AbstractMessageImpl {
     private HeaderList headers;
-    private final MessageProperties props;
 
     /**
      * The JAXB object that represents the header.
@@ -96,7 +95,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
      *      The SOAP version of the message. Must not be null.
      */
     public JAXBMessage( Marshaller marshaller, Object jaxbObject, SOAPVersion soapVer ) {
-        props = new MessageProperties();
         this.bridge = MarshallerBridgeContext.MARSHALLER_BRIDGE;
         this.context = new MarshallerBridgeContext(marshaller);
         this.jaxbObject = jaxbObject;
@@ -146,7 +144,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
         QName tagName = bridge.getTypeReference().tagName;
         this.nsUri = tagName.getNamespaceURI();
         this.localName = tagName.getLocalPart();
-        props = new MessageProperties();
     }
 
     /**
@@ -156,8 +153,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
         this.headers = that.headers;
         if(this.headers!=null)
             this.headers = new HeaderList(this.headers);
-        // TODO: do we need to clone this? I guess so.
-        this.props = that.props;
 
         this.jaxbObject = that.jaxbObject;
         this.bridge = that.bridge;
@@ -174,10 +169,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
         if(headers==null)
             headers = new HeaderList();
         return headers;
-    }
-
-    public MessageProperties getProperties() {
-        return props;
     }
 
     public String getPayloadLocalPart() {

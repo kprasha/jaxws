@@ -2,7 +2,7 @@ package com.sun.xml.ws.client.port;
 
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContextReceiver;
@@ -202,26 +202,26 @@ final class SyncMethodHandler extends MethodHandler {
         Marshaller m = pool.take();
 
         try {
-            Message msg = createRequestMessage(args);
+            Packet req = new Packet(createRequestMessage(args));
 
-            MessageProperties props = msg.getProperties();
-            props.soapAction = soapAction;
-            props.isOneWay = isOneWay;
+            req.soapAction = soapAction;
+            req.isOneWay = isOneWay;
 
             // process the message
-            Message reply = owner.doProcess(msg,rc,receiver);
+            Packet reply = owner.doProcess(req,rc,receiver);
 
-            if(reply==null)
+            Message msg = reply.getMessage();
+            if(msg ==null)
                 // no reply. must have been one-way
                 return null;
 
             try {
-                if(reply.isFault()) {
-                    SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(reply);
-                    throw faultBuilder.createException(checkedExceptions, reply);
+                if(msg.isFault()) {
+                    SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
+                    throw faultBuilder.createException(checkedExceptions, msg);
                 } else {
                     BridgeContext context = seiModel.getBridgeContext();
-                    return responseBuilder.readResponse(reply,args,context);
+                    return responseBuilder.readResponse(msg,args,context);
                 }
             } catch (JAXBException e) {
                 throw new DeserializationException("failed.to.read.response",e);

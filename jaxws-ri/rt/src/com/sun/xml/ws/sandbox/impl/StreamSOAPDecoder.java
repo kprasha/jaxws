@@ -7,7 +7,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -37,7 +37,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
         SOAP_NAMESPACE_URI = namespace;
     }
     
-    public Message decode(InputStream in, String contentType) throws IOException {
+    public Packet decode(InputStream in, String contentType) throws IOException {
         XMLStreamReader reader = createXMLStreamReader();
 
         // Check at the start of the document
@@ -95,10 +95,10 @@ public abstract class StreamSOAPDecoder implements Decoder {
         if (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
             // Payload is present
             // XMLStreamReader is positioned at the first child
-            return createMessage(headers, reader);
+            return new Packet(createMessage(headers, reader));
         } else {
             // Empty payload <soap:Body/>
-            return createMessage(headers, null);
+            return new Packet(createMessage(headers, null));
         } 
     }
 
@@ -106,7 +106,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
      *
      * @see #decode(InputStream, String)
      */
-    public Message decode(ReadableByteChannel in, String contentType ) {
+    public Packet decode(ReadableByteChannel in, String contentType ) {
         throw new UnsupportedOperationException();
     }
 

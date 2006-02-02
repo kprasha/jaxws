@@ -35,11 +35,24 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Properties associated with a {@link Message}.
+ * Represents a container of a {@link Message}.
+ *
+ * <h2>What is a {@link Packet}?</h2>
+ * <p>
+ * A packet can be thought of as a frame/envelope/package that wraps
+ * a {@link Message}. A packet keeps track of optional metadata (properties)
+ * about a {@link Message} that doesn't go across the wire.
+ * This roughly corresponds to {@link MessageContext} in the JAX-WS API.
  *
  * <p>
- * This object holds information about a {@link Message} that doesn't go
- * on the wire. Information frequently used inside the JAX-WS RI
+ * Usually a packet contains a {@link Message} in it, but sometimes
+ * (such as for a reply of an one-way operation), a packet may
+ * float around without a {@link Message} in it.
+ *
+ *
+ * <h2>Properties</h2>
+ * <p>
+ * Information frequently used inside the JAX-WS RI
  * is stored in the strongly-typed fields. Other information is stored
  * in terms of a generic {@link Map} (see {@link #otherProperties} and
  * {@link #invocationProperties}.)
@@ -50,7 +63,7 @@ import java.util.Set;
  * statically known for each of them, and propagation happens accordingly.
  * For generic information stored in {@link Map}, {@link #otherProperties}
  * stores per-message scope information (which don't carry over to
- * response {@link MessageProperties}), and {@link #invocationProperties}
+ * response {@link Packet}), and {@link #invocationProperties}
  * stores per-invocation scope information (which carries over to
  * the response.)
  *
@@ -62,13 +75,13 @@ import java.util.Set;
  *
  * <h3>Relationship to request/response context</h3>
  * <p>
- * Request context is used to seed the initial values of {@link MessageProperties}.
+ * Request context is used to seed the initial values of {@link Packet}.
  * Some of those values go to strongly-typed fields, and others go to
  * {@link #invocationProperties}, as they need to be retained in the reply message.
  *
  * <p>
- * Similarly, response context is constructed from {@link MessageProperties}.
- * (Or rather it's just a view of {@link MessageProperties}.)
+ * Similarly, response context is constructed from {@link Packet}.
+ * (Or rather it's just a view of {@link Packet}.)
  *
  *
  * <h3>TODO</h3>
@@ -83,15 +96,57 @@ import java.util.Set;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class MessageProperties extends PropertySet {
+public final class Packet extends PropertySet {
+
+    /**
+     * Creates a {@link Packet} that wraps a given {@link Message}.
+     */
+    public Packet(Message message) {
+        this.message = message;
+    }
+
+    /**
+     * Creates an empty {@link Packet} that doesn't have any {@link Message}.
+     */
+    public Packet() {
+    }
+
+    private Message message;
+
+    /**
+     * Gets the last {@link Message} set through {@link #setMessage(Message)}.
+     *
+     * @return
+     *      may null. See the class javadoc for when it's null.
+     */
+    public Message getMessage() {
+        return message;
+    }
+
+    /**
+     * Sets a {@link Message} to this packet.
+     *
+     * @param message
+     *      Can be null.
+     */
+    public void setMessage(Message message) {
+        this.message = message;
+    }
+
     /**
      * Value of {@link #HTTP_REQUEST_HEADERS} property.
+     *
+     * @deprecated
+     *      shouldn't be computed eagerly
      */
     @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public Map<String, List<String>> httpRequestHeaders;
 
     /**
      * Value of {@link #HTTP_RESPONSE_HEADERS} property.
+     *
+     * @deprecated
+     *      shouldn't be computed eagerly
      */
     @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> httpResponseHeaders;
@@ -238,7 +293,7 @@ public final class MessageProperties extends PropertySet {
     private static final Map<String,Accessor> model;
 
     static {
-        model = parse(MessageProperties.class);
+        model = parse(Packet.class);
     }
 
     protected Map<String, Accessor> getPropertyMap() {

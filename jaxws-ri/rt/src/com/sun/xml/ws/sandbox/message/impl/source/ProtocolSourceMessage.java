@@ -3,7 +3,7 @@ package com.sun.xml.ws.sandbox.message.impl.source;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
@@ -30,7 +30,6 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
     private HeaderList headers;
     private AttachmentSet attSet;
     private Source src;
-    private MessageProperties properties;
     private StreamMessage sm;
 
     public ProtocolSourceMessage(Source source) {
@@ -53,12 +52,6 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
         if (headers == null)
             headers = new HeaderList();
         return headers;
-    }
-
-    public MessageProperties getProperties() {
-        if (properties == null)
-            return properties = new MessageProperties();
-        return properties;
     }
 
     public String getPayloadLocalPart() {

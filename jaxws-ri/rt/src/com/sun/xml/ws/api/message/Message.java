@@ -75,11 +75,6 @@ import java.lang.reflect.Proxy;
  *    TODO: can attachments be streamed? I suspect so.
  *    does anyone need to read attachment twice?
  *
- * <li>
- *    Properties, which is a bag that keeps information
- *    that is not part of the SOAP message on the wire,
- *    yet relevant to the processing stacks inside JAX-WS.
- *
  * </ol>
  *
  *
@@ -132,7 +127,7 @@ import java.lang.reflect.Proxy;
  *
  * <h2>Message lifespan</h2>
  * <p>
- * Often {@link MessageProperties} include information local to a particular
+ * Often {@link Packet} include information local to a particular
  * invocaion (such as {@link HttpServletRequest}, from this angle, it makes sense
  * to tie a lifespan of a message to one pipeline invocation.
  * <p>
@@ -195,14 +190,6 @@ public abstract class Message {
      *      always return the same non-null object.
      */
     public abstract HeaderList getHeaders();
-
-    /**
-     * Returns the properties of this message.
-     *
-     * @return
-     *      always return the same object. Never null.
-     */
-    public abstract MessageProperties getProperties();
 
     /**
      * Gets the attachments of this message

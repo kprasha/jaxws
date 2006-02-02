@@ -5,6 +5,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
@@ -17,10 +18,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 /**
  * TODO: Use sandbox classes, update javadoc
  */
@@ -42,20 +39,21 @@ public class SourceDispatch extends DispatchImpl<Source> {
         super(port, aClass, mode, owner, pipe, binding);
     }
 
-    Source toReturnValue(Message response) {
+    Source toReturnValue(Packet response) {
+        Message msg = response.getMessage();
         switch (mode){
             case PAYLOAD:
-                return response.readPayloadAsSource();
+                return msg.readPayloadAsSource();
             case MESSAGE:
                 //todo: uncomment when Pa
                 //return
-                return response.readEnvelopeAsSource();
+                return msg.readEnvelopeAsSource();
             default:
                 throw new WebServiceException("Unrecognized dispatch mode");
         }
     }
 
-    Message createMessage(Source msg) {
+    Packet createPacket(Source msg) {
         Message message;
         switch (mode) {
             case PAYLOAD:
@@ -81,18 +79,22 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 throw new WebServiceException("Unrecognized message mode");
         }
 
-        Map<String, List<String>> ch = new HashMap<String, List<String>>();
+        // KK - stubs can't assume what form messages are serialized.
+        // don't assume that it's even going to be formated as text/xml.
 
-        List<String> ct = new ArrayList<String>();
-        ct.add("text/xml");
-        ch.put("Content-Type", ct);
+        //Map<String, List<String>> ch = new HashMap<String, List<String>>();
+        //
+        //List<String> ct = new ArrayList<String>();
+        //ct.add("text/xml");
+        //ch.put("Content-Type", ct);
+        //
+        //List<String> cte = new ArrayList<String>();
+        //cte.add("binary");
+        //ch.put("Content-Transfer-Encoding", cte);
+        //
+        //Packet p = new Packet(message);
+        //p.httpRequestHeaders = ch;
 
-        List<String> cte = new ArrayList<String>();
-        cte.add("binary");
-        ch.put("Content-Transfer-Encoding", cte);
-
-        message.getProperties().httpRequestHeaders = ch;
-
-        return message;
+        return new Packet(message);
     }
 }

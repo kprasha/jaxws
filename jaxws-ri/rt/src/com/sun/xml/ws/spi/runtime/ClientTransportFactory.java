@@ -19,12 +19,12 @@
  */
 package com.sun.xml.ws.spi.runtime;
 
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 
 /**
  * This class is implemented by
  * com.sun.xml.ws.client.ClientTransportFactory
  */
 public interface ClientTransportFactory {
-    public WSConnection create(MessageProperties context);
+    public WSConnection create(Packet context);
 }

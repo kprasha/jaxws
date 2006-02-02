@@ -2,7 +2,7 @@ package com.sun.xml.ws.sandbox.message.impl;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.transform.Source;
 import javax.xml.soap.SOAPMessage;
@@ -30,11 +30,8 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
      */
     private final HeaderList headers;
 
-    private final MessageProperties properties;
-
     public EmptyMessageImpl() {
         headers = new HeaderList();
-        properties = new MessageProperties();
     }
 
     /**
@@ -42,7 +39,6 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
      */
     private EmptyMessageImpl(EmptyMessageImpl that) {
         this.headers = new HeaderList(that.headers);
-        this.properties = that.properties;
     }
 
     public boolean hasHeaders() {
@@ -51,10 +47,6 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
 
     public HeaderList getHeaders() {
         return headers;
-    }
-
-    public MessageProperties getProperties() {
-        return properties;
     }
 
     public String getPayloadLocalPart() {

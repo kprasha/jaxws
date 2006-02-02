@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.util;
 
-import com.sun.xml.ws.api.message.MessageProperties;
+import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.ws.handler.MessageContext;
 import java.lang.annotation.ElementType;
@@ -63,7 +63,7 @@ public abstract class PropertySet {
      * For similar reason, this annotation can be only placed
      * on a reference type, not primitive type.
      *
-     * @see MessageProperties
+     * @see Packet
      * @author Kohsuke Kawaguchi
      */
     @Retention(RetentionPolicy.RUNTIME)
