@@ -22,17 +22,25 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
     String getLocalName();
 
     /**
-     * Gets {@link WSDLMessage} the wsdl:portType/wsdl:input@message value.
+     * Gets the input message of this operation.
      */
     WSDLMessage getInputMessage();
 
     /**
-     * Gets {@link QName} the wsdl:portType/wsdl:output@message value.
+     * Gets the output message of this operation.
+     *
+     * @return
+     *      null if this is an one-way operation.
      */
     WSDLMessage getOutputMessage();
 
     /**
-     * Gets {@link QName} the wsdl:portType/wsdl:fault@message value.
+     * Returns true if this operation is an one-way operation.
+     */
+    boolean isOneWay();
+
+    /**
+     * Gets the fault message of this operation.
      */
     QName getFaultMessage();
 }

@@ -68,6 +68,10 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         return outputMessage;
     }
 
+    public boolean isOneWay() {
+        return outputMessage==null;
+    }
+
     public void setOutputMessage(WSDLMessage outputMessage) {
         this.outputMessage = outputMessage;
     }
