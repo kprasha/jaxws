@@ -4,6 +4,7 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -45,6 +46,7 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -213,8 +215,8 @@ public class WSServiceDelegate extends WSService {
 
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
-            ports.put(portName, new PortInfoBase(endpointAddress,
-                portName, bindingId));
+            ports.put(portName,
+                new PortInfoBase(EndpointAddress.create(endpointAddress), portName, bindingId));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
@@ -245,7 +247,7 @@ public class WSServiceDelegate extends WSService {
         return assembler.createClient(port,this,binding);
     }
 
-    public String getEndpointAddress(QName qName) {
+    public EndpointAddress getEndpointAddress(QName qName) {
         PortInfoBase dispatchPort = ports.get(qName);
         return dispatchPort.getTargetEndpoint();
 

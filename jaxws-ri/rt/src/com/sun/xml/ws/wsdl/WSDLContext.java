@@ -19,25 +19,22 @@
  */
 package com.sun.xml.ws.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.ServiceConfigurationError;
+import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
-import javax.jws.WebService;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -99,11 +96,11 @@ public class WSDLContext {
     }
 
     //just get the first one for now
-    public String getEndpoint(QName serviceName) {
+    public EndpointAddress getEndpoint(QName serviceName) {
         if (serviceName == null)
             throw new WebServiceException("Service unknown, can not identify ports for an unknown Service.");
         WSDLService service = wsdlDoc.getService(serviceName);
-        String endpoint = null;
+        EndpointAddress endpoint = null;
         if (service != null) {
             WSDLPort port = service.getFirstPort();
             if (port!=null) {

@@ -22,6 +22,7 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
@@ -33,7 +34,7 @@ import javax.xml.namespace.QName;
  */
 public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPort {
     private final QName name;
-    private String address;
+    private EndpointAddress address;
     private final QName bindingName;
 
     /**
@@ -54,14 +55,14 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
         return bindingName;
     }
 
-    public String getAddress() {
+    public EndpointAddress getAddress() {
         return address;
     }
 
     /**
      * Only meant for {@link RuntimeWSDLParser} to call.
      */
-    public void setAddress(String address) {
+    public void setAddress(EndpointAddress address) {
         assert address!=null;
         this.address = address;
     }

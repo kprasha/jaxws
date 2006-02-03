@@ -48,7 +48,7 @@ public class ProviderInvokerPipe implements Pipe {
         } catch (NoSuchMethodException e) {
             throw new WebServiceException(e.getMessage(), e);
         }
-    };
+    }
     
     public ProviderInvokerPipe(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;

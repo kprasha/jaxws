@@ -21,6 +21,7 @@
 package com.sun.xml.ws.transport.http.client;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.EndpointAddress;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.WSConnectionImpl;
@@ -35,14 +36,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author WS Development Team
  */
-public class HttpClientTransport extends WSConnectionImpl {
+public final class HttpClientTransport extends WSConnectionImpl {
 
     private static String LAST_ENDPOINT = "";
     private static boolean redirect = true;
@@ -63,7 +63,7 @@ public class HttpClientTransport extends WSConnectionImpl {
     @Override
     public OutputStream getOutput() {
         try {
-            httpConnection = createHttpConnection(endpoint, context);
+            httpConnection = createHttpConnection();
             cookieJar = sendCookieAsNeeded();
 
             // how to incorporate redirect processing: message dispatcher does not seem to tbe right place
@@ -260,8 +260,7 @@ public class HttpClientTransport extends WSConnectionImpl {
      * return message to be processed (i.e., in the case of an UNAUTHORIZED
      * response from the servlet or 404 not found)
      */
-    protected boolean checkResponseCode()
-        throws IOException {
+    protected boolean checkResponseCode() throws IOException {
         boolean isFailure = false;
         try {
 
@@ -361,8 +360,7 @@ public class HttpClientTransport extends WSConnectionImpl {
         }
     }
 
-    protected HttpURLConnection createHttpConnection(String endpoint,
-                                                     Packet context)
+    protected HttpURLConnection createHttpConnection()
             throws IOException {
 
         boolean verification = false;
@@ -382,9 +380,9 @@ public class HttpClientTransport extends WSConnectionImpl {
                 redirect = false;
         }
 
-        checkEndpoints(endpoint);
+        checkEndpoints();
 
-        HttpURLConnection httpConnection = createConnection(endpoint);
+        HttpURLConnection httpConnection = createConnection();
 
         if (!verification) {
             // for https hostname verification  - turn off by default
@@ -426,9 +424,8 @@ public class HttpClientTransport extends WSConnectionImpl {
         return httpConnection;
     }
 
-    private java.net.HttpURLConnection createConnection(String endpoint)
-        throws IOException {
-        return (HttpURLConnection) new URL(endpoint).openConnection();
+    private HttpURLConnection createConnection() throws IOException {
+        return (HttpURLConnection) endpoint.openConnection();
     }
 
 //    private void redirectRequest(HttpURLConnection httpConnection, SOAPMessageContext context) {
@@ -444,10 +441,10 @@ public class HttpClientTransport extends WSConnectionImpl {
         return (((statusCode == 301) || (statusCode == 302)) && redirect && (redirectCount-- > 0));
     }
 
-    private void checkEndpoints(String currentEndpoint) {
-        if (!LAST_ENDPOINT.equalsIgnoreCase(currentEndpoint)) {
+    private void checkEndpoints() {
+        if (!LAST_ENDPOINT.equalsIgnoreCase(endpoint.toString())) {
             redirectCount = START_REDIRECT_COUNT;
-            LAST_ENDPOINT = currentEndpoint;
+            LAST_ENDPOINT = endpoint.toString();
         }
     }
 
@@ -460,7 +457,7 @@ public class HttpClientTransport extends WSConnectionImpl {
     }
 
     HttpURLConnection httpConnection = null;
-    String endpoint = null;
+    EndpointAddress endpoint = null;
     Packet context = null;
     CookieJar cookieJar = null;
     boolean isFailure = false;

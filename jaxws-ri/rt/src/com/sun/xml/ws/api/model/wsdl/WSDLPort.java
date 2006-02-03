@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
+import com.sun.xml.ws.api.EndpointAddress;
 
 import javax.xml.namespace.QName;
 
@@ -30,7 +31,10 @@ public interface WSDLPort extends WSDLObject, WSDLExtensible {
     WSDLBoundPortType getBinding();
 
     /**
-     * Gets the wsdl:service/wsdl:port@address attribute value.
+     * Gets endpoint address of this port.
+     *
+     * @return
+     *      always non-null.
      */
-    String getAddress();
+    EndpointAddress getAddress();
 }

@@ -20,6 +20,7 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.util.PropertySet;
 
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.net.MalformedURLException;
 
 /**
  * Represents a container of a {@link Message}.
@@ -177,9 +179,31 @@ public final class Packet extends PropertySet {
      * <p>
      * The JAX-WS spec allows this to be changed for each message,
      * so it's designed to be a property.
+     *
+     * <p>
+     * Must not be null for a request message on the client. Otherwise
+     * it's null.
+     */
+    public EndpointAddress endpointAddress;
+
+    /**
+     * @deprecated
+     *      The programatic acccess should be done via
+     *      {@link #endpointAddress}. This is for JAX-WS client applications
+     *      that access this property via {@link BindingProvider#ENDPOINT_ADDRESS_PROPERTY}.
      */
     @Property(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
-    public String endpointAddress;
+    public String getEndPointAddressString() {
+        if(endpointAddress==null)
+            return null;
+        else
+            return endpointAddress.toString();
+    }
+
+    public void setEndPointAddressString(String s) {
+        this.endpointAddress = EndpointAddress.create(s);
+    }
+
 
     /**
      * The value of the SOAPAction header associated with the message.

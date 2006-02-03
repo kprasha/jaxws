@@ -28,6 +28,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.Provider;
 
 /**
  * Keeps all the {@link Provider} endpoint information for SOAP binding. It also
@@ -41,12 +42,12 @@ public class SOAPProviderEndpointModel extends ProviderEndpointModel {
     private Class implementorClass;
     private Service.Mode mode;
     private boolean isSource;
-    
+
     public SOAPProviderEndpointModel(Class implementorClass, SOAPVersion soapVersion) {
         this.implementorClass = implementorClass;
         this.soapVersion = soapVersion;
     }
-    
+
     /**
      * Finds parameter type, mode and throws an exception if Service.Mode and
      * parameter type combination is invalid.
@@ -65,7 +66,7 @@ public class SOAPProviderEndpointModel extends ProviderEndpointModel {
                 "Illeagal combination Mode.PAYLOAD and Provider<SOAPMessage>");
         }
     }
-    
+
     /**
      * {@link Message} is converted to correct parameter for invoke() method
      */
@@ -91,7 +92,7 @@ public class SOAPProviderEndpointModel extends ProviderEndpointModel {
         }
         return parameter;
     }
-    
+
     /**
      * return value of invoke() is converted to {@link Message}
      */
@@ -112,10 +113,10 @@ public class SOAPProviderEndpointModel extends ProviderEndpointModel {
         }
         return responseMsg;
     }
-    
+
     /*
-     * Is it Provider<SOAPMessage> ?
-     */
+    * Is it Provider<SOAPMessage> ?
+    */
     private static boolean isSoapMessage(Class c) {
         try {
             c.getMethod("invoke",  SOAPMessage.class);
@@ -125,5 +126,5 @@ public class SOAPProviderEndpointModel extends ProviderEndpointModel {
         }
         return false;
     }
-    
+
 }

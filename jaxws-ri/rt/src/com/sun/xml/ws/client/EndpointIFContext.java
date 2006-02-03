@@ -21,6 +21,7 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.server.RuntimeContext;
+import com.sun.xml.ws.api.EndpointAddress;
 
 import javax.xml.namespace.QName;
 
@@ -35,7 +36,7 @@ public class EndpointIFContext {
     private QName serviceName;
     private final Class sei;
     private QName portName;
-    private String endpointAddress;
+    private EndpointAddress endpointAddress;
     private String bindingId;
 
 
@@ -71,7 +72,7 @@ public class EndpointIFContext {
         return portName;
     }
 
-    public String getEndpointAddress() {
+    public EndpointAddress getEndpointAddress() {
         return endpointAddress;
     }
 

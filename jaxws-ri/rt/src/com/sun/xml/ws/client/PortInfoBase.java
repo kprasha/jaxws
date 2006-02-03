@@ -19,6 +19,8 @@
  */
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.api.EndpointAddress;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
@@ -29,11 +31,11 @@ import javax.xml.ws.Service;
  */
 final class PortInfoBase {
 
-    private final String targetEndpoint;
+    private final EndpointAddress targetEndpoint;
     private final QName portName;
     private final String bindingId;
 
-    public PortInfoBase(String targetEndpoint, QName name, String bindingId) {
+    public PortInfoBase(EndpointAddress targetEndpoint, QName name, String bindingId) {
         this.targetEndpoint = targetEndpoint;
         this.portName = name;
         this.bindingId = bindingId;
@@ -43,7 +45,7 @@ final class PortInfoBase {
         return portName;
     }
 
-    public String getTargetEndpoint() {
+    public EndpointAddress getTargetEndpoint() {
         return targetEndpoint;
     }
 

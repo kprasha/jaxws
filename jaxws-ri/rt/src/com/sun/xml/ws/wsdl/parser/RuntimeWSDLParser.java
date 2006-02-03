@@ -27,6 +27,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
@@ -48,6 +49,7 @@ import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -259,7 +261,11 @@ public class RuntimeWSDLParser {
         }
         if(location==null)
             throw new WebServiceException("No address specified for port "+portQName);
-        port.setAddress(location);
+        try {
+            port.setAddress(new EndpointAddress(location));
+        } catch (MalformedURLException e) {
+            throw new WebServiceException("Invalid endpoint address "+location,e);
+        }
         service.put(portQName, port);
     }
 

@@ -3,6 +3,7 @@ package com.sun.xml.ws.client;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
 
@@ -49,7 +50,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      * The address to which the message is sent to,
      * (unless it's overriden in {@link RequestContext}.
      */
-    private final String defaultEndPointAddress;
+    private final EndpointAddress defaultEndPointAddress;
 
     private RequestContext requestContext = new RequestContext(this);
 
@@ -68,7 +69,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      *      The destination of the message. The actual destination
      *      could be overridden by {@link RequestContext}.
      */
-    protected Stub(Pipe master, BindingImpl binding, String defaultEndPointAddress) {
+    protected Stub(Pipe master, BindingImpl binding, EndpointAddress defaultEndPointAddress) {
         this.master = master;
         this.binding = binding;
         this.defaultEndPointAddress = defaultEndPointAddress;
