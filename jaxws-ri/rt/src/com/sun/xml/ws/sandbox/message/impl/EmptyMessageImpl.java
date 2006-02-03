@@ -35,6 +35,12 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
         this.headers = new HeaderList();
     }
 
+    public EmptyMessageImpl(HeaderList headers, SOAPVersion version){
+        super(version);
+        this.headers = headers;
+    }
+
+
     /**
      * Copy constructor.
      */
