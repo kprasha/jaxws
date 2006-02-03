@@ -21,7 +21,6 @@ package com.sun.xml.ws.api.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
-import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.wsdl.writer.document.Service;
 import com.sun.xml.ws.wsdl.writer.document.Port;
 import com.sun.xml.ws.wsdl.writer.document.PortType;
@@ -198,9 +197,8 @@ public interface WSDLGeneratorExtension {
      *               extension can be added to.
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
-     * @param ce     This is the CheckedException corresponding to the <code>fault</code>
      */
-    public void addBindingOperationFaultExtension(FaultType fault, Method method, CheckedException ce);
+    public void addBindingOperationFaultExtension(FaultType fault, Method method);
 
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
@@ -214,9 +212,8 @@ public interface WSDLGeneratorExtension {
      *                extension can be added to.
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
-     * @param ce      This is the CheckedException corresponding to this fault <code>message</code>
      */
-    public void addFaultMessageExtension(Message message, Method method, CheckedException ce);
+    public void addFaultMessageExtension(Message message, Method method);
 
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
@@ -231,8 +228,7 @@ public interface WSDLGeneratorExtension {
      *               extension can be added to.
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
-     * @param ce     This is the CheckedException corresponding to the <code>fault</code>
      */
-    public void addOperationFaultExtension(FaultType fault, Method method, CheckedException ce);
+    public void addOperationFaultExtension(FaultType fault, Method method);
 
 }

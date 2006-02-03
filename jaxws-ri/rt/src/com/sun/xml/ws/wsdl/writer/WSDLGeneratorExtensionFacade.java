@@ -4,7 +4,6 @@ import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
-import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.wsdl.writer.document.Service;
 import com.sun.xml.ws.wsdl.writer.document.Port;
 import com.sun.xml.ws.wsdl.writer.document.PortType;
@@ -95,18 +94,18 @@ final class WSDLGeneratorExtensionFacade implements WSDLGeneratorExtension {
             e.addBindingOperationOutputExtension(output, method);
     }
 
-    public void addBindingOperationFaultExtension(FaultType fault, Method method, CheckedException ce) {
+    public void addBindingOperationFaultExtension(FaultType fault, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
-            e.addBindingOperationFaultExtension(fault, method, ce);
+            e.addBindingOperationFaultExtension(fault, method);
     }
 
-    public void addFaultMessageExtension(Message message, Method method, CheckedException ce) {
+    public void addFaultMessageExtension(Message message, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
-            e.addFaultMessageExtension(message, method, ce);
+            e.addFaultMessageExtension(message, method);
     }
 
-    public void addOperationFaultExtension(FaultType fault, Method method, CheckedException ce) {
+    public void addOperationFaultExtension(FaultType fault, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
-            e.addOperationFaultExtension(fault, method, ce);
+            e.addOperationFaultExtension(fault, method);
     }
 }

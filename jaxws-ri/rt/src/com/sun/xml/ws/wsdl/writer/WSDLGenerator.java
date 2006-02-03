@@ -396,7 +396,7 @@ public class WSDLGenerator {
             if (processedExceptions.contains(tagName))
                 continue;
             message = portDefinitions.message().name(tagName.getLocalPart());
-            extension.addFaultMessageExtension(message, method.getMethod(), exception);
+            extension.addFaultMessageExtension(message, method.getMethod());
             part = message.part().name(tagName.getLocalPart());
             part.element(tagName);
             processedExceptions.add(tagName);
@@ -430,7 +430,7 @@ public class WSDLGenerator {
                 QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
                 FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
-                extension.addOperationFaultExtension(paramType, method.getMethod(), exception);        
+                extension.addOperationFaultExtension(paramType, method.getMethod());        
             }
         }
     }
