@@ -45,6 +45,7 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.namespace.QName;
 import java.util.List;
 
 
@@ -165,6 +166,10 @@ public abstract class StreamHeader implements Header {
             }
         }
         return null;
+    }
+
+    public String getAttribute(QName name) {
+        return getAttribute(name.getNamespaceURI(),name.getLocalPart());
     }
 
     /**

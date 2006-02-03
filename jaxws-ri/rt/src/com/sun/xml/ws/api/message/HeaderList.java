@@ -21,6 +21,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Decoder;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +76,7 @@ public final class HeaderList extends ArrayList<Header> {
     /**
      * Gets the first {@link Header} of the specified name.
      *
+     * @param nsUri
      * @return null
      *      if not found.
      */
@@ -86,6 +88,16 @@ public final class HeaderList extends ArrayList<Header> {
                 return h;
         }
         return null;
+    }
+
+    /**
+     * Gets the first {@link Header} of the specified name.
+     *
+     * @return null
+     *      if not found.
+     */
+    public final Header get(QName name) {
+        return get(name.getNamespaceURI(),name.getLocalPart());
     }
 
     /**

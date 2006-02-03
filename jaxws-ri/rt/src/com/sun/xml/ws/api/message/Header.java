@@ -32,6 +32,7 @@ import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.namespace.QName;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
@@ -153,6 +154,19 @@ public interface Header {
      *      doesn't have to do anything.
      */
     String getAttribute(String nsUri, String localName);
+
+    /**
+     * Gets the attribute value on the header element.
+     *
+     * <p>
+     * This is a convenience method that calls into {@link #getAttribute(String, String)}
+     *
+     * @param name
+     *      Never null.
+     *
+     * @see #getAttribute(String, String)
+     */
+    String getAttribute(QName name);
 
     /**
      * Reads the header as a {@link XMLStreamReader}.

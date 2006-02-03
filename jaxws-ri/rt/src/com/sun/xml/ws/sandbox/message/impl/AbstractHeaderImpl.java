@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 
 import javax.xml.soap.SOAPConstants;
+import javax.xml.namespace.QName;
 
 /**
  * Partial default implementation of {@link Header}.
@@ -53,6 +54,10 @@ public abstract class AbstractHeaderImpl implements Header {
         String v = getAttribute(soapVersion.nsUri,"relay");
         if(v==null) return false;   // on SOAP 1.1 message there shouldn't be such an attribute, so this works fine
         return parseBool(v);
+    }
+
+    public String getAttribute(QName name) {
+        return getAttribute(name.getNamespaceURI(),name.getLocalPart());
     }
 
     /**
