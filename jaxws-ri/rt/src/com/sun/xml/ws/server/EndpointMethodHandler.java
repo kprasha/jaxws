@@ -10,6 +10,7 @@ import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.Pool;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -52,6 +53,7 @@ public final class EndpointMethodHandler {
     private final SEIModel seiModel;
     private final SOAPVersion soapVersion;
     private final Method method;
+    private final JavaMethodImpl javaMethodModel;
 
     /**
      * Used to get a value from method invocation parameter.
@@ -67,6 +69,7 @@ public final class EndpointMethodHandler {
         this.seiModel = endpointInfo.getRuntimeModel();
         soapVersion = endpointInfo.getBinding().getSOAPVersion();
         this.method = method.getMethod();
+        this.javaMethodModel = method;
 
         {// prepare objects for creating messages
             List<ParameterImpl> rp = method.getResponseParameters();
@@ -196,12 +199,12 @@ public final class EndpointMethodHandler {
                 Throwable cause = e.getCause();
                 if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
                     // Service specific exception
-                    responseMessage = createFaultMessageForServiceException(e);
+                    responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, javaMethodModel.getCheckedException(cause.getClass()), cause);
                 } else {
-                    responseMessage = createFaultMessageForOtherException(e);
+                    responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
                 }
             } catch (Exception e) {
-                responseMessage = createFaultMessageForOtherException(e);
+                responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
             Packet respPacket = new Packet(responseMessage);
             respPacket.isOneWay = isOneWay;
@@ -222,19 +225,5 @@ public final class EndpointMethodHandler {
             filler.fillIn(args, returnValue, msg);
 
         return msg;
-    }
-    
-    /**
-     * Creates a response {@link JAXBMessage} from method arguments.
-     *
-     */
-    private Message createFaultMessageForServiceException(Exception e) {
- 
-        return null;
-    }
-    
-    private Message createFaultMessageForOtherException(Exception e) {
-
-        return null;
-    }
+    }    
 }
