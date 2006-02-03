@@ -32,11 +32,41 @@ public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
     Packet createPacket(DataSource arg) {
         // TODO
+         //Message message = null;
+         /*switch (mode) {
+            case PAYLOAD:
+                //message = ??
+                break;
+            case MESSAGE:
+                //Todo: temporary
+
+                //todo:temp
+                //message = ?;
+                //todo: uncomment above when correct Message for DS is implemented
+                break;
+            default:
+                throw new WebServiceException("Unrecognized message mode");
+        }
+
+        return new Packet(message);
+        */
         throw new UnsupportedOperationException();
     }
 
     DataSource toReturnValue(Packet response) {
         // TODO
+        // TODO
+        //Message msg = response.getMessage();
+        /*switch (mode){
+            case PAYLOAD:
+                //return ?;
+            case MESSAGE:
+                //return
+                //return ?;
+            default:
+                throw new WebServiceException("Unrecognized dispatch mode");
+        }
+        */
         throw new UnsupportedOperationException();
     }
 }
