@@ -26,7 +26,10 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
+import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -39,6 +42,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
+import javax.xml.ws.WebServiceException;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 
 public class StreamMessage extends AbstractMessageImpl {
     /**
@@ -80,9 +86,25 @@ public class StreamMessage extends AbstractMessageImpl {
         super(soapVersion);
         this.headers = headers;
         this.reader = reader;
-        this.payloadLocalName = reader.getLocalName();
-        this.payloadNamespaceURI = reader.getNamespaceURI();
         isPayload = true;
+        //if the reader is pointing to the end element <soapenv:Body/> then its empty message
+        // or no payload
+        if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
+            String body = reader.getLocalName();
+            String nsUri = reader.getNamespaceURI();
+            assert body != null;
+            assert nsUri != null;
+            //if its not soapenv:Body then throw exception, we received malformed stream
+            if(body.equals("Body") && nsUri.equals(soapVersion.nsUri)){
+                this.payloadLocalName = null;
+                this.payloadNamespaceURI = null;
+            }else{ //TODO: i18n and also we should be throwing better message that this
+                throw new WebServiceException("Malformed stream: {"+nsUri+"}"+body);
+            }
+        }else{
+            this.payloadLocalName = reader.getLocalName();
+            this.payloadNamespaceURI = reader.getNamespaceURI();
+        }
     }
 
     /**
@@ -134,11 +156,15 @@ public class StreamMessage extends AbstractMessageImpl {
     }
 
     public Object readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        if(!hasPayload())
+            return null;
         // TODO: How can the unmarshaller process this as a fragment?
         return unmarshaller.unmarshal(reader);
     }
 
     public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        if(!hasPayload())
+            return null;
         return bridge.unmarshal(context,reader);
     }
 
@@ -307,7 +333,8 @@ public class StreamMessage extends AbstractMessageImpl {
             writer.writeEndElement();
         }
         writer.writeStartElement("soapenv", "Body", soapVersion.nsUri);
-        writePayloadTo(writer);
+        if(!hasPayload())
+            writePayloadTo(writer);
         writer.writeEndElement();
         writer.writeEndElement();
     }
@@ -317,7 +344,21 @@ public class StreamMessage extends AbstractMessageImpl {
     }
 
     public Message copy() {
-        throw new UnsupportedOperationException();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        // if the reader is on END element means its empty body or no payload, so lets
+        // return the same message
+        if(!hasPayload())
+            return new EmptyMessageImpl(headers, soapVersion);
+
+        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+        try {
+            writeTo(writer);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return new StreamMessage(headers, XMLStreamReaderFactory.createXMLStreamReader(bis, true), soapVersion);
+
     }
 
 

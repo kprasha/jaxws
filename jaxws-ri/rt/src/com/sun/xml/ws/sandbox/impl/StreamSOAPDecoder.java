@@ -11,6 +11,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
+import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 
@@ -104,7 +105,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
             return new Packet(createMessage(headers, reader));
         } else {
             // Empty payload <soap:Body/>
-            return new Packet(createMessage(headers, null));
+            return new Packet(new EmptyMessageImpl(headers, SOAPVersion.fromNsUri(SOAP_NAMESPACE_URI)));
         }
     }
 
