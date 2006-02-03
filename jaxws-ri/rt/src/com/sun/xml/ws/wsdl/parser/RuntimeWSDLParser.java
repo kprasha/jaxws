@@ -19,23 +19,23 @@
  */
 
 package com.sun.xml.ws.wsdl.parser;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLMessageImpl;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.server.DocInfo;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
-import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
-import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLMessageImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -46,14 +46,13 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.WebServiceException;
 import java.io.IOException;
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 /**
  * Parses WSDL and builds {@link WSDLModel}.
@@ -259,12 +258,16 @@ public class RuntimeWSDLParser {
                 extension.portElements(port,reader);
             }
         }
-        if(location==null)
-            throw new WebServiceException("No address specified for port "+portQName);
-        try {
-            port.setAddress(new EndpointAddress(location));
-        } catch (MalformedURLException e) {
-            throw new WebServiceException("Invalid endpoint address "+location,e);
+        if(location!=null) {
+            try {
+                port.setAddress(new EndpointAddress(location));
+            } catch (MalformedURLException e) {
+                // TODO: JAX-RPC used to generate invalid values, so we don't want
+                // it to be a fatal failure. we might report it and should move on,
+                // as if no address was given.
+                // TODO: modify wegen not to generaet location at all.
+                //throw new WebServiceException("Invalid endpoint address "+location,e);
+            }
         }
         service.put(portQName, port);
     }
