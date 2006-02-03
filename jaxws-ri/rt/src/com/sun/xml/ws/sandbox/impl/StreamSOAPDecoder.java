@@ -77,6 +77,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
                 namespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
             }
 
+            // skip <soap:Header>
             XMLStreamReaderUtil.nextElementContent(reader);
 
             // If SOAP header blocks are present (i.e. not <soap:Header/>)
@@ -91,6 +92,9 @@ public abstract class StreamSOAPDecoder implements Decoder {
                     throw new IOException("");
                 }
             }
+
+            // Move to soap:Body
+            XMLStreamReaderUtil.nextElementContent(reader);
         }
 
         // Verify that <soap:Body> is present
@@ -150,9 +154,6 @@ public abstract class StreamSOAPDecoder implements Decoder {
             // the end of the </soap:header>
             creator.createElementFragment(reader, false);
         }
-
-        // Move to soap:Body
-        XMLStreamReaderUtil.nextElementContent(reader);
 
         return buffer;
     }
