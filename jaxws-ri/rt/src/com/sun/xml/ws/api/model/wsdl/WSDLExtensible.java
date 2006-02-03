@@ -7,7 +7,7 @@ package com.sun.xml.ws.api.model.wsdl;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-public interface WSDLExtensible {
+public interface WSDLExtensible extends WSDLObject {
     /**
      * Gets all the {@link WSDLExtension}s
      * added through {@link #addExtension(WSDLExtension)}.
