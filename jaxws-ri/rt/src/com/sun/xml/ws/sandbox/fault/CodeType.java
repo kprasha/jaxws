@@ -25,7 +25,7 @@ import javax.xml.namespace.QName;
     "Value",
     "Subcode"
 })
-public class CodeType {
+class CodeType {
     @XmlTransient
     private static final String ns="http://www.w3.org/2003/05/soap-envelope";
 
@@ -33,11 +33,18 @@ public class CodeType {
      * mandatory, minOccurs=1
      */
     @XmlElement(namespace = ns)
-    public QName Value;
+    private QName Value;
 
     /**
      * optional, minOcccurs=0, maxOccurs="1"
      */
     @XmlElement(namespace = ns)
-    public SubcodeType Subcode;
+    private SubcodeType Subcode;
+
+    CodeType(QName value) {
+        Value = value;
+    }
+
+    CodeType() {
+    }
 }

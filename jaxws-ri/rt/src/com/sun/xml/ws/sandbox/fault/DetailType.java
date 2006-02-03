@@ -3,7 +3,7 @@ package com.sun.xml.ws.sandbox.fault;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlMixed;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,11 +11,11 @@ import java.util.List;
  *     &lt;m:MaxTime>P5M</m:MaxTime>
  * &lt;/env:Detail>
  */
-public class DetailType {
+class DetailType {
     /**
      * TODO: annotate 0 or more attriubtes
      */
-    public List<Object> attributes;
+    private List<Object> attributes;
 
     /**
      * The detail entry could be 0 or more elements. Perhaps some elements may be
@@ -31,5 +31,19 @@ public class DetailType {
      * {@link Object} once we have better solution that working thru {@link com.sun.xml.bind.api.Bridge}
      */
     @XmlAnyElement(lax=true)
-    public List<Node> detailEntry;
+    private List<Object> detailEntry;
+
+    List<Object> getDetails() {
+        return detailEntry;
+    }
+
+    DetailType(Object detailObject) {
+        if(detailObject != null){
+            detailEntry = new ArrayList<Object>();
+            detailEntry.add(detailObject);
+        }
+    }
+
+    DetailType() {
+    }
 }

@@ -23,18 +23,26 @@ import javax.xml.namespace.QName;
     "Value",
     "Subcode"
         })
-public class SubcodeType {
+class SubcodeType {
     @XmlTransient
     private static final String ns="http://www.w3.org/2003/05/soap-envelope";
     /**
      * mandatory, minOccurs=1
      */
     @XmlElement(namespace = ns)
-    public QName Value;
+    private QName Value;
 
     /**
      * optional, minOcccurs=0
      */
     @XmlElements(@XmlElement(namespace = ns))
-    public SubcodeType Subcode;
+    private SubcodeType Subcode;
+
+    public SubcodeType(QName value, SubcodeType subcode) {
+        Value = value;
+        Subcode = subcode;
+    }
+
+    public SubcodeType() {
+    }
 }

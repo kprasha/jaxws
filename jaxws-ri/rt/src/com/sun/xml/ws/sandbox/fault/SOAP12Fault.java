@@ -1,12 +1,16 @@
 package com.sun.xml.ws.sandbox.fault;
 
 
+import org.w3c.dom.Node;
+
 import javax.xml.bind.annotation.AccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
 
 /**
  * SOAP 1.2 Fault class that can be marshalled/unmarshalled by JAXB
@@ -56,13 +60,13 @@ class SOAP12Fault extends SOAPFaultBuilder {
     @XmlElement(namespace = ns)
     private ReasonType Reason;
 
-    @XmlElement(namespace = ns, nillable = true)
+    @XmlElement(namespace = ns)
     private String Node;
 
-    @XmlElement(namespace = ns, nillable = true)
+    @XmlElement(namespace = ns)
     private String Role;
 
-    @XmlElement(namespace = ns, nillable = true)
+    @XmlElement(namespace = ns)
     private DetailType Detail;
 
     SOAP12Fault() {
@@ -74,6 +78,13 @@ class SOAP12Fault extends SOAPFaultBuilder {
         Node = node;
         Role = role;
         Detail = detail;
+    }
+
+    SOAP12Fault(QName code, String reason, String actor, Node detailObject) {
+        Code = new CodeType(code);
+        Reason = new ReasonType(reason);
+        if(detailObject != null)
+            Detail = new DetailType(detailObject);
     }
 
     CodeType getCode() {
@@ -98,7 +109,7 @@ class SOAP12Fault extends SOAPFaultBuilder {
     }
     @Override
     String getFaultString() {
-        return Reason.text.get(0).text;
+        return Reason.texts().get(0).getText();
     }
 }
 
