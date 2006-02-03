@@ -42,7 +42,7 @@ import java.lang.reflect.Method;
  * More information about TXW can be located at
  * <a href="http://txw.dev.java.net">http://txw.dev.java.net</a>.
  */
-public interface WSDLGeneratorExtension {
+public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:service</code>
      * element can be generated.
@@ -50,7 +50,8 @@ public interface WSDLGeneratorExtension {
      *
      * @param service This is the <code>wsdl:service</code> element that the extension can be added to.
      */
-    public void addServiceExtension(Service service);
+    public void addServiceExtension(Service service) {       
+    }
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:port</code>
@@ -59,7 +60,8 @@ public interface WSDLGeneratorExtension {
      *
      * @param port This is the wsdl:port element that the extension can be added to.
      */
-    public void addPortExtension(Port port);
+    public void addPortExtension(Port port) {        
+    }
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:portType</code>
@@ -68,7 +70,8 @@ public interface WSDLGeneratorExtension {
      *
      * @param portType This is the wsdl:portType element that the extension can be added to.
      */
-    public void addPortTypeExtension(PortType portType);
+    public void addPortTypeExtension(PortType portType) {        
+    }
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:binding</code>
@@ -79,7 +82,8 @@ public interface WSDLGeneratorExtension {
      *
      * @param binding This is the wsdl:binding element that the extension can be added to.
      */
-    public void addBindingExtension(Binding binding);
+    public void addBindingExtension(Binding binding) {        
+    }
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:portType/wsdl:operation</code>
@@ -90,7 +94,8 @@ public interface WSDLGeneratorExtension {
      * @param method    Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                  element on wsdl:operation.
      */
-    public void addOperationExtension(Operation operation, Method method);
+    public void addOperationExtension(Operation operation, Method method) {        
+    }
 
 
     /**
@@ -103,7 +108,8 @@ public interface WSDLGeneratorExtension {
      * @param method    {@link java.lang.annotation.Annotation}s from the {@link Method} can be accessed and translated
      *                  in to WSDL extensibility element on wsdl:operation.
      */
-    public void addBindingOperationExtension(BindingOperationType operation, Method method);
+    public void addBindingOperationExtension(BindingOperationType operation, Method method) {        
+    }
 
     /**
      * This method is invoked so that extensions to an input <code>wsdl:message</code>
@@ -115,7 +121,8 @@ public interface WSDLGeneratorExtension {
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
      */
-    public void addInputMessageExtension(Message message, Method method);
+    public void addInputMessageExtension(Message message, Method method) {        
+    }
 
     /**
      * This method is invoked so that extensions to an output <code>wsdl:message</code>
@@ -127,7 +134,8 @@ public interface WSDLGeneratorExtension {
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
      */
-    public void addOutputMessageExtension(Message message, Method method);
+    public void addOutputMessageExtension(Message message, Method method) {        
+    }
 
 
     /**
@@ -141,7 +149,8 @@ public interface WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addOperationInputExtension(TypedXmlWriter input, Method method);
+    public void addOperationInputExtension(TypedXmlWriter input, Method method) {        
+    }
 
 
     /**
@@ -155,7 +164,8 @@ public interface WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addOperationOutputExtension(TypedXmlWriter output, Method method);
+    public void addOperationOutputExtension(TypedXmlWriter output, Method method) {        
+    }
 
     /**
      * This method is invoked so that extensions to a
@@ -168,7 +178,8 @@ public interface WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addBindingOperationInputExtension(TypedXmlWriter input, Method method);
+    public void addBindingOperationInputExtension(TypedXmlWriter input, Method method) {        
+    }
 
 
     /**
@@ -182,7 +193,8 @@ public interface WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addBindingOperationOutputExtension(TypedXmlWriter output, Method method);
+    public void addBindingOperationOutputExtension(TypedXmlWriter output, Method method) {        
+    }
 
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
@@ -198,7 +210,8 @@ public interface WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addBindingOperationFaultExtension(FaultType fault, Method method);
+    public void addBindingOperationFaultExtension(FaultType fault, Method method) {        
+    }
 
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
@@ -213,7 +226,8 @@ public interface WSDLGeneratorExtension {
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
      */
-    public void addFaultMessageExtension(Message message, Method method);
+    public void addFaultMessageExtension(Message message, Method method) {        
+    }
 
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
@@ -229,6 +243,7 @@ public interface WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addOperationFaultExtension(FaultType fault, Method method);
+    public void addOperationFaultExtension(FaultType fault, Method method) {        
+    }
 
 }

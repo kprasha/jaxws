@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  *
  * @author Doug Kohlert
  */
-final class WSDLGeneratorExtensionFacade implements WSDLGeneratorExtension {
+final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
     private final WSDLGeneratorExtension[] extensions;
 
     WSDLGeneratorExtensionFacade(WSDLGeneratorExtension... extensions) {
