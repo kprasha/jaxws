@@ -21,6 +21,7 @@ package com.sun.xml.ws.api.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
+import com.sun.xml.ws.api.model.CheckedException;
 
 import java.lang.reflect.Method;
 
@@ -234,8 +235,9 @@ public abstract class WSDLGeneratorExtension {
      *               extension can be added to.
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
+     * @param ce     The CheckedException for this Fault.
      */
-    public void addOperationFaultExtension(TypedXmlWriter fault, Method method) {        
+    public void addOperationFaultExtension(TypedXmlWriter fault, Method method, CheckedException ce) {        
     }
 
 }

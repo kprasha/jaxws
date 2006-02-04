@@ -1,8 +1,10 @@
 package com.sun.xml.ws.wsdl.writer;
 
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
+import com.sun.xml.ws.api.model.CheckedException;
 
 import com.sun.xml.txw2.TypedXmlWriter;
+
 
 import java.lang.reflect.Method;
 
@@ -95,8 +97,8 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
             e.addFaultMessageExtension(message, method);
     }
 
-    public void addOperationFaultExtension(TypedXmlWriter fault, Method method) {
+    public void addOperationFaultExtension(TypedXmlWriter fault, Method method, CheckedException ce) {
         for (WSDLGeneratorExtension e : extensions) 
-            e.addOperationFaultExtension(fault, method);
+            e.addOperationFaultExtension(fault, method, ce);
     }
 }

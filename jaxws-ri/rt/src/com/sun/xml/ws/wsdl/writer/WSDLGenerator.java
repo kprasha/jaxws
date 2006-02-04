@@ -430,7 +430,7 @@ public class WSDLGenerator {
                 QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
                 FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
-                extension.addOperationFaultExtension(paramType, method.getMethod());        
+                extension.addOperationFaultExtension(paramType, method.getMethod(), exception);        
             }
         }
     }
