@@ -172,7 +172,10 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         if(sourceUtils.isStreamSource()){
             return streamMessage.readPayload();
         }
-        return SourceReaderFactory.createSourceReader(src, true);
+        XMLStreamReader reader =  SourceReaderFactory.createSourceReader(src, true);
+        //position the reader at start tag then return
+        XMLStreamReaderUtil.next(reader);
+        return reader;
     }
 
     public void writePayloadTo(XMLStreamWriter w) throws XMLStreamException {
