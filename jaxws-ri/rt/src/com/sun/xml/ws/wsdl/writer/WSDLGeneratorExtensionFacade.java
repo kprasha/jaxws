@@ -4,15 +4,6 @@ import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
-import com.sun.xml.ws.wsdl.writer.document.Service;
-import com.sun.xml.ws.wsdl.writer.document.Port;
-import com.sun.xml.ws.wsdl.writer.document.PortType;
-import com.sun.xml.ws.wsdl.writer.document.Binding;
-import com.sun.xml.ws.wsdl.writer.document.Operation;
-import com.sun.xml.ws.wsdl.writer.document.BindingOperationType;
-import com.sun.xml.ws.wsdl.writer.document.Message;
-import com.sun.xml.ws.wsdl.writer.document.FaultType;
-
 import java.lang.reflect.Method;
 
 /**
@@ -34,42 +25,42 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
         this.extensions = extensions;
     }
 
-    public void addServiceExtension(Service service) {
+    public void addServiceExtension(TypedXmlWriter service) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addServiceExtension(service);
     }
 
-    public void addPortExtension(Port port) {
+    public void addPortExtension(TypedXmlWriter port) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addPortExtension(port);
     }
 
-    public void addPortTypeExtension(PortType portType) {
+    public void addPortTypeExtension(TypedXmlWriter portType) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addPortTypeExtension(portType);
     }
 
-    public void addBindingExtension(Binding binding) {
+    public void addBindingExtension(TypedXmlWriter binding) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addBindingExtension(binding);
     }
 
-    public void addOperationExtension(Operation operation, Method method) {
+    public void addOperationExtension(TypedXmlWriter operation, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addOperationExtension(operation, method);
     }
 
-    public void addBindingOperationExtension(BindingOperationType operation, Method method) {
+    public void addBindingOperationExtension(TypedXmlWriter operation, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addBindingOperationExtension(operation, method);
     }
     
-    public void addInputMessageExtension(Message message, Method method) {
+    public void addInputMessageExtension(TypedXmlWriter message, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addInputMessageExtension(message, method);
     }
 
-    public void addOutputMessageExtension(Message message, Method method) {
+    public void addOutputMessageExtension(TypedXmlWriter message, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addOutputMessageExtension(message, method);
     }
@@ -94,17 +85,17 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
             e.addBindingOperationOutputExtension(output, method);
     }
 
-    public void addBindingOperationFaultExtension(FaultType fault, Method method) {
+    public void addBindingOperationFaultExtension(TypedXmlWriter fault, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addBindingOperationFaultExtension(fault, method);
     }
 
-    public void addFaultMessageExtension(Message message, Method method) {
+    public void addFaultMessageExtension(TypedXmlWriter message, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addFaultMessageExtension(message, method);
     }
 
-    public void addOperationFaultExtension(FaultType fault, Method method) {
+    public void addOperationFaultExtension(TypedXmlWriter fault, Method method) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addOperationFaultExtension(fault, method);
     }

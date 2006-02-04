@@ -21,14 +21,6 @@ package com.sun.xml.ws.api.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
-import com.sun.xml.ws.wsdl.writer.document.Service;
-import com.sun.xml.ws.wsdl.writer.document.Port;
-import com.sun.xml.ws.wsdl.writer.document.PortType;
-import com.sun.xml.ws.wsdl.writer.document.Binding;
-import com.sun.xml.ws.wsdl.writer.document.Operation;
-import com.sun.xml.ws.wsdl.writer.document.BindingOperationType;
-import com.sun.xml.ws.wsdl.writer.document.Message;
-import com.sun.xml.ws.wsdl.writer.document.FaultType;
 
 import java.lang.reflect.Method;
 
@@ -50,7 +42,7 @@ public abstract class WSDLGeneratorExtension {
      *
      * @param service This is the <code>wsdl:service</code> element that the extension can be added to.
      */
-    public void addServiceExtension(Service service) {       
+    public void addServiceExtension(TypedXmlWriter service) {       
     }
 
     /**
@@ -60,7 +52,7 @@ public abstract class WSDLGeneratorExtension {
      *
      * @param port This is the wsdl:port element that the extension can be added to.
      */
-    public void addPortExtension(Port port) {        
+    public void addPortExtension(TypedXmlWriter port) {        
     }
 
     /**
@@ -70,7 +62,7 @@ public abstract class WSDLGeneratorExtension {
      *
      * @param portType This is the wsdl:portType element that the extension can be added to.
      */
-    public void addPortTypeExtension(PortType portType) {        
+    public void addPortTypeExtension(TypedXmlWriter portType) {        
     }
 
     /**
@@ -82,7 +74,7 @@ public abstract class WSDLGeneratorExtension {
      *
      * @param binding This is the wsdl:binding element that the extension can be added to.
      */
-    public void addBindingExtension(Binding binding) {        
+    public void addBindingExtension(TypedXmlWriter binding) {        
     }
 
     /**
@@ -94,7 +86,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method    Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                  element on wsdl:operation.
      */
-    public void addOperationExtension(Operation operation, Method method) {        
+    public void addOperationExtension(TypedXmlWriter operation, Method method) {        
     }
 
 
@@ -108,7 +100,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method    {@link java.lang.annotation.Annotation}s from the {@link Method} can be accessed and translated
      *                  in to WSDL extensibility element on wsdl:operation.
      */
-    public void addBindingOperationExtension(BindingOperationType operation, Method method) {        
+    public void addBindingOperationExtension(TypedXmlWriter operation, Method method) {        
     }
 
     /**
@@ -121,7 +113,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
      */
-    public void addInputMessageExtension(Message message, Method method) {        
+    public void addInputMessageExtension(TypedXmlWriter message, Method method) {        
     }
 
     /**
@@ -134,7 +126,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
      */
-    public void addOutputMessageExtension(Message message, Method method) {        
+    public void addOutputMessageExtension(TypedXmlWriter message, Method method) {        
     }
 
 
@@ -210,7 +202,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addBindingOperationFaultExtension(FaultType fault, Method method) {        
+    public void addBindingOperationFaultExtension(TypedXmlWriter fault, Method method) {        
     }
 
     /**
@@ -226,7 +218,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method  Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *                element on wsdl:operation.
      */
-    public void addFaultMessageExtension(Message message, Method method) {        
+    public void addFaultMessageExtension(TypedXmlWriter message, Method method) {        
     }
 
     /**
@@ -243,7 +235,7 @@ public abstract class WSDLGeneratorExtension {
      * @param method Annotations from the {@link Method} can be accessed and translated in to WSDL extensibility
      *               element on wsdl:operation.
      */
-    public void addOperationFaultExtension(FaultType fault, Method method) {        
+    public void addOperationFaultExtension(TypedXmlWriter fault, Method method) {        
     }
 
 }
