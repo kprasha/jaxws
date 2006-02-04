@@ -21,29 +21,34 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.PipelineAssembler;
+import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.server.provider.XMLProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
+import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.SOAPProviderEndpointModel;
 import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
+import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
@@ -125,7 +130,28 @@ public class RuntimeEndpointInfo extends WSEndpoint
     private static final LocalizableMessageFactory messageFactory =
         new LocalizableMessageFactory("com.sun.xml.ws.resources.server");
     private Container container;
+    
+    /**
+     * Reuse pipelines as it's expensive to create.
+     */
+    protected final Pool<Pipe> pipes = new Pool<Pipe>() {
+        protected Pipe create() {
+            return PipeCloner.clone(masterPipe);
+        }
+    };
 
+    /**
+     * Master {@link Pipe} instance from which
+     * copies are created.
+     * <p>
+     * We'll always keep at least one {@link Pipe}
+     * so that we can copy new ones. Note that
+     * this pipe is also in {@link #pipes} and therefore
+     * can be used to process messages like any other pipes.
+     */
+    private Pipe masterPipe;
+
+    
     public String getName() {
         return name;
     }
@@ -373,7 +399,28 @@ public class RuntimeEndpointInfo extends WSEndpoint
                 ((SOAPSEIModel)seiModel).enableMtom(((SOAPBinding)binding).isMTOMEnabled());
             }
         }
+        
+        // Creates Entire pipline for each request and response
+        masterPipe = createPipeline();
+        
         deployed = true;
+    }
+    
+    private Pipe createPipeline() {
+        String bindingId = getBinding().getBindingId();  
+        PipelineAssembler assembler = PipelineAssemblerFactory.create(
+                Thread.currentThread().getContextClassLoader(), bindingId);
+        if (assembler == null) {
+            throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
+        }
+                
+        Pipe invokerPipe;
+        if (getImplementor() instanceof Provider) {
+            invokerPipe = new ProviderInvokerPipe(this);
+        } else {
+            invokerPipe = new EndpointInvokerPipe(this);
+        }
+        return assembler.createServer(null, this, invokerPipe);
     }
 
     public boolean needWSDLGeneration() {
@@ -870,6 +917,15 @@ public class RuntimeEndpointInfo extends WSEndpoint
 
     public ProviderEndpointModel getProviderModel() {
         return providerModel;
+    }
+    
+    public Packet process(Packet request) {
+        Pipe pipe = pipes.take();
+        try {
+            return pipe.process(request);
+        } finally {
+            pipes.recycle(pipe);
+        }
     }
 
 }

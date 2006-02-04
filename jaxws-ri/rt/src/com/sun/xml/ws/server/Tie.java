@@ -105,15 +105,7 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
             String ct = headers.get("Content-Type").get(0);
             InputStream in = connection.getInput();
             Packet packet = decoder.decode(in, ct);
-
-            Pipe pipe;
-            if (endpointInfo.getImplementor() instanceof Provider) {
-                pipe = new ProviderInvokerPipe(endpointInfo);
-            } else {
-                pipe = new EndpointInvokerPipe(endpointInfo);
-            }
-            packet = pipe.process(packet);
-
+            packet = endpointInfo.process(packet);
             ct = encoder.getStaticContentType();          
             if (ct == null) {
                 throw new UnsupportedOperationException();
