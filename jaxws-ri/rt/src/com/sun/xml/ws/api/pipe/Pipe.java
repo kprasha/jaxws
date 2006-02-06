@@ -284,6 +284,12 @@ public interface Pipe {
      *
      * <h3>Implementation Note</h3>
      * <p>
+     * It is the implementation's responsibility to call
+     * {@link PipeCloner#add(Pipe,Pipe)} to register the copied pipe
+     * with the original. This is required before you start copying
+     * the other {@link Pipe} references you have, or else there's a
+     * risk of infinite recursion. 
+     * <p>
      * For most {@link Pipe} implementations that delegate to another
      * {@link Pipe}, this method requires that you also copy the {@link Pipe}
      * that you delegate to.
