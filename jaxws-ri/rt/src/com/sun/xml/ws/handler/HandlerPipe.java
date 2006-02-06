@@ -21,10 +21,8 @@ public class HandlerPipe implements Pipe {
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
-    /**
-     * @param that
-     */
-    private HandlerPipe(HandlerPipe that) {
+    protected HandlerPipe(HandlerPipe that, PipeCloner cloner) {
+        cloner.add(that,this);
     }
 
     /**

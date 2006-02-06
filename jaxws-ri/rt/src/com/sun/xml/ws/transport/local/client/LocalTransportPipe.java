@@ -69,8 +69,9 @@ public class LocalTransportPipe implements Pipe {
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
-    private LocalTransportPipe(LocalTransportPipe that) {
+    private LocalTransportPipe(LocalTransportPipe that, PipeCloner cloner) {
         this(that.endpointInfo, that.encoder.copy(), that.decoder.copy());
+        cloner.add(that,this);
     }
 
     public Packet process(Packet packet) {
@@ -125,6 +126,6 @@ public class LocalTransportPipe implements Pipe {
     }
 
     public Pipe copy(PipeCloner cloner) {
-        return new LocalTransportPipe(this);
+        return new LocalTransportPipe(this,cloner);
     }
 }

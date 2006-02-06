@@ -78,6 +78,7 @@ public final class WsaActionDispatchPipe implements Pipe {
      * Copy-constructor.
      */
     private WsaActionDispatchPipe(WsaActionDispatchPipe that,PipeCloner cloner) {
+        cloner.add(that,this);
         this.next = cloner.copy(that.next);
         this.receivers = new HashMap<String, Pipe>(that.receivers.size());
         for (Map.Entry<String, Pipe> e : that.receivers.entrySet())

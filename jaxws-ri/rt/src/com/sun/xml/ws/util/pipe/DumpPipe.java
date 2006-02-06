@@ -33,6 +33,16 @@ public class DumpPipe implements Pipe {
         this.staxOut = XMLOutputFactory.newInstance();
     }
 
+    /**
+     * Copy constructor.
+     */
+    private DumpPipe(DumpPipe that, PipeCloner cloner) {
+        cloner.add(that,this);
+        this.out = that.out;
+        this.next = cloner.copy(that.next);
+        this.staxOut = XMLOutputFactory.newInstance();
+    }
+
     public Packet process(Packet packet) {
         dump("request",packet);
         Packet reply = next.process(packet);
@@ -61,7 +71,7 @@ public class DumpPipe implements Pipe {
 
 
     public Pipe copy(PipeCloner cloner) {
-        return new DumpPipe(out,cloner.copy(next));
+        return new DumpPipe(this,cloner);
     }
 
     public void preDestroy() {

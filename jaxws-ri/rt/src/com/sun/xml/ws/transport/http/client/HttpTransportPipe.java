@@ -50,8 +50,9 @@ public class HttpTransportPipe implements Pipe {
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
-    private HttpTransportPipe(HttpTransportPipe that) {
+    private HttpTransportPipe(HttpTransportPipe that, PipeCloner cloner) {
         this( that.encoder.copy(), that.decoder.copy() );
+        cloner.add(that,this);
     }
 
     public Packet process(Packet packet) {
@@ -108,6 +109,6 @@ public class HttpTransportPipe implements Pipe {
     }
 
     public Pipe copy(PipeCloner cloner) {
-        return new HttpTransportPipe(this);
+        return new HttpTransportPipe(this,cloner);
     }
 }

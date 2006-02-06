@@ -22,6 +22,7 @@ package com.sun.xml.ws.sandbox.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.MessageContextUtil;
@@ -62,6 +63,12 @@ public class ClientHandlerPipe extends HandlerPipe{
             //set roles on HandlerChainCaller, if it is SOAP binding
             hcaller.setRoles(((SOAPBindingImpl)binding).getRoles());
         } */
+    }
+
+    public ClientHandlerPipe(ClientHandlerPipe that, PipeCloner cloner) {
+        super(that, cloner);
+        this.binding = that.binding;
+        this.nextPipe = cloner.copy(that.nextPipe);
     }
 
     public HandlerChainCaller getHandlerChainCaller() {

@@ -80,8 +80,25 @@ public final class PipeCloner {
         Pipe r = master2copy.get(p);
         if(r==null) {
             r = p.copy(this);
-            master2copy.put(p,r);
+            // the pipe must puts its copy to the map by itself
+            assert master2copy.get(p)==r;
         }
         return (T)r;
+    }
+
+    /**
+     * This method must be called from within the copy constructor
+     * to notify that the copy was created.
+     *
+     * <p>
+     * When your pipe has references to other pipes,
+     * it's particularly important to call this method
+     * before you start copying the pipes you refer to,
+     * or else there's a chance of inifinite loop.
+     */
+    public void add(Pipe original, Pipe copy) {
+        assert !master2copy.containsKey(original);
+        assert original!=null && copy!=null;
+        master2copy.put(original,copy);
     }
 }
