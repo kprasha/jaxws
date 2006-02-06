@@ -23,8 +23,10 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.util.PropertySet;
+import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
 
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -203,6 +205,15 @@ public final class Packet extends PropertySet {
     public void setEndPointAddressString(String s) {
         this.endpointAddress = EndpointAddress.create(s);
     }
+
+    /**
+     * When non-null, this object is consulted to
+     * implement {@link WebServiceContext} methods
+     * exposed to the user application.
+     *
+     * Used only on the server side.
+     */
+    WebServiceContextDelegate webServiceContextDelegate;
 
 
     /**

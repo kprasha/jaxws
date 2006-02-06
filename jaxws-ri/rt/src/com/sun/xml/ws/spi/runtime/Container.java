@@ -59,4 +59,15 @@ public abstract class Container {
      *      null if such an SPI is not implemented by this container.
      */
     public abstract <T> T getSPI(Class<T> spiType);
+
+
+    /**
+     * Constant that represents a "no {@link Container}",
+     * which always returns null from {@link #getSPI(Class)}. 
+     */
+    public static final Container NONE = new Container() {
+        public <T> T getSPI(Class<T> spiType) {
+            return null;
+        }
+    };
 }
