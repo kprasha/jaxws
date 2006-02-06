@@ -52,31 +52,28 @@ import javax.jws.WebParam.Mode;
  */
 abstract class EndpointArgumentsBuilder {
     /**
-     * Reads a response {@link Message}, disassembles it, and moves obtained Java values
-     * to the expected places.
+     * Reads a request {@link Message}, disassembles it, and moves obtained
+     * Java values to the expected places.
      *
-     * @param reply
-     *      The reply {@link Message} to be de-composed.
+     * @param request
+     *      The request {@link Message} to be de-composed.
      * @param args
      *      The Java arguments given to the SEI method invocation.
      *      Some parts of the reply message may be set to {@link Holder}s in the arguments.
      * @param context
      *      This object is used to unmarshal the reply message to Java objects.
-     * @return
-     *      If a part of the reply message is returned as a return value from
-     *      the SEI method, this method returns that value. Otherwise null.
      * @throws JAXBException
-     *      if there's an error during unmarshalling the reply message.
+     *      if there's an error during unmarshalling the request message.
      * @throws XMLStreamException
-     *      if there's an error during unmarshalling the reply message.
+     *      if there's an error during unmarshalling the request message.
      */
-    abstract Object readResponse( Message reply, Object[] args, BridgeContext context ) throws JAXBException, XMLStreamException;
+    abstract void readRequest( Message request, Object[] args, BridgeContext context )
+        throws JAXBException, XMLStreamException;
 
     static final class None extends EndpointArgumentsBuilder {
         private None(){
         }
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) {
-            return null;
+        public void readRequest(Message msg, Object[] args, BridgeContext context) {
         }
     }
 
@@ -123,9 +120,8 @@ abstract class EndpointArgumentsBuilder {
             this.nullValue = nullValue;
             this.setter = setter;
         }
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) {
+        public void readRequest(Message msg, Object[] args, BridgeContext context) {
             setter.put(nullValue, args);
-            return null;
         }
     }
 
@@ -155,17 +151,11 @@ abstract class EndpointArgumentsBuilder {
             this(builders.toArray(new EndpointArgumentsBuilder[builders.size()]));
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
             Object retVal = null;
             for (EndpointArgumentsBuilder builder : builders) {
-                Object r = builder.readResponse(msg,args,context);
-                // there's only at most one EndpointArgumentsBuilder that returns a value.
-                if(r!=null) {
-                    assert retVal==null;
-                    retVal = r;
-                }
+                builder.readRequest(msg,args,context);
             }
-            return retVal;
         }
     }
 
@@ -201,16 +191,14 @@ abstract class EndpointArgumentsBuilder {
             assert param.getOutBinding()== ParameterBinding.HEADER;
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
+        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException {
             com.sun.xml.ws.api.message.Header header =
                 msg.getHeaders().get(headerName.getNamespaceURI(), headerName.getLocalPart());
 
             if(header!=null) {
                 setter.put( header.readAsJAXB(bridge,context), args );
-                return null;
             } else {
                 // header not found.
-                return null;
             }
         }
     }
@@ -233,9 +221,8 @@ abstract class EndpointArgumentsBuilder {
             this.setter = setter;
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
+        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException {
             setter.put( msg.readPayloadAsJAXB(bridge,context), args );
-            return null;
         }
     }
 
@@ -287,7 +274,7 @@ abstract class EndpointArgumentsBuilder {
             this.parts = parts.toArray(new PartBuilder[parts.size()]);
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
             Object retVal = null;
 
             XMLStreamReader reader = msg.readPayload();
@@ -310,8 +297,6 @@ abstract class EndpointArgumentsBuilder {
 
             // we are done with the body
             reader.close();
-
-            return retVal;
         }
 
         /**
@@ -371,9 +356,7 @@ abstract class EndpointArgumentsBuilder {
             }
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
-            Object retVal = null;
-
+        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
             XMLStreamReader reader = msg.readPayload();
             if (!reader.getName().equals(wrapperName))
                 throw new WebServiceException( // TODO: i18n
@@ -388,19 +371,12 @@ abstract class EndpointArgumentsBuilder {
                     XMLStreamReaderUtil.skipElement(reader);
                     reader.nextTag();
                 } else {
-                    Object o = part.readResponse(args,reader,context);
-                    // there's only at most one EndpointArgumentsBuilder that returns a value.
-                    if(o!=null) {
-                        assert retVal==null;
-                        retVal = o;
-                    }
+                    part.readRequest(args,reader,context);
                 }
             }
 
             // we are done with the body
             reader.close();
-
-            return retVal;
         }
 
         /**
@@ -415,20 +391,17 @@ abstract class EndpointArgumentsBuilder {
              * @param bridge
              *      specifies how the part is unmarshalled.
              * @param setter
-             *      specifies how the obtained value is returned to the client.
+             *      specifies how the obtained value is returned to the endpoint.
              */
             public PartBuilder(Bridge bridge, EndpointValueSetter setter) {
                 this.bridge = bridge;
                 this.setter = setter;
             }
 
-            final Object readResponse( Object[] args, XMLStreamReader r, BridgeContext context ) throws JAXBException {
+            final void readRequest( Object[] args, XMLStreamReader r, BridgeContext context ) throws JAXBException {
                 Object obj = bridge.unmarshal(context,r);
                 setter.put(obj,args);
-                return null;
             }
-
-
         }
     }
 }

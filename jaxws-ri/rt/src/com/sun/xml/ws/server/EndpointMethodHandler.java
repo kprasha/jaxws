@@ -159,6 +159,26 @@ public final class EndpointMethodHandler {
                     throw new AssertionError();
                 }
             }
+            
+            {
+                List<ParameterImpl> resp = method.getResponseParameters();
+                for( ParameterImpl param : resp ) {
+                    if (param.isWrapperStyle()) {
+                        WrapperParameter wp = (WrapperParameter)param; 
+                        List<ParameterImpl> children = wp.getWrapperChildren();
+                        for (ParameterImpl p : children) {
+                            if (p.isOUT() && p.getIndex() != -1) {
+                                EndpointValueSetter setter = EndpointValueSetter.get(p);
+                                builders.add(new EndpointArgumentsBuilder.NullSetter(setter, null));
+                            }
+                        }
+                    } else if (param.isOUT() && param.getIndex() != -1) {
+                        EndpointValueSetter setter = EndpointValueSetter.get(param);
+                        builders.add(new EndpointArgumentsBuilder.NullSetter(setter, null));
+                    }
+                }
+            }
+
 
             switch(builders.size()) {
             case 0:
@@ -184,7 +204,7 @@ public final class EndpointMethodHandler {
             Object[] args = new Object[method.getParameterTypes().length]; // TODO
             BridgeContext context = seiModel.getBridgeContext();
             try {
-                responseBuilder.readResponse(req,args,context);
+                responseBuilder.readRequest(req,args,context);
             } catch (JAXBException e) {
                 throw new DeserializationException("failed.to.read.response",e);
             } catch (XMLStreamException e) {
@@ -196,6 +216,7 @@ public final class EndpointMethodHandler {
                 ret = method.invoke(proxy, args);
                 responseMessage = isOneWay ? null : createResponseMessage(args, ret);
             } catch (InvocationTargetException e) {
+                e.printStackTrace();
                 Throwable cause = e.getCause();
                 if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
                     // Service specific exception
@@ -204,6 +225,7 @@ public final class EndpointMethodHandler {
                     responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
             Packet respPacket = new Packet(responseMessage);
