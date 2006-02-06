@@ -132,18 +132,6 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         return src;
     }
 
-    public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        SOAPMessage msg = soapVersion.saajFactory.createMessage();
-        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
-        try {
-            writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
-        } catch (SAXException e) {
-            throw new SOAPException(e);
-        }
-
-        return msg;
-    }
-
     protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException{
         SAXResult sr = new SAXResult(contentHandler);
         try {

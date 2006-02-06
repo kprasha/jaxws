@@ -21,6 +21,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -28,6 +29,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.util.xml.StAXSource;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import org.xml.sax.ContentHandler;
@@ -37,6 +39,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -149,10 +152,6 @@ public class StreamMessage extends AbstractMessageImpl {
 
     public Source readPayloadAsSource() {
         return new StAXSource(reader, true);
-    }
-
-    public SOAPMessage readAsSOAPMessage() {
-        throw new UnsupportedOperationException();
     }
 
     public Object readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
@@ -310,7 +309,8 @@ public class StreamMessage extends AbstractMessageImpl {
         if(isPayload){
             writeEnvelope(sw);
         }else{
-            //TODO
+            // TODO: implement this method later
+            throw new UnsupportedOperationException();
         }
     }
 

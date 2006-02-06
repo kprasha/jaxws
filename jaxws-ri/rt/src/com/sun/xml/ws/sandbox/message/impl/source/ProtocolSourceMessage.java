@@ -71,10 +71,6 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
         throw new UnsupportedOperationException();
     }
 
-    public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        throw new UnsupportedOperationException();
-    }
-
     public XMLStreamReader readPayload() throws XMLStreamException {
         throw new UnsupportedOperationException();
     }

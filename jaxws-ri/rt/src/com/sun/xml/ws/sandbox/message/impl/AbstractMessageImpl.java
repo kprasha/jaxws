@@ -22,8 +22,10 @@ package com.sun.xml.ws.sandbox.message.impl;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.marshaller.SAX2DOMEx;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -31,6 +33,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPException;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -150,6 +154,24 @@ public abstract class AbstractMessageImpl extends Message {
      * Writes the payload to SAX events.
      */
     protected abstract void writePayloadTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException;
+
+    /**
+     * Default implementation that uses {@link #writeTo(ContentHandler, ErrorHandler)}
+     */
+    public SOAPMessage readAsSOAPMessage() throws SOAPException {
+        SOAPMessage msg = soapVersion.saajFactory.createMessage();
+        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
+        try {
+            writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
+        } catch (SAXException e) {
+            throw new SOAPException(e);
+        }
+
+        // TODO: add attachments and so on.
+        // we can use helper classes, I think.
+
+        return msg;
+    }
 
 
     protected static final Attributes EMPTY_ATTS = new AttributesImpl();

@@ -235,19 +235,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
         }
     }
 
-    public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        SOAPMessage msg = soapVersion.saajFactory.createMessage();
-        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
-        try {
-            writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
-        } catch (SAXException e) {
-            throw new SOAPException(e);
-        }
-        // TODO: add attachments and so on.
-        // we can use helper classes, I think.
-        return msg;
-    }
-
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
             // TODO: XOP handling
