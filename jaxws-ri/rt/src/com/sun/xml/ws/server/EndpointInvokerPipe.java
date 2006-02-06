@@ -89,12 +89,13 @@ public class EndpointInvokerPipe extends AbstractPipeImpl {
         Object servant = endpointInfo.getImplementor();
         Packet res = handler.invoke(servant, msg);
         res.invocationProperties.putAll(req.invocationProperties);
-        
+
         return res;
         // TODO: some properties need to be copied from request packet to the response packet
     }
 
     public Pipe copy(PipeCloner cloner) {
+        cloner.add(this,this);
         return this;
     }
 }

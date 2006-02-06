@@ -82,6 +82,7 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
     }
 
     public Pipe copy(PipeCloner cloner) {
+        cloner.add(this,this);
         return this;
     }
 
