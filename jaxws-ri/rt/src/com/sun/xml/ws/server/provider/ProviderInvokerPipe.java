@@ -22,6 +22,7 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 
 import javax.xml.ws.Provider;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author Jitendra Kotamraju
  */
-public class ProviderInvokerPipe implements Pipe {
+public class ProviderInvokerPipe extends AbstractPipeImpl {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
@@ -78,9 +79,6 @@ public class ProviderInvokerPipe implements Pipe {
         //    response.isOneWay = true;
         //}
         return response;
-    }
-
-    public void preDestroy() {
     }
 
     public Pipe copy(PipeCloner cloner) {

@@ -2,6 +2,8 @@ package com.sun.xml.ws.sandbox.notes;
 
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
@@ -40,9 +42,7 @@ import java.util.HashMap;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class WsaActionDispatchPipe implements Pipe {
-    private final Pipe next;
-
+public final class WsaActionDispatchPipe extends AbstractFilterPipeImpl {
     /**
      * wsa:Action URIs to {@link Pipe}s that process such messages.
      */
@@ -68,9 +68,8 @@ public final class WsaActionDispatchPipe implements Pipe {
      */
     // TODO: if this moves to Tango, take PipeConfiguration instead.
     public WsaActionDispatchPipe(Pipe next, Map<String,Pipe> actionReceivers) {
-        assert next!=null;
+        super(next);
         assert actionReceivers!=null;
-        this.next = next;
         this.receivers = actionReceivers;
     }
 
@@ -78,8 +77,7 @@ public final class WsaActionDispatchPipe implements Pipe {
      * Copy-constructor.
      */
     private WsaActionDispatchPipe(WsaActionDispatchPipe that,PipeCloner cloner) {
-        cloner.add(that,this);
-        this.next = cloner.copy(that.next);
+        super(that,cloner);
         this.receivers = new HashMap<String, Pipe>(that.receivers.size());
         for (Map.Entry<String, Pipe> e : that.receivers.entrySet())
             receivers.put(e.getKey(), cloner.copy(e.getValue()));
@@ -124,10 +122,6 @@ public final class WsaActionDispatchPipe implements Pipe {
                 e);
         }
         return action;
-    }
-
-    public void preDestroy() {
-        // noop
     }
 
     public Pipe copy(PipeCloner cloner) {

@@ -139,13 +139,14 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *   }
  *
  *   // copy constructor
- *   private PipeImpl(PipeImpl that) {
+ *   private PipeImpl(PipeImpl that, PipeCloner cloner) {
+ *     cloner.add(that,this);
  *     ...
  *     this.ds = that.ds;
  *   }
  *
  *   public PipeImpl copy(PipeCloner pc) {
- *     return new PipeImpl(this);
+ *     return new PipeImpl(this,pc);
  *   }
  * }
  * </pre>

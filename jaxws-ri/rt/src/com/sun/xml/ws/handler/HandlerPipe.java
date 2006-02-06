@@ -6,23 +6,27 @@ package com.sun.xml.ws.handler;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 
 /**
  * @author WS Development team
  */
-public class HandlerPipe implements Pipe {
+// TODO: shouldn't this class be abstract? - KK
+public class HandlerPipe extends AbstractFilterPipeImpl {
     //Todo: JavaDocs need updating-
     //Todo: client and server pipes?
     //todo:needs impl
 
-    public HandlerPipe() {
+    public HandlerPipe(Pipe next) {
+        super(next);
     }
 
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
     protected HandlerPipe(HandlerPipe that, PipeCloner cloner) {
-        cloner.add(that,this);
+        super(that,cloner);
     }
 
     /**
@@ -72,16 +76,10 @@ public class HandlerPipe implements Pipe {
     }
 
     /**
-     *
-     */
-    public void preDestroy() {
-    }
-
-    /**
      * @param cloner
      * @return
      */
     public Pipe copy(PipeCloner cloner) {
-        return new HandlerPipe(this);
+        return new HandlerPipe(this,cloner);
     }
 }

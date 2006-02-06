@@ -41,11 +41,10 @@ import com.sun.xml.ws.api.message.Packet;
 public class ClientHandlerPipe extends HandlerPipe{
     private WSBinding binding;
     private HandlerChainCaller hcaller;
-    private Pipe nextPipe;
     /** Creates a new instance of ClientHandlerPipe */
     public ClientHandlerPipe(WSBinding binding, Pipe nextPipe) {
+        super(nextPipe);
         this.binding = binding;
-        this.nextPipe = nextPipe;
         /*
          *Reason for commenting:
          * Client can set a new HandlerChain on Binding after the ClientPipe is 
@@ -68,7 +67,6 @@ public class ClientHandlerPipe extends HandlerPipe{
     public ClientHandlerPipe(ClientHandlerPipe that, PipeCloner cloner) {
         super(that, cloner);
         this.binding = that.binding;
-        this.nextPipe = cloner.copy(that.nextPipe);
     }
 
     public HandlerChainCaller getHandlerChainCaller() {
@@ -119,7 +117,7 @@ public class ClientHandlerPipe extends HandlerPipe{
         // Call next Pipe.process() on msg
         Packet reply;
         try {
-            reply = nextPipe.process(ch.getMessage());
+            reply = next.process(ch.getMessage());
             // Next Pipe Should be MUHeaderPipe
             // TODO: Do MUHeader Processing
         } catch (WebServiceException wse) {

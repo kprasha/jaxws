@@ -3,6 +3,7 @@ package com.sun.xml.ws.util.pipe;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -14,9 +15,7 @@ import java.io.PrintStream;
  *
  * @author Kohsuke Kawaguchi
  */
-public class DumpPipe implements Pipe {
-    private final Pipe next;
-
+public class DumpPipe extends AbstractFilterPipeImpl {
     private final PrintStream out;
 
     private final XMLOutputFactory staxOut;
@@ -28,8 +27,8 @@ public class DumpPipe implements Pipe {
      *      The next {@link Pipe} in the pipeline.
      */
     public DumpPipe(PrintStream out, Pipe next) {
+        super(next);
         this.out = out;
-        this.next = next;
         this.staxOut = XMLOutputFactory.newInstance();
     }
 
@@ -37,9 +36,8 @@ public class DumpPipe implements Pipe {
      * Copy constructor.
      */
     private DumpPipe(DumpPipe that, PipeCloner cloner) {
-        cloner.add(that,this);
+        super(that,cloner);
         this.out = that.out;
-        this.next = cloner.copy(that.next);
         this.staxOut = XMLOutputFactory.newInstance();
     }
 
