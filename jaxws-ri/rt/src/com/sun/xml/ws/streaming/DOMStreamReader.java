@@ -34,6 +34,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
 
 import com.sun.xml.ws.util.exception.XMLStreamException2;
+import com.sun.xml.ws.util.xml.DummyLocation;
 
 /**
  *
@@ -81,27 +82,6 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
      * XMLStreamConstants class.
      */
     int _state;
-
-    /**
-     * Dummy Location instance returned in <code>getLocation</code>.
-     */
-    private static Location dummyLocation = new Location() {
-        public int getCharacterOffset() {
-            return -1;
-        }
-        public int getColumnNumber() {
-            return -1;
-        }
-        public int getLineNumber() {
-            return -1;
-        }
-        public String getPublicId() {
-            return null;
-        }
-        public String getSystemId() {
-            return null;
-        }
-    };
 
     public DOMStreamReader() {
     }
@@ -265,8 +245,8 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         throw new IllegalStateException("DOMStreamReader: getAttributeValue() called in illegal state");
     }
 
-    public javax.xml.stream.Location getLocation() {
-        return dummyLocation;
+    public Location getLocation() {
+        return DummyLocation.INSTANCE;
     }
 
     /**

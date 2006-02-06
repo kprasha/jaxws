@@ -21,33 +21,33 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
-import com.sun.xml.ws.util.xml.StAXSource;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.util.xml.DummyLocation;
+import com.sun.xml.ws.util.xml.StAXSource;
+import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 public class StreamMessage extends AbstractMessageImpl {
     /**
@@ -184,48 +184,34 @@ public class StreamMessage extends AbstractMessageImpl {
             }
             switch (state) {
                 case XMLStreamConstants.START_ELEMENT:
-                    /*
-                     * TODO: Is this necessary, shouldn't zephyr return "" instead of
-                     * null for getNamespaceURI() and getPrefix()?
-                     */
-                    String uri = reader.getNamespaceURI();
-                    String prefix = reader.getPrefix();
+                    String uri = fixNull(reader.getNamespaceURI());
+                    String prefix = fixNull(reader.getPrefix());
                     String localName = reader.getLocalName();
 
-                    if (prefix == null) {
-                        if (uri == null) {
-                            writer.writeStartElement(localName);
-                        } else {
-                            writer.writeStartElement(uri, localName);
-                        }
-                    } else {
-                        assert uri != null;
-
-                        if(prefix.length() > 0){
-                            /**
-                             * Before we write the
-                             */
-                            String writerURI = null;
-                            if (writer.getNamespaceContext() != null)
-                                writerURI = writer.getNamespaceContext().getNamespaceURI(prefix);
-                            String writerPrefix = writer.getPrefix(uri);
-                            if(declarePrefix(prefix, uri, writerPrefix, writerURI)){
-                                writer.writeStartElement(prefix, localName, uri);
-                                writer.setPrefix(prefix, uri != null ? uri : "");
-                                writer.writeNamespace(prefix, uri);
-                            }else{
-                                writer.writeStartElement(prefix, localName, uri);
-                            }
+                    if(prefix.length() > 0){
+                        /**
+                         * Before we write the
+                         */
+                        String writerURI = null;
+                        if (writer.getNamespaceContext() != null)
+                            writerURI = writer.getNamespaceContext().getNamespaceURI(prefix);
+                        String writerPrefix = writer.getPrefix(uri);
+                        if(declarePrefix(prefix, uri, writerPrefix, writerURI)){
+                            writer.writeStartElement(prefix, localName, uri);
+                            writer.setPrefix(prefix, uri != null ? uri : "");
+                            writer.writeNamespace(prefix, uri);
                         }else{
                             writer.writeStartElement(prefix, localName, uri);
                         }
+                    }else{
+                        writer.writeStartElement(prefix, localName, uri);
                     }
 
                     int n = reader.getNamespaceCount();
                     // Write namespace declarations
                     for (int i = 0; i < n; i++) {
-                        String nsPrefix = reader.getNamespacePrefix(i);
-                        if (nsPrefix == null) nsPrefix = "";
+                        String nsPrefix = fixNull(reader.getNamespacePrefix(i));
+
                         // StAX returns null for default ns
                         String writerURI = null;
                         if (writer.getNamespaceContext() != null)
@@ -252,11 +238,10 @@ public class StreamMessage extends AbstractMessageImpl {
                     // Write attributes
                     n = reader.getAttributeCount();
                     for (int i = 0; i < n; i++) {
-                        String attrPrefix = reader.getAttributePrefix(i);
-                        String attrURI = reader.getAttributeNamespace(i);
+                        String attrPrefix = fixNull(reader.getAttributePrefix(i));
+                        String attrURI = fixNull(reader.getAttributeNamespace(i));
 
-                        writer.writeAttribute(attrPrefix != null ? attrPrefix : "",
-                            attrURI != null ? attrURI : "",
+                        writer.writeAttribute(attrPrefix,attrURI,
                             reader.getAttributeLocalName(i),
                             reader.getAttributeValue(i));
                         // if the attribute prefix is undeclared in current writer scope then declare it
@@ -293,14 +278,9 @@ public class StreamMessage extends AbstractMessageImpl {
 
     /**
      * check if we need to declare
-     * @param rPrefix
-     * @param rUri
-     * @param wPrefix
-     * @param wUri
      */
     private boolean declarePrefix(String rPrefix, String rUri, String wPrefix, String wUri){
-        if (wUri == null ||((wPrefix != null) && !rPrefix.equals(wPrefix))||
-                (rUri != null && !wUri.equals(rUri)))
+        if (wUri == null || !rPrefix.equals(wPrefix) || !wUri.equals(rUri))
             return true;
         return false;
     }
@@ -340,7 +320,19 @@ public class StreamMessage extends AbstractMessageImpl {
     }
 
     public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        throw new UnsupportedOperationException();
+        try {
+            XMLStreamReaderToContentHandler conv =
+                new XMLStreamReaderToContentHandler(reader,contentHandler,true);
+            conv.bridge();
+            reader.close();
+        } catch (XMLStreamException e) {
+            Location loc = e.getLocation();
+            if(loc==null)   loc = DummyLocation.INSTANCE;
+
+            SAXParseException x = new SAXParseException(
+                e.getMessage(),loc.getPublicId(),loc.getSystemId(),loc.getLineNumber(),loc.getColumnNumber(),e);
+            errorHandler.error(x);
+        }
     }
 
     public Message copy() {
@@ -361,5 +353,8 @@ public class StreamMessage extends AbstractMessageImpl {
 
     }
 
-
+    private static final String fixNull(String s) {
+        if(s==null)     return "";
+        else            return s;
+    }
 }
