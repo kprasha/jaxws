@@ -66,7 +66,7 @@ import java.io.InputStream;
  */
 public interface ClientEdgePipe {
     /**
-     * Sends a {@link Message} and returns a response {@link XMLStreamReader}
+     * Sends a {@link Packet} and returns a response {@link XMLStreamReader}
      * to it.
      *
      * @throws WebServiceException
@@ -75,10 +75,10 @@ public interface ClientEdgePipe {
      * @throws RuntimeException
      *      see {@link Pipe#process(Packet)}.
      *
-     * @param msg
-     *      always a non-null valid unconsumed {@link Message} that
+     * @param packet
+     *      always a non-null valid unconsumed {@link Packet} that
      *      represents a request.
-     *      The callee may consume a {@link Message} (and in fact
+     *      The callee may consume a {@link Packet} (and in fact
      *      most of the time it will), and therefore once a {@link Message}
      *      is given to a {@link Pipe}.
      *
@@ -92,7 +92,7 @@ public interface ClientEdgePipe {
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
-    XMLStreamReaderMessage processStreamReader(Message msg);
+    XMLStreamReaderMessage processStreamReader(Packet packet);
 
     /**
      * Sends a {@link InputStream} and returns a response {@link XMLStreamReader}
@@ -121,7 +121,7 @@ public interface ClientEdgePipe {
     XMLStreamReaderMessage processStreamReader(InputStreamMessage msg);
 
     /**
-     * Sends a {@link InputStream} and returns a response {@link Message}
+     * Sends a {@link InputStream} and returns a response {@link Packet}
      * to it.
      *
      * @throws WebServiceException
@@ -143,5 +143,5 @@ public interface ClientEdgePipe {
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
-    Message processMessage(InputStreamMessage msg);
+    Packet processMessage(InputStreamMessage msg);
 }

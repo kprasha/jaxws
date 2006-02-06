@@ -81,14 +81,14 @@ public interface ServerEdgePipe {
      *
      * @return
      *      If this method returns a non-null value, it must be
-     *      a valid unconsumed {@link Message}. This message represents
+     *      a valid unconsumed {@link Packet}. This message represents
      *      a response to the request message passed as a parameter.
      *      <p>
      *      This method is also allowed to return null, which indicates
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
-    Message processMessage(XMLStreamReaderMessage msg);
+    Packet processMessage(XMLStreamReaderMessage msg);
 
     /**
      * Receives a {@link javax.xml.stream.XMLStreamReader} and returns a response
@@ -126,12 +126,10 @@ public interface ServerEdgePipe {
      * @throws RuntimeException
      *      see {@link Pipe#process(Packet)}.
      *
-     * @param msg
-     *      always a non-null valid unconsumed {@link Message} that
-     *      represents a request.
-     *      The callee may consume a {@link Message} (and in fact
-     *      most of the time it will), and therefore once a {@link Message}
-     *      is given to a {@link Pipe}.
+     * @param packet
+     *      always a non-null valid unconsumed {@link Packet} that
+     *      represents a request. See the <tt>packet</tt> parameter
+     *      of {@link Pipe#process(Packet)}.
      *
      * @return
      *      If this method returns a non-null value, it must be
@@ -143,7 +141,7 @@ public interface ServerEdgePipe {
      *      that there's no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
-    InputStreamMessage processInputStream(Message msg);
+    InputStreamMessage processInputStream(Packet packet);
 
     /**
      * Request response type enumerations.
