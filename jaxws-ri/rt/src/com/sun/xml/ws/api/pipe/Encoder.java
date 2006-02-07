@@ -21,6 +21,7 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.WSBinding;
 
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
@@ -48,6 +49,10 @@ import java.nio.channels.WritableByteChannel;
  * {@link Encoder} is a non-reentrant object, meaning no two threads
  * can concurrently invoke the decode method. This allows the implementation
  * to easily reuse parser objects (as instance variables), which are costly otherwise.
+ *
+ *
+ * <p>
+ * {@link WSBinding} determines the {@link Encoder}. See {@link WSBinding#createEncoder()}.
  *
  * @author Kohsuke Kawaguchi
  */

@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import java.util.Arrays;
@@ -42,7 +43,11 @@ public class HttpTransportPipe implements Pipe {
     private final Encoder encoder;
     private final Decoder decoder;
 
-    public HttpTransportPipe(Encoder encoder, Decoder decoder) {
+    public HttpTransportPipe(WSBinding binding) {
+        this(binding.createEncoder(),binding.createDecoder());
+    }
+
+    private HttpTransportPipe(Encoder encoder, Decoder decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
     }

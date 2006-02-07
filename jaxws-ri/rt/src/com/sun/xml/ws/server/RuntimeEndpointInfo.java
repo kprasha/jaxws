@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
@@ -43,7 +44,6 @@ import com.sun.xml.ws.server.provider.XMLProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.SOAPProviderEndpointModel;
-import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
@@ -229,11 +229,11 @@ public class RuntimeEndpointInfo extends WSEndpoint
                 if(getPortName() != null){
                     wsdlPort = wsdlDoc.getService(getServiceName()).get(getPortName());
                     if(wsdlPort == null)
-                        throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", new Object[]{serviceName, portName, getWsdlUrl()});
+                        throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, getWsdlUrl());
                 }else{
                     WSDLService service = wsdlDoc.getService(serviceName);
                     if(service == null)
-                        throw new ServerRtException("runtime.parser.wsdl.noservice", new Object[]{serviceName, getWsdlUrl()});
+                        throw new ServerRtException("runtime.parser.wsdl.noservice", serviceName, getWsdlUrl());
 
                     String bindingId = binding.getBindingId();
                     List<WSDLBoundPortType> bindings = wsdlDoc.getBindings(service, bindingId);
@@ -358,7 +358,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         // setting a default binding
         if (binding == null) {
             String bindingId = RuntimeModeler.getBindingId(getImplementorClass());
-            setBinding(new SOAPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING));
+            setBinding(BindingImpl.getDefaultBinding());
         }
 
         if (isProviderEndpoint()) {
@@ -396,7 +396,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
             }
             //set momt processing
             if(binding instanceof SOAPBindingImpl){
-                ((SOAPSEIModel)seiModel).enableMtom(((SOAPBinding)binding).isMTOMEnabled());
+                seiModel.enableMtom(((SOAPBinding)binding).isMTOMEnabled());
             }
         }
         
@@ -512,7 +512,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         urlPattern = s;
     }
 
-    public void setBinding(Binding binding){
+    public void setBinding(WSBinding binding){
         this.binding = (BindingImpl)binding;
     }
 

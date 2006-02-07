@@ -39,12 +39,12 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.ServerRtException;
-import com.sun.xml.ws.spi.runtime.Binding;
 import com.sun.xml.ws.streaming.Attributes;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
+import com.sun.xml.ws.api.WSBinding;
 
 /**
  * @author WS Development Team
@@ -114,7 +114,7 @@ public class RuntimeEndpointInfoParser {
 
                 //set Binding using DD, annotation, or default one(in that order)
                 String bindingId = getAttribute(attrs, ATTR_BINDING);
-                Binding binding = BindingImpl.getBinding(bindingId,
+                WSBinding binding = BindingImpl.getBinding(bindingId,
                     implementorClass, rei.getServiceName(), true);
                 rei.setBinding(binding);
 

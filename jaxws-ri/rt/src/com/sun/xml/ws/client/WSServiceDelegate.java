@@ -3,8 +3,9 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -14,6 +15,7 @@ import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
+import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
 import com.sun.xml.ws.client.port.PortInterfaceStub;
 import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
@@ -46,7 +48,6 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -261,7 +262,7 @@ public class WSServiceDelegate extends WSService {
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
         BindingImpl binding = getBinding(portName);
-        return Stubs.createJAXBDispatch(portName, (WSServiceDelegate)this, binding, jaxbContext, mode,createPipeline(portName,binding));        
+        return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,createPipeline(portName,binding));
     }
 
     public QName getServiceName() {
@@ -328,7 +329,8 @@ public class WSServiceDelegate extends WSService {
         // create binding
         if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
             bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            SOAPBindingImpl bindingImpl = new SOAPBindingImpl(handlerChain, bindingId, serviceName);
+            SOAPBindingImpl bindingImpl = new SOAPHTTPBindingImpl(
+                handlerChain, SOAPVersion.fromHttpBinding(bindingId), serviceName);
 
             Set<String> roles = rolesMap.get(portName);
             if (roles != null) {

@@ -19,8 +19,8 @@
  */
 package com.sun.xml.ws.binding.soap;
 
-import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerChainCaller;
@@ -44,7 +44,7 @@ import java.util.Set;
 /**
  * @author WS Development Team
  */
-public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
+public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
 
     public static final String X_SOAP12HTTP_BINDING =
@@ -56,21 +56,14 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     protected Set<String> roles;
     protected boolean enableMtom = false;
 
-    private final SOAPVersion soapVersion;
+    protected final SOAPVersion soapVersion;
 
 
-    // called by DispatchImpl
-    public SOAPBindingImpl(String bindingId, QName serviceName) {
-        this(null,bindingId,serviceName);
-    }
+    protected SOAPBindingImpl(
+        List<Handler> handlerChain, SOAPVersion soapVersion, String bindingId, QName serviceName) {
 
-    public SOAPBindingImpl(String bindingId) {
-        this(bindingId,null);
-    }
-
-    public SOAPBindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
         super(handlerChain, bindingId, serviceName);
-        soapVersion = SOAPVersion.fromHttpBinding(getBindingId());
+        this.soapVersion = soapVersion;
         setup(getBindingId());
         setupSystemHandlerDelegate(serviceName);
     }

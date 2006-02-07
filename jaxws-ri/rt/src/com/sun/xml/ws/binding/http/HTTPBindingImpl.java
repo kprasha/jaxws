@@ -19,31 +19,38 @@
  */
 package com.sun.xml.ws.binding.http;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
+import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
+import com.sun.xml.ws.util.localization.Localizable;
+import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
+import com.sun.xml.ws.util.localization.Localizer;
+
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.http.HTTPBinding;
-
 import java.util.List;
-
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.SOAPVersion;
 
 /**
  * @author WS Development Team
  */
 public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
 
-    public HTTPBindingImpl() {
-        super(HTTPBinding.HTTP_BINDING, null);
+    public HTTPBindingImpl(List<Handler> handlerChain) {
+        // TODO: implement a real encoder/decoder for these
+        super(handlerChain, HTTPBinding.HTTP_BINDING, null);
     }
 
-    public HTTPBindingImpl(List<Handler> handlerChain) {
-        super(handlerChain, HTTPBinding.HTTP_BINDING, null);
+    public Encoder createEncoder() {
+        return TestEncoderImpl.INSTANCE11;
+    }
+
+    public Decoder createDecoder() {
+        return TestDecoderImpl.INSTANCE11;
     }
 
     /*

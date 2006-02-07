@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.Tie;
@@ -60,7 +61,11 @@ public class LocalTransportPipe implements Pipe {
     private final LocalMessage lm = new LocalMessage();
     private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
-    public LocalTransportPipe(RuntimeEndpointInfo endpointInfo, Encoder encoder, Decoder decoder) {
+    public LocalTransportPipe(RuntimeEndpointInfo endpointInfo, WSBinding binding) {
+        this(endpointInfo,binding.createEncoder(),binding.createDecoder());
+    }
+
+    private LocalTransportPipe(RuntimeEndpointInfo endpointInfo, Encoder encoder, Decoder decoder) {
         this.endpointInfo = endpointInfo;
         this.encoder = encoder;
         this.decoder = decoder;

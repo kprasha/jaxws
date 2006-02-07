@@ -20,20 +20,22 @@
 
 package com.sun.xml.ws.binding;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
+import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
 import com.sun.xml.ws.handler.HandlerChainCaller;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
-import com.sun.xml.ws.api.WSBinding;
 
-import javax.xml.ws.Binding;
+import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Instances are created by the service, which then
@@ -52,25 +54,21 @@ import javax.xml.namespace.QName;
  *
  * @author WS Development Team
  */
-public abstract class BindingImpl implements
-    com.sun.xml.ws.spi.runtime.Binding, WSBinding {
+public abstract class BindingImpl implements WSBinding {
 
     // caller ignored on server side
     protected HandlerChainCaller chainCaller;
 
     private SystemHandlerDelegate systemHandlerDelegate;
     private List<Handler> handlers;
-    private String bindingId;
-    protected QName serviceName;
+    private final String bindingId;
+    protected final QName serviceName;
 
-   // called by DispatchImpl
-    public BindingImpl(String bindingId, QName serviceName) {
-        this.bindingId = bindingId;
-        this.serviceName = serviceName;
-    }
-
-    public BindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
-        handlers = handlerChain;
+    // called by DispatchImpl
+    protected BindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
+        if(handlerChain==null)
+            handlerChain = Collections.emptyList();
+        this.handlers = handlerChain;
         this.bindingId = bindingId;
         this.serviceName = serviceName;
     }
@@ -92,19 +90,13 @@ public abstract class BindingImpl implements
      */
     public List<Handler> getHandlerChain() {
         if (chainCaller != null) {
-            return new ArrayList(chainCaller.getHandlerChain());
+            return new ArrayList<Handler>(chainCaller.getHandlerChain());
         }
-        if (handlers == null) {
-            return null;
-        }
-        return new ArrayList(handlers);
+        return new ArrayList<Handler>(handlers);
     }
 
     public boolean hasHandlers() {
-        if (handlers == null || handlers.size() == 0) {
-            return false;
-        }
-        return true;
+        return !handlers.isEmpty();
     }
 
     /**
@@ -143,10 +135,6 @@ public abstract class BindingImpl implements
         return bindingId;
     }
 
-    public void setServiceName(QName serviceName){
-        this.serviceName = serviceName;
-    }
-
     public SystemHandlerDelegate getSystemHandlerDelegate() {
         return systemHandlerDelegate;
     }
@@ -155,8 +143,7 @@ public abstract class BindingImpl implements
         systemHandlerDelegate = delegate;
     }
 
-    public static com.sun.xml.ws.spi.runtime.Binding getBinding(String bindingId,
-                                                                Class implementorClass, QName serviceName, boolean tokensOK) {
+    public static WSBinding getBinding(String bindingId, Class implementorClass, QName serviceName, boolean tokensOK) {
 
         if (bindingId == null) {
             // Gets bindingId from @BindingType annotation
@@ -177,19 +164,19 @@ public abstract class BindingImpl implements
         if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING)
             || bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)
             || bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
-            return new SOAPBindingImpl(bindingId, serviceName);
+            return new SOAPHTTPBindingImpl(null, SOAPVersion.fromHttpBinding(bindingId), serviceName);
         } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
-            return new HTTPBindingImpl();
+            return new HTTPBindingImpl(null);
         } else {
             throw new IllegalArgumentException("Wrong bindingId "+bindingId);
         }
     }
 
-    public static Binding getDefaultBinding() {
-        return new SOAPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING);
+    public static WSBinding getDefaultBinding() {
+        return getDefaultBinding(null);
     }
 
-    public static Binding getDefaultBinding(QName serviceName) {
-        return new SOAPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING, serviceName);
+    public static WSBinding getDefaultBinding(QName serviceName) {
+        return new SOAPHTTPBindingImpl(null,SOAPVersion.SOAP_11,serviceName);
     }
 }

@@ -22,6 +22,7 @@ package com.sun.xml.ws.spi.runtime;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import org.xml.sax.EntityResolver;
+import com.sun.xml.ws.api.WSBinding;
 
 /**
  * This captures all the required information (e.g: handlers, binding, endpoint
@@ -95,13 +96,13 @@ public interface RuntimeEndpointInfo {
      *
      * @return Binding Returns the binding for this endpoint.
      */
-    public Binding getBinding();
+    public WSBinding getBinding();
 
     /**
      * sets the binding for this endpoint. If there are handlers, set them on
      * the binding object.
      */
-    public void setBinding(Binding binding);
+    public void setBinding(WSBinding binding);
 
     /**
      * Returns the WebServiceContext of this endpoint

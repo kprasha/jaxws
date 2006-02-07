@@ -19,29 +19,28 @@
  */
 package com.sun.xml.ws.util;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import java.io.OutputStream;
-
+import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
 import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 import com.sun.xml.ws.server.Tie;
-import com.sun.xml.ws.spi.runtime.ClientTransportFactory;
-
-import com.sun.xml.ws.spi.runtime.ClientTransportFactoryTypes;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.servlet.ServletConnectionImpl;
 import com.sun.xml.ws.transport.http.servlet.WSServlet;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import java.net.URL;
-import java.util.List;
+import org.xml.sax.EntityResolver;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
-import org.xml.sax.EntityResolver;
-import javax.xml.ws.handler.MessageContext;
+import java.net.URL;
+import java.util.List;
 
 /**
  * Singleton factory class to instantiate concrete objects.
@@ -81,14 +80,14 @@ public class WSRtObjectFactoryImpl
     }
     
     @Override
-    public com.sun.xml.ws.spi.runtime.Binding createBinding(String bindingId) {
+    public WSBinding createBinding(String bindingId) {
         if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
                 bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            return new SOAPBindingImpl(bindingId);
+            return new SOAPHTTPBindingImpl(null, SOAPVersion.fromHttpBinding(bindingId),null);
         } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
-            return new HTTPBindingImpl();
+            return new HTTPBindingImpl(null);
         }
-        return new SOAPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING);
+        return BindingImpl.getDefaultBinding();
     }
     
     /**

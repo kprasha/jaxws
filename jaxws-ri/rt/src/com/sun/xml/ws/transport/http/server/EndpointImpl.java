@@ -21,15 +21,16 @@
 
 package com.sun.xml.ws.transport.http.server;
 
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.server.RuntimeEndpointInfo;
 
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.Binding;
 import javax.xml.transform.Source;
+import javax.xml.ws.Binding;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.WebServicePermission;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import javax.xml.ws.WebServicePermission;
 
 
 /**
@@ -47,7 +48,7 @@ public class EndpointImpl extends Endpoint {
         rtEndpointInfo = new RuntimeEndpointInfo();
         rtEndpointInfo.setImplementor(impl);
         rtEndpointInfo.setImplementorClass(impl.getClass());
-        com.sun.xml.ws.spi.runtime.Binding binding =
+        WSBinding binding =
             BindingImpl.getBinding(bindingId, impl.getClass(), null, false);
         rtEndpointInfo.setBinding(binding);
     }

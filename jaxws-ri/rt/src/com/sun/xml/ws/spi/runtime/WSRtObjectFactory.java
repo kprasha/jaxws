@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.sun.xml.ws.util.WSRtObjectFactoryImpl;
+import com.sun.xml.ws.api.WSBinding;
+
 import java.net.URL;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -86,7 +88,7 @@ public abstract class WSRtObjectFactory {
      * javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING,
      * javax.xml.ws.http.HTTPBinding.HTTP_BINDING
      */
-    public abstract Binding createBinding(String bindingId);
+    public abstract WSBinding createBinding(String bindingId);
     
     /**
      * creates an EntityResolver for the XML Catalog URL
