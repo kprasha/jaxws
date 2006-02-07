@@ -221,6 +221,16 @@ public class Operation extends ModelObject {
         return JAXBRIContext.mangleNameToVariableName(_name.getLocalPart());
     }
 
+    public com.sun.tools.ws.wsdl.document.Operation getWSDLOperation(){
+        return wsdlOperation;
+    }
+
+    public void setWSDLOperation(com.sun.tools.ws.wsdl.document.Operation wsdlOperation){
+        this.wsdlOperation = wsdlOperation;
+    }
+
+
+
     private String customizedName;
     private boolean _isWrapped = true;
     private QName _name;
@@ -233,5 +243,6 @@ public class Operation extends ModelObject {
     private SOAPUse _use = SOAPUse.LITERAL;
     private Set<String> _faultNames;
     private Set<Fault> _faults;
+    private com.sun.tools.ws.wsdl.document.Operation wsdlOperation;
 
 }
