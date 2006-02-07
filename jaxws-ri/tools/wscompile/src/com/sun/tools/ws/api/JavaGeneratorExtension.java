@@ -8,12 +8,12 @@ import com.sun.tools.ws.api.wsdl.TExtensible;
  *
  * @author Vivek Pandey
  */
-public interface JavaGeneratorExtension {
+public abstract class JavaGeneratorExtension {
     /**
-     * This method should be used to write annotations on {@link JMethod}
+     * This method should be used to write annotations on {@link JMethod}.
      *
      * @param wsdlOperation non-null wsdl extensiblity element -  wsdl:operation.
      * @param jMethod non-null {@link JMethod}
      */
-    void writeOperationAnnotations(TExtensible wsdlOperation, JMethod jMethod);
+     abstract void writeOperationAnnotations(TExtensible wsdlOperation, JMethod jMethod);
 }
