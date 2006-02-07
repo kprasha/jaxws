@@ -17,12 +17,6 @@ import javax.xml.ws.WebServiceException;
  * One instance of this object is created for each deployed service
  * endpoint.
  *
- * <pre>
- * TODO:
- *      how do we correctly produce WSDL that contains endpoint specific information?
- *      for example, binding needs to be reflected in WSDL, so does the endpoint address.
- * </pre>
- *
  * @author Kohsuke Kawaguchi
  */
 public abstract class WSEndpoint<T> {
@@ -48,8 +42,12 @@ public abstract class WSEndpoint<T> {
     /**
      * Gets the port that this endpoint is serving.
      *
+     * <p>
+     * A service is not required to have a WSDL, and when it doesn't,
+     * this method returns null.
+     *
      * @return
-     *      always non-null. TODO: is it?
+     *      Possibly null, but always the same value.
      */
     public abstract WSDLPort getPort();
 
@@ -66,6 +64,15 @@ public abstract class WSEndpoint<T> {
      * @param request
      *      Must be non-null unconsumed {@link Packet} that represents
      *      a request.
+     * @param wscd
+     *      {@link WebServiceContextDelegate} to be set to {@link Packet}.
+     *      (we didn't have to take this and instead just ask the caller to
+     *      set to {@link Packet#webServiceContextDelegate}, but that felt
+     *      too error prone.)
+     * @param tbc
+     *      {@link TransportBackChannel} to be set to {@link Packet}.
+     *      See the {@code wscd} parameter javadoc for why this is a parameter.
+     *      Can be null.
      * @return
      *      always a non-null unconsumed {@link Packet} that represents
      *      a reply to the request.
@@ -85,9 +92,9 @@ public abstract class WSEndpoint<T> {
      *      Therefore, it should be recorded by the caller in a way that
      *      allows developers to fix a bug.
      *
-     *TODO: define a mechanism to early-close a response channel
      */
-    public abstract Packet process(Packet request, WebServiceContextDelegate wscd);
+    public abstract Packet process(
+        Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc);
 
     /**
      * Sets a new {@link InstanceResolver}.
@@ -111,10 +118,20 @@ public abstract class WSEndpoint<T> {
      *
      * <p>
      * Once this method is called, the behavior is undefed for
-     * all in-progress {@link #process(Packet)} methods (by other threads)
-     * and future {@link #process(Packet)} method invocations.
+     * all in-progress {@link #process} methods (by other threads)
+     * and future {@link #process} method invocations.
      */
     public abstract void dispose();
 
+    /**
+     * Gets the description of the service.
+     *
+     * <p>
+     * A service is not required to have a description, and when it doesn't,
+     * this method returns null.
+     *
+     * @return
+     *      Possible null, but always the same value.
+     */
     public abstract ServiceDefinition getServiceDefinition();
 }

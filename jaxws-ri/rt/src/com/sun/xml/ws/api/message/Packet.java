@@ -24,6 +24,8 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.util.PropertySet;
 import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.sandbox.server.TransportBackChannel;
+import com.sun.xml.ws.sandbox.server.WSEndpoint;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
@@ -36,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.net.MalformedURLException;
 
 /**
  * Represents a container of a {@link Message}.
@@ -212,9 +213,24 @@ public final class Packet extends PropertySet {
      * exposed to the user application.
      *
      * Used only on the server side.
+     *
+     * <p>
+     * This property is set from the parameter
+     * of {@link WSEndpoint#process(Packet,WebServiceContextDelegate,TransportBackChannel)}.
      */
-    WebServiceContextDelegate webServiceContextDelegate;
+    public WebServiceContextDelegate webServiceContextDelegate;
 
+    /**
+     * Used only on the server side so that the transport
+     * can close the connection early.
+     *
+     * This field can be null.
+     *
+     * <p>
+     * This property is set from the parameter
+     * of {@link WSEndpoint#process(Packet,WebServiceContextDelegate,TransportBackChannel)}.
+     */
+    public TransportBackChannel transportBackChannel;
 
     /**
      * The value of the SOAPAction header associated with the message.
