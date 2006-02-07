@@ -44,6 +44,9 @@ public abstract class StreamSOAPDecoder implements Decoder {
     // consider caching
     // private final XMLStreamReader reader;
 
+    // consider caching
+    // private final XMLStreamBuffer buffer;
+    
     public Packet decode(InputStream in, String contentType) throws IOException {
         XMLStreamReader reader = createXMLStreamReader(in);
 
@@ -169,6 +172,10 @@ public abstract class StreamSOAPDecoder implements Decoder {
     }
 
     private XMLStreamBuffer createXMLStreamBuffer() {
+        // TODO: Decode should own one XMLStreamBuffer for reuse
+        // since it is more efficient. ISSUE: possible issue with
+        // lifetime of information in the buffer if accessed beyond
+        // the pipe line.
         return new XMLStreamBuffer();
     }
 
