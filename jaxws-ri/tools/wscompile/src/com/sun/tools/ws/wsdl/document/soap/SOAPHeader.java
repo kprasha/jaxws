@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
 
@@ -37,7 +37,7 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  *
  * @author WS Development Team
  */
-public class SOAPHeader extends Extension {
+public class SOAPHeader extends ExtensionImpl {
 
     public SOAPHeader() {
         _faults = new ArrayList();

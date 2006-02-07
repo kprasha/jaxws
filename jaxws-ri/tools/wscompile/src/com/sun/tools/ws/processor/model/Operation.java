@@ -221,11 +221,11 @@ public class Operation extends ModelObject {
         return JAXBRIContext.mangleNameToVariableName(_name.getLocalPart());
     }
 
-    public com.sun.tools.ws.wsdl.document.Operation getWSDLOperation(){
+    public com.sun.tools.ws.wsdl.document.Operation getWSDLPortTypeOperation(){
         return wsdlOperation;
     }
 
-    public void setWSDLOperation(com.sun.tools.ws.wsdl.document.Operation wsdlOperation){
+    public void setWSDLPortTypeOperation(com.sun.tools.ws.wsdl.document.Operation wsdlOperation){
         this.wsdlOperation = wsdlOperation;
     }
 

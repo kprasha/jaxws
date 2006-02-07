@@ -20,16 +20,13 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.io.IOException;
+import java.util.Map;
 
 import org.w3c.dom.Element;
 
-import com.sun.tools.ws.wsdl.document.schema.Schema;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
-import com.sun.tools.ws.wsdl.framework.ParserContext;
-import com.sun.tools.ws.wsdl.framework.WriterContext;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -37,9 +34,10 @@ import com.sun.tools.ws.util.xml.XmlUtil;
  *
  * @author WS Development Team
  */
-public class SchemaExtensionHandler extends ExtensionHandler {
+public class SchemaExtensionHandler extends AbstractExtensionHandler {
 
-    public SchemaExtensionHandler() {
+    public SchemaExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap) {
+        super(extensionHandlerMap);
     }
 
     public String getNamespaceURI() {
@@ -47,8 +45,8 @@ public class SchemaExtensionHandler extends ExtensionHandler {
     }
 
     public boolean doHandleExtension(
-        ParserContext context,
-        Extensible parent,
+        TParserContextImpl context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_SCHEMA)) {
             SchemaParser parser = new SchemaParser();
@@ -56,17 +54,6 @@ public class SchemaExtensionHandler extends ExtensionHandler {
             return true;
         } else {
             return false;
-        }
-    }
-
-    public void doHandleExtension(WriterContext context, Extension extension)
-        throws IOException {
-        if (extension instanceof Schema) {
-            SchemaWriter writer = new SchemaWriter();
-            writer.writeSchema(context, (Schema) extension);
-        } else {
-            // unknown extension
-            throw new IllegalArgumentException();
         }
     }
 }

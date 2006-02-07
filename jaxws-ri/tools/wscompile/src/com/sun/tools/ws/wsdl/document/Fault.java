@@ -20,16 +20,15 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.Iterator;
-
 import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.AbstractDocument;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
 
 /**
@@ -37,7 +36,7 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  *
  * @author WS Development Team
  */
-public class Fault extends Entity implements Extensible{
+public class Fault extends Entity implements TExtensible {
 
     public Fault() {
         _helper = new ExtensibilityHelper();
@@ -107,18 +106,41 @@ public class Fault extends Entity implements Extensible{
     private QName _message;
     private ExtensibilityHelper _helper;
 
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return parent.getNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
     /* (non-Javadoc)
-     * @see Extensible#addExtension(Extension)
-     */
-    public void addExtension(Extension e) {
+    * @see TExtensible#addExtension(ExtensionImpl)
+    */
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
 
     }
 
     /* (non-Javadoc)
-     * @see Extensible#extensions()
+     * @see TExtensible#extensions()
      */
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
     }
+
+    public TExtensible getParent() {
+        return parent;
+    }
+
+
+    public void setParent(TExtensible parent) {
+        this.parent = parent;
+    }
+
+    private TExtensible parent;
 }

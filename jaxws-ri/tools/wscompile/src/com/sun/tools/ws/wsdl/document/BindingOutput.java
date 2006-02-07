@@ -20,22 +20,21 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.Iterator;
-
 import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * Entity corresponding to the "output" child element of a binding operation.
  *
  * @author WS Development Team
  */
-public class BindingOutput extends Entity implements Extensible {
+public class BindingOutput extends Entity implements TExtensible {
 
     public BindingOutput() {
         _helper = new ExtensibilityHelper();
@@ -61,12 +60,28 @@ public class BindingOutput extends Entity implements Extensible {
         _documentation = d;
     }
 
-    public void addExtension(Extension e) {
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
+    }
+
+    public TExtensible getParent() {
+        return parent;
     }
 
     public void withAllSubEntitiesDo(EntityAction action) {
@@ -82,6 +97,12 @@ public class BindingOutput extends Entity implements Extensible {
     public void validateThis() {
     }
 
+
+    public void setParent(TExtensible parent) {
+        this.parent = parent;
+    }
+
+    private TExtensible parent;
     private ExtensibilityHelper _helper;
     private Documentation _documentation;
     private String _name;

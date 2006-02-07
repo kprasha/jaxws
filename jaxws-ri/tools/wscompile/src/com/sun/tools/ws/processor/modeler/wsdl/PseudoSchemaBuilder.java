@@ -21,10 +21,8 @@ package com.sun.tools.ws.processor.modeler.wsdl;
 
 import static com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase.*;
 import com.sun.tools.ws.processor.config.ModelInfo;
-import com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase.ProcessSOAPOperationInfo; 
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
+import com.sun.tools.ws.api.wsdl.TExtensible;
 
 import org.xml.sax.InputSource;
 
@@ -41,7 +39,6 @@ import java.util.Set;
 
 import com.sun.tools.ws.wsdl.document.MessagePart;
 import com.sun.tools.ws.wsdl.document.Operation;
-import com.sun.tools.ws.wsdl.document.Kinds;
 import com.sun.tools.ws.wsdl.document.Message;
 import com.sun.tools.ws.wsdl.document.PortType;
 import com.sun.tools.ws.wsdl.document.Port;
@@ -51,7 +48,6 @@ import com.sun.tools.ws.wsdl.document.Binding;
 import com.sun.tools.ws.wsdl.document.BindingOperation;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBinding;
 import com.sun.tools.ws.wsdl.document.soap.*;
-
 
 
 /**
@@ -242,14 +238,14 @@ public class PseudoSchemaBuilder {
         }
     }
 
-    private QName getOperationName(PortType portType, String operationName, Extensible binding){
+    private QName getOperationName(PortType portType, String operationName, TExtensible binding){
         if(operationName == null)
             return null;
 //        String namespaceURI = wsdlDocument.getDefinitions().getTargetNamespaceURI()+"?"+portType.getName()+"?" + operationName;
         String namespaceURI = "";
         return new QName(namespaceURI, operationName+"Response");
     }
-   
+
     private void print( String msg ) {
         print( msg, new Object[0] );
     }

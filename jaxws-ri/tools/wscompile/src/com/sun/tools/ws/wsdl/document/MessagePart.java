@@ -26,6 +26,7 @@ import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
 import com.sun.tools.ws.wsdl.framework.Kind;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
+
 import javax.jws.WebParam.Mode;
 
 /**

@@ -29,15 +29,16 @@ import javax.xml.namespace.QName;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * Entity corresponding to the "operation" child element of a WSDL "binding" element.
  *
  * @author WS Development Team
  */
-public class BindingOperation extends Entity implements Extensible {
+public class BindingOperation extends Entity implements TExtensible {
 
     public BindingOperation() {
         _faults = new ArrayList();
@@ -128,12 +129,28 @@ public class BindingOperation extends Entity implements Extensible {
         _documentation = d;
     }
 
-    public void addExtension(Extension e) {
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return parent.getNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
+    }
+
+    public TExtensible getParent() {
+        return parent;
     }
 
     public void withAllSubEntitiesDo(EntityAction action) {
@@ -195,4 +212,10 @@ public class BindingOperation extends Entity implements Extensible {
     private List _faults;
     private OperationStyle _style;
     private String _uniqueKey;
+
+    public void setParent(TExtensible parent) {
+        this.parent = parent;
+    }
+
+    private TExtensible parent;
 }

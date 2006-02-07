@@ -20,14 +20,31 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
+import com.sun.tools.ws.api.wsdl.TExtensible;
 import com.sun.tools.ws.api.wsdl.TExtension;
 
 /**
- * A visitor working on extension entities.
+ * An entity extending another entity.
  *
  * @author WS Development Team
  */
-public interface ExtensionVisitor {
-    public void preVisit(TExtension extension) throws Exception;
-    public void postVisit(TExtension extension) throws Exception;
+public abstract class ExtensionImpl extends Entity implements TExtension {
+
+    public ExtensionImpl() {
+    }
+
+    public TExtensible getParent() {
+        return _parent;
+    }
+
+    public void setParent(TExtensible parent) {
+        _parent = parent;
+    }
+
+    public void accept(ExtensionVisitor visitor) throws Exception {
+        visitor.preVisit(this);
+        visitor.postVisit(this);
+    }
+
+    private TExtensible _parent;
 }

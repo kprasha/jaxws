@@ -22,14 +22,14 @@ package com.sun.tools.ws.wsdl.document.soap;
 
 import javax.xml.namespace.QName;
 
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * A SOAP binding extension.
  *
  * @author WS Development Team
  */
-public class SOAPBinding extends Extension {
+public class SOAPBinding extends ExtensionImpl {
 
     public SOAPBinding() {
         _style = SOAPStyle.DOCUMENT;

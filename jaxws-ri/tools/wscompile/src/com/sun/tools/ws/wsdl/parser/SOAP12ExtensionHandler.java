@@ -25,8 +25,13 @@ import com.sun.tools.ws.wsdl.document.soap.SOAP12Constants;
 import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
 import com.sun.tools.ws.wsdl.document.soap.SOAP12Binding;
 
+import java.util.Map;
+
 
 public class SOAP12ExtensionHandler extends SOAPExtensionHandler {
+    public SOAP12ExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap) {
+        super(extensionHandlerMap);
+    }
 
     /* 
      * @see SOAPExtensionHandler#getNamespaceURI()

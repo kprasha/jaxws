@@ -20,8 +20,8 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -33,10 +33,9 @@ import com.sun.tools.ws.wsdl.document.mime.MIMEContent;
 import com.sun.tools.ws.wsdl.document.mime.MIMEMultipartRelated;
 import com.sun.tools.ws.wsdl.document.mime.MIMEPart;
 import com.sun.tools.ws.wsdl.document.mime.MIMEXml;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
-import com.sun.tools.ws.wsdl.framework.ParserContext;
-import com.sun.tools.ws.wsdl.framework.WriterContext;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TParserContext;
+import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -44,9 +43,10 @@ import com.sun.tools.ws.util.xml.XmlUtil;
  *
  * @author WS Development Team
  */
-public class MIMEExtensionHandler extends ExtensionHandler {
+public class MIMEExtensionHandler extends AbstractExtensionHandler {
 
-    public MIMEExtensionHandler() {
+    public MIMEExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap) {
+        super(extensionHandlerMap);
     }
 
     public String getNamespaceURI() {
@@ -54,26 +54,26 @@ public class MIMEExtensionHandler extends ExtensionHandler {
     }
 
     public boolean doHandleExtension(
-        ParserContext context,
-        Extensible parent,
+        TParserContext context,
+        TExtensible parent,
         Element e) {
-        if (parent.getElementName().equals(WSDLConstants.QNAME_OUTPUT)) {
+        if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_OUTPUT)) {
             return handleInputOutputExtension(context, parent, e);
-        } else if (parent.getElementName().equals(WSDLConstants.QNAME_INPUT)) {
+        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_INPUT)) {
             return handleInputOutputExtension(context, parent, e);
-        } else if (parent.getElementName().equals(MIMEConstants.QNAME_PART)) {
+        } else if (parent.getWSDLElementName().equals(MIMEConstants.QNAME_PART)) {
             return handleMIMEPartExtension(context, parent, e);
         } else {
-            context.fireIgnoringExtension(
-                new QName(e.getNamespaceURI(), e.getLocalName()),
-                parent.getElementName());
+//            context.fireIgnoringExtension(
+//                new QName(e.getNamespaceURI(), e.getLocalName()),
+//                parent.getWSDLElementName());
             return false;
         }
     }
 
     protected boolean handleInputOutputExtension(
-        ParserContext context,
-        Extensible parent,
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, MIMEConstants.QNAME_MULTIPART_RELATED)) {
             context.push();
@@ -99,15 +99,13 @@ public class MIMEExtensionHandler extends ExtensionHandler {
                     }
 
                     for (Iterator iter2 = XmlUtil.getAllChildren(e2);
-                        iter2.hasNext();
+                         iter2.hasNext();
                         ) {
                         Element e3 = Util.nextElement(iter2);
                         if (e3 == null)
                             break;
 
-                        ExtensionHandler h =
-                            (ExtensionHandler) _extensionHandlers.get(
-                                e3.getNamespaceURI());
+                        AbstractExtensionHandler h = getExtensionHandlers().get(e3.getNamespaceURI());
                         boolean handled = false;
                         if (h != null) {
                             handled = h.doHandleExtension(context, part, e3);
@@ -126,20 +124,20 @@ public class MIMEExtensionHandler extends ExtensionHandler {
                                     e3.getTagName(),
                                     e3.getNamespaceURI());
                             } else {
-                                context.fireIgnoringExtension(
-                                    new QName(
-                                        e3.getNamespaceURI(),
-                                        e3.getLocalName()),
-                                    part.getElementName());
+//                                context.fireIgnoringExtension(
+//                                    new QName(
+//                                        e3.getNamespaceURI(),
+//                                        e3.getLocalName()),
+//                                    part.getElementName());
                             }
                         }
                     }
 
                     mpr.add(part);
                     context.pop();
-                    context.fireDoneParsingEntity(
-                        MIMEConstants.QNAME_PART,
-                        part);
+//                    context.fireDoneParsingEntity(
+//                        MIMEConstants.QNAME_PART,
+//                        part);
                 } else {
                     Util.fail(
                         "parsing.invalidElement",
@@ -150,9 +148,9 @@ public class MIMEExtensionHandler extends ExtensionHandler {
 
             parent.addExtension(mpr);
             context.pop();
-            context.fireDoneParsingEntity(
-                MIMEConstants.QNAME_MULTIPART_RELATED,
-                mpr);
+//            context.fireDoneParsingEntity(
+//                MIMEConstants.QNAME_MULTIPART_RELATED,
+//                mpr);
             return true;
         } else if (XmlUtil.matchesTagNS(e, MIMEConstants.QNAME_CONTENT)) {
             MIMEContent content = parseMIMEContent(context, e);
@@ -172,8 +170,8 @@ public class MIMEExtensionHandler extends ExtensionHandler {
     }
 
     protected boolean handleMIMEPartExtension(
-        ParserContext context,
-        Extensible parent,
+        TParserContextImpl context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, MIMEConstants.QNAME_CONTENT)) {
             MIMEContent content = parseMIMEContent(context, e);
@@ -192,7 +190,7 @@ public class MIMEExtensionHandler extends ExtensionHandler {
         }
     }
 
-    protected MIMEContent parseMIMEContent(ParserContext context, Element e) {
+    protected MIMEContent parseMIMEContent(TParserContext context, Element e) {
         context.push();
         context.registerNamespaces(e);
 
@@ -209,11 +207,11 @@ public class MIMEExtensionHandler extends ExtensionHandler {
         }
 
         context.pop();
-        context.fireDoneParsingEntity(MIMEConstants.QNAME_CONTENT, content);
+//        context.fireDoneParsingEntity(MIMEConstants.QNAME_CONTENT, content);
         return content;
     }
 
-    protected MIMEXml parseMIMEXml(ParserContext context, Element e) {
+    protected MIMEXml parseMIMEXml(TParserContext context, Element e) {
         context.push();
         context.registerNamespaces(e);
 
@@ -225,45 +223,7 @@ public class MIMEExtensionHandler extends ExtensionHandler {
         }
 
         context.pop();
-        context.fireDoneParsingEntity(MIMEConstants.QNAME_MIME_XML, mimeXml);
+//        context.fireDoneParsingEntity(MIMEConstants.QNAME_MIME_XML, mimeXml);
         return mimeXml;
-    }
-
-    public void doHandleExtension(WriterContext context, Extension extension)
-        throws IOException {
-        // NOTE - this ugliness can be avoided by moving all the XML parsing/writing code
-        // into the document classes themselves
-        if (extension instanceof MIMEContent) {
-            MIMEContent content = (MIMEContent) extension;
-            context.writeStartTag(content.getElementName());
-            context.writeAttribute(Constants.ATTR_PART, content.getPart());
-            context.writeAttribute(Constants.ATTR_TYPE, content.getType());
-            context.writeEndTag(content.getElementName());
-        } else if (extension instanceof MIMEXml) {
-            MIMEXml mimeXml = (MIMEXml) extension;
-            context.writeStartTag(mimeXml.getElementName());
-            context.writeAttribute(Constants.ATTR_PART, mimeXml.getPart());
-            context.writeEndTag(mimeXml.getElementName());
-        } else if (extension instanceof MIMEMultipartRelated) {
-            MIMEMultipartRelated mpr = (MIMEMultipartRelated) extension;
-            context.writeStartTag(mpr.getElementName());
-            for (Iterator iter = mpr.getParts(); iter.hasNext();) {
-                MIMEPart part = (MIMEPart) iter.next();
-                context.writeStartTag(part.getElementName());
-                for (Iterator iter2 = part.extensions(); iter2.hasNext();) {
-                    Extension e = (Extension) iter2.next();
-                    ExtensionHandler h =
-                        (ExtensionHandler) _extensionHandlers.get(
-                            e.getElementName().getNamespaceURI());
-                    if (h != null) {
-                        h.doHandleExtension(context, e);
-                    }
-                }
-                context.writeEndTag(part.getElementName());
-            }
-            context.writeEndTag(mpr.getElementName());
-        } else {
-            throw new IllegalArgumentException();
-        }
     }
 }

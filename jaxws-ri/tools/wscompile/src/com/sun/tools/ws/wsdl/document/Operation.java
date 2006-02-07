@@ -29,15 +29,15 @@ import javax.xml.namespace.QName;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
 
 /**
  * Entity corresponding to the "operation" child element of a "portType" WSDL element.
  *
  * @author WS Development Team
  */
-public class Operation extends Entity implements Extensible{
+public class Operation extends Entity implements TExtensible {
 
     public Operation() {
         _faults = new ArrayList();
@@ -194,22 +194,42 @@ public class Operation extends Entity implements Extensible{
         }
     }
 
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return parent.getNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
     /* (non-Javadoc)
-     * @see Extensible#addExtension(Extension)
-     */
-    public void addExtension(Extension e) {
+    * @see TExtensible#addExtension(ExtensionImpl)
+    */
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
 
     }
 
     /* (non-Javadoc)
-     * @see Extensible#extensions()
+     * @see TExtensible#extensions()
      */
-    public Iterator extensions() {
+    public Iterable<? extends TExtension> extensions() {
         return _helper.extensions();
     }
 
+    public TExtensible getParent() {
+        return parent;
+    }
 
+    public void setParent(TExtensible parent) {
+        this.parent = parent;
+    }
+
+    private TExtensible parent;
     private Documentation _documentation;
     private String _name;
     private Input _input;

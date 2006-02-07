@@ -20,8 +20,8 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -37,10 +37,9 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPHeaderFault;
 import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
-import com.sun.tools.ws.wsdl.framework.ParserContext;
-import com.sun.tools.ws.wsdl.framework.WriterContext;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TParserContext;
+import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -48,18 +47,19 @@ import com.sun.tools.ws.util.xml.XmlUtil;
  *
  * @author WS Development Team
  */
-public class SOAPExtensionHandler extends ExtensionHandlerBase {
+public class SOAPExtensionHandler extends AbstractExtensionHandler {
 
-    public SOAPExtensionHandler() {
+    public SOAPExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap) {
+        super(extensionHandlerMap);
     }
 
     public String getNamespaceURI() {
         return Constants.NS_WSDL_SOAP;
     }
 
-    protected boolean handleDefinitionsExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleDefinitionsExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -68,9 +68,9 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         return false; // keep compiler happy
     }
 
-    protected boolean handleTypesExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleTypesExtension(
+        com.sun.tools.ws.api.wsdl.TParserContext context,
+        TExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -83,9 +83,9 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         return new SOAPBinding();
     }
 
-    protected boolean handleBindingExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleBindingExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getBindingQName())) {
             context.push();
@@ -114,7 +114,7 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
             }
             parent.addExtension(binding);
             context.pop();
-            context.fireDoneParsingEntity(getBindingQName(), binding);
+//            context.fireDoneParsingEntity(getBindingQName(), binding);
             return true;
         } else {
             Util.fail(
@@ -125,9 +125,9 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         }
     }
 
-    protected boolean handleOperationExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleOperationExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getOperationQName())) {
             context.push();
@@ -156,9 +156,9 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
             }
             parent.addExtension(operation);
             context.pop();
-            context.fireDoneParsingEntity(
-                getOperationQName(),
-                operation);
+//            context.fireDoneParsingEntity(
+//                getOperationQName(),
+//                operation);
             return true;
         } else {
             Util.fail(
@@ -169,30 +169,31 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         }
     }
 
-    protected boolean handleInputExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleInputExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
     }
-    protected boolean handleOutputExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleOutputExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
     }
 
     protected boolean handleMIMEPartExtension(
-        ParserContext context,
-        Extensible parent,
+        TParserContextImpl context,
+        TExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
     }
 
     protected boolean handleInputOutputExtension(
-        ParserContext context,
-        Extensible parent,
+        TParserContext contextif,
+        TExtensible parent,
         Element e) {
+        TParserContextImpl context = (TParserContextImpl)contextif;
         if (XmlUtil.matchesTagNS(e, getBodyQName())) {
             context.push();
             context.registerNamespaces(e);
@@ -232,7 +233,7 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
 
             parent.addExtension(body);
             context.pop();
-            context.fireDoneParsingEntity(getBodyQName(), body);
+//            context.fireDoneParsingEntity(getBodyQName(), body);
             return true;
         } else if (XmlUtil.matchesTagNS(e, getHeaderQName())) {
             context.push();
@@ -356,9 +357,9 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         }
     }
 
-    protected boolean handleFaultExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleFaultExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getFaultQName())) {
             context.push();
@@ -399,7 +400,7 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
 
             parent.addExtension(fault);
             context.pop();
-            context.fireDoneParsingEntity(getFaultQName(), fault);
+//            context.fireDoneParsingEntity(getFaultQName(), fault);
             return true;
         } else {
             Util.fail(
@@ -410,9 +411,9 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         }
     }
 
-    protected boolean handleServiceExtension(
-        ParserContext context,
-        Extensible parent,
+    public boolean handleServiceExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -421,9 +422,10 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         return false; // keep compiler happy
     }
 
-    protected boolean handlePortExtension(
-        ParserContext context,
-        Extensible parent,
+    @Override
+    public boolean handlePortExtension(
+        TParserContext context,
+        TExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getAddressQName())) {
             context.push();
@@ -437,7 +439,7 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
 
             parent.addExtension(address);
             context.pop();
-            context.fireDoneParsingEntity(getAddressQName(), address);
+//            context.fireDoneParsingEntity(getAddressQName(), address);
             return true;
         } else {
             Util.fail(
@@ -448,161 +450,38 @@ public class SOAPExtensionHandler extends ExtensionHandlerBase {
         }
     }
 
-    public void doHandleExtension(WriterContext context, Extension extension)
-        throws IOException {
-        // NOTE - this ugliness can be avoided by moving all the XML parsing/writing code
-        // into the document classes themselves
-        if (extension instanceof SOAPAddress) {
-            SOAPAddress address = (SOAPAddress) extension;
-            context.writeStartTag(address.getElementName());
-            context.writeAttribute(
-                Constants.ATTR_LOCATION,
-                address.getLocation());
-            context.writeEndTag(address.getElementName());
-        } else if (extension instanceof SOAPBinding) {
-            SOAPBinding binding = (SOAPBinding) extension;
-            context.writeStartTag(binding.getElementName());
-            context.writeAttribute(
-                Constants.ATTR_TRANSPORT,
-                binding.getTransport());
-            String style =
-                (binding.getStyle() == null
-                    ? null
-                    : (binding.getStyle() == SOAPStyle.DOCUMENT
-                        ? Constants.ATTRVALUE_DOCUMENT
-                        : Constants.ATTRVALUE_RPC));
-            context.writeAttribute(Constants.ATTR_STYLE, style);
-            context.writeEndTag(binding.getElementName());
-        } else if (extension instanceof SOAPBody) {
-            SOAPBody body = (SOAPBody) extension;
-            context.writeStartTag(body.getElementName());
-            context.writeAttribute(
-                Constants.ATTR_ENCODING_STYLE,
-                body.getEncodingStyle());
-            context.writeAttribute(Constants.ATTR_PARTS, body.getParts());
-            String use =
-                (body.getUse() == null
-                    ? null
-                    : (body.getUse() == SOAPUse.LITERAL
-                        ? Constants.ATTRVALUE_LITERAL
-                        : Constants.ATTRVALUE_ENCODED));
-            context.writeAttribute(Constants.ATTR_USE, use);
-            context.writeAttribute(
-                Constants.ATTR_NAMESPACE,
-                body.getNamespace());
-            context.writeEndTag(body.getElementName());
-        } else if (extension instanceof SOAPFault) {
-            SOAPFault fault = (SOAPFault) extension;
-            context.writeStartTag(fault.getElementName());
-            context.writeAttribute(Constants.ATTR_NAME, fault.getName());
-            context.writeAttribute(
-                Constants.ATTR_ENCODING_STYLE,
-                fault.getEncodingStyle());
-            String use =
-                (fault.getUse() == null
-                    ? null
-                    : (fault.getUse() == SOAPUse.LITERAL
-                        ? Constants.ATTRVALUE_LITERAL
-                        : Constants.ATTRVALUE_ENCODED));
-            context.writeAttribute(Constants.ATTR_USE, use);
-            context.writeAttribute(
-                Constants.ATTR_NAMESPACE,
-                fault.getNamespace());
-            context.writeEndTag(fault.getElementName());
-        } else if (extension instanceof SOAPHeader) {
-            SOAPHeader header = (SOAPHeader) extension;
-            context.writeStartTag(header.getElementName());
-            context.writeAttribute(Constants.ATTR_MESSAGE, header.getMessage());
-            context.writeAttribute(Constants.ATTR_PART, header.getPart());
-            context.writeAttribute(
-                Constants.ATTR_ENCODING_STYLE,
-                header.getEncodingStyle());
-            String use =
-                (header.getUse() == null
-                    ? null
-                    : (header.getUse() == SOAPUse.LITERAL
-                        ? Constants.ATTRVALUE_LITERAL
-                        : Constants.ATTRVALUE_ENCODED));
-            context.writeAttribute(Constants.ATTR_USE, use);
-            context.writeAttribute(
-                Constants.ATTR_NAMESPACE,
-                header.getNamespace());
-            context.writeEndTag(header.getElementName());
-        } else if (extension instanceof SOAPHeaderFault) {
-            SOAPHeaderFault headerfault = (SOAPHeaderFault) extension;
-            context.writeStartTag(headerfault.getElementName());
-            context.writeAttribute(
-                Constants.ATTR_MESSAGE,
-                headerfault.getMessage());
-            context.writeAttribute(Constants.ATTR_PART, headerfault.getPart());
-            context.writeAttribute(
-                Constants.ATTR_ENCODING_STYLE,
-                headerfault.getEncodingStyle());
-            String use =
-                (headerfault.getUse() == null
-                    ? null
-                    : (headerfault.getUse() == SOAPUse.LITERAL
-                        ? Constants.ATTRVALUE_LITERAL
-                        : Constants.ATTRVALUE_ENCODED));
-            context.writeAttribute(Constants.ATTR_USE, use);
-            context.writeAttribute(
-                Constants.ATTR_NAMESPACE,
-                headerfault.getNamespace());
-            context.writeEndTag(headerfault.getElementName());
-        } else if (extension instanceof SOAPOperation) {
-            SOAPOperation operation = (SOAPOperation) extension;
-            context.writeStartTag(operation.getElementName());
-            context.writeAttribute(
-                Constants.ATTR_SOAP_ACTION,
-                operation.getSOAPAction());
-            String style =
-                (operation.getStyle() == null
-                    ? null
-                    : (operation.isDocument()
-                        ? Constants.ATTRVALUE_DOCUMENT
-                        : Constants.ATTRVALUE_RPC));
-            context.writeAttribute(Constants.ATTR_STYLE, style);
-            context.writeEndTag(operation.getElementName());
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see ExtensionHandlerBase#handlePortTypeExtension(ParserContext, Extensible, org.w3c.dom.Element)
-     */
-    protected boolean handlePortTypeExtension(ParserContext context, Extensible parent, Element e) {
-        Util.fail(
+    public boolean handlePortTypeExtension(TParserContext context, TExtensible parent, Element e) {
+       Util.fail(
             "parsing.invalidExtensionElement",
             e.getTagName(),
             e.getNamespaceURI());
         return false; // keep compiler happy
     }
-    
+
     protected QName getBodyQName(){
         return SOAPConstants.QNAME_BODY;
     }
-    
+
     protected QName getHeaderQName(){
         return SOAPConstants.QNAME_HEADER;
     }
-    
+
     protected QName getHeaderfaultQName(){
         return SOAPConstants.QNAME_HEADERFAULT;
     }
-    
+
     protected QName getOperationQName(){
         return SOAPConstants.QNAME_OPERATION;
     }
-    
+
     protected QName getFaultQName(){
         return SOAPConstants.QNAME_FAULT;
     }
-    
+
     protected QName getAddressQName(){
         return SOAPConstants.QNAME_ADDRESS;
     }
-    
+
     protected QName getBindingQName(){
         return SOAPConstants.QNAME_BINDING;
     }

@@ -98,8 +98,8 @@ public class NamespaceSupport {
     /**
      * An empty enumeration.
      */
-    private final static Iterator EMPTY_ENUMERATION =
-        new ArrayList().iterator();
+    private final static Iterable<String> EMPTY_ENUMERATION =
+        new ArrayList<String>();
 
     ////////////////////////////////////////////////////////////////////
     // Constructor.
@@ -362,7 +362,7 @@ public class NamespaceSupport {
      * @see #getDeclaredPrefixes
      * @see #getURI
      */
-    public Iterator getPrefixes() {
+    public Iterable<String> getPrefixes() {
         return currentContext.getPrefixes();
     }
 
@@ -412,9 +412,7 @@ public class NamespaceSupport {
      */
     public Iterator getPrefixes(String uri) {
         List prefixes = new ArrayList();
-        Iterator allPrefixes = getPrefixes();
-        while (allPrefixes.hasNext()) {
-            String prefix = (String) allPrefixes.next();
+        for (String prefix: getPrefixes()) {
             if (uri.equals(getURI(prefix))) {
                 prefixes.add(prefix);
             }
@@ -434,7 +432,7 @@ public class NamespaceSupport {
      * @see #getPrefixes
      * @see #getURI
      */
-    public Iterator getDeclaredPrefixes() {
+    public Iterable<String> getDeclaredPrefixes() {
         return currentContext.getDeclaredPrefixes();
     }
 
@@ -669,11 +667,11 @@ public class NamespaceSupport {
          * @return An enumeration of prefixes (possibly empty).
          * @see org.xml.sax.helpers.NamespaceSupport#getDeclaredPrefixes
          */
-        Iterator getDeclaredPrefixes() {
+        Iterable<String> getDeclaredPrefixes() {
             if (declarations == null) {
                 return EMPTY_ENUMERATION;
             } else {
-                return declarations.iterator();
+                return declarations;
             }
         }
 
@@ -686,11 +684,11 @@ public class NamespaceSupport {
          * @return An enumeration of prefixes (never empty).
          * @see org.xml.sax.helpers.NamespaceSupport#getPrefixes
          */
-        Iterator getPrefixes() {
+        Iterable<String> getPrefixes() {
             if (prefixTable == null) {
                 return EMPTY_ENUMERATION;
             } else {
-                return prefixTable.keySet().iterator();
+                return prefixTable.keySet();
             }
         }
 

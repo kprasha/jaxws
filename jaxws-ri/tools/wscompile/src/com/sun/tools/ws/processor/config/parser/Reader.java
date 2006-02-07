@@ -20,18 +20,11 @@
 package com.sun.tools.ws.processor.config.parser;
 
 
-import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.xml.ws.util.JAXWSUtils;
-import com.sun.tools.ws.wsdl.document.WSDLConstants;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-
-import javax.xml.stream.XMLStreamReader;
 
 import org.xml.sax.EntityResolver;
 

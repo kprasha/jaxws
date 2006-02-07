@@ -83,7 +83,7 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
 import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.Extensible;
+import com.sun.tools.ws.api.wsdl.TExtensible;
 import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
 import com.sun.tools.ws.wsdl.framework.ParseException;
 import com.sun.tools.ws.wsdl.framework.ParserListener;
@@ -635,6 +635,7 @@ public class WSDLModeler extends WSDLModelerBase {
         Request request = new Request();
         Response response = new Response();
         info.operation.setUse(SOAPUse.LITERAL);
+        info.operation.setWSDLPortTypeOperation(info.portTypeOperation);
         SOAPBody soapRequestBody = getSOAPRequestBody();
         if((StyleAndUse.DOC_LITERAL == styleAndUse) && (soapRequestBody.getNamespace() != null)){
             warn("wsdlmodeler.warning.r2716", new Object[]{"soapbind:body", info.bindingOperation.getName()});
@@ -1162,7 +1163,7 @@ public class WSDLModeler extends WSDLModelerBase {
             headerName = part.getDescriptor();
             jaxbType = getJAXBType(headerName);
             headerBlock = new Block(headerName, jaxbType);
-            Extensible ext;
+            TExtensible ext;
             if(processRequest){
                 ext = info.bindingOperation.getInput();
             }else{
@@ -1463,7 +1464,7 @@ public class WSDLModeler extends WSDLModelerBase {
         return headerParts;
     }
 
-    private Message getHeaderMessage(MessagePart part, Extensible ext) {
+    private Message getHeaderMessage(MessagePart part, TExtensible ext) {
         Iterator<SOAPHeader> headers =  getHeaderExtensions(ext).iterator();
         while(headers.hasNext()){
             SOAPHeader header = headers.next();
@@ -1494,7 +1495,7 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     private List<MessagePart> getHeaderParts(boolean isInput) {
-        Extensible ext;
+        TExtensible ext;
         if(isInput){
             ext = info.bindingOperation.getInput();
         }else{
@@ -1908,7 +1909,7 @@ public class WSDLModeler extends WSDLModelerBase {
      * @param param
      * @param wrapperStyle TODO
      */
-    private void setCustomizedParameterName(Extensible extension, Message msg, MessagePart part, Parameter param, boolean wrapperStyle) {
+    private void setCustomizedParameterName(TExtensible extension, Message msg, MessagePart part, Parameter param, boolean wrapperStyle) {
         JAXWSBinding jaxwsBinding = (JAXWSBinding)getExtensionOfType(extension, JAXWSBinding.class);
         if(jaxwsBinding == null)
             return;

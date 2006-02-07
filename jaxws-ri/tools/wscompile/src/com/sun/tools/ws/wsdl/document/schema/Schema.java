@@ -30,7 +30,7 @@ import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.AbstractDocument;
 import com.sun.tools.ws.wsdl.framework.Defining;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.Kind;
 import com.sun.tools.ws.wsdl.framework.ValidationException;
 import com.sun.tools.ws.wsdl.parser.Constants;
@@ -39,7 +39,7 @@ import com.sun.tools.ws.wsdl.parser.Constants;
  *
  * @author WS Development Team
  */
-public class Schema extends Extension implements Defining {
+public class Schema extends ExtensionImpl implements Defining {
 
     public Schema(AbstractDocument document) {
         _document = document;

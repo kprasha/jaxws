@@ -29,8 +29,8 @@ import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
 
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 
 /**
@@ -39,7 +39,7 @@ import com.sun.tools.ws.wsdl.framework.Extension;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class JAXWSBinding extends Extension implements Extensible {
+public class JAXWSBinding extends ExtensionImpl {
 
     /**
      *
@@ -66,19 +66,23 @@ public class JAXWSBinding extends Extension implements Extensible {
         // TODO Auto-generated method stub
         return JAXWSBindingsConstants.JAXWS_BINDINGS;
     }
+    
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
 
     /* (non-Javadoc)
-     * @see Extensible#addExtension(Extension)
-     */
-    public void addExtension(Extension e) {
+    * @see TExtensible#addExtension(ExtensionImpl)
+    */
+    public void addExtension(ExtensionImpl e) {
         // TODO Auto-generated method stub
 
     }
 
     /* (non-Javadoc)
-     * @see Extensible#extensions()
+     * @see TExtensible#extensions()
      */
-    public Iterator extensions() {
+    public Iterable<ExtensionImpl> extensions() {
         // TODO Auto-generated method stub
         return null;
     }

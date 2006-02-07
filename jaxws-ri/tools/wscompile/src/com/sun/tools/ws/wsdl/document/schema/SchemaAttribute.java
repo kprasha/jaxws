@@ -22,7 +22,6 @@ package com.sun.tools.ws.wsdl.document.schema;
 
 import javax.xml.namespace.QName;
 
-import com.sun.tools.ws.wsdl.framework.WriterContext;
 
 /**
  *
@@ -64,14 +63,6 @@ public class SchemaAttribute {
             } else {
                 return _parent.asString(_qnameValue);
             }
-        } else {
-            return _value;
-        }
-    }
-
-    public String getValue(WriterContext context) {
-        if (_qnameValue != null) {
-            return context.getQNameString(_qnameValue);
         } else {
             return _value;
         }

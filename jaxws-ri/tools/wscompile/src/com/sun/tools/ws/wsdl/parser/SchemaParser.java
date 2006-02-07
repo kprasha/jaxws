@@ -31,10 +31,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.sun.xml.ws.util.xml.NamedNodeMapIterator;
 import com.sun.tools.ws.util.xml.NullEntityResolver;
@@ -44,7 +42,7 @@ import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaDocument;
 import com.sun.tools.ws.wsdl.document.schema.SchemaElement;
 import com.sun.tools.ws.wsdl.framework.ParseException;
-import com.sun.tools.ws.wsdl.framework.ParserContext;
+import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
 import com.sun.tools.ws.wsdl.framework.ValidationException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 
@@ -69,14 +67,14 @@ public class SchemaParser {
     public SchemaDocument parse(InputSource source) {
         SchemaDocument schemaDocument = new SchemaDocument();
         schemaDocument.setSystemId(source.getSystemId());
-        ParserContext context = new ParserContext(schemaDocument, null);
+        TParserContextImpl context = new TParserContextImpl(schemaDocument, null);
         context.setFollowImports(_followImports);
         schemaDocument.setSchema(parseSchema(context, source, null));
         return schemaDocument;
     }
 
     public Schema parseSchema(
-        ParserContext context,
+        TParserContextImpl context,
         InputSource source,
         String expectedTargetNamespaceURI) {
         Schema schema =
@@ -87,7 +85,7 @@ public class SchemaParser {
     }
 
     public Schema parseSchema(
-        ParserContext context,
+        TParserContextImpl context,
         Element e,
         String expectedTargetNamespaceURI) {
         Schema schema =
@@ -98,7 +96,7 @@ public class SchemaParser {
     }
 
     protected void processImports(
-        ParserContext context,
+        TParserContextImpl context,
         InputSource source,
         Schema schema) {
         for (Iterator iter = schema.getContent().children(); iter.hasNext();) {
@@ -179,7 +177,7 @@ public class SchemaParser {
     }
 
     protected Schema parseSchemaNoImport(
-        ParserContext context,
+        TParserContextImpl context,
         InputSource source,
         String expectedTargetNamespaceURI) {
         try {
@@ -214,7 +212,7 @@ public class SchemaParser {
     }
 
     protected Schema parseSchemaNoImport(
-        ParserContext context,
+        TParserContextImpl context,
         Document doc,
         String expectedTargetNamespaceURI) {
         Element root = doc.getDocumentElement();
@@ -223,7 +221,7 @@ public class SchemaParser {
     }
 
     protected Schema parseSchemaNoImport(
-        ParserContext context,
+        TParserContextImpl context,
         Element e,
         String expectedTargetNamespaceURI) {
         Schema schema = new Schema(context.getDocument());
@@ -245,8 +243,7 @@ public class SchemaParser {
             schema.setTargetNamespaceURI(targetNamespaceURI);
 
         // snapshot the current prefixes
-        for (Iterator iter = context.getPrefixes(); iter.hasNext();) {
-            String prefix = (String) iter.next();
+        for (String prefix: context.getPrefixes()) {
             String nsURI = context.getNamespaceURI(prefix);
             if (nsURI == null) {
                 // should not happen

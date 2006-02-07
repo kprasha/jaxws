@@ -161,7 +161,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             if(methodJavaDoc != null)
                 methodDoc.add(methodJavaDoc);
 
-//            extension.writeOperationAnnotations(operation.getWSDLOperation(),m);
+            extension.writeMethodAnnotations(operation.getWSDLPortTypeOperation(),m);
             writeWebMethod(operation, m);
             JClass holder = cm.ref(Holder.class);
             for (JavaParameter parameter: method.getParametersList()) {

@@ -21,15 +21,9 @@
 package com.sun.tools.ws.wsdl.parser;
 
 import static com.sun.xml.ws.util.xml.XmlUtil.DRACONIAN_ERROR_HANDLER;
-import static com.sun.xml.ws.util.xml.XmlUtil.*;
-import static com.sun.xml.ws.util.xml.XmlUtil.*;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,10 +44,8 @@ import javax.xml.transform.dom.DOMSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.EntityResolver;
 
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
@@ -84,9 +76,9 @@ import com.sun.tools.ws.wsdl.document.WSDLDocument;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.Extensible;
+import com.sun.tools.ws.api.wsdl.TExtensible;
 import com.sun.tools.ws.wsdl.framework.ParseException;
-import com.sun.tools.ws.wsdl.framework.ParserContext;
+import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
 import com.sun.tools.ws.wsdl.framework.ParserListener;
 import com.sun.tools.ws.util.xml.XmlUtil;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
@@ -110,12 +102,14 @@ public class WSDLParser {
         hSet = new HashSet();
 
         // register handlers for default extensions
-        register(new SOAPExtensionHandler());
-        register(new HTTPExtensionHandler());
-        register(new MIMEExtensionHandler());
-        register(new SchemaExtensionHandler());
-        register(new JAXWSBindingExtensionHandler());
-        register(new SOAP12ExtensionHandler());
+        register(new SOAPExtensionHandler(_extensionHandlers));
+        register(new HTTPExtensionHandler(_extensionHandlers));
+        register(new MIMEExtensionHandler(_extensionHandlers));
+        //we dont really need to handle the schema it done latteron by JAXB
+        //TODO: verify it and if not needed remove SchemaExtensionHandler
+        register(new SchemaExtensionHandler(_extensionHandlers));
+        register(new JAXWSBindingExtensionHandler(_extensionHandlers));
+        register(new SOAP12ExtensionHandler(_extensionHandlers));
     }
 
     public WSDLParser(WSDLModelInfo modelInfo) {
@@ -125,14 +119,12 @@ public class WSDLParser {
         this.entityResolver = modelInfo.getEntityResolver();
     }
 
-    public void register(ExtensionHandler h) {
+    public void register(AbstractExtensionHandler h) {
         _extensionHandlers.put(h.getNamespaceURI(), h);
-        h.setExtensionHandlers(_extensionHandlers);
     }
 
-    public void unregister(ExtensionHandler h) {
+    public void unregister(AbstractExtensionHandler h) {
         _extensionHandlers.put(h.getNamespaceURI(), null);
-        h.setExtensionHandlers(null);
     }
 
     public void unregister(String uri) {
@@ -168,7 +160,7 @@ public class WSDLParser {
 //
 //        WSDLDocument document = new WSDLDocument();
 //        document.setSystemId(source.getSystemId());
-//        ParserContext context = new ParserContext(document, _listeners);
+//        TParserContextImpl context = new TParserContextImpl(document, _listeners);
 //        context.setFollowImports(_followImports);
 //        document.setDefinitions(parseDefinitions(context, source, null));
 //        return document;
@@ -210,13 +202,13 @@ public class WSDLParser {
             source = new InputSource(wsdlLoc);
         }
         document.setSystemId(wsdlLoc);
-        ParserContext context = new ParserContext(document, _listeners);
+        TParserContextImpl context = new TParserContextImpl(document, _listeners);
         context.setFollowImports(_followImports);
         document.setDefinitions(parseDefinitions(context, source, null));
         return document;
     }
 
-    protected Definitions parseDefinitions(ParserContext context,
+    protected Definitions parseDefinitions(TParserContextImpl context,
             InputSource source, String expectedTargetNamespaceURI) {
         context.pushWSDLLocation();
         context.setWSDLLocation(context.getDocument().getSystemId());
@@ -329,7 +321,6 @@ public class WSDLParser {
     /**
      * @param source
      * @param location
-     * @return
      */
     private String getAdjustedLocation(InputSource source, String location) {
         return source.getSystemId() == null
@@ -364,9 +355,9 @@ public class WSDLParser {
     }
 
     /* (non-Javadoc)
-     * @see WSDLParser#processImports(ParserContext, org.xml.sax.InputSource, Definitions)
+     * @see WSDLParser#processImports(TParserContextImpl, org.xml.sax.InputSource, Definitions)
      */
-    protected void processImports(ParserContext context, InputSource source, Definitions definitions) {
+    protected void processImports(TParserContextImpl context, InputSource source, Definitions definitions) {
         for(String location : imports){
             if (!context.getDocument().isImportedDocument(location)){
                 Definitions importedDefinitions = parseDefinitionsNoImport(context,
@@ -380,7 +371,7 @@ public class WSDLParser {
     }
 
     protected Definitions parseDefinitionsNoImport(
-        ParserContext context,
+        TParserContextImpl context,
         InputSource source,
         String expectedTargetNamespaceURI) {
         try {
@@ -424,7 +415,7 @@ public class WSDLParser {
     }
 
     protected Definitions parseDefinitionsNoImport(
-        ParserContext context,
+        TParserContextImpl context,
         Document doc,
         String expectedTargetNamespaceURI) {
         _targetNamespaceURI = null;
@@ -437,7 +428,7 @@ public class WSDLParser {
     }
 
     protected Definitions parseDefinitionsNoImport(
-        ParserContext context,
+        TParserContextImpl context,
         Element e,
         String expectedTargetNamespaceURI) {
         context.push();
@@ -516,7 +507,7 @@ public class WSDLParser {
     }
 
     protected Message parseMessage(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -556,7 +547,7 @@ public class WSDLParser {
         return message;
     }
 
-    protected MessagePart parseMessagePart(ParserContext context, Element e) {
+    protected MessagePart parseMessagePart(TParserContextImpl context, Element e) {
         context.push();
         context.registerNamespaces(e);
         MessagePart part = new MessagePart();
@@ -590,7 +581,7 @@ public class WSDLParser {
     }
 
     protected PortType parsePortType(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -618,6 +609,7 @@ public class WSDLParser {
             } else if (
                 XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_OPERATION)) {
                 Operation op = parsePortTypeOperation(context, e2);
+                op.setParent(portType);
                 portType.add(op);
             } else {
                 // possible extensibility element -- must live outside the WSDL namespace
@@ -639,7 +631,7 @@ public class WSDLParser {
     }
 
     protected Operation parsePortTypeOperation(
-        ParserContext context,
+        TParserContextImpl context,
         Element e) {
         context.push();
         context.registerNamespaces(e);
@@ -852,7 +844,7 @@ public class WSDLParser {
     }
 
     protected Binding parseBinding(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -897,7 +889,7 @@ public class WSDLParser {
     }
 
     protected BindingOperation parseBindingOperation(
-        ParserContext context,
+        TParserContextImpl context,
         Element e) {
         context.push();
         context.registerNamespaces(e);
@@ -1102,7 +1094,7 @@ public class WSDLParser {
     }
 
     protected Import parseImport(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -1143,7 +1135,7 @@ public class WSDLParser {
     }
 
     protected Service parseService(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -1186,7 +1178,7 @@ public class WSDLParser {
     }
 
     protected Port parsePort(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -1231,7 +1223,7 @@ public class WSDLParser {
     }
 
     protected Types parseTypes(
-        ParserContext context,
+        TParserContextImpl context,
         Definitions definitions,
         Element e) {
         context.push();
@@ -1303,11 +1295,11 @@ public class WSDLParser {
     }
 
     protected boolean handleExtension(
-        ParserContext context,
-        Extensible entity,
+        TParserContextImpl context,
+        TExtensible entity,
         Element e) {
-        ExtensionHandler h =
-            (ExtensionHandler) _extensionHandlers.get(e.getNamespaceURI());
+        AbstractExtensionHandler h =
+            (AbstractExtensionHandler) _extensionHandlers.get(e.getNamespaceURI());
         if (h == null) {
             context.fireIgnoringExtension(
                 new QName(e.getNamespaceURI(), e.getLocalName()),

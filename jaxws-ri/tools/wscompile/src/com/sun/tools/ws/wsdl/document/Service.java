@@ -30,8 +30,9 @@ import com.sun.tools.ws.wsdl.framework.Defining;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.GlobalEntity;
 import com.sun.tools.ws.wsdl.framework.Kind;
 
@@ -40,7 +41,7 @@ import com.sun.tools.ws.wsdl.framework.Kind;
  *
  * @author WS Development Team
  */
-public class Service extends GlobalEntity implements Extensible {
+public class Service extends GlobalEntity implements TExtensible {
 
     public Service(Defining defining) {
         super(defining);
@@ -95,12 +96,28 @@ public class Service extends GlobalEntity implements Extensible {
         }
     }
 
-    public void addExtension(Extension e) {
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return getDefining().getTargetNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
+    }
+
+    public TExtensible getParent() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     private ExtensibilityHelper _helper;

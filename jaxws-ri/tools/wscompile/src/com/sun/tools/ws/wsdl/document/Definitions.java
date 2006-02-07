@@ -34,15 +34,16 @@ import com.sun.tools.ws.wsdl.framework.DuplicateEntityException;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * Entity corresponding to the "definitions" WSDL element.
  *
  * @author WS Development Team
  */
-public class Definitions extends Entity implements Defining, Extensible {
+public class Definitions extends Entity implements Defining, TExtensible {
 
     public Definitions(AbstractDocument document) {
         _document = document;
@@ -134,7 +135,15 @@ public class Definitions extends Entity implements Defining, Extensible {
         return _services.iterator();
     }
 
-    public QName getElementName() {
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return getTargetNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
         return WSDLConstants.QNAME_DEFINITIONS;
     }
 
@@ -146,12 +155,19 @@ public class Definitions extends Entity implements Defining, Extensible {
         _documentation = d;
     }
 
-    public void addExtension(Extension e) {
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
+    }
+
+    /**
+     * wsdl:definition is the root hence no parent so return null.
+     */
+    public TExtensible getParent() {
+        return null;
     }
 
     public void withAllSubEntitiesDo(EntityAction action) {
@@ -219,4 +235,8 @@ public class Definitions extends Entity implements Defining, Extensible {
     private List<Service> _services;
     private List _imports;
     private Set _importedNamespaces;
+
+    public QName getElementName() {
+        return getWSDLElementName();
+    }
 }

@@ -20,10 +20,11 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
+import com.sun.tools.ws.api.wsdl.TExtension;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * A helper class for extensible entities.
@@ -35,30 +36,18 @@ public class ExtensibilityHelper {
     public ExtensibilityHelper() {
     }
 
-    public void addExtension(Extension e) {
+    public void addExtension(TExtension e) {
         if (_extensions == null) {
             _extensions = new ArrayList();
         }
         _extensions.add(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         if (_extensions == null) {
-            return new Iterator() {
-                public boolean hasNext() {
-                    return false;
-                }
-
-                public Object next() {
-                    throw new NoSuchElementException();
-                }
-
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
+            return new ArrayList<TExtension>();
         } else {
-            return _extensions.iterator();
+            return _extensions;
         }
     }
 
@@ -73,10 +62,10 @@ public class ExtensibilityHelper {
     public void accept(ExtensionVisitor visitor) throws Exception {
         if (_extensions != null) {
             for (Iterator iter = _extensions.iterator(); iter.hasNext();) {
-                ((Extension) iter.next()).accept(visitor);
+                ((ExtensionImpl) iter.next()).accept(visitor);
             }
         }
     }
 
-    private List _extensions;
+    private List<TExtension> _extensions;
 }

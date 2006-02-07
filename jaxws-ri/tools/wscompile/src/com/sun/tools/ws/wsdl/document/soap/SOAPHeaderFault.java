@@ -22,7 +22,7 @@ package com.sun.tools.ws.wsdl.document.soap;
 
 import javax.xml.namespace.QName;
 
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
 
 /**
@@ -30,7 +30,7 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  *
  * @author WS Development Team
  */
-public class SOAPHeaderFault extends Extension {
+public class SOAPHeaderFault extends ExtensionImpl {
 
     public SOAPHeaderFault() {
     }

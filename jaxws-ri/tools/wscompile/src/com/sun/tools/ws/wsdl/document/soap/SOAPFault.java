@@ -22,14 +22,14 @@ package com.sun.tools.ws.wsdl.document.soap;
 
 import javax.xml.namespace.QName;
 
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * A SOAP fault extension.
  *
  * @author WS Development Team
  */
-public class SOAPFault extends Extension {
+public class SOAPFault extends ExtensionImpl {
 
     public SOAPFault() {
         _use = SOAPUse.LITERAL;

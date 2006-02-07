@@ -22,14 +22,14 @@ package com.sun.tools.ws.wsdl.document.soap;
 
 import javax.xml.namespace.QName;
 
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * A SOAP address extension.
  *
  * @author WS Development Team
  */
-public class SOAPAddress extends Extension {
+public class SOAPAddress extends ExtensionImpl {
 
     public SOAPAddress() {
     }

@@ -20,6 +20,8 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
+import com.sun.tools.ws.api.wsdl.TExtension;
+
 /**
  * A base class for extension visitors.
  *
@@ -29,8 +31,8 @@ public class ExtensionVisitorBase implements ExtensionVisitor {
     public ExtensionVisitorBase() {
     }
 
-    public void preVisit(Extension extension) throws Exception {
+    public void preVisit(TExtension extension) throws Exception {
     }
-    public void postVisit(Extension extension) throws Exception {
+    public void postVisit(TExtension extension) throws Exception {
     }
 }

@@ -20,15 +20,14 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.Iterator;
-
 import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
 
 /**
@@ -36,7 +35,7 @@ import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
  *
  * @author WS Development Team
  */
-public class Types extends Entity implements Extensible {
+public class Types extends Entity implements TExtensible {
 
     public Types() {
         _helper = new ExtensibilityHelper();
@@ -63,12 +62,35 @@ public class Types extends Entity implements Extensible {
     public void validateThis() {
     }
 
-    public void addExtension(Extension e) {
+    /**
+     * wsdl:type does not have any name attribute
+     */
+    public String getNameValue() {
+        return null;
+    }
+
+    public String getNamespaceURI() {
+        return parent.getNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
+    }
+
+    public TExtensible getParent() {
+        return parent;
+    }
+
+    public void setParent(TExtensible parent) {
+        this.parent = parent;
     }
 
     public void withAllSubEntitiesDo(EntityAction action) {
@@ -79,6 +101,7 @@ public class Types extends Entity implements Extensible {
         _helper.accept(visitor);
     }
 
+    private TExtensible parent;
     private ExtensibilityHelper _helper;
     private Documentation _documentation;
 }

@@ -20,21 +20,20 @@
 
 package com.sun.tools.ws.wsdl.document.mime;
 
-import java.util.Iterator;
-
 import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * A MIME part extension.
  *
  * @author WS Development Team
  */
-public class MIMEPart extends Extension implements Extensible {
+public class MIMEPart extends ExtensionImpl implements TExtensible{
 
     public MIMEPart() {
         _helper = new ExtensibilityHelper();
@@ -52,11 +51,23 @@ public class MIMEPart extends Extension implements Extensible {
         _name = s;
     }
 
-    public void addExtension(Extension e) {
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return getParent().getNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
     }
 

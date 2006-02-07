@@ -32,8 +32,9 @@ import com.sun.tools.ws.wsdl.framework.Defining;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.Extensible;
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.GlobalEntity;
 import com.sun.tools.ws.wsdl.framework.Kind;
 import com.sun.tools.ws.wsdl.framework.ValidationException;
@@ -43,7 +44,7 @@ import com.sun.tools.ws.wsdl.framework.ValidationException;
  *
  * @author WS Development Team
  */
-public class PortType extends GlobalEntity implements Extensible{
+public class PortType extends GlobalEntity implements TExtensible {
 
     public PortType(Defining defining) {
         super(defining);
@@ -117,21 +118,42 @@ public class PortType extends GlobalEntity implements Extensible{
         }
     }
 
+    public String getNameValue() {
+        return getName();
+    }
+
+    public String getNamespaceURI() {
+        return getDefining().getTargetNamespaceURI();
+    }
+
+    public QName getWSDLElementName() {
+        return getElementName();
+    }
+
     /* (non-Javadoc)
-     * @see Extensible#addExtension(Extension)
-     */
-    public void addExtension(Extension e) {
+    * @see TExtensible#addExtension(ExtensionImpl)
+    */
+    public void addExtension(TExtension e) {
         _helper.addExtension(e);
 
     }
 
     /* (non-Javadoc)
-     * @see Extensible#extensions()
+     * @see TExtensible#extensions()
      */
-    public Iterator extensions() {
+    public Iterable<TExtension> extensions() {
         return _helper.extensions();
     }
 
+    public TExtensible getParent() {
+        return parent;
+    }
+
+    public void setParent(TExtensible parent) {
+        this.parent = parent;
+    }
+
+    private TExtensible parent;
     private Documentation _documentation;
     private List _operations;
     private Set _operationKeys;

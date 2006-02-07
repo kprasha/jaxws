@@ -22,14 +22,14 @@ package com.sun.tools.ws.wsdl.document.mime;
 
 import javax.xml.namespace.QName;
 
-import com.sun.tools.ws.wsdl.framework.Extension;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
  * A MIME content extension.
  *
  * @author WS Development Team
  */
-public class MIMEContent extends Extension {
+public class MIMEContent extends ExtensionImpl {
 
     public MIMEContent() {
     }
