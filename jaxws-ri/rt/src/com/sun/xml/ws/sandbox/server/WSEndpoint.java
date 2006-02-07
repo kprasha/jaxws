@@ -84,8 +84,10 @@ public abstract class WSEndpoint<T> {
      *      <p>
      *      Therefore, it should be recorded by the caller in a way that
      *      allows developers to fix a bug.
+     *
+     *TODO: define a mechanism to early-close a response channel
      */
-    public abstract Packet process(Packet request);
+    public abstract Packet process(Packet request, WebServiceContextDelegate wscd);
 
     /**
      * Sets a new {@link InstanceResolver}.

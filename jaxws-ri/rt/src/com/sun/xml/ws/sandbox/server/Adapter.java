@@ -31,9 +31,9 @@ public abstract class Adapter {
     protected final Encoder encoder;
     protected final Decoder decoder;
 
-    protected Adapter(WSEndpoint head, Encoder encoder, Decoder decoder) {
+    protected Adapter(WSEndpoint head) {
         this.head = head;
-        this.encoder = encoder;
-        this.decoder = decoder;
+        this.encoder = head.getEncoder();
+        this.decoder = head.getDecoder();
     }
 }

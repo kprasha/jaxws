@@ -25,4 +25,6 @@ public interface WSBinding extends Binding {
      *      binding shall be handled by {@link Pipe}s.
      */
     SOAPVersion getSOAPVersion();
+
+    // TODO: add getEncoder()/getDecoder()
 }
