@@ -35,9 +35,9 @@ public final class JavaGeneratorExtensionFacade extends JavaGeneratorExtension {
         this.extensions = extensions;
     }
     
-    public void writeOperationAnnotations(TExtensible wsdlOperation, JMethod jMethod) {
+    public void writeMethodAnnotations(TExtensible wsdlOperation, JMethod jMethod) {
         for (JavaGeneratorExtension e : extensions) {
-            e.writeOperationAnnotations(wsdlOperation, jMethod);
+            e.writeMethodAnnotations(wsdlOperation, jMethod);
         }
     }
 }
