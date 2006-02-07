@@ -3,7 +3,9 @@ package com.sun.xml.ws.sandbox.server;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.api.WSBinding;
 import java.net.URL;
+import java.util.List;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
@@ -58,6 +60,11 @@ public class Root {
         throw new UnsupportedOperationException();
     }
 
+    public <T> WSEndpoint<T> createSEIEndpoint(Class<T> seiType, T implementationObject, QName serviceName, QName portName, Container container, WSBinding binding, List<Source> wsdlDocs, EntityResolver resolver) {
+        // TODO: implement this method later
+        throw new UnsupportedOperationException();
+    }
+    
     /**
      * Creates a {@link Provider}-backed {@link WSEndpoint}.
      *

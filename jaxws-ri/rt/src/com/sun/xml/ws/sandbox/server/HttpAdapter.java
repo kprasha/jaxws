@@ -11,7 +11,7 @@ import com.sun.xml.ws.spi.runtime.WSConnection;
  */
 public class HttpAdapter extends Adapter {
     public HttpAdapter(WSEndpoint head, Encoder encoder, Decoder decoder) {
-        super(head, encoder, decoder);
+        super(head);
     }
 
     /**

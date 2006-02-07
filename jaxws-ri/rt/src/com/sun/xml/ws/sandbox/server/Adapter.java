@@ -28,12 +28,10 @@ import com.sun.xml.ws.api.message.Packet;
  */
 public abstract class Adapter {
     protected final WSEndpoint head;
-    protected final Encoder encoder;
-    protected final Decoder decoder;
+    protected final Encoder encoder = null;
+    protected final Decoder decoder = null;
 
     protected Adapter(WSEndpoint head) {
         this.head = head;
-        this.encoder = head.getEncoder();
-        this.decoder = head.getDecoder();
     }
 }
