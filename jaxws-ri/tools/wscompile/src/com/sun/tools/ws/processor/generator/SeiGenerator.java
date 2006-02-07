@@ -22,6 +22,7 @@ package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.*;
 import com.sun.codemodel.writer.ProgressCodeWriter;
+import com.sun.tools.ws.api.JavaGeneratorExtension;
 import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.config.WSDLModelInfo;
@@ -37,6 +38,7 @@ import com.sun.tools.ws.processor.util.IndentingWriter;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -62,6 +64,7 @@ import java.util.Properties;
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
+    private JavaGeneratorExtension extension;
 
     public SeiGenerator() {
     }
@@ -79,17 +82,18 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     }
 
     public GeneratorBase getGenerator(Model model, Configuration config, Properties properties) {
-        return new SeiGenerator(model, config, properties);
+        return new SeiGenerator(model, config, properties, ServiceFinder.find(JavaGeneratorExtension.class).toArray());
     }
 
-    public SeiGenerator(Model model, Configuration config, Properties properties) {
+    public SeiGenerator(Model model, Configuration config, Properties properties, JavaGeneratorExtension... extensions) {
         super(model, config, properties);
         this.model = model;
         this.wsdlModelInfo = (WSDLModelInfo)config.getModelInfo();
+        this.extension = new JavaGeneratorExtensionFacade(extensions);
     }
 
     public GeneratorBase getGenerator(Model model, Configuration config, Properties properties, SOAPVersion ver) {
-        return new SeiGenerator(model, config, properties);
+        return new SeiGenerator(model, config, properties, ServiceFinder.find(JavaGeneratorExtension.class).toArray());
     }
 
 
@@ -157,6 +161,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             if(methodJavaDoc != null)
                 methodDoc.add(methodJavaDoc);
 
+//            extension.writeOperationAnnotations(operation.getWSDLOperation(),m);
             writeWebMethod(operation, m);
             JClass holder = cm.ref(Holder.class);
             for (JavaParameter parameter: method.getParametersList()) {
