@@ -30,7 +30,8 @@ import javax.xml.namespace.QName;
  */
 public interface TExtensible {
     /**
-     * Gives the wsdl extensiblity element's name attribute value;
+     * Gives the wsdl extensiblity element's name attribute value. It can be null as @name on some of the wsdl
+     * extensibility elements are optinal such as wsdl:input
      */
     String getNameValue();
 
