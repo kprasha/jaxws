@@ -36,7 +36,9 @@ import javax.jws.WebParam.Mode;
  *
  * <h2>Creating {@link JAXBMessage}</h2>
  * <p>
- * At the construction time, we prepare {@link EndpointResponseMessageBuilder} and {@link MessageFiller}s
+ * At the construction time, we prepare {@link EndpointArgumentsBuilder} that knows how to create endpoint {@link Method}
+ * invocation arguments.
+ * we also prepare {@link EndpointResponseMessageBuilder} and {@link MessageFiller}s
  * that know how to move arguments into a {@link Message}.
  * Some arguments go to the payload, some go to headers, still others go to attachments.
  *
@@ -44,156 +46,158 @@ import javax.jws.WebParam.Mode;
  */
 public final class EndpointMethodHandler {
 
-    // these objects together create a message from method parameters
-    private final EndpointResponseMessageBuilder bodyBuilder;
-    private final MessageFiller[] inFillers;
-
-    private final Boolean isOneWay;
-
     private final SEIModel seiModel;
     private final SOAPVersion soapVersion;
     private final Method method;
     private final JavaMethodImpl javaMethodModel;
 
-    /**
-     * Used to get a value from method invocation parameter.
-     *
-     * valueGetters[i] is for methodArgs[i], and so on.
-     */
-    /*package*/ final ValueGetter[] valueGetters;
+     private final Boolean isOneWay;
 
-    private final EndpointArgumentsBuilder responseBuilder;
+    // Converts {@link Message} --> Object[]
+    private final EndpointArgumentsBuilder argumentsBuilder;
+
+    // these objects together create a response message from method parameters
+    private final EndpointResponseMessageBuilder bodyBuilder;
+    private final MessageFiller[] outFillers;
+
 
     public EndpointMethodHandler(RuntimeEndpointInfo endpointInfo, JavaMethodImpl method) {
-
         this.seiModel = endpointInfo.getRuntimeModel();
         soapVersion = endpointInfo.getBinding().getSOAPVersion();
         this.method = method.getMethod();
         this.javaMethodModel = method;
+        argumentsBuilder = createArgumentsBuilder();
+        List<MessageFiller> fillers = new ArrayList<MessageFiller>();
+        bodyBuilder = createResponseMessageBuilder(fillers);
+        this.outFillers = fillers.toArray(new MessageFiller[fillers.size()]);
+        this.isOneWay = method.getMEP().isOneWay();
+    }
 
-        {// prepare objects for creating messages
-            List<ParameterImpl> rp = method.getResponseParameters();
+    /**
+     * It builds EndpointArgumentsBuilder which converts request {@link Message} to endpoint method's invocation
+     * arguments Object[]
+     *
+     * @return EndpointArgumentsBuilder
+     */
+    private EndpointArgumentsBuilder createArgumentsBuilder() {
+        EndpointArgumentsBuilder argsBuilder;
+        List<ParameterImpl> rp = javaMethodModel.getRequestParameters();
+        List<EndpointArgumentsBuilder> builders = new ArrayList<EndpointArgumentsBuilder>();
 
-            EndpointResponseMessageBuilder bodyBuilder = null;
-            List<MessageFiller> fillers = new ArrayList<MessageFiller>();
-            valueGetters = new ValueGetter[rp.size()];
-
-            for (ParameterImpl param : rp) {
-                ValueGetter getter = ValueGetter.get(param);
-
-                switch(param.getOutBinding().kind) {
-                case BODY:
-                    if(param.isWrapperStyle()) {
-                        if(param.getParent().getBinding().isRpcLit())
-                            bodyBuilder = new EndpointResponseMessageBuilder.RpcLit((WrapperParameter)param, seiModel, soapVersion);
-                        else
-                            bodyBuilder = new EndpointResponseMessageBuilder.DocLit((WrapperParameter)param, seiModel, soapVersion);
-                    } else {
-                        bodyBuilder = new EndpointResponseMessageBuilder.Bare(param, seiModel, soapVersion);
-                    }
-                    break;
-                case HEADER:
-                    fillers.add(new MessageFiller.Header(
-                        seiModel,
-                        param.getIndex(),
-                        soapVersion,
-                        param.getBridge(),
-                        getter ));
-                    break;
-                case ATTACHMENT:
-                    // TODO: implement this later
-                    throw new UnsupportedOperationException();
-                case UNBOUND:
-                    break;
-                default:
-                    throw new AssertionError(); // impossible
+        for( ParameterImpl param : rp ) {
+            EndpointValueSetter setter = EndpointValueSetter.get(param);
+            switch(param.getInBinding().kind) {
+            case BODY:
+                if(param.isWrapperStyle()) {
+                    if(param.getParent().getBinding().isRpcLit())
+                        builders.add(new EndpointArgumentsBuilder.RpcLit((WrapperParameter)param));
+                    else
+                        builders.add(new EndpointArgumentsBuilder.DocLit((WrapperParameter)param, Mode.OUT));
+                } else {
+                    builders.add(new EndpointArgumentsBuilder.Body(param.getBridge(),setter));
                 }
+                break;
+            case HEADER:
+                builders.add(new EndpointArgumentsBuilder.Header(param, setter));
+                break;
+            case ATTACHMENT:
+                // TODO: implement this later
+                throw new UnsupportedOperationException();
+            case UNBOUND:
+                builders.add(new EndpointArgumentsBuilder.NullSetter(setter,
+                    EndpointArgumentsBuilder.getVMUninitializedValue(param.getTypeReference().type)));
+                break;
+            default:
+                throw new AssertionError();
             }
-
-            if(bodyBuilder==null) {
-                // no parameter binds to body. we create an empty message
-                switch(soapVersion) {
-                case SOAP_11:
-                    bodyBuilder = EndpointResponseMessageBuilder.EMPTY_SOAP11;
-                    break;
-                case SOAP_12:
-                    bodyBuilder = EndpointResponseMessageBuilder.EMPTY_SOAP12;
-                    break;
-                default:
-                    throw new AssertionError();
-                }
-            }
-
-            this.bodyBuilder = bodyBuilder;
-            this.inFillers = fillers.toArray(new MessageFiller[fillers.size()]);
         }
 
-        {// prepare objects for processing request
-            List<ParameterImpl> rp = method.getRequestParameters();
-            List<EndpointArgumentsBuilder> builders = new ArrayList<EndpointArgumentsBuilder>();
-
-            for( ParameterImpl param : rp ) {
-                EndpointValueSetter setter = EndpointValueSetter.get(param);
-                switch(param.getInBinding().kind) {
-                case BODY:
-                    if(param.isWrapperStyle()) {
-                        if(param.getParent().getBinding().isRpcLit())
-                            builders.add(new EndpointArgumentsBuilder.RpcLit((WrapperParameter)param));
-                        else
-                            builders.add(new EndpointArgumentsBuilder.DocLit((WrapperParameter)param, Mode.OUT));
-                    } else {
-                        builders.add(new EndpointArgumentsBuilder.Body(param.getBridge(),setter));
-                    }
-                    break;
-                case HEADER:
-                    builders.add(new EndpointArgumentsBuilder.Header(param, setter));
-                    break;
-                case ATTACHMENT:
-                    // TODO: implement this later
-                    throw new UnsupportedOperationException();
-                case UNBOUND:
-                    builders.add(new EndpointArgumentsBuilder.NullSetter(setter,
-                        EndpointArgumentsBuilder.getVMUninitializedValue(param.getTypeReference().type)));
-                    break;
-                default:
-                    throw new AssertionError();
-                }
-            }
-            
-            {
-                List<ParameterImpl> resp = method.getResponseParameters();
-                for( ParameterImpl param : resp ) {
-                    if (param.isWrapperStyle()) {
-                        WrapperParameter wp = (WrapperParameter)param; 
-                        List<ParameterImpl> children = wp.getWrapperChildren();
-                        for (ParameterImpl p : children) {
-                            if (p.isOUT() && p.getIndex() != -1) {
-                                EndpointValueSetter setter = EndpointValueSetter.get(p);
-                                builders.add(new EndpointArgumentsBuilder.NullSetter(setter, null));
-                            }
-                        }
-                    } else if (param.isOUT() && param.getIndex() != -1) {
-                        EndpointValueSetter setter = EndpointValueSetter.get(param);
+        // creates {@link Holder} arguments for OUT parameters
+        List<ParameterImpl> resp = javaMethodModel.getResponseParameters();
+        for( ParameterImpl param : resp ) {
+            if (param.isWrapperStyle()) {
+                WrapperParameter wp = (WrapperParameter)param;
+                List<ParameterImpl> children = wp.getWrapperChildren();
+                for (ParameterImpl p : children) {
+                    if (p.isOUT() && p.getIndex() != -1) {
+                        EndpointValueSetter setter = EndpointValueSetter.get(p);
                         builders.add(new EndpointArgumentsBuilder.NullSetter(setter, null));
                     }
                 }
-            }
-
-
-            switch(builders.size()) {
-            case 0:
-                responseBuilder = EndpointArgumentsBuilder.NONE;
-                break;
-            case 1:
-                responseBuilder = builders.get(0);
-                break;
-            default:
-                responseBuilder = new EndpointArgumentsBuilder.Composite(builders);
+            } else if (param.isOUT() && param.getIndex() != -1) {
+                EndpointValueSetter setter = EndpointValueSetter.get(param);
+                builders.add(new EndpointArgumentsBuilder.NullSetter(setter, null));
             }
         }
 
-        this.isOneWay = method.getMEP().isOneWay();
+        switch(builders.size()) {
+        case 0:
+            argsBuilder = EndpointArgumentsBuilder.NONE;
+            break;
+        case 1:
+            argsBuilder = builders.get(0);
+            break;
+        default:
+            argsBuilder = new EndpointArgumentsBuilder.Composite(builders);
+        }
+        return argsBuilder;
     }
+
+    /**
+    * prepare objects for creating response {@link Message}
+    */
+    private EndpointResponseMessageBuilder createResponseMessageBuilder(List<MessageFiller> fillers) {
+
+        EndpointResponseMessageBuilder bodyBuilder = null;
+        List<ParameterImpl> rp = javaMethodModel.getResponseParameters();
+
+        for (ParameterImpl param : rp) {
+            ValueGetter getter = ValueGetter.get(param);
+
+            switch(param.getOutBinding().kind) {
+            case BODY:
+                if(param.isWrapperStyle()) {
+                    if(param.getParent().getBinding().isRpcLit()) {
+                        bodyBuilder = new EndpointResponseMessageBuilder.RpcLit((WrapperParameter)param, seiModel,
+                                soapVersion);
+                    } else {
+                        bodyBuilder = new EndpointResponseMessageBuilder.DocLit((WrapperParameter)param, seiModel,
+                                soapVersion);
+                    }
+                } else {
+                    bodyBuilder = new EndpointResponseMessageBuilder.Bare(param, seiModel, soapVersion);
+                }
+                break;
+            case HEADER:
+                fillers.add(new MessageFiller.Header(seiModel, param.getIndex(), soapVersion, param.getBridge(),
+                        getter ));
+                break;
+            case ATTACHMENT:
+                // TODO: implement this later
+                throw new UnsupportedOperationException();
+            case UNBOUND:
+                break;
+            default:
+                throw new AssertionError(); // impossible
+            }
+        }
+
+        if (bodyBuilder == null) {
+            // no parameter binds to body. we create an empty message
+            switch(soapVersion) {
+            case SOAP_11:
+                bodyBuilder = EndpointResponseMessageBuilder.EMPTY_SOAP11;
+                break;
+            case SOAP_12:
+                bodyBuilder = EndpointResponseMessageBuilder.EMPTY_SOAP12;
+                break;
+            default:
+                throw new AssertionError();
+            }
+        }
+        return bodyBuilder;
+    }
+
 
     public Packet invoke(Object proxy, Message req) {
 
@@ -201,10 +205,10 @@ public final class EndpointMethodHandler {
         Marshaller m = pool.take();
 
         try {
-            Object[] args = new Object[method.getParameterTypes().length]; // TODO
+            Object[] args = new Object[method.getParameterTypes().length];
             BridgeContext context = seiModel.getBridgeContext();
             try {
-                responseBuilder.readRequest(req,args,context);
+                argumentsBuilder.readRequest(req,args,context);
             } catch (JAXBException e) {
                 throw new DeserializationException("failed.to.read.response",e);
             } catch (XMLStreamException e) {
@@ -220,7 +224,8 @@ public final class EndpointMethodHandler {
                 Throwable cause = e.getCause();
                 if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
                     // Service specific exception
-                    responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, javaMethodModel.getCheckedException(cause.getClass()), cause);
+                    responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion,
+                            javaMethodModel.getCheckedException(cause.getClass()), cause);
                 } else {
                     responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
                 }
@@ -237,13 +242,14 @@ public final class EndpointMethodHandler {
     }
 
     /**
-     * Creates a response {@link JAXBMessage} from method arguments.
+     * Creates a response {@link JAXBMessage} from method arguments, return value
      *
+     * @return response message
      */
     private Message createResponseMessage(Object[] args, Object returnValue) {
         Message msg = bodyBuilder.createMessage(args, returnValue);
 
-        for (MessageFiller filler : inFillers)
+        for (MessageFiller filler : outFillers)
             filler.fillIn(args, returnValue, msg);
 
         return msg;
