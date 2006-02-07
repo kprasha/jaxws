@@ -21,6 +21,7 @@ package com.sun.xml.ws.api.message;
 
 import javax.activation.DataHandler;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPException;
 import javax.xml.transform.Source;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,5 +71,5 @@ public interface Attachment {
     /**
      * Writes this attachment to the given {@link SOAPMessage}.
      */
-    void writeTo(SOAPMessage saaj);
+    void writeTo(SOAPMessage saaj) throws SOAPException;
 }
