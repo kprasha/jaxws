@@ -160,6 +160,9 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             } else if (args[i].equals("-keep")) {
                 keepGenerated = true;
                 args[i] = null;
+            } else if (args[i].equals("-mex")) {
+                useMex = true;
+                args[i] = null;
             } else if(args[i].equals("-wsdllocation")){
                 if(program.equals(WSGEN)) {
                     onError(getMessage("wscompile.invalidOption", args[i]));
@@ -779,6 +782,8 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             properties.setProperty(ProcessorOptions.WSDL_LOCATION, wsdlLocation);
         if(defaultPackage != null)
             properties.setProperty(ProcessorOptions.DEFAULT_PACKAGE, defaultPackage);
+        properties.setProperty(ProcessorOptions.USE_MEX,
+            (useMex ? TRUE : FALSE));
     }
 
     protected String getGenericErrorMessage() {
@@ -891,6 +896,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     protected boolean compilerOptimize = false;
     protected boolean verbose = false;
     protected boolean keepGenerated = false;
+    protected boolean useMex = false;
     protected boolean extensions = false;
     protected String userClasspath = null;
     protected Set<String> bindingFiles = new HashSet<String>();

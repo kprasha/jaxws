@@ -153,6 +153,14 @@ public class WSDLParser {
         _listeners.remove(l);
     }
 
+    public boolean getUseMex() {
+        return useMex;
+    }
+
+    public void setUseMex(boolean b) {
+        useMex = b;
+    }
+
 //    public WSDLDocument parse(InputSource source) {
 //        _messageFactory =
 //            new LocalizableMessageFactory("com.sun.tools.ws.resources.wsdl");
@@ -1372,4 +1380,5 @@ public class WSDLParser {
     private LocalizableMessageFactory _messageFactory = null;
     private Localizer _localizer;
     private HashSet hSet = null;
+    private boolean useMex = false;
 }
