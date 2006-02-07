@@ -15,5 +15,5 @@ public abstract class JavaGeneratorExtension {
      * @param wsdlOperation non-null wsdl extensiblity element -  wsdl:operation.
      * @param jMethod non-null {@link JMethod}
      */
-     abstract void writeOperationAnnotations(TExtensible wsdlOperation, JMethod jMethod);
+     public abstract void writeOperationAnnotations(TExtensible wsdlOperation, JMethod jMethod);
 }
