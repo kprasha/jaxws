@@ -12,8 +12,8 @@ public abstract class JavaGeneratorExtension {
     /**
      * This method should be used to write annotations on {@link JMethod}.
      *
-     * @param wsdlOperation non-null wsdl extensiblity element -  wsdl:operation.
+     * @param wsdlOperation non-null wsdl extensiblity element -  wsdl:portType/wsdl:operation.
      * @param jMethod non-null {@link JMethod}
      */
-     public abstract void writeOperationAnnotations(TExtensible wsdlOperation, JMethod jMethod);
+     public abstract void writeMethodAnnotations(TExtensible wsdlOperation, JMethod jMethod);
 }
