@@ -1,4 +1,4 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.model.ParameterImpl;

@@ -36,7 +36,6 @@ import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
-import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
@@ -44,6 +43,7 @@ import com.sun.xml.ws.server.provider.XMLProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.SOAPProviderEndpointModel;
+import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.spi.runtime.WebServiceContext;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
@@ -418,7 +418,7 @@ public class RuntimeEndpointInfo extends WSEndpoint
         if (getImplementor() instanceof Provider) {
             invokerPipe = new ProviderInvokerPipe(this);
         } else {
-            invokerPipe = new EndpointInvokerPipe(this);
+            invokerPipe = new SEIInvokerPipe(this);
         }
         return assembler.createServer(null, this, invokerPipe);
     }

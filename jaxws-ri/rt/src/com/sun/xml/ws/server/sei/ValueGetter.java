@@ -1,4 +1,4 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.model.ParameterImpl;
 
@@ -56,9 +56,11 @@ enum ValueGetter {
      * Returns a {@link ValueGetter} suitable for the given {@link Parameter}.
      */
     static ValueGetter get(ParameterImpl p) {
-        if(p.getMode()== Mode.IN)
+        // return value is always PLAIN
+        if(p.getMode() == Mode.IN || p.getIndex() == -1) {
             return PLAIN;
-        else
+        } else {
             return HOLDER;
+        }
     }
 }

@@ -1,7 +1,6 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -28,8 +27,8 @@ import java.util.concurrent.Executor;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PortInterfaceStub extends Stub implements InvocationHandler {
-    public PortInterfaceStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Pipe master) {
+public final class SEIStub extends Stub implements InvocationHandler {
+    public SEIStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Pipe master) {
         super(master,binding,seiModel.getPort().getAddress());
         this.owner = owner;
         this.seiModel = seiModel;

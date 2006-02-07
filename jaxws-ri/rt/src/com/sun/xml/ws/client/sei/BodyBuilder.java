@@ -1,23 +1,4 @@
-/*
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the "License").  You may not use this file except
- * in compliance with the License.
- * 
- * You can obtain a copy of the license at
- * https://jwsdp.dev.java.net/CDDLv1.0.html
- * See the License for the specific language governing
- * permissions and limitations under the License.
- * 
- * When distributing Covered Code, include this CDDL
- * HEADER in each file and include the License file at
- * https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
- * add the following below this CDDL HEADER, with the
- * fields enclosed by brackets "[]" replaced with your
- * own identifying information: Portions Copyright [yyyy]
- * [name of copyright owner]
- */
-package com.sun.xml.ws.server;
+package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
@@ -41,31 +22,31 @@ import java.util.List;
  * Builds a JAXB object that represents the payload.
  *
  * @see MessageFiller
- * @author Jitendra Kotamraju
+ * @author Kohsuke Kawaguchi
  */
-abstract class EndpointResponseMessageBuilder {
-    abstract Message createMessage(Object[] methodArgs, Object returnValue);
+abstract class BodyBuilder {
+    abstract Message createMessage(Object[] methodArgs);
 
-    static final EndpointResponseMessageBuilder EMPTY_SOAP11 = new Empty(SOAPVersion.SOAP_11);
-    static final EndpointResponseMessageBuilder EMPTY_SOAP12 = new Empty(SOAPVersion.SOAP_12);
+    static final BodyBuilder EMPTY_SOAP11 = new Empty(SOAPVersion.SOAP_11);
+    static final BodyBuilder EMPTY_SOAP12 = new Empty(SOAPVersion.SOAP_12);
 
-    private static final class Empty extends EndpointResponseMessageBuilder {
+    private static final class Empty extends BodyBuilder {
         private final SOAPVersion soapVersion;
 
         public Empty(SOAPVersion soapVersion) {
             this.soapVersion = soapVersion;
         }
 
-        Message createMessage(Object[] methodArgs, Object returnValue) {
+        Message createMessage(Object[] methodArgs) {
             return Messages.createEmpty(soapVersion);
         }
     }
 
     /**
-     * Base class for those {@link EndpointResponseMessageBuilder}s that build a {@link Message}
+     * Base class for those {@link BodyBuilder}s that build a {@link Message}
      * from JAXB objects.
      */
-    private static abstract class JAXB extends EndpointResponseMessageBuilder {
+    private static abstract class JAXB extends BodyBuilder {
         /**
          * This object determines the binding of the object returned
          * from {@link #build(Object[])}.
@@ -81,16 +62,16 @@ abstract class EndpointResponseMessageBuilder {
             this.soapVersion = soapVersion;
         }
 
-        final Message createMessage(Object[] methodArgs, Object returnValue) {
+        final Message createMessage(Object[] methodArgs) {
             return new JAXBMessage(
-                bridge, build(methodArgs, returnValue),
+                bridge, build(methodArgs),
                 seiModel.getBridgeContext(), soapVersion );
         }
 
         /**
          * Builds a JAXB object that becomes the payload.
          */
-        abstract Object build(Object[] methodArgs, Object returnValue);
+        abstract Object build(Object[] methodArgs);
     }
 
     /**
@@ -106,7 +87,7 @@ abstract class EndpointResponseMessageBuilder {
         private final ValueGetter getter;
 
         /**
-         * Creates a {@link EndpointResponseMessageBuilder} from a bare parameter.
+         * Creates a {@link BodyBuilder} from a bare parameter.
          */
         Bare(ParameterImpl p, SEIModel seiModel, SOAPVersion soapVersion) {
             super(p.getBridge(), seiModel, soapVersion);
@@ -117,10 +98,7 @@ abstract class EndpointResponseMessageBuilder {
         /**
          * Picks up an object from the method arguments and uses it.
          */
-        Object build(Object[] methodArgs, Object returnValue) {
-            if (methodPos == -1) {
-                return returnValue;
-            }
+        Object build(Object[] methodArgs) {
             return getter.get(methodArgs[methodPos]);
         }
     }
@@ -166,8 +144,6 @@ abstract class EndpointResponseMessageBuilder {
          * How does each wrapped parameter binds to XML?
          */
         private final RawAccessor[] accessors;
-        
-        //private final RawAccessor retAccessor;
 
         /**
          * Wrapper bean.
@@ -175,7 +151,7 @@ abstract class EndpointResponseMessageBuilder {
         private final Class wrapper;
 
         /**
-         * Creates a {@link EndpointResponseMessageBuilder} from a {@link WrapperParameter}.
+         * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
         DocLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
             super(wp, seiModel, soapVersion);
@@ -202,17 +178,13 @@ abstract class EndpointResponseMessageBuilder {
         /**
          * Packs a bunch of arguments into a {@link CompositeStructure}.
          */
-        Object build(Object[] methodArgs, Object returnValue) {
+        Object build(Object[] methodArgs) {
             try {
                 Object bean = wrapper.newInstance();
 
                 // fill in wrapped parameters from methodArgs
                 for( int i=indices.length-1; i>=0; i-- ) {
-                    if (indices[i] == -1) {
-                        accessors[i].set(bean, returnValue);
-                    } else {
-                        accessors[i].set(bean,getters[i].get(methodArgs[indices[i]]));
-                    }
+                    accessors[i].set(bean,getters[i].get(methodArgs[indices[i]]));
                 }
 
                 return bean;
@@ -249,7 +221,7 @@ abstract class EndpointResponseMessageBuilder {
         private final Bridge[] parameterBridges;
 
         /**
-         * Creates a {@link EndpointResponseMessageBuilder} from a {@link WrapperParameter}.
+         * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
         RpcLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
             super(wp, seiModel, soapVersion);
@@ -266,19 +238,14 @@ abstract class EndpointResponseMessageBuilder {
         /**
          * Packs a bunch of arguments intoa {@link CompositeStructure}.
          */
-        CompositeStructure build(Object[] methodArgs, Object returnValue) {
+        CompositeStructure build(Object[] methodArgs) {
             CompositeStructure cs = new CompositeStructure();
             cs.bridges = parameterBridges;
             cs.values = new Object[parameterBridges.length];
 
             // fill in wrapped parameters from methodArgs
-            for( int i=indices.length-1; i>=0; i-- ) {
-                if (indices[i] == -1) {
-                    cs.values[i] = getters[i].get(returnValue);
-                } else {
-                    cs.values[i] = getters[i].get(methodArgs[indices[i]]);
-                }
-            }
+            for( int i=indices.length-1; i>=0; i-- )
+                cs.values[i] = getters[i].get(methodArgs[indices[i]]);
 
             return cs;
         }

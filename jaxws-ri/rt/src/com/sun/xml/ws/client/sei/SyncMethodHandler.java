@@ -1,4 +1,4 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Message;
@@ -67,7 +67,7 @@ final class SyncMethodHandler extends MethodHandler {
     private final ResponseBuilder responseBuilder;
     private final Map<QName, CheckedExceptionImpl> checkedExceptions;
 
-    public SyncMethodHandler(PortInterfaceStub owner, JavaMethodImpl method) {
+    public SyncMethodHandler(SEIStub owner, JavaMethodImpl method) {
         super(owner);
 
         //keep all the CheckedException model for the detail qname

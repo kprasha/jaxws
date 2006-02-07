@@ -16,7 +16,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
-import com.sun.xml.ws.client.port.PortInterfaceStub;
+import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -304,7 +304,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         BindingImpl binding = createBinding(portName, eif.getBindingID());
-        PortInterfaceStub pis = new PortInterfaceStub(this, binding, model, createPipeline(portName,binding));
+        SEIStub pis = new SEIStub(this, binding, model, createPipeline(portName,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{

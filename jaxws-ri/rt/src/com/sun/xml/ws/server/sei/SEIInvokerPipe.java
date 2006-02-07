@@ -17,17 +17,18 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.server;
+package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
-import com.sun.xml.ws.client.port.MethodHandler;
-import com.sun.xml.ws.server.EndpointMethodHandler;
+import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.server.RuntimeEndpointInfo;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +40,10 @@ import javax.xml.namespace.QName;
  *
  * @author Jitendra Kotamraju
  */
-public class EndpointInvokerPipe extends AbstractPipeImpl {
+public class SEIInvokerPipe extends AbstractPipeImpl {
 
     private static final Logger logger = Logger.getLogger(
-        com.sun.xml.ws.util.Constants.LoggingDomain + ".server.EndpointInvokerPipe");
+        com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SEIInvokerPipe");
     private final RuntimeEndpointInfo endpointInfo;
     /**
      * For each method on the port interface we have
@@ -51,7 +52,7 @@ public class EndpointInvokerPipe extends AbstractPipeImpl {
     private final Map<Method, EndpointMethodHandler> methodHandlers = new HashMap<Method, EndpointMethodHandler>();
     private static final QName EMPTY_QNAME = new QName("");
 
-    public EndpointInvokerPipe(RuntimeEndpointInfo endpointInfo) {
+    public SEIInvokerPipe(RuntimeEndpointInfo endpointInfo) {
         this.endpointInfo = endpointInfo;
 
         AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();

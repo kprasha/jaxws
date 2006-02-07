@@ -8,7 +8,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.JAXBDispatch;
-import com.sun.xml.ws.client.port.PortInterfaceStub;
+import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.model.SOAPSEIModel;
 
 import javax.activation.DataSource;
@@ -177,7 +177,7 @@ public abstract class Stubs {
     public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
                                   Class<T> portInterface, Pipe next ) {
 
-        PortInterfaceStub ps = new PortInterfaceStub(service,(BindingImpl)binding, (SOAPSEIModel)model,next);
+        SEIStub ps = new SEIStub(service,(BindingImpl)binding, (SOAPSEIModel)model,next);
         return portInterface.cast(
             Proxy.newProxyInstance( portInterface.getClassLoader(),
                 new Class[]{portInterface,BindingProvider.class}, ps ));

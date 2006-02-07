@@ -20,12 +20,8 @@
 
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Acceptor;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.transport.Headers;
 import java.util.Arrays;
 import javax.xml.ws.handler.MessageContext;
@@ -34,19 +30,11 @@ import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.encoding.soap.internal.DelegateBase;
-import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.pept.Delegate;
-import com.sun.xml.ws.pept.ept.EPTFactory;
-import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
-import com.sun.xml.ws.util.MessageInfoUtil;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import javax.xml.ws.Provider;
 
 /**
  * Entry point for all server requests.
@@ -56,12 +44,12 @@ import javax.xml.ws.Provider;
 public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
     private final Encoder encoder;
     private final Decoder decoder;
-    
+
     public Tie() {
         this.encoder = null;
         this.decoder = null;
     }
-    
+
     public Tie(Encoder encoder, Decoder decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
@@ -86,27 +74,27 @@ public class Tie implements com.sun.xml.ws.spi.runtime.Tie, Acceptor {
     public void handle(WSConnection connection,
                        com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo endpoint)
     throws Exception {
-      
+
         /*
-        if (encoder != null) {
-         */
-            
+       if (encoder != null) {
+        */
+
             // TODO : only HTTP transport is changed to work with Server Pipe line
-            // Once the server side has EndpointInvokerPipe, everything uses this
+            // Once the server side has SEIInvokerPipe, everything uses this
             // codepath
-            
+
             System.out.println("****** SERVER SIDE REARCH PATH ******");
-            
+
             RuntimeEndpointInfo endpointInfo = (RuntimeEndpointInfo)endpoint;
             Encoder encoder = TestEncoderImpl.get(endpointInfo.getBinding().getSOAPVersion());
             Decoder decoder = TestDecoderImpl.get(endpointInfo.getBinding().getSOAPVersion());
-            
+
             Map<String, List<String>> headers = connection.getHeaders();
             String ct = headers.get("Content-Type").get(0);
             InputStream in = connection.getInput();
             Packet packet = decoder.decode(in, ct);
             packet = endpointInfo.process(packet);
-            ct = encoder.getStaticContentType();          
+            ct = encoder.getStaticContentType();
             if (ct == null) {
                 throw new UnsupportedOperationException();
             } else {

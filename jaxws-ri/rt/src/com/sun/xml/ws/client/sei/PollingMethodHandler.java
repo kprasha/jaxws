@@ -1,6 +1,4 @@
-package com.sun.xml.ws.client.port;
-
-import com.sun.xml.ws.client.RequestContext;
+package com.sun.xml.ws.client.sei;
 
 import javax.xml.ws.Response;
 import javax.xml.ws.WebServiceException;
@@ -11,7 +9,7 @@ import javax.xml.ws.WebServiceException;
  */
 final class PollingMethodHandler extends AsyncMethodHandler {
 
-    public PollingMethodHandler(PortInterfaceStub owner, SyncMethodHandler core) {
+    public PollingMethodHandler(SEIStub owner, SyncMethodHandler core) {
         super(owner,core);
     }
 

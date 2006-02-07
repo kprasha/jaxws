@@ -1,6 +1,4 @@
-package com.sun.xml.ws.client.port;
-
-import com.sun.xml.ws.client.RequestContext;
+package com.sun.xml.ws.client.sei;
 
 import javax.xml.ws.WebServiceException;
 
@@ -15,9 +13,9 @@ import javax.xml.ws.WebServiceException;
  */
 public abstract class MethodHandler {
 
-    protected final PortInterfaceStub owner;
+    protected final SEIStub owner;
 
-    protected MethodHandler(PortInterfaceStub owner) {
+    protected MethodHandler(SEIStub owner) {
         this.owner = owner;
     }
 

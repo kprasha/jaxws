@@ -1,4 +1,4 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseImpl;
@@ -21,7 +21,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
      */
     private final SyncMethodHandler core;
 
-    protected AsyncMethodHandler(PortInterfaceStub owner, SyncMethodHandler core) {
+    protected AsyncMethodHandler(SEIStub owner, SyncMethodHandler core) {
         super(owner);
         this.core = core;
     }

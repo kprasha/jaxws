@@ -1,4 +1,4 @@
-package com.sun.xml.ws.server;
+package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.bind.api.BridgeContext;
@@ -12,6 +12,9 @@ import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.Pool;
+import com.sun.xml.ws.server.sei.EndpointArgumentsBuilder;
+import com.sun.xml.ws.server.RuntimeEndpointInfo;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -44,7 +47,7 @@ import javax.jws.WebParam.Mode;
  *
  * @author Jitendra Kotamraju
  */
-public final class EndpointMethodHandler {
+final class EndpointMethodHandler {
 
     private final SEIModel seiModel;
     private final SOAPVersion soapVersion;

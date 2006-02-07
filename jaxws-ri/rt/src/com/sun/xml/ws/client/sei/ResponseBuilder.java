@@ -1,4 +1,4 @@
-package com.sun.xml.ws.client.port;
+package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;

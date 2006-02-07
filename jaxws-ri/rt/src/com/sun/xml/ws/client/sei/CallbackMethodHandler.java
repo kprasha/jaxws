@@ -1,6 +1,4 @@
-package com.sun.xml.ws.client.port;
-
-import com.sun.xml.ws.client.RequestContext;
+package com.sun.xml.ws.client.sei;
 
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.WebServiceException;
@@ -18,7 +16,7 @@ final class CallbackMethodHandler extends AsyncMethodHandler {
      */
     private final int handlerPos;
 
-    public CallbackMethodHandler(PortInterfaceStub owner, SyncMethodHandler core, int handlerPos) {
+    public CallbackMethodHandler(SEIStub owner, SyncMethodHandler core, int handlerPos) {
         super(owner,core);
         this.handlerPos = handlerPos;
     }
