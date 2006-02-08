@@ -52,11 +52,11 @@ public class ExtensibilityHelper {
     }
 
     public void withAllSubEntitiesDo(EntityAction action) {
-        if (_extensions != null) {
-            for (Iterator iter = _extensions.iterator(); iter.hasNext();) {
-                action.perform((Entity) iter.next());
-            }
-        }
+//        if (_extensions != null) {
+//            for (Iterator iter = _extensions.iterator(); iter.hasNext();) {
+//                action.perform((Entity) iter.next());
+//            }
+//        }
     }
 
     public void accept(ExtensionVisitor visitor) throws Exception {
