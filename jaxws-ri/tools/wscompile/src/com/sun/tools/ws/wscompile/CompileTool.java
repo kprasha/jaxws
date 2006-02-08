@@ -416,13 +416,9 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 // abolutized URL string
                 String fileName = arg;
                 if (program.equals(WSGEN)) {
-                    if (!isClass(fileName)) {
-                        onError(getMessage("wsgen.class.not.found", fileName));
+                    if (!isValidWSGenClass(fileName))
                         return false;
-                    }
-                } else {
-                    //fileName = JAXWSUtils.absolutize(JAXWSUtils.getFileOrURLName(args[i]));
-                }
+                } 
                 inputFiles.add(fileName);
             }
         }
@@ -442,6 +438,20 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             return false;
         }
         return true;    
+    }
+    
+    protected boolean isValidWSGenClass(String className) {        
+        Class clazz = getClass(className);
+        if (clazz == null) {
+            onError(getMessage("wsgen.class.not.found", className));
+            return false;
+        }        
+        if (clazz.isEnum() || clazz.isInterface() ||
+            clazz.isPrimitive()) {
+            onError(getMessage("wsgen.class.must.be.implementation.class", className));
+            return false;
+        }
+        return true;
     }
     
     protected boolean validateArguments() {
@@ -822,16 +832,16 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         return webServiceAP;
     }
 
-    private boolean isClass(String className) {
+    private Class getClass(String className) {
         try {
             ProcessorEnvironment env = createEnvironment();
-            env.getClassLoader().loadClass(className);
+            return env.getClassLoader().loadClass(className);
         } catch (ClassNotFoundException e) {
-            return false;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
+        return null;
     }
 
     private ProcessorEnvironment createEnvironment() throws Exception {
