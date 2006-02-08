@@ -20,6 +20,8 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
+import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
+import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.DRACONIAN_ERROR_HANDLER;
 
 import java.io.IOException;
@@ -41,9 +43,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMSource;
+import org.w3c.dom.Attr;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.EntityResolver;
@@ -111,6 +115,10 @@ public class WSDLParser {
         register(new SchemaExtensionHandler(_extensionHandlers));
         register(new JAXWSBindingExtensionHandler(_extensionHandlers));
         register(new SOAP12ExtensionHandler(_extensionHandlers));
+        
+        for (TWSDLExtensionHandler te : ServiceFinder.find(TWSDLExtensionHandler.class).toArray()) {
+            register(te);
+        }
     }
 
     public WSDLParser(WSDLModelInfo modelInfo) {
@@ -120,11 +128,11 @@ public class WSDLParser {
         this.entityResolver = modelInfo.getEntityResolver();
     }
 
-    public void register(AbstractExtensionHandler h) {
+    public void register(TWSDLExtensionHandler h) {
         _extensionHandlers.put(h.getNamespaceURI(), h);
     }
 
-    public void unregister(AbstractExtensionHandler h) {
+    public void unregister(TWSDLExtensionHandler h) {
         _extensionHandlers.put(h.getNamespaceURI(), null);
     }
 
@@ -686,6 +694,7 @@ public class WSDLParser {
                 context.push();
                 context.registerNamespaces(e2);
                 Input input = new Input();
+//                input.setParent((TWSDLExtensible)e);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
                 input.setMessage(context.translateQualifiedName(messageAttr));
@@ -696,6 +705,23 @@ public class WSDLParser {
                 gotInput = true;
                 if (gotOutput) {
                     inputBeforeOutput = false;
+                }
+                
+                // check for extensiblity attributes
+                for (Iterator iter2 = XmlUtil.getAllAttributes(e2);
+                iter2.hasNext();
+                ) {
+                    Attr e3 = (Attr)iter2.next();
+                    if (e3.getLocalName().equals(Constants.ATTR_MESSAGE) ||
+                        e3.getLocalName().equals(Constants.ATTR_NAME))
+                        continue;
+                    
+                    // possible extensibility element -- must live outside the WSDL namespace
+                    checkNotWsdlAttribute(e3);
+                    if (!handleExtension(context, input, e3, e2)) {
+                        // ignore the extensiblity attribute
+                        // TODO throw a WARNING
+                    }
                 }
 
                 // verify that there is at most one child element and it is a documentation element
@@ -737,6 +763,7 @@ public class WSDLParser {
                 context.push();
                 context.registerNamespaces(e2);
                 Output output = new Output();
+//                output.setParent((TWSDLExtensible)e);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
                 output.setMessage(context.translateQualifiedName(messageAttr));
@@ -749,6 +776,23 @@ public class WSDLParser {
                     inputBeforeOutput = true;
                 }
 
+                // check for extensiblity attributes
+                for (Iterator iter2 = XmlUtil.getAllAttributes(e2);
+                iter2.hasNext();
+                ) {
+                    Attr e3 = (Attr)iter2.next();
+                    if (e3.getLocalName().equals(Constants.ATTR_MESSAGE) ||
+                        e3.getLocalName().equals(Constants.ATTR_NAME))
+                        continue;
+                    
+                    // possible extensibility element -- must live outside the WSDL namespace
+                    checkNotWsdlAttribute(e3);
+                    if (!handleExtension(context, output, e3, e2)) {
+                        // ignore the extensiblity attribute
+                        // TODO throw a WARNING
+                    }
+                }
+                
                 // verify that there is at most one child element and it is a documentation element
                 boolean gotDocumentation2 = false;
                 for (Iterator iter2 = XmlUtil.getAllChildren(e2);
@@ -779,6 +823,7 @@ public class WSDLParser {
                 context.push();
                 context.registerNamespaces(e2);
                 Fault fault = new Fault();
+//                fault.setParent((TWSDLExtensible)e);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
                 fault.setMessage(context.translateQualifiedName(messageAttr));
@@ -788,6 +833,23 @@ public class WSDLParser {
                 operation.addFault(fault);
                 gotFault = true;
 
+                // check for extensiblity attributes
+                for (Iterator iter2 = XmlUtil.getAllAttributes(e2);
+                iter2.hasNext();
+                ) {
+                    Attr e3 = (Attr)iter2.next();
+                    if (e3.getLocalName().equals(Constants.ATTR_MESSAGE) ||
+                        e3.getLocalName().equals(Constants.ATTR_NAME))
+                        continue;
+                    
+                    // possible extensibility element -- must live outside the WSDL namespace
+                    checkNotWsdlAttribute(e3);
+                    if (!handleExtension(context, fault, e3, e2)) {
+                        // ignore the extensiblity attribute
+                        // TODO throw a WARNING
+                    }
+                }
+                
                 // verify that there is at most one child element and it is a documentation element
                 boolean gotDocumentation2 = false;
                 for (Iterator iter2 = XmlUtil.getAllChildren(e2);
@@ -1318,12 +1380,35 @@ public class WSDLParser {
             return h.doHandleExtension(context, entity, e);
         }
     }
+    
+    protected boolean handleExtension(
+        TWSDLParserContextImpl context,
+        TWSDLExtensible entity,
+        Node n,
+        Element e) {
+        TWSDLExtensionHandler h =
+            (TWSDLExtensionHandler) _extensionHandlers.get(n.getNamespaceURI());
+        if (h == null) {
+            context.fireIgnoringExtension(
+                new QName(n.getNamespaceURI(), n.getLocalName()),
+                ((Entity) entity).getElementName());
+            return false;
+        } else {
+            return h.doHandleExtension(context, entity, e);
+        }
+    }
 
     protected void checkNotWsdlElement(Element e) {
         // possible extensibility element -- must live outside the WSDL namespace
         if (e.getNamespaceURI().equals(Constants.NS_WSDL))
             Util.fail("parsing.invalidWsdlElement", e.getTagName());
     }
+    
+    protected void checkNotWsdlAttribute(Attr a) {
+        // possible extensibility element -- must live outside the WSDL namespace
+        if (a.getNamespaceURI().equals(Constants.NS_WSDL))
+            Util.fail("parsing.invalidWsdlElement", a.getLocalName());
+    }    
 
     protected void checkNotWsdlRequired(Element e) {
         // check the wsdl:required attribute, fail if set to "true"
