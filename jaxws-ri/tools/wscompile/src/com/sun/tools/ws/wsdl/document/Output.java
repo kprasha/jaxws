@@ -20,22 +20,22 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import javax.xml.namespace.QName;
-
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.AbstractDocument;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
 
+import javax.xml.namespace.QName;
+
 /**
  * Entity corresponding to the "output" child element of a port type operation.
  *
  * @author WS Development Team
  */
-public class Output extends Entity implements TExtensible {
+public class Output extends Entity implements TWSDLExtensible {
 
     public Output() {
     }
@@ -100,9 +100,9 @@ public class Output extends Entity implements TExtensible {
     private String _name;
     private QName _message;
     private ExtensibilityHelper _helper;
-    private TExtensible parent;
+    private TWSDLExtensible parent;
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
@@ -110,11 +110,11 @@ public class Output extends Entity implements TExtensible {
         return getElementName();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return parent;
     }
     
-    public void setParent(TExtensible parent) {
+    public void setParent(TWSDLExtensible parent) {
         this.parent = parent;
     }
 
@@ -126,7 +126,7 @@ public class Output extends Entity implements TExtensible {
         return null;
     }
 
-    public Iterable<? extends TExtension> extensions() {
+    public Iterable<? extends TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 }

@@ -20,8 +20,8 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import javax.xml.namespace.QName;
 
@@ -35,7 +35,7 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  *
  * @author WS Development Team
  */
-public class Input extends Entity implements TExtensible {
+public class Input extends Entity implements TWSDLExtensible {
 
     public Input() {
         _helper = new ExtensibilityHelper();
@@ -101,9 +101,9 @@ public class Input extends Entity implements TExtensible {
     private String _name;
     private QName _message;
     private ExtensibilityHelper _helper;
-    private TExtensible parent;
+    private TWSDLExtensible parent;
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
@@ -111,11 +111,11 @@ public class Input extends Entity implements TExtensible {
         return getElementName();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return parent;
     }
-    
-    public void setParent(TExtensible parent) {
+
+    public void setParent(TWSDLExtensible parent) {
         this.parent = parent;
     }
 
@@ -127,7 +127,7 @@ public class Input extends Entity implements TExtensible {
         return null;
     }
 
-    public Iterable<? extends TExtension> extensions() {
+    public Iterable<? extends TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 }
