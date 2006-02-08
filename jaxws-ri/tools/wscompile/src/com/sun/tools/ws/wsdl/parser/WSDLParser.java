@@ -694,7 +694,7 @@ public class WSDLParser {
                 context.push();
                 context.registerNamespaces(e2);
                 Input input = new Input();
-//                input.setParent((TWSDLExtensible)e);
+                input.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
                 input.setMessage(context.translateQualifiedName(messageAttr));
@@ -763,7 +763,7 @@ public class WSDLParser {
                 context.push();
                 context.registerNamespaces(e2);
                 Output output = new Output();
-//                output.setParent((TWSDLExtensible)e);
+                output.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
                 output.setMessage(context.translateQualifiedName(messageAttr));
@@ -823,7 +823,7 @@ public class WSDLParser {
                 context.push();
                 context.registerNamespaces(e2);
                 Fault fault = new Fault();
-//                fault.setParent((TWSDLExtensible)e);
+                fault.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
                 fault.setMessage(context.translateQualifiedName(messageAttr));
