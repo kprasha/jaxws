@@ -58,34 +58,10 @@ public abstract class AbstractExtensionHandler extends TWSDLExtensionHandler {
      *         then the WSDL parser can abort if the wsdl extensibility element had <code>required</code> attribute set to true
      */
     public boolean doHandleExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_DEFINITIONS)) {
-            return handleDefinitionsExtension(context, parent, e);
-        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_TYPES)) {
-            return handleTypesExtension(context, parent, e);
-        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_PORT_TYPE)) {
-            return handlePortTypeExtension(context, parent, e);
-        } else if (
-            parent.getWSDLElementName().equals(WSDLConstants.QNAME_BINDING)) {
-            return handleBindingExtension(context, parent, e);
-        } else if (
-            parent.getWSDLElementName().equals(WSDLConstants.QNAME_OPERATION)) {
-            return handleOperationExtension(context, parent, e);
-        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_INPUT)) {
-            return handleInputExtension(context, parent, e);
-        } else if (
-            parent.getWSDLElementName().equals(WSDLConstants.QNAME_OUTPUT)) {
-            return handleOutputExtension(context, parent, e);
-        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_FAULT)) {
-            return handleFaultExtension(context, parent, e);
-        } else if (
-            parent.getWSDLElementName().equals(WSDLConstants.QNAME_SERVICE)) {
-            return handleServiceExtension(context, parent, e);
-        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_PORT)) {
-            return handlePortExtension(context, parent, e);
-        } else if (parent.getWSDLElementName().equals(MIMEConstants.QNAME_PART)) {
+        if (parent.getWSDLElementName().equals(MIMEConstants.QNAME_PART)) {
             return handleMIMEPartExtension(context, parent, e);
         } else {
-            return false;
+            return super.doHandleExtension(context, parent, e);
         }
     }
 
