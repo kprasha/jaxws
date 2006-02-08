@@ -22,7 +22,7 @@ package com.sun.tools.ws.processor.modeler.wsdl;
 import static com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase.*;
 import com.sun.tools.ws.processor.config.ModelInfo;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
-import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 
 import org.xml.sax.InputSource;
 
@@ -238,7 +238,7 @@ public class PseudoSchemaBuilder {
         }
     }
 
-    private QName getOperationName(PortType portType, String operationName, TExtensible binding){
+    private QName getOperationName(PortType portType, String operationName, TWSDLExtensible binding){
         if(operationName == null)
             return null;
 //        String namespaceURI = wsdlDocument.getDefinitions().getTargetNamespaceURI()+"?"+portType.getName()+"?" + operationName;

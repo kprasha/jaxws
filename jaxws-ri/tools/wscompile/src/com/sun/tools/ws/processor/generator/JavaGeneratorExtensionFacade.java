@@ -21,22 +21,22 @@
 package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.JMethod;
-import com.sun.tools.ws.api.JavaGeneratorExtension;
-import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.TJavaGeneratorExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 
 /**
  * @author Arun Gupta
  */
-public final class JavaGeneratorExtensionFacade extends JavaGeneratorExtension {
-    private final JavaGeneratorExtension[] extensions;
+public final class JavaGeneratorExtensionFacade extends TJavaGeneratorExtension {
+    private final TJavaGeneratorExtension[] extensions;
     
-    JavaGeneratorExtensionFacade(JavaGeneratorExtension... extensions) {
+    JavaGeneratorExtensionFacade(TJavaGeneratorExtension... extensions) {
         assert extensions != null;
         this.extensions = extensions;
     }
     
-    public void writeMethodAnnotations(TExtensible wsdlOperation, JMethod jMethod) {
-        for (JavaGeneratorExtension e : extensions) {
+    public void writeMethodAnnotations(TWSDLExtensible wsdlOperation, JMethod jMethod) {
+        for (TJavaGeneratorExtension e : extensions) {
             e.writeMethodAnnotations(wsdlOperation, jMethod);
         }
     }

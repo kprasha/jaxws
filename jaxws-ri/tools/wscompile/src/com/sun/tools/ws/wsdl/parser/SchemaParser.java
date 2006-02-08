@@ -42,7 +42,7 @@ import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaDocument;
 import com.sun.tools.ws.wsdl.document.schema.SchemaElement;
 import com.sun.tools.ws.wsdl.framework.ParseException;
-import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
+import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
 import com.sun.tools.ws.wsdl.framework.ValidationException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 
@@ -67,14 +67,14 @@ public class SchemaParser {
     public SchemaDocument parse(InputSource source) {
         SchemaDocument schemaDocument = new SchemaDocument();
         schemaDocument.setSystemId(source.getSystemId());
-        TParserContextImpl context = new TParserContextImpl(schemaDocument, null);
+        TWSDLParserContextImpl context = new TWSDLParserContextImpl(schemaDocument, null);
         context.setFollowImports(_followImports);
         schemaDocument.setSchema(parseSchema(context, source, null));
         return schemaDocument;
     }
 
     public Schema parseSchema(
-        TParserContextImpl context,
+        TWSDLParserContextImpl context,
         InputSource source,
         String expectedTargetNamespaceURI) {
         Schema schema =
@@ -85,7 +85,7 @@ public class SchemaParser {
     }
 
     public Schema parseSchema(
-        TParserContextImpl context,
+        TWSDLParserContextImpl context,
         Element e,
         String expectedTargetNamespaceURI) {
         Schema schema =
@@ -96,7 +96,7 @@ public class SchemaParser {
     }
 
     protected void processImports(
-        TParserContextImpl context,
+        TWSDLParserContextImpl context,
         InputSource source,
         Schema schema) {
         for (Iterator iter = schema.getContent().children(); iter.hasNext();) {
@@ -177,7 +177,7 @@ public class SchemaParser {
     }
 
     protected Schema parseSchemaNoImport(
-        TParserContextImpl context,
+        TWSDLParserContextImpl context,
         InputSource source,
         String expectedTargetNamespaceURI) {
         try {
@@ -212,7 +212,7 @@ public class SchemaParser {
     }
 
     protected Schema parseSchemaNoImport(
-        TParserContextImpl context,
+        TWSDLParserContextImpl context,
         Document doc,
         String expectedTargetNamespaceURI) {
         Element root = doc.getDocumentElement();
@@ -221,7 +221,7 @@ public class SchemaParser {
     }
 
     protected Schema parseSchemaNoImport(
-        TParserContextImpl context,
+        TWSDLParserContextImpl context,
         Element e,
         String expectedTargetNamespaceURI) {
         Schema schema = new Schema(context.getDocument());

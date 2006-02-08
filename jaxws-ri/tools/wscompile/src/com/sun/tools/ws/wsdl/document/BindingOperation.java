@@ -29,16 +29,15 @@ import javax.xml.namespace.QName;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 
 /**
  * Entity corresponding to the "operation" child element of a WSDL "binding" element.
  *
  * @author WS Development Team
  */
-public class BindingOperation extends Entity implements TExtensible {
+public class BindingOperation extends Entity implements TWSDLExtensible {
 
     public BindingOperation() {
         _faults = new ArrayList();
@@ -141,15 +140,15 @@ public class BindingOperation extends Entity implements TExtensible {
         return getElementName();
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return parent;
     }
 
@@ -213,9 +212,9 @@ public class BindingOperation extends Entity implements TExtensible {
     private OperationStyle _style;
     private String _uniqueKey;
 
-    public void setParent(TExtensible parent) {
+    public void setParent(TWSDLExtensible parent) {
         this.parent = parent;
     }
 
-    private TExtensible parent;
+    private TWSDLExtensible parent;
 }

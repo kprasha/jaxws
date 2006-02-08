@@ -31,18 +31,18 @@ import org.w3c.dom.Element;
 
 import com.sun.xml.ws.util.NamespaceSupport;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.tools.ws.api.wsdl.TParserContext;
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 
 /**
  * The context used by parser classes.
  *
  * @author WS Development Team
  */
-public class TParserContextImpl implements TParserContext {
+public class TWSDLParserContextImpl implements TWSDLParserContext {
 
     private final static String PREFIX_XMLNS = "xmlns";
 
-    public TParserContextImpl(AbstractDocument doc, ArrayList listeners) {
+    public TWSDLParserContextImpl(AbstractDocument doc, ArrayList listeners) {
         _document = doc;
         _listeners = listeners;
         _nsSupport = new NamespaceSupport();

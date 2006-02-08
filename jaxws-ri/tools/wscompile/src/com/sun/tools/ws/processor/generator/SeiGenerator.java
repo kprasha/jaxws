@@ -22,7 +22,7 @@ package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.*;
 import com.sun.codemodel.writer.ProgressCodeWriter;
-import com.sun.tools.ws.api.JavaGeneratorExtension;
+import com.sun.tools.ws.api.TJavaGeneratorExtension;
 import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.config.WSDLModelInfo;
@@ -64,7 +64,7 @@ import java.util.Properties;
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
-    private JavaGeneratorExtension extension;
+    private TJavaGeneratorExtension extension;
 
     public SeiGenerator() {
     }
@@ -82,10 +82,10 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     }
 
     public GeneratorBase getGenerator(Model model, Configuration config, Properties properties) {
-        return new SeiGenerator(model, config, properties, ServiceFinder.find(JavaGeneratorExtension.class).toArray());
+        return new SeiGenerator(model, config, properties, ServiceFinder.find(TJavaGeneratorExtension.class).toArray());
     }
 
-    public SeiGenerator(Model model, Configuration config, Properties properties, JavaGeneratorExtension... extensions) {
+    public SeiGenerator(Model model, Configuration config, Properties properties, TJavaGeneratorExtension... extensions) {
         super(model, config, properties);
         this.model = model;
         this.wsdlModelInfo = (WSDLModelInfo)config.getModelInfo();
@@ -93,7 +93,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     }
 
     public GeneratorBase getGenerator(Model model, Configuration config, Properties properties, SOAPVersion ver) {
-        return new SeiGenerator(model, config, properties, ServiceFinder.find(JavaGeneratorExtension.class).toArray());
+        return new SeiGenerator(model, config, properties, ServiceFinder.find(TJavaGeneratorExtension.class).toArray());
     }
 
 

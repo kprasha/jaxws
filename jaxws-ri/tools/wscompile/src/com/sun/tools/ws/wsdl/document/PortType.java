@@ -32,9 +32,8 @@ import com.sun.tools.ws.wsdl.framework.Defining;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.GlobalEntity;
 import com.sun.tools.ws.wsdl.framework.Kind;
 import com.sun.tools.ws.wsdl.framework.ValidationException;
@@ -44,7 +43,7 @@ import com.sun.tools.ws.wsdl.framework.ValidationException;
  *
  * @author WS Development Team
  */
-public class PortType extends GlobalEntity implements TExtensible {
+public class PortType extends GlobalEntity implements TWSDLExtensible {
 
     public PortType(Defining defining) {
         super(defining);
@@ -131,29 +130,29 @@ public class PortType extends GlobalEntity implements TExtensible {
     }
 
     /* (non-Javadoc)
-    * @see TExtensible#addExtension(ExtensionImpl)
+    * @see TWSDLExtensible#addExtension(ExtensionImpl)
     */
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
 
     }
 
     /* (non-Javadoc)
-     * @see TExtensible#extensions()
+     * @see TWSDLExtensible#extensions()
      */
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return parent;
     }
 
-    public void setParent(TExtensible parent) {
+    public void setParent(TWSDLExtensible parent) {
         this.parent = parent;
     }
 
-    private TExtensible parent;
+    private TWSDLExtensible parent;
     private Documentation _documentation;
     private List _operations;
     private Set _operationKeys;

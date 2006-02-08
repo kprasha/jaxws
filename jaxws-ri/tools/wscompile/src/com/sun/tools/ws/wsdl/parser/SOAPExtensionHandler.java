@@ -37,9 +37,9 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPHeaderFault;
 import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TParserContext;
-import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
+import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -58,8 +58,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleDefinitionsExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -69,8 +69,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleTypesExtension(
-        com.sun.tools.ws.api.wsdl.TParserContext context,
-        TExtensible parent,
+        com.sun.tools.ws.api.wsdl.TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -84,8 +84,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleBindingExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getBindingQName())) {
             context.push();
@@ -126,8 +126,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleOperationExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getOperationQName())) {
             context.push();
@@ -170,30 +170,30 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleInputExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
     }
     public boolean handleOutputExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
     }
 
     protected boolean handleMIMEPartExtension(
-        TParserContextImpl context,
-        TExtensible parent,
+        TWSDLParserContextImpl context,
+        TWSDLExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
     }
 
     protected boolean handleInputOutputExtension(
-        TParserContext contextif,
-        TExtensible parent,
+        TWSDLParserContext contextif,
+        TWSDLExtensible parent,
         Element e) {
-        TParserContextImpl context = (TParserContextImpl)contextif;
+        TWSDLParserContextImpl context = (TWSDLParserContextImpl)contextif;
         if (XmlUtil.matchesTagNS(e, getBodyQName())) {
             context.push();
             context.registerNamespaces(e);
@@ -358,8 +358,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleFaultExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getFaultQName())) {
             context.push();
@@ -412,8 +412,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleServiceExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -424,8 +424,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
 
     @Override
     public boolean handlePortExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, getAddressQName())) {
             context.push();
@@ -450,7 +450,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
         }
     }
 
-    public boolean handlePortTypeExtension(TParserContext context, TExtensible parent, Element e) {
+    public boolean handlePortTypeExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
        Util.fail(
             "parsing.invalidExtensionElement",
             e.getTagName(),

@@ -30,9 +30,8 @@ import com.sun.tools.ws.wsdl.framework.Defining;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.GlobalEntity;
 import com.sun.tools.ws.wsdl.framework.Kind;
 
@@ -41,7 +40,7 @@ import com.sun.tools.ws.wsdl.framework.Kind;
  *
  * @author WS Development Team
  */
-public class Service extends GlobalEntity implements TExtensible {
+public class Service extends GlobalEntity implements TWSDLExtensible {
 
     public Service(Defining defining) {
         super(defining);
@@ -108,15 +107,15 @@ public class Service extends GlobalEntity implements TExtensible {
         return getElementName();
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

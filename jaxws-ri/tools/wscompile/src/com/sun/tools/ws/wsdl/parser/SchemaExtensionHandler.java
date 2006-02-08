@@ -25,8 +25,8 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -45,8 +45,8 @@ public class SchemaExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean doHandleExtension(
-        TParserContextImpl context,
-        TExtensible parent,
+        TWSDLParserContextImpl context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_SCHEMA)) {
             SchemaParser parser = new SchemaParser();

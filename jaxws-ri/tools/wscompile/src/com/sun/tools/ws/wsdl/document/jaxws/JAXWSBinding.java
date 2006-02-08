@@ -29,7 +29,6 @@ import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
 
-import com.sun.tools.ws.api.wsdl.TExtensible;
 import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 
@@ -72,7 +71,7 @@ public class JAXWSBinding extends ExtensionImpl {
     }
 
     /* (non-Javadoc)
-    * @see TExtensible#addExtension(ExtensionImpl)
+    * @see TWSDLExtensible#addExtension(ExtensionImpl)
     */
     public void addExtension(ExtensionImpl e) {
         // TODO Auto-generated method stub
@@ -80,7 +79,7 @@ public class JAXWSBinding extends ExtensionImpl {
     }
 
     /* (non-Javadoc)
-     * @see TExtensible#extensions()
+     * @see TWSDLExtensible#extensions()
      */
     public Iterable<ExtensionImpl> extensions() {
         // TODO Auto-generated method stub

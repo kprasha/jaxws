@@ -25,16 +25,15 @@ import javax.xml.namespace.QName;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 
 /**
  * Entity corresponding to the "fault" child element of a binding operation.
  *
  * @author WS Development Team
  */
-public class BindingFault extends Entity implements TExtensible {
+public class BindingFault extends Entity implements TWSDLExtensible {
 
     public BindingFault() {
         _helper = new ExtensibilityHelper();
@@ -72,15 +71,15 @@ public class BindingFault extends Entity implements TExtensible {
         return getElementName();
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return parent;
     }
 
@@ -104,9 +103,9 @@ public class BindingFault extends Entity implements TExtensible {
     private Documentation _documentation;
     private String _name;
 
-    public void setParent(TExtensible parent) {
+    public void setParent(TWSDLExtensible parent) {
         this.parent = parent;
     }
 
-    private TExtensible parent;
+    private TWSDLExtensible parent;
 }

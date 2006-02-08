@@ -83,7 +83,7 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
 import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.api.wsdl.TExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
 import com.sun.tools.ws.wsdl.framework.ParseException;
 import com.sun.tools.ws.wsdl.framework.ParserListener;
@@ -1163,7 +1163,7 @@ public class WSDLModeler extends WSDLModelerBase {
             headerName = part.getDescriptor();
             jaxbType = getJAXBType(headerName);
             headerBlock = new Block(headerName, jaxbType);
-            TExtensible ext;
+            TWSDLExtensible ext;
             if(processRequest){
                 ext = info.bindingOperation.getInput();
             }else{
@@ -1464,7 +1464,7 @@ public class WSDLModeler extends WSDLModelerBase {
         return headerParts;
     }
 
-    private Message getHeaderMessage(MessagePart part, TExtensible ext) {
+    private Message getHeaderMessage(MessagePart part, TWSDLExtensible ext) {
         Iterator<SOAPHeader> headers =  getHeaderExtensions(ext).iterator();
         while(headers.hasNext()){
             SOAPHeader header = headers.next();
@@ -1495,7 +1495,7 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     private List<MessagePart> getHeaderParts(boolean isInput) {
-        TExtensible ext;
+        TWSDLExtensible ext;
         if(isInput){
             ext = info.bindingOperation.getInput();
         }else{
@@ -1909,7 +1909,7 @@ public class WSDLModeler extends WSDLModelerBase {
      * @param param
      * @param wrapperStyle TODO
      */
-    private void setCustomizedParameterName(TExtensible extension, Message msg, MessagePart part, Parameter param, boolean wrapperStyle) {
+    private void setCustomizedParameterName(TWSDLExtensible extension, Message msg, MessagePart part, Parameter param, boolean wrapperStyle) {
         JAXWSBinding jaxwsBinding = (JAXWSBinding)getExtensionOfType(extension, JAXWSBinding.class);
         if(jaxwsBinding == null)
             return;

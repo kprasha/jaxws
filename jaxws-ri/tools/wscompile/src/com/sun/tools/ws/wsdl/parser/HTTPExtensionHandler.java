@@ -30,9 +30,8 @@ import com.sun.tools.ws.wsdl.document.http.HTTPConstants;
 import com.sun.tools.ws.wsdl.document.http.HTTPOperation;
 import com.sun.tools.ws.wsdl.document.http.HTTPUrlEncoded;
 import com.sun.tools.ws.wsdl.document.http.HTTPUrlReplacement;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TParserContext;
-import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -52,8 +51,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleDefinitionsExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -63,8 +62,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleTypesExtension(
-        com.sun.tools.ws.api.wsdl.TParserContext context,
-        TExtensible parent,
+        com.sun.tools.ws.api.wsdl.TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -74,8 +73,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleBindingExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, HTTPConstants.QNAME_BINDING)) {
             context.push();
@@ -100,8 +99,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleOperationExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, HTTPConstants.QNAME_OPERATION)) {
             context.push();
@@ -129,8 +128,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleInputExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, HTTPConstants.QNAME_URL_ENCODED)) {
             parent.addExtension(new HTTPUrlEncoded());
@@ -149,8 +148,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleOutputExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -160,8 +159,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleFaultExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -171,8 +170,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handleServiceExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
@@ -182,8 +181,8 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean handlePortExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, HTTPConstants.QNAME_ADDRESS)) {
             context.push();
@@ -208,7 +207,7 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
         }
     }
 
-    public boolean handlePortTypeExtension(TParserContext context, TExtensible parent, Element e) {
+    public boolean handlePortTypeExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         Util.fail(
             "parsing.invalidExtensionElement",
             e.getTagName(),

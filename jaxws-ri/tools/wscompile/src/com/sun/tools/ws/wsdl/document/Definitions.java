@@ -34,16 +34,15 @@ import com.sun.tools.ws.wsdl.framework.DuplicateEntityException;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 
 /**
  * Entity corresponding to the "definitions" WSDL element.
  *
  * @author WS Development Team
  */
-public class Definitions extends Entity implements Defining, TExtensible {
+public class Definitions extends Entity implements Defining, TWSDLExtensible {
 
     public Definitions(AbstractDocument document) {
         _document = document;
@@ -155,18 +154,18 @@ public class Definitions extends Entity implements Defining, TExtensible {
         _documentation = d;
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 
     /**
      * wsdl:definition is the root hence no parent so return null.
      */
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return null;
     }
 

@@ -20,24 +20,24 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 
 /**
  * An entity extending another entity.
  *
  * @author WS Development Team
  */
-public abstract class ExtensionImpl extends Entity implements TExtension {
+public abstract class ExtensionImpl extends Entity implements TWSDLExtension {
 
     public ExtensionImpl() {
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return _parent;
     }
 
-    public void setParent(TExtensible parent) {
+    public void setParent(TWSDLExtensible parent) {
         _parent = parent;
     }
 
@@ -46,5 +46,5 @@ public abstract class ExtensionImpl extends Entity implements TExtension {
         visitor.postVisit(this);
     }
 
-    private TExtensible _parent;
+    private TWSDLExtensible _parent;
 }

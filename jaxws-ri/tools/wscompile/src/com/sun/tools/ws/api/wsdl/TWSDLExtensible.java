@@ -28,7 +28,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface TExtensible {
+public interface TWSDLExtensible {
     /**
      * Gives the wsdl extensiblity element's name attribute value. It can be null as @name on some of the wsdl
      * extensibility elements are optinal such as wsdl:input
@@ -46,16 +46,16 @@ public interface TExtensible {
     QName getWSDLElementName();
 
     /**
-     * An {@link TExtensionHandler} will call this method to add an {@link TExtension} object
+     * An {@link TWSDLExtensionHandler} will call this method to add an {@link TWSDLExtension} object
      *
      * @param e non-null extension object
      */
-    void addExtension(TExtension e);
+    void addExtension(TWSDLExtension e);
 
     /**
-     * Gives iterator over {@link TExtension}s
+     * Gives iterator over {@link TWSDLExtension}s
      */
-    Iterable<? extends TExtension> extensions();
+    Iterable<? extends TWSDLExtension> extensions();
 
     /**
      * Gives the parent of a wsdl extensibility element.
@@ -65,9 +65,9 @@ public interface TExtensible {
      *     <wsdl:portType>
      *         <wsdl:operation>
      *     ...
-     * Here, the {@link TExtensible}representing wsdl:operation's parent would be wsdl:portType
+     * Here, the {@link TWSDLExtensible}representing wsdl:operation's parent would be wsdl:portType
      *
-     * @return null if the {@link TExtensible} has no parent, root of wsdl document - wsdl:definition.
+     * @return null if the {@link TWSDLExtensible} has no parent, root of wsdl document - wsdl:definition.
      */
-    TExtensible getParent();
+    TWSDLExtensible getParent();
 }

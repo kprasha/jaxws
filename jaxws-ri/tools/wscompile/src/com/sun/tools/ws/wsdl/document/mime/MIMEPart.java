@@ -24,8 +24,8 @@ import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 
 /**
@@ -33,7 +33,7 @@ import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
  *
  * @author WS Development Team
  */
-public class MIMEPart extends ExtensionImpl implements TExtensible{
+public class MIMEPart extends ExtensionImpl implements TWSDLExtensible {
 
     public MIMEPart() {
         _helper = new ExtensibilityHelper();
@@ -63,11 +63,11 @@ public class MIMEPart extends ExtensionImpl implements TExtensible{
         return getElementName();
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 

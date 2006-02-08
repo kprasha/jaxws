@@ -25,9 +25,8 @@ import javax.xml.namespace.QName;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
 
 /**
@@ -35,7 +34,7 @@ import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
  *
  * @author WS Development Team
  */
-public class Types extends Entity implements TExtensible {
+public class Types extends Entity implements TWSDLExtensible {
 
     public Types() {
         _helper = new ExtensibilityHelper();
@@ -77,19 +76,19 @@ public class Types extends Entity implements TExtensible {
         return getElementName();
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         _helper.addExtension(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         return _helper.extensions();
     }
 
-    public TExtensible getParent() {
+    public TWSDLExtensible getParent() {
         return parent;
     }
 
-    public void setParent(TExtensible parent) {
+    public void setParent(TWSDLExtensible parent) {
         this.parent = parent;
     }
 
@@ -101,7 +100,7 @@ public class Types extends Entity implements TExtensible {
         _helper.accept(visitor);
     }
 
-    private TExtensible parent;
+    private TWSDLExtensible parent;
     private ExtensibilityHelper _helper;
     private Documentation _documentation;
 }

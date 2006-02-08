@@ -20,7 +20,7 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
-import com.sun.tools.ws.api.wsdl.TExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,16 +36,16 @@ public class ExtensibilityHelper {
     public ExtensibilityHelper() {
     }
 
-    public void addExtension(TExtension e) {
+    public void addExtension(TWSDLExtension e) {
         if (_extensions == null) {
             _extensions = new ArrayList();
         }
         _extensions.add(e);
     }
 
-    public Iterable<TExtension> extensions() {
+    public Iterable<TWSDLExtension> extensions() {
         if (_extensions == null) {
-            return new ArrayList<TExtension>();
+            return new ArrayList<TWSDLExtension>();
         } else {
             return _extensions;
         }
@@ -67,5 +67,5 @@ public class ExtensibilityHelper {
         }
     }
 
-    private List<TExtension> _extensions;
+    private List<TWSDLExtension> _extensions;
 }

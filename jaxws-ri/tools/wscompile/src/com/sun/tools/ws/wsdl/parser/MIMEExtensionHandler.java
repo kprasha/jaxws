@@ -23,8 +23,6 @@ package com.sun.tools.ws.wsdl.parser;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.namespace.QName;
-
 import org.w3c.dom.Element;
 
 import com.sun.tools.ws.wsdl.document.WSDLConstants;
@@ -33,9 +31,9 @@ import com.sun.tools.ws.wsdl.document.mime.MIMEContent;
 import com.sun.tools.ws.wsdl.document.mime.MIMEMultipartRelated;
 import com.sun.tools.ws.wsdl.document.mime.MIMEPart;
 import com.sun.tools.ws.wsdl.document.mime.MIMEXml;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TParserContext;
-import com.sun.tools.ws.wsdl.framework.TParserContextImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
+import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
 
 /**
@@ -54,8 +52,8 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
     }
 
     public boolean doHandleExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_OUTPUT)) {
             return handleInputOutputExtension(context, parent, e);
@@ -72,8 +70,8 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
     }
 
     protected boolean handleInputOutputExtension(
-        TParserContext context,
-        TExtensible parent,
+        TWSDLParserContext context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, MIMEConstants.QNAME_MULTIPART_RELATED)) {
             context.push();
@@ -170,8 +168,8 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
     }
 
     protected boolean handleMIMEPartExtension(
-        TParserContextImpl context,
-        TExtensible parent,
+        TWSDLParserContextImpl context,
+        TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, MIMEConstants.QNAME_CONTENT)) {
             MIMEContent content = parseMIMEContent(context, e);
@@ -190,7 +188,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
         }
     }
 
-    protected MIMEContent parseMIMEContent(TParserContext context, Element e) {
+    protected MIMEContent parseMIMEContent(TWSDLParserContext context, Element e) {
         context.push();
         context.registerNamespaces(e);
 
@@ -211,7 +209,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
         return content;
     }
 
-    protected MIMEXml parseMIMEXml(TParserContext context, Element e) {
+    protected MIMEXml parseMIMEXml(TWSDLParserContext context, Element e) {
         context.push();
         context.registerNamespaces(e);
 

@@ -53,9 +53,8 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPBody;
 import com.sun.tools.ws.wsdl.document.soap.SOAPFault;
 import com.sun.tools.ws.wsdl.document.soap.SOAPHeader;
 import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
-import com.sun.tools.ws.api.wsdl.TExtensible;
-import com.sun.tools.ws.api.wsdl.TExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.GloballyKnown;
 import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
 import com.sun.tools.ws.wsdl.parser.Constants;
@@ -234,7 +233,7 @@ public abstract class WSDLModelerBase implements Modeler {
     }
 
     protected boolean isRequestMimeMultipart() {
-        for (TExtension extension: info.bindingOperation.getInput().extensions()) {
+        for (TWSDLExtension extension: info.bindingOperation.getInput().extensions()) {
             if (extension.getClass().equals(MIMEMultipartRelated.class)) {
                 return true;
             }
@@ -243,7 +242,7 @@ public abstract class WSDLModelerBase implements Modeler {
     }
 
     protected boolean isResponseMimeMultipart() {
-        for (TExtension extension: info.bindingOperation.getOutput().extensions()) {
+        for (TWSDLExtension extension: info.bindingOperation.getOutput().extensions()) {
             if (extension.getClass().equals(MIMEMultipartRelated.class)) {
                 return true;
             }
@@ -336,7 +335,7 @@ public abstract class WSDLModelerBase implements Modeler {
      * @param message
      * @return MessageParts referenced by the mime:content
      */
-    protected List getMimeContentParts(Message message, TExtensible ext) {
+    protected List getMimeContentParts(Message message, TWSDLExtensible ext) {
         ArrayList mimeContentParts = new ArrayList();
         String mimeContentPartName = null;
         Iterator mimeParts = getMimeParts(ext);
@@ -357,7 +356,7 @@ public abstract class WSDLModelerBase implements Modeler {
         List mimeContents = new ArrayList();
         while(mimeParts.hasNext()) {
             MIMEPart mPart = (MIMEPart)mimeParts.next();
-            Iterator<TExtension> extns = mPart.extensions().iterator();
+            Iterator<TWSDLExtension> extns = mPart.extensions().iterator();
             while(extns.hasNext()){
                 Object obj = extns.next();
                 if(obj instanceof SOAPBody){
@@ -444,7 +443,7 @@ public abstract class WSDLModelerBase implements Modeler {
         return true;
     }
 
-    protected Iterator<MIMEPart> getMimeParts(TExtensible ext) {
+    protected Iterator<MIMEPart> getMimeParts(TWSDLExtensible ext) {
         MIMEMultipartRelated multiPartRelated =
             (MIMEMultipartRelated) getAnyExtensionOfType(ext,
                     MIMEMultipartRelated.class);
@@ -460,7 +459,7 @@ public abstract class WSDLModelerBase implements Modeler {
         List<MIMEContent> mimeContents = new ArrayList<MIMEContent>();
         Iterator parts = part.extensions().iterator();
         while(parts.hasNext()) {
-            TExtension mimeContent = (TExtension) parts.next();
+            TWSDLExtension mimeContent = (TWSDLExtension) parts.next();
             if (mimeContent instanceof MIMEContent) {
                 mimeContents.add((MIMEContent)mimeContent);
             }
@@ -548,15 +547,15 @@ public abstract class WSDLModelerBase implements Modeler {
     /**
      * @return List of SOAPHeader extensions
      */
-    protected List<SOAPHeader> getHeaderExtensions(TExtensible extensible) {
+    protected List<SOAPHeader> getHeaderExtensions(TWSDLExtensible extensible) {
         List<SOAPHeader> headerList = new ArrayList<SOAPHeader>();
-        Iterator<? extends TExtension> bindingIter = extensible.extensions().iterator();
+        Iterator<? extends TWSDLExtension> bindingIter = extensible.extensions().iterator();
         while (bindingIter.hasNext()) {
-            TExtension extension = bindingIter.next();
+            TWSDLExtension extension = bindingIter.next();
             if (extension.getClass().equals(MIMEMultipartRelated.class)) {
                 for (Iterator parts = ((MIMEMultipartRelated) extension).getParts();
                 parts.hasNext();) {
-                    TExtension part = (TExtension) parts.next();
+                    TWSDLExtension part = (TWSDLExtension) parts.next();
                     if (part.getClass().equals(MIMEPart.class)) {
                         boolean isRootPart = isRootPart((MIMEPart)part);
                         Iterator iter = ((MIMEPart)part).extensions().iterator();
@@ -730,7 +729,7 @@ public abstract class WSDLModelerBase implements Modeler {
      * @param name
      * @return List of MimeContents from ext
      */
-    protected List<MIMEContent> getMimeContents(TExtensible ext, Message message, String name) {
+    protected List<MIMEContent> getMimeContents(TWSDLExtensible ext, Message message, String name) {
         Iterator mimeParts = getMimeParts(ext);
         while(mimeParts.hasNext()){
             MIMEPart mimePart = (MIMEPart)mimeParts.next();
@@ -870,10 +869,10 @@ public abstract class WSDLModelerBase implements Modeler {
             entity.getName());
     }
 
-    protected static TExtension getExtensionOfType(
-            TExtensible extensible,
+    protected static TWSDLExtension getExtensionOfType(
+            TWSDLExtensible extensible,
             Class type) {
-        for (TExtension extension:extensible.extensions()) {
+        for (TWSDLExtension extension:extensible.extensions()) {
             if (extension.getClass().equals(type)) {
                 return extension;
             }
@@ -882,12 +881,12 @@ public abstract class WSDLModelerBase implements Modeler {
         return null;
     }
 
-    protected TExtension getAnyExtensionOfType(
-        TExtensible extensible,
+    protected TWSDLExtension getAnyExtensionOfType(
+        TWSDLExtensible extensible,
         Class type) {
         if(extensible == null)
             return null;
-        for (TExtension extension:extensible.extensions()) {
+        for (TWSDLExtension extension:extensible.extensions()) {
             if(extension.getClass().equals(type)) {
                 return extension;
             }else if (extension.getClass().equals(MIMEMultipartRelated.class) &&
@@ -897,11 +896,11 @@ public abstract class WSDLModelerBase implements Modeler {
                     ((MIMEMultipartRelated) extension).getParts();
                 parts.hasNext();
                 ) {
-                    TExtension part = (TExtension) parts.next();
+                    TWSDLExtension part = (TWSDLExtension) parts.next();
                     if (part.getClass().equals(MIMEPart.class)) {
                         MIMEPart mPart = (MIMEPart)part;
                         //bug fix: 5024001
-                        TExtension extn =  getExtensionOfType((TExtensible) part, type);
+                        TWSDLExtension extn =  getExtensionOfType((TWSDLExtensible) part, type);
                         if(extn != null)
                             return extn;
                     }

@@ -8,7 +8,7 @@ import org.w3c.dom.Element;
  *
  * @author Vivek Pandey
  */
-public interface TParserContext {
+public interface TWSDLParserContext {
 
     /**
      * Pushes the parsing context
