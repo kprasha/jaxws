@@ -1,6 +1,7 @@
 package com.sun.tools.ws.api.wsdl;
 
 import org.w3c.dom.Element;
+import com.sun.tools.ws.wsdl.document.WSDLConstants;
 
 /**
  * JAXWS WSDL parser {@link com.sun.tools.ws.wsdl.parser.WSDLParser} will call an {@link TWSDLExtensionHandler} registered
@@ -19,6 +20,8 @@ public abstract class TWSDLExtensionHandler {
     }
 
     /**
+     * This interface is called during WSDL parsing on detecting any wsdl extension.
+     * 
      * @param context Parser context that will be passed on by the wsdl parser
      * @param parent  The Parent element within which the extensibility element is defined
      * @param e       The extensibility elemenet
@@ -26,7 +29,33 @@ public abstract class TWSDLExtensionHandler {
      *         then the WSDL parser can abort if the wsdl extensibility element had <code>required</code> attribute set to true
      */
     public boolean doHandleExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        return false;
+        if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_DEFINITIONS)) {
+            return handleDefinitionsExtension(context, parent, e);
+        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_TYPES)) {
+            return handleTypesExtension(context, parent, e);
+        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_PORT_TYPE)) {
+            return handlePortTypeExtension(context, parent, e);
+        } else if (
+            parent.getWSDLElementName().equals(WSDLConstants.QNAME_BINDING)) {
+            return handleBindingExtension(context, parent, e);
+        } else if (
+            parent.getWSDLElementName().equals(WSDLConstants.QNAME_OPERATION)) {
+            return handleOperationExtension(context, parent, e);
+        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_INPUT)) {
+            return handleInputExtension(context, parent, e);
+        } else if (
+            parent.getWSDLElementName().equals(WSDLConstants.QNAME_OUTPUT)) {
+            return handleOutputExtension(context, parent, e);
+        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_FAULT)) {
+            return handleFaultExtension(context, parent, e);
+        } else if (
+            parent.getWSDLElementName().equals(WSDLConstants.QNAME_SERVICE)) {
+            return handleServiceExtension(context, parent, e);
+        } else if (parent.getWSDLElementName().equals(WSDLConstants.QNAME_PORT)) {
+            return handlePortExtension(context, parent, e);
+        } else {
+            return false;
+        }
     }
 
     /**
