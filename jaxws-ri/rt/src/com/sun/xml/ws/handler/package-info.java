@@ -16,7 +16,7 @@
  * <h3>Server side handler creation</h3>
  *
  * <p>The deployment descriptor is first parsed, and
- * {@link com.sun.xml.ws.transport.http.servlet.RuntimeEndpointInfoParser#setHandlersAndRoles}
+ * {@link com.sun.xml.ws.transport.http.DeploymentDescriptorParser#setHandlersAndRoles}
  * parses the handler chains xml in the deployment descriptor if present.
  * It then sets the handlers and roles on the Binding object that has
  * already been created. Setting the handler chain on the binding does
@@ -70,6 +70,8 @@
  * {@link com.sun.xml.ws.protocol.soap.server.SOAPMessageDispatcher} and
  * {@link com.sun.xml.ws.protocol.xml.server.XMLMessageDispatcher} on the
  * server side.
+ *
+ * TODO: this needs to be rewritten to reflect the new architecture.
  *
  * @ArchitectureDocument
  */

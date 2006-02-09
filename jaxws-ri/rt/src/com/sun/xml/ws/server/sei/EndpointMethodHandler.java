@@ -3,6 +3,7 @@ package com.sun.xml.ws.server.sei;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
@@ -13,7 +14,6 @@ import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.server.sei.EndpointArgumentsBuilder;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -64,9 +64,9 @@ final class EndpointMethodHandler {
     private final MessageFiller[] outFillers;
 
 
-    public EndpointMethodHandler(RuntimeEndpointInfo endpointInfo, JavaMethodImpl method) {
-        this.seiModel = endpointInfo.getRuntimeModel();
-        soapVersion = endpointInfo.getBinding().getSOAPVersion();
+    public EndpointMethodHandler(SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
+        this.seiModel = seiModel;
+        this.soapVersion = binding.getSOAPVersion();
         this.method = method.getMethod();
         this.javaMethodModel = method;
         argumentsBuilder = createArgumentsBuilder();

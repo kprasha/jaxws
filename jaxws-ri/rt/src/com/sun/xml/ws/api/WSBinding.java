@@ -47,4 +47,17 @@ public interface WSBinding extends Binding {
      *      Always non-null.
      */
     Decoder createDecoder();
+
+    /**
+     * Gets the binding ID, which uniquely identifies the binding.
+     *
+     * <p>
+     * The relevant specs define the binding IDs and what they mean.
+     * The ID is used in many places to identify the kind of binding
+     * (such as SOAP1.1, SOAP1.2, REST, ...)
+     *
+     * @return
+     *      Always non-null same value.
+     */
+    String getBindingId();
 }

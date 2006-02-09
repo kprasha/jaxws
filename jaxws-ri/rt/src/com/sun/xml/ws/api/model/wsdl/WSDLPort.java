@@ -35,4 +35,12 @@ public interface WSDLPort extends WSDLObject, WSDLExtensible {
      *      always non-null.
      */
     EndpointAddress getAddress();
+
+    /**
+     * Gets the {@link WSDLService} that owns this port.
+     *
+     * @return
+     *      always non-null.
+     */
+    WSDLService getOwner();
 }

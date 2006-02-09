@@ -19,13 +19,8 @@
  */
 package com.sun.xml.ws.handler;
 import java.util.List;
-import com.sun.xml.ws.spi.runtime.MessageContext;
-import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
-import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
 import com.sun.xml.ws.spi.runtime.InternalSoapEncoder;
 import com.sun.xml.ws.spi.runtime.Invoker;
-import com.sun.xml.ws.util.MessageInfoUtil;
 
 import java.lang.reflect.Method;
 
@@ -79,7 +74,9 @@ public class SHDSOAPMessageContext extends SOAPMessageContextImpl implements com
      * Encoder to marshall all JAXWS objects: RpcLitPayload, JAXBBridgeInfo etc
      */
     public InternalSoapEncoder getEncoder() {
-        return (InternalSoapEncoder)((SOAPEPTFactory)handlerCtxt.getMessageInfo().getEPTFactory()).getSOAPEncoder();
+        // commented out as a part of server side rearch
+        throw new UnsupportedOperationException();
+        //return (InternalSoapEncoder)((SOAPEPTFactory)handlerCtxt.getMessageInfo().getEPTFactory()).getSOAPEncoder();
     }
     
     public String getBindingId() {
@@ -104,8 +101,10 @@ public class SHDSOAPMessageContext extends SOAPMessageContextImpl implements com
      * @return true if MTOM is enabled otherwise returns false;
      */
     public boolean isMtomEnabled() {
-        JAXWSAttachmentMarshaller am = MessageInfoUtil.getAttachmentMarshaller(handlerCtxt.getMessageInfo());
-        return (am != null)?am.isXOPPackage():false;
+        // commented out as a part of server side rearch
+        throw new UnsupportedOperationException();
+        //JAXWSAttachmentMarshaller am = MessageInfoUtil.getAttachmentMarshaller(handlerCtxt.getMessageInfo());
+        //return (am != null)?am.isXOPPackage():false;
     }
 
 }

@@ -19,16 +19,20 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.Headers;
+import com.sun.xml.ws.transport.WSConnectionImpl;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.sun.xml.ws.transport.WSConnectionImpl;
-
 import java.net.HttpURLConnection;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -41,22 +45,23 @@ import java.util.Map;
  *
  * @author WS Development Team
  */
-public class ServletConnectionImpl extends WSConnectionImpl {
+final class ServletConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
+    private final ServletContext context;
     private int status;
     private Map<String,List<String>> requestHeaders;
     private Map<String,List<String>> responseHeaders;
 
-    public ServletConnectionImpl(HttpServletRequest request,
-        HttpServletResponse response) {
+    public ServletConnectionImpl(ServletContext context, HttpServletRequest request, HttpServletResponse response) {
+        this.context = context;
         this.request = request;
         this.response = response;
     }
 
     @Override
-    public Map<String,List<String>> getHeaders() {
+    public Map<String,List<String>> getRequestHeaders() {
         if (requestHeaders == null) {
             requestHeaders = new Headers();
             Enumeration enums = request.getHeaderNames();
@@ -70,23 +75,23 @@ public class ServletConnectionImpl extends WSConnectionImpl {
                 }
                 values.add(headerValue);
             }
-        }       
+        }
         return requestHeaders;
     }
-    
+
     /**
      * sets response headers.
      */
     @Override
-    public void setHeaders(Map<String,List<String>> headers) {
+    public void setResponseHeaders(Map<String,List<String>> headers) {
         responseHeaders = headers;
     }
-    
+
     @Override
     public void setStatus(int status) {
         this.status = status;
     }
-    
+
     /**
      * sets HTTP status code
      */
@@ -97,7 +102,7 @@ public class ServletConnectionImpl extends WSConnectionImpl {
         }
         return status;
     }
-    
+
     @Override
     public InputStream getInput() {
         try {
@@ -107,7 +112,7 @@ public class ServletConnectionImpl extends WSConnectionImpl {
         }
         return null;
     }
-    
+
     @Override
     public OutputStream getOutput() {
         // write HTTP status code, and headers
@@ -130,4 +135,41 @@ public class ServletConnectionImpl extends WSConnectionImpl {
         return null;
     }
 
+    public WebServiceContextDelegate getWebServiceContextDelegate() {
+        return this;
+    }
+
+    public Principal getUserPrincipal(Packet p) {
+        return request.getUserPrincipal();
+    }
+
+    public boolean isUserInRole(Packet p,String role) {
+        return request.isUserInRole(role);
+    }
+
+    @Override
+    public void wrapUpRequestPacket(Packet p) {
+        p.put(MessageContext.SERVLET_CONTEXT, context);
+        p.put(MessageContext.SERVLET_REQUEST, request);
+        p.put(MessageContext.SERVLET_RESPONSE, response);
+
+        // other properties that can be inferred from request/response
+        // should be implemented as a virtual property
+    }
+
+    public String getRequestMethod() {
+        return request.getMethod();
+    }
+
+    public String getRequestHeader(String headerName) {
+        return request.getHeader(headerName);
+    }
+
+    public String getQueryString() {
+        return request.getQueryString();
+    }
+
+    public String getPathInfo() {
+        return request.getPathInfo();
+    }
 }

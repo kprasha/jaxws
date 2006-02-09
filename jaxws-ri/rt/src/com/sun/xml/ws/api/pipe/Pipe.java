@@ -262,7 +262,7 @@ public interface Pipe {
      *      that there was no response. This is used for things like
      *      one-way message and/or one-way transports.
      */
-    Packet process( Packet packet );
+    Packet process( Packet request);
 
     /**
      * Invoked before the last copy of the pipeline is about to be discarded,

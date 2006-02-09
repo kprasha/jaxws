@@ -19,17 +19,18 @@
  */
 package com.sun.xml.ws.spi.runtime;
 
-import java.io.OutputStream;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.transport.http.servlet.WSRtObjectFactoryImpl;
+import com.sun.xml.ws.transport.http.HttpAdapter;
+import org.xml.sax.EntityResolver;
+
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.sun.xml.ws.util.WSRtObjectFactoryImpl;
-import com.sun.xml.ws.api.WSBinding;
-
+import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.http.HTTPBinding;
 import java.net.URL;
 import java.util.List;
-import javax.servlet.ServletContext;
-import org.xml.sax.EntityResolver;
-import javax.xml.ws.handler.MessageContext;
 
 /**
  * Singleton abstract factory used to produce JAX-WS runtime related objects.
@@ -46,47 +47,27 @@ public abstract class WSRtObjectFactory {
     public static WSRtObjectFactory newInstance() {
         return factory;
     }
-
-    /**
-     * Creates SOAPMessageContext
-     */
-    public abstract SOAPMessageContext createSOAPMessageContext();
-
-
-    /**
-     * Creates an object with all endpoint info
-     */
-    public abstract RuntimeEndpointInfo createRuntimeEndpointInfo();
     
     /**
      * Creates a connection for servlet transport
      */
     public abstract WSConnection createWSConnection(
-            HttpServletRequest req, HttpServletResponse res);
+            ServletContext context, HttpServletRequest req, HttpServletResponse res);
     
     /**
      * @return List of endpoints
      */
-    public abstract List<RuntimeEndpointInfo> getRuntimeEndpointInfos(
+    public abstract List<HttpAdapter> getRuntimeEndpointInfos(
             ServletContext ctxt);
     
     /**
-     * creates a Tie object, entry point to JAXWS runtime.
-     */
-    public abstract Tie createTie();
-    
-    /**
-     * creates a MesageContext object. Create it for each MEP.
-     */
-    public abstract MessageContext createMessageContext();
-    
-    /**
-     * creates the Binding object implementation. Set the object on
-     * RuntimeEndpointInfo.
-     * bindingId should be one of these values:
-     * javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING,
-     * javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING,
-     * javax.xml.ws.http.HTTPBinding.HTTP_BINDING
+     * creates the Binding object implementation.
+     *
+     * @param bindingId
+     *      should be one of these values.
+     *      {@link SOAPBinding#SOAP11HTTP_BINDING},
+     *      {@link SOAPBinding#SOAP12HTTP_BINDING},
+     *      {@link HTTPBinding#HTTP_BINDING}.
      */
     public abstract WSBinding createBinding(String bindingId);
     

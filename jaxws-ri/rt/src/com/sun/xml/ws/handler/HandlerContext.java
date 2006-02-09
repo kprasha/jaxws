@@ -23,8 +23,6 @@ import javax.xml.ws.handler.MessageContext;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 import com.sun.xml.ws.encoding.soap.internal.HeaderBlock;
-import com.sun.xml.ws.encoding.soap.internal.AttachmentBlock;
-import com.sun.xml.ws.spi.runtime.InternalSoapEncoder;
 import com.sun.xml.ws.spi.runtime.Invoker;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -158,12 +156,15 @@ public class HandlerContext {
     }
 
     public void populateAttachmentMap(){
-        //populate the attachment map
-        if(internalMessage != null){
-            for(AttachmentBlock ab: internalMessage.getAttachments().values()){
-                MessageContextUtil.addMessageAttachment(msgContext, ab.getId(), ab.asDataHandler());
-            }
-        }
+        // commented out as a part of server side rearch
+        throw new UnsupportedOperationException();
+
+        ////populate the attachment map
+        //if(internalMessage != null){
+        //    for(AttachmentBlock ab: internalMessage.getAttachments().values()){
+        //        MessageContextUtil.addMessageAttachment(msgContext, ab.getId(), ab.asDataHandler());
+        //    }
+        //}
     }
 
 }

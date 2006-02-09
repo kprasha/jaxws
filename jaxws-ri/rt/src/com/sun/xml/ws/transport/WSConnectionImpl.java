@@ -20,18 +20,17 @@
 
 package com.sun.xml.ws.transport;
 
-import com.sun.xml.ws.pept.ept.EPTFactory;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.client.ClientTransportException;
+import com.sun.xml.ws.spi.runtime.WSConnection;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-
-import com.sun.xml.ws.client.ClientTransportException;
-import com.sun.xml.ws.spi.runtime.WSConnection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract class for WSConnection. All client-side and server-side
@@ -40,12 +39,12 @@ import com.sun.xml.ws.spi.runtime.WSConnection;
  * @author WS Development Team
  */
 public abstract class WSConnectionImpl implements WSConnection {
-    Map<String, List<String>> headers = null;
-    public OutputStream debugStream = null;
+    private Map<String, List<String>> reqHeaders = null;
+    private Map<String, List<String>> rspHeaders = null;
     public OutputStream outputStream = null;
     public InputStream inputStream = null;
-    int statusCode;
-    
+    protected int statusCode;
+
     /** Creates a new instance of WSConnectionImpl */
     public WSConnectionImpl () {
     }
@@ -58,8 +57,12 @@ public abstract class WSConnectionImpl implements WSConnection {
         this.statusCode = statusCode;
     }
 
-    public OutputStream getDebug () {
-        return debugStream;
+    public Map<String, List<String>> getResponseHeaders() {
+        return rspHeaders;
+    }
+
+    public void setRequestHeaders(Map<String, List<String>> reqHeaders) {
+        this.reqHeaders = reqHeaders;
     }
 
     /**
@@ -71,7 +74,7 @@ public abstract class WSConnectionImpl implements WSConnection {
     public OutputStream getOutput() {
         return outputStream;
     }
-    
+
     /**
      * @return inputStream
      *
@@ -82,14 +85,27 @@ public abstract class WSConnectionImpl implements WSConnection {
         return inputStream;
     }
 
-    public Map<String, List<String>> getHeaders () {
-        return headers;
+    public void wrapUpRequestPacket(Packet p) {
+        // noop
     }
-    
-    public void setHeaders (Map<String, List<String>> headers) {
-        this.headers = headers;
+
+    public Map<String, List<String>> getRequestHeaders () {
+        return reqHeaders;
     }
-    
+
+    // default implementation
+    public String getRequestHeader(String headerName) {
+        List<String> values = getRequestHeaders().get(headerName);
+        if(values==null || values.isEmpty())
+            return null;
+        else
+            return values.get(0);
+    }
+
+    public void setResponseHeaders(Map<String, List<String>> headers) {
+        this.rspHeaders = headers;
+    }
+
     /**
      * Write connection headers in HTTP syntax using \r\n as a
      * separator.
@@ -99,10 +115,9 @@ public abstract class WSConnectionImpl implements WSConnection {
             byte[] newLine = "\r\n".getBytes("us-ascii");
 
             // Write all headers ala HTTP (only first list entry serialized)
-            Map<String, List<String>> headers = getHeaders();
-            for (String header : headers.keySet()) {
-                os.write((header + ":" + 
-                    headers.get(header).get(0)).getBytes("us-ascii"));
+            for (String header : rspHeaders.keySet()) {
+                os.write((header + ":" +
+                    rspHeaders.get(header).get(0)).getBytes("us-ascii"));
                 os.write(newLine);
             }
 
@@ -112,7 +127,7 @@ public abstract class WSConnectionImpl implements WSConnection {
         catch (Exception ex) {
             throw new ClientTransportException("local.client.failed",ex);
         }
-    } 
+    }
 
     /**
      * Read and consume connection headers in HTTP syntax using 
@@ -122,16 +137,15 @@ public abstract class WSConnectionImpl implements WSConnection {
         try {
             int c1, c2;
             StringBuffer line = new StringBuffer();
-            
-            if (headers == null) {
-                headers = new HashMap<String, List<String>>();
+
+            if (reqHeaders == null) {
+                reqHeaders = new HashMap<String, List<String>>();
+            } else {
+                reqHeaders.clear();
             }
-            else {
-                headers.clear();            
-            }
-            
+
             // Read headers until finding a \r\n line
-            while ((c1 = is.read()) != -1) {         
+            while ((c1 = is.read()) != -1) {
                 if (c1 == '\r') {
                     c2 = is.read();
                     assert c2 != -1;
@@ -146,24 +160,24 @@ public abstract class WSConnectionImpl implements WSConnection {
                             assert k > 0;
                             ArrayList<String> value = new ArrayList<String>();
                             value.add(s.substring(k + 1));
-                            headers.put(s.substring(0, k), value); 
+                            reqHeaders.put(s.substring(0, k), value);
                             line.setLength(0);      // clear line buffer
                         }
                     }
                     else {
-                        line.append((char) c1).append((char) c2);   
+                        line.append((char) c1).append((char) c2);
                     }
                 }
                 else {
                     line.append((char) c1);
-                }                
+                }
             }
         }
         catch (Exception ex) {
             throw new ClientTransportException("local.client.failed",ex);
-        }            
+        }
     }
-    
+
     public void closeOutput() {
         try {
             if (outputStream != null) {
@@ -174,11 +188,11 @@ public abstract class WSConnectionImpl implements WSConnection {
             ex.printStackTrace();
         }
     }
-    
+
     public void closeInput() {
     }
-    
+
     public void close() {
-        
+
     }
 }

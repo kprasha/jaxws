@@ -19,10 +19,9 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
@@ -36,13 +35,15 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private final QName name;
     private EndpointAddress address;
     private final QName bindingName;
+    private final WSDLServiceImpl owner;
 
     /**
      * To be set after the WSDL parsing is complete.
      */
     private WSDLBoundPortTypeImpl boundPortType;
 
-    public WSDLPortImpl(QName name, QName binding) {
+    public WSDLPortImpl(WSDLServiceImpl owner, QName name, QName binding) {
+        this.owner = owner;
         this.name = name;
         this.bindingName = binding;
     }
@@ -57,6 +58,10 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
 
     public EndpointAddress getAddress() {
         return address;
+    }
+
+    public WSDLServiceImpl getOwner() {
+        return owner;
     }
 
     /**

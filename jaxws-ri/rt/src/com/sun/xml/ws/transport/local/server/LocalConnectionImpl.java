@@ -19,14 +19,16 @@
  */
 
 package com.sun.xml.ws.transport.local.server;
-import java.util.List;
-import java.util.Map;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.WSConnectionImpl;
-import com.sun.xml.ws.transport.local.LocalMessage;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -34,41 +36,47 @@ import java.io.OutputStream;
  *
  * Server-side Local transport implementation
  */
-public class LocalConnectionImpl extends WSConnectionImpl {
-    private int status;
-    private LocalMessage lm;
-    
-    public LocalConnectionImpl (LocalMessage localMessage) {
-        this.lm = localMessage;
+public final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
+    private ByteArrayBuffer baos;
+
+    public LocalConnectionImpl() {
     }
-    
-    public Map<String,List<String>> getHeaders () {
-        return lm.getHeaders ();
-    }
-    
-    /**
-     * sets response headers.
-     */
-    public void setHeaders (Map<String,List<String>> headers) {
-        lm.setHeaders (headers);
-    }
-    
-    public void setStatus (int status) {
-        this.status = status;
-    }
-    
+
     public InputStream getInput () {
-        return lm.getOutput().newInputStream();
+        return baos.newInputStream();
     }
-    
+
     public OutputStream getOutput () {
-        ByteArrayBuffer bab = new ByteArrayBuffer();
-        lm.setOutput(bab);
-        return bab;
+        baos = new ByteArrayBuffer();
+        return baos;
     }
 
     public String toString() {
-        return lm.toString();
+        return baos.toString();
+    }
+
+    public WebServiceContextDelegate getWebServiceContextDelegate() {
+        return this;
+    }
+
+    public Principal getUserPrincipal(Packet request) {
+        return null;   // not really supported
+    }
+
+    public boolean isUserInRole(Packet request, String role) {
+        return false;   // not really supported
+    }
+
+    public String getRequestMethod() {
+        return "POST";   // not really supported
+    }
+
+    public String getQueryString() {
+        return null;   // not really supported
+    }
+
+    public String getPathInfo() {
+        return null;   // not really supported
     }
 }
 

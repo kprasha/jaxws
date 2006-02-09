@@ -32,6 +32,7 @@ import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
+import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -40,7 +41,6 @@ import org.xml.sax.SAXParseException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.Location;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -173,116 +173,7 @@ public class StreamMessage extends AbstractMessageImpl {
     }
 
     public void writePayloadTo(XMLStreamWriter writer)throws XMLStreamException {
-        int state;
-        boolean firsttime = true;
-        do {
-            if(firsttime){
-                state = reader.getEventType();
-                firsttime = false;
-            }else{
-                state = reader.next();
-            }
-            switch (state) {
-                case XMLStreamConstants.START_ELEMENT:
-                    String uri = fixNull(reader.getNamespaceURI());
-                    String prefix = fixNull(reader.getPrefix());
-                    String localName = reader.getLocalName();
-
-                    if(prefix.length() > 0){
-                        /**
-                         * Before we write the
-                         */
-                        String writerURI = null;
-                        if (writer.getNamespaceContext() != null)
-                            writerURI = writer.getNamespaceContext().getNamespaceURI(prefix);
-                        String writerPrefix = writer.getPrefix(uri);
-                        if(declarePrefix(prefix, uri, writerPrefix, writerURI)){
-                            writer.writeStartElement(prefix, localName, uri);
-                            writer.setPrefix(prefix, uri != null ? uri : "");
-                            writer.writeNamespace(prefix, uri);
-                        }else{
-                            writer.writeStartElement(prefix, localName, uri);
-                        }
-                    }else{
-                        writer.writeStartElement(prefix, localName, uri);
-                    }
-
-                    int n = reader.getNamespaceCount();
-                    // Write namespace declarations
-                    for (int i = 0; i < n; i++) {
-                        String nsPrefix = fixNull(reader.getNamespacePrefix(i));
-
-                        // StAX returns null for default ns
-                        String writerURI = null;
-                        if (writer.getNamespaceContext() != null)
-                            writerURI = writer.getNamespaceContext().getNamespaceURI(nsPrefix);
-
-                        // Zephyr: Why is this returning null?
-                        // Compare nsPrefix with prefix because of [1] (above)
-                        String readerURI = reader.getNamespaceURI(i);
-
-                        /**
-                         * write the namespace in 3 conditions
-                         *  - when the namespace URI is not bound to the prefix in writer(writerURI == 0)
-                         *  - when the readerPrefix and writerPrefix are ""
-                         *  - when readerPrefix and writerPrefix are not equal and the URI bound to them
-                         *    are different
-                         */
-                        if (writerURI == null || ((nsPrefix.length() == 0) || (prefix.length() == 0)) ||
-                                (!nsPrefix.equals(prefix) && !writerURI.equals(readerURI))) {
-                            writer.setPrefix(nsPrefix, readerURI != null ? readerURI : "");
-                            writer.writeNamespace(nsPrefix, readerURI != null ? readerURI : "");
-                        }
-                    }
-
-                    // Write attributes
-                    n = reader.getAttributeCount();
-                    for (int i = 0; i < n; i++) {
-                        String attrPrefix = fixNull(reader.getAttributePrefix(i));
-                        String attrURI = fixNull(reader.getAttributeNamespace(i));
-
-                        writer.writeAttribute(attrPrefix,attrURI,
-                            reader.getAttributeLocalName(i),
-                            reader.getAttributeValue(i));
-                        // if the attribute prefix is undeclared in current writer scope then declare it
-                        setUndeclaredPrefix(attrPrefix, attrURI, writer);
-                    }
-                    break;
-                case XMLStreamConstants.END_ELEMENT:
-                    writer.writeEndElement();
-                    break;
-                case XMLStreamConstants.CHARACTERS:
-                    writer.writeCharacters(reader.getText());
-            }
-        } while (state != XMLStreamConstants.END_DOCUMENT);
-        reader.close();
-
-    }
-
-    /**
-     * sets undeclared prefixes on the writer
-     * @param prefix
-     * @param writer
-     * @throws XMLStreamException
-     */
-    private void setUndeclaredPrefix(String prefix, String readerURI, XMLStreamWriter writer) throws XMLStreamException {
-        String writerURI = null;
-        if (writer.getNamespaceContext() != null)
-            writerURI = writer.getNamespaceContext().getNamespaceURI(prefix);
-
-        if (writerURI == null) {
-            writer.setPrefix(prefix, readerURI != null ? readerURI : "");
-            writer.writeNamespace(prefix, readerURI != null ? readerURI : "");
-        }
-    }
-
-    /**
-     * check if we need to declare
-     */
-    private boolean declarePrefix(String rPrefix, String rUri, String wPrefix, String wUri){
-        if (wUri == null || !rPrefix.equals(wPrefix) || !wUri.equals(rUri))
-            return true;
-        return false;
+        new XMLStreamReaderToXMLStreamWriter().bridge(reader,writer);
     }
 
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException{
@@ -313,7 +204,7 @@ public class StreamMessage extends AbstractMessageImpl {
             writer.writeEndElement();
         }
         writer.writeStartElement("soapenv", "Body", soapVersion.nsUri);
-        if(!hasPayload())
+        if(hasPayload())
             writePayloadTo(writer);
         writer.writeEndElement();
         writer.writeEndElement();

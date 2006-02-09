@@ -36,6 +36,7 @@ import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -72,7 +73,7 @@ public class RuntimeWSDLParser {
     /**
      * Must not be null.
      */
-    private final EntityResolver resolver;
+    private final XMLEntityResolver resolver;
     /**
      * The {@link WSDLParserExtension}. Always non-null.
      */
@@ -80,8 +81,16 @@ public class RuntimeWSDLParser {
 
     public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver!=null;
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver,extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser(new EntityResolverWrapper(resolver),extensions);
         parser.parseWSDL(wsdlLoc);
+        parser.wsdlDoc.freeze();
+        return parser.wsdlDoc;
+    }
+
+    public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+        assert resolver!=null;
+        RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver,extensions);
+        parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
         return parser.wsdlDoc;
     }
@@ -150,7 +159,7 @@ public class RuntimeWSDLParser {
         }
     }
 
-    private RuntimeWSDLParser(EntityResolver resolver, WSDLParserExtension... extensions) {
+    private RuntimeWSDLParser(XMLEntityResolver resolver, WSDLParserExtension... extensions) {
         this.resolver = resolver;
         this.extension = new WSDLParserExtensionFacade(extensions);
     }
@@ -166,27 +175,24 @@ public class RuntimeWSDLParser {
 
     private void parseWSDL(URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
 
-//        String systemId = wsdlLoc.toExternalForm();
-//        InputSource source = resolver.resolveEntity(null,systemId);
-//        if(source==null)
-//            source = new InputSource(systemId);
+        String systemId = wsdlLoc.toExternalForm();
 
-        InputSource source = resolver.resolveEntity(null,wsdlLoc.toExternalForm());
-        if(source==null)
-            source = new InputSource(wsdlLoc.toExternalForm());  // default resolution
-        else
-            if(source.getSystemId()==null)
-                // ideally entity resolvers should be giving us the system ID for the resource
-                // (or otherwise we won't be able to resolve references within this imported WSDL correctly),
-                // but if none is given, the system ID before the entity resolution is better than nothing.
-                source.setSystemId(wsdlLoc.toExternalForm());
+        XMLEntityResolver.Parser parser = resolver.resolveEntity(null,systemId);
+        if(parser==null) {
+            parser = new Parser(wsdlLoc,
+                XMLStreamReaderFactory.createFreshXMLStreamReader(new InputSource(systemId),true));
+        }
 
+        parseWSDL(parser);
+    }
+
+    private void parseWSDL(Parser parser) throws XMLStreamException, IOException, SAXException {
         // avoid processing the same WSDL twice.
-        if(!importedWSDLs.add(source.getSystemId()))
+        if(!importedWSDLs.add(parser.systemId.toExternalForm()))
             return;
 
 
-        XMLStreamReader reader = createReader(source);
+        XMLStreamReader reader = parser.parser;
         XMLStreamReaderUtil.nextElementContent(reader);
 
         //wsdl:definition
@@ -207,7 +213,7 @@ public class RuntimeWSDLParser {
 
             QName name = reader.getName();
             if (WSDLConstants.QNAME_IMPORT.equals(name)) {
-                parseImport(wsdlLoc, reader);
+                parseImport(parser.systemId,reader);
             } else if(WSDLConstants.QNAME_MESSAGE.equals(name)){
                 parseMessage(reader);
             } else if(WSDLConstants.QNAME_PORT_TYPE.equals(name)){
@@ -246,7 +252,7 @@ public class RuntimeWSDLParser {
 
         QName bindingName = ParserUtil.getQName(reader, binding);
         QName portQName = new QName(service.getName().getNamespaceURI(), portName);
-        WSDLPortImpl port = new WSDLPortImpl(portQName, bindingName);
+        WSDLPortImpl port = new WSDLPortImpl(service, portQName, bindingName);
 
         String location = null;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {

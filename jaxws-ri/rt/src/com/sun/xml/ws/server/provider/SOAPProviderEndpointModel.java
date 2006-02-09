@@ -37,7 +37,7 @@ import javax.xml.ws.Provider;
  *
  * @author Jitendra Kotamraju
  */
-public class SOAPProviderEndpointModel extends ProviderEndpointModel {
+final class SOAPProviderEndpointModel extends ProviderEndpointModel {
     private SOAPVersion soapVersion;
     private Class implementorClass;
     private Service.Mode mode;

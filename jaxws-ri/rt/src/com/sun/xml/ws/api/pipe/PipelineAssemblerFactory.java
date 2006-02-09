@@ -48,8 +48,7 @@ public abstract class PipelineAssemblerFactory {
      *      The binding ID string for which the new {@link PipelineAssembler}
      *      is created. Must not be null.
      * @return
-     *      null if no corresponding {@link PipelineAssemblerFactory}
-     *      was found.
+     *      Always non-null, since we fall back to our default {@link PipelineAssembler}.
      */
     public static PipelineAssembler create(ClassLoader classLoader, String bindingId) {
         for (PipelineAssemblerFactory factory : ServiceFinder.find(PipelineAssemblerFactory.class,classLoader)) {

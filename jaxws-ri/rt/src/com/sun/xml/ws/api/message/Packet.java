@@ -19,13 +19,13 @@
  */
 package com.sun.xml.ws.api.message;
 
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
-import com.sun.xml.ws.util.PropertySet;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
 import com.sun.xml.ws.sandbox.server.TransportBackChannel;
-import com.sun.xml.ws.sandbox.server.WSEndpoint;
+import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
@@ -55,6 +55,7 @@ import java.util.Set;
  * float around without a {@link Message} in it.
  *
  *
+ * <a name="properties"></a>
  * <h2>Properties</h2>
  * <p>
  * Information frequently used inside the JAX-WS RI
@@ -80,13 +81,17 @@ import java.util.Set;
  *
  * <h3>Relationship to request/response context</h3>
  * <p>
- * Request context is used to seed the initial values of {@link Packet}.
+ * {@link BindingProvider#getResponseContext() Request context} is used to
+ * seed the initial values of {@link Packet}.
  * Some of those values go to strongly-typed fields, and others go to
  * {@link #invocationProperties}, as they need to be retained in the reply message.
  *
  * <p>
- * Similarly, response context is constructed from {@link Packet}.
- * (Or rather it's just a view of {@link Packet}.)
+ * Similarly, {@link BindingProvider#getResponseContext() response context}
+ * is constructed from {@link Packet} (or rather it's just a view of {@link Packet}.)
+ * by using properties from both
+ * {@link #invocationProperties} and {@link #otherProperties}.
+ *
  *
  *
  * <h3>TODO</h3>
@@ -216,7 +221,7 @@ public final class Packet extends PropertySet {
      *
      * <p>
      * This property is set from the parameter
-     * of {@link WSEndpoint#process(Packet,WebServiceContextDelegate,TransportBackChannel)}.
+     * of {@link WSEndpoint.PipeHead#process}.
      */
     public WebServiceContextDelegate webServiceContextDelegate;
 
@@ -228,9 +233,17 @@ public final class Packet extends PropertySet {
      *
      * <p>
      * This property is set from the parameter
-     * of {@link WSEndpoint#process(Packet,WebServiceContextDelegate,TransportBackChannel)}.
+     * of {@link WSEndpoint.PipeHead#process}.
      */
     public TransportBackChannel transportBackChannel;
+
+    /**
+     * The governing {@link WSEndpoint} in which this message is floating.
+     *
+     * <p>
+     * This property is set if and only if this is on the server side.
+     */
+    public WSEndpoint endpoint;
 
     /**
      * The value of the SOAPAction header associated with the message.
@@ -299,6 +312,9 @@ public final class Packet extends PropertySet {
      * Properties in this map will have the same life span
      * as the Message itself.
      *
+     * <p>
+     * See <a href="#properties">class javadoc</a> for more discussion.
+     *
      * TODO: allocate this instance lazily.
      */
     public final Map<String,Object> otherProperties = new HashMap<String,Object>();
@@ -310,6 +326,9 @@ public final class Packet extends PropertySet {
      * <p>
      * These properties are copied from a request to a response.
      * This is where we keep properties that are set by handlers.
+     *
+     * <p>
+     * See <a href="#properties">class javadoc</a> for more discussion.
      */
     public final Map<String,Object> invocationProperties = new HashMap<String,Object>();
 

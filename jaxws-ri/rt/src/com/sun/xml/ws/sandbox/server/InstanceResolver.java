@@ -2,6 +2,9 @@ package com.sun.xml.ws.sandbox.server;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.WSEndpoint;
+
+import javax.xml.ws.WebServiceContext;
 
 /**
  * Determines the instance that serves
@@ -28,7 +31,6 @@ import com.sun.xml.ws.api.message.Message;
  * with a specific WS-RM session.
  *
  * @author Kohsuke Kawaguchi
- * @see WSEndpoint#setInstanceResolver(InstanceResolver)
  */
 public abstract class InstanceResolver<T> {
     /**
@@ -49,18 +51,29 @@ public abstract class InstanceResolver<T> {
      */
     public abstract T resolve(Packet request);
 
+    /**
+     * Called by {@link WSEndpoint} when it's set up.
+     *
+     * <p>
+     * This is an opportunity for {@link InstanceResolver}
+     * to do a endpoint-specific initialization process.
+     *
+     * @param wsc
+     *      The {@link WebServiceContext} instance to be injected
+     *      to the user instances (assuming {@link InstanceResolver}
+     *      supports it.
+     */
+    public void start(WSEndpoint owner, WebServiceContext wsc) {}
 
-    private static final class Singleton<T> extends InstanceResolver<T> {
-        private final T singleton;
+    /**
+     * Called by {@link WSEndpoint}
+     * when {@link WSEndpoint#dispose()} is called.
+     *
+     * <p>
+     * This method is guaranteed to be only called once by {@link WSEndpoint}.
+     */
+    public void dispose() {}
 
-        public Singleton(T singleton) {
-            this.singleton = singleton;
-        }
-
-        public T resolve(Packet request) {
-            return singleton;
-        }
-    }
 
     /**
      * Creates a {@link InstanceResolver} implementation that always
@@ -68,6 +81,6 @@ public abstract class InstanceResolver<T> {
      */
     public static <T> InstanceResolver<T> createSingleton(T singleton) {
         assert singleton!=null;
-        return new Singleton<T>(singleton);
+        return new SingletonResolver<T>(singleton);
     }
 }

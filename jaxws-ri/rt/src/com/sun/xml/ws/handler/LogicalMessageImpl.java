@@ -19,27 +19,12 @@
  */
 package com.sun.xml.ws.handler;
 
-import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
-import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
-import com.sun.xml.ws.encoding.soap.SOAPEncoder;
 import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.WebServiceException;
 
@@ -70,71 +55,72 @@ public class LogicalMessageImpl implements LogicalMessage {
      * convert to DOMSource and return it. DOMSource is also stored in BodyBlock
      */
     public Source getPayload() {
-        try {
-            InternalMessage internalMessage = ctxt.getInternalMessage();
-            if (internalMessage == null) {
-                SOAPMessage soapMessage = ctxt.getSOAPMessage();
-                if (soapMessage == null) {
-                    return null;
-                } else {
-                    Node node = soapMessage.getSOAPBody().getFirstChild();
-                    if (node != null) {
-                        setSource(new DOMSource(node));
-                    } else {
-                        return null;
-                    }
-                }
-            }
-            internalMessage = ctxt.getInternalMessage();
-            BodyBlock bodyBlock = internalMessage.getBody();
-            if (bodyBlock == null) {
-                return null;
-            } else {
-                Object obj = bodyBlock.getValue();
-                if (obj instanceof DOMSource) {
-                    return (Source)obj;
-                } else if (obj instanceof Source) {
-                    Source source = (Source)obj;
-                    Transformer transformer = XmlUtil.newTransformer();
-                    DOMResult domResult = new DOMResult();
-                    transformer.transform(source, domResult);
-                    DOMSource domSource = new DOMSource(domResult.getNode());
-                    bodyBlock.setSource(domSource);
-                    return domSource;
-                } else if (obj instanceof JAXBBridgeInfo) {
-                    MessageInfo messageInfo = ctxt.getMessageInfo();
-                    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-                    SOAPEncoder encoder = eptf.getSOAPEncoder();
-                    DOMSource domSource = encoder.toDOMSource((JAXBBridgeInfo)obj, messageInfo);
-                    bodyBlock.setSource(domSource);
-                    return domSource;
-                } else if (obj instanceof JAXBBeanInfo) {
-                    DOMSource domSource = ((JAXBBeanInfo)obj).toDOMSource();
-                    bodyBlock.setSource(domSource);
-                    return domSource;
-                } else if (obj instanceof RpcLitPayload) {
-                    MessageInfo messageInfo = ctxt.getMessageInfo();
-                    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-                    SOAPEncoder encoder = eptf.getSOAPEncoder();
-                    DOMSource domSource = encoder.toDOMSource((RpcLitPayload)obj, messageInfo);
-                    bodyBlock.setSource(domSource);
-                    return domSource;
-                } else if (obj instanceof SOAPFaultInfo) {
-                    MessageInfo messageInfo = ctxt.getMessageInfo();
-                    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-                    SOAPEncoder encoder = eptf.getSOAPEncoder();
-                    DOMSource domSource = encoder.toDOMSource((SOAPFaultInfo)obj, messageInfo);
-                    bodyBlock.setSource(domSource);
-                    return domSource;
-                } else {
-                    throw new WebServiceException("Unknown type "+obj.getClass()+" in BodyBlock");
-                }
-            }
-        } catch(TransformerException te) {
-            throw new WebServiceException(te);
-        } catch(SOAPException se) {
-            throw new WebServiceException(se);
-        }
+        throw new UnsupportedOperationException();
+        //try {
+        //    InternalMessage internalMessage = ctxt.getInternalMessage();
+        //    if (internalMessage == null) {
+        //        SOAPMessage soapMessage = ctxt.getSOAPMessage();
+        //        if (soapMessage == null) {
+        //            return null;
+        //        } else {
+        //            Node node = soapMessage.getSOAPBody().getFirstChild();
+        //            if (node != null) {
+        //                setSource(new DOMSource(node));
+        //            } else {
+        //                return null;
+        //            }
+        //        }
+        //    }
+        //    internalMessage = ctxt.getInternalMessage();
+        //    BodyBlock bodyBlock = internalMessage.getBody();
+        //    if (bodyBlock == null) {
+        //        return null;
+        //    } else {
+        //        Object obj = bodyBlock.getValue();
+        //        if (obj instanceof DOMSource) {
+        //            return (Source)obj;
+        //        } else if (obj instanceof Source) {
+        //            Source source = (Source)obj;
+        //            Transformer transformer = XmlUtil.newTransformer();
+        //            DOMResult domResult = new DOMResult();
+        //            transformer.transform(source, domResult);
+        //            DOMSource domSource = new DOMSource(domResult.getNode());
+        //            bodyBlock.setSource(domSource);
+        //            return domSource;
+        //        } else if (obj instanceof JAXBBridgeInfo) {
+        //            MessageInfo messageInfo = ctxt.getMessageInfo();
+        //            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
+        //            SOAPEncoder encoder = eptf.getSOAPEncoder();
+        //            DOMSource domSource = encoder.toDOMSource((JAXBBridgeInfo)obj, messageInfo);
+        //            bodyBlock.setSource(domSource);
+        //            return domSource;
+        //        } else if (obj instanceof JAXBBeanInfo) {
+        //            DOMSource domSource = ((JAXBBeanInfo)obj).toDOMSource();
+        //            bodyBlock.setSource(domSource);
+        //            return domSource;
+        //        } else if (obj instanceof RpcLitPayload) {
+        //            MessageInfo messageInfo = ctxt.getMessageInfo();
+        //            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
+        //            SOAPEncoder encoder = eptf.getSOAPEncoder();
+        //            DOMSource domSource = encoder.toDOMSource((RpcLitPayload)obj, messageInfo);
+        //            bodyBlock.setSource(domSource);
+        //            return domSource;
+        //        } else if (obj instanceof SOAPFaultInfo) {
+        //            MessageInfo messageInfo = ctxt.getMessageInfo();
+        //            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
+        //            SOAPEncoder encoder = eptf.getSOAPEncoder();
+        //            DOMSource domSource = encoder.toDOMSource((SOAPFaultInfo)obj, messageInfo);
+        //            bodyBlock.setSource(domSource);
+        //            return domSource;
+        //        } else {
+        //            throw new WebServiceException("Unknown type "+obj.getClass()+" in BodyBlock");
+        //        }
+        //    }
+        //} catch(TransformerException te) {
+        //    throw new WebServiceException(te);
+        //} catch(SOAPException se) {
+        //    throw new WebServiceException(se);
+        //}
     }
 
     /*

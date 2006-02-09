@@ -1,13 +1,16 @@
 package com.sun.xml.ws.sandbox.server;
 
+import com.sun.xml.ws.api.WSEndpoint;
+
 import javax.xml.stream.XMLStreamWriter;
+import java.io.OutputStream;
 
 /**
  * Resolves relative references among {@link SDDocument}s.
  *
  * <p>
  * This interface is implemented by the caller of
- * {@link SDDocument#writeTo(String, XMLStreamWriter)} method so
+ * {@link SDDocument#writeTo)} method so
  * that the {@link SDDocument} can correctly produce references
  * to other documents.
  *

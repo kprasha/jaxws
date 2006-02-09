@@ -23,12 +23,11 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
+
 import javax.activation.DataSource;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
+import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
 
 /**
  * Keeps all the {@link Provider} endpoint information for XML/HTTP binding. It
@@ -37,16 +36,16 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Jitendra Kotamraju
  */
-public class XMLProviderEndpointModel extends ProviderEndpointModel {
-    
+final class XMLProviderEndpointModel extends ProviderEndpointModel {
+
     private Class implementorClass;
     private Service.Mode mode;
     private boolean isSource;
-    
+
     public XMLProviderEndpointModel(Class implementorClass) {
         this.implementorClass = implementorClass;
     }
-    
+
     /**
      * Finds parameter type, mode and throws an exception if Service.Mode and
      * parameter type combination is invalid.
@@ -63,9 +62,9 @@ public class XMLProviderEndpointModel extends ProviderEndpointModel {
         if (mode == Service.Mode.PAYLOAD && isDataSource) {
             throw new IllegalArgumentException(
                 "Illeagal combination Mode.PAYLOAD and Provider<DataSource>");
-        } 
+        }
     }
-    
+
     /**
      * {@link Message} is converted to correct parameter for Provider.invoke() method
      */
@@ -107,7 +106,7 @@ public class XMLProviderEndpointModel extends ProviderEndpointModel {
         }
         return parameter;
     }
-    
+
     /**
      * return value of Provider.invoke() is converted to {@link Message}
      */
@@ -132,10 +131,10 @@ public class XMLProviderEndpointModel extends ProviderEndpointModel {
         }
         return responseMsg;
     }
-    
+
     /*
-     * Is it Provider<DataSource> ?
-     */
+    * Is it Provider<DataSource> ?
+    */
     private static boolean isDataSource(Class c) {
         try {
             c.getMethod("invoke",  DataSource.class);
@@ -145,5 +144,5 @@ public class XMLProviderEndpointModel extends ProviderEndpointModel {
         }
         return false;
     }
-    
+
 }

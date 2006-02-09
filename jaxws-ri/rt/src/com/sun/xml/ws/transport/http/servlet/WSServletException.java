@@ -28,7 +28,7 @@ import com.sun.xml.ws.server.*;
  *
  * @author WS Development Team
  */
-public class WSServletException extends JAXWSExceptionBase {
+final class WSServletException extends JAXWSExceptionBase {
     public WSServletException(String key, Object... args) {
         super(key, args);
     }

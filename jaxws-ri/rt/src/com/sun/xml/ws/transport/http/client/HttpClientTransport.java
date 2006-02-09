@@ -20,11 +20,10 @@
 
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.message.Packet;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
-import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.net.ssl.HostnameVerifier;
@@ -41,27 +40,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * TODO: this class seems to be pointless. Just merge it with {@link HttpTransportPipe}.
+ *
  * @author WS Development Team
  */
-public final class HttpClientTransport extends WSConnectionImpl {
+final class HttpClientTransport {
 
     private static String LAST_ENDPOINT = "";
     private static boolean redirect = true;
     private static final int START_REDIRECT_COUNT = 3;
     private static int redirectCount = START_REDIRECT_COUNT;
-    int statusCode;
+
+    /*package*/ int statusCode;
+    private final Map<String, List<String>> reqHeaders;
     private Map<String, List<String>> respHeaders = null;
 
-    public HttpClientTransport(OutputStream logStream, Packet packet) {
-        _logStream = logStream;
+    private OutputStream outputStream;
+
+    public HttpClientTransport(Packet packet, Map<String,List<String>> reqHeaders) {
         endpoint = packet.endpointAddress;
         context = packet;
+        this.reqHeaders = reqHeaders;
     }
 
     /**
      * Prepare the stream for HTTP request
      */
-    @Override
     public OutputStream getOutput() {
         try {
             httpConnection = createHttpConnection();
@@ -82,10 +86,16 @@ public final class HttpClientTransport extends WSConnectionImpl {
         return outputStream;
     }
 
+    public void closeOutput() throws IOException {
+        if (outputStream != null) {
+            outputStream.flush();
+            outputStream.close();
+        }
+    }
+
     /**
      * Get the response from HTTP connection and prepare the input stream for response
      */
-    @Override
     public InputStream getInput() {
         // response processing
 
@@ -112,64 +122,17 @@ public final class HttpClientTransport extends WSConnectionImpl {
         return in;
     }
 
-    @Override
-    public OutputStream getDebug() {
-        return _logStream;
-    }
-
-    @Override
     public Map<String, List<String>> getHeaders() {
         if (respHeaders != null) {
             return respHeaders;
         }
-        try {
-            isFailure = checkResponseCode();
+        isFailure = checkResponseCode();
 
-            respHeaders = collectResponseMimeHeaders();
+        respHeaders = collectResponseMimeHeaders();
 
-            saveCookieAsNeeded(cookieJar);
-            setHeaders(respHeaders);
-
-            return respHeaders;
-        } catch (IOException e) {
-            if (statusCode == HttpURLConnection.HTTP_NO_CONTENT
-                || (isFailure
-                && statusCode != HttpURLConnection.HTTP_INTERNAL_ERROR)) {
-                try {
-                    throw new ClientTransportException("http.status.code",
-                        new Object[]{
-                            statusCode,
-                            httpConnection.getResponseMessage()});
-                } catch (IOException ex) {
-                    throw new ClientTransportException("http.status.code",
-                        new Object[]{
-                            statusCode,
-                            ex});
-                }
-            }
-            throw new ClientTransportException("http.client.failed",
-                e.getMessage());
-        }
-
+        saveCookieAsNeeded(cookieJar);
+        return respHeaders;
     }
-
-//    public void invoke(String endpoint, SOAPMessageContext context)
-//            throws ClientTransportException {
-
-//        try {
-//            int statusCode = httpConnection.getResponseCode();
-//
-//            //http URL redirection does not redirect http requests
-//            //to an https endpoint probably due to a bug in the jdk
-//            //or by intent - to workaround this if an error code
-//            //of HTTP_MOVED_TEMP or HTTP_MOVED_PERM is received then
-//            //the jaxws client will reinvoke the original request
-//            //to the new endpoint - kw bug 4890118
-//            if (checkForRedirect(statusCode)) {
-//                redirectRequest(httpConnection, context);
-//                return;
-//            }
-//    }
 
     protected InputStream readResponse()
         throws IOException {
@@ -261,12 +224,11 @@ public final class HttpClientTransport extends WSConnectionImpl {
      * return message to be processed (i.e., in the case of an UNAUTHORIZED
      * response from the servlet or 404 not found)
      */
-    protected boolean checkResponseCode() throws IOException {
+    protected boolean checkResponseCode() {
         boolean isFailure = false;
         try {
 
             statusCode = httpConnection.getResponseCode();
-            setStatus(statusCode);
 
             if ((httpConnection.getResponseCode()
                 == HttpURLConnection.HTTP_INTERNAL_ERROR)) {
@@ -293,16 +255,13 @@ public final class HttpClientTransport extends WSConnectionImpl {
 
                 if (!redirect || (redirectCount <= 0)) {
                     throw new ClientTransportException("http.status.code",
-                        new Object[]{
-                            statusCode,
-                            getStatusMessage(httpConnection)});
+                            statusCode,getStatusMessage(httpConnection));
                 }
             } else if (
                 statusCode < 200 || (statusCode >= 303 && statusCode < 500)) {
                 throw new ClientTransportException("http.status.code",
-                    new Object[]{
-                        statusCode,
-                        getStatusMessage(httpConnection)});
+                    statusCode,
+                    getStatusMessage(httpConnection));
             } else if (statusCode >= 500) {
                 isFailure = true;
             }
@@ -418,10 +377,10 @@ public final class HttpClientTransport extends WSConnectionImpl {
         httpConnection.setRequestMethod(method);
 
         // set the properties on HttpURLConnection
-        for (Map.Entry entry : super.getHeaders().entrySet()) {
+        for (Map.Entry entry : reqHeaders.entrySet()) {
             httpConnection.addRequestProperty((String) entry.getKey(), ((List<String>) entry.getValue()).get(0));
         }
-        
+
         return httpConnection;
     }
 
@@ -462,6 +421,5 @@ public final class HttpClientTransport extends WSConnectionImpl {
     Packet context = null;
     CookieJar cookieJar = null;
     boolean isFailure = false;
-    OutputStream _logStream = null;
 }
 

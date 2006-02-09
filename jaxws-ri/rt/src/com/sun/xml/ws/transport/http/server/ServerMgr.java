@@ -21,9 +21,9 @@ package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import com.sun.xml.ws.server.ServerRtException;
+
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.HashMap;
@@ -31,24 +31,25 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
-import javax.net.ssl.SSLContext;
 
 /**
  * Manages all the WebService HTTP/HTTPS servers created by JAXWS runtime.
  *
  * @author WS Development Team
  */
-public class ServerMgr {
+final class ServerMgr {
     
     private static final ServerMgr serverMgr = new ServerMgr();
     private static final Logger logger =
         Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".server.http");
-    private Map<InetSocketAddress, ServerState> servers = new HashMap(); 
+    private final Map<InetSocketAddress,ServerState> servers = new HashMap<InetSocketAddress,ServerState>();
             
-    protected ServerMgr() {
-    }
-    
+    private ServerMgr() {}
+
+    /**
+     * Gets the singleton instance.
+     */
     public static ServerMgr getInstance() {
         return serverMgr;
     }
@@ -60,9 +61,8 @@ public class ServerMgr {
      */
     public HttpContext createContext(String address) {
         try {
-            HttpServer server = null;
-            ServerState state = null;
-            boolean started = false;
+            HttpServer server;
+            ServerState state;
             URL url = new URL(address);
             InetSocketAddress inetAddress = new InetSocketAddress(url.getHost(),
                     url.getPort());
@@ -87,12 +87,10 @@ public class ServerMgr {
             }
             server = state.getServer();
             if (url.getProtocol().equals("https") && !(server instanceof HttpsServer)) {
-                throw new ServerRtException("already.http.server",
-                    new Object[] { inetAddress } );
+                throw new ServerRtException("already.http.server",inetAddress);
             }
             if (url.getProtocol().equals("http") && server instanceof HttpsServer) {
-                throw new ServerRtException("already.https.server",
-                    new Object[] { inetAddress } );
+                throw new ServerRtException("already.https.server",inetAddress);
             }
             logger.fine("Creating HTTP Context at = "+url.getPath());
             HttpContext context = server.createContext(url.getPath());
@@ -123,8 +121,8 @@ public class ServerMgr {
         }
     }
     
-    private static class ServerState {
-        private HttpServer server;
+    private static final class ServerState {
+        private final HttpServer server;
         private int instances;
         
         ServerState(HttpServer server) {

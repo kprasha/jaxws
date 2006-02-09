@@ -23,7 +23,9 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.sandbox.server.InstanceResolver;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
@@ -39,7 +41,8 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
-    private final RuntimeEndpointInfo endpointInfo;
+    private final ProviderEndpointModel model;
+    private final InstanceResolver<? extends Provider> instanceResolver;
 
     private static final Method invoke_Method;
     static {
@@ -51,8 +54,16 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
         }
     }
     
-    public ProviderInvokerPipe(RuntimeEndpointInfo endpointInfo) {
-        this.endpointInfo = endpointInfo;
+    public ProviderInvokerPipe(Class<? extends Provider> implType, InstanceResolver<? extends Provider> instanceResolver, WSBinding binding) {
+        this.instanceResolver = instanceResolver;
+
+        SOAPVersion soapVersion = binding.getSOAPVersion();
+        if (soapVersion != null) {
+            model = new SOAPProviderEndpointModel(implType,soapVersion);
+        } else {
+            model = new XMLProviderEndpointModel(implType);
+        }
+        model.createModel();
     }
 
     /*
@@ -61,10 +72,9 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
      * invoke() is used to create a new {@link Message} that traverses
      * through the Pipeline to transport.
      */
-    public Packet process(Packet packet) {
-        ProviderEndpointModel model = endpointInfo.getProviderModel();
-        Object parameter = model.getParameter(packet.getMessage());
-        Provider servant = (Provider)endpointInfo.getImplementor();
+    public Packet process(Packet request) {
+        Object parameter = model.getParameter(request.getMessage());
+        Provider servant = instanceResolver.resolve(request);
         logger.fine("Invoking Provider Endpoint "+servant);
         Object returnValue = servant.invoke(parameter);
 

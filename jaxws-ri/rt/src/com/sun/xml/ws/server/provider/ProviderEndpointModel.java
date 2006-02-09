@@ -32,7 +32,7 @@ import javax.xml.ws.ServiceMode;
  * 
  * @author Jitendra Kotamraju
  */
-public abstract class ProviderEndpointModel {
+abstract class ProviderEndpointModel {
         
     /**
      * Finds parameter type, mode and throws an exception if Service.Mode and

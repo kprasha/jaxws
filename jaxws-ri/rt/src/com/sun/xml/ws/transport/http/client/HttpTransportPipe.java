@@ -62,16 +62,15 @@ public class HttpTransportPipe implements Pipe {
 
     public Packet process(Packet packet) {
         try {
-            // Set up WSConnection with tranport headers, request content
-            // TODO: remove WSConnection based HttpClienTransport
-            WSConnection con = new HttpClientTransport(null, packet);
-
             // get transport headers from message
             Map<String, List<String>> reqHeaders = packet.httpRequestHeaders;
             //assign empty map if its null
             if(reqHeaders == null){
                 reqHeaders = new HashMap<String, List<String>>();
             }
+
+            HttpClientTransport con = new HttpClientTransport(packet,reqHeaders);
+
             String ct = encoder.getStaticContentType();
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
@@ -79,15 +78,10 @@ public class HttpTransportPipe implements Pipe {
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
                 reqHeaders.put("Content-Type", Arrays.asList(ct));
-                con.setHeaders(reqHeaders);
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
-                if (reqHeaders == null) {
-                    reqHeaders = new HashMap<String, List<String>>();
-                }
                 reqHeaders.put("Content-Type", Arrays.asList(ct));
-                con.setHeaders(reqHeaders);
                 encoder.encode(packet, con.getOutput());
             }
             con.closeOutput();
@@ -95,7 +89,7 @@ public class HttpTransportPipe implements Pipe {
             Map<String, List<String>> respHeaders = con.getHeaders();
             ct = getContentType(respHeaders);
             if(packet.isOneWay==Boolean.TRUE
-            || con.getStatus()==WSConnection.ONEWAY)
+            || con.statusCode==WSConnection.ONEWAY)
                 return null;    // one way. no response given.
 
             return decoder.decode(con.getInput(), ct);

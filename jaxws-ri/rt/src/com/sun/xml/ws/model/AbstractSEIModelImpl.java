@@ -32,8 +32,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.encoding.JAXWSAttachmentMarshaller;
-import com.sun.xml.ws.encoding.JAXWSAttachmentUnmarshaller;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
@@ -568,8 +566,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {
         protected BridgeContext initialValue() {
             BridgeContext bc = jaxbContext.createBridgeContext();
-            bc.setAttachmentMarshaller(new JAXWSAttachmentMarshaller(enableMtom));
-            bc.setAttachmentUnmarshaller(new JAXWSAttachmentUnmarshaller());
+            //bc.setAttachmentMarshaller(new JAXWSAttachmentMarshaller(enableMtom));
+            //bc.setAttachmentUnmarshaller(new JAXWSAttachmentUnmarshaller());
             return bc;
         }
     };

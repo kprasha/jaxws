@@ -20,114 +20,99 @@
 
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
-import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.sandbox.server.SDDocument;
+import com.sun.xml.ws.sandbox.server.SDDocumentSource;
+import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.wsdl.writer.WSDLResolver;
 
+import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * @author WS Development Team
  */
+final class WSDLGenResolver implements WSDLResolver {
+    
+    private List<SDDocumentImpl> docs;
+    private SDDocumentImpl abstractWsdl;
+    private SDDocumentImpl concreteWsdl;
 
-public class WSDLGenResolver implements WSDLResolver {
-    
-    private Map<String, DocInfo> docs;
-    private DocInfo abstractWsdl;
-    private DocInfo concreteWsdl;
-    private Map<String, List<String>> nsMapping;    // targetNS -> system id list
-    
-    public WSDLGenResolver(Map<String, DocInfo> docs) {
+    /**
+     * targetNS -> documents.
+     */
+    private final Map<String, List<SDDocumentImpl>> nsMapping = new HashMap<String,List<SDDocumentImpl>>();
+
+    private final QName serviceName;
+    private final QName portName;
+
+    public WSDLGenResolver(List<SDDocumentImpl> docs,QName serviceName,QName portName) {
         this.docs = docs;
-        nsMapping = new HashMap<String, List<String>>();
-        Set<Entry<String, DocInfo>> docEntries = docs.entrySet();
-        for(Entry<String, DocInfo> entry : docEntries) {
-            DocInfo docInfo = entry.getValue();
-            if (docInfo.hasPortType()) {
-                abstractWsdl = docInfo;
+        this.serviceName = serviceName;
+        this.portName = portName;
+
+        for (SDDocumentImpl doc : docs) {
+            if(doc.isWSDL()) {
+                SDDocument.WSDL wsdl = (SDDocument.WSDL) doc;
+                if(wsdl.hasService())
+                    abstractWsdl = doc;
             }
-            if (docInfo.getDocType() == DOC_TYPE.SCHEMA) {
-                List<String> sysIds = nsMapping.get(docInfo.getTargetNamespace());
+            if(doc.isSchema()) {
+                SDDocument.Schema schema = (SDDocument.Schema) doc;
+                List<SDDocumentImpl> sysIds = nsMapping.get(schema.getTargetNamespace());
                 if (sysIds == null) {
-                    sysIds = new ArrayList<String>();
-                    nsMapping.put(docInfo.getTargetNamespace(), sysIds);
+                    sysIds = new ArrayList<SDDocumentImpl>();
+                    nsMapping.put(schema.getTargetNamespace(), sysIds);
                 }
-                sysIds.add(docInfo.getUrl().toString());
+                sysIds.add(doc);
             }
         }
     }
     
-    public String getWSDLFile() {
-        return concreteWsdl.getUrl().toString();
+    public SDDocument getConcreteWSDL() {
+        return concreteWsdl;
     }
     
-    public Map<String, DocInfo> getDocs() {
-        return docs;
-    }
-    
-    /*
-    public Result getWSDL(String suggestedFileName) {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        
-        StreamDocInfo docInfo = new StreamDocInfo(suggestedFileName, bout);
-        
-        if (wsdlFile == null) {
-            docInfo.setQueryString("wsdl");
-            wsdlFile = suggestedFileName;
-        } else {
-            docInfo.setQueryString("wsdl="+suggestedFileName);
-        }
-        docs.put(docInfo.getPath(),  docInfo);
-   
-        StreamResult result = new StreamResult();
-        result.setOutputStream(bout);
-        result.setSystemId(suggestedFileName);
-        return result;
-    }
+    /**
+     * return null if concrete WSDL need not be generated.
+     *
+     * TODO: but it's not returning null. What am I missing!? - KK
      */
-    
-    public Result getSchemaOutput(String namespaceUri, String suggestedFileName) {
-        ByteArrayBuffer bout = new ByteArrayBuffer();
-        
-        StreamDocInfo docInfo = new StreamDocInfo(suggestedFileName, bout);
-        docInfo.setQueryString("xsd="+suggestedFileName);
-        docInfo.setDocType(DOC_TYPE.SCHEMA);
-        docs.put(docInfo.getUrl().toString(),  docInfo);
-   
-        StreamResult result = new StreamResult();
-        result.setOutputStream(bout);
-        result.setSystemId(docInfo.getUrl().toString());
-        return result;
-    }
-    
-    /*
-     * return null if concrete WSDL need not be generated
-     */
-    public Result getWSDL(String filename) {
-        ByteArrayBuffer bout = new ByteArrayBuffer();
-        StreamDocInfo docInfo = new StreamDocInfo(filename, bout);
-        docInfo.setDocType(DOC_TYPE.WSDL);
-        docInfo.setQueryString("wsdl");
-        concreteWsdl = docInfo;
-        docs.put(docInfo.getUrl().toString(),  docInfo);
-        StreamResult result = new StreamResult();
-        result.setOutputStream(bout);
-        result.setSystemId(docInfo.getUrl().toString());
-        return result;
+    public Result getWSDL(String filename) {        
+        XMLStreamBuffer xsb = new XMLStreamBuffer();
+        SDDocumentSource sd = SDDocumentSource.create(createURL(filename),xsb);
+
+        concreteWsdl=SDDocumentImpl.create(sd,serviceName,portName);
+
+        docs.add(concreteWsdl);
+
+        XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
+        r.setSystemId(filename);
+        return r;
     }
 
-    /*
+    private URL createURL(String filename) {
+        try {
+            return new URL(filename);
+        } catch (MalformedURLException e) {
+            // TODO: I really don't think this is the right way to handle this error,
+            // WSDLResolver needs to be documented carefully.
+            throw new WebServiceException(e);
+        }
+    }
+
+    /**
      * Updates filename if the suggested filename need to be changed in
      * wsdl:import
      *
@@ -135,18 +120,20 @@ public class WSDLGenResolver implements WSDLResolver {
      */
     public Result getAbstractWSDL(Holder<String> filename) {
         if (abstractWsdl != null) {
-            filename.value = abstractWsdl.getUrl().toString();
+            filename.value = abstractWsdl.getURL().toString();
             return null;                // Don't generate abstract WSDL
         }
-        ByteArrayBuffer bout = new ByteArrayBuffer();
-        StreamDocInfo abstractWsdl = new StreamDocInfo(filename.value, bout);
-        abstractWsdl.setDocType(DOC_TYPE.WSDL);
-        //abstractWsdl.setQueryString("wsdl="+filename.value);
-        docs.put(abstractWsdl.getUrl().toString(),  abstractWsdl);
-        StreamResult result = new StreamResult();
-        result.setOutputStream(bout);
-        result.setSystemId(abstractWsdl.getUrl().toString());
-        return result;
+
+        XMLStreamBuffer xsb = new XMLStreamBuffer();
+        SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
+
+        abstractWsdl=SDDocumentImpl.create(sd,serviceName,portName);
+
+        docs.add(abstractWsdl);
+
+        XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
+        r.setSystemId(filename.value);
+        return r;
     }
 
     /*
@@ -155,25 +142,26 @@ public class WSDLGenResolver implements WSDLResolver {
      *
      * return null if schema need not be generated
      */
+    // TODO: shouldn't file name be an URL?
     public Result getSchemaOutput(String namespace, Holder<String> filename) {
-        List<String> schemas = nsMapping.get(namespace);
+        List<SDDocumentImpl> schemas = nsMapping.get(namespace);
         if (schemas != null) {
             if (schemas.size() > 1) {
                 throw new ServerRtException("server.rt.err",
                     "More than one schema for the target namespace "+namespace);
             }
-            filename.value = schemas.get(0);
+            filename.value = schemas.get(0).getURL().toExternalForm();
             return null;            // Don't generate schema
         }
-        ByteArrayBuffer bout = new ByteArrayBuffer();
-        StreamDocInfo docInfo = new StreamDocInfo(filename.value, bout);
-        docInfo.setDocType(DOC_TYPE.SCHEMA);
-        //docInfo.setQueryString("xsd="+filename.value);
-        docs.put(docInfo.getUrl().toString(),  docInfo);
-        StreamResult result = new StreamResult();
-        result.setOutputStream(bout);
-        result.setSystemId(docInfo.getUrl().toString());
-        return result;
+
+        XMLStreamBuffer xsb = new XMLStreamBuffer();
+        SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
+
+        docs.add(SDDocumentImpl.create(sd,serviceName,portName));
+
+        XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
+        r.setSystemId(filename.value);
+        return r;
     }
     
     private static class StreamDocInfo implements DocInfo {
@@ -199,9 +187,8 @@ public class WSDLGenResolver implements WSDLResolver {
             try {
                 return new URL("file:///"+resource);
             } catch(Exception e) {
-                
+                return null;
             }
-            return null;
         }
 
         public String getQueryString() {

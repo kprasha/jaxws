@@ -20,7 +20,6 @@
 package com.sun.xml.ws.handler;
 import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import com.sun.xml.ws.encoding.soap.SOAPEPTFactory;
 import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
 
 import javax.xml.bind.JAXBContext;
@@ -77,26 +76,28 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     }
 
     public SOAPMessage getMessage() {
-        SOAPMessage soap = handlerCtxt.getSOAPMessage();
-        InternalMessage intr = handlerCtxt.getInternalMessage();
-        if (intr == null && soap != null) {
-            // Not much to do
-        } else if (intr != null && soap != null) {
-            // Overlay BodyBlock of InternalMessage on top of existing SOAPMessage
-            MessageInfo messageInfo = handlerCtxt.getMessageInfo();
-            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-            soap = eptf.getSOAPEncoder().toSOAPMessage(intr, soap);
-            setMessage(soap);        // It also sets InernalMessage to null
-        } else if (intr != null && soap == null) {
-            // Convert InternalMessage to a SOAPMessage
-            MessageInfo messageInfo = handlerCtxt.getMessageInfo();
-            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-            soap = eptf.getSOAPEncoder().toSOAPMessage(intr, messageInfo);
-            setMessage(soap);        // It also sets InernalMessage to null
-        } else {
-            throw new WebServiceException("Don't have SOAPMessage");
-        }
-        return soap;
+        // commented out as a part of server side rearch
+        throw new UnsupportedOperationException();
+        //SOAPMessage soap = handlerCtxt.getSOAPMessage();
+        //InternalMessage intr = handlerCtxt.getInternalMessage();
+        //if (intr == null && soap != null) {
+        //    // Not much to do
+        //} else if (intr != null && soap != null) {
+        //    // Overlay BodyBlock of InternalMessage on top of existing SOAPMessage
+        //    MessageInfo messageInfo = handlerCtxt.getMessageInfo();
+        //    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
+        //    soap = eptf.getSOAPEncoder().toSOAPMessage(intr, soap);
+        //    setMessage(soap);        // It also sets InernalMessage to null
+        //} else if (intr != null && soap == null) {
+        //    // Convert InternalMessage to a SOAPMessage
+        //    MessageInfo messageInfo = handlerCtxt.getMessageInfo();
+        //    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
+        //    soap = eptf.getSOAPEncoder().toSOAPMessage(intr, messageInfo);
+        //    setMessage(soap);        // It also sets InernalMessage to null
+        //} else {
+        //    throw new WebServiceException("Don't have SOAPMessage");
+        //}
+        //return soap;
     }
 
     public void setMessage(SOAPMessage soapMessage) {

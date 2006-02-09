@@ -20,221 +20,95 @@
 
 package com.sun.xml.ws.transport.http.server;
 
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
-import com.sun.xml.ws.handler.MessageContextImpl;
-import com.sun.xml.ws.handler.MessageContextUtil;
-import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.server.WSDLPatcher;
-import javax.xml.ws.handler.MessageContext;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
-import com.sun.xml.ws.server.Tie;
 import com.sun.xml.ws.spi.runtime.WSConnection;
-import com.sun.xml.ws.spi.runtime.WebServiceContext;
-import com.sun.xml.ws.transport.Headers;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * {@link HttpHandler} implementation that serves the actual request.
  *
  * @author WS Development Team
+ * @author Kohsuke Kawaguhi
  */
-public class WSHttpHandler implements HttpHandler {
-    
+final class WSHttpHandler implements HttpHandler {
+
     private static final String GET_METHOD = "GET";
     private static final String POST_METHOD = "POST";
-    private static final String HTML_CONTENT_TYPE = "text/html";
-    private static final String XML_CONTENT_TYPE = "text/xml";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    
+
     private static final Logger logger =
         Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".server.http");
     private static final Localizer localizer = new Localizer();
     private static final LocalizableMessageFactory messageFactory =
         new LocalizableMessageFactory("com.sun.xml.ws.resources.httpserver");
-    
-    private RuntimeEndpointInfo endpointInfo;
-    private Tie tie;
-    
-    public WSHttpHandler(Tie tie, RuntimeEndpointInfo endpointInfo) {
-        this.tie = tie;
-        this.endpointInfo = endpointInfo;
+
+    private final HttpAdapter adapter;
+
+    public WSHttpHandler(HttpAdapter adapter) {
+        assert adapter!=null;
+        this.adapter = adapter;
     }
-    
+
     public void handle(HttpExchange msg) {
-        logger.fine("Received HTTP request:"+msg.getRequestURI());
-        String method = msg.getRequestMethod();
-        if (method.equals(GET_METHOD)) {
-            String queryString = msg.getRequestURI().getQuery();
-            logger.fine("Query String for request ="+queryString);
-            if (queryString != null &&
-                (queryString.equals("wsdl") || queryString.startsWith("wsdl=")
-                || queryString.startsWith("xsd="))) {
-                // Handles WSDL, Schema documents
-                processDocRequest(msg);
-            } else {
-                process(msg);
-            }
-        } else if (method.equals(POST_METHOD)) {
-            process(msg);
-        } else {
-            logger.warning(
-                localizer.localize(
-                    messageFactory.getMessage(
-                        "unexpected.http.method", method)));
-            try {
-                msg.close();
-            } catch(IOException ioe) {
-                ioe.printStackTrace();          // Not much can be done
-            }
-        }
-    }
-    
-    /*
-     * Handles POST requests
-     */
-    private void process(HttpExchange msg) {
         WSConnection con = new ServerConnectionImpl(msg);
-        try {
-            MessageContext msgCtxt = new MessageContextImpl();
-            WebServiceContext wsContext = endpointInfo.getWebServiceContext();
-            wsContext.setMessageContext(msgCtxt);
-            MessageContextUtil.setHttpRequestMethod(msgCtxt, msg.getRequestMethod());
-            MessageContextUtil.setHttpRequestHeaders(msgCtxt, con.getHeaders());
-            MessageContextUtil.setHttpExchange(msgCtxt, msg);
-            URI requestUri = msg.getRequestURI();
-            String query = requestUri.getQuery();
-            if (query != null) {
-                MessageContextUtil.setQueryString(msgCtxt, query);
-            }
-            String reqPath = requestUri.getPath();
-            String ctxtPath = msg.getHttpContext().getPath();
-            if (reqPath.length() > ctxtPath.length()) {
-                String extraPath = reqPath.substring(ctxtPath.length());
-                MessageContextUtil.setPathInfo(msgCtxt, extraPath);
-            }
-            tie.handle(con, endpointInfo);
-        } catch(Exception e) {
-            e.printStackTrace();
-        } finally {
-            con.close();
-        }
-    }
-    
-    /*
-     * Handles GET requests for WSDL and Schema docuemnts
-     */ 
-    public void processDocRequest(HttpExchange msg) {
-        WSConnection con = new ServerConnectionImpl(msg);
-        try {
-            con.getInput();
-            String queryString = msg.getRequestURI().getQuery();
-            String inPath = endpointInfo.getPath(queryString);
-            if (inPath == null) {
-                String message =
-                    localizer.localize(
-                        messageFactory.getMessage("html.notFound",
-                            "Invalid Request ="+msg.getRequestURI()));
-                writeErrorPage(con, HttpURLConnection.HTTP_NOT_FOUND, message);
-                return;
-            }
-            DocInfo docInfo = endpointInfo.getDocMetadata().get(inPath);
-            if (docInfo == null) {
-                String message =
-                    localizer.localize(
-                        messageFactory.getMessage("html.notFound",
-                            "Invalid Request ="+msg.getRequestURI()));
-                writeErrorPage(con, HttpURLConnection.HTTP_NOT_FOUND, message);
-                return;
-            }
-            
-            InputStream docStream = null;
-            try {
-                Map<String, List<String>> reqHeaders = con.getHeaders();
-                List<String> hostHeader = reqHeaders.get("Host");
-                
-                Headers respHeaders = new Headers();
-                respHeaders.add(CONTENT_TYPE_HEADER, XML_CONTENT_TYPE);
-                con.setHeaders(respHeaders);
-                con.setStatus(HttpURLConnection.HTTP_OK);
-                OutputStream os = con.getOutput();
 
-                List<RuntimeEndpointInfo> endpoints = new ArrayList<RuntimeEndpointInfo>();
-                endpoints.add(endpointInfo);
-               
-                StringBuffer strBuf = new StringBuffer();
-                strBuf.append((msg instanceof HttpsExchange) ? "https" : "http");
-                strBuf.append("://");
-                if (hostHeader != null) {
-                    strBuf.append(hostHeader.get(0));   // Uses Host header
+        try {
+            logger.fine("Received HTTP request:"+msg.getRequestURI());
+
+            String method = msg.getRequestMethod();
+            if (method.equals(GET_METHOD)) {
+                String queryString = msg.getRequestURI().getQuery();
+                logger.fine("Query String for request ="+queryString);
+                if (adapter.isMetadataQuery(queryString)) {
+                    adapter.publishWSDL(con,getRequestAddress(msg), msg.getRequestURI().getQuery());
                 } else {
-                    strBuf.append(msg.getLocalAddress().getHostName());
-                    strBuf.append(":");
-                    strBuf.append(msg.getLocalAddress().getPort());
+                    adapter.handle(con);
                 }
-                strBuf.append(msg.getRequestURI().getPath());
-                String address = strBuf.toString();
-                logger.fine("Address ="+address);
-                WSDLPatcher patcher = new WSDLPatcher(docInfo, address,
-                        endpointInfo, endpoints);
-                docStream = docInfo.getDoc();
-                patcher.patchDoc(docStream, os);
-            } finally {
-                closeInputStream(docStream);
-                con.closeOutput();
+            } else if (method.equals(POST_METHOD)) {
+                adapter.handle(con);
+            } else {
+                logger.warning(
+                    localizer.localize(
+                        messageFactory.getMessage(
+                            "unexpected.http.method", method)));
             }
+        } catch(IOException e) {
+            logger.log(Level.WARNING, e.getMessage(),e);
         } finally {
             con.close();
         }
     }
 
-    /*
-     * writes error html page
+    /**
+     * Computes the address that was requested.
+     *
+     * @return
+     *      a string like "http://foo.bar:1234/abc/def"
      */
-    private void writeErrorPage(WSConnection con, int status, String message) {
-        try {
-            Map<String,List<String>> headers = new HashMap<String, List<String>>();
-            List<String> ctHeader = new ArrayList<String>();
-            ctHeader.add(HTML_CONTENT_TYPE);
-            headers.put(CONTENT_TYPE_HEADER, ctHeader);
-            con.setHeaders(headers);
-            con.setStatus(status);
-            OutputStream outputStream = con.getOutput();
-            PrintWriter out = new PrintWriter(outputStream);
-            out.println("<html><head><title>");
-            out.println(
-                localizer.localize(
-                    messageFactory.getMessage("html.title")));
-            out.println("</title></head><body>");
-            out.println(message);
-            out.println("</body></html>");
-            out.close();
-        } finally {
-            con.closeOutput();
+    private String getRequestAddress(HttpExchange msg) {
+        StringBuilder strBuf = new StringBuilder();
+        strBuf.append((msg instanceof HttpsExchange) ? "https" : "http");
+        strBuf.append("://");
+
+        List<String> hostHeader = msg.getResponseHeaders().get("Host");
+        if (hostHeader != null) {
+            strBuf.append(hostHeader.get(0));   // Uses Host header
+        } else {
+            strBuf.append(msg.getLocalAddress().getHostName());
+            strBuf.append(":");
+            strBuf.append(msg.getLocalAddress().getPort());
         }
+        strBuf.append(msg.getRequestURI().getPath());
+
+        return strBuf.toString();
     }
-    
-    private static void closeInputStream(InputStream is) {
-        if (is != null) {
-            try {
-                is.close();
-            } catch(IOException ioe) {
-                ioe.printStackTrace();
-            }
-        }
-    }
-    
 }

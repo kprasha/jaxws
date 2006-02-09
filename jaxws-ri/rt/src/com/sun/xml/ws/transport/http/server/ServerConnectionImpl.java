@@ -20,20 +20,19 @@
 
 package com.sun.xml.ws.transport.http.server;
 
-import java.io.ByteArrayOutputStream;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.transport.WSConnectionImpl;
+import com.sun.xml.ws.util.NoCloseInputStream;
+import com.sun.xml.ws.util.NoCloseOutputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-
-import com.sun.xml.ws.pept.ept.EPTFactory;
-import com.sun.xml.ws.transport.WSConnectionImpl;
-import com.sun.net.httpserver.HttpExchange;
-
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +42,7 @@ import java.util.Map;
  *
  * @author WS Development Team
  */
-public class ServerConnectionImpl extends WSConnectionImpl {
+final class ServerConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
 
     private HttpExchange httpExchange;
     private int status;
@@ -61,18 +60,18 @@ public class ServerConnectionImpl extends WSConnectionImpl {
     public Map<String,List<String>> getHeaders() {
         return httpExchange.getRequestHeaders();
     }
-    
+
     /**
      * sets response headers.
      */
-    public void setHeaders(Map<String,List<String>> headers) {
+    public void setResponseHeaders(Map<String,List<String>> headers) {
         responseHeaders = headers;
     }
-    
+
     public void setStatus(int status) {
         this.status = status;
     }
-    
+
     /**
      * sets HTTP status code
      */
@@ -82,14 +81,14 @@ public class ServerConnectionImpl extends WSConnectionImpl {
         }
         return status;
     }
-    
+
     public InputStream getInput() {
         if (is == null) {
             is = new NoCloseInputStream(httpExchange.getRequestBody());
         }
         return is;
     }
-    
+
     public OutputStream getOutput() {
         if (out == null) {
             try {
@@ -119,11 +118,11 @@ public class ServerConnectionImpl extends WSConnectionImpl {
         }
         return out;
     }
-    
+
     public void closeOutput() {
         if (out != null) {
-            try {                 
-                out.getOutputStream().close();
+            try {
+                out.doClose();
                 closedOutput = true;
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -131,15 +130,15 @@ public class ServerConnectionImpl extends WSConnectionImpl {
         }
         out = null;
     }
-    
+
     public void closeInput() {
         if (is != null) {
             try {
                 // Read everything from request and close it
                 byte[] buf = new byte[1024];
                 while (is.read(buf) != -1) {
-                }             
-                is.getInputStream().close();
+                }
+                is.doClose();
                 closedInput = true;
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -147,7 +146,7 @@ public class ServerConnectionImpl extends WSConnectionImpl {
         }
         is = null;
     }
-    
+
     public void close() {
         try {
             if (!closedInput) {
@@ -158,7 +157,7 @@ public class ServerConnectionImpl extends WSConnectionImpl {
             }
             if (!closedOutput) {
                 if (out == null) {
-                    getOutput();    
+                    getOutput();
                 }
                 closeOutput();
             }
@@ -170,100 +169,42 @@ public class ServerConnectionImpl extends WSConnectionImpl {
             }
         }
     }
-    
-    private static class NoCloseInputStream extends InputStream {
-        private InputStream is;
-        
-        public NoCloseInputStream(InputStream is) {
-            this.is = is;
-        }
-        
-        @Override
-        public int read() throws IOException {
-            return is.read();
-        }
 
-        @Override
-        public void close() throws IOException {           
-            // Intentionally left empty. use closeInput() to close
-        }
-        
-        public InputStream getInputStream() {
-            return is;
-        }
-
-        @Override
-        public int read(byte b[]) throws IOException {
-            return is.read(b);
-        }
-
-        @Override
-        public int read(byte b[], int off, int len) throws IOException {
-            return is.read(b, off, len);
-        }
-
-        @Override
-        public long skip(long n) throws IOException {
-            return is.skip(n);
-        }
-
-        @Override
-        public int available() throws IOException {
-            return is.available();
-        }
-
-        @Override
-        public void mark(int readlimit) {
-            is.mark(readlimit);
-        }
-
-
-        @Override
-        public void reset() throws IOException {
-            is.reset();
-        }
-
-        @Override
-        public boolean markSupported() {
-            return is.markSupported();
-        }
-    }
-    
-    private static class NoCloseOutputStream extends OutputStream {
-        private OutputStream out;
-        
-        public NoCloseOutputStream(OutputStream out) {
-            this.out = out;
-        }
-        
-        @Override
-        public void write(int ch) throws IOException {
-            out.write(ch);
-        }
-
-        @Override
-        public void close() throws IOException {         
-            // Intentionally left empty. use closeOutput() to close
-        }
-        
-        @Override
-        public void write(byte b[]) throws IOException {
-            out.write(b);
-        }
-        
-        @Override
-        public void write(byte b[], int off, int len) throws IOException {
-            out.write(b, off, len);
-        }
-        
-        @Override
-        public void flush() throws IOException {
-            out.flush();
-        }
-        
-        public OutputStream getOutputStream() {
-            return out;
-        }
+    public WebServiceContextDelegate getWebServiceContextDelegate() {
+        return this;
     }
 
+    public Principal getUserPrincipal(Packet request) {
+        return null;
+    }
+
+    public boolean isUserInRole(Packet request, String role) {
+        return false;
+    }
+
+    public String getRequestMethod() {
+        return httpExchange.getRequestMethod();
+    }
+
+    public String getRequestHeader(String headerName) {
+        return httpExchange.getResponseHeaders().getFirst(headerName);
+    }
+
+    public String getQueryString() {
+        URI requestUri = httpExchange.getRequestURI();
+        String query = requestUri.getQuery();
+        if (query != null)
+            return query;
+        return null;
+    }
+
+    public String getPathInfo() {
+        URI requestUri = httpExchange.getRequestURI();
+        String reqPath = requestUri.getPath();
+        String ctxtPath = httpExchange.getHttpContext().getPath();
+        if (reqPath.length() > ctxtPath.length()) {
+            return reqPath.substring(ctxtPath.length());
+        }
+        return null;
+    }
 }

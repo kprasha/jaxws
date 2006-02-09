@@ -25,12 +25,11 @@ import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
-import com.sun.xml.ws.server.RuntimeContext;
-import com.sun.xml.ws.spi.runtime.StubBase;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
+import com.sun.xml.ws.server.RuntimeContext;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
@@ -296,7 +295,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         //apply parameter bindings
-        SOAPSEIModel model = eif.getRuntimeContext().getModel();
+        SOAPSEIModel model = eif.getModel();
         if (portName != null) {
             WSDLBoundPortTypeImpl binding = getPortModel(portName).getBinding();
             eif.setBindingID(binding.getBindingId());
@@ -307,9 +306,7 @@ public class WSServiceDelegate extends WSService {
         SEIStub pis = new SEIStub(this, binding, model, createPipeline(portName,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
-            new Class[]{
-                portInterface, BindingProvider.class, StubBase.class
-            }, pis));
+            new Class[]{ portInterface, BindingProvider.class }, pis));
     }
 
     /**
@@ -365,12 +362,9 @@ public class WSServiceDelegate extends WSService {
     //todo: valid port in wsdl
     private void addSEI(Class portInterface) throws WebServiceException {
         EndpointIFContext eifc = seiContext.get(portInterface);
-        if ((eifc == null) || (eifc.getRuntimeContext() == null)) {
-
-            if (eifc == null) {
-                eifc = new EndpointIFContext(portInterface);
-                seiContext.put(eifc.getSei(),eifc);
-            }
+        if (eifc == null) {
+            eifc = new EndpointIFContext(portInterface);
+            seiContext.put(eifc.getSei(),eifc);
 
             //toDo:
             QName portName = eifc.getPortName();
@@ -388,12 +382,12 @@ public class WSServiceDelegate extends WSService {
             modeler.setPortName(portName);
             AbstractSEIModelImpl model = modeler.buildRuntimeModel();
 
-            eifc.setRuntimeContext(new RuntimeContext(model));
+            eifc.setModel((SOAPSEIModel)model);
 
             // get handler information
             HandlerAnnotationInfo chainInfo =
                 HandlerAnnotationProcessor.buildHandlerInfo(portInterface,
-                    model.getServiceQName(), model.getPortName(), wsdlPort.getBinding().getBindingId());
+                    model.getServiceQName(), model.getPortName(), getBinding(wsdlPort.getName()));
 
             if (chainInfo != null) {
                 if(handlerResolver==null)

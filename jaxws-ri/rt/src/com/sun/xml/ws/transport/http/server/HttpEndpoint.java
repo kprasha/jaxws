@@ -21,183 +21,42 @@
 package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
-import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
+import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.server.ServerRtException;
-import com.sun.xml.ws.server.Tie;
-import com.sun.xml.ws.spi.runtime.WebServiceContext;
-import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import org.xml.sax.EntityResolver;
-
-import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.ws.Endpoint;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 /**
+ * Hides {@link HttpContext} so that {@link EndpointImpl}
+ * may load even without {@link HttpContext}.
+ *
+ * TODO: But what's the point? If Light-weight HTTP server isn't present,
+ * all the publish operations will fail way. Why is it better to defer
+ * the failure, as opposed to cause the failure as earyl as possible? -KK
  *
  * @author WS Development Team
  */
-public class HttpEndpoint {
-    
-    private static final Logger logger =
-        Logger.getLogger(
-            com.sun.xml.ws.util.Constants.LoggingDomain + ".server.http");
-    
+final class HttpEndpoint {
     private String address;
     private HttpContext httpContext;
-    private boolean published;
-    private RuntimeEndpointInfo endpointInfo;
-    
-    private static final int MAX_THREADS = 5;
-    
-    public HttpEndpoint(RuntimeEndpointInfo rtEndpointInfo) {
-        this.endpointInfo = rtEndpointInfo;
-        endpointInfo.setUrlPattern("");
-    }
-    
-    // If Service Name is in properties, set it on RuntimeEndpointInfo
-    private void setServiceName() {
-        Map<String, Object> properties = endpointInfo.getProperties();
-        if (properties != null) {
-            QName serviceName = (QName)properties.get(Endpoint.WSDL_SERVICE);
-            if (serviceName != null) {
-                endpointInfo.setServiceName(serviceName);
-            }
-        }
-    }
-    
-    // If WSDLPort Name is in properties, set it on RuntimeEndpointInfo
-    private void setPortName() {
-        Map<String, Object> properties = endpointInfo.getProperties();
-        if (properties != null) {
-            QName portName = (QName)properties.get(Endpoint.WSDL_PORT);
-            if (portName != null) {
-                endpointInfo.setPortName(portName);
-            }
-        }
+    private final HttpAdapter adapter;
+
+    public HttpEndpoint(WSEndpoint endpoint) {
+        this.adapter = new HttpAdapter(endpoint);
     }
 
-    /*
-     * Convert metadata sources using identity transform. So that we can
-     * reuse the Source object multiple times.
-     */
-    private void setDocInfo() throws MalformedURLException {
-        List<Source> metadata = endpointInfo.getMetadata();
-        if (metadata != null) {
-            Map<String, DocInfo> newMetadata = new HashMap<String, DocInfo>();
-            Transformer transformer = XmlUtil.newTransformer();
-            for(Source source: metadata) {
-                ByteArrayBuffer baos = new ByteArrayBuffer();
-                try {
-                    transformer.transform(source, new StreamResult(baos));
-                } catch (TransformerException te) {
-                    throw new ServerRtException("server.rt.err",te);
-                }
-                String systemId = source.getSystemId();
-                URL url = new URL(systemId);
-                EndpointDocInfo docInfo = new EndpointDocInfo(url, baos);
-                newMetadata.put(systemId, docInfo);
-            }
-            endpointInfo.setMetadata(newMetadata);
-        }
-    }
-    
-    // Finds primary WSDL
-    private void findPrimaryWSDL() throws Exception {
-        Map<String, DocInfo> metadata = endpointInfo.getDocMetadata();
-        if (metadata != null) {
-            for(Entry<String, DocInfo> entry: metadata.entrySet()) {
-                DocInfo docInfo = entry.getValue();
-                if (docInfo.getService() != null) {
-                    // Donot generate any WSDL or Schema document
-                    URL wsdlUrl = new URL(entry.getKey());
-                    EntityResolver resolver = new EndpointEntityResolver(metadata);
-                    endpointInfo.setWsdlInfo(wsdlUrl, resolver);
-                    docInfo.setQueryString("wsdl");
-                    break;
-                }
-            }
-        }
-    }
-    
-    /*
-     * Fills RuntimeEndpointInfo with ServiceName, and PortName from properties
-     */
-    public void fillEndpointInfo() throws Exception {
-        // set Service Name from properties on RuntimeEndpointInfo
-        setServiceName();
-        
-        // set WSDLPort Name from properties on RuntimeEndpointInfo
-        setPortName();
-        
-        // Sets the correct Service Name
-        endpointInfo.doServiceNameProcessing();
-        
-        // Sets the correct WSDLPort Name
-        endpointInfo.doPortNameProcessing();
-        
-        // Sets the PortType Name
-        endpointInfo.doPortTypeNameProcessing();
-        
-        // Creates DocInfo from metadata and sets it on RuntimeEndpointinfo
-        setDocInfo();
-        
-        // Fill DocInfo with docuent info : WSDL or Schema, targetNS etc.
-        RuntimeEndpointInfo.fillDocInfo(endpointInfo);
-        
-        // Finds primary WSDL from metadata documents
-        findPrimaryWSDL();
-        
-    }
-    
-    /*
-     * Generates necessary WSDL and Schema documents
-     */
-    public void generateWSDLDocs() {
-        if (endpointInfo.needWSDLGeneration()) {
-            endpointInfo.generateWSDL();
-        }
-    }
-    
     public void publish(String address) {
-        try {
-            this.address = address;
-            httpContext = ServerMgr.getInstance().createContext(address);
-            try {
-                publish(httpContext);
-            } catch(Exception e) {
-                ServerMgr.getInstance().removeContext(httpContext);
-                throw e;
-            }
-        } catch(Exception e) {
-            throw new ServerRtException("server.rt.err", e );
-        }
+        this.address = address;
+        httpContext = ServerMgr.getInstance().createContext(address);
+        publish(httpContext);
     }
 
     public void publish(Object serverContext) {
         if (!(serverContext instanceof HttpContext)) {
-            throw new ServerRtException("not.HttpContext.type",
-                new Object[] { serverContext.getClass() });
+            throw new ServerRtException("not.HttpContext.type", serverContext.getClass());
         }
-        
+
         this.httpContext = (HttpContext)serverContext;
-        try {
-            publish(httpContext);
-        } catch(Exception e) {
-            throw new ServerRtException("server.rt.err", new Object[] { e } );
-        }
-        published = true;
+        publish(httpContext);
     }
 
     public void stop() {
@@ -209,24 +68,13 @@ public class HttpEndpoint {
             // Remove HttpContext created by JAXWS runtime 
             ServerMgr.getInstance().removeContext(httpContext);
         }
-        
+
         // Invoke WebService Life cycle method
-        endpointInfo.endService();
-        published = false;
+        adapter.getEndpoint().dispose();
     }
 
-    private void publish (HttpContext context) throws Exception {
-        fillEndpointInfo();
-        endpointInfo.init();
-        generateWSDLDocs();
-        RuntimeEndpointInfo.publishWSDLDocs(endpointInfo);
-        logger.fine("Doc Metadata="+endpointInfo.getDocMetadata());
-        WebServiceContext wsContext = new WebServiceContextImpl();
-        endpointInfo.setWebServiceContext(wsContext);
-        endpointInfo.injectContext();
-        endpointInfo.beginService();
-        Tie tie = new Tie();
-        context.setHandler(new WSHttpHandler(tie, endpointInfo));
-    }       
-    
+    private void publish (HttpContext context) {
+        context.setHandler(new WSHttpHandler(adapter));
+    }
+
 }

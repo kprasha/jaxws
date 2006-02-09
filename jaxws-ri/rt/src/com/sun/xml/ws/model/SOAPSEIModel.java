@@ -34,9 +34,7 @@ import com.sun.xml.ws.encoding.soap.message.FaultReasonText;
 import com.sun.xml.ws.encoding.soap.message.FaultSubcode;
 import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
-import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.ws.server.ServerRtException;
-import com.sun.xml.ws.util.MessageInfoUtil;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -235,17 +233,6 @@ public class SOAPSEIModel extends AbstractSEIModelImpl {
         return im;
     }
     
-    // currently adds not understood header blocks if there are any
-    public static void addHeaders(InternalMessage message, MessageInfo mi) {
-        Set<HeaderBlock> notUnderstoodHeaders =
-            MessageInfoUtil.getNotUnderstoodHeaders(mi);
-        if (notUnderstoodHeaders != null) {
-            for (HeaderBlock block : notUnderstoodHeaders) {
-                message.addHeader(block);
-            }
-        }
-    }
-
     private static SOAP12FaultInfo createSOAP12FaultInfo(Throwable e, String role, String node, Object detail) {
         SOAPFaultException soapFaultException = null;
         FaultCode code = null;

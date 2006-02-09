@@ -20,7 +20,6 @@
 package com.sun.xml.ws.wsdl.writer;
 
 
-import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.bind.api.JAXBRIContext;
 import static com.sun.xml.bind.v2.schemagen.Util.*;
 import com.sun.xml.txw2.TXW;
@@ -28,10 +27,18 @@ import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.txw2.output.ResultFactory;
 import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
+import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
+import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.wsdl.parser.SOAPConstants;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import com.sun.xml.ws.wsdl.writer.document.Binding;
@@ -52,18 +59,9 @@ import com.sun.xml.ws.wsdl.writer.document.soap.BodyType;
 import com.sun.xml.ws.wsdl.writer.document.soap.Header;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPAddress;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
-import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.JavaMethod;
 
-
-import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.model.ParameterImpl;
-import com.sun.xml.ws.model.CheckedExceptionImpl;
-import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import javax.jws.soap.SOAPBinding.Use;
 import javax.jws.soap.SOAPBinding.Style;
-
-
+import javax.jws.soap.SOAPBinding.Use;
 import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
@@ -202,7 +200,7 @@ public class WSDLGenerator {
         this.extension = new WSDLGeneratorExtensionFacade(extensions);
     }
 
-     /**
+    /**
      * Performes the actual WSDL generation
      */
     public void doGeneration() {
@@ -312,8 +310,7 @@ public class WSDLGenerator {
      */
     protected void generateMessages() {
         for (JavaMethodImpl method : model.getJavaMethods()) {
-            if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding)
-                generateSOAPMessages(method, (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding());
+            generateSOAPMessages(method, method.getBinding());
         }
     }
 
@@ -390,7 +387,7 @@ public class WSDLGenerator {
                 }
             }
         }
-        for (CheckedExceptionImpl exception : ((List<CheckedExceptionImpl>)method.getCheckedExceptions())) {
+        for (CheckedExceptionImpl exception : (List<CheckedExceptionImpl>) method.getCheckedExceptions()) {
             QName tagName = exception.getDetailType().tagName;
             if (processedExceptions.contains(tagName))
                 continue;
@@ -425,7 +422,7 @@ public class WSDLGenerator {
                     break;
             }
             // faults
-            for (CheckedExceptionImpl exception : ((List<CheckedExceptionImpl>)method.getCheckedExceptions())) {
+            for (CheckedExceptionImpl exception : (List<CheckedExceptionImpl>) method.getCheckedExceptions()) {
                 QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
                 FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
@@ -453,9 +450,7 @@ public class WSDLGenerator {
      * @return true if method is rpc/literal, otherwise, false
      */    
     protected boolean isRpcLit(JavaMethodImpl method) {
-        if (method.getBinding().getStyle()==Style.RPC)
-            return true;
-        return false;
+        return method.getBinding().getStyle() == Style.RPC;
     }
 
     /**
@@ -501,7 +496,7 @@ public class WSDLGenerator {
     /**
      * Generates the parameterOrder for a PortType operation
      * @param operation the operation to generate the parameterOrder for
-     * @param method the {@link JavaMetho} to generate the parameterOrder from
+     * @param method the {@link JavaMethod} to generate the parameterOrder from
      */    
     protected void generateDocumentParameterOrder(Operation operation, JavaMethodImpl method) {
         String partName;
@@ -597,21 +592,11 @@ public class WSDLGenerator {
         return paramBinding.isBody();
     }
 
-    /**
-     * 
-     * @param parameter 
-     * @return 
-     */    
     protected boolean isHeaderParameter(ParameterImpl parameter) {
         ParameterBinding paramBinding = parameter.getBinding();
         return paramBinding.isHeader();
     }
 
-    /**
-     * 
-     * @param parameter 
-     * @return 
-     */
     protected boolean isAttachmentParameter(ParameterImpl parameter) {
         ParameterBinding paramBinding = parameter.getBinding();
         return paramBinding.isAttachment();
@@ -628,25 +613,23 @@ public class WSDLGenerator {
         boolean first = true;
         for (JavaMethodImpl method : model.getJavaMethods()) {
             if (first) {
-                if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-                    com.sun.xml.ws.api.model.soap.SOAPBinding sBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
-                    SOAPVersion soapVersion = sBinding.getSOAPVersion();
+                SOAPBinding sBinding = method.getBinding();
+                SOAPVersion soapVersion = sBinding.getSOAPVersion();
 
-                    if(soapVersion.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
-                        com.sun.xml.ws.wsdl.writer.document.soap12.SOAPBinding soapBinding = binding.soap12Binding();
-                        soapBinding.transport(SOAP12_HTTP_TRANSPORT);
-                        if (sBinding.getStyle().equals(Style.DOCUMENT))
-                            soapBinding.style(DOCUMENT);
-                        else
-                            soapBinding.style(RPC);
-                    }else{
-                        com.sun.xml.ws.wsdl.writer.document.soap.SOAPBinding soapBinding = binding.soapBinding();
-                        soapBinding.transport(SOAP_HTTP_TRANSPORT);
-                        if (sBinding.getStyle().equals(Style.DOCUMENT))
-                            soapBinding.style(DOCUMENT);
-                        else
-                            soapBinding.style(RPC);
-                    }
+                if(soapVersion.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
+                    com.sun.xml.ws.wsdl.writer.document.soap12.SOAPBinding soapBinding = binding.soap12Binding();
+                    soapBinding.transport(SOAP12_HTTP_TRANSPORT);
+                    if (sBinding.getStyle().equals(Style.DOCUMENT))
+                        soapBinding.style(DOCUMENT);
+                    else
+                        soapBinding.style(RPC);
+                }else{
+                    com.sun.xml.ws.wsdl.writer.document.soap.SOAPBinding soapBinding = binding.soapBinding();
+                    soapBinding.transport(SOAP_HTTP_TRANSPORT);
+                    if (sBinding.getStyle().equals(Style.DOCUMENT))
+                        soapBinding.style(DOCUMENT);
+                    else
+                        soapBinding.style(RPC);
                 }
                 first = false;
             }
@@ -657,11 +640,6 @@ public class WSDLGenerator {
         }
     }
 
-    /**
-     * 
-     * @param method 
-     * @param binding 
-     */    
     protected void generateBindingOperation(JavaMethodImpl method, Binding binding) {
 //        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         BindingOperationType operation = binding.operation().name(method.getOperationName());
@@ -671,189 +649,182 @@ public class WSDLGenerator {
 //        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
         QName requestMessage = new QName(targetNamespace, method.getOperationName());
         QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
-        if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-            List<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
-            List<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
-            splitParameters(bodyParams, headerParams, method.getRequestParameters());
-            com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
-            operation.soapOperation().soapAction(soapBinding.getSOAPAction());
 
-            // input
-            TypedXmlWriter input = operation.input();
-            extension.addBindingOperationInputExtension(input, method.getMethod());
-            BodyType body = input._element(Body.class);
-            boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
-            if (soapBinding.getUse().equals(Use.LITERAL)) {
-                body.use(LITERAL);
-                if (headerParams.size() > 0) {
-                    ParameterImpl param = bodyParams.iterator().next();
-                    if (isRpc) {
-                        StringBuffer parts = new StringBuffer();
-                        int i=0;
-                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                            if (i++>0)
-                                parts.append(' ');
-                            parts.append(parameter.getPartName());
-                        }
-                        body.parts(parts.toString());
-                    } else if (param.isWrapperStyle()) {
-                        body.parts(PARAMETERS);
-                    } else {
-                       body.parts(param.getPartName());
-                    }
-                    generateSOAPHeaders(input, headerParams, requestMessage);
-                }
-                if (isRpc) {
-                    body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
-                }
-            } else {
-                // TODO localize this
-                throw new WebServiceException("encoded use is not supported");
-            }
+        List<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
+        List<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
+        splitParameters(bodyParams, headerParams, method.getRequestParameters());
+        SOAPBinding soapBinding = method.getBinding();
+        operation.soapOperation().soapAction(soapBinding.getSOAPAction());
 
-            if (method.getMEP() != MEP.ONE_WAY) {
-                boolean unwrappable = headerParams.size() == 0;
-                // output
-                bodyParams.clear();
-                headerParams.clear();
-                splitParameters(bodyParams, headerParams, method.getResponseParameters());
-                unwrappable = unwrappable ? headerParams.size() == 0 : unwrappable;
-                TypedXmlWriter output = operation.output();
-                extension.addBindingOperationOutputExtension(output, method.getMethod());
-                body = output._element(Body.class);
-                body.use(LITERAL);
-                if (headerParams.size() > 0) {
-                    ParameterImpl param = bodyParams.iterator().hasNext() ? bodyParams.iterator().next() : null;
-                    String parts = "";
-                    if (isRpc) {
-                        int i=0;
-                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                            if (i++>0)
-                                parts += " ";
-                            parts += parameter.getPartName();
-                        }
-                    } else {
-                        if (param != null) {
-                            if (param.isWrapperStyle()) {
-                                // if its not really wrapper style dont use the same name as input message
-                                if (unwrappable)
-                                    parts = RESULT;
-                                else
-                                    parts = UNWRAPPABLE_RESULT;
-                            } else {
-                                parts = param.getPartName();
-                            }
-                        } 
-                    }
-                    body.parts(parts);
-                    generateSOAPHeaders(output, headerParams, responseMessage);
-                }
+        // input
+        TypedXmlWriter input = operation.input();
+        extension.addBindingOperationInputExtension(input, method.getMethod());
+        BodyType body = input._element(Body.class);
+        boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
+        if (soapBinding.getUse()==Use.LITERAL) {
+            body.use(LITERAL);
+            if (bodyParams.size() > 0) {
+                ParameterImpl param = bodyParams.iterator().next();
                 if (isRpc) {
-                    body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
+                    StringBuffer parts = new StringBuffer();
+                    int i=0;
+                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        if (i++>0)
+                            parts.append(' ');
+                        parts.append(parameter.getPartName());
+                    }
+                    body.parts(parts.toString());
+                } else if (param.isWrapperStyle()) {
+                    body.parts(PARAMETERS);
+                } else {
+                   body.parts(param.getPartName());
                 }
+                generateSOAPHeaders(input, headerParams, requestMessage);
             }
-            for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
-                QName tagName = exception.getDetailType().tagName;
-                Fault fault = operation.fault().name(tagName.getLocalPart());
-                SOAPFault soapFault = fault._element(SOAPFault.class).name(tagName.getLocalPart());
+            if (isRpc) {
+                body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
+            }
+        } else {
+            // TODO localize this
+            throw new WebServiceException("encoded use is not supported");
+        }
+
+        if (method.getMEP() != MEP.ONE_WAY) {
+            boolean unwrappable = headerParams.size() == 0;
+            // output
+            bodyParams.clear();
+            headerParams.clear();
+            splitParameters(bodyParams, headerParams, method.getResponseParameters());
+            unwrappable = unwrappable ? headerParams.size() == 0 : unwrappable;
+            TypedXmlWriter output = operation.output();
+            extension.addBindingOperationOutputExtension(output, method.getMethod());
+            body = output._element(Body.class);
+            body.use(LITERAL);
+            if (headerParams.size() > 0) {
+                ParameterImpl param = bodyParams.iterator().hasNext() ? bodyParams.iterator().next() : null;
+                String parts = "";
+                if (isRpc) {
+                    int i=0;
+                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        if (i++>0)
+                            parts += " ";
+                        parts += parameter.getPartName();
+                    }
+                } else {
+                    if (param != null) {
+                        if (param.isWrapperStyle()) {
+                            // if its not really wrapper style dont use the same name as input message
+                            if (unwrappable)
+                                parts = RESULT;
+                            else
+                                parts = UNWRAPPABLE_RESULT;
+                        } else {
+                            parts = param.getPartName();
+                        }
+                    }
+                }
+                body.parts(parts);
+                generateSOAPHeaders(output, headerParams, responseMessage);
+            }
+            if (isRpc) {
+                body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
+            }
+        }
+        for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
+            QName tagName = exception.getDetailType().tagName;
+            Fault fault = operation.fault().name(tagName.getLocalPart());
+            SOAPFault soapFault = fault._element(SOAPFault.class).name(tagName.getLocalPart());
 //                extension.addBindingOperationFaultExtension(fault, method.getMethod(), exception);
-                soapFault.use(LITERAL);
-            }
+            soapFault.use(LITERAL);
         }
     }
 
-    /**
-     * 
-     * @param method 
-     * @param binding 
-     */    
     protected void generateSOAP12BindingOperation(JavaMethodImpl method, Binding binding) {
         BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         String targetNamespace = model.getTargetNamespace();
         QName requestMessage = method.getOperation().getName();
         QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
-        if (method.getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-            ArrayList<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
-            ArrayList<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
-            splitParameters(bodyParams, headerParams, method.getRequestParameters());
-            com.sun.xml.ws.api.model.soap.SOAPBinding soapBinding = (com.sun.xml.ws.api.model.soap.SOAPBinding)method.getBinding();
-            operation.soap12Operation().soapAction(soapBinding.getSOAPAction());
 
-            // input
-            TypedXmlWriter input = operation.input();
+        ArrayList<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
+        ArrayList<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
+        splitParameters(bodyParams, headerParams, method.getRequestParameters());
+        SOAPBinding soapBinding = method.getBinding();
+        operation.soap12Operation().soapAction(soapBinding.getSOAPAction());
 
-            com.sun.xml.ws.wsdl.writer.document.soap12.BodyType body = input._element(com.sun.xml.ws.wsdl.writer.document.soap12.Body.class);
-            boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
-            if (soapBinding.getUse().equals(Use.LITERAL)) {
-                body.use(LITERAL);
-                if (headerParams.size() > 0) {
-                    ParameterImpl param = bodyParams.iterator().next();
-                    if (isRpc) {
-                        StringBuffer parts = new StringBuffer();
-                        int i=0;
-                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                            if (i++>0)
-                                parts.append(' ');
-                            parts.append(parameter.getPartName());
-                        }
-                        body.parts(parts.toString());
-                    } else if (param.isWrapperStyle()) {
-                        body.parts(PARAMETERS);
-                    } else {
-                       body.parts(param.getPartName());
-                    }
-                    generateSOAP12Headers(input, headerParams, requestMessage);
-                }
+        // input
+        TypedXmlWriter input = operation.input();
+
+        com.sun.xml.ws.wsdl.writer.document.soap12.BodyType body = input._element(com.sun.xml.ws.wsdl.writer.document.soap12.Body.class);
+        boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
+        if (soapBinding.getUse().equals(Use.LITERAL)) {
+            body.use(LITERAL);
+            if (headerParams.size() > 0) {
+                ParameterImpl param = bodyParams.iterator().next();
                 if (isRpc) {
-                    body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
-                }
-            } else {
-                // TODO localize this
-                throw new WebServiceException("encoded use is not supported");
-            }
-
-            if (method.getMEP() != MEP.ONE_WAY) {
-                // output
-                boolean unwrappable = headerParams.size() == 0;
-                bodyParams.clear();
-                headerParams.clear();
-                splitParameters(bodyParams, headerParams, method.getResponseParameters());
-                unwrappable = unwrappable ? headerParams.size() == 0 : unwrappable;
-                TypedXmlWriter output = operation.output();
-                body = output._element(com.sun.xml.ws.wsdl.writer.document.soap12.Body.class);
-                body.use(LITERAL);
-                if (headerParams.size() > 0) {
-                    ParameterImpl param = bodyParams.iterator().next();
-                    if (isRpc) {
-                        String parts = "";
-                        int i=0;
-                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                            if (i++>0)
-                                parts += " ";
-                            parts += parameter.getPartName();
-                        }
-                        body.parts(parts);
-                    } else if (param.isWrapperStyle()) {
-                        // if its not really wrapper style dont use the same name as input message
-                        if (unwrappable)
-                            body.parts(RESULT);
-                        else
-                            body.parts(UNWRAPPABLE_RESULT);
-                    } else {
-                        body.parts(param.getPartName());
+                    StringBuffer parts = new StringBuffer();
+                    int i=0;
+                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        if (i++>0)
+                            parts.append(' ');
+                        parts.append(parameter.getPartName());
                     }
-                    generateSOAP12Headers(output, headerParams, responseMessage);
+                    body.parts(parts.toString());
+                } else if (param.isWrapperStyle()) {
+                    body.parts(PARAMETERS);
+                } else {
+                   body.parts(param.getPartName());
                 }
+                generateSOAP12Headers(input, headerParams, requestMessage);
+            }
+            if (isRpc) {
+                body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
+            }
+        } else {
+            // TODO localize this
+            throw new WebServiceException("encoded use is not supported");
+        }
+
+        if (method.getMEP() != MEP.ONE_WAY) {
+            // output
+            boolean unwrappable = headerParams.size() == 0;
+            bodyParams.clear();
+            headerParams.clear();
+            splitParameters(bodyParams, headerParams, method.getResponseParameters());
+            unwrappable = unwrappable ? headerParams.size() == 0 : unwrappable;
+            TypedXmlWriter output = operation.output();
+            body = output._element(com.sun.xml.ws.wsdl.writer.document.soap12.Body.class);
+            body.use(LITERAL);
+            if (headerParams.size() > 0) {
+                ParameterImpl param = bodyParams.iterator().next();
                 if (isRpc) {
-                    body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
+                    String parts = "";
+                    int i=0;
+                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                        if (i++>0)
+                            parts += " ";
+                        parts += parameter.getPartName();
+                    }
+                    body.parts(parts);
+                } else if (param.isWrapperStyle()) {
+                    // if its not really wrapper style dont use the same name as input message
+                    if (unwrappable)
+                        body.parts(RESULT);
+                    else
+                        body.parts(UNWRAPPABLE_RESULT);
+                } else {
+                    body.parts(param.getPartName());
                 }
+                generateSOAP12Headers(output, headerParams, responseMessage);
             }
-            for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
-                QName tagName = exception.getDetailType().tagName;
-                Fault fault = operation.fault().name(tagName.getLocalPart());
-                com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault soapFault = fault._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault.class).name(tagName.getLocalPart());
-                soapFault.use(LITERAL);
+            if (isRpc) {
+                body.namespace(method.getRequestParameters().iterator().next().getName().getNamespaceURI());
             }
+        }
+        for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
+            QName tagName = exception.getDetailType().tagName;
+            Fault fault = operation.fault().name(tagName.getLocalPart());
+            com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault soapFault = fault._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault.class).name(tagName.getLocalPart());
+            soapFault.use(LITERAL);
         }
     }
 
@@ -920,14 +891,13 @@ public class WSDLGenerator {
         extension.addPortExtension(port);
         if (model.getJavaMethods().size() == 0)
             return;
-        if (model.getJavaMethods().iterator().next().getBinding() instanceof com.sun.xml.ws.api.model.soap.SOAPBinding) {
-            if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
-                com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress address = port._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress.class);
-                address.location(REPLACE_WITH_ACTUAL_URL);
-            }else{
-                SOAPAddress address = port._element(SOAPAddress.class);
-                address.location(REPLACE_WITH_ACTUAL_URL);
-            }
+
+        if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
+            com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress address = port._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress.class);
+            address.location(REPLACE_WITH_ACTUAL_URL);
+        }else{
+            SOAPAddress address = port._element(SOAPAddress.class);
+            address.location(REPLACE_WITH_ACTUAL_URL);
         }
     }
 

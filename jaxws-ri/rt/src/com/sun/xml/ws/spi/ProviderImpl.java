@@ -53,7 +53,7 @@ public class ProviderImpl extends Provider {
     @Override
     public Endpoint createAndPublishEndpoint(String address,
                                              Object implementor) {
-        Endpoint endpoint = new EndpointImpl(null, implementor);
+        Endpoint endpoint = new EndpointImpl((String)null, implementor);
         endpoint.publish(address);
         return endpoint;
     }

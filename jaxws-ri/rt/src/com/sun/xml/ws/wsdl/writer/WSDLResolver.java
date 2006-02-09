@@ -25,12 +25,18 @@ import javax.xml.ws.Holder;
 
 /**
  *
+ *
+ * TODO: please document! -KK
+ *   for example,
+ *      1) how the errors were supposed to be reported?
+ *      2) what are "filenames"? are they absolute?
+ *
  * @author WS Development Team
  */
 public interface WSDLResolver {
     public Result getWSDL(String suggestedFilename);
 
-    /*
+    /**
      * Updates filename if the suggested filename need to be changed in
      * wsdl:import
      *
@@ -38,7 +44,7 @@ public interface WSDLResolver {
      */
     public Result getAbstractWSDL(Holder<String> filename);
 
-    /*
+    /**
      * Updates filename if the suggested filename need to be changed in
      * xsd:import
      *

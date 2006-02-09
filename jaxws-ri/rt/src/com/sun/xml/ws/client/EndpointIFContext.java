@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the "License").  You may not use this file except
  * in compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://jwsdp.dev.java.net/CDDLv1.0.html
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * HEADER in each file and include the License file at
  * https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
@@ -22,6 +22,9 @@ package com.sun.xml.ws.client;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.server.RuntimeContext;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.SOAPSEIModel;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
 
 import javax.xml.namespace.QName;
 
@@ -31,7 +34,6 @@ import javax.xml.namespace.QName;
  */
 public class EndpointIFContext {
 
-    private RuntimeContext runtimeContext; //from annotationPro ess
     private Class serviceInterface;    //prop can take out
     private QName serviceName;
     private final Class sei;
@@ -39,17 +41,11 @@ public class EndpointIFContext {
     private EndpointAddress endpointAddress;
     private String bindingId;
 
+    private SOAPSEIModel model;
+
 
     public EndpointIFContext(Class sei) {
         this.sei = sei;
-    }
-
-    public RuntimeContext getRuntimeContext() {
-        return runtimeContext;
-    }
-
-    public void setRuntimeContext(RuntimeContext runtimeContext) {
-        this.runtimeContext = runtimeContext;
     }
 
     public Class getServiceInterface() {
@@ -65,10 +61,10 @@ public class EndpointIFContext {
     }
 
     public QName getPortName() {
-        if (portName == null){
-        if ((runtimeContext != null) && (runtimeContext.getModel() != null))
-            portName = runtimeContext.getModel().getPortName();
-        } 
+        if (portName == null && model!=null){
+            // TODO: I can instinctively tell that something is wrong with this!
+            portName = model.getPortName();
+        }
         return portName;
     }
 
@@ -102,5 +98,13 @@ public class EndpointIFContext {
 
     public void setBindingID(String bindingId) {
         this.bindingId = bindingId;
+    }
+
+    public SOAPSEIModel getModel() {
+        return model;
+    }
+
+    public void setModel(SOAPSEIModel model) {
+        this.model = model;
     }
 }

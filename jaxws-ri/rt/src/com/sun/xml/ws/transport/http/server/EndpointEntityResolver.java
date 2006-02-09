@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  *
  * @author WS Developement Team
  */
-public class EndpointEntityResolver implements EntityResolver {
+final class EndpointEntityResolver implements EntityResolver {
 
     private EntityResolver catalogResolver;
     private Map<String, DocInfo> metadata;

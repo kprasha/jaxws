@@ -18,6 +18,12 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.spi.runtime;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.util.PropertySet.Property;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.handler.MessageContext;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -25,22 +31,12 @@ import java.util.Map;
 
 
 /**
- * Captures many transports that are used to talk with WS endpoints.
- * 
- * For endpoints deployed in light weight http server in J2SE, the implemenation
- * of this class uses HttpTransaction to read from or write to stream.
+ * The view of an HTTP exchange from the point of view of JAX-WS.
  *
- * For endpoints deployed in servlet container, the implementation of this
- * class uses HttpServletRequest to read a request, and uses HttpServletResponse
- * to write response.
- *
- * This also works for local transport, JMS transport.
- *
- * Runtime can access to the implementation of this interface using
- * messageInfo.getConnection()
- * 
+ * <p>
+ * Different HTTP server layer uses different implementations of this class
+ * so that JAX-WS can be shielded from individuality of such layers.
  */
-
 public interface WSConnection {
     
     public static final int OK=200;
@@ -48,55 +44,98 @@ public interface WSConnection {
     public static final int UNSUPPORTED_MEDIA=415;
     public static final int MALFORMED_XML=400;
     public static final int INTERNAL_ERR=500;
-    
+
     /**
-     * returns transport headers
-     * @return transport headers
+     * This is an opportunity for {@link WSConnection} to fill in a {@link Packet}
+     * additional transport-specific properties.
      */
-    public Map<String,List<String>> getHeaders();
-    
+    void wrapUpRequestPacket(Packet p);
+
     /**
      * sets transport headers
      */
-    public void setHeaders(Map<String,List<String>> headers);
+    void setResponseHeaders(Map<String,List<String>> headers);
     
     /**
      * sets the transport status code like <code>OK</code>
      */
-    public void setStatus(int status);
-    
-    /**
-     * @return return the status code
-     */
-    public int getStatus();
-    
+    void setStatus(int status);
+
     /**
      * Transport's underlying input stream
      * @return Transport's underlying input stream
      */
-    public InputStream getInput();
+    InputStream getInput();
     
     /**
      * Closes transport's input stream
      */
-    public void closeInput();
+    void closeInput();
     
     /**
      * Transport's underlying output stream
      * @return Transport's underlying output stream
      */
-    public OutputStream getOutput();
+    OutputStream getOutput();
     
     /**
      * Closes transport's output stream
      */
-    public void closeOutput();
-    
-    public OutputStream getDebug();
-    
+    void closeOutput();
+
     /**
      * Closes transport connection
      */
-    public void close();
-    
+    void close();
+
+    /**
+     * Returns the {@link WebServiceContextDelegate} for this connection.
+     */
+    WebServiceContextDelegate getWebServiceContextDelegate();
+
+    /**
+     * HTTP request method, such as "GET" or "POST".
+     */
+    @Property(javax.xml.ws.handler.MessageContext.HTTP_REQUEST_METHOD)
+    String getRequestMethod();
+
+    /**
+     * HTTP request headers.
+     *
+     * @deprecated
+     *      This is a potentially expensive operation.
+     *      Programs that want to access HTTP headers should consider using
+     *      other methods.
+     *
+     * @return
+     *      can be empty but never null.
+     */
+    @Property(MessageContext.HTTP_REQUEST_HEADERS)
+    Map<String, List<String>> getRequestHeaders();
+
+    /**
+     * Gets an HTTP request header.
+     *
+     * <p>
+     * if multiple headers are present, this method returns one of them.
+     * (The implementation is free to choose which one it returns.)
+     *
+     * @return
+     *      null if no header exists.
+     */
+    String getRequestHeader(String headerName);
+
+    /**
+     * HTTP Query string, such as "foo=bar", or null if none exists.
+     */
+    @Property(MessageContext.QUERY_STRING)
+    String getQueryString();
+
+    /**
+     * Requested path. A string like "/foo/bar/baz".
+     *
+     * @see HttpServletRequest#getPathInfo()
+     */
+    @Property(MessageContext.PATH_INFO)
+    String getPathInfo();
 }

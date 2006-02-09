@@ -19,21 +19,22 @@
  */
 package com.sun.xml.ws.server.sei;
 
-import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
+import com.sun.xml.ws.sandbox.server.InstanceResolver;
 
+import javax.xml.namespace.QName;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.xml.namespace.QName;
 
 /**
  * This pipe is used to invoke SEI based endpoints. 
@@ -44,7 +45,8 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SEIInvokerPipe");
-    private final RuntimeEndpointInfo endpointInfo;
+    private final AbstractSEIModelImpl model;
+    private final InstanceResolver instanceResolver;
     /**
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
@@ -52,15 +54,14 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
     private final Map<Method, EndpointMethodHandler> methodHandlers = new HashMap<Method, EndpointMethodHandler>();
     private static final QName EMPTY_QNAME = new QName("");
 
-    public SEIInvokerPipe(RuntimeEndpointInfo endpointInfo) {
-        this.endpointInfo = endpointInfo;
-
-        AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();
+    public SEIInvokerPipe(AbstractSEIModelImpl model,InstanceResolver instanceResolver, WSBinding binding) {
+        this.model = model;
+        this.instanceResolver = instanceResolver;
 
         // fill in methodHandlers.
         // first fill in sychronized versions
-        for( JavaMethodImpl m : seiModel.getJavaMethods() ) {
-            EndpointMethodHandler handler = new EndpointMethodHandler(endpointInfo, m);
+        for( JavaMethodImpl m : model.getJavaMethods() ) {
+            EndpointMethodHandler handler = new EndpointMethodHandler(model,m,binding);
             methodHandlers.put(m.getMethod(),handler);
         }
     }
@@ -82,12 +83,11 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
             ? EMPTY_QNAME
             : new QName(msg.getPayloadNamespaceURI(), localPart);
 
-        AbstractSEIModelImpl seiModel = endpointInfo.getRuntimeModel();
-        JavaMethodImpl javaMethod = seiModel.getJavaMethod(opName);
+        JavaMethodImpl javaMethod = model.getJavaMethod(opName);
         Method method = javaMethod.getMethod();
 
         EndpointMethodHandler handler = methodHandlers.get(method);
-        Object servant = endpointInfo.getImplementor();
+        Object servant = instanceResolver.resolve(req);
         Packet res = handler.invoke(servant, msg);
         res.invocationProperties.putAll(req.invocationProperties);
 

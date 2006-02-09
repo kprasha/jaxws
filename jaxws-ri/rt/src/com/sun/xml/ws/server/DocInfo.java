@@ -26,7 +26,7 @@ import java.net.URL;
 
 public interface DocInfo {
     
-    public enum DOC_TYPE { WSDL, SCHEMA, OTHER };
+    public enum DOC_TYPE { WSDL, SCHEMA, OTHER }
     
     /*
      * The implemenation needs to work for multiple invocations of this method

@@ -193,7 +193,7 @@ abstract class EndpointArgumentsBuilder {
 
         public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException {
             com.sun.xml.ws.api.message.Header header =
-                msg.getHeaders().get(headerName.getNamespaceURI(), headerName.getLocalPart());
+                msg.getHeaders().get(headerName);
 
             if(header!=null) {
                 setter.put( header.readAsJAXB(bridge,context), args );

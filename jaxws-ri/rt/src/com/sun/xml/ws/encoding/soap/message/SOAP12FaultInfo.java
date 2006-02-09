@@ -20,17 +20,10 @@
 
 package com.sun.xml.ws.encoding.soap.message;
 
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
-import com.sun.xml.ws.encoding.soap.SOAPEncoder;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.server.RuntimeContext;
-import com.sun.xml.ws.server.ServerRtException;
-import com.sun.xml.ws.streaming.DOMStreamReader;
-import com.sun.xml.ws.util.MessageInfoUtil;
 import com.sun.xml.ws.util.SOAPUtil;
 import org.w3c.dom.Node;
 
@@ -177,55 +170,57 @@ public class SOAP12FaultInfo extends SOAPFaultInfo {
     }
 
 
-    public void write(XMLStreamWriter writer, MessageInfo mi) {
-        try {
-            writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
-                    SOAP12Constants.QNAME_SOAP_FAULT.getLocalPart(),
-                    SOAP12Constants.QNAME_SOAP_FAULT.getNamespaceURI());
-            // Writing NS since this may be called without writing envelope
-            writer.writeNamespace(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
-                    SOAP12Constants.QNAME_SOAP_FAULT.getNamespaceURI());
-
-            code.write(writer); //<soapenv:Code> ... </soapenv:Code>
-            reason.write(writer);
-
-
-            //<soapenv:Node>...</soapenv:Node>
-            if (node != null) {
-                writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
-                        SOAP12Constants.QNAME_FAULT_NODE.getLocalPart(), SOAP12NamespaceConstants.ENVELOPE);
-                writer.writeCharacters(node);
-                writer.writeEndElement();
-            }
-
-            //<soapenv:Role>...</soapenv:Role>
-            if (role != null) {
-                writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
-                        SOAP12Constants.QNAME_FAULT_ROLE.getLocalPart(), SOAP12NamespaceConstants.ENVELOPE);
-                writer.writeCharacters(role);
-                writer.writeEndElement();
-            }
-
-            //<soapenv:Detail>...</soapenv:Detail>
-            if (detail != null) {
-                // Not RuntimeException, Not header soapFault
-                if (detail instanceof Detail) {
-                    // SOAPFaultException
-                    SOAPEncoder.serializeReader(new DOMStreamReader((Detail) detail), writer);
-                } else if (detail instanceof JAXBBridgeInfo) {
-                    // Service specific exception
-                    startDetailElement(writer);     // <soapenv:Detail>
-                    RuntimeContext rtCtxt = MessageInfoUtil.getRuntimeContext(mi);
-                    BridgeContext bridgeContext = rtCtxt.getBridgeContext();
-                    ((JAXBBridgeInfo) detail).serialize(bridgeContext, writer);
-                    writer.writeEndElement();  // </soapenv:Detail>
-                }
-            }
-            writer.writeEndElement();                // </soapenv:Fault>
-        } catch (XMLStreamException e) {
-            throw new ServerRtException(e);
-        }
-    }
+    // commented out as a part of server side rearch
+    //
+    //public void write(XMLStreamWriter writer, MessageInfo mi) {
+    //    try {
+    //        writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
+    //                SOAP12Constants.QNAME_SOAP_FAULT.getLocalPart(),
+    //                SOAP12Constants.QNAME_SOAP_FAULT.getNamespaceURI());
+    //        // Writing NS since this may be called without writing envelope
+    //        writer.writeNamespace(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
+    //                SOAP12Constants.QNAME_SOAP_FAULT.getNamespaceURI());
+    //
+    //        code.write(writer); //<soapenv:Code> ... </soapenv:Code>
+    //        reason.write(writer);
+    //
+    //
+    //        //<soapenv:Node>...</soapenv:Node>
+    //        if (node != null) {
+    //            writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
+    //                    SOAP12Constants.QNAME_FAULT_NODE.getLocalPart(), SOAP12NamespaceConstants.ENVELOPE);
+    //            writer.writeCharacters(node);
+    //            writer.writeEndElement();
+    //        }
+    //
+    //        //<soapenv:Role>...</soapenv:Role>
+    //        if (role != null) {
+    //            writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,
+    //                    SOAP12Constants.QNAME_FAULT_ROLE.getLocalPart(), SOAP12NamespaceConstants.ENVELOPE);
+    //            writer.writeCharacters(role);
+    //            writer.writeEndElement();
+    //        }
+    //
+    //        //<soapenv:Detail>...</soapenv:Detail>
+    //        if (detail != null) {
+    //            // Not RuntimeException, Not header soapFault
+    //            if (detail instanceof Detail) {
+    //                // SOAPFaultException
+    //                SOAPEncoder.serializeReader(new DOMStreamReader((Detail) detail), writer);
+    //            } else if (detail instanceof JAXBBridgeInfo) {
+    //                // Service specific exception
+    //                startDetailElement(writer);     // <soapenv:Detail>
+    //                RuntimeContext rtCtxt = MessageInfoUtil.getRuntimeContext(mi);
+    //                BridgeContext bridgeContext = rtCtxt.getBridgeContext();
+    //                ((JAXBBridgeInfo) detail).serialize(bridgeContext, writer);
+    //                writer.writeEndElement();  // </soapenv:Detail>
+    //            }
+    //        }
+    //        writer.writeEndElement();                // </soapenv:Fault>
+    //    } catch (XMLStreamException e) {
+    //        throw new ServerRtException(e);
+    //    }
+    //}
 
     private void startDetailElement(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeStartElement(SOAPNamespaceConstants.NSPREFIX_SOAP_ENVELOPE,

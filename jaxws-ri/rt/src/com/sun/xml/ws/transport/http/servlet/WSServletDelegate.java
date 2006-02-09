@@ -19,23 +19,14 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.handler.MessageContextImpl;
-import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
-import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.encoding.soap.SOAPConstants;
+import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
+import com.sun.xml.ws.util.localization.Localizable;
+import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
+import com.sun.xml.ws.util.localization.Localizer;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -43,41 +34,48 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MimeHeaders;
-
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
-import com.sun.xml.ws.handler.MessageContextUtil;
-import com.sun.xml.ws.server.RuntimeEndpointInfo;
-import com.sun.xml.ws.server.WSDLPublisher;
-import com.sun.xml.ws.spi.runtime.WSConnection;
-import com.sun.xml.ws.spi.runtime.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
-import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
-import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.http.HTTPBinding;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Servlet for WS invocations
+ * Called by {@link WSServlet} to choose {@link HttpAdapter}
+ * and sends a request to it.
+ *
+ * <p>
+ * One instance of this object is created, and then shared across
+ * {@link WSServlet} instances (the container might deploy many of them,
+ * depending on how the user writes {@code web.xml}.)
  *
  * @author WS Development Team
  */
-public class WSServletDelegate {
-    
-    private com.sun.xml.ws.server.Tie tie =
-        new com.sun.xml.ws.server.Tie(TestEncoderImpl.INSTANCE11, TestDecoderImpl.INSTANCE11);
+final class WSServletDelegate {
 
-    public void init(ServletConfig servletConfig)
-        throws ServletException {
+    /**
+     * All {@link ServletAdapter}s that are deployed in the current web appliation.
+     */
+    public final List<ServletAdapter> adapters;
 
-        defaultLocalizer = new Localizer();
-        localizerMap = new HashMap();
+    private final Map<String, ServletAdapter> fixedUrlPatternEndpoints = new HashMap<String, ServletAdapter>();
+    private final List<ServletAdapter> pathUrlPatternEndpoints = new ArrayList<ServletAdapter>();
+    private final Map<Locale,Localizer> localizerMap = new HashMap<Locale,Localizer>();
+    private boolean publishStatusPage;
+
+    public WSServletDelegate(List<ServletAdapter> adapters, ServletContext context) {
+        this.adapters = adapters;
+
+        for(ServletAdapter info : adapters)
+            registerEndpointUrlPattern(info);
+
         localizerMap.put(defaultLocalizer.getLocale(), defaultLocalizer);
-        messageFactory =
-            new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
-
-        this.servletContext = servletConfig.getServletContext();
 
         if (logger.isLoggable(Level.INFO)) {
             logger.info(
@@ -85,56 +83,11 @@ public class WSServletDelegate {
                     messageFactory.getMessage("servlet.info.initialize")));
         }
 
-        fixedUrlPatternEndpoints = new HashMap();
-        pathUrlPatternEndpoints = new ArrayList();
-
-        jaxwsInfo =
-            (List<RuntimeEndpointInfo>) servletContext.getAttribute(
-                WSServlet.JAXWS_RI_RUNTIME_INFO);
-        if (jaxwsInfo == null) {
-            warnMissingContextInformation();
-        } else {
-            Map endpointsByName = new HashMap();
-            for(RuntimeEndpointInfo info : jaxwsInfo) {
-                if (endpointsByName.containsKey(info.getName())) {
-                    logger.warning(
-                        defaultLocalizer.localize(
-                            messageFactory.getMessage(
-                                "servlet.warning.duplicateEndpointName",
-                                info.getName())));
-                } else {
-                    endpointsByName.put(info.getName(), info);
-                    registerEndpointUrlPattern(info);
-                    
-                    try {
-                        info.injectContext();
-                        info.beginService();
-                    } catch(Exception e) {
-                        logger.log(Level.SEVERE, e.getMessage(), e);
-                        throw new ServletException(e.getMessage());
-                    }
-                }
-            }
-        }
-
-        String publishWSDLParam =
-            servletContext.getInitParameter(
-                WSServlet.JAXWS_RI_PROPERTY_PUBLISH_WSDL);
-        publishWSDL =
-            (publishWSDLParam == null
-                ? true
-                : Boolean.valueOf(publishWSDLParam).booleanValue());
-
         String publishStatusPageParam =
-            servletContext.getInitParameter(
+            context.getInitParameter(
                 WSServlet.JAXWS_RI_PROPERTY_PUBLISH_STATUS_PAGE);
         publishStatusPage =
-            (publishStatusPageParam == null
-                ? true
-                : Boolean.valueOf(publishStatusPageParam).booleanValue());
-
-        publisher = new WSDLPublisher(servletContext, jaxwsInfo);
-
+            (publishStatusPageParam == null || Boolean.parseBoolean(publishStatusPageParam));
     }
 
     public void destroy() {
@@ -143,53 +96,32 @@ public class WSServletDelegate {
                 defaultLocalizer.localize(
                     messageFactory.getMessage("servlet.info.destroy")));
         }
-        if (jaxwsInfo != null) {
-            for(RuntimeEndpointInfo info : jaxwsInfo) {
-                try {
-                    info.endService();
-                } catch(Exception e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                }
+
+        for(ServletAdapter a : adapters) {
+            try {
+                a.getEndpoint().dispose();
+            } catch(Throwable e) {
+                logger.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
+    public void doGet(HttpServletRequest request, HttpServletResponse response, ServletContext context)
         throws ServletException {
 
         try {
-            /*
-            Localizer localizer = getLocalizerFor(request);
-
-            MimeHeaders headers = getHeaders(request);
-            
-            if (checkForContent(headers)) {
-                writeInvalidMethodType(
-                    localizer,
-                    response,
-                    "Invalid Method Type");
-                if (logger.isLoggable(Level.INFO)) {
-                    logger.severe(
-                        defaultLocalizer.localize(
-                            messageFactory.getMessage("servlet.html.method")));
-                    logger.severe("Must use Http POST for the service request");
-                }
-                return;
-            }
-             */
-            RuntimeEndpointInfo targetEndpoint = getEndpointFor(request);
-            if (targetEndpoint != null) {
+            ServletAdapter target = getTarget(request);
+            if (target != null) {
                 String query = request.getQueryString();
-                if (query != null && (query.startsWith("wsdl") || query.startsWith("xsd="))) {
+                if (target.isMetadataQuery(query)) {
                     // Sends published WSDL and schema documents
-                    publisher.handle(targetEndpoint, fixedUrlPatternEndpoints,
-                        request, response);
+                    target.publishWSDL(context, request, response);
                     return;
                 }
-                BindingImpl binding = (BindingImpl)targetEndpoint.getBinding();
+                WSBinding binding = target.getEndpoint().getBinding();
                 if (binding.getBindingId().equals(HTTPBinding.HTTP_BINDING)) {
                     // The request is handled by endpoint or runtime
-                    handle(request, response, targetEndpoint);
+                    target.handle(context, request, response);
                 } else {
                     // Writes HTML page with all the endpoint descriptions
                     writeWebServicesHtmlPage(request, response);
@@ -205,33 +137,30 @@ public class WSServletDelegate {
     }
 
     /**
-     * processes web service requests by finding the <code>RuntimeEndpointInfo</code>
-     * created by the <code>WSContextListener</code> and creating a 
-     * <code>ServletConnectionImpl</code> and passing it to <code>Tie.handle</code>
+     * processes web service requests by finding the {@link ServletAdapter}
+     * created by the {@link WSServletContextListener} and creating a
+     * {@link ServletConnectionImpl}.
+     *
      * @param request the HTTP request object
      * @param response the HTTP response object
-     * @throws javax.servlet.ServletException 
      */
-    public void doPost(
-        HttpServletRequest request,
-        HttpServletResponse response)
-        throws ServletException {
-        
+    public void doPost(HttpServletRequest request, HttpServletResponse response, ServletContext context) {
+
         try {
-            RuntimeEndpointInfo targetEndpoint = getEndpointFor(request);
-            if (targetEndpoint != null) {
+            ServletAdapter target = getTarget(request);
+            if (target != null) {
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest(defaultLocalizer.localize(
                             messageFactory.getMessage(
                                 "servlet.trace.gotRequestForEndpoint",
-                                targetEndpoint.getName())));
+                                target.name)));
                 }
             } else {
                 Localizer localizer = getLocalizerFor(request);
                 writeNotFoundErrorPage(localizer, response, "Invalid request");
                 return;
             }
-            handle(request, response, targetEndpoint);
+            target.handle(context, request, response);
         } catch (JAXWSExceptionBase e) {
             logger.log(Level.SEVERE, defaultLocalizer.localize(e), e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -247,36 +176,6 @@ public class WSServletDelegate {
 
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-    }
-    
-    /*
-     * Invokes JAXWS runtime with the correct MessageContext
-     */
-    private void handle(HttpServletRequest request, HttpServletResponse response,
-        RuntimeEndpointInfo targetEndpoint) throws Exception {
-    
-        WebServiceContext wsCtxt = targetEndpoint.getWebServiceContext();
-        MessageContext msgCtxt = new MessageContextImpl();
-        wsCtxt.setMessageContext(msgCtxt);
-        msgCtxt.put(MessageContext.SERVLET_CONTEXT, servletContext);
-        msgCtxt.setScope(MessageContext.SERVLET_CONTEXT, Scope.APPLICATION);
-        msgCtxt.put(MessageContext.SERVLET_REQUEST, request);
-        msgCtxt.setScope(MessageContext.SERVLET_REQUEST, Scope.APPLICATION);
-        msgCtxt.put(MessageContext.SERVLET_RESPONSE, response);
-        msgCtxt.setScope(MessageContext.SERVLET_RESPONSE, Scope.APPLICATION);
-
-        MessageContextUtil.setHttpRequestMethod(msgCtxt, request.getMethod());
-        if (request.getQueryString() != null) {
-            MessageContextUtil.setQueryString(msgCtxt, request.getQueryString());
-        }
-        if (request.getPathInfo() != null) {
-            MessageContextUtil.setPathInfo(msgCtxt, request.getPathInfo());
-        }
-
-        WSConnection connection =
-            new ServletConnectionImpl(request, response);
-        MessageContextUtil.setHttpRequestHeaders(msgCtxt, connection.getHeaders());
-        tie.handle(connection, targetEndpoint);
     }
 
     protected void writeNotFoundErrorPage(
@@ -344,41 +243,34 @@ public class WSServletDelegate {
         return headers;
     }
 
-    public void registerEndpointUrlPattern(
-        com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo info) {
-        String urlPattern = ((RuntimeEndpointInfo) info).getUrlPattern();
+    private void registerEndpointUrlPattern(ServletAdapter a) {
+        String urlPattern = a.urlPattern;
         if (urlPattern.indexOf("*.") != -1) {
             // cannot deal with implicit mapping right now
             logger.warning(
                 defaultLocalizer.localize(
                     messageFactory.getMessage(
                         "servlet.warning.ignoringImplicitUrlPattern",
-                        ((RuntimeEndpointInfo) info).getName())));
+                        a.name)));
         } else if (urlPattern.endsWith("/*")) {
-            pathUrlPatternEndpoints.add(info);
+            pathUrlPatternEndpoints.add(a);
         } else {
             if (fixedUrlPatternEndpoints.containsKey(urlPattern)) {
                 logger.warning(
                     defaultLocalizer.localize(
                         messageFactory.getMessage(
                             "servlet.warning.duplicateEndpointUrlPattern",
-                            ((RuntimeEndpointInfo) info).getName())));
+                            a.name)));
             } else {
-                fixedUrlPatternEndpoints.put(urlPattern, info);
+                fixedUrlPatternEndpoints.put(urlPattern, a);
             }
         }
     }
 
-    protected String getValidPathForEndpoint(RuntimeEndpointInfo info) {
-        String s = info.getUrlPattern();
-        if (s.endsWith("/*")) {
-            return s.substring(0, s.length() - 2);
-        } else {
-            return s;
-        }
-    }
-
-    protected RuntimeEndpointInfo getEndpointFor(HttpServletRequest request) {
+    /**
+     * Determines which {@link ServletAdapter} serves the given request.
+     */
+    protected ServletAdapter getTarget(HttpServletRequest request) {
 
         /*System.err.println("----");
         System.err.println("CONTEXT PATH   : " + request.getContextPath());
@@ -392,15 +284,10 @@ public class WSServletDelegate {
         String path =
             request.getRequestURI().substring(
                 request.getContextPath().length());
-        RuntimeEndpointInfo result =
-            (RuntimeEndpointInfo) fixedUrlPatternEndpoints.get(path);
+        ServletAdapter result = fixedUrlPatternEndpoints.get(path);
         if (result == null) {
-            for (Iterator iter = pathUrlPatternEndpoints.iterator();
-                iter.hasNext();
-                ) {
-                RuntimeEndpointInfo candidate =
-                    (RuntimeEndpointInfo) iter.next();
-                if (path.startsWith(getValidPathForEndpoint(candidate))) {
+            for (ServletAdapter candidate : pathUrlPatternEndpoints) {
+                if (path.startsWith(candidate.getValidPath())) {
                     result = candidate;
                     break;
                 }
@@ -424,7 +311,7 @@ public class WSServletDelegate {
     protected boolean checkContentLength(MimeHeaders headers) {
         String[] contentLength = headers.getHeader("Content-Length");
         if ((contentLength != null) && (contentLength.length > 0)) {
-            int length = new Integer(contentLength[0]).intValue();
+            int length = Integer.parseInt(contentLength[0]);
             if (length > 0) {
                 return true;
             }
@@ -448,7 +335,7 @@ public class WSServletDelegate {
         }
 
         synchronized (localizerMap) {
-            Localizer localizer = (Localizer) localizerMap.get(locale);
+            Localizer localizer = localizerMap.get(locale);
             if (localizer == null) {
                 localizer = new Localizer(locale);
                 localizerMap.put(locale, localizer);
@@ -460,10 +347,10 @@ public class WSServletDelegate {
     protected QName getFaultServerQName(){
         return SOAPConstants.FAULT_CODE_SERVER;
     }
-    
+
     private void writeWebServicesHtmlPage(HttpServletRequest request,
-        HttpServletResponse response) throws IOException {
-    
+                                          HttpServletResponse response) throws IOException {
+
         if (publishStatusPage) {
             Localizer localizer = getLocalizerFor(request);
 
@@ -483,7 +370,7 @@ public class WSServletDelegate {
             out.println(
                 localizer.localize(
                     messageFactory.getMessage("servlet.html.title2")));
-            if (jaxwsInfo == null) {
+            if (adapters.isEmpty()) {
                 // out.println("<p>No JAX-WS context information available.</p>");
                 out.println(
                     localizer.localize(
@@ -522,39 +409,26 @@ public class WSServletDelegate {
                         + request.getServerPort()
                         + request.getContextPath();
 
-                for (RuntimeEndpointInfo info : jaxwsInfo) {
+                for (ServletAdapter a : adapters) {
                     String endpointAddress =
-                        baseAddress + getValidPathForEndpoint(info);
+                        baseAddress + a.getValidPath();
                     out.println("<tr>");
-                    out.println("<td>" + info.getName() + "</td>");
+                    out.println("<td>" + a.name + "</td>");
                     out.println("<td>");
-                    if (info.isDeployed()) {
-                        // out.println("ACTIVE");
-                        out.println(
-                            localizer.localize(
-                                messageFactory.getMessage(
-                                    "servlet.html.status.active")));
-                    } else {
-                        // out.println("ERROR");
-                        out.println(
-                            localizer.localize(
-                                messageFactory.getMessage(
-                                    "servlet.html.status.error")));
-                    }
+                    out.println(
+                        localizer.localize(
+                            messageFactory.getMessage(
+                                "servlet.html.status.active")));
                     out.println("</td>");
                     out.println("<td>");
                     out.println(
                         localizer.localize(
                             messageFactory.getMessage(
                                 "servlet.html.information.table",
-                                new Object[] {
-                                    endpointAddress,
-                                    info.getPortName(),
-                                    info
-                                        .getImplementor()
-                                        .getClass()
-                                        .getName()})));
-
+                                endpointAddress,
+                                a.getPortName(),
+                                a.implementationType.getName()
+                            )));
                     out.println("</td>");
                     out.println("</tr>");
                 }
@@ -565,17 +439,9 @@ public class WSServletDelegate {
         }
     }
 
-    private ServletContext servletContext;
-    private List<RuntimeEndpointInfo> jaxwsInfo;
-    private Localizer defaultLocalizer;
-    private LocalizableMessageFactory messageFactory;
-    private Map fixedUrlPatternEndpoints;
-    private List pathUrlPatternEndpoints;
-    private Map localizerMap;
-    private WSDLPublisher publisher;
-    private boolean publishWSDL;
-    private boolean publishStatusPage;
-
+    private static final Localizer defaultLocalizer = new Localizer();
+    private static final LocalizableMessageFactory messageFactory =
+        new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
     private static final Logger logger =
         Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".servlet.http");

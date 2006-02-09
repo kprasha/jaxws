@@ -76,17 +76,12 @@ public abstract class BindingImpl implements WSBinding {
 
     /**
      * Return a copy of the list. If there is a handler chain caller,
-     * this is the proper list. Otherwise, return a copy of 'handlers'
-     * or null if list is null. The RuntimeEndpointInfo.init() method
-     * relies on this list being null if there were no handlers
-     * in the deployment descriptor file.
+     * this is the proper list. Otherwise, return a copy of 'handlers'.
      *
-     * @return The list of handlers. This can be null if there are
-     * no handlers. The list may have a different order depending on
+     * @return The list of handlers.
+     * The list may have a different order depending on
      * whether or not the handlers have been called yet, since the
      * logical and protocol handlers will be sorted before calling them.
-     *
-     * @see com.sun.xml.ws.server.RuntimeEndpointInfo#init
      */
     public List<Handler> getHandlerChain() {
         if (chainCaller != null) {
@@ -143,6 +138,10 @@ public abstract class BindingImpl implements WSBinding {
         systemHandlerDelegate = delegate;
     }
 
+    /**
+     * @deprecated
+     *      This ugly it-does-all method needs refactoring!
+     */
     public static WSBinding getBinding(String bindingId, Class implementorClass, QName serviceName, boolean tokensOK) {
 
         if (bindingId == null) {

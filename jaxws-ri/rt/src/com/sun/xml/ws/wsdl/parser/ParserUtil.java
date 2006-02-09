@@ -34,9 +34,11 @@ import javax.xml.stream.XMLStreamReader;
 
 
 /**
+ *
+ * TODO: made public just for now
  * @author WS Development Team
  */
-class ParserUtil {
+public class ParserUtil {
     public static String getAttribute(XMLStreamReader reader, String name) {
         return reader.getAttributeValue(null, name);
     }

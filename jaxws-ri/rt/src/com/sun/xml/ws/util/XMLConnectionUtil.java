@@ -47,7 +47,7 @@ public class XMLConnectionUtil {
 
     public static XMLMessage getXMLMessage(WSConnection con, MessageInfo mi) {
         try {
-            Map<String, List<String>> headers = con.getHeaders();
+            Map<String, List<String>> headers = con.getRequestHeaders();
             MimeHeaders mh = new MimeHeaders();
             if (headers != null) {
                 for (Map.Entry<String, List<String>> entry : headers.entrySet())
@@ -83,7 +83,7 @@ public class XMLConnectionUtil {
                 }
                 values.add(mh.getValue());
             }
-            con.setHeaders(headers);
+            con.setResponseHeaders(headers);
             xmlMessage.writeTo(con.getOutput());
 
         } catch (Exception e) {
@@ -122,7 +122,7 @@ public class XMLConnectionUtil {
     }
 
     public static Map<String, List<String>> getHeaders(WSConnection con) {
-        return con.getHeaders();
+        return con.getRequestHeaders();
     }
 
     /**
@@ -130,7 +130,7 @@ public class XMLConnectionUtil {
      */
     public static void setHeaders(WSConnection con,
                                   Map<String, List<String>> headers) {
-        con.setHeaders(headers);
+        con.setResponseHeaders(headers);
     }
 
     public static void setStatus(WSConnection con, int status) {
