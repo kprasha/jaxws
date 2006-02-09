@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Properties;
+import java.util.Map;
 
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
@@ -161,7 +162,6 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             if(methodJavaDoc != null)
                 methodDoc.add(methodJavaDoc);
 
-            extension.writeMethodAnnotations(operation.getWSDLPortTypeOperation(),m);
             writeWebMethod(operation, m);
             JClass holder = cm.ref(Holder.class);
             for (JavaParameter parameter: method.getParametersList()) {
@@ -179,10 +179,15 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
                 JAnnotationUse paramAnn = var.annotate(cm.ref(WebParam.class));
                 writeWebParam(operation, parameter, paramAnn);
             }
+            com.sun.tools.ws.wsdl.document.Operation wsdlOp = operation.getWSDLPortTypeOperation();
             for(Fault fault:operation.getFaultsSet()){
                 m._throws(fault.getExceptionClass());
                 methodDoc.addThrows(fault.getExceptionClass());
+                wsdlOp.putFault(fault.getElementName(), fault.getJavaException().getName());
             }
+            
+            //It should be the last thing to invoke after JMethod is built completely
+            extension.writeMethodAnnotations(wsdlOp, m);
         }
         CodeWriter cw = new WSCodeWriter(sourceDir,env);
 

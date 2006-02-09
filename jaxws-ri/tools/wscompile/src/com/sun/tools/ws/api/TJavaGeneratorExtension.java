@@ -1,7 +1,7 @@
 package com.sun.tools.ws.api;
 
 import com.sun.codemodel.JMethod;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLOperation;
 
 /**
  * Provides Java SEI Code generation Extensiblity mechanism.
@@ -16,5 +16,5 @@ public abstract class TJavaGeneratorExtension {
      * @param wsdlOperation non-null wsdl extensiblity element -  wsdl:portType/wsdl:operation.
      * @param jMethod non-null {@link JMethod}
      */
-     public abstract void writeMethodAnnotations(TWSDLExtensible wsdlOperation, JMethod jMethod);
+     public abstract void writeMethodAnnotations(TWSDLOperation wsdlOperation, JMethod jMethod);
 }

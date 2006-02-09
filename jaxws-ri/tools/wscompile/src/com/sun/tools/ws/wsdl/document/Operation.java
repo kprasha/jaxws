@@ -23,6 +23,9 @@ package com.sun.tools.ws.wsdl.document;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Collections;
+import java.util.HashMap;
 
 import javax.xml.namespace.QName;
 
@@ -31,13 +34,14 @@ import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLOperation;
 
 /**
  * Entity corresponding to the "operation" child element of a "portType" WSDL element.
  *
  * @author WS Development Team
  */
-public class Operation extends Entity implements TWSDLExtensible {
+public class Operation extends Entity implements TWSDLOperation {
 
     public Operation() {
         _faults = new ArrayList();
@@ -229,6 +233,14 @@ public class Operation extends Entity implements TWSDLExtensible {
         this.parent = parent;
     }
 
+    public Map<QName, String> getFaults() {
+        return unmodifiableFaultClassMap;
+    }
+
+    public void putFault(QName detailName, String exception){
+        faultClassMap.put(detailName, exception);
+    }
+
     private TWSDLExtensible parent;
     private Documentation _documentation;
     private String _name;
@@ -239,4 +251,6 @@ public class Operation extends Entity implements TWSDLExtensible {
     private String _parameterOrder;
     private String _uniqueKey;
     private ExtensibilityHelper _helper;
+    private final Map<QName, String> faultClassMap = new HashMap<QName, String>();
+    private final Map<QName, String> unmodifiableFaultClassMap = Collections.unmodifiableMap(faultClassMap);
 }
