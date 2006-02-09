@@ -42,5 +42,5 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
     /**
      * Gets the fault message of this operation.
      */
-    QName getFaultMessage();
+    Iterable<WSDLMessage> getFaultMessages();
 }

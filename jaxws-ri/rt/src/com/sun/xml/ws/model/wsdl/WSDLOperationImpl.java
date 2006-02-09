@@ -23,6 +23,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 
 import javax.xml.namespace.QName;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Implementaiton of {@link WSDLOperation}
@@ -34,10 +36,11 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
     private String parameterOrder;
     private WSDLMessage inputMessage;
     private WSDLMessage outputMessage;
-    private QName faultMessage;
+    private final List<WSDLMessage> faultMessages;
 
     public WSDLOperationImpl(QName name) {
         this.name = name;
+        this.faultMessages = new ArrayList<WSDLMessage>();
     }
 
     public QName getName() {
@@ -76,11 +79,11 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         this.outputMessage = outputMessage;
     }
 
-    public QName getFaultMessage() {
-        return faultMessage;
+    public Iterable<WSDLMessage> getFaultMessages() {
+        return faultMessages;
     }
 
-    public void setFaultMessage(QName faultMessage) {
-        this.faultMessage = faultMessage;
+    public void addFaultMessage(WSDLMessage faultMessage) {
+        faultMessages.add(faultMessage);
     }
 }
