@@ -526,10 +526,19 @@ public class RuntimeWSDLParser {
                 parsePortTypeOperationInput(reader, operation);
             }else if(name.equals(WSDLConstants.QNAME_OUTPUT)){
                 parsePortTypeOperationOutput(reader, operation);
+            }else if(name.equals(WSDLConstants.QNAME_FAULT)){
+                parsePortTypeOperationFault(reader, operation);
             }else{
                 XMLStreamReaderUtil.skipElement(reader);
-            }
+            }            
         }
+    }
+
+    private void parsePortTypeOperationFault(XMLStreamReader reader, WSDLOperationImpl operation) {
+        String msg = ParserUtil.getAttribute(reader, "message");
+        QName msgName = ParserUtil.getQName(reader, msg);
+        operation.addFaultMessage(new WSDLMessageImpl(msgName));
+        goToEnd(reader);
     }
 
     private void parsePortTypeOperationInput(XMLStreamReader reader, WSDLOperationImpl operation) {
