@@ -1,7 +1,6 @@
 package com.sun.xml.ws.api;
 
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.Service;

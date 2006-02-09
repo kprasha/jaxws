@@ -23,10 +23,6 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
-import com.sun.xml.ws.pept.ept.MessageInfo;
-
-import javax.xml.namespace.QName;
-import java.lang.reflect.Method;
 //import com.sun.xml.ws.api.model.SEIModel;
 
 
@@ -44,46 +40,6 @@ public class RuntimeContext {
      */
     public SOAPSEIModel getModel() {
         return model;
-    }
-
-    /**
-     * @param name
-     * @param mi
-     * @return the <code>Method</code> associated with the operation named name
-     */
-    public Method getDispatchMethod(QName name, MessageInfo mi) {
-        return getDispatchMethod(name);
-    }
-
-    /**
-     * @param name
-     * @return the <code>Method</code> associated with the operation named name
-     */
-    public Method getDispatchMethod(QName name){
-        return model.getDispatchMethod(name);
-    }
-
-    /**
-     * @param qname
-     * @param mi
-     */
-    public void setMethodAndMEP(QName qname, MessageInfo mi) {
-        if (model != null) {
-            mi.setMethod((model.getDispatchMethod(qname)));
-
-            // if null, default MEP is ok
-            if (qname != null && model.getJavaMethod(qname) != null) {
-                mi.setMEP(model.getJavaMethod(qname).getMEP());
-            }
-        }
-    }
-
-    /**
-     * @param name
-     * @return the decoder Info associated with operation named name
-     */
-    public Object getDecoderInfo(QName name) {
-        return model.getDecoderInfo(name);
     }
 
     public BridgeContext getBridgeContext() {

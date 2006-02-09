@@ -154,22 +154,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param name
-     * @return either a <code>RpcLitpayload</code> or a <code>JAXBBridgeInfo</code> for
-     * either a message payload or header
-     * @deprecated Will no longer be needed with the {@link com.sun.xml.ws.api.message.Message}
-     */
-    public Object getDecoderInfo(QName name) {
-        Object obj = payloadMap.get(name);
-        if (obj instanceof RpcLitPayload) {
-            return RpcLitPayload.copy((RpcLitPayload) obj);
-        } else if (obj instanceof JAXBBridgeInfo) {
-            return JAXBBridgeInfo.copy((JAXBBridgeInfo) obj);
-        }
-        return null;
-    }
-
-    /**
      * @param name Qualified name of the message payload or header
      * @param payload  One of {@link RpcLitPayload} or {@link JAXBBridgeInfo}
      * @deprecated It will be no longer needed with the {@link com.sun.xml.ws.api.message.Message}
