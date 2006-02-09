@@ -1,4 +1,4 @@
-package com.sun.xml.ws.sandbox.server;
+package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 

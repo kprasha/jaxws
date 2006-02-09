@@ -23,8 +23,8 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
-import com.sun.xml.ws.sandbox.server.TransportBackChannel;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.TransportBackChannel;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;

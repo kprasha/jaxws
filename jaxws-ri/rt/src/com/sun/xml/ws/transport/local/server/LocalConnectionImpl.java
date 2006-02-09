@@ -20,15 +20,13 @@
 
 package com.sun.xml.ws.transport.local.server;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 
 /**

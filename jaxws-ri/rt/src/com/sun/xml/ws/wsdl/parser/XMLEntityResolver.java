@@ -9,7 +9,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URL;
 
-import com.sun.xml.ws.sandbox.server.SDDocumentSource;
+import com.sun.xml.ws.api.server.SDDocumentSource;
 
 /**
  * Resolves a reference to {@link XMLStreamReader}.

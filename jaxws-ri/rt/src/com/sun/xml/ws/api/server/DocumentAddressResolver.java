@@ -1,9 +1,6 @@
-package com.sun.xml.ws.sandbox.server;
+package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.WSEndpoint;
-
-import javax.xml.stream.XMLStreamWriter;
-import java.io.OutputStream;
 
 /**
  * Resolves relative references among {@link SDDocument}s.

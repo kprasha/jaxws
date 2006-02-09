@@ -25,7 +25,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.sandbox.server.InstanceResolver;
+import com.sun.xml.ws.api.server.InstanceResolver;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;

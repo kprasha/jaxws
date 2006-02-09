@@ -22,7 +22,7 @@ package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 import com.sun.xml.ws.util.NoCloseInputStream;
 import com.sun.xml.ws.util.NoCloseOutputStream;

@@ -1,8 +1,8 @@
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.sandbox.server.DocumentAddressResolver;
-import com.sun.xml.ws.sandbox.server.SDDocument;
-import com.sun.xml.ws.sandbox.server.SDDocumentSource;
+import com.sun.xml.ws.api.server.DocumentAddressResolver;
+import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import com.sun.xml.ws.wsdl.parser.ParserUtil;

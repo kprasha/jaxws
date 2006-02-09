@@ -22,17 +22,14 @@ package com.sun.xml.ws.server;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.sandbox.server.SDDocument;
-import com.sun.xml.ws.sandbox.server.SDDocumentSource;
-import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.wsdl.writer.WSDLResolver;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.ArrayList;

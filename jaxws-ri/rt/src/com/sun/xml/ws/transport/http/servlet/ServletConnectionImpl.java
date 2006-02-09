@@ -20,7 +20,7 @@
 
 package com.sun.xml.ws.transport.http.servlet;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.transport.WSConnectionImpl;
 

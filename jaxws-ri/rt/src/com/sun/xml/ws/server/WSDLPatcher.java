@@ -21,8 +21,8 @@ package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.sandbox.server.DocumentAddressResolver;
-import com.sun.xml.ws.sandbox.server.SDDocument;
+import com.sun.xml.ws.api.server.DocumentAddressResolver;
+import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 

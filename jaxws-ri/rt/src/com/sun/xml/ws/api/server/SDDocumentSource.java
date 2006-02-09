@@ -1,18 +1,10 @@
-package com.sun.xml.ws.sandbox.server;
+package com.sun.xml.ws.api.server;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
-import com.sun.xml.ws.wsdl.parser.WSDLConstants;
-import com.sun.xml.ws.wsdl.parser.ParserUtil;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import com.sun.xml.ws.server.ServiceDefinitionImpl;
 
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.net.URL;
 

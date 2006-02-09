@@ -2,11 +2,11 @@ package com.sun.xml.ws.transport.http;
 
 import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.sandbox.server.Adapter;
-import com.sun.xml.ws.sandbox.server.DocumentAddressResolver;
-import com.sun.xml.ws.sandbox.server.SDDocument;
-import com.sun.xml.ws.sandbox.server.ServiceDefinition;
-import com.sun.xml.ws.sandbox.server.TransportBackChannel;
+import com.sun.xml.ws.api.server.Adapter;
+import com.sun.xml.ws.api.server.DocumentAddressResolver;
+import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.ServiceDefinition;
+import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;

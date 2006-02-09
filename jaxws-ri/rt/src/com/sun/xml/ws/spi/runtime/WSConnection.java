@@ -19,7 +19,7 @@
  */
 package com.sun.xml.ws.spi.runtime;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet.Property;
 
 import javax.servlet.http.HttpServletRequest;

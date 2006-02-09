@@ -9,14 +9,13 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
-import com.sun.xml.ws.sandbox.server.InstanceResolver;
-import com.sun.xml.ws.sandbox.server.TransportBackChannel;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.TransportBackChannel;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 import java.lang.reflect.Method;

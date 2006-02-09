@@ -28,7 +28,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.sandbox.server.InstanceResolver;
+import com.sun.xml.ws.api.server.InstanceResolver;
 
 import javax.xml.namespace.QName;
 import java.lang.reflect.Method;
@@ -83,6 +83,8 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
             ? EMPTY_QNAME
             : new QName(msg.getPayloadNamespaceURI(), localPart);
 
+        // TODO: Don't go through 2 map look up. Prepare a map
+        // so that you can go from opName to handler just by one look-up. - KK
         JavaMethodImpl javaMethod = model.getJavaMethod(opName);
         Method method = javaMethod.getMethod();
 

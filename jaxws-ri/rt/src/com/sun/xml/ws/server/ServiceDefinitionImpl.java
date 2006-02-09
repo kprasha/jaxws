@@ -1,7 +1,7 @@
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.sandbox.server.SDDocument;
-import com.sun.xml.ws.sandbox.server.ServiceDefinition;
+import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.ServiceDefinition;
 
 import java.net.URL;
 import java.util.HashMap;

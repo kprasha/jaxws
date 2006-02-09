@@ -4,7 +4,7 @@ import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
-import com.sun.xml.ws.sandbox.server.InstanceResolver;
+import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 
 import javax.servlet.ServletContext;

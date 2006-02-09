@@ -1,10 +1,9 @@
-package com.sun.xml.ws.sandbox.server;
+package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.WSEndpoint;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceException;
 import javax.xml.namespace.QName;
 import java.io.OutputStream;
 import java.io.IOException;

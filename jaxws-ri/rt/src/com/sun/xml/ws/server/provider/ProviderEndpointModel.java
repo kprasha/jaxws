@@ -21,7 +21,7 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.xml.ws.api.message.Message;
-import javax.xml.soap.SOAPMessage;
+
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.ServiceMode;
@@ -53,8 +53,8 @@ abstract class ProviderEndpointModel {
     /*
      * Is it PAYLOAD or MESSAGE ??
      */
-    protected static Service.Mode getServiceMode(Class c) {
-        ServiceMode mode = (ServiceMode)c.getAnnotation(ServiceMode.class);
+    protected static Service.Mode getServiceMode(Class<?> c) {
+        ServiceMode mode = c.getAnnotation(ServiceMode.class);
         if (mode == null) {
             return Service.Mode.PAYLOAD;
         }

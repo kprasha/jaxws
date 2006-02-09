@@ -5,10 +5,10 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.sandbox.server.InstanceResolver;
-import com.sun.xml.ws.sandbox.server.ServiceDefinition;
-import com.sun.xml.ws.sandbox.server.TransportBackChannel;
-import com.sun.xml.ws.sandbox.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.ServiceDefinition;
+import com.sun.xml.ws.api.server.TransportBackChannel;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.xml.ws.WebServiceException;
