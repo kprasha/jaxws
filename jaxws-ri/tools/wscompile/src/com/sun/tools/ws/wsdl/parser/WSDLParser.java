@@ -80,6 +80,7 @@ import com.sun.tools.ws.wsdl.document.WSDLDocument;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.tools.ws.wsdl.mex.HTTPMexClient;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
 import com.sun.tools.ws.wsdl.framework.ParseException;
@@ -258,73 +259,76 @@ public class WSDLParser {
      */
     private void buildDocumentFromWSDL(String systemId, InputSource source, String expectedTargetNamespaceURI) {
         try {
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            builderFactory.setNamespaceAware(true);
-            builderFactory.setValidating(false);
-            DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            builder.setErrorHandler(DRACONIAN_ERROR_HANDLER);
-            if(entityResolver != null)
-                builder.setEntityResolver(entityResolver);
-            else
-                builder.setEntityResolver(new NullEntityResolver());
+            Document document = null;
+            if (useMex && systemId.startsWith("http")) {
+                document = getMexClient().getWSDLDocument(systemId);
+            } else {
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                builderFactory.setNamespaceAware(true);
+                builderFactory.setValidating(false);
+                DocumentBuilder builder = builderFactory.newDocumentBuilder();
+                builder.setErrorHandler(DRACONIAN_ERROR_HANDLER);
+                if(entityResolver != null)
+                    builder.setEntityResolver(entityResolver);
+                else
+                    builder.setEntityResolver(new NullEntityResolver());
 
-            try {
-                Document document = builder.parse(source);
-                wsdlDocuments.put(systemId, document);
-                Element e = document.getDocumentElement();
-                Util.verifyTagNSRootElement(e, WSDLConstants.QNAME_DEFINITIONS);
-                String name = XmlUtil.getAttributeOrNull(e, Constants.ATTR_NAME);
+                document = builder.parse(source);
+            }
+            wsdlDocuments.put(systemId, document);
+            Element e = document.getDocumentElement();
+            Util.verifyTagNSRootElement(e, WSDLConstants.QNAME_DEFINITIONS);
+            String name = XmlUtil.getAttributeOrNull(e, Constants.ATTR_NAME);
 
-                String _targetNamespaceURI =
-                    XmlUtil.getAttributeOrNull(e, Constants.ATTR_TARGET_NAMESPACE);
+            String _targetNamespaceURI =
+                XmlUtil.getAttributeOrNull(e, Constants.ATTR_TARGET_NAMESPACE);
 
-                if (expectedTargetNamespaceURI != null
-                    && !expectedTargetNamespaceURI.equals(_targetNamespaceURI)){
-                    //TODO: throw an exception???
-                }
+            if (expectedTargetNamespaceURI != null
+                && !expectedTargetNamespaceURI.equals(_targetNamespaceURI)){
+                //TODO: throw an exception???
+            }
 
-                for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
-                    Element e2 = Util.nextElement(iter);
-                    if (e2 == null)
-                        break;
+            for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
+                Element e2 = Util.nextElement(iter);
+                if (e2 == null)
+                    break;
 
-                    //check to see if it has imports
-                    if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_IMPORT)){
-                        String namespace = Util.getRequiredAttribute(e2, Constants.ATTR_NAMESPACE);
-                        String location = Util.getRequiredAttribute(e2, Constants.ATTR_LOCATION);
-                        location = getAdjustedLocation(source, location);
-                        if(location != null && !location.equals("")){
-                            if(!imports.contains(location)){
-                                imports.add(location);
-                                InputSource impSource = null;
-                                if(entityResolver != null){
-                                    impSource = entityResolver.resolveEntity(null, location);
-                                }
-
-                                if(impSource==null)
-                                    impSource = new InputSource(location);  // default resolution{
-
-                                buildDocumentFromWSDL(location, impSource, namespace);
+                //check to see if it has imports
+                if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_IMPORT)){
+                    String namespace = Util.getRequiredAttribute(e2, Constants.ATTR_NAMESPACE);
+                    String location = Util.getRequiredAttribute(e2, Constants.ATTR_LOCATION);
+                    location = getAdjustedLocation(source, location);
+                    if(location != null && !location.equals("")){
+                        if(!imports.contains(location)){
+                            imports.add(location);
+                            InputSource impSource = null;
+                            if(entityResolver != null){
+                                impSource = entityResolver.resolveEntity(null, location);
                             }
+
+                            if(impSource==null)
+                                impSource = new InputSource(location);  // default resolution{
+
+                            buildDocumentFromWSDL(location, impSource, namespace);
                         }
                     }
                 }
-            } catch (IOException e) {
-                if (source.getSystemId() != null) {
-                    throw new ParseException(
-                        "parsing.ioExceptionWithSystemId",
-                        source.getSystemId(),e);
-                } else {
-                    throw new ParseException("parsing.ioException",e);
-                }
-            } catch (SAXException e) {
-                if (source.getSystemId() != null) {
-                    throw new ParseException(
-                        "parsing.saxExceptionWithSystemId",
-                        source.getSystemId(),e);
-                } else {
-                    throw new ParseException("parsing.saxException",e);
-                }
+            }
+        } catch (IOException e) {
+            if (source.getSystemId() != null) {
+                throw new ParseException(
+                    "parsing.ioExceptionWithSystemId",
+                    source.getSystemId(),e);
+            } else {
+                throw new ParseException("parsing.ioException",e);
+            }
+        } catch (SAXException e) {
+            if (source.getSystemId() != null) {
+                throw new ParseException(
+                    "parsing.saxExceptionWithSystemId",
+                    source.getSystemId(),e);
+            } else {
+                throw new ParseException("parsing.saxException",e);
             }
         } catch (ParserConfigurationException e) {
             throw new ParseException(
@@ -1457,6 +1461,17 @@ public class WSDLParser {
         System.err.println(
             _localizer.localize(_messageFactory.getMessage(key, args)));
     }
+    
+    /*
+     * Used to avoid creating a new one every time
+     * a request is made.
+     */
+    private HTTPMexClient getMexClient() {
+        if (mexClient == null) {
+            mexClient = new HTTPMexClient();
+        }
+        return mexClient;
+    }
 
     private boolean _followImports;
     private String _targetNamespaceURI;
@@ -1467,4 +1482,5 @@ public class WSDLParser {
     private Localizer _localizer;
     private HashSet hSet = null;
     private boolean useMex = false;
+    private HTTPMexClient mexClient;
 }

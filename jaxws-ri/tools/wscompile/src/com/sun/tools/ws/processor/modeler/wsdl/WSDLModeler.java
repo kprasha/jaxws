@@ -159,6 +159,9 @@ public class WSDLModeler extends WSDLModelerBase {
             extensions = Boolean.valueOf(_options.getProperty(ProcessorOptions.EXTENSION));
             
             useWSIBasicProfile = !extensions;
+            if (_options.getProperty(ProcessorOptions.USE_MEX).equals("true")) {
+                parser.setUseMex(true);
+            }
             document =
                 parser.parse();
             document.validateLocally();
