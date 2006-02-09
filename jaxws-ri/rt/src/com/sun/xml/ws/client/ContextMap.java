@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public abstract class ContextMap extends HashMap<String,Object>
+abstract class ContextMap extends HashMap<String,Object>
     implements BindingProviderProperties {
 
     /**
@@ -40,7 +40,6 @@ public abstract class ContextMap extends HashMap<String,Object>
     private static final HashMap<String,Class> _allowedClass = new HashMap<String, Class>();
 
     protected BindingProvider _owner;
-    protected PortInfoBase portInfo;
 
     public abstract ContextMap copy();
 
@@ -104,14 +103,6 @@ public abstract class ContextMap extends HashMap<String,Object>
         KNOWN_PROPERTIES = temp;
     }
 
-    //used for dispatch
-    public ContextMap(PortInfoBase info, BindingProvider provider) {
-        _owner = provider;
-        if (info != null) {
-            this.portInfo = info;
-        }
-    }
-
     /**
      * Copy constructor.
      */
@@ -122,7 +113,7 @@ public abstract class ContextMap extends HashMap<String,Object>
 
     //may not need this
     public ContextMap(BindingProvider owner) {
-        this(null, owner);
+        _owner = owner;
     }
 
     boolean doValidation() {

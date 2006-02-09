@@ -28,10 +28,6 @@ public class RequestContext extends ContextMap {
         super(provider);
     }
 
-    public RequestContext(PortInfoBase port, BindingProvider provider) {
-        super(port, provider);
-    }
-
     /**
      * Copy constructor.
      */

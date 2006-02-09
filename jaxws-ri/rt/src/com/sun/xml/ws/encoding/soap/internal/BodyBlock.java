@@ -24,47 +24,36 @@ import javax.xml.transform.Source;
 import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
-import com.sun.xml.ws.encoding.soap.message.SOAPFaultInfo;
-import com.sun.xml.ws.encoding.soap.message.SOAP12FaultInfo;
 
 /**
  * @author WS Development Team
  */
 public class BodyBlock {
-     
+
     private Object value;
-    
+
     public BodyBlock(Object value) {
         this.value = value;
     }
-       
+
     public BodyBlock(JAXBBeanInfo beanInfo) {
         this.value = beanInfo;
     }
-    
+
     public BodyBlock(JAXBBridgeInfo bridgeInfo) {
         this.value = bridgeInfo;
     }
-    
+
     public BodyBlock(Source source) {
-    	setSource(source);
+        setSource(source);
     }
-    
-    public BodyBlock(SOAPFaultInfo faultInfo) {
-    	setFaultInfo(faultInfo);
-    }    
 
     public BodyBlock(RpcLitPayload rpcLoad) {
         this.value = rpcLoad;
     }
-    
+
     public void setSource(Source source) {
         this.value = source;
-    }
-    
-    public void setFaultInfo(SOAPFaultInfo faultInfo) {
-        this.value = faultInfo;
     }
 
     /**
@@ -77,5 +66,5 @@ public class BodyBlock {
     public Object getValue() {
         return value;
     }
-	 
+
 }

@@ -26,7 +26,6 @@ package com.sun.xml.ws.pept.ept;
 import com.sun.xml.ws.pept.encoding.Decoder;
 import com.sun.xml.ws.pept.encoding.Encoder;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
-import com.sun.xml.ws.pept.protocol.MessageDispatcher;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 
 /**
@@ -49,15 +48,6 @@ public interface MessageInfo extends MessageStruct {
  * </p>
  */
     public EPTFactory getEPTFactory();
-/**
- * <p>
- * Does ...
- * </p><p>
- * 
- * @return a MessageDispatcher with ...
- * </p>
- */
-    public MessageDispatcher getMessageDispatcher();
 /**
  * <p>
  * Does ...
@@ -96,17 +86,6 @@ public interface MessageInfo extends MessageStruct {
  * </p>
  */
     public void setEPTFactory(EPTFactory eptFactory);
-/**
- * <p>
- * Does ...
- * </p><p>
- * 
- * </p><p>
- * 
- * @param messageDispatcher ...
- * </p>
- */
-    public void setMessageDispatcher(MessageDispatcher messageDispatcher);
 /**
  * <p>
  * Does ...
