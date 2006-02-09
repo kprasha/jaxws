@@ -23,11 +23,11 @@ package com.sun.tools.ws.processor.model;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Collections;
 
 import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.processor.model.java.JavaType;
-import com.sun.xml.ws.util.NullIterator;
 
 /**
  *
@@ -118,7 +118,7 @@ public abstract class AbstractType {
 
     public Iterator getProperties() {
         if (properties == null) {
-            return NullIterator.getInstance();
+            return Collections.emptyList().iterator();
         } else {
             return properties.keySet().iterator();
         }

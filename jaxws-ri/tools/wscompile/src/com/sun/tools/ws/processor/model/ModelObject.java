@@ -23,8 +23,7 @@ package com.sun.tools.ws.processor.model;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.sun.xml.ws.util.NullIterator;
+import java.util.Collections;
 
 /**
  *
@@ -61,7 +60,7 @@ public abstract class ModelObject {
 
     public Iterator getProperties() {
         if (_properties == null) {
-            return NullIterator.getInstance();
+            return Collections.emptyList().iterator();
         } else {
             return _properties.keySet().iterator();
         }

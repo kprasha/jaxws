@@ -25,11 +25,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.wsdl.framework.ValidationException;
-import com.sun.xml.ws.util.NullIterator;
 import com.sun.xml.ws.util.xml.XmlUtil;
 
 /**
@@ -114,7 +114,7 @@ public class SchemaElement {
 
     public Iterator children() {
         if (_children == null) {
-            return NullIterator.getInstance();
+            return Collections.emptyList().iterator();
         } else {
             return _children.iterator();
         }
@@ -147,7 +147,7 @@ public class SchemaElement {
 
     public Iterator attributes() {
         if (_attributes == null) {
-            return NullIterator.getInstance();
+            return Collections.emptyList().iterator();
         } else {
             return _attributes.iterator();
         }
@@ -264,7 +264,7 @@ public class SchemaElement {
 
     public Iterator prefixes() {
         if (_nsPrefixes == null) {
-            return NullIterator.getInstance();
+            return Collections.emptyList().iterator();
         } else {
             return _nsPrefixes.keySet().iterator();
         }
