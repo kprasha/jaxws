@@ -21,7 +21,7 @@
 <project xmlns="http://www.netbeans.org/ns/project/1">
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
-        <data profile-file-target="" profile-target="" version="0.4" xmlns="http://www.netbeans.org/ns/profiler/1"/>
+        <data xmlns="http://www.netbeans.org/ns/profiler/1" profile-file-target="" profile-target="" version="0.4"/>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
             <!--Do not use Project Properties customizer when editing this file manually.-->
             <name>JAXWS-RI-REARCH</name>
@@ -138,6 +138,16 @@
                 <location>build/lib/sjsxp.jar</location>
                 <build-target>main</build-target>
             </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/stax-ex.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>build/lib/streambuffer.jar</location>
+                <build-target>main</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="packages">
@@ -184,7 +194,7 @@
             <compilation-unit>
                 <package-root>rt/src</package-root>
                 <package-root>tools/wscompile/src</package-root>
-                <classpath mode="compile">lib/activation.jar:lib/ant-junit.jar:lib/ant-launcher.jar:lib/ant-nodeps.jar:lib/ant-trax.jar:lib/ant.jar:lib/FastInfoset.jar:lib/jaxb-api.jar:lib/jaxb-impl.jar:lib/jaxb-libs.jar:lib/jaxb-xjc.jar:lib/jaxws-api.jar:lib/jsr173_api.jar:lib/jsr181-api.jar:lib/junit.jar:lib/relaxngDatatype.jar:lib/saaj-api.jar:lib/saaj-impl.jar:lib/servlet.jar:lib/sjsxp.jar:lib/http.jar:lib/jsr250-api.jar</classpath>
+                <classpath mode="compile">lib/activation.jar;lib/ant-junit.jar;lib/ant-launcher.jar;lib/ant-nodeps.jar;lib/ant-trax.jar;lib/ant.jar;lib/FastInfoset.jar;lib/http.jar;lib/jaxb-api.jar;lib/jaxb-impl.jar;lib/jaxb-xjc.jar;lib/jaxws-api.jar;lib/jsr173_api.jar;lib/jsr181-api.jar;lib/jsr250-api.jar;lib/junit.jar;lib/resolver.jar;lib/saaj-api.jar;lib/saaj-impl-fast.jar_;lib/saaj-impl.jar;lib/servlet.jar;lib/sjsxp.jar;lib/stax-ex.jar;lib/streambuffer.jar</classpath>
                 <built-to>build/lib/activation.jar</built-to>
                 <built-to>build/lib/FastInfoset.jar</built-to>
                 <built-to>build/lib/http.jar</built-to>
@@ -201,6 +211,8 @@
                 <built-to>build/lib/saaj-api.jar</built-to>
                 <built-to>build/lib/saaj-impl.jar</built-to>
                 <built-to>build/lib/sjsxp.jar</built-to>
+                <built-to>build/lib/stax-ex.jar</built-to>
+                <built-to>build/lib/streambuffer.jar</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
