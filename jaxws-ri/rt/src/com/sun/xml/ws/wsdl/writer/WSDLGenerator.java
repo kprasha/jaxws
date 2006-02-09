@@ -54,7 +54,6 @@ import com.sun.xml.ws.wsdl.writer.document.soap.SOAPAddress;
 import com.sun.xml.ws.wsdl.writer.document.soap.SOAPFault;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.SOAPVersion;
 
 
 import com.sun.xml.ws.model.JavaMethodImpl;
@@ -87,7 +86,7 @@ import java.util.Set;
  */
 public class WSDLGenerator {
     private JAXWSOutputSchemaResolver resolver;
-    private WSDLOutputResolver wsdlResolver = null;
+    private WSDLResolver wsdlResolver = null;
     private AbstractSEIModelImpl model;
     private Definitions serviceDefinitions;
     private Definitions portDefinitions;
@@ -194,7 +193,7 @@ public class WSDLGenerator {
      * @param extensions an array {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
      */    
-    public WSDLGenerator(AbstractSEIModelImpl model, WSDLOutputResolver wsdlResolver, String bindingId,
+    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, String bindingId,
             WSDLGeneratorExtension... extensions) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
@@ -210,7 +209,7 @@ public class WSDLGenerator {
         XmlSerializer serviceWriter;
         XmlSerializer portWriter = null;
         String fileName = JAXBRIContext.mangleNameToClassName(model.getServiceQName().getLocalPart());
-        Result result = wsdlResolver.getWSDLOutput(fileName+DOT_WSDL);
+        Result result = wsdlResolver.getWSDL(fileName+DOT_WSDL);
         if (result == null)
             return;
         wsdlLocation = result.getSystemId();
@@ -224,7 +223,7 @@ public class WSDLGenerator {
                 wsdlName += "PortType";
             Holder<String> absWSDLName = new Holder<String>();
             absWSDLName.value = wsdlName+DOT_WSDL;
-            result = wsdlResolver.getAbstractWSDLOutput(absWSDLName);
+            result = wsdlResolver.getAbstractWSDL(absWSDLName);
           
             if (result != null) {
                 portWSDLID = result.getSystemId();

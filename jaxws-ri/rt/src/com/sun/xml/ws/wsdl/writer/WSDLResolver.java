@@ -27,8 +27,8 @@ import javax.xml.ws.Holder;
  *
  * @author WS Development Team
  */
-public interface WSDLOutputResolver {
-    public Result getWSDLOutput(String suggestedFilename);
+public interface WSDLResolver {
+    public Result getWSDL(String suggestedFilename);
 
     /*
      * Updates filename if the suggested filename need to be changed in
@@ -36,7 +36,7 @@ public interface WSDLOutputResolver {
      *
      * return null if abstract WSDL need not be generated
      */
-    public Result getAbstractWSDLOutput(Holder<String> filename);
+    public Result getAbstractWSDL(Holder<String> filename);
 
     /*
      * Updates filename if the suggested filename need to be changed in

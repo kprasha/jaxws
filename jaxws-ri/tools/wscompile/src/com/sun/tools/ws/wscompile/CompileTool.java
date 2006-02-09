@@ -602,8 +602,8 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 rtModeler.setPortName(portName);
             AbstractSEIModelImpl rtModel = rtModeler.buildRuntimeModel();
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
-                    new com.sun.xml.ws.wsdl.writer.WSDLOutputResolver() {
-                        public Result getWSDLOutput(String suggestedFilename) {
+                    new com.sun.xml.ws.wsdl.writer.WSDLResolver() {
+                        public Result getWSDL(String suggestedFilename) {
                             File wsdlFile =
                                 new File(nonclassDestDir, suggestedFilename);
                             
@@ -619,10 +619,10 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         public Result getSchemaOutput(String namespace, String suggestedFilename) {
                             if (namespace.equals(""))
                                 return null;
-                            return getWSDLOutput(suggestedFilename);
+                            return getWSDL(suggestedFilename);
                         }
-                        public Result getAbstractWSDLOutput(Holder<String> filename) {
-                            return getWSDLOutput(filename.value);
+                        public Result getAbstractWSDL(Holder<String> filename) {
+                            return getWSDL(filename.value);
                         }
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);

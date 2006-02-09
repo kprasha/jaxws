@@ -23,7 +23,7 @@ package com.sun.xml.ws.server;
 import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.wsdl.writer.WSDLOutputResolver;
+import com.sun.xml.ws.wsdl.writer.WSDLResolver;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
@@ -41,7 +41,7 @@ import java.util.Set;
  * @author WS Development Team
  */
 
-public class WSDLGenResolver implements WSDLOutputResolver {
+public class WSDLGenResolver implements WSDLResolver {
     
     private Map<String, DocInfo> docs;
     private DocInfo abstractWsdl;
@@ -77,7 +77,7 @@ public class WSDLGenResolver implements WSDLOutputResolver {
     }
     
     /*
-    public Result getWSDLOutput(String suggestedFileName) {       
+    public Result getWSDL(String suggestedFileName) {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         
         StreamDocInfo docInfo = new StreamDocInfo(suggestedFileName, bout);
@@ -114,7 +114,7 @@ public class WSDLGenResolver implements WSDLOutputResolver {
     /*
      * return null if concrete WSDL need not be generated
      */
-    public Result getWSDLOutput(String filename) {        
+    public Result getWSDL(String filename) {
         ByteArrayBuffer bout = new ByteArrayBuffer();
         StreamDocInfo docInfo = new StreamDocInfo(filename, bout);
         docInfo.setDocType(DOC_TYPE.WSDL);
@@ -133,7 +133,7 @@ public class WSDLGenResolver implements WSDLOutputResolver {
      *
      * return null if abstract WSDL need not be generated
      */
-    public Result getAbstractWSDLOutput(Holder<String> filename) {
+    public Result getAbstractWSDL(Holder<String> filename) {
         if (abstractWsdl != null) {
             filename.value = abstractWsdl.getUrl().toString();
             return null;                // Don't generate abstract WSDL
