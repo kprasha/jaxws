@@ -163,61 +163,61 @@ public abstract class WSDLModelerBase implements Modeler {
         return false;
     }
 
-    protected void createParentFault(Fault fault) {
-        AbstractType faultType = fault.getBlock().getType();
-        AbstractType parentType = null;
+//    protected void createParentFault(Fault fault) {
+//        AbstractType faultType = fault.getBlock().getType();
+//        AbstractType parentType = null;
+//
+//
+//        if (parentType == null) {
+//            return;
+//        }
+//
+//        if (fault.getParentFault() != null) {
+//            return;
+//        }
+//        Fault parentFault =
+//            new Fault(((AbstractType)parentType).getName().getLocalPart());
+//        /* this is what it really should be but for interop with JAXRPC 1.0.1 we are not doing
+//         * this at this time.
+//         *
+//         * TODO - we should double-check this; the above statement might not be true anymore.
+//         */
+//        QName faultQName =
+//            new QName(
+//                fault.getBlock().getName().getNamespaceURI(),
+//                parentFault.getName());
+//        Block block = new Block(faultQName);
+//        block.setType((AbstractType)parentType);
+//        parentFault.setBlock(block);
+//        parentFault.addSubfault(fault);
+//        createParentFault(parentFault);
+//    }
 
-        
-        if (parentType == null) {
-            return;
-        }
-
-        if (fault.getParentFault() != null) {
-            return;
-        }
-        Fault parentFault =
-            new Fault(((AbstractType)parentType).getName().getLocalPart());
-        /* this is what it really should be but for interop with JAXRPC 1.0.1 we are not doing
-         * this at this time.
-         *
-         * TODO - we should double-check this; the above statement might not be true anymore.
-         */
-        QName faultQName =
-            new QName(
-                fault.getBlock().getName().getNamespaceURI(),
-                parentFault.getName());
-        Block block = new Block(faultQName);
-        block.setType((AbstractType)parentType);
-        parentFault.setBlock(block);
-        parentFault.addSubfault(fault);
-        createParentFault(parentFault);
-    }
-
-    protected void createSubfaults(Fault fault) {
-        AbstractType faultType = fault.getBlock().getType();
-        Iterator subtypes = null;        
-        if (subtypes != null) {
-            AbstractType subtype;
-            while (subtypes.hasNext()) {
-                subtype = (AbstractType)subtypes.next();
-                Fault subFault = new Fault(subtype.getName().getLocalPart());
-                /* this is what it really is but for interop with JAXRPC 1.0.1 we are not doing
-                 * this at this time
-                 *
-                 * TODO - we should double-check this; the above statement might not be true anymore.
-                 */
-                QName faultQName =
-                    new QName(
-                        fault.getBlock().getName().getNamespaceURI(),
-                        subFault.getName());
-                Block block = new Block(faultQName);
-                block.setType(subtype);
-                subFault.setBlock(block);
-                fault.addSubfault(subFault);
-                createSubfaults(subFault);
-            }
-        }
-    }
+//    protected void createSubfaults(Fault fault) {
+//        AbstractType faultType = fault.getBlock().getType();
+//        Iterator subtypes = null;
+//        if (subtypes != null) {
+//            AbstractType subtype;
+//            while (subtypes.hasNext()) {
+//                subtype = (AbstractType)subtypes.next();
+//                Fault subFault = new Fault(subtype.getName().getLocalPart());
+//                /* this is what it really is but for interop with JAXRPC 1.0.1 we are not doing
+//                 * this at this time
+//                 *
+//                 * TODO - we should double-check this; the above statement might not be true anymore.
+//                 */
+//                QName faultQName =
+//                    new QName(
+//                        fault.getBlock().getName().getNamespaceURI(),
+//                        subFault.getName());
+//                Block block = new Block(faultQName);
+//                block.setType(subtype);
+//                subFault.setBlock(block);
+//                fault.addSubfault(subFault);
+//                createSubfaults(subFault);
+//            }
+//        }
+//    }
 
     protected SOAPBody getSOAPRequestBody() {
         SOAPBody requestBody =
@@ -413,9 +413,6 @@ public abstract class WSDLModelerBase implements Modeler {
         return mimeTypes;
     }
 
-    /**
-     * @param iterator
-     */
     private boolean validateMimeContentPartNames(Iterator mimeContents) {
         //validate mime:content(s) in the mime:part as per R2909
         while(mimeContents.hasNext()){

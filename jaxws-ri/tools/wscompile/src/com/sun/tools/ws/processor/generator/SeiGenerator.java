@@ -183,7 +183,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             for(Fault fault:operation.getFaultsSet()){
                 m._throws(fault.getExceptionClass());
                 methodDoc.addThrows(fault.getExceptionClass());
-                wsdlOp.putFault(fault.getElementName(), fault.getJavaException().getName());
+                wsdlOp.putFault(fault.getName(), fault.getJavaException().getName());
             }
             
             //It should be the last thing to invoke after JMethod is built completely

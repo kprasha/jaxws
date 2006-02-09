@@ -10,8 +10,8 @@ import java.util.Map;
  */
 public interface TWSDLOperation extends TWSDLExtensible{
     /**
-     * Gives a Map of fault element attribute value to the fully qualified
+     * Gives a Map of fault name attribute value to the fully qualified
      * exception class name.
      */
-    Map<QName, String> getFaults();
+    Map<String, String> getFaults();
 }

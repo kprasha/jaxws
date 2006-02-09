@@ -36,10 +36,9 @@ import com.sun.codemodel.JClass;
  */
 public class Fault extends ModelObject {
 
-    public Fault() {}
-
-    public Fault(String name) {
+    public Fault(String name, String faultClassName) {
         this.name = name;
+        this.faultClassName = faultClassName;
         parentFault = null;
     }
 
@@ -173,6 +172,10 @@ public class Fault extends ModelObject {
         return exceptionClass;
     }
 
+    public String getFaultClassName(){
+        return faultClassName;
+    }
+
     private boolean wsdlException = true;
     private String name;
     private Block block;
@@ -182,4 +185,5 @@ public class Fault extends ModelObject {
     private QName elementName = null;
     private String javaMemberName = null;
     private JClass exceptionClass;
+    private final String faultClassName;
 }

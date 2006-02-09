@@ -1233,7 +1233,7 @@ public class WSDLModeler extends WSDLModelerBase {
 
             // wsdl:fault message name is used to create the java exception name later on
             String faultName = getFaultClassName(portTypeFault);
-            Fault fault = new Fault(faultName);
+            Fault fault = new Fault(portTypeFault.getName(), faultName);
             setDocumentationIfPresent(fault, portTypeFault.getDocumentation());
 
             //get the soapbind:fault from wsdl:fault in the binding
@@ -1310,18 +1310,14 @@ public class WSDLModeler extends WSDLModelerBase {
 
             Block faultBlock = new Block(faultQName, jaxbType);
             fault.setBlock(faultBlock);
-            createParentFault(fault);
-            createSubfaults(fault);
+            //createParentFault(fault);
+            //createSubfaults(fault);
             if(!response.getFaultBlocksMap().containsKey(faultBlock.getName()))
                 response.addFaultBlock(faultBlock);
             info.operation.addFault(fault);
         }
     }
 
-    /**
-     * @param portTypeFault
-     * @return
-     */
     private String getFaultClassName(com.sun.tools.ws.wsdl.document.Fault portTypeFault) {
         JAXWSBinding jaxwsBinding = (JAXWSBinding)getExtensionOfType(portTypeFault, JAXWSBinding.class);
         if(jaxwsBinding != null){
@@ -2435,7 +2431,7 @@ public class WSDLModeler extends WSDLModelerBase {
 
         String exceptionName =
             makePackageQualified(
-                _env.getNames().validJavaClassName(fault.getName()),
+                _env.getNames().validJavaClassName(fault.getFaultClassName()),
                 port.getName());
 
         // use fault namespace attribute

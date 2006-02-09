@@ -233,12 +233,12 @@ public class Operation extends Entity implements TWSDLOperation {
         this.parent = parent;
     }
 
-    public Map<QName, String> getFaults() {
+    public Map<String, String> getFaults() {
         return unmodifiableFaultClassMap;
     }
 
-    public void putFault(QName detailName, String exception){
-        faultClassMap.put(detailName, exception);
+    public void putFault(String faultName, String exception){
+        faultClassMap.put(faultName, exception);
     }
 
     private TWSDLExtensible parent;
@@ -251,6 +251,6 @@ public class Operation extends Entity implements TWSDLOperation {
     private String _parameterOrder;
     private String _uniqueKey;
     private ExtensibilityHelper _helper;
-    private final Map<QName, String> faultClassMap = new HashMap<QName, String>();
-    private final Map<QName, String> unmodifiableFaultClassMap = Collections.unmodifiableMap(faultClassMap);
+    private final Map<String, String> faultClassMap = new HashMap<String, String>();
+    private final Map<String, String> unmodifiableFaultClassMap = Collections.unmodifiableMap(faultClassMap);
 }
