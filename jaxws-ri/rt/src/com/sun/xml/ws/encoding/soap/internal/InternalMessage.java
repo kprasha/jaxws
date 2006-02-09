@@ -21,10 +21,8 @@ package com.sun.xml.ws.encoding.soap.internal;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -37,7 +35,7 @@ public class InternalMessage {
     private List<HeaderBlock> headers;
     private Set<QName> headerSet;
     private BodyBlock body;
-    private final Map<String,AttachmentBlock> attachments = new HashMap<String, AttachmentBlock>();
+    //private final Map<String,AttachmentBlock> attachments = new HashMap<String, AttachmentBlock>();
 
     /**
      * @return the <code>BodyBlock</code> for this message
@@ -80,19 +78,19 @@ public class InternalMessage {
         this.body = body;
     }
 
-    public void addAttachment(AttachmentBlock attachment){
-        attachments.put(attachment.getId(),attachment);
-    }
-
-    public AttachmentBlock getAttachment(String contentId){
-        return attachments.get(contentId);
-    }
-
-    /**
-     * @return a <code>Map</code> of contentIds to attachments
-     */
-    public Map<String, AttachmentBlock> getAttachments() {
-        return attachments;
-    }
+    //public void addAttachment(AttachmentBlock attachment){
+    //    attachments.put(attachment.getId(),attachment);
+    //}
+    //
+    //public AttachmentBlock getAttachment(String contentId){
+    //    return attachments.get(contentId);
+    //}
+    //
+    ///**
+    // * @return a <code>Map</code> of contentIds to attachments
+    // */
+    //public Map<String, AttachmentBlock> getAttachments() {
+    //    return attachments;
+    //}
 
 }
