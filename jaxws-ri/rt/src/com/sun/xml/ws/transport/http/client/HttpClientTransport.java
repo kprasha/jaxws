@@ -30,6 +30,7 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import javax.xml.ws.BindingProvider;
 import javax.xml.soap.MimeHeaders;
 import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
 import java.io.IOException;
@@ -55,6 +56,9 @@ public final class HttpClientTransport extends WSConnectionImpl {
         _logStream = logStream;
         endpoint = packet.endpointAddress;
         context = packet;
+        String address = (String)packet.invocationProperties.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+        if (address != null)
+            endpoint = EndpointAddress.create(address);
     }
 
     /**
