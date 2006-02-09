@@ -56,9 +56,6 @@ public final class HttpClientTransport extends WSConnectionImpl {
         _logStream = logStream;
         endpoint = packet.endpointAddress;
         context = packet;
-        String address = (String)packet.invocationProperties.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
-        if (address != null)
-            endpoint = EndpointAddress.create(address);
     }
 
     /**
