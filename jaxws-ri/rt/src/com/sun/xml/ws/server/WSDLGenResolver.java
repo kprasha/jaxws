@@ -89,7 +89,7 @@ final class WSDLGenResolver implements WSDLResolver {
      *
      * TODO: but it's not returning null. What am I missing!? - KK
      */
-    public Result getWSDL(String filename) {        
+    public Result getWSDL(String filename) {
         XMLStreamBuffer xsb = new XMLStreamBuffer();
         SDDocumentSource sd = SDDocumentSource.create(createURL(filename),xsb);
 
@@ -163,73 +163,4 @@ final class WSDLGenResolver implements WSDLResolver {
         r.setSystemId(filename.value);
         return r;
     }
-    
-    private static class StreamDocInfo implements DocInfo {
-        private ByteArrayBuffer bout;
-        private String resource;
-        private String queryString;
-		private DOC_TYPE docType;
-        
-        public StreamDocInfo(String resource, ByteArrayBuffer bout) {
-            this.resource = resource;
-            this.bout = bout;
-        }
-
-        public InputStream getDoc() {
-            return bout.newInputStream();
-        }
-
-        public String getPath() {
-            return resource;
-        }
-        
-        public URL getUrl() {
-            try {
-                return new URL("file:///"+resource);
-            } catch(Exception e) {
-                return null;
-            }
-        }
-
-        public String getQueryString() {
-            return queryString;
-        }
-
-        public void setQueryString(String queryString) {
-            this.queryString = queryString;
-        }
-        
-        public void setDocType(DOC_TYPE docType) {
-			this.docType = docType;
-        }
-
-        public DOC_TYPE getDocType() {
-            return docType;
-        }
-
-        public void setTargetNamespace(String ns) {
-
-        }
-
-        public String getTargetNamespace() {
-            return null;
-        }
-
-        public void setService(WSDLService service) {
-
-        }
-
-        public WSDLService getService() {
-            return null;
-        }
-
-        public void setPortType(boolean portType) {
-
-        }
-
-        public boolean hasPortType() {
-            return false;
-        }
-    }
-
 }

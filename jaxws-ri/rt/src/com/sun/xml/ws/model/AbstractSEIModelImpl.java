@@ -69,7 +69,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         populateMaps();
         populateAsyncExceptions();
         createJAXBContext();
-        createDecoderInfo();
     }
 
     /**
@@ -555,12 +554,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     public Map<Integer, RawAccessor> getRawAccessorMap() {
         return rawAccessorMap;
     }
-
-    /**
-     * This method creates the decoder info that
-     * @deprecated
-     */
-    protected abstract void createDecoderInfo();
 
     private boolean enableMtom = false;
     private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {

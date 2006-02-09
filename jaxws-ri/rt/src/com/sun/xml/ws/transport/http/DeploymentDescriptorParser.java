@@ -26,7 +26,6 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.sandbox.server.InstanceResolver;
 import com.sun.xml.ws.sandbox.server.SDDocumentSource;
-import com.sun.xml.ws.server.DocInfo;
 import com.sun.xml.ws.server.Root;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.spi.runtime.Container;
@@ -248,7 +247,7 @@ public class DeploymentDescriptorParser<A> {
 
     /**
      * Checks the deployment descriptor or {@link @WebServiceProvider} annotation
-     * to see if it points to any WSDL. If so, returns the {@link DocInfo}.
+     * to see if it points to any WSDL. If so, returns the {@link SDDocumentSource}.
      *
      * @return
      *      The pointed WSDL, if any. Otherwise null.

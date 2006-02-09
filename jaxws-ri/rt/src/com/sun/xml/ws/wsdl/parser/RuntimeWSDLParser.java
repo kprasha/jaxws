@@ -31,8 +31,6 @@ import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
-import com.sun.xml.ws.server.DocInfo;
-import com.sun.xml.ws.server.DocInfo.DOC_TYPE;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -93,70 +91,6 @@ public class RuntimeWSDLParser {
         parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
         return parser.wsdlDoc;
-    }
-
-    /*
-     * Fills DocInfo with Document type(WSDL, or schema),
-     * Service Name, WSDLPort Type name, targetNamespace for the document.
-     * 
-     * Don't follow imports
-     */
-    public static void fillDocInfo(DocInfo docInfo, QName serviceName,
-        QName portTypeName) throws XMLStreamException {
-
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(null);
-        InputSource source = new InputSource(docInfo.getDoc());
-
-        XMLStreamReader reader = createReader(source);
-        try {
-            XMLStreamReaderUtil.nextElementContent(reader);
-
-            if(reader.getName().equals(WSDLConstants.QNAME_SCHEMA)){
-                docInfo.setDocType(DOC_TYPE.SCHEMA);
-                String tns = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_TNS);
-                docInfo.setTargetNamespace(tns);
-                return;
-            }else if (reader.getName().equals(WSDLConstants.QNAME_DEFINITIONS)) {
-                docInfo.setDocType(DOC_TYPE.WSDL);
-                String tns = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_TNS);
-                parser.targetNamespace = tns;
-                docInfo.setTargetNamespace(tns);
-            }else{
-                docInfo.setDocType(DOC_TYPE.OTHER);
-                return;
-            }
-
-            while (XMLStreamReaderUtil.nextElementContent(reader) !=
-                    XMLStreamConstants.END_ELEMENT) {
-                 if(reader.getEventType() == XMLStreamConstants.END_DOCUMENT)
-                    break;
-
-                QName name = reader.getName();
-                if (WSDLConstants.QNAME_PORT_TYPE.equals(name)) {
-                    String pn = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-                    if (portTypeName != null) {
-                        if(!portTypeName.getLocalPart().equals(pn)
-                           || !portTypeName.getNamespaceURI().equals(docInfo.getTargetNamespace())) {
-                            docInfo.setPortType(true);
-                        }
-                    }
-                    XMLStreamReaderUtil.skipElement(reader);
-                } else if (WSDLConstants.QNAME_SERVICE.equals(name)) {
-                    String sn = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-                    QName sqn = new QName(docInfo.getTargetNamespace(), sn);
-                    if(!serviceName.equals(sqn))
-                        continue;
-                    parser.parseService(reader);
-                    docInfo.setService(parser.wsdlDoc.getService(sqn));
-                    if(reader.getEventType() != XMLStreamConstants.END_ELEMENT)
-                        XMLStreamReaderUtil.next(reader);
-                } else{
-                    XMLStreamReaderUtil.skipElement(reader);
-                }
-            }
-        } finally {
-            reader.close();
-        }
     }
 
     private RuntimeWSDLParser(XMLEntityResolver resolver, WSDLParserExtension... extensions) {
@@ -427,7 +361,7 @@ public class RuntimeWSDLParser {
     private static void parseSOAPHeaderBinding(XMLStreamReader reader, Map<String,ParameterBinding> parts){
         String part = reader.getAttributeValue(null, "part");
         //if(part == null| part.equals("")||message == null || message.equals("")){
-        if(part == null| part.equals("")){
+        if(part == null || part.equals("")){
             return;
         }
 
