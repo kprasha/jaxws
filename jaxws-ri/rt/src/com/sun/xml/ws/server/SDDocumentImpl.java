@@ -154,6 +154,7 @@ class SDDocumentImpl implements SDDocument {
             w.writeStartDocument();
             writeTo(endpointAddress,resolver,w);
             w.writeEndDocument();
+            w.close();
         } catch (XMLStreamException e) {
             IOException ioe = new IOException(e.getMessage());
             ioe.initCause(e);
