@@ -35,6 +35,7 @@ import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.api.wsdl.TWSDLOperation;
+import com.sun.codemodel.JClass;
 
 /**
  * Entity corresponding to the "operation" child element of a "portType" WSDL element.
@@ -233,11 +234,11 @@ public class Operation extends Entity implements TWSDLOperation {
         this.parent = parent;
     }
 
-    public Map<String, String> getFaults() {
+    public Map<String, JClass> getFaults() {
         return unmodifiableFaultClassMap;
     }
 
-    public void putFault(String faultName, String exception){
+    public void putFault(String faultName, JClass exception){
         faultClassMap.put(faultName, exception);
     }
 
@@ -251,6 +252,6 @@ public class Operation extends Entity implements TWSDLOperation {
     private String _parameterOrder;
     private String _uniqueKey;
     private ExtensibilityHelper _helper;
-    private final Map<String, String> faultClassMap = new HashMap<String, String>();
-    private final Map<String, String> unmodifiableFaultClassMap = Collections.unmodifiableMap(faultClassMap);
+    private final Map<String, JClass> faultClassMap = new HashMap<String, JClass>();
+    private final Map<String, JClass> unmodifiableFaultClassMap = Collections.unmodifiableMap(faultClassMap);
 }

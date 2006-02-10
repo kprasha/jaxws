@@ -1,5 +1,7 @@
 package com.sun.tools.ws.api.wsdl;
 
+import com.sun.codemodel.JClass;
+
 import javax.xml.namespace.QName;
 import java.util.Map;
 
@@ -10,8 +12,7 @@ import java.util.Map;
  */
 public interface TWSDLOperation extends TWSDLExtensible{
     /**
-     * Gives a Map of fault name attribute value to the fully qualified
-     * exception class name.
+     * Gives a Map of fault name attribute value to the {@link JClass}
      */
-    Map<String, String> getFaults();
+    Map<String, JClass> getFaults();
 }
