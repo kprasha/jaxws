@@ -24,6 +24,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamConstants;
 
+import org.jvnet.staxex.XMLStreamReaderEx;
+
 /**
  * A stream SOAP decoder.
  *
@@ -46,9 +48,13 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
     // consider caching
     // private final XMLStreamBuffer buffer;
-    
+
     public Packet decode(InputStream in, String contentType) throws IOException {
         XMLStreamReader reader = createXMLStreamReader(in);
+        return decode(reader, contentType);
+    }
+
+    Packet decode(XMLStreamReader reader, String contentType) throws IOException {
 
         // Check at the start of the document
         XMLStreamReaderUtil.verifyReaderState(reader,
@@ -165,7 +171,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
     protected abstract StreamMessage createMessage(HeaderList headers, XMLStreamReader reader);
 
-    private XMLStreamReader createXMLStreamReader(InputStream in) {
+    protected XMLStreamReader createXMLStreamReader(InputStream in) {
         // TODO: we should definitely let Decode owns one XMLStreamReader instance
         // instead of going to this generic factory
         return XMLStreamReaderFactory.createXMLStreamReader(in,true);
@@ -196,4 +202,5 @@ public abstract class StreamSOAPDecoder implements Decoder {
             throw new AssertionError();
         }
     }
+
 }
