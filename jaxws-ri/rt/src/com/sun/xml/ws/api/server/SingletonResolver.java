@@ -1,7 +1,6 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.server.ServerRtException;
 
 import javax.annotation.PostConstruct;

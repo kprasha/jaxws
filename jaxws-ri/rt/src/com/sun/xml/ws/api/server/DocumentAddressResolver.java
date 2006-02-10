@@ -1,13 +1,11 @@
 package com.sun.xml.ws.api.server;
 
-import com.sun.xml.ws.api.WSEndpoint;
-
 /**
  * Resolves relative references among {@link SDDocument}s.
  *
  * <p>
  * This interface is implemented by the caller of
- * {@link SDDocument#writeTo)} method so
+ * {@link SDDocument#writeTo} method so
  * that the {@link SDDocument} can correctly produce references
  * to other documents.
  *

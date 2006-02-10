@@ -2,7 +2,6 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.WSEndpoint;
 
 import javax.xml.ws.WebServiceContext;
 

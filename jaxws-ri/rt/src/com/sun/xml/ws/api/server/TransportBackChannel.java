@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 
 /**
  * Represents a transport back-channel.
@@ -15,7 +16,7 @@ import com.sun.xml.ws.api.message.Packet;
  * <p>
  * This allows the transport to close down the communication
  * channel sooner than wainting for
- * {@link WSEndpoint#process(Packet,WebServiceContextDelegate,TransportBackChannel)}
+ * {@link PipeHead#process}
  * method to return, thereby improving the overall throughput
  * of the system.
  *

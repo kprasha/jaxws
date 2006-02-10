@@ -1,7 +1,5 @@
 package com.sun.xml.ws.api.server;
 
-import com.sun.xml.ws.api.WSEndpoint;
-
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.namespace.QName;

@@ -3,9 +3,8 @@ package com.sun.xml.ws.api.server;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.WSEndpoint;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSEndpoint.PipeHead;
+import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.util.Pool;
 
 /**
@@ -18,24 +17,53 @@ import com.sun.xml.ws.util.Pool;
  * the name is the "adapter".
  *
  * <p>
- * This class contains a bunch of convenience methods and refererences
- * to other components that aid the adapting process, such as ...
+ * The purpose of this class is twofolds:
  *
  * <ol>
  * <li>
- * {@link Encoder} and {@link Decoder}, which achieves
- * the de-coupling of transport and message encoding.
+ * To hide the logic of converting a transport-specific connection
+ * to a {@link Packet} and do the other way around.
+ *
+ * <li>
+ * To manage thread-unsafe resources, such as {@link WSEndpoint.PipeHead},
+ * {@link Encoder}, and {@link Decoder}.
  * </ol>
  *
+ * <p>
+ * {@link Adapter}s are extended to work with each kind of transport,
+ * and therefore {@link Adapter} class itself is not all that
+ * useful by itself --- it merely provides a design template
+ * that can be followed.
+ *
+ * <p>
+ * For managing resources, an adapter uses an object called {@link Toolkit}
+ * (think of it as a tray full of tools that a dentist uses ---
+ * trays are identical, but each patient has to get one. You have
+ * a pool of them and you assign it to a patient.)
+ *
+ * {@link Adapter.Toolkit} can be extended by derived classes.
+ * That actual type is the {@code TK} type parameter this class takes.
  *
  * @author Kohsuke Kawaguchi
  */
 public abstract class Adapter<TK extends Adapter.Toolkit> {
     protected final WSEndpoint<?> endpoint;
 
+    /**
+     * Object that groups all thread-unsafe resources.
+     */
     public class Toolkit {
+        /**
+         * For encoding infoset to the byte stream.
+         */
         public final Encoder encoder;
+        /**
+         * For decoding the byte stream to XML infoset.
+         */
         public final Decoder decoder;
+        /**
+         * This object from {@link WSEndpoint} serves the request.
+         */
         public final PipeHead head;
 
         public Toolkit() {
@@ -55,12 +83,20 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
         }
     };
 
+    /**
+     * Creates an {@link Adapter} that delivers
+     * messages to the given endpoint.
+     */
     protected Adapter(WSEndpoint endpoint) {
+        assert endpoint!=null;
         this.endpoint = endpoint;
     }
 
     /**
      * Gets the endpoint that this {@link Adapter} is serving.
+     *
+     * @return
+     *      always non-null.
      */
     public WSEndpoint<?> getEndpoint() {
         return endpoint;
