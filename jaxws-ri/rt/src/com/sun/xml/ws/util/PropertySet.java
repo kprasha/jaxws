@@ -28,6 +28,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -92,10 +93,19 @@ public abstract class PropertySet {
             if(cp!=null)
                 props.put(cp.value(), new FieldAccessor(f, cp));
         }
-
         for (Method m : clazz.getMethods()) {
             Property cp = m.getAnnotation(Property.class);
-            // if(cp!=null) props.put(cp.value(), new MethodProperty(m, cp));
+            if(cp!=null) {
+                try {
+                    String name = m.getName();
+                    assert name.startsWith("get");  // must be on the getter
+                    name = 's'+name.substring(1);   // getFoo -> setFoo
+                    Method setter = clazz.getMethod(name,m.getReturnType());
+                    props.put(cp.value(), new MethodAccessor(m,setter,cp));
+                } catch (NoSuchMethodException e) {
+                    throw new Error(e);     // that's a bug. define the setter please.
+                }
+            }
         }
 
         return props;
@@ -149,6 +159,71 @@ public abstract class PropertySet {
             } catch (IllegalAccessException e) {
                 throw new AssertionError();
             }
+        }
+    }
+
+    static final class MethodAccessor implements Accessor {
+        /**
+         * Getter method.
+         */
+        private final Method getter;
+        /**
+         * Setter method.
+         */
+        private final Method setter;
+
+        /**
+         * {@link Property} annotation on {@link #getter}.
+         */
+        final Property annotation;
+
+        protected MethodAccessor(Method getter, Method setter, Property annotation) {
+            this.getter = getter;
+            this.setter = setter;
+            this.annotation = annotation;
+        }
+
+        public String getName() {
+            return annotation.value();
+        }
+
+        public boolean hasValue(PropertySet props) {
+            return get(props)!=null;
+        }
+
+        public Object get(PropertySet props) {
+            try {
+                return getter.invoke(props);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError();
+            } catch (InvocationTargetException e) {
+                handle(e);
+                return 0;   // never reach here
+            }
+        }
+
+        public void set(PropertySet props, Object value) {
+            try {
+                setter.invoke(props,value);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError();
+            } catch (InvocationTargetException e) {
+                handle(e);
+            }
+        }
+
+        /**
+         * Since we don't expect the getter/setter to throw a checked exception,
+         * it should be possible to make the exception propagation transparent.
+         * That's what we are trying to do here.
+         */
+        private Exception handle(InvocationTargetException e) {
+            Throwable t = e.getTargetException();
+            if(t instanceof Error)
+                throw (Error)t;
+            if(t instanceof RuntimeException)
+                throw (RuntimeException)t;
+            throw new Error(e);
         }
     }
 
