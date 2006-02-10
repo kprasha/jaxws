@@ -11,6 +11,12 @@ import java.security.Principal;
  * to serve {@link WebServiceContext} methods for a {@link Packet}.
  *
  * <p>
+ * When the user application calls a method on {@link WebServiceContext},
+ * the JAX-WS RI goes to the {@link Packet} that represents the request,
+ * then check {@link Packet#webServiceContextDelegate}, and forwards
+ * the method calls to {@link WebServiceContextDelegate}. 
+ *
+ * <p>
  * All the methods defined on this interface takes {@link Packet}
  * (whose {@link Packet#webServiceContextDelegate} points to
  * this object), so that a single stateless {@link WebServiceContextDelegate}
