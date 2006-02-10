@@ -63,10 +63,10 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             int xsdnum = 1;
             for (SDDocument sdd : sdef) {
                 if(sdd.isWSDL()) {
-                    wsdls.put("xsd="+(xsdnum++),sdd);
+                    wsdls.put("wsdl="+(wsdlnum++),sdd);
                 }
                 if(sdd.isSchema()) {
-                    wsdls.put("wsdl="+(wsdlnum++),sdd);
+                    wsdls.put("xsd="+(xsdnum++),sdd);
                 }
             }
 
