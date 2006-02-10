@@ -41,7 +41,7 @@ abstract public class AbstractExtensibleImpl implements WSDLExtensible {
     }
 
     public void addExtension(WSDLExtension ex) {
-        if(ex!=null)
+        if(ex==null)
             // I don't trust plugins. So let's always check it, instead of making this an assertion
             throw new IllegalArgumentException();
         extensions.add(ex);

@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
 import javax.xml.stream.XMLStreamReader;
@@ -51,6 +52,27 @@ final class WSDLParserExtensionFacade extends WSDLParserExtension {
         }
         XMLStreamReaderUtil.skipElement(reader);
         return true;
+    }
+
+    public boolean portTypeOperationInput(WSDLOperation op, XMLStreamReader reader) {
+        for (WSDLParserExtension e : extensions)
+            e.portTypeOperationInput(op,reader);
+
+        return false;
+    }
+
+    public boolean portTypeOperationOutput(WSDLOperation op, XMLStreamReader reader) {
+        for (WSDLParserExtension e : extensions)
+            e.portTypeOperationOutput(op,reader);
+
+        return false;
+    }
+
+    public boolean portTypeOperationFault(WSDLOperation op, XMLStreamReader reader) {
+        for (WSDLParserExtension e : extensions)
+            e.portTypeOperationFault(op,reader);
+
+        return false;
     }
 
     public void portAttributes(WSDLPort port, XMLStreamReader reader) {

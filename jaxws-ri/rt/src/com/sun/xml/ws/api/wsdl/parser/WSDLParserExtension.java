@@ -1,10 +1,6 @@
 package com.sun.xml.ws.api.wsdl.parser;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
+import com.sun.xml.ws.api.model.wsdl.*;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
@@ -117,10 +113,34 @@ import javax.xml.ws.WebServiceException;
  * @author Kohsuke Kawaguchi
  */
 public abstract class WSDLParserExtension {
-    public abstract void serviceAttributes(WSDLService service, XMLStreamReader reader);
-    public abstract boolean serviceElements(WSDLService service, XMLStreamReader reader);
-    public abstract void portAttributes(WSDLPort port, XMLStreamReader reader);
-    public abstract boolean portElements(WSDLPort port, XMLStreamReader reader);
+    public void serviceAttributes(WSDLService service, XMLStreamReader reader) {
+        // noop
+    }
+
+    public boolean serviceElements(WSDLService service, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void portAttributes(WSDLPort port, XMLStreamReader reader) {
+        // noop
+    }
+
+    public boolean portElements(WSDLPort port, XMLStreamReader reader) {
+        return false;
+    }
+
+    public boolean portTypeOperationInput(WSDLOperation op, XMLStreamReader reader) {
+        return false;
+    }
+
+    public boolean portTypeOperationOutput(WSDLOperation op, XMLStreamReader reader) {
+        return false;
+    }
+
+    public boolean portTypeOperationFault(WSDLOperation op, XMLStreamReader reader) {
+        return false;
+    }
+
 
     // TODO: complete the rest of the callback
 
@@ -134,5 +154,7 @@ public abstract class WSDLParserExtension {
      *      The completely parsed {@link WSDLModel}. All the methods on
      *      the model can be safely invoked, and expected to work.
      */
-    public abstract void finished(WSDLModel model);
+    public void finished(WSDLModel model) {
+        // noop
+    }
 }

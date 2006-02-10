@@ -470,7 +470,7 @@ public class RuntimeWSDLParser {
                 parsePortTypeOperationFault(reader, operation);
             }else{
                 XMLStreamReaderUtil.skipElement(reader);
-            }            
+            }
         }
     }
 
@@ -478,6 +478,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.addFaultMessage(new WSDLMessageImpl(msgName));
+        extension.portTypeOperationFault(operation, reader);
         goToEnd(reader);
     }
 
@@ -485,6 +486,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.setInputMessage(new WSDLMessageImpl(msgName));
+        extension.portTypeOperationInput(operation, reader);
         goToEnd(reader);
     }
 
@@ -492,6 +494,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         operation.setOutputMessage(new WSDLMessageImpl(msgName));
+        extension.portTypeOperationOutput(operation, reader);
         goToEnd(reader);
     }
 

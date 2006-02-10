@@ -43,6 +43,14 @@ public class ParserUtil {
         return reader.getAttributeValue(null, name);
     }
 
+    public static String getAttribute(XMLStreamReader reader, String nsUri, String name) {
+        return reader.getAttributeValue(nsUri, name);
+    }
+
+    public static String getAttribute(XMLStreamReader reader, QName name) {
+        return reader.getAttributeValue(name.getNamespaceURI(), name.getLocalPart());
+    }
+
     public static void verifyTag(XMLReader reader, QName name) {
         if (!name.equals(reader.getName())) {
             throw new XMLReaderException("xmlreader.unexpectedState.tag",
