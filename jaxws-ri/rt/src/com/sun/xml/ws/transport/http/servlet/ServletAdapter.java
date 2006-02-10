@@ -1,6 +1,6 @@
 package com.sun.xml.ws.transport.http.servlet;
 
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;

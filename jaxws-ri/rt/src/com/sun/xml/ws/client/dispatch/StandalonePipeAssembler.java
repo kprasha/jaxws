@@ -4,7 +4,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;

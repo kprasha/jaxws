@@ -20,7 +20,7 @@
 package com.sun.xml.ws.transport.local.client;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;

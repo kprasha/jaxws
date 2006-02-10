@@ -21,10 +21,8 @@
 package com.sun.xml.ws.transport.http.servlet;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
-import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
-import com.sun.xml.ws.api.WSEndpoint;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;

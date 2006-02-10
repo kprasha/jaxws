@@ -19,7 +19,7 @@
  */
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;

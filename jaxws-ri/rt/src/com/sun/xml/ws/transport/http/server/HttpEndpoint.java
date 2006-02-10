@@ -21,7 +21,7 @@
 package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.server.ServerRtException;
 

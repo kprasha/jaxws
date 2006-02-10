@@ -1,6 +1,6 @@
 package com.sun.xml.ws.spi.runtime;
 
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 
 /**
  * Root of the SPI implemented by the container

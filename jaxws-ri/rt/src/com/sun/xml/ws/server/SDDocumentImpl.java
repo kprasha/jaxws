@@ -3,10 +3,10 @@ package com.sun.xml.ws.server;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import com.sun.xml.ws.wsdl.parser.ParserUtil;
-import com.sun.xml.ws.api.WSEndpoint;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;

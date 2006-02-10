@@ -20,7 +20,7 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.api.server.TransportBackChannel;

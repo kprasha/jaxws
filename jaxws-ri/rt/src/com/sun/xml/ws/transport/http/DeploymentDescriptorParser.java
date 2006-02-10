@@ -21,7 +21,7 @@
 package com.sun.xml.ws.transport.http;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.api.server.InstanceResolver;
