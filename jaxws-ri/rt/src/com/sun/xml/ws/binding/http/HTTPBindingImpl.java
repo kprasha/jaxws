@@ -28,6 +28,7 @@ import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
+import java.util.ArrayList;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
@@ -53,13 +54,14 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
         return TestDecoderImpl.INSTANCE11;
     }
 
-    /*
-     * Sets the handler chain. Only logical handlers are
-     * allowed with HTTPBinding.
+    /**
+     * This method separates the logical and protocol handlers.
+     * Only logical handlers are allowed with HTTPBinding. 
+     * Setting SOAPHandlers throws WebServiceException
      */
-    @Override
-    public void setHandlerChain(List<Handler> chain) {
-        for (Handler handler : chain) {
+    protected void sortHandlers() {
+        logicalHandlers =  new ArrayList<LogicalHandler>();
+        for (Handler handler : handlers) {
             if (!(handler instanceof LogicalHandler)) {
                 LocalizableMessageFactory messageFactory =
                     new LocalizableMessageFactory(
@@ -69,11 +71,12 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
                     messageFactory.getMessage("non.logical.handler.set",
                     handler.getClass().toString());
                 throw new WebServiceException(localizer.localize(locMessage));
-            }
-        }
-        super.setHandlerChain(chain);
+            } else {
+                logicalHandlers.add((LogicalHandler) handler);
+            }            
+        }        
     }
-
+    
     public SOAPVersion getSOAPVersion() {
         return null;
     }

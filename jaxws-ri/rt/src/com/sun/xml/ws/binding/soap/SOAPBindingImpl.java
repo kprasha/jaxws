@@ -23,11 +23,12 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.handler.HandlerChainCaller;
+import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegateFactory;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
+import java.util.ArrayList;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -38,6 +39,8 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.soap.SOAPHandler;
 
 
 
@@ -55,7 +58,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
     protected Set<String> requiredRoles;
     protected Set<String> roles;
     protected boolean enableMtom = false;
-
+    private Set<QName> handlerUnderstoodHeaders;
     protected final SOAPVersion soapVersion;
 
 
@@ -81,8 +84,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         }
         ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
         roles = new HashSet<String>();
-        addRequiredRoles();
-        setRolesOnHandlerChain();
+        addRequiredRoles();        
     }
 
     /*
@@ -96,22 +98,55 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         }
         return bindingId;
     }
-
+    
+    /**
+     * This method separates the logical and protocol handlers. 
+     */
+    protected void sortHandlers() {
+        logicalHandlers =  new ArrayList<LogicalHandler>();
+        soapHandlers =  new ArrayList<SOAPHandler>();
+        for (Handler handler : handlers) {
+            if (LogicalHandler.class.isAssignableFrom(handler.getClass())) {
+                logicalHandlers.add((LogicalHandler) handler);
+            } else if (SOAPHandler.class.isAssignableFrom(handler.getClass())) {
+                soapHandlers.add((SOAPHandler) handler);
+                Set<QName> headers = ((SOAPHandler) handler).getHeaders();
+                if (headers != null) {
+                    handlerUnderstoodHeaders.addAll(headers);
+                }
+            } else if (Handler.class.isAssignableFrom(handler.getClass())) {
+                throw new HandlerException(
+                    "cannot.extend.handler.directly",
+                    handler.getClass().toString());
+            } else {
+                throw new HandlerException("handler.not.valid.type",
+                    handler.getClass().toString());
+            }
+        }
+        //handlers.clear();
+        //handlers.addAll(logicalHandlers);
+        //handlers.addAll(soapHandlers);
+    }
+    
+    /**
+     * Returns the headers understood by the handlers. This set
+     * is created when the handler chain caller is instantiated and
+     * the handlers are sorted. The set is comprised of headers
+     * returned from SOAPHandler.getHeaders() method calls.
+     *
+     * @return The set of all headers that the handlers declare
+     * that they understand.
+     */
+    public Set<QName> getHandlerUnderstoodHeaders() {
+        return handlerUnderstoodHeaders;
+    }
+    
     /*
     * Use this to distinguish SOAP12HTTP_BINDING or X_SOAP12HTTP_BINDING
     */
     @Override
     public String getActualBindingId() {
         return super.getBindingId();
-    }
-
-    /*
-     * When client sets a new handler chain, must also set roles on
-     * the new handler chain caller that gets created.
-     */
-    public void setHandlerChain(List<Handler> chain) {
-        super.setHandlerChain(chain);
-        setRolesOnHandlerChain();
     }
 
     protected void addRequiredRoles() {
@@ -139,8 +174,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
             throw new WebServiceException(localizer.localize(locMessage));
         }
         this.roles = roles;
-        addRequiredRoles();
-        setRolesOnHandlerChain();
+        addRequiredRoles();        
     }
 
 
@@ -169,25 +203,6 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
 
     public MessageFactory getMessageFactory() {
         return soapVersion.saajFactory;
-    }
-
-    /**
-     * This call defers to the super class to get the
-     * handler chain caller. It then sets the roles on the
-     * caller before returning it.
-     *
-     * @see com.sun.xml.ws.binding.BindingImpl#getHandlerChainCaller
-     */
-    public HandlerChainCaller getHandlerChainCaller() {
-        HandlerChainCaller caller = super.getHandlerChainCaller();
-        caller.setRoles(roles);
-        return chainCaller;
-    }
-    
-    protected void setRolesOnHandlerChain() {
-        if (chainCaller != null) {
-            chainCaller.setRoles(roles);
-        }
     }
 
     protected void setupSystemHandlerDelegate(QName serviceName) {

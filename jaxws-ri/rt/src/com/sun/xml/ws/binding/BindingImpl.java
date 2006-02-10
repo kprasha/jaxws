@@ -25,12 +25,15 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
-import com.sun.xml.ws.handler.HandlerChainCaller;
+import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.ArrayList;
@@ -39,13 +42,7 @@ import java.util.List;
 
 /**
  * Instances are created by the service, which then
- * sets the handler chain on the binding impl. The handler
- * caller class actually creates and manages the handlers.
- *
- * <p>Also used on the server side, where non-api calls such as
- * getHandlerChainCaller cannot be used. So the binding impl
- * now stores the handler list rather than deferring to the
- * handler chain caller.
+ * sets the handler chain on the binding impl.
  *
  * <p>This class is made abstract as we dont see a situation when a BindingImpl has much meaning without binding id.
  * IOw, for a specific binding there will be a class extending BindingImpl, for example SOAPBindingImpl.
@@ -56,11 +53,12 @@ import java.util.List;
  */
 public abstract class BindingImpl implements WSBinding {
 
-    // caller ignored on server side
-    protected HandlerChainCaller chainCaller;
-
     private SystemHandlerDelegate systemHandlerDelegate;
-    private List<Handler> handlers;
+    protected List<Handler> handlers; // may be logical/soap mixed
+    protected List<LogicalHandler> logicalHandlers;
+    protected List<SOAPHandler> soapHandlers;
+    
+    
     private final String bindingId;
     protected final QName serviceName;
 
@@ -69,6 +67,7 @@ public abstract class BindingImpl implements WSBinding {
         if(handlerChain==null)
             handlerChain = Collections.emptyList();
         this.handlers = handlerChain;
+        sortHandlers();
         this.bindingId = bindingId;
         this.serviceName = serviceName;
     }
@@ -84,9 +83,6 @@ public abstract class BindingImpl implements WSBinding {
      * logical and protocol handlers will be sorted before calling them.
      */
     public List<Handler> getHandlerChain() {
-        if (chainCaller != null) {
-            return new ArrayList<Handler>(chainCaller.getHandlerChain());
-        }
         return new ArrayList<Handler>(handlers);
     }
 
@@ -95,33 +91,24 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     /**
-     * Sets the handlers on the binding. If the handler chain
-     * caller already exists, then the handlers will be set on
-     * the caller and the handler chain held by the binding will
-     * be the sorted list.
+     * Sets the handlers on the binding and then
+     * sorts the handlers in to logical and protocol handlers.
      */
     public void setHandlerChain(List<Handler> chain) {
-        if (chainCaller != null) {
-            chainCaller = new HandlerChainCaller(chain);
-            handlers = chainCaller.getHandlerChain();
-        } else {
-            handlers = chain;
-        }
+        handlers = chain;
+        sortHandlers();
     }
-
-    /**
-     * Creates the handler chain caller if needed and returns
-     * it. Once the handler chain caller exists, this class
-     * defers getHandlers() calls to it to get the new sorted
-     * list of handlers.
-     */
-    public HandlerChainCaller getHandlerChainCaller() {
-        if (chainCaller == null) {
-            chainCaller = new HandlerChainCaller(handlers);
-        }
-        return chainCaller;
+    
+    protected abstract void sortHandlers();
+    
+    public List<SOAPHandler> getSOAPHandlerChain(){
+        return soapHandlers;
     }
-
+    
+    public List<LogicalHandler> getLogicalHandlerChain(){
+        return logicalHandlers;
+    }
+    
     public String getBindingId(){
         return bindingId;
     }
