@@ -102,9 +102,6 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
 
             packet.proxy = this;
             packet.endpointAddress = defaultEndPointAddress;
-            String address = (String)requestContext.get(ENDPOINT_ADDRESS_PROPERTY);
-            if (address != null)
-                packet.setEndPointAddressString(address);
             
             if(!requestContext.isEmpty()) {
                 for (Entry<String, Object> entry : requestContext.entrySet()) {
