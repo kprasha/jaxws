@@ -948,20 +948,23 @@ public class RuntimeModeler {
             ExceptionType exceptionType = ExceptionType.WSDLException;
             String namespace = targetNamespace;
             String name = exception.getSimpleName();
+            String beanPackage = packageName + PD_JAXWS_PACKAGE_PD;
+            String className = beanPackage+ name + BEAN;
+            if (webFault != null) {
+                if (webFault.faultBean().length()>0)
+                    className = webFault.faultBean();
+                if (webFault.name().length()>0)
+                    name = webFault.name();
+                if (webFault.targetNamespace().length()>0)
+                    namespace = webFault.targetNamespace();
+            }
             if (faultInfoMethod == null)  {
-                String beanPackage = packageName + PD_JAXWS_PACKAGE_PD;
-                String className = beanPackage+ name + BEAN;
-                if (webFault != null && webFault.faultBean().length()>0)
-                    className = webFault.faultBean();                
                 exceptionBean = getClass(className);
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
                 exceptionBean = faultInfoMethod.getReturnType();
                 anns = faultInfoMethod.getAnnotations();
-                if (webFault.targetNamespace().length() > 0)
-                    namespace = webFault.targetNamespace();
-                name = webFault.name();
             }
             QName faultName = new QName(namespace, name);
             TypeReference typeRef = new TypeReference(faultName, exceptionBean, anns);
