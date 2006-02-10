@@ -943,6 +943,7 @@ public class RuntimeModeler {
                 continue;
             Class exceptionBean;
             Annotation[] anns;
+            WebFault webFault = getPrivClassAnnotation((Class)exception, WebFault.class);            
             Method faultInfoMethod = getWSDLExceptionFaultInfo(exception);
             ExceptionType exceptionType = ExceptionType.WSDLException;
             String namespace = targetNamespace;
@@ -950,11 +951,12 @@ public class RuntimeModeler {
             if (faultInfoMethod == null)  {
                 String beanPackage = packageName + PD_JAXWS_PACKAGE_PD;
                 String className = beanPackage+ name + BEAN;
+                if (webFault != null && webFault.faultBean().length()>0)
+                    className = webFault.faultBean();                
                 exceptionBean = getClass(className);
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
-                WebFault webFault = exception.getAnnotation(WebFault.class);
                 exceptionBean = faultInfoMethod.getReturnType();
                 anns = faultInfoMethod.getAnnotations();
                 if (webFault.targetNamespace().length() > 0)
