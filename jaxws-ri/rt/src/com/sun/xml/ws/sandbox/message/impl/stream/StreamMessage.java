@@ -238,6 +238,7 @@ public class StreamMessage extends AbstractMessageImpl {
             writer.writeStartDocument();
             writeTo(writer);
             writer.writeEndDocument();
+            writer.close();
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
