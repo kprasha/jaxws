@@ -32,10 +32,6 @@ import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.util.QNameMap;
 
 import javax.xml.namespace.QName;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * This pipe is used to invoke SEI based endpoints.
@@ -43,10 +39,6 @@ import java.util.logging.Logger;
  * @author Jitendra Kotamraju
  */
 public class SEIInvokerPipe extends AbstractPipeImpl {
-
-    private static final Logger logger = Logger.getLogger(
-        com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SEIInvokerPipe");
-    private final AbstractSEIModelImpl model;
 
     /**
      * For each method on the port interface we have
@@ -58,7 +50,6 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
 
 
     public SEIInvokerPipe(AbstractSEIModelImpl model,InstanceResolver instanceResolver, WSBinding binding) {
-        this.model = model;
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         // fill in methodHandlers.
         for( JavaMethodImpl m : model.getJavaMethods() ) {
@@ -68,7 +59,7 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
         }
     }
 
-    /*
+    /**
      * This binds the parameters for SEI endpoints and invokes the endpoint method. The
      * return value, and response Holder arguments are used to create a new {@link Message}
      * that traverses through the Pipeline to transport.
@@ -84,9 +75,7 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
             nsUri = msg.getPayloadNamespaceURI();
         }
         EndpointMethodHandler handler = methodHandlers.get(nsUri, localPart);
-        Packet res = handler.invoke(req);
-        return res;
-
+        return handler.invoke(req);
     }
 
     public Pipe copy(PipeCloner cloner) {

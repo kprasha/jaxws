@@ -30,8 +30,6 @@ import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 
 import javax.xml.ws.Provider;
-import javax.xml.ws.WebServiceException;
-import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 /**
@@ -47,16 +45,6 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
     private final InstanceResolver<? extends Provider> instanceResolver;
     private final SOAPVersion soapVersion;
 
-    private static final Method invoke_Method;
-    static {
-        try {
-            Class[] methodParams = { Object.class };
-            invoke_Method = (Provider.class).getMethod("invoke", methodParams);
-        } catch (NoSuchMethodException e) {
-            throw new WebServiceException(e.getMessage(), e);
-        }
-    }
-    
     public ProviderInvokerPipe(Class<? extends Provider> implType, InstanceResolver<? extends Provider> instanceResolver, WSBinding binding) {
         this.instanceResolver = instanceResolver;
         soapVersion = binding.getSOAPVersion();
