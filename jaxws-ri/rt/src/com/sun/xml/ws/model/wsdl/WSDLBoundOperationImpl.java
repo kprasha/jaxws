@@ -50,8 +50,8 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private Boolean emptyInputBody;
     private Boolean emptyOutputBody;
 
-    private final Map<String, WSDLPart> inParts;
-    private final Map<String, WSDLPart> outParts;
+    private final Map<String, WSDLPartImpl> inParts;
+    private final Map<String, WSDLPartImpl> outParts;
     private WSDLOperation operation;
 
     /**
@@ -64,8 +64,8 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         outputParts = new HashMap<String, ParameterBinding>();
         inputMimeTypes = new HashMap<String, String>();
         outputMimeTypes = new HashMap<String, String>();
-        inParts = new HashMap<String, WSDLPart>();
-        outParts = new HashMap<String, WSDLPart>();
+        inParts = new HashMap<String, WSDLPartImpl>();
+        outParts = new HashMap<String, WSDLPartImpl>();
     }
 
     public QName getName(){
@@ -85,7 +85,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return null;
     }
 
-    public void addPart(WSDLPart part, Mode mode){
+    public void addPart(WSDLPartImpl part, Mode mode){
         if(mode==Mode.IN)
             inParts.put(part.getName(), part);
         else if(mode==Mode.OUT)
@@ -170,13 +170,33 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         this.style = style;
     }
 
-    public QName getBodyName() {
+    public QName getPayloadName() {
         if(style.equals(Style.RPC)){
             return name;
+        }else{
+            if(emptyPayload)
+                return null;
+            
+            if(payloadName != null)
+                return payloadName;
+
+            for(WSDLPartImpl part:inParts.values()){
+                ParameterBinding binding = getInputBinding(part.getName());
+                if(binding.isBody()){
+                    payloadName = part.getDescriptor().name();
+                    return payloadName;
+                }
+            }
+
+            //Its empty payload
+            emptyPayload = true;
         }
-        //TODO: doclit handling
+        //empty body
         return null;
     }
+
+    private QName payloadName;
+    private boolean emptyPayload;
 
     void freeze(WSDLBoundPortTypeImpl parent) {
         operation = parent.getPortType().get(name.getLocalPart());

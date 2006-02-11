@@ -85,16 +85,9 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     /**
      * Populate methodToJM and nameToJM maps.
      */
-    protected void populateMaps() {
-        for (JavaMethodImpl jm : getJavaMethods()) {
-            put(jm.getMethod(), jm);
-            for (ParameterImpl p : jm.getRequestParameters()) {
-                put(p.getName(), jm);
-            }
-        }
-    }
+    abstract protected void populateMaps();
 
-    protected void populateAsyncExceptions() {
+    private void populateAsyncExceptions() {
         for (JavaMethodImpl jm : getJavaMethods()) {
             MEP mep = jm.getMEP();
             if (mep.isAsync) {
@@ -539,24 +532,12 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         return rawAccessorMap;
     }
 
-    private boolean enableMtom = false;
     private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {
         protected BridgeContext initialValue() {
-            BridgeContext bc = jaxbContext.createBridgeContext();
-            //bc.setAttachmentMarshaller(new JAXWSAttachmentMarshaller(enableMtom));
-            //bc.setAttachmentUnmarshaller(new JAXWSAttachmentUnmarshaller());
-            return bc;
+            return jaxbContext.createBridgeContext();
         }
     };
-    //private ThreadLocal<Marshaller> marshallers = new ThreadLocal<Marshaller>() {
-    //    protected Marshaller initialValue() {
-    //        try {
-    //            return jaxbContext.createMarshaller();
-    //        } catch (JAXBException e) {
-    //            throw new Error(e);     // impossible
-    //        }
-    //    }
-    //};
+
     private Pool.Marshaller marshallers;
     protected JAXBRIContext jaxbContext;
     private String wsdlLocation;
@@ -573,4 +554,5 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private final Map<Integer, RawAccessor> rawAccessorMap = new HashMap<Integer, RawAccessor>();
     private List<String> knownNamespaceURIs = null;
     private WSDLPortImpl port;
+    private boolean enableMtom;
 }

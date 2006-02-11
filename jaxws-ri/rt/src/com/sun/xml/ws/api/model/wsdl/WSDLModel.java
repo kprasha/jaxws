@@ -65,7 +65,7 @@ public interface WSDLModel {
      *
      * @return an empty Map if the wsdl document has no wsdl:portType
      */
-    Map<QName, WSDLPortType> getPortTypes();
+    Map<QName, ? extends WSDLPortType> getPortTypes();
 
     /**
      * Gives a {@link Map} of wsdl:binding {@link QName} and {@link WSDLBoundPortType}
@@ -79,23 +79,5 @@ public interface WSDLModel {
      *
      * @return an empty Map if the wsdl document has no wsdl:service
      */
-    Map<QName, ? extends WSDLService> getServices();
-
-    /**
-     * Gets the bound operation for a service, port and a tag name. the
-     * {@link WSDLBoundOperation} will provide the operation parts and the respective
-     * bindings. Here the operation would be the one whose input part descriptor is same as
-     * the tag name except for rpclit where the tag name would be {@link WSDLBoundOperation@getName()}.
-     * <p>
-     * For example this can be used in the case when a message receipient can get the
-     * {@link WSDLBoundOperation} from the payload tag name.
-     *
-     * @param serviceName  non-null service name
-     * @param portName     non-null port name
-     * @param tag          The payload tag name.
-     * @return null if the operation is not found
-     * @throws NullPointerException if either of serviceName, portName or operationName is null.
-     * @see com.sun.xml.ws.api.model.ParameterBinding
-     */
-    WSDLBoundOperation getOperation(QName serviceName, QName portName, QName tag);
+    Map<QName, ? extends WSDLService> getServices();    
 }

@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.util.QNameMap;
 
 import javax.xml.namespace.QName;
 import javax.jws.WebParam.Mode;
@@ -40,11 +41,11 @@ import java.util.Map;
 public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implements WSDLBoundPortType {
     private final QName name;
     private final QName portTypeName;
-    private WSDLPortType portType;
+    private WSDLPortTypeImpl portType;
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private final Map<QName,WSDLBoundOperationImpl> bindingOperations = new Hashtable<QName,WSDLBoundOperationImpl>();
+    private final Map<QName, WSDLBoundOperationImpl> bindingOperations = new Hashtable<QName, WSDLBoundOperationImpl>();
 
     public WSDLBoundPortTypeImpl(QName name, QName portTypeName) {
         this.name = name;
@@ -55,7 +56,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return name;
     }
 
-    public WSDLBoundOperation get(QName operationName) {
+    public WSDLBoundOperationImpl get(QName operationName) {
         return bindingOperations.get(operationName);
     }
 
@@ -74,7 +75,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return portTypeName;
     }
 
-    public WSDLPortType getPortType() {
+    public WSDLPortTypeImpl getPortType() {
         return portType;
     }
 
@@ -145,27 +146,48 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         }
     }
 
-    public WSDLBoundOperation getOperation(QName tag){
+    public WSDLBoundOperation getOperation(String namespaceUri, String localName) {
+        boolean emptyPayload = false;
         /**
          * If the style is rpc then the tag name should be
          * same as operation name so return the operation that matches the tag name.
          */
         if(style==Style.RPC) {
-           return bindingOperations.get(tag);
+            assert (namespaceUri != null && localName != null);
+            return bindingOperations.get(new QName(namespaceUri,localName));
         }
 
         /**
          * For doclit The tag will be the operation that has the same input part descriptor value
          */
+        if(namespaceUri==null && localName == null){
+            emptyPayload = true;
+            if(emptyPayloadOperation != null){
+                return emptyPayloadOperation;
+            }
+        }
+
         for(WSDLBoundOperationImpl op:bindingOperations.values()){
-            QName name = op.getBodyName();
-            if((name != null) && name.equals(tag))
+            QName name = op.getPayloadName();
+            //empty payload
+            if(name == null){
+                emptyPayloadOperation = op;
+                if(emptyPayload)
+                    return op;
+            }
+
+            if(name.equals(new QName(namespaceUri, localName))){
+                payloadMap.put(name, op);
                 return op;
+            }
         }
 
         //not found, return null
         return null;
     }
+
+    private WSDLBoundOperationImpl emptyPayloadOperation;
+    private final QNameMap<WSDLBoundOperationImpl> payloadMap = new QNameMap<WSDLBoundOperationImpl>();
 
     public SOAPVersion getSOAPVersion(){
         return SOAPVersion.fromHttpBinding(bindingId);

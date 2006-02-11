@@ -33,23 +33,23 @@ import java.util.Hashtable;
  */
 public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements WSDLPortType {
     private QName name;
-    private final Map<String, WSDLOperation> portTypeOperations;
+    private final Map<String, WSDLOperationImpl> portTypeOperations;
 
     public WSDLPortTypeImpl(QName name) {
         super();
         this.name = name;
-        portTypeOperations = new Hashtable<String, WSDLOperation>();
+        portTypeOperations = new Hashtable<String, WSDLOperationImpl>();
     }
 
     public QName getName() {
         return name;
     }
 
-    public WSDLOperation get(String operationName) {
+    public WSDLOperationImpl get(String operationName) {
         return portTypeOperations.get(operationName);
     }
 
-    Iterable<WSDLOperation> getOperations() {
+    Iterable<WSDLOperationImpl> getOperations() {
         return portTypeOperations.values();
     }
 
@@ -59,7 +59,7 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
      * @param ptOp  Must be non-null
      * @throws NullPointerException if either opName or ptOp is null
      */
-    public void put(String opName, WSDLOperation ptOp){
+    public void put(String opName, WSDLOperationImpl ptOp){
         portTypeOperations.put(opName, ptOp);
     }
 }

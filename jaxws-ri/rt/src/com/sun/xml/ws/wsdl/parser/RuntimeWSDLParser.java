@@ -22,6 +22,7 @@ package com.sun.xml.ws.wsdl.parser;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
@@ -31,6 +32,8 @@ import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartDescriptorImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -501,21 +504,31 @@ public class RuntimeWSDLParser {
     private void parseMessage(XMLStreamReader reader) {
         String msgName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
         WSDLMessageImpl msg = new WSDLMessageImpl(new QName(targetNamespace, msgName));
+        int partIndex = 0;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
             if (WSDLConstants.QNAME_PART.equals(name)) {
                 String part = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-//                String desc = null;
-//                int index = reader.getAttributeCount();
-//                for (int i = 0; i < index; i++) {
-//                    if (reader.getAttributeName(i).equals("element") || reader.getAttributeName(i).equals("type")) {
-//                        desc = reader.getAttributeValue(i);
-//                        break;
-//                    }
-//                }
-//                if (desc == null)
-//                    continue;
-                msg.add(part);
+                String desc = null;
+                int index = reader.getAttributeCount();
+                WSDLDescriptorKind kind = WSDLDescriptorKind.ELEMENT;
+                for (int i = 0; i < index; i++) {
+                    QName descName = reader.getAttributeName(i);
+                    if(descName.getLocalPart().equals("element"))
+                        kind = WSDLDescriptorKind.ELEMENT;
+                    else if(descName.getLocalPart().equals("TYPE"))
+                        kind = WSDLDescriptorKind.TYPE;
+
+                    if (descName.getLocalPart().equals("element") || descName.getLocalPart().equals("type")) {
+                        desc = reader.getAttributeValue(i);
+                        break;
+                    }
+                }
+                if (desc == null)
+                    continue;
+
+                WSDLPartImpl wsdlPart = new WSDLPartImpl(part, partIndex, new WSDLPartDescriptorImpl(ParserUtil.getQName(reader, desc), kind));
+                msg.add(wsdlPart);
                 if(reader.getEventType() != XMLStreamConstants.END_ELEMENT)
                     goToEnd(reader);
             }else{

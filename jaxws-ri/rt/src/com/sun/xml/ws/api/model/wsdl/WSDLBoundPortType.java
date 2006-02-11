@@ -66,4 +66,23 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      * @return null if the binding could not be resolved for the part.
      */
     String getMimeType(QName operation, String part, Mode mode);
+
+     /**
+     * Gets the bound operation in this port for a tag name. Here the operation would be the one whose
+     * input part descriptor bound to soap:body is same as the tag name except for rpclit where the tag
+     * name would be {@link WSDLBoundOperation@getName()}.
+     * <p>
+     * For example this can be used in the case when a message receipient can get the
+     * {@link WSDLBoundOperation} from the payload tag name.
+     *
+     * namespaceUri and the local name both can be null to get the WSDLBoundOperation that has empty body -
+     * there is no payload. According to BP 1.1 in a port there can be at MOST one operation with empty body.
+     * Its an error to have namespace URI non-null but local name as null.
+     *
+     * @param namespaceUri namespace of the payload element.
+     * @param localName local name of the payload
+     * @return null if no operation with the given tag name is found
+     * @throws NullPointerException if localName is null and namespaceUri is not.
+     */
+    WSDLBoundOperation getOperation(String namespaceUri, String localName);
 }

@@ -48,7 +48,7 @@ import java.util.Collections;
  */
 public final class WSDLModelImpl implements WSDLModel {
     private final Map<QName, WSDLMessageImpl> messages = new HashMap<QName, WSDLMessageImpl>();
-    private final Map<QName, WSDLPortType> portTypes = new HashMap<QName, WSDLPortType>();
+    private final Map<QName, WSDLPortTypeImpl> portTypes = new HashMap<QName, WSDLPortTypeImpl>();
     private final Map<QName, WSDLBoundPortTypeImpl> bindings = new HashMap<QName, WSDLBoundPortTypeImpl>();
     private final Map<QName, WSDLServiceImpl> services = new LinkedHashMap<QName, WSDLServiceImpl>();
 
@@ -63,11 +63,11 @@ public final class WSDLModelImpl implements WSDLModel {
         return messages.get(name);
     }
 
-    public void addPortType(WSDLPortType pt){
+    public void addPortType(WSDLPortTypeImpl pt){
         portTypes.put(pt.getName(), pt);
     }
 
-    public WSDLPortType getPortType(QName name){
+    public WSDLPortTypeImpl getPortType(QName name){
         return portTypes.get(name);
     }
 
@@ -91,7 +91,7 @@ public final class WSDLModelImpl implements WSDLModel {
         return messages;
     }
 
-    public Map<QName, WSDLPortType> getPortTypes() {
+    public Map<QName, WSDLPortTypeImpl> getPortTypes() {
         return portTypes;
     }
 
@@ -101,29 +101,6 @@ public final class WSDLModelImpl implements WSDLModel {
 
     public Map<QName, WSDLServiceImpl> getServices(){
         return services;
-    }
-
-    //TODO Partial impl
-    public WSDLBoundOperation getOperation(QName serviceName, QName portName, QName tag) {
-        WSDLService service = getService(serviceName);
-        if(service  == null)
-            return null;
-        WSDLPort port = service.get(portName);
-        if(port == null)
-            return null;
-        WSDLBoundPortType bpt = port.getBinding();
-        if(bpt == null)
-            return null;
-        WSDLPortTypeImpl pt = (WSDLPortTypeImpl) bpt.getPortType();
-        if(pt == null)
-            return null;
-
-        for(WSDLOperation op: pt.getOperations()){
-            WSDLMessage msgName = op.getInputMessage();
-            WSDLMessageImpl msg = messages.get(msgName);
-            //TODO
-        }
-        return bpt.get(tag);
     }
 
     /**
@@ -232,10 +209,13 @@ public final class WSDLModelImpl implements WSDLModel {
             WSDLMessageImpl inMsg = messages.get(inMsgName.getName());
             int bodyindex = 0;
             if(inMsg != null){
-                for(String name:inMsg.parts()){
+                for(WSDLPartImpl part:inMsg.parts()){
+                    String name = part.getName();
                     ParameterBinding pb = bop.getInputBinding(name);
                     if(pb.isBody()){
-                        bop.addPart(new WSDLPartImpl(name, pb, bodyindex++), Mode.IN);
+                        part.setIndex(bodyindex++);
+                        part.setBinding(pb);
+                        bop.addPart(part, Mode.IN);
                     }
                 }
             }
@@ -245,10 +225,13 @@ public final class WSDLModelImpl implements WSDLModel {
                 continue;
             WSDLMessageImpl outMsg = messages.get(outMsgName.getName());
             if(outMsg!= null){
-                for(String name:outMsg.parts()){
+                for(WSDLPartImpl part:outMsg.parts()){
+                    String name = part.getName();
                     ParameterBinding pb = bop.getOutputBinding(name);
                     if(pb.isBody()){
-                        bop.addPart(new WSDLPartImpl(name, pb, bodyindex++), Mode.OUT);
+                        part.setIndex(bodyindex++);
+                        part.setBinding(pb);
+                        bop.addPart(part, Mode.OUT);
                     }
                 }
             }

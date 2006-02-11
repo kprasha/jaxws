@@ -23,6 +23,8 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLPartDescriptor;
 
+import javax.xml.namespace.QName;
+
 /**
  * Implementation of {@link WSDLPart}
  *
@@ -30,22 +32,16 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPartDescriptor;
  */
 public final class WSDLPartImpl implements WSDLPart {
     private final String name;
-    private final ParameterBinding binding;
-    private final int index;
+    private ParameterBinding binding;
+    private int index;
+    private final WSDLPartDescriptor descriptor;
 
-    /**
-     * The constructor is used when the wsdl:part order is known from the abstract wsdl:portType. This constructor
-     * should be called when atleast all of wsdl:portType, wsdl:binding, wsdl:service are parsed. IOW, this should
-     * be called after all the WSDL is parsed - during post processing.
-     * @param name
-     * @param binding
-     * @param index
-     * @see {@link WSDLBoundPortTypeImpl#finalizeRpcLitBinding()}
-     */
-    public WSDLPartImpl(String name, ParameterBinding binding, int index) {
-        this.name = name;
-        this.binding = binding;
+    public WSDLPartImpl(String partName, int index, WSDLPartDescriptor descriptor) {
+        this.name = partName;
+        this.binding = ParameterBinding.UNBOUND;
         this.index = index;
+        this.descriptor = descriptor;
+
     }
 
     public String getName() {
@@ -56,12 +52,24 @@ public final class WSDLPartImpl implements WSDLPart {
         return binding;
     }
 
+    public void setBinding(ParameterBinding binding) {
+        this.binding = binding;
+    }
+
     public int getIndex() {
         return index;
     }
 
-    //TODO
+    //need to set the index in case of rpclit to reorder the body parts
+    public void setIndex(int index){
+        this.index = index;
+    }
+
+    boolean isBody(){
+        return binding.isBody();
+    }
+
     public WSDLPartDescriptor getDescriptor() {
-        throw new UnsupportedOperationException();
+        return descriptor;
     }
 }

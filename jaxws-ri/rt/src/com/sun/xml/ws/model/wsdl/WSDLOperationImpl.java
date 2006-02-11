@@ -34,8 +34,8 @@ import java.util.ArrayList;
 public final class WSDLOperationImpl extends AbstractExtensibleImpl implements WSDLOperation {
     private final QName name;
     private String parameterOrder;
-    private WSDLMessage inputMessage;
-    private WSDLMessage outputMessage;
+    private WSDLMessageImpl inputMessage;
+    private WSDLMessageImpl outputMessage;
     private final List<WSDLMessage> faultMessages;
 
     public WSDLOperationImpl(QName name) {
@@ -59,11 +59,11 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         this.parameterOrder = parameterOrder;
     }
 
-    public WSDLMessage getInputMessage() {
+    public WSDLMessageImpl getInputMessage() {
         return inputMessage;
     }
 
-    public void setInputMessage(WSDLMessage inputMessage) {
+    public void setInputMessage(WSDLMessageImpl inputMessage) {
         this.inputMessage = inputMessage;
     }
 
@@ -75,7 +75,7 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         return outputMessage==null;
     }
 
-    public void setOutputMessage(WSDLMessage outputMessage) {
+    public void setOutputMessage(WSDLMessageImpl outputMessage) {
         this.outputMessage = outputMessage;
     }
 

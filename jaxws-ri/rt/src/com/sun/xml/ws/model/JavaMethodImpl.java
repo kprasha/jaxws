@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.model.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.namespace.QName;
@@ -50,7 +51,7 @@ public final class JavaMethodImpl implements JavaMethod {
     private SOAPBinding binding;
     private MEP mep;
     private String operationName;
-    private WSDLBoundOperation wsdlOperation;
+    private WSDLBoundOperationImpl wsdlOperation;
     /*package*/ final AbstractSEIModelImpl owner;
 
     public JavaMethodImpl(AbstractSEIModelImpl owner, Method method) {
@@ -204,6 +205,15 @@ public final class JavaMethodImpl implements JavaMethod {
         return null;
     }
 
+    public QName getPayloadName(){
+        if(payloadName != null)
+            return payloadName;
+        payloadName = wsdlOperation.getPayloadName();
+        return payloadName;
+    }
+
+    private QName payloadName;
+
     /**
      * @return a list of checked Exceptions thrown by this method
      */
@@ -225,9 +235,11 @@ public final class JavaMethodImpl implements JavaMethod {
         return null;
     }
 
+
+
     /**
-     * Returns if the java method MEP is async
-     * @return if this is an Asynch MEP
+     * Returns if the java method  is async
+     * @return if this is an Asynch 
      */
     public boolean isAsync(){
         return mep.isAsync;
