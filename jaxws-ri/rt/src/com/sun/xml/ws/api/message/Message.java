@@ -329,6 +329,10 @@ public abstract class Message {
      * to the given writer.
      *
      * This consumes the message.
+     * The implementation will not write
+     * {@link XMLStreamWriter#writeStartDocument()}
+     * nor
+     * {@link XMLStreamWriter#writeEndDocument()} 
      *
      * @throws XMLStreamException
      *      If the {@link XMLStreamWriter} reports an error,
