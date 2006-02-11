@@ -1,0 +1,158 @@
+/*
+ * LogicalHandlerPipe.java
+ *
+ * Created on February 9, 2006, 11:12 PM
+ *
+ *
+ */
+
+package com.sun.xml.ws.sandbox.handler;
+
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.handler.MessageContextUtil;
+import com.sun.xml.ws.sandbox.handler.HandlerProcessor.Direction;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.ws.ProtocolException;
+import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.LogicalMessageContext;
+import javax.xml.ws.handler.MessageContext;
+
+
+/**
+ * TODO: Kohsuke put a comment that packet.isOneWay may be null
+ * @author WS Development Team
+ */
+public class LogicalHandlerPipe extends HandlerPipe {
+    
+    private WSBinding binding;
+    private LogicalHandlerProcessor processor;
+    private List<LogicalHandler> logicalHandlers;
+    
+    /** Creates a new instance of LogicalHandlerPipe */
+    // No handle to SOAPHandlerPipe means its used on SERVER-SIDE
+    public LogicalHandlerPipe(WSBinding binding, Pipe next) {
+        super(next);
+        this.binding = binding;
+    }
+    
+    // Handle to SOAPHandlerPipe means its used on CLIENT-SIDE
+    /**
+     * This constructor is used on client-side where, SOAPHandlerPipe is created
+     * first and then a LogicalHandlerPipe is created with a handler to that
+     * SOAPHandlerPipe.
+     * With this handle, LogicalHandlerPipe can call
+     * SOAPHandlerPipe.closeHandlers()
+     */
+    public LogicalHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
+        super(next,cousinPipe);
+        this.binding = binding;
+    }
+    
+    /**
+     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
+     */
+    protected LogicalHandlerPipe(HandlerPipe that, PipeCloner cloner) {
+        super(that,cloner);
+    }
+    
+    @Override
+    public Packet process( Packet packet) {
+        // This is done here instead of the constructor, since User can change
+        // the roles and handlerchain after a stub/proxy is created.
+        setUpProcessor();
+        
+        if(logicalHandlers.isEmpty()) {
+            return next.process(packet);
+        }
+        try {
+            boolean isOneWay = packet.isOneWay;
+            MessageContext msgContext = new MessageContextImpl(packet);
+            LogicalMessageContext context =  new LogicalMessageContextImpl(binding,packet,msgContext);
+            boolean handlerResult = false;
+            
+            // Call handlers on Request
+            try {
+                if(cousinPipe == null) {
+                    //SERVER-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+                } else {
+                    //CLIENT-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
+                }
+            } catch (ProtocolException pe) {
+                handlerResult = false;
+                if (MessageContextUtil.ignoreFaultInMessage(msgContext)) {
+                    // ignore fault in this case and use exception
+                    throw pe;
+                }
+            }
+            
+            // the only case where no message is sent
+            if (!isOneWay && !handlerResult) {
+                //TODO: return packet
+                return packet;
+            }
+            
+            // Call next Pipe.process() on msg
+            Packet reply = next.process(packet);
+            
+            isOneWay = reply.isOneWay;
+            //TODO: For now create again
+            msgContext = new MessageContextImpl(packet);
+            context =  new LogicalMessageContextImpl(binding,packet,msgContext);
+            // Call handlers on Response
+            if(cousinPipe == null) {
+                //SERVER-SIDE
+                processor.callHandlersResponse(Direction.OUTBOUND,context,!isOneWay);
+            } else {
+                //CLIENT-SIDE
+                processor.callHandlersResponse(Direction.INBOUND,context,!isOneWay);
+            }
+            return reply;
+        } finally {
+            close();
+        }
+        
+        
+    }
+    
+    /**
+     * Close SOAPHandlers first and then LogicalHandlers
+     */
+    public void close(){
+        if(cousinPipe != null){
+            // Close SOAPHandlers
+            cousinPipe.close();
+        }
+        closeLogicalHandlers();
+    }
+    
+    //TODO:
+    private void closeLogicalHandlers(){
+        
+    }
+    
+    /**
+     * TODO:
+     * @param cloner
+     * @return
+     */
+    public Pipe copy(PipeCloner cloner) {
+        return new LogicalHandlerPipe(this,cloner);
+    }
+    
+    private void setUpProcessor() {
+        // Take a snapshot, User may change chain after invocation, Same chain
+        // should be used for the entire MEP
+        logicalHandlers = new ArrayList<LogicalHandler>();
+        logicalHandlers.addAll(((BindingImpl)binding).getLogicalHandlerChain());
+        processor = new LogicalHandlerProcessor(binding,logicalHandlers);
+    }
+    
+}
