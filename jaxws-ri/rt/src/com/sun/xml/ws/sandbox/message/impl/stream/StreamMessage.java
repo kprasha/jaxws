@@ -235,7 +235,9 @@ public class StreamMessage extends AbstractMessageImpl {
 
         XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
         try {
+            writer.writeStartDocument();
             writeTo(writer);
+            writer.writeEndDocument();
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
