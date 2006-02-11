@@ -140,7 +140,7 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     private void writeAttribute(int i, String value) throws XMLStreamException {
         out.writeAttribute(
             in.getAttributePrefix(i),
-            in.getAttributeNamespace(i),
+            in.getAttributeNamespace(i) == null ? "" : in.getAttributeNamespace(i) ,    // TODO hack
             in.getAttributeLocalName(i),
             value
         );
@@ -151,17 +151,20 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
         QName name = in.getName();
 
         if (name.equals(WSDLConstants.QNAME_DEFINITIONS)) {
-            String value = in.getAttributeValue("","targetNamespace");
+            //String value = in.getAttributeValue("","targetNamespace");
+            String value = in.getAttributeValue(null,"targetNamespace");
             if (value != null) {
                 targetNamespace = value;
             }
         } else if (name.equals(WSDLConstants.QNAME_SERVICE)) {
-            String value = in.getAttributeValue("","name");
+            //String value = in.getAttributeValue("","name");
+            String value = in.getAttributeValue(null,"name");
             if (value != null) {
                 serviceName = new QName(targetNamespace, value);
             }
         } else if (name.equals(WSDLConstants.QNAME_PORT)) {
-            String value = in.getAttributeValue("","name");
+            //String value = in.getAttributeValue("","name");
+            String value = in.getAttributeValue(null,"name");
             if (value != null) {
                 portName = new QName(targetNamespace,value);
             }

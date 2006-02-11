@@ -172,8 +172,14 @@ public class Root {
 
 
         List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
-
-
+        SDDocumentImpl primaryDoc = null;
+        // TODO it is hack, need to be fixed
+        for (SDDocumentImpl doc : docList) {
+            if (doc.getURL().equals(primaryWsdl.getSystemId())) {
+                primaryDoc = doc;
+                break;
+            }
+        }
 
         {// error check
             String serviceNS = serviceName.getNamespaceURI();
@@ -184,7 +190,7 @@ public class Root {
         }
 
 
-        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,ir,new ServiceDefinitionImpl(docList),terminal);
+        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,ir,new ServiceDefinitionImpl(docList, primaryDoc),terminal);
     }
 
 

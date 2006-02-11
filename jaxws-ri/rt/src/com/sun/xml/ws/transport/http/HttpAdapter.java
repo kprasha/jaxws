@@ -62,11 +62,15 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             int wsdlnum = 1;
             int xsdnum = 1;
             for (SDDocument sdd : sdef) {
-                if(sdd.isWSDL()) {
-                    wsdls.put("wsdl="+(wsdlnum++),sdd);
-                }
-                if(sdd.isSchema()) {
-                    wsdls.put("xsd="+(xsdnum++),sdd);
+                if (sdd == sdef.getPrimary()) {
+                    wsdls.put("wsdl", sdd);
+                } else {
+                    if(sdd.isWSDL()) {
+                        wsdls.put("wsdl="+(wsdlnum++),sdd);
+                    }
+                    if(sdd.isSchema()) {
+                        wsdls.put("xsd="+(xsdnum++),sdd);
+                    }
                 }
             }
 

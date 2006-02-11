@@ -22,6 +22,7 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
     private final List<SDDocumentImpl> docs;
 
     private final Map<String, SDDocumentImpl> bySystemId;
+    private final SDDocumentImpl primaryWsdl;
 
     /**
      * Set when {@link WSEndpointImpl} is created.
@@ -34,9 +35,10 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
      *      There must be at least one entry.
      *      The first document is considered {@link #getPrimary() primary}.
      */
-    public ServiceDefinitionImpl(List<SDDocumentImpl> docs) {
-        assert !docs.isEmpty();
+    public ServiceDefinitionImpl(List<SDDocumentImpl> docs, SDDocumentImpl primaryWsdl) {
+        assert docs.contains(primaryWsdl);
         this.docs = docs;
+        this.primaryWsdl = primaryWsdl;
 
         this.bySystemId = new HashMap<String, SDDocumentImpl>(docs.size());
         for (SDDocumentImpl doc : docs) {
@@ -56,7 +58,7 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
     }
 
     public SDDocument getPrimary() {
-        return docs.get(0);
+        return primaryWsdl;
     }
 
     public Iterator<SDDocument> iterator() {
