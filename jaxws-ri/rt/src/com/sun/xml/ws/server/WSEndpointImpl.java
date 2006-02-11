@@ -60,7 +60,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 Thread.currentThread().getContextClassLoader(), binding.getBindingId());
         assert assembler!=null;
 
-        this.masterPipeline = assembler.createServer(null, this, terminalPipe);
+        this.masterPipeline = assembler.createServer(port, this, terminalPipe);
 
         instanceResolver.start(this,webServiceContext);
     }
