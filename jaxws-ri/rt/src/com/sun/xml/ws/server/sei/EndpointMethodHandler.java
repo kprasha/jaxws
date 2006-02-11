@@ -14,7 +14,6 @@ import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.server.sei.EndpointArgumentsBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -227,10 +226,9 @@ final class EndpointMethodHandler {
             } catch (XMLStreamException e) {
                 throw new DeserializationException("failed.to.read.response",e);
             }
-            Object ret = null;
-            Message responseMessage = null;
+            Message responseMessage;
             try {
-                ret = method.invoke(proxy, args);
+                Object ret = method.invoke(proxy, args);
                 responseMessage = isOneWay ? null : createResponseMessage(args, ret);
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
