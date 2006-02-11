@@ -75,7 +75,10 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
             nsUri = msg.getPayloadNamespaceURI();
         }
         EndpointMethodHandler handler = methodHandlers.get(nsUri, localPart);
-        return handler.invoke(req);
+        Packet res = handler.invoke(req);
+        res.invocationProperties.putAll(req.invocationProperties);
+
+        return res;
     }
 
     public Pipe copy(PipeCloner cloner) {
