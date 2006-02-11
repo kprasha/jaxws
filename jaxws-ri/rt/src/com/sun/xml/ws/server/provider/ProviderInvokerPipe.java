@@ -20,12 +20,14 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
@@ -43,6 +45,7 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
     private final ProviderEndpointModel model;
     private final InstanceResolver<? extends Provider> instanceResolver;
+    private final SOAPVersion soapVersion;
 
     private static final Method invoke_Method;
     static {
@@ -56,8 +59,7 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
     
     public ProviderInvokerPipe(Class<? extends Provider> implType, InstanceResolver<? extends Provider> instanceResolver, WSBinding binding) {
         this.instanceResolver = instanceResolver;
-
-        SOAPVersion soapVersion = binding.getSOAPVersion();
+        soapVersion = binding.getSOAPVersion();
         if (soapVersion != null) {
             model = new SOAPProviderEndpointModel(implType,soapVersion);
         } else {
@@ -76,18 +78,30 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
         Object parameter = model.getParameter(request.getMessage());
         Provider servant = instanceResolver.resolve(request);
         logger.fine("Invoking Provider Endpoint "+servant);
-        Object returnValue = servant.invoke(parameter);
+        Packet response = null;
+        Object returnValue = null;
+        try {
+            returnValue = servant.invoke(parameter);
+        } catch(RuntimeException e) {
+            // TODO exception handling for XML/HTTP binding
+            e.printStackTrace();
+            Message responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
+            response = new Packet(responseMessage);
+        }
+        if (returnValue == null) {
+            // Oneway. Send response code immediately for transports(like HTTP)
+            if (request.transportBackChannel != null) {
+                request.transportBackChannel.close();
+            }
+        }
 
-        Packet response;
-        if(returnValue==null)
-            response = new Packet(null);
-        else
-            response = new Packet(model.getResponseMessage(returnValue));
-
-        // KK - see javadoc of isOneWay. It's only for clients, so shouldn't be used on the server
-        //if (returnValue == null) {
-        //    response.isOneWay = true;
-        //}
+        if (response == null) {
+            response = (returnValue == null)
+                    ? new Packet(null)
+                    : new Packet(model.getResponseMessage(returnValue));
+        }
+        // TODO: some properties need to be copied from request packet to the response packet
+        response.invocationProperties.putAll(request.invocationProperties);
         return response;
     }
 

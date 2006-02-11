@@ -29,6 +29,7 @@ import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.util.QNameMap;
 
 import javax.xml.namespace.QName;
 import java.lang.reflect.Method;
@@ -37,7 +38,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * This pipe is used to invoke SEI based endpoints. 
+ * This pipe is used to invoke SEI based endpoints.
  *
  * @author Jitendra Kotamraju
  */
@@ -46,55 +47,46 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SEIInvokerPipe");
     private final AbstractSEIModelImpl model;
-    private final InstanceResolver instanceResolver;
+
     /**
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
      */
-    private final Map<Method, EndpointMethodHandler> methodHandlers = new HashMap<Method, EndpointMethodHandler>();
-    private static final QName EMPTY_QNAME = new QName("");
+    private final QNameMap<EndpointMethodHandler> methodHandlers;
+    private static final String EMPTY_PAYLOAD_LOCAL = "";
+    private static final String EMPTY_PAYLOAD_NSURI = "";
+
 
     public SEIInvokerPipe(AbstractSEIModelImpl model,InstanceResolver instanceResolver, WSBinding binding) {
         this.model = model;
-        this.instanceResolver = instanceResolver;
-
+        methodHandlers = new QNameMap<EndpointMethodHandler>();
         // fill in methodHandlers.
-        // first fill in sychronized versions
         for( JavaMethodImpl m : model.getJavaMethods() ) {
-            EndpointMethodHandler handler = new EndpointMethodHandler(model,m,binding);
-            methodHandlers.put(m.getMethod(),handler);
+            EndpointMethodHandler handler = new EndpointMethodHandler(model,m,binding, instanceResolver);
+            QName payloadName = model.getQNameForJM(m);     // TODO need a new method on JavaMethodImpl
+            methodHandlers.put(payloadName.getNamespaceURI(), payloadName.getLocalPart(), handler);
         }
     }
 
     /*
-     * This binds the parameter for Provider endpoints and invokes the
-     * invoke() method of {@linke Provider} endpoint. The return value from
-     * invoke() is used to create a new {@link Message} that traverses
-     * through the Pipeline to transport.
+     * This binds the parameters for SEI endpoints and invokes the endpoint method. The
+     * return value, and response Holder arguments are used to create a new {@link Message}
+     * that traverses through the Pipeline to transport.
      */
     public Packet process(Packet req) {
-        // TODO need find dispatch method using different mechanisms
-        // TODO need to define an API
-
         Message msg = req.getMessage();
-
         String localPart = msg.getPayloadLocalPart();
-        QName opName = (localPart == null)
-            ? EMPTY_QNAME
-            : new QName(msg.getPayloadNamespaceURI(), localPart);
-
-        // TODO: Don't go through 2 map look up. Prepare a map
-        // so that you can go from opName to handler just by one look-up. - KK
-        JavaMethodImpl javaMethod = model.getJavaMethod(opName);
-        Method method = javaMethod.getMethod();
-
-        EndpointMethodHandler handler = methodHandlers.get(method);
-        Object servant = instanceResolver.resolve(req);
-        Packet res = handler.invoke(servant, msg);
-        res.invocationProperties.putAll(req.invocationProperties);
-
+        String nsUri;
+        if (localPart == null) {
+            localPart = EMPTY_PAYLOAD_LOCAL;
+            nsUri = EMPTY_PAYLOAD_NSURI;
+        } else {
+            nsUri = msg.getPayloadNamespaceURI();
+        }
+        EndpointMethodHandler handler = methodHandlers.get(nsUri, localPart);
+        Packet res = handler.invoke(req);
         return res;
-        // TODO: some properties need to be copied from request packet to the response packet
+
     }
 
     public Pipe copy(PipeCloner cloner) {

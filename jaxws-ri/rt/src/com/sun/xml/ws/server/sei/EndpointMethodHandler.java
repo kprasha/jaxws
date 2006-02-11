@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
@@ -52,7 +53,9 @@ final class EndpointMethodHandler {
     private final SEIModel seiModel;
     private final SOAPVersion soapVersion;
     private final Method method;
+    private final int noOfArgs;
     private final JavaMethodImpl javaMethodModel;
+    private final InstanceResolver instanceResolver;
 
      private final Boolean isOneWay;
 
@@ -64,16 +67,18 @@ final class EndpointMethodHandler {
     private final MessageFiller[] outFillers;
 
 
-    public EndpointMethodHandler(SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
+    public EndpointMethodHandler(SEIModel seiModel, JavaMethodImpl method, WSBinding binding, InstanceResolver instanceResolver) {
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
         this.method = method.getMethod();
+        this.instanceResolver = instanceResolver;
         this.javaMethodModel = method;
         argumentsBuilder = createArgumentsBuilder();
         List<MessageFiller> fillers = new ArrayList<MessageFiller>();
         bodyBuilder = createResponseMessageBuilder(fillers);
         this.outFillers = fillers.toArray(new MessageFiller[fillers.size()]);
         this.isOneWay = method.getMEP().isOneWay();
+        this.noOfArgs = this.method.getParameterTypes().length;
     }
 
     /**
@@ -202,16 +207,21 @@ final class EndpointMethodHandler {
     }
 
 
-    public Packet invoke(Object proxy, Message req) {
-
+    public Packet invoke(Packet req) {
+        // Some transports(like HTTP) may want to send response before envoking endpoint method
+        if (isOneWay && req.transportBackChannel != null) {
+            req.transportBackChannel.close();
+        }
+        Object proxy = instanceResolver.resolve(req);
+        Message reqMsg = req.getMessage();
         Pool.Marshaller pool = seiModel.getMarshallerPool();
         Marshaller m = pool.take();
 
         try {
-            Object[] args = new Object[method.getParameterTypes().length];
+            Object[] args = new Object[noOfArgs];
             BridgeContext context = seiModel.getBridgeContext();
             try {
-                argumentsBuilder.readRequest(req,args,context);
+                argumentsBuilder.readRequest(reqMsg,args,context);
             } catch (JAXBException e) {
                 throw new DeserializationException("failed.to.read.response",e);
             } catch (XMLStreamException e) {
@@ -236,9 +246,10 @@ final class EndpointMethodHandler {
                 e.printStackTrace();
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
-            Packet respPacket = new Packet(responseMessage);
-            respPacket.isOneWay = isOneWay;
-            return respPacket;
+            Packet res = new Packet(responseMessage);
+            // TODO: some properties need to be copied from request packet to the response packet
+            res.invocationProperties.putAll(req.invocationProperties);
+            return new Packet(responseMessage);
         } finally {
             pool.recycle(m);
         }
