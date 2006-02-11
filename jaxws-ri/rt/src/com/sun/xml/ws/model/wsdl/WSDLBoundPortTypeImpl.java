@@ -170,13 +170,12 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         for(WSDLBoundOperationImpl op:bindingOperations.values()){
             QName name = op.getPayloadName();
             //empty payload
-            if(name == null){
+            if(name == null && emptyPayload){
                 emptyPayloadOperation = op;
-                if(emptyPayload)
-                    return op;
+                return op;
             }
 
-            if(name.equals(new QName(namespaceUri, localName))){
+            if(name != null && name.equals(new QName(namespaceUri, localName))){
                 payloadMap.put(name, op);
                 return op;
             }
@@ -193,7 +192,13 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return SOAPVersion.fromHttpBinding(bindingId);
     }
 
+    private Map<QName, WSDLMessageImpl> messages;
+
+    Map<QName, WSDLMessageImpl> getMessages(){
+        return messages;
+    }
     void freeze(WSDLModelImpl owner) {
+        messages = owner.getMessages();
         portType = owner.getPortType(portTypeName);
         // TODO: error check for null. that's an error in WSDL that needs to be reported
         for (WSDLBoundOperationImpl op : bindingOperations.values()) {

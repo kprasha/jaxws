@@ -180,7 +180,9 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
             if(payloadName != null)
                 return payloadName;
 
-            for(WSDLPartImpl part:inParts.values()){
+            QName inMsgName = operation.getInputMessage().getName();
+            WSDLMessageImpl message = messages.get(inMsgName);
+            for(WSDLPartImpl part:message.parts()){
                 ParameterBinding binding = getInputBinding(part.getName());
                 if(binding.isBody()){
                     payloadName = part.getDescriptor().name();
@@ -197,8 +199,10 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
 
     private QName payloadName;
     private boolean emptyPayload;
+    private Map<QName, WSDLMessageImpl> messages;
 
     void freeze(WSDLBoundPortTypeImpl parent) {
+        messages = parent.getMessages();
         operation = parent.getPortType().get(name.getLocalPart());
     }
 }
