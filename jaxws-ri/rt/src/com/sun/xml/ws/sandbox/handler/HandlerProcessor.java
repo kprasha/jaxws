@@ -93,7 +93,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * Gives index of the handler in the chain to know what handlers in the chain
      * are invoked
      */
-    private int getIndex() {
+    protected int getIndex() {
         return index;
     }
     /**
@@ -343,7 +343,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * index through the ending index (inclusive). Made indices
      * inclusive to allow both directions more easily.
      */
-    private void closeHandlers(MessageContext context, int start, int end) {
+    protected void closeHandlers(MessageContext context, int start, int end) {
         
         if (handlers.isEmpty()) {
             return;

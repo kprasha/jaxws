@@ -37,7 +37,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
     private SOAPHandlerProcessor processor;
     private List<SOAPHandler> soapHandlers;
     protected Set<String> roles;
-    
+    private boolean remedyActionTaken = false;
     /** Creates a new instance of SOAPHandlerPipe */
     // No handle to LogicalHandlerPipe means its used on CLIENT-SIDE 
     public SOAPHandlerPipe(WSBinding binding, Pipe next) {
@@ -73,9 +73,10 @@ public class SOAPHandlerPipe extends HandlerPipe {
         // This is done here instead of the constructor, since User can change
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
+        MessageContext msgContext = new MessageContextImpl(packet);
+        
         try {
-            boolean isOneWay = packet.isOneWay;
-            MessageContext msgContext = new MessageContextImpl(packet);
+            boolean isOneWay = packet.isOneWay;            
             SOAPMessageContext context =  new SOAPMessageContextImpl(binding,packet,msgContext);
             boolean handlerResult = false;
             // Call handlers on Request
@@ -99,6 +100,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
             
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
+                remedyActionTaken = true;
                 //TODO: return packet
                 return packet;
             }
@@ -121,24 +123,36 @@ public class SOAPHandlerPipe extends HandlerPipe {
             
             return reply;
         } finally {
-            close();
+            close(msgContext);
         }
     }
 
     /**
      * Close SOAPHandlers first and then LogicalHandlers
      */
-    public void close(){
-        closeSOAPHandlers();
+    public void close(MessageContext msgContext){
+        closeSOAPHandlers(msgContext);
         if(cousinPipe != null){
             // Close LogicalHandlers
-            cousinPipe.close();            
+            cousinPipe.close(msgContext);            
         }        
     }
     
     //TODO:
-    private void closeSOAPHandlers(){
-        
+    private void closeSOAPHandlers(MessageContext msgContext){
+        if(remedyActionTaken){
+          //Close only invoked handlers in the chain
+          if(cousinPipe == null){
+              //CLIENT-SIDE
+              processor.closeHandlers(msgContext,0,processor.getIndex());              
+          } else {
+              //SERVER-SIDE
+              processor.closeHandlers(msgContext,soapHandlers.size()-1,processor.getIndex());
+          }
+      } else {
+          //Close all handlers in the chain
+          processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
+      }
     }
     
     /**

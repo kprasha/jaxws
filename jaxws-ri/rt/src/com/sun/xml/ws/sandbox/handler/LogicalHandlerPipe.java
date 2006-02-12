@@ -33,7 +33,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
     private WSBinding binding;
     private LogicalHandlerProcessor processor;
     private List<LogicalHandler> logicalHandlers;
-    
+    private boolean remedyActionTaken = false;
     /** Creates a new instance of LogicalHandlerPipe */
     // No handle to SOAPHandlerPipe means its used on SERVER-SIDE
     public LogicalHandlerPipe(WSBinding binding, Pipe next) {
@@ -70,9 +70,9 @@ public class LogicalHandlerPipe extends HandlerPipe {
         if(logicalHandlers.isEmpty()) {
             return next.process(packet);
         }
+        MessageContext msgContext = new MessageContextImpl(packet);
         try {
-            boolean isOneWay = packet.isOneWay;
-            MessageContext msgContext = new MessageContextImpl(packet);
+            boolean isOneWay = packet.isOneWay;            
             LogicalMessageContext context =  new LogicalMessageContextImpl(binding,packet,msgContext);
             boolean handlerResult = false;
             
@@ -95,6 +95,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
             
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
+                remedyActionTaken = true;
                 //TODO: return packet
                 return packet;
             }
@@ -116,7 +117,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
             }
             return reply;
         } finally {
-            close();
+            close(msgContext);
         }
         
         
@@ -125,17 +126,29 @@ public class LogicalHandlerPipe extends HandlerPipe {
     /**
      * Close SOAPHandlers first and then LogicalHandlers
      */
-    public void close(){
+    public void close(MessageContext msgContext){
         if(cousinPipe != null){
             // Close SOAPHandlers
-            cousinPipe.close();
+            cousinPipe.close(msgContext);
         }
-        closeLogicalHandlers();
+        closeLogicalHandlers(msgContext);
     }
     
     //TODO:
-    private void closeLogicalHandlers(){
-        
+    private void closeLogicalHandlers(MessageContext msgContext){
+      if(remedyActionTaken){
+          //Close only invoked handlers in the chain
+          if(cousinPipe == null){
+              //SERVER-SIDE
+              processor.closeHandlers(msgContext,logicalHandlers.size()-1,processor.getIndex());
+          } else {
+              //CLIENT-SIDE
+              processor.closeHandlers(msgContext,0,processor.getIndex());
+          }
+      } else {
+          //Close all handlers in the chain
+          processor.closeHandlers(msgContext,logicalHandlers.size()-1,0);
+      }
     }
     
     /**
