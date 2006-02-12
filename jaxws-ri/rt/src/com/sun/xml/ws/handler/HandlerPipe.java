@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import javax.xml.ws.handler.MessageContext;
 
 /**
  * @author WS Development team
@@ -44,7 +45,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     /**
      * Close SOAPHandlers first and then LogicalHandlers
      */
-    public abstract void close();
+    public abstract void close(MessageContext msgContext);
     
     
     /**
