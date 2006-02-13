@@ -1,6 +1,9 @@
 package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPBinding;
@@ -67,14 +70,20 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      */
     String getMimeType(QName operation, String part, Mode mode);
 
-     /**
+    /**
      * Gets the bound operation in this port for a tag name. Here the operation would be the one whose
      * input part descriptor bound to soap:body is same as the tag name except for rpclit where the tag
      * name would be {@link WSDLBoundOperation#getName()}.
+     *
+     * <p>
+     * If you have a {@link Message} and trying to figure out which operation it belongs to,
+     * always use {@link Message#getOperation}, as that performs better.
+     *
      * <p>
      * For example this can be used in the case when a message receipient can get the
      * {@link WSDLBoundOperation} from the payload tag name.
      *
+     * <p>
      * namespaceUri and the local name both can be null to get the WSDLBoundOperation that has empty body -
      * there is no payload. According to BP 1.1 in a port there can be at MOST one operation with empty body.
      * Its an error to have namespace URI non-null but local name as null.
