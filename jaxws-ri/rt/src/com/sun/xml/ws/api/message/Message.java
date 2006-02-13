@@ -20,8 +20,12 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.bind.api.BridgeContext;
@@ -42,6 +46,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
+import javax.xml.ws.Dispatch;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
 
@@ -197,6 +202,40 @@ public abstract class Message {
      */
     public AttachmentSet getAttachments() {
         return AttachmentSet.EMPTY;
+    }
+
+    private WSDLBoundOperation operation = null;
+
+    /**
+     * Returns the operation of which this message is an instance of.
+     *
+     * <p>
+     * This method relies on {@link WSDLBoundPortType#getOperation(String, String)} but
+     * it does so in an efficient way.
+     *
+     * @param boundPortType
+     *      This represents the port for which this message is used.
+     *      Most {@link Pipe}s should get this information when they are created,
+     *      since a pippeline always work against a particular type of {@link WSDLPort}.
+     *
+     * @return
+     *      Null if the operation was not found. This is possible, for example when a protocol
+     *      message is sent through a pipeline, or when we receive an invalid request on the server,
+     *      or when we are on the client and the user appliation sends a random DOM through
+     *      {@link Dispatch}.
+     */
+    public final WSDLBoundOperation getOperation(WSDLBoundPortType boundPortType) {
+        if(operation==null)
+            operation = boundPortType.getOperation(getPayloadNamespaceURI(),getPayloadLocalPart());
+        return operation;
+    }
+
+    /**
+     * The same as {@link #getOperation(WSDLBoundPortType)} but
+     * takes {@link WSDLPort} for convenience.
+     */
+    public final WSDLBoundOperation getOperation(WSDLPort port) {
+        return getOperation(port.getBinding());
     }
 
     /**
