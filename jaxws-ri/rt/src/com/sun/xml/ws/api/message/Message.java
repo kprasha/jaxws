@@ -19,23 +19,21 @@
  */
 package com.sun.xml.ws.api.message;
 
-import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.SAXException;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
