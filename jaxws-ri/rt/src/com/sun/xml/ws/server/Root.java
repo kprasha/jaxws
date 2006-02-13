@@ -171,13 +171,17 @@ public class Root {
         }
 
 
-        List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
         SDDocumentImpl primaryDoc = null;
-        // TODO it is hack, need to be fixed
-        for (SDDocumentImpl doc : docList) {
-            if (doc.getURL().equals(primaryWsdl.getSystemId())) {
-                primaryDoc = doc;
-                break;
+        List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
+        if (primaryWsdl == null) {
+            primaryDoc = generateWSDL(binding,  seiModel, docList);
+        } else {
+            // TODO it is hack, need to be fixed
+            for (SDDocumentImpl doc : docList) {
+                if (doc.getURL().equals(primaryWsdl.getSystemId())) {
+                    primaryDoc = doc;
+                    break;
+                }
             }
         }
 
@@ -291,7 +295,7 @@ public class Root {
      * Generates the WSDL and XML Schema for the endpoint if necessary
      * It generates WSDL only for SOAP1.1, and for XSOAP1.2 bindings
      */
-    private SDDocumentSource generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
+    private SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
         BindingImpl bindingImpl = (BindingImpl)binding;
         String bindingId = bindingImpl.getActualBindingId();
         if (!bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) &&
@@ -309,9 +313,11 @@ public class Root {
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortName());
         WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding.getBindingId());
         wsdlGen.doGeneration();
-
+        return wsdlResolver.updateDocs();
+/*
         // TODO: feed back the generated documents into the metadata list.
         throw new UnsupportedOperationException();
+ */
     }
 
     /**

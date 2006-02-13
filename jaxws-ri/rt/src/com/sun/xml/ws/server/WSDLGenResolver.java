@@ -43,6 +43,10 @@ import java.util.Map;
 final class WSDLGenResolver implements WSDLResolver {
     
     private List<SDDocumentImpl> docs;
+    private final List<SDDocumentSource> newDocs = new ArrayList<SDDocumentSource>();
+    private SDDocumentSource abstractWsdlSource;
+    private SDDocumentSource concreteWsdlSource;
+    
     private SDDocumentImpl abstractWsdl;
     private SDDocumentImpl concreteWsdl;
 
@@ -62,7 +66,7 @@ final class WSDLGenResolver implements WSDLResolver {
         for (SDDocumentImpl doc : docs) {
             if(doc.isWSDL()) {
                 SDDocument.WSDL wsdl = (SDDocument.WSDL) doc;
-                if(wsdl.hasService())
+                if(wsdl.hasPortType())
                     abstractWsdl = doc;
             }
             if(doc.isSchema()) {
@@ -77,8 +81,14 @@ final class WSDLGenResolver implements WSDLResolver {
         }
     }
     
-    public SDDocument getConcreteWSDL() {
+    /*
+    public SDDocumentImpl getConcreteWSDL() {
         return concreteWsdl;
+    }
+     */
+    
+    public List<SDDocumentSource> getGeneratedDocs() {
+        return newDocs;
     }
     
     /**
@@ -88,12 +98,14 @@ final class WSDLGenResolver implements WSDLResolver {
      */
     public Result getWSDL(String filename) {
         XMLStreamBuffer xsb = new XMLStreamBuffer();
-        SDDocumentSource sd = SDDocumentSource.create(createURL(filename),xsb);
+        concreteWsdlSource = SDDocumentSource.create(createURL(filename),xsb);
+        newDocs.add(concreteWsdlSource);
 
+        /*
         concreteWsdl=SDDocumentImpl.create(sd,serviceName,portName);
 
         docs.add(concreteWsdl);
-
+*/
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename);
         return r;
@@ -101,7 +113,7 @@ final class WSDLGenResolver implements WSDLResolver {
 
     private URL createURL(String filename) {
         try {
-            return new URL(filename);
+            return new URL("file://"+filename);
         } catch (MalformedURLException e) {
             // TODO: I really don't think this is the right way to handle this error,
             // WSDLResolver needs to be documented carefully.
@@ -122,11 +134,13 @@ final class WSDLGenResolver implements WSDLResolver {
         }
 
         XMLStreamBuffer xsb = new XMLStreamBuffer();
-        SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
-
+        abstractWsdlSource = SDDocumentSource.create(createURL(filename.value),xsb);
+        newDocs.add(abstractWsdlSource);
+/*
         abstractWsdl=SDDocumentImpl.create(sd,serviceName,portName);
 
         docs.add(abstractWsdl);
+ */
 
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename.value);
@@ -153,11 +167,26 @@ final class WSDLGenResolver implements WSDLResolver {
 
         XMLStreamBuffer xsb = new XMLStreamBuffer();
         SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
+        /*
 
         docs.add(SDDocumentImpl.create(sd,serviceName,portName));
+         */
+        newDocs.add(sd);
 
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename.value);
         return r;
     }
+    
+    public SDDocumentImpl updateDocs() {
+        for (SDDocumentSource doc : newDocs) {
+            SDDocumentImpl docImpl = SDDocumentImpl.create(doc,serviceName,portName);
+            if (doc == concreteWsdlSource) {
+                concreteWsdl = docImpl;
+            }
+            docs.add(docImpl);
+        }
+        return concreteWsdl;
+    }
+    
 }
