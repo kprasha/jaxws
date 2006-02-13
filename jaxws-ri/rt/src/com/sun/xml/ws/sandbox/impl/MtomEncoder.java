@@ -28,12 +28,14 @@ import java.nio.channels.WritableByteChannel;
 import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 
 import org.jvnet.staxex.XMLStreamWriterEx;
+import org.jvnet.staxex.NamespaceContextEx;
 
 /**
  * Partial Implmentation of MTOM/XOP {@link Encoder}.
@@ -47,10 +49,10 @@ import org.jvnet.staxex.XMLStreamWriterEx;
  */
 public class MtomEncoder implements Encoder {
     private static final String boundary = "uuid:" + UUID.randomUUID().toString();
-    private static final String boundaryParameter = "boundary=\"" + boundary;
+    private static final String boundaryParameter = "boundary=\"" + boundary+"\"";
     private static final String xopContentType = "application/xop+xml";
     private final String soapXopContentType;
-    private final MtomStreamWriter xmlStreamWriterEx = new MtomStreamWriter();
+    private final XMLStreamWriterEx xmlStreamWriterEx = new MtomStreamWriter();
     private final String messageContentType;
     private final String soapContentType;
     private XMLStreamWriter writer;
@@ -81,11 +83,14 @@ public class MtomEncoder implements Encoder {
         this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         if(packet.getMessage() != null){
             try {
-                OutputUtil.writeln("--"+boundary, out); 
+                //OutputUtil.writeln("Content-Type: "+messageContentType, out);
+                //OutputUtil.writeln(out);                    // write \r\n
+                OutputUtil.writeln("--"+boundary, out);
                 OutputUtil.writeln("Content-Type: "+ soapXopContentType,  out);
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
+                OutputUtil.writeln(out);
                 packet.getMessage().writeTo(getXmlStreamWriterEx());
-                OutputUtil.writeln(out);                    // write \r\n
+                //OutputUtil.writeln(out);                    // write \r\n
                 //most of the writeTo calls writer.close(), does it close the outputStream also?
                 out.write(mtomAttachmentStream.toByteArray());
 
@@ -106,16 +111,18 @@ public class MtomEncoder implements Encoder {
             String contentId = encodeCid(null);
 
             //build attachment frame
+
+            OutputUtil.writeln(mtomAttachmentStream);                    // write \r\n
             writeMimeHeaders(contentType, contentId, mtomAttachmentStream);
-            OutputUtil.writeln(mtomAttachmentStream);                    // write \r\n
             mtomAttachmentStream.write(data, start, len);
-            OutputUtil.writeln(mtomAttachmentStream);                    // write \r\n
+            //OutputUtil.writeln(mtomAttachmentStream);                    // write \r\n
 
             //write out the xop reference
             try {
                 String xopPrefix = writer.getPrefix(XOP_NAMESPACEURI);
                 if(xopPrefix == null){
-                    writer.writeStartElement(XOP_NAMESPACEURI, XOP_LOCALNAME);
+                    writer.setPrefix("xop", XOP_NAMESPACEURI);
+                    writer.writeStartElement("xop", XOP_LOCALNAME, XOP_NAMESPACEURI);
                 }else{
                     writer.writeStartElement(xopPrefix, XOP_LOCALNAME, XOP_NAMESPACEURI);
                 }
@@ -130,9 +137,10 @@ public class MtomEncoder implements Encoder {
 
     private void writeMimeHeaders(String contentType, String contentId, OutputStream out) throws IOException {
         OutputUtil.writeln("--"+boundary, out);
-        OutputUtil.writeln("Content-Id: <" + contentId+">", out);
         OutputUtil.writeln("Content-Type: " + contentType, out);
+        OutputUtil.writeln("Content-Id: <" + contentId+">", out);
         OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
+        OutputUtil.writeln(out);
     }
 
     private void writeMtomBinary(DataHandler dataHandler){
@@ -157,6 +165,11 @@ public class MtomEncoder implements Encoder {
     }
 
     public XMLStreamWriterEx getXmlStreamWriterEx() {
+        return xmlStreamWriterEx;
+    }
+
+    public XMLStreamWriterEx getXmlStreamWriterEx(OutputStream os) {
+        this.writer = XMLStreamWriterFactory.createXMLStreamWriter(os);
         return xmlStreamWriterEx;
     }
 
@@ -210,6 +223,35 @@ public class MtomEncoder implements Encoder {
 
         public OutputStream writeBinary(String contentType) throws XMLStreamException {
             return writeMtomBinary(contentType);
+        }
+
+        public void writePCDATA(CharSequence data) throws XMLStreamException {
+            throw new UnsupportedOperationException();
+        }
+
+        private class MtomNamespaceContextEx implements NamespaceContextEx {
+            private NamespaceContext nsContext;
+
+            public MtomNamespaceContextEx(NamespaceContext nsContext) {
+                this.nsContext = nsContext;
+            }
+
+            public Iterator<Binding> iterator() {
+                throw new UnsupportedOperationException();
+            }
+
+            public String getNamespaceURI(String prefix) {
+                return nsContext.getNamespaceURI(prefix);
+            }
+
+            public String getPrefix(String namespaceURI) {
+                return nsContext.getPrefix(namespaceURI);
+            }
+
+            public Iterator getPrefixes(String namespaceURI) {
+                return nsContext.getPrefixes(namespaceURI);
+            }
+
         }
 
         public void close() throws XMLStreamException {
@@ -280,8 +322,9 @@ public class MtomEncoder implements Encoder {
             writer.writeStartElement(localName);
         }
 
-        public NamespaceContext getNamespaceContext() {
-            return writer.getNamespaceContext();
+        public NamespaceContextEx getNamespaceContext() {
+            NamespaceContext nsContext = writer.getNamespaceContext();
+            return new MtomNamespaceContextEx(nsContext);
         }
 
         public void setNamespaceContext(NamespaceContext context) throws XMLStreamException {
