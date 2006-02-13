@@ -49,12 +49,12 @@ public class SOAPHandlerPipe extends HandlerPipe {
         this.binding = binding;        
     }
     
-    // Handle to SOAPHandlerPipe means its used on SERVER-SIDE
+    // Handle to LogicalHandlerPipe means its used on SERVER-SIDE
     /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
+     * This constructor is used on client-side where, LogicalHandlerPipe is created
      * first and then a SOAPHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, SOAPHandlerPipe can call SOAPHandlerPipe.closeHandlers()
+     * LogicalHandlerPipe.
+     * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
      */
     public SOAPHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
         super(next,cousinPipe);
