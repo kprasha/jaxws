@@ -38,15 +38,17 @@ public class SOAPHandlerPipe extends HandlerPipe {
     private List<SOAPHandler> soapHandlers;
     protected Set<String> roles;
     private boolean remedyActionTaken = false;
+    private final boolean isClient;
+    
     /** Creates a new instance of SOAPHandlerPipe */
-    // No handle to LogicalHandlerPipe means its used on CLIENT-SIDE 
-    public SOAPHandlerPipe(WSBinding binding, Pipe next) {
+    public SOAPHandlerPipe(WSBinding binding, Pipe next, boolean isClient) {
         super(next);
         if(binding.getSOAPVersion() != null) {
             // SOAPHandlerPipe should n't be used for bindings other than SOAP.
             // TODO: throw Exception
         }        
-        this.binding = binding;        
+        this.binding = binding;
+        this.isClient = isClient;
     }
     
     // Handle to LogicalHandlerPipe means its used on SERVER-SIDE
@@ -56,16 +58,18 @@ public class SOAPHandlerPipe extends HandlerPipe {
      * LogicalHandlerPipe.
      * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
      */
-    public SOAPHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
+    public SOAPHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe, boolean isClient) {
         super(next,cousinPipe);
         this.binding = binding;
+        this.isClient = isClient;
     }
     
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
-    protected SOAPHandlerPipe(HandlerPipe that, PipeCloner cloner) {
+    protected SOAPHandlerPipe(SOAPHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
+        this.isClient = that.isClient;
     }
     
     @Override
@@ -82,7 +86,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
             // Call handlers on Request
             try {
                 if(!soapHandlers.isEmpty()) {
-                    if(cousinPipe == null) {
+                    if(isClient) {
                         //CLIENT-SIDE
                         processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
                     } else {
@@ -113,7 +117,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
             msgContext = new MessageContextImpl(packet);
             context =  new SOAPMessageContextImpl(binding,packet,msgContext);
             // Call handlers on Response
-            if(cousinPipe == null) {
+            if(isClient) {
                 //CLIENT-SIDE
                 processor.callHandlersResponse(Direction.INBOUND,context,!isOneWay);
             } else {
@@ -142,7 +146,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
     private void closeSOAPHandlers(MessageContext msgContext){
         if(remedyActionTaken){
           //Close only invoked handlers in the chain
-          if(cousinPipe == null){
+          if(isClient){
               //CLIENT-SIDE
               processor.closeHandlers(msgContext,0,processor.getIndex());              
           } else {

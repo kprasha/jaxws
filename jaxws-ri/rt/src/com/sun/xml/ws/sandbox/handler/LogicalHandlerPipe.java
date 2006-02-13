@@ -34,14 +34,17 @@ public class LogicalHandlerPipe extends HandlerPipe {
     private LogicalHandlerProcessor processor;
     private List<LogicalHandler> logicalHandlers;
     private boolean remedyActionTaken = false;
+    private final boolean isClient;
+    
+    
     /** Creates a new instance of LogicalHandlerPipe */
-    // No handle to SOAPHandlerPipe means its used on SERVER-SIDE
-    public LogicalHandlerPipe(WSBinding binding, Pipe next) {
+    public LogicalHandlerPipe(WSBinding binding, Pipe next, boolean isClient) {
         super(next);
         this.binding = binding;
+        this.isClient = isClient;
     }
     
-    // Handle to SOAPHandlerPipe means its used on CLIENT-SIDE
+    
     /**
      * This constructor is used on client-side where, SOAPHandlerPipe is created
      * first and then a LogicalHandlerPipe is created with a handler to that
@@ -49,16 +52,19 @@ public class LogicalHandlerPipe extends HandlerPipe {
      * With this handle, LogicalHandlerPipe can call
      * SOAPHandlerPipe.closeHandlers()
      */
-    public LogicalHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
+    public LogicalHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe, boolean isClient) {
         super(next,cousinPipe);
         this.binding = binding;
+        this.isClient = isClient;
     }
     
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
-    protected LogicalHandlerPipe(HandlerPipe that, PipeCloner cloner) {
+    
+    protected LogicalHandlerPipe(LogicalHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
+        this.isClient = that.isClient;               
     }
     
     @Override
@@ -78,13 +84,14 @@ public class LogicalHandlerPipe extends HandlerPipe {
             
             // Call handlers on Request
             try {
-                if(cousinPipe == null) {
-                    //SERVER-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
-                } else {
+                if(isClient) {
                     //CLIENT-SIDE
                     handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-                }
+                } else {
+                    //SERVER-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+                }    
+                
             } catch (ProtocolException pe) {
                 handlerResult = false;
                 if (MessageContextUtil.ignoreFaultInMessage(msgContext)) {
@@ -108,12 +115,12 @@ public class LogicalHandlerPipe extends HandlerPipe {
             msgContext = new MessageContextImpl(packet);
             context =  new LogicalMessageContextImpl(binding,packet,msgContext);
             // Call handlers on Response
-            if(cousinPipe == null) {
-                //SERVER-SIDE
-                processor.callHandlersResponse(Direction.OUTBOUND,context,!isOneWay);
-            } else {
+            if(isClient) {
                 //CLIENT-SIDE
-                processor.callHandlersResponse(Direction.INBOUND,context,!isOneWay);
+                processor.callHandlersResponse(Direction.INBOUND,context,!isOneWay);                
+            } else {                
+                //SERVER-SIDE                
+                processor.callHandlersResponse(Direction.OUTBOUND,context,!isOneWay);
             }
             return reply;
         } finally {
@@ -138,12 +145,12 @@ public class LogicalHandlerPipe extends HandlerPipe {
     private void closeLogicalHandlers(MessageContext msgContext){
       if(remedyActionTaken){
           //Close only invoked handlers in the chain
-          if(cousinPipe == null){
-              //SERVER-SIDE
-              processor.closeHandlers(msgContext,logicalHandlers.size()-1,processor.getIndex());
-          } else {
+          if(isClient){
               //CLIENT-SIDE
               processor.closeHandlers(msgContext,0,processor.getIndex());
+          } else {
+              //SERVER-SIDE
+              processor.closeHandlers(msgContext,logicalHandlers.size()-1,processor.getIndex());
           }
       } else {
           //Close all handlers in the chain

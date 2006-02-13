@@ -18,9 +18,17 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe head = createTransport(wsdlModel,service,binding);
         if(!binding.getHandlerChain().isEmpty()) {
-            HandlerPipe soapHandlerPipe = new SOAPHandlerPipe(binding, head);
-            HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, soapHandlerPipe, soapHandlerPipe);
-            head = logicalHandlerPipe;
+            boolean isClient = true;            
+            if(binding.getSOAPVersion() != null) {
+                HandlerPipe soapHandlerPipe = new SOAPHandlerPipe(binding, head, isClient);
+                HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, soapHandlerPipe, soapHandlerPipe, isClient);
+                head = logicalHandlerPipe;
+            } else {
+                //XML/HTTP Binding can have only LogicalHandlers
+                HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, head, isClient);
+                head = logicalHandlerPipe;
+            }    
+            
         }         
         return head;
     }
@@ -32,9 +40,16 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
         WSBinding binding = endpoint.getBinding();
         if(!binding.getHandlerChain().isEmpty()) {
-            HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal);
-            HandlerPipe soapHandlerPipe = new SOAPHandlerPipe(binding, logicalHandlerPipe, logicalHandlerPipe);
-            terminal = soapHandlerPipe;
+            boolean isClient = false;
+            if(binding.getSOAPVersion() != null) {
+                HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal, isClient);
+                HandlerPipe soapHandlerPipe = new SOAPHandlerPipe(binding, logicalHandlerPipe, logicalHandlerPipe, isClient);
+                terminal = soapHandlerPipe;
+            } else {
+                //XML/HTTP Binding can have only LogicalHandlers
+                HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal, isClient);
+                terminal = logicalHandlerPipe;
+            }            
         }
         return terminal;
     }
