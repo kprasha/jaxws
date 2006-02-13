@@ -70,7 +70,7 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      /**
      * Gets the bound operation in this port for a tag name. Here the operation would be the one whose
      * input part descriptor bound to soap:body is same as the tag name except for rpclit where the tag
-     * name would be {@link WSDLBoundOperation@getName()}.
+     * name would be {@link WSDLBoundOperation#getName()}.
      * <p>
      * For example this can be used in the case when a message receipient can get the
      * {@link WSDLBoundOperation} from the payload tag name.
