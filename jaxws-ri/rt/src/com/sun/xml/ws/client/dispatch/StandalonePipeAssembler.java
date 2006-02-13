@@ -9,18 +9,19 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
-//import com.sun.xml.ws.sandbox.handler.ClientHandlerPipe;
+import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.sandbox.handler.LogicalHandlerPipe;
+import com.sun.xml.ws.sandbox.handler.SOAPHandlerPipe;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe head = createTransport(wsdlModel,service,binding);
-        /*
         if(!binding.getHandlerChain().isEmpty()) {
-            Pipe handlerPipe = new ClientHandlerPipe(binding, head);
-            head = handlerPipe;
-        }
-         */
+            HandlerPipe soapHandlerPipe = new SOAPHandlerPipe(binding, head);
+            HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, soapHandlerPipe, soapHandlerPipe);
+            head = logicalHandlerPipe;
+        }         
         return head;
     }
 
@@ -29,6 +30,12 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     }
 
     public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
+        WSBinding binding = endpoint.getBinding();
+        if(!binding.getHandlerChain().isEmpty()) {
+            HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal);
+            HandlerPipe soapHandlerPipe = new SOAPHandlerPipe(binding, logicalHandlerPipe, logicalHandlerPipe);
+            terminal = soapHandlerPipe;
+        }
         return terminal;
     }
 }
