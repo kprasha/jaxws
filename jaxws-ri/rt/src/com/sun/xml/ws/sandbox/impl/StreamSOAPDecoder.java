@@ -98,7 +98,10 @@ public abstract class StreamSOAPDecoder implements Decoder {
                     cacheHeaders(reader, namespaces, headers);
                 } catch (Exception e) {
                     // TODO need to throw more meaningful exception
-                    throw new IOException("");
+                    IOException io = new IOException();
+                    io.initCause(e);
+
+                    throw io;
                 }
             }
 
