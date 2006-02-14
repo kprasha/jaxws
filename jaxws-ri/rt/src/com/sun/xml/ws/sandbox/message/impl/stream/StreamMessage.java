@@ -21,14 +21,14 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
@@ -46,8 +46,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 public class StreamMessage extends AbstractMessageImpl {
     /**
@@ -63,7 +61,7 @@ public class StreamMessage extends AbstractMessageImpl {
      * The reader will be positioned at
      * the first child of the SOAP body
      */
-    protected final XMLStreamReader reader;
+    protected XMLStreamReader reader;
 
     // lazily created
     private HeaderList headers;
@@ -227,28 +225,23 @@ public class StreamMessage extends AbstractMessageImpl {
     }
 
     public Message copy() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         // if the reader is on END element means its empty body or no payload, so lets
         // return the same message
         if(!hasPayload())
-            return new EmptyMessageImpl(headers, soapVersion);
+            return new EmptyMessageImpl(headers.copy(), soapVersion);
 
-        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
         try {
-            writer.writeStartDocument();
-            writeTo(writer);
-            writer.writeEndDocument();
-            writer.close();
+            // copy the payload
+            XMLStreamBuffer xsb = new XMLStreamBuffer();
+            xsb.createFromXMLStreamReader(reader);
+
+            reader = xsb.processUsingXMLStreamReader();
+
+            return new StreamMessage(headers.copy(), xsb.processUsingXMLStreamReader(), soapVersion);
         } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
+            throw new WebServiceException("Failed to copy a message",e);
+        } catch (XMLStreamBufferException e) {
+            throw new WebServiceException("Failed to copy a message",e);
         }
-        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        return new StreamMessage(headers, XMLStreamReaderFactory.createXMLStreamReader(bis, true), soapVersion);
-
-    }
-
-    private static final String fixNull(String s) {
-        if(s==null)     return "";
-        else            return s;
     }
 }
