@@ -101,8 +101,10 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
     
     /**
      * This method separates the logical and protocol handlers. 
+     * Also parses Headers understood by SOAPHandlers.
      */
     protected void sortHandlers() {
+        handlerUnderstoodHeaders = new HashSet<QName>();
         logicalHandlers =  new ArrayList<LogicalHandler>();
         soapHandlers =  new ArrayList<SOAPHandler>();
         for (Handler handler : handlers) {
