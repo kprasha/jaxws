@@ -242,7 +242,7 @@ public interface Pipe {
      *      is *not* a bug in the JAX-WS implementation, it must be catched
      *      and wrapped into a {@link WebServiceException}.
      *
-     * @param packet
+     * @param request
      *      The packet that represents a request message. Must not be null.
      *      If the packet has a non-null message, it must be a valid
      *      unconsumed {@link Message}. This message represents the
