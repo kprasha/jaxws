@@ -1,16 +1,11 @@
 package com.sun.xml.ws.sandbox.impl;
 
-import com.sun.xml.stream.PropertyManager;
-import com.sun.xml.stream.writers.XMLStreamWriterImpl;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamAttachment;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 
 import javax.activation.DataHandler;
@@ -20,9 +15,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.util.UUID;
@@ -48,12 +41,12 @@ import org.jvnet.staxex.NamespaceContextEx;
  * @author Vivek Pandey
  */
 public class MtomEncoder implements Encoder {
-    private static final String boundary = "uuid:" + UUID.randomUUID().toString();
-    private static final String boundaryParameter = "boundary=\"" + boundary+"\"";
+    private String boundaryParameter;
+    private String boundary;
     private static final String xopContentType = "application/xop+xml";
     private final String soapXopContentType;
     private final XMLStreamWriterEx xmlStreamWriterEx = new MtomStreamWriter();
-    private final String messageContentType;
+    private String messageContentType;
     private final String soapContentType;
     private XMLStreamWriter writer;
 
@@ -62,8 +55,14 @@ public class MtomEncoder implements Encoder {
 
     public MtomEncoder(String contentType){
         this.soapContentType = contentType;
-        this.messageContentType =  "Multipart/Related;type=\""+xopContentType+"\";" + boundaryParameter + ";start-info=\"" + soapContentType+"\"";
+        createConteTypeHeader();
         this.soapXopContentType = xopContentType+";charset=utf-8;type=\""+soapContentType+"\"";
+    }
+
+    private void createConteTypeHeader(){
+        boundary = "uuid:" + UUID.randomUUID().toString();
+        boundaryParameter = "boundary=\"" + boundary +"\"";
+        messageContentType =  "Multipart/Related;type=\""+xopContentType+"\";" + boundaryParameter + ";start-info=\"" + soapContentType+"\"";
     }
 
     /**
@@ -80,6 +79,8 @@ public class MtomEncoder implements Encoder {
     }
 
     public String encode(Packet packet, OutputStream out) throws IOException {
+        //get the current boundary thaat will be reaturned from this method
+        String currBoundary = boundary;
         this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         if(packet.getMessage() != null){
             try {
@@ -91,15 +92,14 @@ public class MtomEncoder implements Encoder {
                 OutputUtil.writeln(out);
                 packet.getMessage().writeTo(getXmlStreamWriterEx());
                 OutputUtil.writeln(out);
-                //most of the writeTo calls writer.close(), does it close the outputStream also?
 
                 int numOfAttachments = 0;
                 Iterator<Attachment> mimeAttSet = packet.getMessage().getAttachments().iterator();
                 for(ByteArrayOutputStream bos : mtomAttachmentStream){
                     out.write(bos.toByteArray());
-                    if(++numOfAttachments != mtomAttachmentStream.size()){
-                        OutputUtil.writeln(out);
-                    }else{
+                    OutputUtil.writeln(out);
+                    if(++numOfAttachments == mtomAttachmentStream.size()){
+                        OutputUtil.writeAsAscii("--"+boundary, out);
                         OutputUtil.writeAsAscii("--", out);
                     }
                 }
@@ -110,7 +110,9 @@ public class MtomEncoder implements Encoder {
                 throw new WebServiceException(e);
             }
         }
-        return messageContentType;
+        //now create the boundary for next encode() call
+        createConteTypeHeader();
+        return currBoundary;
     }
 
     private static final String XOP_LOCALNAME = "Include";
@@ -125,8 +127,6 @@ public class MtomEncoder implements Encoder {
             OutputUtil.writeln("--"+boundary, bos);
             writeMimeHeaders(contentType, contentId, bos);
             bos.write(data, start, len);
-            OutputUtil.writeln(bos);
-            OutputUtil.writeAsAscii("--"+boundary, bos);
             mtomAttachmentStream.add(bos);
 
             //write out the xop reference
@@ -139,6 +139,7 @@ public class MtomEncoder implements Encoder {
                     writer.writeStartElement(xopPrefix, XOP_LOCALNAME, XOP_NAMESPACEURI);
                 }
                 writer.writeAttribute("href", "cid:"+contentId);
+                writer.writeEndElement();
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }

@@ -36,20 +36,19 @@ public class MimeMultipartRelatedDecoder implements Decoder {
     private byte[] boundaryBytes;
 
     private boolean parsed;
-    private BitSet lastPartFound = new BitSet(1);
+    private BitSet lastPartFound;
     // current stream position, set to -1 on EOF
     int b = 0;
     /*
      * When true it indicates parsing hasnt been done at all
      */
-    private boolean begining = true;
+    private boolean begining;
 
-    private final int[] bcs = new int[256];
-    int[] gss = null;
+    private int[] bcs;
+    int[] gss;
     private static final int BUFFER_SIZE = 4096;
-    private byte[] buffer = new byte[BUFFER_SIZE];
-    private byte[] prevBuffer = new byte[BUFFER_SIZE];
-//    private List<MimeBodyPart> parts;
+    private byte[] buffer;
+    private byte[] prevBuffer;
 
     private Map<String, StreamAttachment> attachemnts;
 
@@ -64,6 +63,18 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         this.version = version;
     }
 
+    private void init(){
+        mtomEncoded = false;
+        if(attachemnts != null)
+            attachemnts.clear();
+        bcs = new int[256];
+        gss = null;
+        buffer = new byte[BUFFER_SIZE];
+        prevBuffer = new byte[BUFFER_SIZE];
+        begining = true;
+        lastPartFound = new BitSet(1);
+    }
+
     /**
      * @param in
      * @param contentType
@@ -71,6 +82,7 @@ public class MimeMultipartRelatedDecoder implements Decoder {
      * @throws IOException
      */
     public Packet decode(InputStream in, String contentType) throws IOException {
+        init();
         try {
             /**
              * A xop packaged Content-Type header would tell whether its MTOM message or not, it also tells the root
@@ -82,9 +94,6 @@ public class MimeMultipartRelatedDecoder implements Decoder {
              * multipart/related; type="application/xop+xml";start="<http://tempuri.org/0>";boundary="uuid:0ca0e16e-feb1-426c-97d8-c4508ada5e82+id=1";start-info="text/xml"
              */
 
-            byte[] bytes = ASCIIUtility.getBytes(in);
-            System.out.println("Received Contnet: " + new String(bytes));
-            in = new ByteArrayInputStream(bytes);
             ct = new ContentType(contentType);
             //This decoder cant handle the content-type other than Multipart/Related
             //TODO throw some exception that can be caught by the caller to invoke appropriate decoder
@@ -131,6 +140,9 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         } catch (MessagingException e) {
             throw new WebServiceException(e);
         }
+        if(attachemnts != null)
+            attachemnts.clear();
+
         return null;
     }
 
@@ -189,9 +201,6 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         //else parse the MIME parts till we get what we want
         while (!lastPartFound.get(0) && (b != -1)) {
 
-//            ByteOutputStream bos = getNextPart();
-//            ByteInputStream is = bos.newInputStream();
-//            System.out.println("Received Attachemnt: " + new String(is.getBytes()));
             try {
                 InternetHeaders ih = new InternetHeaders(in);
                 String [] ids = ih.getHeader("content-id");
@@ -241,72 +250,6 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         b = readBody(in, boundaryBytes, baos);
         return baos;
     }
-
-//    /**
-//     * parses the inputStream
-//     */
-//    private void parse() {
-//        if (parsed)
-//	        return;
-//
-//        String bnd = "--" + boundary;
-//        byte[] bndbytes = ASCIIUtility.getBytes(bnd);
-//        try {
-//                parse(in, bndbytes);
-//        } catch (IOException ioex) {
-//            throw new WebServiceException("IO Error", ioex);
-//        } catch (Exception ex) {
-//            throw new WebServiceException("Error", ex);
-//        }
-//        parsed = true;
-//    }
-//
-//    public boolean parse(InputStream stream, byte[] pattern)
-//        throws Exception {
-//
-//        while (!lastPartFound.get(0) && (b != -1)) {
-//           getNextPart(stream, pattern);
-//        }
-//        return true;
-//    }
-//
-//    public MimeBodyPart getNextPart(InputStream stream, byte[] pattern)
-//        throws Exception {
-//
-//        if (!stream.markSupported()) {
-//            throw new Exception("InputStream does not support Marking");
-//        }
-//
-//        if (begining) {
-//            compile(pattern);
-//            if (!skipPreamble(stream, pattern)) {
-//                throw new Exception(
-//                    "Missing Start Boundary, or boundary does not start on a new line");
-//            }
-//            begining = false;
-//        }
-//
-//        if (lastBodyPartFound()) {
-//            throw new Exception("No parts found in Multipart InputStream");
-//        }
-//
-//
-//        InternetHeaders headers = new InternetHeaders(stream);
-//        ByteOutputStream baos = new ByteOutputStream();
-//        b = readBody(stream, pattern, baos);
-//        MimeBodyPart mbp = new MimeBodyPart(headers, baos.getBytes(),baos.getCount());
-//        addBodyPart(mbp);
-//        return mbp;
-//    }
-//
-//    private void addBodyPart(MimeBodyPart mbp) {
-//        if (parts == null)
-//	    parts = new FinalArrayList<MimeBodyPart>();
-//
-//	parts.add(mbp);
-//	//part.setParent(this);
-//    }
-
 
     int readBody(InputStream is, byte[] pattern, ByteOutputStream baos) throws IOException {
         if (!find(is, pattern, baos)) {
@@ -536,7 +479,6 @@ public class MimeMultipartRelatedDecoder implements Decoder {
                 throw new WebServiceException(
                         "Unexpected singular '-' character after Mime Boundary");
             } else {
-                //System.out.println("Last WSDLPartImpl Found");
                 lastPartFound.flip(0);
                 // read the next char
                 b = is.read();

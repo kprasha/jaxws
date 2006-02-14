@@ -62,11 +62,6 @@ public class MtomDecoder implements Decoder{
 
     private CharSequence getMtomPCData() {
         if(xopReferencePresent){
-            try {
-                reader.next();
-            } catch (XMLStreamException e) {
-                throw new WebServiceException(e);
-            }
             return base64AttData;
         }
         return reader.getText();
@@ -154,6 +149,11 @@ public class MtomDecoder implements Decoder{
                     throw new WebServiceException(e);
                 }
                 //move to the </xop:Include>
+                try {
+                    reader.next();
+                } catch (XMLStreamException e) {
+                    throw new WebServiceException(e);
+                }
                 return XMLStreamConstants.CHARACTERS;
             }
             if(xopReferencePresent)
