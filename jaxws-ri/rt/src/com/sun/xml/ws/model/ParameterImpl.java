@@ -103,16 +103,10 @@ public class ParameterImpl implements Parameter {
         return typeReference;
     }
 
-    /**
-     * @return Returns the mode.
-     */
     public Mode getMode() {
         return mode;
     }
 
-    /**
-     * @return Returns the index.
-     */
     public int getIndex() {
         return index;
     }
