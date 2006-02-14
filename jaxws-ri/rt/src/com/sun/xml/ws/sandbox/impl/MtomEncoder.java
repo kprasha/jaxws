@@ -58,7 +58,7 @@ public class MtomEncoder implements Encoder {
     private XMLStreamWriter writer;
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
-    private final ByteArrayOutputStream mtomAttachmentStream = new ByteArrayOutputStream();
+    private final List<ByteArrayOutputStream> mtomAttachmentStream = new ArrayList<ByteArrayOutputStream>();
 
     public MtomEncoder(String contentType){
         this.soapContentType = contentType;
@@ -90,9 +90,19 @@ public class MtomEncoder implements Encoder {
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
                 OutputUtil.writeln(out);
                 packet.getMessage().writeTo(getXmlStreamWriterEx());
-                //OutputUtil.writeln(out);                    // write \r\n
+                OutputUtil.writeln(out);
                 //most of the writeTo calls writer.close(), does it close the outputStream also?
-                out.write(mtomAttachmentStream.toByteArray());
+
+                int numOfAttachments = 0;
+                Iterator<Attachment> mimeAttSet = packet.getMessage().getAttachments().iterator();
+                for(ByteArrayOutputStream bos : mtomAttachmentStream){
+                    out.write(bos.toByteArray());
+                    if(++numOfAttachments != mtomAttachmentStream.size()){
+                        OutputUtil.writeln(out);
+                    }else{
+                        OutputUtil.writeAsAscii("--", out);
+                    }
+                }
 
                 //now write out the attachments in the message
                 writeAttachments(packet.getMessage().getAttachments(),out);
@@ -108,14 +118,16 @@ public class MtomEncoder implements Encoder {
 
     private void writeMtomBinary(byte[] data, int start, int len, String contentType){
         try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             String contentId = encodeCid(null);
 
             //build attachment frame
-
-            OutputUtil.writeln(mtomAttachmentStream);                    // write \r\n
-            writeMimeHeaders(contentType, contentId, mtomAttachmentStream);
-            mtomAttachmentStream.write(data, start, len);
-            //OutputUtil.writeln(mtomAttachmentStream);                    // write \r\n
+            OutputUtil.writeln("--"+boundary, bos);
+            writeMimeHeaders(contentType, contentId, bos);
+            bos.write(data, start, len);
+            OutputUtil.writeln(bos);
+            OutputUtil.writeAsAscii("--"+boundary, bos);
+            mtomAttachmentStream.add(bos);
 
             //write out the xop reference
             try {
@@ -136,7 +148,6 @@ public class MtomEncoder implements Encoder {
     }
 
     private void writeMimeHeaders(String contentType, String contentId, OutputStream out) throws IOException {
-        OutputUtil.writeln("--"+boundary, out);
         OutputUtil.writeln("Content-Type: " + contentType, out);
         OutputUtil.writeln("Content-Id: <" + contentId+">", out);
         OutputUtil.writeln("Content-Transfer-Encoding: binary", out);

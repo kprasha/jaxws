@@ -5,6 +5,8 @@ import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
+import com.sun.xml.ws.sandbox.impl.MtomEncoder;
+import com.sun.xml.ws.sandbox.impl.MimeMultipartRelatedDecoder;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
@@ -21,10 +23,14 @@ public final class SOAPHTTPBindingImpl extends SOAPBindingImpl {
     }
 
     public Encoder createEncoder() {
-        return TestEncoderImpl.get(soapVersion);
+        //if(isMTOMEnabled())
+            return MtomEncoder.get(soapVersion);
+        //return TestEncoderImpl.get(soapVersion);
     }
 
     public Decoder createDecoder() {
-        return StreamSOAPDecoder.create(soapVersion);
+        //if(isMTOMEnabled())
+            return new MimeMultipartRelatedDecoder(soapVersion);
+        //return StreamSOAPDecoder.create(soapVersion);
     }
 }

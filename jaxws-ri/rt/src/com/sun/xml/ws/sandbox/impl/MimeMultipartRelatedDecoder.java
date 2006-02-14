@@ -6,6 +6,7 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.ASCIIUtility;
@@ -15,6 +16,7 @@ import javax.xml.ws.WebServiceException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.BitSet;
 import java.util.Map;
@@ -58,6 +60,10 @@ public class MimeMultipartRelatedDecoder implements Decoder {
 
     private SOAPVersion version;
 
+    public MimeMultipartRelatedDecoder(SOAPVersion version) {
+        this.version = version;
+    }
+
     /**
      * @param in
      * @param contentType
@@ -76,7 +82,9 @@ public class MimeMultipartRelatedDecoder implements Decoder {
              * multipart/related; type="application/xop+xml";start="<http://tempuri.org/0>";boundary="uuid:0ca0e16e-feb1-426c-97d8-c4508ada5e82+id=1";start-info="text/xml"
              */
 
-
+            byte[] bytes = ASCIIUtility.getBytes(in);
+            System.out.println("Received Contnet: " + new String(bytes));
+            in = new ByteArrayInputStream(bytes);
             ct = new ContentType(contentType);
             //This decoder cant handle the content-type other than Multipart/Related
             //TODO throw some exception that can be caught by the caller to invoke appropriate decoder
@@ -126,6 +134,20 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         return null;
     }
 
+    public Packet decode(ReadableByteChannel in, String contentType) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates a copy of this {@link com.sun.xml.ws.api.pipe.Decoder}.
+     * <p/>
+     * <p/>
+     * See {@link com.sun.xml.ws.api.pipe.Encoder#copy()} for the detailed contract.
+     */
+    public Decoder copy() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }    
+
     private void parseContentType(String contentType) throws ParseException {
         ContentType ct = new ContentType(contentType);
         String base = ct.getPrimaryType();
@@ -166,10 +188,12 @@ public class MimeMultipartRelatedDecoder implements Decoder {
 
         //else parse the MIME parts till we get what we want
         while (!lastPartFound.get(0) && (b != -1)) {
-            ByteOutputStream bos = getNextPart();
-            ByteInputStream is = bos.newInputStream();
+
+//            ByteOutputStream bos = getNextPart();
+//            ByteInputStream is = bos.newInputStream();
+//            System.out.println("Received Attachemnt: " + new String(is.getBytes()));
             try {
-                InternetHeaders ih = new InternetHeaders(is);
+                InternetHeaders ih = new InternetHeaders(in);
                 String [] ids = ih.getHeader("content-id");
                 if (ids == null)
                     return null;
@@ -179,11 +203,10 @@ public class MimeMultipartRelatedDecoder implements Decoder {
                 String contentType = "application/octet-stream";
                 if (contentTypes != null)
                     contentType = contentTypes[0];
-                StreamAttachment as = attachemnts.get(ids[0]);
-                if (as == null) {
-                    as = new StreamAttachment(is.getBytes(), is.getOffset(), is.getCount(), contentType, contentId);
-                    attachemnts.put(contentId, as);
-                }
+
+                ByteOutputStream bos = getNextPart();
+                StreamAttachment as = new StreamAttachment(bos.getBytes(), 0, bos.getCount(), contentType, contentId);
+                attachemnts.put(contentId, as);
                 if (ids[0].equals(contentId))
                     return as;
                 else
@@ -562,19 +585,5 @@ public class MimeMultipartRelatedDecoder implements Decoder {
             bufferLength = i;
         }
         return bufferLength;
-    }
-
-    public Packet decode(ReadableByteChannel in, String contentType) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Creates a copy of this {@link com.sun.xml.ws.api.pipe.Decoder}.
-     * <p/>
-     * <p/>
-     * See {@link com.sun.xml.ws.api.pipe.Encoder#copy()} for the detailed contract.
-     */
-    public Decoder copy() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

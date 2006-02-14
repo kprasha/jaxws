@@ -120,7 +120,7 @@ public abstract class AbstractMessageImpl extends Message {
         w.writeEndElement();
         w.writeEndDocument();
         w.flush();
-        w.close();
+        //w.close();
     }
 
     /**

@@ -5,8 +5,6 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamAttachment;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
-import com.sun.xml.bind.v2.runtime.unmarshaller.Base64Data;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -25,6 +23,7 @@ import java.net.URLDecoder;
 
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.NamespaceContextEx;
+import org.jvnet.staxex.Base64Data;
 
 /**
  * @author Vivek Pandey
@@ -45,7 +44,7 @@ public class MtomDecoder implements Decoder{
     }
 
     public Packet decode(InputStream in, String contentType) throws IOException {
-        reader = reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);
+        reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);
         return decoder.decode(getXmlStreamReaderEx(), contentType);
     }
 
@@ -63,7 +62,11 @@ public class MtomDecoder implements Decoder{
 
     private CharSequence getMtomPCData() {
         if(xopReferencePresent){
-            xopReferencePresent = false;
+            try {
+                reader.next();
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
             return base64AttData;
         }
         return reader.getText();
@@ -79,6 +82,10 @@ public class MtomDecoder implements Decoder{
             return new MtomNamespaceContextEx(nsContext);
 
 
+        }
+
+        public String getElementTextTrim() throws XMLStreamException {
+            throw new UnsupportedOperationException();
         }
 
         private class MtomNamespaceContextEx implements NamespaceContextEx {
@@ -132,8 +139,6 @@ public class MtomDecoder implements Decoder{
         }
 
         public int next() throws XMLStreamException {
-            if(xopReferencePresent)
-                xopReferencePresent = false;
             int event = reader.next();
             if ((event == XMLStreamConstants.START_ELEMENT) && reader.getLocalName().equals(XOP_LOCALNAME) && reader.getNamespaceURI().equals(XOP_NAMESPACEURI))
             {
@@ -148,8 +153,11 @@ public class MtomDecoder implements Decoder{
                 } catch (IOException e) {
                     throw new WebServiceException(e);
                 }
+                //move to the </xop:Include>
                 return XMLStreamConstants.CHARACTERS;
             }
+            if(xopReferencePresent)
+                xopReferencePresent = false;
             return event;
         }
 
