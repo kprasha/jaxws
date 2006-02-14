@@ -39,6 +39,11 @@
                     <type>java</type>
                     <location>tools/wscompile/src</location>
                 </source-folder>
+                <source-folder>
+                    <label>servlet/src</label>
+                    <type>java</type>
+                    <location>servlet/src</location>
+                </source-folder>
             </folders>
             <ide-actions>
                 <action name="build">
@@ -158,6 +163,10 @@
                         <label>tools/wscompile/src</label>
                         <location>tools/wscompile/src</location>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>servlet/src</label>
+                        <location>servlet/src</location>
+                    </source-folder>
                     <source-file>
                         <location>build.xml</location>
                     </source-file>
@@ -194,7 +203,8 @@
             <compilation-unit>
                 <package-root>rt/src</package-root>
                 <package-root>tools/wscompile/src</package-root>
-                <classpath mode="compile">lib/activation.jar;lib/ant-junit.jar;lib/ant-launcher.jar;lib/ant-nodeps.jar;lib/ant-trax.jar;lib/ant.jar;lib/FastInfoset.jar;lib/http.jar;lib/jaxb-api.jar;lib/jaxb-impl.jar;lib/jaxb-xjc.jar;lib/jaxws-api.jar;lib/jsr173_api.jar;lib/jsr181-api.jar;lib/jsr250-api.jar;lib/junit.jar;lib/resolver.jar;lib/saaj-api.jar;lib/saaj-impl-fast.jar_;lib/saaj-impl.jar;lib/servlet.jar;lib/sjsxp.jar;lib/stax-ex.jar;lib/streambuffer.jar</classpath>
+                <package-root>servlet/src</package-root>
+                <classpath mode="compile">lib/activation.jar:lib/ant-junit.jar:lib/ant-launcher.jar:lib/ant-nodeps.jar:lib/ant-trax.jar:lib/ant.jar:lib/FastInfoset.jar:lib/http.jar:lib/jaxb-api.jar:lib/jaxb-impl.jar:lib/jaxb-xjc.jar:lib/jaxws-api.jar:lib/jsr173_api.jar:lib/jsr181-api.jar:lib/jsr250-api.jar:lib/junit.jar:lib/resolver.jar:lib/saaj-api.jar:lib/saaj-impl-fast.jar_:lib/saaj-impl.jar:lib/servlet.jar:lib/sjsxp.jar:lib/stax-ex.jar:lib/streambuffer.jar:servlet/lib/servlet.jar</classpath>
                 <built-to>build/lib/activation.jar</built-to>
                 <built-to>build/lib/FastInfoset.jar</built-to>
                 <built-to>build/lib/http.jar</built-to>
