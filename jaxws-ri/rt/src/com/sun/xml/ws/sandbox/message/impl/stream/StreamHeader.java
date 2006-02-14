@@ -22,11 +22,10 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.v2.util.FinalArrayList;
-import com.sun.xml.bind.util.SAXException2;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Node;
@@ -36,6 +35,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
@@ -46,7 +46,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
-import javax.xml.namespace.QName;
 import java.util.List;
 
 
