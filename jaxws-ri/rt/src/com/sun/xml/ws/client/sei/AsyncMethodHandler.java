@@ -37,7 +37,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
         private final Object proxy;
         private final Object[] args;
         // need to take a copy. required by the spec
-        private final RequestContext snapshot = owner.getRequestContext().copy();
+        private final RequestContext snapshot = owner.requestContext.copy();
         /**
          * Because of the object instantiation order,
          * we can't take this as a constructor parameter.

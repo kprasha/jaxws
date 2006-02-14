@@ -13,10 +13,13 @@ import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.client.dispatch.DispatchContext;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.*;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -132,13 +135,13 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     public final T invoke(T in) {
-        return doInvoke(in,getRequestContext(),this);
+        return doInvoke(in,requestContext,this);
     }
 
     public final void invokeOneWay(T in) {
         Packet request = createPacket(in);
         setProperties(request,true);
-        Packet response = process(request,getRequestContext(),this);
+        Packet response = process(request,requestContext,this);
     }
 
     void setProperties(Packet packet, boolean isOneWay) {
@@ -157,7 +160,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         private final T param;
         // snapshot the context now. this is necessary to avoid concurrency issue,
         // and is required by the spec
-        private final RequestContext rc = getRequestContext().copy();
+        private final RequestContext rc = requestContext.copy();
 
         /**
          * Because of the object instantiation order,

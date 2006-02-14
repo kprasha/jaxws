@@ -183,7 +183,7 @@ final class SyncMethodHandler extends MethodHandler {
     }
 
     public Object invoke(Object proxy, Object[] args) throws Throwable {
-        return invoke(proxy,args,owner.getRequestContext(),owner);
+        return invoke(proxy,args,owner.requestContext,owner);
     }
 
     /**

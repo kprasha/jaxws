@@ -76,18 +76,26 @@ public abstract class PropertySet {
         String value();
     }
 
+    /**
+     * Represents the list of strongly-typed known propertyies
+     * (keyed by property names.)
+     *
+     * <p>
+     * Just giving it an alias to make the use of this class more fool-proof.
+     */
+    protected static final class PropertyMap extends HashMap<String,Accessor> {}
 
     /**
      * Map representing the Fields and Methods annotated with {@link Property}.
      * Model of {@link PropertySet} class.
      */
-    protected abstract Map<String,Accessor> getPropertyMap();
+    protected abstract PropertyMap getPropertyMap();
 
     /**
      * This method parses a class for fields and methods with {@link Property}.
      */
-    protected static Map<String,Accessor> parse(Class clazz) {
-        Map<String,Accessor> props = new HashMap<String,Accessor>();
+    protected static PropertyMap parse(Class clazz) {
+        PropertyMap props = new PropertyMap();
         for (Field f : clazz.getFields()) {
             Property cp = f.getAnnotation(Property.class);
             if(cp!=null)
@@ -266,7 +274,7 @@ public abstract class PropertySet {
     /**
      * Checks if this {@link PropertySet} supports a property of the given name.
      */
-    public boolean supports(String key) {
+    public boolean supports(Object key) {
         return getPropertyMap().containsKey(key);
     }
 

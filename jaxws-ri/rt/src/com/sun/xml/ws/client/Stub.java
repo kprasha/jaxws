@@ -10,6 +10,7 @@ import com.sun.xml.ws.util.Pool;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import java.util.Map.Entry;
+import java.util.Map;
 
 /**
  * Base class for stubs, which accept method invocations from
@@ -52,7 +53,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      */
     private final EndpointAddress defaultEndPointAddress;
 
-    private RequestContext requestContext = new RequestContext(this);
+    public final RequestContext requestContext = new RequestContext();
 
     /**
      * {@link ResponseContext} from the last synchronous operation.
@@ -102,16 +103,8 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
 
             packet.proxy = this;
             packet.endpointAddress = defaultEndPointAddress;
-            
-            if(!requestContext.isEmpty()) {
-                for (Entry<String, Object> entry : requestContext.entrySet()) {
-                    String key = entry.getKey();
-                    if(packet.supports(key))
-                        packet.put(key,entry.getValue());
-                    else
-                        packet.invocationProperties.put(key,entry.getValue());
-                }
-            }
+
+            requestContext.fill(packet);
         }
 
         Packet reply;
@@ -135,8 +128,8 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
         return binding;
     }
 
-    public final RequestContext getRequestContext() {
-        return requestContext;
+    public final Map<String,Object> getRequestContext() {
+        return requestContext.getMapView();
     }
 
     public final ResponseContext getResponseContext() {

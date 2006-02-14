@@ -360,13 +360,13 @@ public final class Packet extends PropertySet {
 
 
 // completes TypedMap
-    private static final Map<String,Accessor> model;
+    private static final PropertyMap model;
 
     static {
         model = parse(Packet.class);
     }
 
-    protected Map<String, Accessor> getPropertyMap() {
+    protected PropertyMap getPropertyMap() {
         return model;
     }
 }

@@ -159,13 +159,13 @@ public class MessageContextImpl extends PropertySet implements MessageContext {
 
 
 
-    private static final Map<String,Accessor> model;
+    private static final PropertyMap model;
 
     static {
         model = parse(MessageContextImpl.class);
     }
 
-    protected Map<String, Accessor> getPropertyMap() {
+    protected PropertyMap getPropertyMap() {
         return model;
     }
 
