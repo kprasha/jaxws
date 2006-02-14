@@ -22,6 +22,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.v2.util.FinalArrayList;
+import com.sun.xml.bind.util.SAXException2;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
@@ -232,7 +233,7 @@ public abstract class StreamHeader implements Header {
         try {
             _mark.processUsingSAXContentHandler(contentHandler);
         } catch (XMLStreamBufferException e) {
-            throw new SAXException(e);
+            throw new SAXException2(e);
         }
     }
 
