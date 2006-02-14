@@ -32,6 +32,7 @@ import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.XMLConstants;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -96,13 +97,27 @@ public class DOMUtil {
         if (node.hasAttributes()){
             NamedNodeMap attrs = node.getAttributes();
             int numOfAttributes = attrs.getLength();
+            // write namespace declarations first.
+            // if we interleave this with attribue writing,
+            // Zephyr will try to fix it and we end up getting inconsistent namespace bindings.
             for(int i = 0; i < numOfAttributes; i++){
                 Node attr = attrs.item(i);
-                writer.writeAttribute(
-                    fixNull(attr.getPrefix()),
-                    fixNull(attr.getNamespaceURI()),
-                    attr.getLocalName(),
-                    attr.getNodeValue());
+                String nsUri = attr.getNamespaceURI();
+                if(nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+                    // this is a namespace declaration, not an attribute
+                    writer.writeNamespace(attr.getLocalName(),attr.getNodeValue());
+                }
+            }
+            for(int i = 0; i < numOfAttributes; i++){
+                Node attr = attrs.item(i);
+                String nsUri = attr.getNamespaceURI();
+                if(!nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+                    writer.writeAttribute(
+                        fixNull(attr.getPrefix()),
+                        fixNull(nsUri),
+                        attr.getLocalName(),
+                        attr.getNodeValue());
+                }
             }
         }
 
