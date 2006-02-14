@@ -1,6 +1,5 @@
 package com.sun.xml.ws.transport.http;
 
-import javax.servlet.ServletContext;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.Set;
@@ -42,7 +41,7 @@ public interface ResourceLoader {
      *      null if the path is invalid. empty if the path didn't contain
      *      any entry in it.
      *
-     * @see ServletContext#getResourcePaths(String)
+     * @see javax.servlet.http.ServletContext#getResourcePaths(String)
      */
     Set<String> getResourcePaths(String path);
 }

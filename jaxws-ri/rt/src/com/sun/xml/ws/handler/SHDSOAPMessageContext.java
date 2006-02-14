@@ -18,11 +18,10 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.handler;
-import java.util.List;
-import com.sun.xml.ws.spi.runtime.InternalSoapEncoder;
 import com.sun.xml.ws.spi.runtime.Invoker;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Implementation of SOAPMessageContext. This class is used at runtime
@@ -69,16 +68,7 @@ public class SHDSOAPMessageContext extends SOAPMessageContextImpl implements com
     public Object getMessageInfo() {
         return handlerCtxt.getMessageInfo();
     }
-    
-    /*
-     * Encoder to marshall all JAXWS objects: RpcLitPayload, JAXBBridgeInfo etc
-     */
-    public InternalSoapEncoder getEncoder() {
-        // commented out as a part of server side rearch
-        throw new UnsupportedOperationException();
-        //return (InternalSoapEncoder)((SOAPEPTFactory)handlerCtxt.getMessageInfo().getEPTFactory()).getSOAPEncoder();
-    }
-    
+
     public String getBindingId() {
         return handlerCtxt.getBindingId();
     }

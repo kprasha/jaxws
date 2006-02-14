@@ -12,7 +12,6 @@ import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -175,7 +174,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             return;
         }
 
-        con.setStatus(HttpServletResponse.SC_OK);
+        con.setStatus(SC_OK);
         setContentType(con, "application/xml");
 
         OutputStream os = con.getOutput();
@@ -190,7 +189,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     }
 
     private void writeNotFoundErrorPage(WSConnection con, String message) throws IOException {
-        con.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        con.setStatus(SC_NOT_FOUND);
         setContentType(con, "text/html; charset=UTF-8");
 
         PrintWriter out = new PrintWriter(new OutputStreamWriter(con.getOutput(),"UTF-8"));
@@ -218,4 +217,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     private static final Localizer localizer = new Localizer();
     private static final LocalizableMessageFactory messageFactory =
         new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
+
+
+    private static final int SC_OK = 200;
+    private static final int SC_NOT_FOUND = 404;
 }

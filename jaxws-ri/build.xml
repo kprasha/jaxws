@@ -81,9 +81,8 @@
   </target>
 
   <target name="runtime-compile" depends="prepare">
-    <ant dir="${basedir}/rt"
-        target="compile"
-        inheritrefs="true"/>
+    <ant dir="${basedir}/rt"      target="compile" inheritrefs="true"/>
+    <ant dir="${basedir}/servlet" target="compile" inheritrefs="true"/>
   </target>
 
   <target name="runtime-compile-mustang" depends="prepare">
@@ -92,13 +91,14 @@
         inheritrefs="true"/>
   </target>
 
-  <path id="spi-path">
+  <path id="all-source-path">
      <pathelement path="${basedir}/rt/src"/>
+     <pathelement path="${basedir}/servlet/src"/>
      <pathelement path="${basedir}/tools/wscompile/src"/>
   </path>
   <target name="javadocs-spi" depends="image">
     <javadoc packagenames="com.sun.xml.ws.spi.runtime.*, com.sun.tools.ws.spi.*"
-         sourcepathref="spi-path"
+         sourcepathref="all-source-path"
          destdir="${build.home}/javadocs/spi"
          author="false"
          version="false"
@@ -112,7 +112,7 @@
 
   <target name="javadocs" depends="image">
     <javadoc packagenames=".,com.sun.xml.ws.*,com.sun.pept.*,javax.xml.ws.*,javax.xml.soap.*,javax.xml.bind.*,com.sun.tools.ws.*"
-         sourcepath="${basedir}/rt/src:${basedir}/tools/wscompile/src"
+         sourcepath="all-source-path"
          destdir="${build.home}/javadocs/"
          author="false"
          version="false"
@@ -228,6 +228,7 @@ major-version=${release.impl.version}
     <jar jarfile="${build.home}/lib/jaxws-rt.jar"
         manifest="${basedir}/rt/build/manifest">
       <fileset dir="${basedir}/rt/build/classes"/>
+      <fileset dir="${basedir}/servlet/build/classes"/>
     </jar>
   </target>
 
@@ -277,7 +278,7 @@ major-version=${release.impl.version}
     <copy    todir="${build.home}/lib">
       <fileset dir="${lib.home}/" 
                includes="**/*.jar" 
-               excludes="ant.jar, ant-junit.jar, ant-launcher.jar, ant-nodeps.jar, ant-trax.jar, junit.jar, servlet.jar"/>
+               excludes="ant.jar, ant-junit.jar, ant-launcher.jar, ant-nodeps.jar, ant-trax.jar, junit.jar"/>
     </copy>
 
     <!-- Copying the manifest -->

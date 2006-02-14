@@ -57,8 +57,7 @@ public abstract class WSRtObjectFactory {
     /**
      * @return List of endpoints
      */
-    public abstract List<HttpAdapter> getRuntimeEndpointInfos(
-            ServletContext ctxt);
+    public abstract List<HttpAdapter> getRuntimeEndpointInfos(ServletContext ctxt);
     
     /**
      * creates the Binding object implementation.

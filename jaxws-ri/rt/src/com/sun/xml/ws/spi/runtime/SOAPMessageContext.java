@@ -50,12 +50,5 @@ public interface SOAPMessageContext
      * @return object containg information thats used by InternalEncoderDecoder write methods.
      *
      */
-    public Object getMessageInfo();
-    
-    /**
-     * Returns to marshall all JAXWS objects: RpcLitPayload, JAXBBridgeInfo etc
-     * @return
-     */
-    public InternalSoapEncoder getEncoder();
-    
+    public Object getMessageInfo();    
 }

@@ -489,8 +489,6 @@ abstract class HandlerProcessor<C extends MessageContext> {
         int getIndex(){
             return index;
         }
-        
-        
     }
     */
 }

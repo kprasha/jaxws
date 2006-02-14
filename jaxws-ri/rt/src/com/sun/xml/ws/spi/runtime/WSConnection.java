@@ -22,7 +22,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet.Property;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.handler.MessageContext;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -134,7 +133,7 @@ public interface WSConnection {
     /**
      * Requested path. A string like "/foo/bar/baz".
      *
-     * @see HttpServletRequest#getPathInfo()
+     * @see javax.servlet.http.HttpServletRequest#getPathInfo()
      */
     @Property(MessageContext.PATH_INFO)
     String getPathInfo();

@@ -119,20 +119,20 @@ public class MessageContextImpl extends PropertySet implements MessageContext {
      * Value of {@link #SERVLET_REQUEST} property.
      */
     @Property(MessageContext.SERVLET_REQUEST)
-    public javax.servlet.http.HttpServletRequest servletRequest;
+    public Object servletRequest;
     
     /**
      * Value of {@link #SERVLET_RESPONSE} property.
      */
     @Property(MessageContext.SERVLET_RESPONSE)
-    public javax.servlet.http.HttpServletResponse servletResponse;
+    public Object servletResponse;
     
         
     /**
      * Value of {@link #SERVLET_CONTEXT} property.
      */
     @Property(MessageContext.SERVLET_CONTEXT)
-    public javax.servlet.ServletContext servletContext;
+    public Object servletContext;
     
     /** Creates a new instance of MessageContextImpl */
     public MessageContextImpl(Packet packet) {

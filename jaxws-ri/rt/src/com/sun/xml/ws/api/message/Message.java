@@ -35,7 +35,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
@@ -131,7 +130,7 @@ import java.lang.reflect.Proxy;
  * <h2>Message lifespan</h2>
  * <p>
  * Often {@link Packet} include information local to a particular
- * invocaion (such as {@link HttpServletRequest}, from this angle, it makes sense
+ * invocaion (such as {@code HttpServletRequest}, from this angle, it makes sense
  * to tie a lifespan of a message to one pipeline invocation.
  * <p>
  * On the other hand, if you think about WS-RM, it often needs to hold on to
