@@ -71,8 +71,8 @@ public abstract class SOAPFaultBuilder {
         }
         Class exceptionClass = ce.getExcpetionClass();
         try {
-            Constructor constructor = exceptionClass.getConstructor(new Class[]{String.class, (Class) ce.getDetailType().type});
-            Object exception = constructor.newInstance(new Object[]{getFaultString(), getJAXBObject(jaxbDetail, ce)});
+            Constructor constructor = exceptionClass.getConstructor(String.class, (Class) ce.getDetailType().type);
+            Object exception = constructor.newInstance(getFaultString(), getJAXBObject(jaxbDetail, ce));
             return (Exception) exception;
         } catch (Exception e) {
             throw new WebServiceException(e);
@@ -103,7 +103,7 @@ public abstract class SOAPFaultBuilder {
     }
 
     /**
-     * Server runtime will call this when there is some internal error not resulting from an exxception.
+     * Server runtime will call this when there is some internal error not resulting from an exception.
      *
      * @param soapVersion {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
      * @param faultString must be non-null
@@ -156,13 +156,13 @@ public abstract class SOAPFaultBuilder {
     private Exception createUserDefinedException(CheckedExceptionImpl ce) {
         Class exceptionClass = ce.getExcpetionClass();
         try {
-            Constructor constructor = exceptionClass.getConstructor(new Class[]{String.class});
-            Object exception = constructor.newInstance(new Object[]{getFaultString()});
+            Constructor constructor = exceptionClass.getConstructor(String.class);
+            Object exception = constructor.newInstance(getFaultString());
             Object jaxbDetail = getDetail().getDetails().get(0);
             Field[] fields = jaxbDetail.getClass().getFields();
             for (Field f : fields) {
                 Method m = exceptionClass.getMethod(getWriteMethod(f));
-                m.invoke(exception, new Object[]{f.get(jaxbDetail)});
+                m.invoke(exception, f.get(jaxbDetail));
             }
             throw (Exception) exception;
         } catch (Exception e) {
