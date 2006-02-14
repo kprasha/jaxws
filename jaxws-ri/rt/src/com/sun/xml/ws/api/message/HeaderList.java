@@ -204,4 +204,11 @@ public final class HeaderList extends ArrayList<Header> {
     public boolean add(Header header) {
         return super.add(header);
     }
+
+    /**
+     * Creates a copy.
+     */
+    public HeaderList copy() {
+        return new HeaderList(this);
+    }
 }
