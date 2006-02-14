@@ -21,6 +21,8 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.Dispatch;
@@ -201,6 +203,9 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *      inbound invoker: invoke the service
  *         Inkoke SEI, e.g. EJB or SEI in servlet.
  * </pre>
+ *
+ * @see AbstractPipeImpl
+ * @see AbstractFilterPipeImpl
  */
 public interface Pipe {
     /**
