@@ -230,11 +230,7 @@ public abstract class StreamHeader implements Header {
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        try {
-            _mark.processUsingSAXContentHandler(contentHandler);
-        } catch (XMLStreamBufferException e) {
-            throw new SAXException2(e);
-        }
+        _mark.processUsingSAXContentHandler(contentHandler);
     }
 
     protected abstract FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader);
