@@ -82,12 +82,15 @@ public abstract class StreamHeader implements Header {
      * TODO: this whole attribute handling could be done better, I think.
      */
     protected static final class Attribute {
+        /**
+         * Can be empty but never null.
+         */
         final String nsUri;
         final String localName;
         final String value;
 
         public Attribute(String nsUri, String localName, String value) {
-            this.nsUri = nsUri;
+            this.nsUri = fixNull(nsUri);
             this.localName = localName;
             this.value = value;
         }
@@ -234,4 +237,12 @@ public abstract class StreamHeader implements Header {
     }
 
     protected abstract FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader);
+
+    /**
+     * Convert null to "".
+     */
+    private static String fixNull(String s) {
+        if(s==null) return "";
+        else        return s;
+    }
 }
