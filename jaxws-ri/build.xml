@@ -431,7 +431,7 @@ major-version=${release.impl.version}
 
   <target name="integrate-xmlstreambuffer-hudson" depends="prepare"
           description="integrate the last successful XmlStreamBuffer Hudson build">
-    <get src="http://kohsuke.sfbay/hudson/job/xmlstreambuffer/lastSuccessfulBuild/artifact/xmlstreambuffer/package/StreamBuffer.src.zip"
+    <get src="http://kohsuke.sfbay/hudson/job/xmlstreambuffer/lastSuccessfulBuild/artifact/xmlstreambuffer/package/streambuffer.src.zip"
          dest="lib/streambuffer.src.zip" />
     <get src="http://kohsuke.sfbay/hudson/job/xmlstreambuffer/lastSuccessfulBuild/artifact/xmlstreambuffer/streambuffer/dist/streambuffer.jar"
          dest="lib/streambuffer.jar" />
