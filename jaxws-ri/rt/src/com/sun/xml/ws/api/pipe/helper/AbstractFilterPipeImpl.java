@@ -10,6 +10,62 @@ import com.sun.xml.ws.api.message.Packet;
  * <p>
  * A filter pipe works on a {@link Packet}, then pass it onto the next pipe.
  *
+ *
+ * <h2>How do I implement a filter?</h2>
+ * <p>
+ * Filter {@link Pipe}s are ideal for those components that wish to
+ * do some of the followings:
+ *
+ * <dl>
+ * <dt><b>
+ * To read an incoming message and perform some work before the
+ * application (or more precisely the next pipe sees it)
+ * </b>
+ * <dd>
+ * Implement the {@link #process} method and do some processing before
+ * you pass the packet to the next pipe:
+ * <pre>
+ * process(request) {
+ *   doSomethingWith(request);
+ *   return next.process(request);
+ * }
+ * </pre>
+ *
+ *
+ * <dt><b>
+ * To intercept an incoming message and prevent the next pipe from seeing it.
+ * </b>
+ * <dd>
+ * Implement the {@link #process} method and do some processing,
+ * then do NOT pass the request onto the next pipe.
+ * <pre>
+ * process(request) {
+ *   if(isSomethingWrongWith(request))
+ *     return createErrorMessage();
+ *   else
+ *     return next.proces(request);
+ * }
+ * </pre>
+ *
+ * <dt><b>
+ * To post process a reply and possibly modify a message:
+ * </b>
+ * <dd>
+ * Implement the {@link #process} method and do some processing,
+ * then do NOT pass the request onto the next pipe.
+ * <pre>
+ * process(request) {
+ *   op = request.getMessage().getOperation();
+ *   reply = next.proces(request);
+ *   if(op is something I care) {
+ *     reply = playWith(reply);
+ *   }
+ *   return reply;
+ * }
+ * </pre>
+ *
+ * </dl>
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class AbstractFilterPipeImpl extends AbstractPipeImpl {
