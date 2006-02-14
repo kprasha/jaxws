@@ -44,7 +44,7 @@ public class MtomDecoder implements Decoder{
     }
 
     public Packet decode(InputStream in, String contentType) throws IOException {
-        reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);
+        reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);        
         return decoder.decode(getXmlStreamReaderEx(), contentType);
     }
 

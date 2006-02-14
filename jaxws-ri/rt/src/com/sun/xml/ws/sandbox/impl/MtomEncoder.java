@@ -31,12 +31,7 @@ import org.jvnet.staxex.XMLStreamWriterEx;
 import org.jvnet.staxex.NamespaceContextEx;
 
 /**
- * Partial Implmentation of MTOM/XOP {@link Encoder}.
- * <p/>
- * This will typically be created by the
- * {@link com.sun.xml.ws.transport.http.client.HttpTransportPipe} or
- * {@link com.sun.xml.ws.transport.local.client.LocalTransportPipe} on the client side and
- * by {@link com.sun.xml.ws.api.pipe.Acceptor} on the server side.
+ * Mtom messge Encoder. It can be used even for non-soap message's mtom encoding.
  *
  * @author Vivek Pandey
  */

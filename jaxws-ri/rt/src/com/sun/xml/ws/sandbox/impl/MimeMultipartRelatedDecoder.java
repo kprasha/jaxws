@@ -23,6 +23,10 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
+ * Decoder that serves as Multipart/Related messages decoder. Internally it delegates decoding to
+ * {@link StreamSOAPDecoder} for normal MR messages with root part as SOAP 1.1 or SOAP 1.2 envelope. If the MR
+ * message is XOP packaged then it delegates decoding to {@link MtomDecoder}.
+ *
  * @author Vivek Pandey
  */
 
@@ -51,16 +55,21 @@ public class MimeMultipartRelatedDecoder implements Decoder {
     private byte[] prevBuffer;
 
     private Map<String, StreamAttachment> attachemnts;
+    private final Decoder mtomDecoder;
+    private final Decoder soapDecoder;
 
     /**
      * Tells if the root part is mtom encoded
      */
-    private boolean mtomEncoded = false;
+    private boolean mtomEncoded;
 
-    private SOAPVersion version;
+    private final SOAPVersion version;
+    private SOAPVersion parsedVersion;
 
     public MimeMultipartRelatedDecoder(SOAPVersion version) {
         this.version = version;
+        mtomDecoder = new MtomDecoder(this, version);
+        soapDecoder = StreamSOAPDecoder.create(version);
     }
 
     private void init(){
@@ -128,13 +137,15 @@ public class MimeMultipartRelatedDecoder implements Decoder {
             InternetHeaders ih = new InternetHeaders(bodyStream);
             String[] ctype = ih.getHeader("Content-Type");
             if (ctype != null) {
-                parseContentType(ctype[0]);
+                SOAPVersion parsedVersion = parseContentType(ctype[0]);
+                if(parsedVersion.compareTo(version) != 0){
+                    //TODO: i18nify
+                    throw new WebServiceException("Incorrect Content-Type, expecting: " + version.toString()+", got: "+parsedVersion);
+                }
                 if (mtomEncoded) {
-                    Decoder decoder = new MtomDecoder(this, version);
-                    return decoder.decode(bodyStream, ctype[0]);
+                    return mtomDecoder.decode(bodyStream, ctype[0]);
                 } else {
-                    Decoder decoder = StreamSOAPDecoder.create(version);
-                    return decoder.decode(bodyStream, ctype[0]);
+                    return soapDecoder.decode(bodyStream, ctype[0]);
                 }
             }
         } catch (MessagingException e) {
@@ -160,23 +171,25 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }    
 
-    private void parseContentType(String contentType) throws ParseException {
+    private SOAPVersion parseContentType(String contentType) throws ParseException {
+        SOAPVersion parsedVersion=null;
         ContentType ct = new ContentType(contentType);
         String base = ct.getPrimaryType();
         String sub = ct.getSubType();
         if (base.equals("text") && sub.equals("xml")) {
-            version = SOAPVersion.SOAP_11;
+            parsedVersion = SOAPVersion.SOAP_11;
         } else if (base.equals("application") && sub.equals("soap+xml")) {
-            version = SOAPVersion.SOAP_11;
+            parsedVersion = SOAPVersion.SOAP_11;
         } else if (base.equals("application") && sub.equals("xop+xml")) {
             mtomEncoded = true;
             String type = ct.getParameter("type");
             if (type.equals("text/xml"))
-                version = SOAPVersion.SOAP_11;
+                parsedVersion = SOAPVersion.SOAP_11;
             else if (type.equals("application/soap+xml"))
-                version = SOAPVersion.SOAP_12;
+                parsedVersion = SOAPVersion.SOAP_12;
             //TODO: XML/HTTP
         }
+        return parsedVersion;
     }
 
     private ByteOutputStream parseMessage() throws IOException {
@@ -527,5 +540,22 @@ public class MimeMultipartRelatedDecoder implements Decoder {
             bufferLength = i;
         }
         return bufferLength;
+    }
+
+    public static final Decoder SOAP11 = new MimeMultipartRelatedDecoder(SOAPVersion.SOAP_11);
+    public static final Decoder SOAP12 = new MimeMultipartRelatedDecoder(SOAPVersion.SOAP_12);
+
+    public static Decoder get(SOAPVersion version) {
+        if(version==null)
+            // this decoder is for SOAP, not for XML/HTTP
+            throw new IllegalArgumentException();
+        switch(version) {
+        case SOAP_11:
+            return SOAP11;
+        case SOAP_12:
+            return SOAP12;
+        default:
+            throw new AssertionError();
+        }
     }
 }
