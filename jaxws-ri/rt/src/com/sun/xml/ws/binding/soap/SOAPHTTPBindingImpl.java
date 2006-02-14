@@ -23,14 +23,14 @@ public final class SOAPHTTPBindingImpl extends SOAPBindingImpl {
     }
 
     public Encoder createEncoder() {
-        //if(isMTOMEnabled())
+        if(isMTOMEnabled())
             return MtomEncoder.get(soapVersion);
-        //return TestEncoderImpl.get(soapVersion);
+        return TestEncoderImpl.get(soapVersion);
     }
 
     public Decoder createDecoder() {
-        //if(isMTOMEnabled())
+        if(isMTOMEnabled())
             return new MimeMultipartRelatedDecoder(soapVersion);
-        //return StreamSOAPDecoder.create(soapVersion);
+        return StreamSOAPDecoder.create(soapVersion);
     }
 }
