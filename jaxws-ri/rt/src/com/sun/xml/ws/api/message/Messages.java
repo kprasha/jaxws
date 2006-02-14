@@ -12,7 +12,9 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPFault;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -69,7 +71,7 @@ public abstract class Messages {
     public static Message create(SOAPMessage saaj) {
         return new SAAJMessage(saaj);
     }
-    
+
     /**
      * Creates a {@link Message} using Source as payload.
      *
@@ -85,7 +87,7 @@ public abstract class Messages {
     public static Message createUsingPayload(Source payload, SOAPVersion ver) {
         return new PayloadSourceMessage(payload, ver);
     }
-    
+
     /**
      * Creates a {@link Message} using Source as entire envelope.
      *
@@ -121,5 +123,26 @@ public abstract class Messages {
     public static Message create(Throwable t) {
         // TODO: implement this method later
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates a fault {@link Message}.
+     *
+     * <p>
+     * This method is not designed for efficiency, and we don't expect
+     * to be used for the performance critical codepath.
+     *
+     * @param fault
+     *      The populated SAAJ data structure that represents a fault
+     *      in detail.
+     * @param ver
+     *      The SOAP version of the message.
+     *      TODO: shouldn't there be a way to tell this just from {@link SOAPFault}?
+     *
+     * @return
+     *      Always non-null. A message that wraps this {@link SOAPFault}.
+     */
+    public static Message create(SOAPFault fault, SOAPVersion ver) {
+        return new PayloadSourceMessage(new DOMSource(fault),ver);
     }
 }
