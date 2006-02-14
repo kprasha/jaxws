@@ -22,7 +22,7 @@ import java.util.Iterator;
  * <ol>
  *  <li>
  *  Endpoint address is eventually turned into an {@link URL},
- *  and given that generally this value is read more than being set,
+ *  and given that generally this value is read more often than being set,
  *  it makes sense to eagerly turn it into an {@link URL},
  *  thereby avoiding a repeated conversion.
  *
