@@ -26,11 +26,11 @@ abstract class AsyncMethodHandler extends MethodHandler {
         this.core = core;
     }
 
-    protected final Response<Object> doInvoke(final Object proxy, final Object[] args, AsyncHandler handler) {
+    protected final Response<Object> doInvoke(Object proxy, Object[] args, AsyncHandler handler) {
         AsyncMethodHandler.Invoker invoker = new Invoker(proxy, args);
         ResponseImpl<Object> ft = new ResponseImpl<Object>(invoker,handler);
         invoker.setReceiver(ft);
-        
+
         owner.getExecutor().execute(ft);
         return ft;
     }
