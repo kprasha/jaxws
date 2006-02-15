@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -146,6 +147,20 @@ public class DOMUtil {
             }
         }
         writer.writeEndElement();
+    }
+
+    /**
+     * Gets the first child of the given name, or null.
+     */
+    public static Element getFirstChild(Element e, String nsUri, String local) {
+        for( Node n=e.getFirstChild(); n!=null; n=n.getNextSibling() ) {
+            if(n.getNodeType()==Node.ELEMENT_NODE) {
+                Element c = (Element)n;
+                if(c.getLocalName().equals(local) && c.getNamespaceURI().equals(nsUri))
+                    return c;
+            }
+        }
+        return null;
     }
 
     private static String fixNull(String s) {
