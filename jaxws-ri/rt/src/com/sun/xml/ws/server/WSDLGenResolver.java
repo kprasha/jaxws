@@ -113,7 +113,7 @@ final class WSDLGenResolver implements WSDLResolver {
 
     private URL createURL(String filename) {
         try {
-            return new URL("file://"+filename);
+            return new URL("file:///"+filename);
         } catch (MalformedURLException e) {
             // TODO: I really don't think this is the right way to handle this error,
             // WSDLResolver needs to be documented carefully.
