@@ -43,13 +43,13 @@ public class MtomDecoder implements Decoder{
         this.mimeMultipartDecoder = mimeMultipartDecoder;
     }
 
-    public Packet decode(InputStream in, String contentType) throws IOException {
-        reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);        
-        return decoder.decode(getXmlStreamReaderEx(), contentType);
+    public void decode(InputStream in, String contentType, Packet packet) throws IOException {
+        reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);
+        packet.setMessage(decoder.decode(getXmlStreamReaderEx(), contentType));
     }
 
-    public Packet decode(ReadableByteChannel in, String contentType) {
-        return decoder.decode(in, contentType);
+    public void decode(ReadableByteChannel in, String contentType, Packet packet) {
+        decoder.decode(in,contentType,packet);
     }
 
     public Decoder copy() {

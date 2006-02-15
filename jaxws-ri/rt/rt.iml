@@ -154,7 +154,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/streambuffer.src.zip!/streambuffer/src" />
+          <root url="jar://$MODULE_DIR$/../lib/streambuffer.src.zip!/" />
         </SOURCES>
       </library>
     </orderEntry>

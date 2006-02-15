@@ -76,18 +76,22 @@ public interface Decoder {
      *      <tt>multipart/related; boundary="--=_outer_boundary"; type="multipart/alternative"</tt>.
      *      This parameter must not be null.
      *
-     * @return never null.
+     * @param response
+     *      The parsed {@link Message} will be set to this {@link Packet}.
+     *      {@link Decoder} may add additional properties to this {@link Packet}.
+     *      On a successful method completion, a {@link Packet} must contain a
+     *      {@link Message}.
      *
      * @throws IOException
      *      if {@link InputStream} throws an exception.
      */
-    Packet decode( InputStream in, String contentType ) throws IOException;
+    void decode( InputStream in, String contentType, Packet response ) throws IOException;
 
     /**
      *
-     * @see #decode(InputStream, String)
+     * @see #decode(InputStream, String, Packet)
      */
-    Packet decode( ReadableByteChannel in, String contentType );
+    void decode( ReadableByteChannel in, String contentType, Packet response );
 
     /*
      * The following methods need to be documented and implemented.

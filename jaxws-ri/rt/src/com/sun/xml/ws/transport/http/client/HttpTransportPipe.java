@@ -60,21 +60,21 @@ public class HttpTransportPipe implements Pipe {
         cloner.add(that,this);
     }
 
-    public Packet process(Packet packet) {
+    public Packet process(Packet request) {
         try {
             // get transport headers from message
-            Map<String, List<String>> reqHeaders = packet.httpRequestHeaders;
+            Map<String, List<String>> reqHeaders = request.httpRequestHeaders;
             //assign empty map if its null
             if(reqHeaders == null){
                 reqHeaders = new HashMap<String, List<String>>();
             }
 
-            HttpClientTransport con = new HttpClientTransport(packet,reqHeaders);
+            HttpClientTransport con = new HttpClientTransport(request,reqHeaders);
 
             String ct = encoder.getStaticContentType();
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
-                ct = encoder.encode(packet, buf);
+                ct = encoder.encode(request, buf);
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
                 reqHeaders.put("Content-Type", Arrays.asList(ct));
@@ -82,17 +82,19 @@ public class HttpTransportPipe implements Pipe {
             } else {
                 // Set static Content-Type
                 reqHeaders.put("Content-Type", Arrays.asList(ct));
-                encoder.encode(packet, con.getOutput());
+                encoder.encode(request, con.getOutput());
             }
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
             ct = getContentType(respHeaders);
-            if(packet.isOneWay==Boolean.TRUE
+            if(request.isOneWay==Boolean.TRUE
             || con.statusCode==WSConnection.ONEWAY)
                 return null;    // one way. no response given.
 
-            return decoder.decode(con.getInput(), ct);
+            Packet reply = request.createResponse(null);
+            decoder.decode(con.getInput(), ct, reply);
+            return reply;
         } catch(WebServiceException wex) {
             throw wex;
         } catch(Exception ex) {

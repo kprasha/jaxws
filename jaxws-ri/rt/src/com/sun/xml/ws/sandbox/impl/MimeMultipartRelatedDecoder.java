@@ -5,22 +5,20 @@ import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.util.ASCIIUtility;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamAttachment;
+import com.sun.xml.ws.util.ASCIIUtility;
 
 import javax.xml.ws.WebServiceException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.BitSet;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Decoder that serves as Multipart/Related messages decoder. Internally it delegates decoding to
@@ -84,13 +82,7 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         lastPartFound = new BitSet(1);
     }
 
-    /**
-     * @param in
-     * @param contentType
-     * @return
-     * @throws IOException
-     */
-    public Packet decode(InputStream in, String contentType) throws IOException {
+    public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         init();
         try {
             /**
@@ -143,9 +135,11 @@ public class MimeMultipartRelatedDecoder implements Decoder {
                     throw new WebServiceException("Incorrect Content-Type, expecting: " + version.toString()+", got: "+parsedVersion);
                 }
                 if (mtomEncoded) {
-                    return mtomDecoder.decode(bodyStream, ctype[0]);
+                    mtomDecoder.decode(bodyStream, ctype[0], packet);
+                    return;
                 } else {
-                    return soapDecoder.decode(bodyStream, ctype[0]);
+                    soapDecoder.decode(bodyStream, ctype[0], packet);
+                    return;
                 }
             }
         } catch (MessagingException e) {
@@ -154,10 +148,11 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         if(attachemnts != null)
             attachemnts.clear();
 
-        return null;
+        // BUG: not allowed to leave a message without a packet - KK
+        throw new UnsupportedOperationException();
     }
 
-    public Packet decode(ReadableByteChannel in, String contentType) {
+    public void decode(ReadableByteChannel in, String contentType, Packet packet) {
         throw new UnsupportedOperationException();
     }
 
@@ -169,7 +164,7 @@ public class MimeMultipartRelatedDecoder implements Decoder {
      */
     public Decoder copy() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }    
+    }
 
     private SOAPVersion parseContentType(String contentType) throws ParseException {
         SOAPVersion parsedVersion=null;

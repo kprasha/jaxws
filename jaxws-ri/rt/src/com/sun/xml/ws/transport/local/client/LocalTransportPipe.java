@@ -84,7 +84,7 @@ public class LocalTransportPipe implements Pipe {
         cloner.add(that,this);
     }
 
-    public Packet process(Packet packet) {
+    public Packet process(Packet request) {
 
         try {
             // Set up WSConnection with tranport headers, request content
@@ -92,11 +92,11 @@ public class LocalTransportPipe implements Pipe {
             LocalConnectionImpl con = new LocalConnectionImpl();
             // get transport headers from message
             reqHeaders.clear();
-            if (packet.httpRequestHeaders != null)
-                reqHeaders.putAll(packet.httpRequestHeaders);
+            if (request.httpRequestHeaders != null)
+                reqHeaders.putAll(request.httpRequestHeaders);
             con.setResponseHeaders(reqHeaders);
 
-            String contentType = encoder.encode(packet, con.getOutput());
+            String contentType = encoder.encode(request, con.getOutput());
 
             reqHeaders.put("Content-Type", Arrays.asList(contentType));
             con.setRequestHeaders(reqHeaders);
@@ -105,14 +105,16 @@ public class LocalTransportPipe implements Pipe {
 
             String ct = getContentType(con);
 
-            if (packet.isOneWay == Boolean.TRUE
+            if (request.isOneWay == Boolean.TRUE
                 || con.getStatus() == WSConnection.ONEWAY) {
-                packet = new Packet(null);    // one way. no response given.
-                packet.isOneWay = true;
-                return packet;
+                request = new Packet(null);    // one way. no response given.
+                request.isOneWay = true;
+                return request;
             }
 
-            return decoder.decode(con.getInput(), ct);
+            Packet reply = request.createResponse(null);
+            decoder.decode(con.getInput(), ct, reply);
+            return reply;
         } catch (WebServiceException wex) {
             throw wex;
         } catch (IOException ex) {

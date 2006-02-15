@@ -27,17 +27,17 @@ public final class TestDecoderImpl implements Decoder {
         factory = soapVersion.saajFactory;
     }
 
-    public Packet decode(InputStream in, String contentType) throws IOException {
+    public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         try {
             MimeHeaders headers = new MimeHeaders();
             headers.addHeader("Content-Type", contentType);
-            return new Packet(new SAAJMessage(factory.createMessage(headers,in)));
+            packet.setMessage(new SAAJMessage(factory.createMessage(headers,in)));
         } catch (SOAPException e) {
             throw new WebServiceException("Unable to parse a message",e);
         }
     }
 
-    public Packet decode(ReadableByteChannel in, String contentType) {
+    public void decode(ReadableByteChannel in, String contentType, Packet packet) {
         // TODO
         throw new UnsupportedOperationException();
     }

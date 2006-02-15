@@ -25,16 +25,18 @@ public class DecoderFacade implements Decoder {
         soapHttpDecoder = StreamSOAPDecoder.create(version);
     }
 
-    public Packet decode(InputStream in, String contentType) throws IOException {
+    public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         if(isMultipartRelated(contentType))
-            return mimeMPSoapDecoder.decode(in, contentType);
-        return soapHttpDecoder.decode(in, contentType);
+            mimeMPSoapDecoder.decode(in, contentType, packet);
+        else
+            soapHttpDecoder.decode(in, contentType, packet);
     }
 
-    public Packet decode(ReadableByteChannel in, String contentType) {
+    public void decode(ReadableByteChannel in, String contentType, Packet packet) {
         if(isMultipartRelated(contentType))
-            return mimeMPSoapDecoder.decode(in, contentType);
-        return soapHttpDecoder.decode(in, contentType);
+            mimeMPSoapDecoder.decode(in, contentType, packet);
+        else
+            soapHttpDecoder.decode(in, contentType, packet);
     }
 
     public Decoder copy() {

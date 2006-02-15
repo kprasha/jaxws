@@ -88,7 +88,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             this.con = con;
             String ct = con.getRequestHeader("Content-Type");
             InputStream in = con.getInput();
-            Packet packet = decoder.decode(in, ct);
+            Packet packet = new Packet();
+            decoder.decode(in, ct, packet);
             con.wrapUpRequestPacket(packet);
             packet = head.process(packet,con.getWebServiceContextDelegate(),this);
 

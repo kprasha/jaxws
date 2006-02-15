@@ -8,6 +8,7 @@ import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
@@ -49,12 +50,12 @@ public abstract class StreamSOAPDecoder implements Decoder {
     // consider caching
     // private final XMLStreamBuffer buffer;
 
-    public Packet decode(InputStream in, String contentType) throws IOException {
+    public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         XMLStreamReader reader = createXMLStreamReader(in);
-        return decode(reader, contentType);
+        packet.setMessage(decode(reader, contentType));
     }
 
-    Packet decode(XMLStreamReader reader, String contentType) throws IOException {
+    Message decode(XMLStreamReader reader, String contentType) throws IOException {
 
         // Check at the start of the document
         XMLStreamReaderUtil.verifyReaderState(reader,
@@ -118,18 +119,14 @@ public abstract class StreamSOAPDecoder implements Decoder {
         if (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
             // Payload is present
             // XMLStreamReader is positioned at the first child
-            return new Packet(createMessage(headers, reader));
+            return createMessage(headers, reader);
         } else {
             // Empty payload <soap:Body/>
-            return new Packet(new EmptyMessageImpl(headers, SOAPVersion.fromNsUri(SOAP_NAMESPACE_URI)));
+            return new EmptyMessageImpl(headers, SOAPVersion.fromNsUri(SOAP_NAMESPACE_URI));
         }
     }
 
-    /**
-     *
-     * @see #decode(InputStream, String)
-     */
-    public Packet decode(ReadableByteChannel in, String contentType ) {
+    public void decode(ReadableByteChannel in, String contentType, Packet packet ) {
         throw new UnsupportedOperationException();
     }
 
