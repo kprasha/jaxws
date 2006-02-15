@@ -84,7 +84,8 @@ public class SOAPHandlerPipe extends HandlerPipe {
         MessageContext msgContext = new MessageContextImpl(packet);
         try {
             boolean isOneWay = packet.isOneWay;            
-            SOAPMessageContext context =  new SOAPMessageContextImpl(binding,packet,msgContext);
+            SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet,msgContext);
+            context.setRoles(roles);
             boolean handlerResult = false;
             // Call handlers on Request
             try {
@@ -117,7 +118,9 @@ public class SOAPHandlerPipe extends HandlerPipe {
                         
             //TODO: For now create again
             msgContext = new MessageContextImpl(packet);
+            
             context =  new SOAPMessageContextImpl(binding,packet,msgContext);
+            context.setRoles(roles);
             // Call handlers on Response
             if(isClient) {
                 //CLIENT-SIDE
