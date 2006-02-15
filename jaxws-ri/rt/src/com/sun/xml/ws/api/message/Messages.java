@@ -2,19 +2,23 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.sandbox.message.impl.DOMMessage;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.ProtocolSourceMessage;
+import com.sun.xml.ws.util.DOMUtil;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -73,7 +77,7 @@ public abstract class Messages {
     }
 
     /**
-     * Creates a {@link Message} using Source as payload.
+     * Creates a {@link Message} using {@link Source} as payload.
      *
      * @param payload
      *      Source payload is {@link Message}'s payload
@@ -86,6 +90,56 @@ public abstract class Messages {
      */
     public static Message createUsingPayload(Source payload, SOAPVersion ver) {
         return new PayloadSourceMessage(payload, ver);
+    }
+
+    /**
+     * Creates a {@link Message} from an {@link Element} that represents
+     * a payload.
+     *
+     * @param payload
+     *      The element that becomes the child element of the SOAP body.
+     *      Must not be null.
+     *
+     * @param ver
+     *      The SOAP version of the message. Must not be null.
+     */
+    public static Message createUsingPayload(Element payload, SOAPVersion ver) {
+        return new DOMMessage(ver,payload);
+    }
+
+    /**
+     * Creates a {@link Message} from an {@link Element} that represents
+     * the whole SOAP message.
+     *
+     * @param soapEnvelope
+     *      The SOAP envelope element.
+     */
+    public static Message create(Element soapEnvelope) {
+        SOAPVersion ver = SOAPVersion.fromNsUri(soapEnvelope.getNamespaceURI());
+        // find the headers
+        Element header = DOMUtil.getFirstChild(soapEnvelope, ver.nsUri, "Header");
+        HeaderList headers = null;
+        if(header!=null) {
+            for( Node n=header.getFirstChild(); n!=null; n=n.getNextSibling() ) {
+                if(n.getNodeType()==Node.ELEMENT_NODE) {
+                    if(headers==null)
+                        headers = new HeaderList();
+                    headers.add(Headers.create(ver,(Element)n));
+                }
+            }
+        }
+
+        // find the payload
+        Element body = DOMUtil.getFirstChild(soapEnvelope, ver.nsUri, "Body");
+        if(body==null)
+            throw new WebServiceException("Message doesn't have <S:Body> "+soapEnvelope);
+        Element payload = DOMUtil.getFirstChild(soapEnvelope, ver.nsUri, "Body");
+
+        if(payload==null) {
+            return new EmptyMessageImpl(headers,ver);
+        } else {
+            return new DOMMessage(ver,headers,payload);
+        }
     }
 
     /**
@@ -135,14 +189,12 @@ public abstract class Messages {
      * @param fault
      *      The populated SAAJ data structure that represents a fault
      *      in detail.
-     * @param ver
-     *      The SOAP version of the message.
-     *      TODO: shouldn't there be a way to tell this just from {@link SOAPFault}?
      *
      * @return
      *      Always non-null. A message that wraps this {@link SOAPFault}.
      */
-    public static Message create(SOAPFault fault, SOAPVersion ver) {
-        return new PayloadSourceMessage(new DOMSource(fault),ver);
+    public static Message create(SOAPFault fault) {
+        SOAPVersion ver = SOAPVersion.fromNsUri(fault.getNamespaceURI());
+        return new DOMMessage(ver,fault);
     }
 }
