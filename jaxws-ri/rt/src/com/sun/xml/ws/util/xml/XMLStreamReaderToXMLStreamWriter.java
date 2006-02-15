@@ -109,11 +109,15 @@ public class XMLStreamReaderToXMLStreamWriter {
     }
 
     protected void handleStartElement() throws XMLStreamException {
-        out.writeStartElement(
-            in.getPrefix(),
-            in.getLocalName(),
-            in.getNamespaceURI()
-        );
+        String nsUri = in.getNamespaceURI();
+        if(nsUri==null)
+            out.writeStartElement(in.getLocalName());
+        else
+            out.writeStartElement(
+                in.getPrefix(),
+                in.getLocalName(),
+                nsUri
+            );
 
         // start namespace bindings
         int nsCount = in.getNamespaceCount();
