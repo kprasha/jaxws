@@ -16,29 +16,35 @@ import java.nio.channels.WritableByteChannel;
  * @author Vivek Pandey
  */
 public class EncoderFacade implements Encoder {
-    private final Encoder encoder;
+    private final Encoder mtomEncoder;
+    private final Encoder soapEncoder;
+    private final SOAPBinding binding;
 
     public EncoderFacade(SOAPVersion version, SOAPBinding binding) {
-        if(binding.isMTOMEnabled()){
-            encoder = MtomEncoder.get(version);
-        }else{
-            encoder = TestEncoderImpl.get(version);
-        }
+        mtomEncoder = MtomEncoder.get(version);
+        soapEncoder = TestEncoderImpl.get(version);
+        this.binding = binding;
     }
 
     public String getStaticContentType() {
-        return encoder.getStaticContentType();
+        return getEncoder().getStaticContentType();
     }
 
     public String encode(Packet packet, OutputStream out) throws IOException {
-        return encoder.encode(packet, out);
+        return getEncoder().encode(packet, out);
     }
 
     public String encode(Packet packet, WritableByteChannel buffer) {
-        return encoder.encode(packet, buffer);
+        return getEncoder().encode(packet, buffer);
     }
 
     public Encoder copy() {
-        return encoder.copy();
+        return getEncoder().copy();
+    }
+
+    private Encoder getEncoder(){
+        if(binding.isMTOMEnabled())
+            return mtomEncoder;
+        return soapEncoder;
     }
 }
