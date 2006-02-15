@@ -207,8 +207,16 @@ public final class HeaderList extends ArrayList<Header> {
 
     /**
      * Creates a copy.
+     *
+     * This handles null {@link HeaderList} correctly.
+     *
+     * @param original
+     *      Can be null.
      */
-    public HeaderList copy() {
-        return new HeaderList(this);
+    public static HeaderList copy(HeaderList original) {
+        if(original==null)
+            return null;
+        else
+            return new HeaderList(original);
     }
 }

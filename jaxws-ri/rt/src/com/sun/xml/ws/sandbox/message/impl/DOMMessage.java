@@ -47,7 +47,7 @@ public final class DOMMessage extends AbstractMessageImpl {
      */
     private DOMMessage(DOMMessage that) {
         super(that);
-        this.headers = that.headers!=null ? that.headers.copy() : null;
+        this.headers = HeaderList.copy(that.headers);
         this.payload = that.payload;
     }
 

@@ -234,7 +234,7 @@ public class StreamMessage extends AbstractMessageImpl {
         // if the reader is on END element means its empty body or no payload, so lets
         // return the same message
         if(!hasPayload())
-            return new EmptyMessageImpl(headers.copy(), soapVersion);
+            return new EmptyMessageImpl(HeaderList.copy(headers), soapVersion);
 
         assert unconsumed();
         try {
@@ -244,7 +244,7 @@ public class StreamMessage extends AbstractMessageImpl {
 
             reader = xsb.processUsingXMLStreamReader();
 
-            return new StreamMessage(headers.copy(), xsb.processUsingXMLStreamReader(), soapVersion);
+            return new StreamMessage(HeaderList.copy(headers), xsb.processUsingXMLStreamReader(), soapVersion);
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message",e);
         } catch (XMLStreamBufferException e) {
