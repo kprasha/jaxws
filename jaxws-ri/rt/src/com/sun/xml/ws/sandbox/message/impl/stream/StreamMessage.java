@@ -155,6 +155,7 @@ public class StreamMessage extends AbstractMessageImpl {
     public Object readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         if(!hasPayload())
             return null;
+        assert unconsumed();
         // TODO: How can the unmarshaller process this as a fragment?
         return unmarshaller.unmarshal(reader);
     }
@@ -162,15 +163,18 @@ public class StreamMessage extends AbstractMessageImpl {
     public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
         if(!hasPayload())
             return null;
+        assert unconsumed();
         return bridge.unmarshal(context,reader);
     }
 
     public XMLStreamReader readPayload() {
         // TODO: What about access at and beyond </soap:Body>
+        assert unconsumed();
         return this.reader;
     }
 
     public void writePayloadTo(XMLStreamWriter writer)throws XMLStreamException {
+        assert unconsumed();
         new XMLStreamReaderToXMLStreamWriter().bridge(reader,writer);
     }
 
@@ -188,6 +192,7 @@ public class StreamMessage extends AbstractMessageImpl {
      * @param writer
      */
     private void writeEnvelope(XMLStreamWriter writer) throws XMLStreamException {
+        assert unconsumed();
         writer.writeStartElement("soapenv", "Envelope", soapVersion.nsUri);
         writer.writeNamespace("soapenv", soapVersion.nsUri);
         //TODO: collect all the namespaces from the payload and add to Envelope element
@@ -209,6 +214,7 @@ public class StreamMessage extends AbstractMessageImpl {
     }
 
     public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        assert unconsumed();
         try {
             XMLStreamReaderToContentHandler conv =
                 new XMLStreamReaderToContentHandler(reader,contentHandler,true);
@@ -230,6 +236,7 @@ public class StreamMessage extends AbstractMessageImpl {
         if(!hasPayload())
             return new EmptyMessageImpl(headers.copy(), soapVersion);
 
+        assert unconsumed();
         try {
             // copy the payload
             XMLStreamBuffer xsb = new XMLStreamBuffer();
@@ -244,4 +251,22 @@ public class StreamMessage extends AbstractMessageImpl {
             throw new WebServiceException("Failed to copy a message",e);
         }
     }
+
+    /**
+     * Used for an assertion. Returns true when the message is unconsumed.
+     */
+    private boolean unconsumed() {
+        if(reader.getEventType()!=XMLStreamReader.START_ELEMENT) {
+            AssertionError error = new AssertionError("StreamMessage has been already consumed. See the nested exception for where it's consumed");
+            error.initCause(consumedAt);
+            throw error;
+        }
+        consumedAt = new Exception().fillInStackTrace();
+        return true;
+    }
+
+    /**
+     * Used only for debugging. This records where the message was consumed.
+     */
+    private Throwable consumedAt;
 }
