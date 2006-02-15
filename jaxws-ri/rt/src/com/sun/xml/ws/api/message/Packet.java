@@ -110,15 +110,32 @@ public final class Packet extends PropertySet {
 
     /**
      * Creates a {@link Packet} that wraps a given {@link Message}.
+     *
+     * <p>
+     * This method should be only used to create a fresh {@link Packet}.
+     * To create a {@link Packet} for a reply, use {@link #createResponse(Message)}.
+     *
+     * @param request
+     *      The request {@link Message}. Can be null.
      */
-    public Packet(Message message) {
-        this.message = message;
+    public Packet(Message request) {
+        this();
+        this.message = request;
     }
 
     /**
      * Creates an empty {@link Packet} that doesn't have any {@link Message}.
      */
     public Packet() {
+        this.invocationProperties = new HashMap<String,Object>();
+    }
+
+    /**
+     * Used by {@link #createResponse(Message)}.
+     */
+    private Packet(Packet that) {
+        this.invocationProperties = that.invocationProperties;
+        // copy other properties that need to be copied. is there any?
     }
 
     private Message message;
@@ -330,7 +347,7 @@ public final class Packet extends PropertySet {
      * <p>
      * See <a href="#properties">class javadoc</a> for more discussion.
      */
-    public final Map<String,Object> invocationProperties = new HashMap<String,Object>();
+    public final Map<String,Object> invocationProperties;
 
     /**
      * Gets a {@link Set} that stores application-scope properties.
@@ -357,6 +374,22 @@ public final class Packet extends PropertySet {
     }
 
     private static final String SCOPE_PROPERTY = "com.sun.xml.ws.HandlerScope";
+
+    /**
+     * Creates a response {@link Packet} from a request packet ({@code this}).
+     *
+     * <p>
+     * When a {@link Packet} for a reply is created, some properties need to be
+     * copied over from a request to a response, and this method handles it correctly.
+     *
+     * @param msg
+     *      The {@link Message} that represents a reply. Can be null.
+     */
+    public Packet createResponse(Message msg) {
+        Packet response = new Packet(this);
+        response.setMessage(msg);
+        return response;
+    }
 
 
 // completes TypedMap
