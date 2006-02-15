@@ -24,7 +24,7 @@ public final class TestDecoderImpl implements Decoder {
     private final MessageFactory factory;
 
     private TestDecoderImpl(SOAPVersion soapVersion) {
-        factory = soapVersion.saajFactory;
+        factory = soapVersion.saajMessageFactory;
     }
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {

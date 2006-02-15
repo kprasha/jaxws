@@ -204,7 +204,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
 
 
     public MessageFactory getMessageFactory() {
-        return soapVersion.saajFactory;
+        return soapVersion.saajMessageFactory;
     }
 
     protected void setupSystemHandlerDelegate(QName serviceName) {

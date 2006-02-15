@@ -39,7 +39,6 @@ import javax.xml.soap.SOAPException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.LocatorImpl;
@@ -159,7 +158,7 @@ public abstract class AbstractMessageImpl extends Message {
      * Default implementation that uses {@link #writeTo(ContentHandler, ErrorHandler)}
      */
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        SOAPMessage msg = soapVersion.saajFactory.createMessage();
+        SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
         SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
         try {
             writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);

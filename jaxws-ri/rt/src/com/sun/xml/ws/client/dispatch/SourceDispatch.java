@@ -64,7 +64,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 SOAPMessage soapmsg;
                 try {
                     //todo:
-                    soapmsg = binding.getSOAPVersion().saajFactory.createMessage();
+                    soapmsg = binding.getSOAPVersion().saajMessageFactory.createMessage();
                     soapmsg.getSOAPPart().setContent(msg);
                     soapmsg.saveChanges();
                 } catch (SOAPException e) {

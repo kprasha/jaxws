@@ -76,7 +76,7 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
     }
 
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        SOAPMessage msg = soapVersion.saajFactory.createMessage();
+        SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
         for (Header header : headers) {
             header.writeTo(msg);
         }
