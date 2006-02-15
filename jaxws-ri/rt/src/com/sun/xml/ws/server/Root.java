@@ -175,6 +175,8 @@ public class Root {
         List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
         if (primaryWsdl == null) {
             primaryDoc = generateWSDL(binding,  seiModel, docList);
+            // create WSDL model
+            wsdlPort = getWSDLPort(primaryDoc, md, implType, serviceName, portName);
         } else {
             // TODO it is hack, need to be fixed
             for (SDDocumentImpl doc : docList) {
@@ -333,6 +335,33 @@ public class Root {
         }
 
         return r;
+    }
+    
+    private WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<SDDocumentSource> metadata,
+        Class<?> implType, QName serviceName, QName portName) {
+        URL wsdlUrl = primaryWsdl.getSystemId();
+        try {
+            // TODO: delegate to another entity resolver
+            WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
+                new Parser(primaryWsdl), new EntityResolverImpl(metadata),
+                ServiceFinder.find(WSDLParserExtension.class).toArray());
+            WSDLPortImpl wsdlPort = null;
+            if(serviceName == null)
+                serviceName = RuntimeModeler.getServiceName(implType);
+            if(portName != null){
+                wsdlPort = wsdlDoc.getService(serviceName).get(portName);
+                return wsdlPort;
+            }
+        } catch (IOException e) {
+            throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
+        } catch (XMLStreamException e) {
+            throw new ServerRtException("runtime.saxparser.exception", e.getMessage(), e.getLocation(), e);
+        } catch (SAXException e) {
+            throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
+        } catch (ServiceConfigurationError e) {
+            throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
+        }
+        return null;
     }
 
     /**
