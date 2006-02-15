@@ -27,7 +27,6 @@ import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Node;
@@ -322,7 +321,7 @@ public class SAAJMessage extends Message {
     public Message copy() {
         try {
             SOAPBody sb = sm.getSOAPPart().getEnvelope().getBody();
-            SOAPMessage msg = SOAPVersion.fromNsUri(sb.getNamespaceURI()).saajFactory.createMessage();
+            SOAPMessage msg = SOAPVersion.fromNsUri(sb.getNamespaceURI()).saajMessageFactory.createMessage();
             SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
             if(payload != null){
                 Node n = newBody.getOwnerDocument().importNode(payload, true);
