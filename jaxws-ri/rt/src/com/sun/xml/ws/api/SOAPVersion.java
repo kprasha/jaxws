@@ -82,7 +82,7 @@ public enum SOAPVersion {
     /**
      * SAAJ {@link MessageFactory} for this SOAP version.
      */
-    public final MessageFactory saajFactory;
+    public final MessageFactory saajMessageFactory;
 
     /**
      * SAAJ {@link SOAPFactory} for this SOAP version.
@@ -93,7 +93,7 @@ public enum SOAPVersion {
         this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
         try {
-            saajFactory = MessageFactory.newInstance(saajFactoryString);
+            saajMessageFactory = MessageFactory.newInstance(saajFactoryString);
             saajSoapFactory = SOAPFactory.newInstance(saajFactoryString);
         } catch (SOAPException e) {
             throw new Error(e);
