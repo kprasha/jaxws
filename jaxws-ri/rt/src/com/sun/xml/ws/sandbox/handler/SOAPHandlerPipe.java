@@ -88,10 +88,10 @@ public class SOAPHandlerPipe extends HandlerPipe {
                 if(!soapHandlers.isEmpty()) {
                     if(isClient) {
                         //CLIENT-SIDE
-                        processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
+                        handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
                     } else {
                         //SERVER-SIDE
-                        processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+                        handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
                     }
                 }
             } catch (ProtocolException pe) {
@@ -135,7 +135,8 @@ public class SOAPHandlerPipe extends HandlerPipe {
      * Close SOAPHandlers first and then LogicalHandlers
      */
     public void close(MessageContext msgContext){
-        closeSOAPHandlers(msgContext);
+        if(processor != null)
+            closeSOAPHandlers(msgContext);
         if(cousinPipe != null){
             // Close LogicalHandlers
             cousinPipe.close(msgContext);            

@@ -138,7 +138,8 @@ public class LogicalHandlerPipe extends HandlerPipe {
             // Close SOAPHandlers
             cousinPipe.close(msgContext);
         }
-        closeLogicalHandlers(msgContext);
+        if(processor != null)
+            closeLogicalHandlers(msgContext);
     }
     
     //TODO:
