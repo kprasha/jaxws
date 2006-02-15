@@ -77,8 +77,11 @@ public class SOAPHandlerPipe extends HandlerPipe {
         // This is done here instead of the constructor, since User can change
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
-        MessageContext msgContext = new MessageContextImpl(packet);
         
+        if(soapHandlers.isEmpty()) {
+            return next.process(packet);
+        }
+        MessageContext msgContext = new MessageContextImpl(packet);
         try {
             boolean isOneWay = packet.isOneWay;            
             SOAPMessageContext context =  new SOAPMessageContextImpl(binding,packet,msgContext);
@@ -111,18 +114,17 @@ public class SOAPHandlerPipe extends HandlerPipe {
             
             // Call next Pipe.process() on msg
             Packet reply = next.process(packet);
-            
-            isOneWay = reply.isOneWay;
+                        
             //TODO: For now create again
             msgContext = new MessageContextImpl(packet);
             context =  new SOAPMessageContextImpl(binding,packet,msgContext);
             // Call handlers on Response
             if(isClient) {
                 //CLIENT-SIDE
-                processor.callHandlersResponse(Direction.INBOUND,context,!isOneWay);
+                processor.callHandlersResponse(Direction.INBOUND,context);
             } else {
                 //SERVER-SIDE
-                processor.callHandlersResponse(Direction.OUTBOUND,context,!isOneWay);
+                processor.callHandlersResponse(Direction.OUTBOUND,context);
             }
             
             return reply;

@@ -110,17 +110,16 @@ public class LogicalHandlerPipe extends HandlerPipe {
             // Call next Pipe.process() on msg
             Packet reply = next.process(packet);
             
-            isOneWay = reply.isOneWay;
             //TODO: For now create again
             msgContext = new MessageContextImpl(packet);
             context =  new LogicalMessageContextImpl(binding,packet,msgContext);
             // Call handlers on Response
             if(isClient) {
                 //CLIENT-SIDE
-                processor.callHandlersResponse(Direction.INBOUND,context,!isOneWay);                
+                processor.callHandlersResponse(Direction.INBOUND,context);                
             } else {                
                 //SERVER-SIDE                
-                processor.callHandlersResponse(Direction.OUTBOUND,context,!isOneWay);
+                processor.callHandlersResponse(Direction.OUTBOUND,context);
             }
             return reply;
         } finally {

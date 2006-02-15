@@ -205,8 +205,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * TODO: there might be a problem with Index tracking in some cases.
      */
     public void callHandlersResponse(Direction direction,
-            C context,
-            boolean responseExpected) {
+            C context) {
         // call handlers
         try {
             if (direction == Direction.OUTBOUND) {
