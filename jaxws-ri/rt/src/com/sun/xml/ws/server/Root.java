@@ -341,7 +341,7 @@ public class Root {
     private static final class EntityResolverImpl implements XMLEntityResolver {
         private Map<String,SDDocumentSource> metadata = new HashMap<String,SDDocumentSource>();
 
-        public EntityResolverImpl(List<SDDocumentSource> metadata) {
+        public EntityResolverImpl(List<? extends SDDocumentSource> metadata) {
             for (SDDocumentSource doc : metadata) {
                 this.metadata.put(doc.getSystemId().toExternalForm(),doc);
             }

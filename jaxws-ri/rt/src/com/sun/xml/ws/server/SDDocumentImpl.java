@@ -22,9 +22,14 @@ import java.net.URL;
 /**
  * {@link SDDocument} implmentation.
  *
+ * <p>
+ * This extends from {@link SDDocumentSource} so that
+ * JAX-WS server runtime code can use {@link SDDocument}
+ * as {@link SDDocumentSource}.
+ *
  * @author Kohsuke Kawaguchi
  */
-class SDDocumentImpl implements SDDocument {
+class SDDocumentImpl extends SDDocumentSource implements SDDocument {
 
     /**
      * Creates {@link SDDocument} from {@link SDDocumentSource}.
@@ -145,6 +150,14 @@ class SDDocumentImpl implements SDDocument {
     }
 
     public URL getURL() {
+        return url;
+    }
+
+    public XMLStreamReader read(XMLInputFactory xif) throws IOException, XMLStreamException {
+        return source.read(xif);
+    }
+
+    public URL getSystemId() {
         return url;
     }
 
