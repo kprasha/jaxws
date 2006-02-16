@@ -200,6 +200,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     void freeze(WSDLModelImpl owner) {
         messages = owner.getMessages();
         portType = owner.getPortType(portTypeName);
+        portType.freeze(owner);
         // TODO: error check for null. that's an error in WSDL that needs to be reported
         for (WSDLBoundOperationImpl op : bindingOperations.values()) {
             op.freeze(this);

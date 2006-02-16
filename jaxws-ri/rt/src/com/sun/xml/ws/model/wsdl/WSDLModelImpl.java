@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 
 import javax.xml.namespace.QName;
 import javax.jws.WebParam.Mode;
@@ -181,18 +182,6 @@ public final class WSDLModelImpl implements WSDLModel {
         return bs;
     }
 
-    private WSDLBoundOperation getBoundOperation(WSDLBoundPortType bpt){
-        WSDLPortTypeImpl pt = (WSDLPortTypeImpl) bpt.getPortType();
-        if(pt == null)
-            return null;
-        for(WSDLOperation op: pt.getOperations()){
-            WSDLMessage msgName = op.getInputMessage();
-            WSDLMessageImpl msg = messages.get(msgName);
-            //TODO: implement the rest
-        }
-        return null;
-    }
-
     void finalizeRpcLitBinding(WSDLBoundPortTypeImpl boundPortType){
         assert(boundPortType != null);
         QName portTypeName = boundPortType.getPortTypeName();
@@ -203,7 +192,7 @@ public final class WSDLModelImpl implements WSDLModel {
             return;
         for (WSDLBoundOperationImpl bop : boundPortType.getBindingOperations()) {
             WSDLOperation pto = pt.get(bop.getName().getLocalPart());
-            WSDLMessage inMsgName = pto.getInputMessage();
+            WSDLMessage inMsgName = pto.getInput().getMessage();
             if(inMsgName == null)
                 continue;
             WSDLMessageImpl inMsg = messages.get(inMsgName.getName());
@@ -220,7 +209,9 @@ public final class WSDLModelImpl implements WSDLModel {
                 }
             }
             bodyindex=0;
-            WSDLMessage outMsgName = pto.getOutputMessage();
+            if(pto.isOneWay())
+                continue;
+            WSDLMessage outMsgName = pto.getOutput().getMessage();
             if(outMsgName == null)
                 continue;
             WSDLMessageImpl outMsg = messages.get(outMsgName.getName());

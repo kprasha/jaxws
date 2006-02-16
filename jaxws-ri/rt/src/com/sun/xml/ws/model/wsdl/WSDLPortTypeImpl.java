@@ -62,4 +62,10 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
     public void put(String opName, WSDLOperationImpl ptOp){
         portTypeOperations.put(opName, ptOp);
     }
+
+    void freeze(WSDLModelImpl root) {
+        for(WSDLOperationImpl op : portTypeOperations.values()){
+            op.freez(root);            
+        }
+    }
 }

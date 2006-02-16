@@ -34,6 +34,9 @@ import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPartDescriptorImpl;
+import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
+import com.sun.xml.ws.model.wsdl.WSDLInputImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOutputImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -478,17 +481,19 @@ public class RuntimeWSDLParser {
     }
 
     private void parsePortTypeOperationFault(XMLStreamReader reader, WSDLOperationImpl operation) {
-        String msg = ParserUtil.getAttribute(reader, "message");
+        String msg = ParserUtil.getMandatoryNonEmptyAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
-        operation.addFaultMessage(new WSDLMessageImpl(msgName));
+        String name = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
+        operation.addFault(new WSDLFaultImpl(name, msgName));
         extension.portTypeOperationFault(operation, reader);
         goToEnd(reader);
     }
 
     private void parsePortTypeOperationInput(XMLStreamReader reader, WSDLOperationImpl operation) {
-        String msg = ParserUtil.getAttribute(reader, "message");
+        String msg = ParserUtil.getMandatoryNonEmptyAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
-        operation.setInputMessage(new WSDLMessageImpl(msgName));
+        String name = ParserUtil.getAttribute(reader, "name");
+        operation.setInput(new WSDLInputImpl(name, msgName));
         extension.portTypeOperationInput(operation, reader);
         goToEnd(reader);
     }
@@ -496,7 +501,8 @@ public class RuntimeWSDLParser {
     private void parsePortTypeOperationOutput(XMLStreamReader reader, WSDLOperationImpl operation) {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
-        operation.setOutputMessage(new WSDLMessageImpl(msgName));
+        String name = ParserUtil.getAttribute(reader, "name");
+        operation.setOutput(new WSDLOutputImpl(name, msgName));
         extension.portTypeOperationOutput(operation, reader);
         goToEnd(reader);
     }

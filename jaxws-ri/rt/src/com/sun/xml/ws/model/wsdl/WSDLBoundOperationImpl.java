@@ -180,7 +180,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
             if(payloadName != null)
                 return payloadName;
 
-            QName inMsgName = operation.getInputMessage().getName();
+            QName inMsgName = operation.getInput().getMessage().getName();
             WSDLMessageImpl message = messages.get(inMsgName);
             for(WSDLPartImpl part:message.parts()){
                 ParameterBinding binding = getInputBinding(part.getName());

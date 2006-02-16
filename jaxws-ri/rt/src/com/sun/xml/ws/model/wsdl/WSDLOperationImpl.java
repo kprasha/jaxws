@@ -21,6 +21,8 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -34,13 +36,14 @@ import java.util.ArrayList;
 public final class WSDLOperationImpl extends AbstractExtensibleImpl implements WSDLOperation {
     private final QName name;
     private String parameterOrder;
-    private WSDLMessageImpl inputMessage;
-    private WSDLMessageImpl outputMessage;
-    private final List<WSDLMessage> faultMessages;
+    private WSDLInputImpl input;
+    private WSDLOutputImpl output;
+    private final List<WSDLFaultImpl> faults;
+    protected Iterable<WSDLMessageImpl> messages;
 
     public WSDLOperationImpl(QName name) {
         this.name = name;
-        this.faultMessages = new ArrayList<WSDLMessage>();
+        this.faults = new ArrayList<WSDLFaultImpl>();
     }
 
     public QName getName() {
@@ -59,31 +62,41 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         this.parameterOrder = parameterOrder;
     }
 
-    public WSDLMessageImpl getInputMessage() {
-        return inputMessage;
+    public WSDLInputImpl getInput() {
+        return input;
     }
 
-    public void setInputMessage(WSDLMessageImpl inputMessage) {
-        this.inputMessage = inputMessage;
+    public void setInput(WSDLInputImpl input) {
+        this.input = input;
     }
 
-    public WSDLMessage getOutputMessage() {
-        return outputMessage;
+    public WSDLOutput getOutput() {
+        return output;
     }
 
     public boolean isOneWay() {
-        return outputMessage==null;
+        return output == null;
     }
 
-    public void setOutputMessage(WSDLMessageImpl outputMessage) {
-        this.outputMessage = outputMessage;
+    public void setOutput(WSDLOutputImpl output) {
+        this.output = output;
     }
 
-    public Iterable<WSDLMessage> getFaultMessages() {
-        return faultMessages;
+    public Iterable<WSDLFaultImpl> getFaults() {
+        return faults;
     }
 
-    public void addFaultMessage(WSDLMessage faultMessage) {
-        faultMessages.add(faultMessage);
+    public void addFault(WSDLFaultImpl fault) {
+        faults.add(fault);
+    }
+
+    public void freez(WSDLModelImpl root) {
+        assert input != null;
+        input.freeze(root, this);
+        if(output != null)
+            output.freeze(root, this);
+        for(WSDLFaultImpl fault : faults){
+            fault.freeze(root);
+        }
     }
 }
