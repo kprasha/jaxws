@@ -61,6 +61,8 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
      */
     protected void sortHandlers() {
         logicalHandlers =  new ArrayList<LogicalHandler>();
+        if(handlers == null)
+            return;
         for (Handler handler : handlers) {
             if (!(handler instanceof LogicalHandler)) {
                 LocalizableMessageFactory messageFactory =

@@ -64,8 +64,9 @@ public abstract class BindingImpl implements WSBinding {
 
     // called by DispatchImpl
     protected BindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
+        /*
         if(handlerChain==null)
-            handlerChain = Collections.emptyList();
+            handlerChain = Collections.emptyList(); */
         this.handlers = handlerChain;
         sortHandlers();
         this.bindingId = bindingId;
@@ -83,6 +84,8 @@ public abstract class BindingImpl implements WSBinding {
      * logical and protocol handlers will be sorted before calling them.
      */
     public List<Handler> getHandlerChain() {
+        if(handlers == null)
+            return null;
         return new ArrayList<Handler>(handlers);
     }
 
@@ -97,6 +100,7 @@ public abstract class BindingImpl implements WSBinding {
     public void setHandlerChain(List<Handler> chain) {
         handlers = chain;
         sortHandlers();
+            
     }
     
     protected abstract void sortHandlers();

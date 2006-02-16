@@ -107,6 +107,8 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         handlerUnderstoodHeaders = new HashSet<QName>();
         logicalHandlers =  new ArrayList<LogicalHandler>();
         soapHandlers =  new ArrayList<SOAPHandler>();
+        if(handlers == null)
+            return;
         for (Handler handler : handlers) {
             if (LogicalHandler.class.isAssignableFrom(handler.getClass())) {
                 logicalHandlers.add((LogicalHandler) handler);
