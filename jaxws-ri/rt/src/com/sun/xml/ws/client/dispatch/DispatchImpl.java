@@ -6,6 +6,7 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
@@ -13,6 +14,9 @@ import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.bind.api.BridgeContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
@@ -20,6 +24,10 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.http.HTTPException;
+import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -127,10 +135,31 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * See {@link #process(Packet, RequestContext, ResponseContextReceiver)} on
      * why it takes a {@link RequestContext} and {@link ResponseContextReceiver} as a parameter.
      */
-    public final T doInvoke(T in, RequestContext rc, ResponseContextReceiver receiver) {
-        Packet message = createPacket(in);
-        setProperties(message,false);
-        Packet response = process(message,rc,receiver);
+    public final T doInvoke(T in, RequestContext rc, ResponseContextReceiver receiver){
+        Packet response = null;
+        try {
+            Packet message = createPacket(in);
+            setProperties(message,false);
+            response = process(message,rc,receiver);
+            Message msg = response.getMessage();
+
+            if(msg != null && msg.isFault()) {
+                SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
+                // passing null means there is no checked excpetion we're looking for all
+                // it will get back to us is a protocol exception
+                throw (SOAPFaultException)faultBuilder.createException(null, msg);
+            }
+        } catch (JAXBException e) {
+            //TODO: i18nify
+            throw new DeserializationException("failed.to.read.response",e);
+        } catch(HTTPException e){
+            throw e;
+        } catch(WebServiceException e){
+            throw e;
+        } catch(Throwable e){
+            throw new WebServiceException(e);
+        }
+
         return toReturnValue(response);
     }
 

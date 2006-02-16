@@ -140,13 +140,7 @@ public abstract class SOAPFaultBuilder {
         }
     }
 
-    private Throwable getProtocolException(Message msg) {
-        try {
-            return new SOAPFaultException(msg.readAsSOAPMessage().getSOAPBody().getFault());
-        } catch (SOAPException e) {
-            throw new WebServiceException(e);
-        }
-    }
+    abstract protected Throwable getProtocolException(Message msg);
 
     private Object getJAXBObject(Node jaxbBean, CheckedException ce) throws JAXBException {
         Bridge bridge = ce.getBridge();

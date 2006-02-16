@@ -1,11 +1,21 @@
 package com.sun.xml.ws.sandbox.fault;
 
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.SOAPVersion;
+
 import javax.xml.bind.annotation.AccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.Detail;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPFaultException;
+
+import org.w3c.dom.Node;
 
 /**
  * This class represents SOAP1.1 Fault. This class will be used to marshall/unmarshall a soap fault using JAXB.
@@ -114,5 +124,18 @@ class SOAP11Fault extends SOAPFaultBuilder {
      */
     void setDetail(DetailType detail) {
         this.detail = detail;
+    }
+
+    protected Throwable getProtocolException(Message msg) {
+        try {
+            SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault(faultstring, faultcode);
+            if(detail != null && detail.getDetails() != null && detail.getDetails().size() > 0 && detail.getDetails().get(0) instanceof Detail){
+                Node n = fault.getOwnerDocument().importNode((Detail)detail.getDetails().get(0), true);
+                fault.appendChild(n);
+            }
+            throw new SOAPFaultException(fault);
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
     }
 }

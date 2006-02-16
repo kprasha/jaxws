@@ -10,7 +10,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.Detail;
+import javax.xml.soap.SOAPException;
+import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
+
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.SOAPVersion;
 
 /**
  * SOAP 1.2 Fault class that can be marshalled/unmarshalled by JAXB
@@ -110,6 +118,19 @@ class SOAP12Fault extends SOAPFaultBuilder {
     @Override
     String getFaultString() {
         return Reason.texts().get(0).getText();
+    }
+
+     protected Throwable getProtocolException(Message msg) {
+        try {
+            SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(Reason.texts().get(0).getText(), (Code != null)?Code.getValue():null);
+            if(Detail.getDetails() != null && Detail.getDetails().size() > 0 && Detail.getDetails().get(0) instanceof Detail){
+                Node n = fault.getOwnerDocument().importNode((Detail)Detail.getDetails().get(0), true);
+                fault.appendChild(n);
+            }
+            throw new SOAPFaultException(fault);
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
     }
 }
 

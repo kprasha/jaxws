@@ -47,4 +47,8 @@ class CodeType {
 
     CodeType() {
     }
+
+    QName getValue(){
+        return Value;
+    }
 }
