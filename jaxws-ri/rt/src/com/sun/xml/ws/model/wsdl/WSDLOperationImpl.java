@@ -92,9 +92,9 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
 
     public void freez(WSDLModelImpl root) {
         assert input != null;
-        input.freeze(root, this);
+        input.freeze(root);
         if(output != null)
-            output.freeze(root, this);
+            output.freeze(root);
         for(WSDLFaultImpl fault : faults){
             fault.freeze(root);
         }

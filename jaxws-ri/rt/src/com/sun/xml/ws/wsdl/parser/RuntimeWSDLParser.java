@@ -51,9 +51,11 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -207,12 +209,9 @@ public class RuntimeWSDLParser {
         if(location!=null) {
             try {
                 port.setAddress(new EndpointAddress(location));
-            } catch (URISyntaxException e) {
-                // TODO: JAX-RPC used to generate invalid values, so we don't want
-                // it to be a fatal failure. we might report it and should move on,
-                // as if no address was given.
-                // TODO: modify wegen not to generaet location at all.
-                //throw new WebServiceException("Invalid endpoint address "+location,e);
+            } catch (MalformedURLException e) {
+                //TODO:i18nify
+                throw new WebServiceException("Malformed URL: "+location, e);
             }
         }
         service.put(portQName, port);
@@ -493,7 +492,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getMandatoryNonEmptyAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         String name = ParserUtil.getAttribute(reader, "name");
-        operation.setInput(new WSDLInputImpl(name, msgName));
+        operation.setInput(new WSDLInputImpl(name, msgName, operation));
         extension.portTypeOperationInput(operation, reader);
         goToEnd(reader);
     }
@@ -502,7 +501,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         String name = ParserUtil.getAttribute(reader, "name");
-        operation.setOutput(new WSDLOutputImpl(name, msgName));
+        operation.setOutput(new WSDLOutputImpl(name, msgName, operation));
         extension.portTypeOperationOutput(operation, reader);
         goToEnd(reader);
     }

@@ -14,9 +14,10 @@ public class WSDLOutputImpl extends AbstractExtensibleImpl implements WSDLOutput
     private WSDLOperationImpl operation;
     private WSDLMessageImpl message;
 
-    public WSDLOutputImpl(String name, QName messageName) {
+    public WSDLOutputImpl(String name, QName messageName, WSDLOperationImpl operation) {
         this.name = name;
         this.messageName = messageName;
+        this.operation = operation;
     }
 
     public String getName() {
@@ -27,10 +28,7 @@ public class WSDLOutputImpl extends AbstractExtensibleImpl implements WSDLOutput
         return message;
     }
 
-    void freeze(WSDLModelImpl root, WSDLOperationImpl owner) {
+    void freeze(WSDLModelImpl root) {
         message = root.getMessage(messageName);
-        this.operation = owner;
     }
-
-
 }

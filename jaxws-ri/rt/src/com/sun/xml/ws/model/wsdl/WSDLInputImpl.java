@@ -14,9 +14,10 @@ public class WSDLInputImpl extends AbstractExtensibleImpl implements WSDLInput {
     private WSDLOperationImpl operation;
     private WSDLMessageImpl message;
 
-    public WSDLInputImpl(String name, QName messageName) {
+    public WSDLInputImpl(String name, QName messageName, WSDLOperationImpl operation) {
         this.name = name;
         this.messageName = messageName;
+        this.operation = operation;
     }
 
     public String getName() {
@@ -30,8 +31,7 @@ public class WSDLInputImpl extends AbstractExtensibleImpl implements WSDLInput {
         return message;
     }
 
-    void freeze(WSDLModelImpl parent, WSDLOperationImpl operation) {
+    void freeze(WSDLModelImpl parent) {
         message = parent.getMessage(messageName);
-        this.operation = operation;
     }
 }
