@@ -76,10 +76,11 @@ public class LogicalHandlerPipe extends HandlerPipe {
         if(logicalHandlers.isEmpty()) {
             return next.process(packet);
         }
-        MessageContext msgContext = new MessageContextImpl(packet);
+        MessageContextImpl msgContext = new MessageContextImpl(packet);
+        LogicalMessageContextImpl context =  new LogicalMessageContextImpl(binding,packet,msgContext);
+        Packet reply;
         try {
-            boolean isOneWay = packet.isOneWay;            
-            LogicalMessageContext context =  new LogicalMessageContextImpl(binding,packet,msgContext);
+            boolean isOneWay = packet.isOneWay;
             boolean handlerResult = false;
             
             // Call handlers on Request
@@ -99,6 +100,9 @@ public class LogicalHandlerPipe extends HandlerPipe {
                     throw pe;
                 }
             }
+            //Update Packet Properties
+            context.updatePacket();
+            msgContext.fill(packet);
             
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
@@ -108,11 +112,11 @@ public class LogicalHandlerPipe extends HandlerPipe {
             }
             
             // Call next Pipe.process() on msg
-            Packet reply = next.process(packet);
+            reply = next.process(packet);
             
             //TODO: For now create again
-            msgContext = new MessageContextImpl(packet);
-            context =  new LogicalMessageContextImpl(binding,packet,msgContext);
+            msgContext = new MessageContextImpl(reply);
+            context =  new LogicalMessageContextImpl(binding,reply,msgContext);
             // Call handlers on Response
             if(isClient) {
                 //CLIENT-SIDE
@@ -120,11 +124,15 @@ public class LogicalHandlerPipe extends HandlerPipe {
             } else {                
                 //SERVER-SIDE                
                 processor.callHandlersResponse(Direction.OUTBOUND,context);
-            }
-            return reply;
+            }            
+            
         } finally {
-            close(msgContext);
+            close(msgContext);            
         }
+        //Update Packet Properties
+        context.updatePacket();
+        msgContext.fill(reply);
+        return reply;
         
         
     }

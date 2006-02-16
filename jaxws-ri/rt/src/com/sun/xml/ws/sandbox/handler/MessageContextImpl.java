@@ -20,10 +20,9 @@
 
 package com.sun.xml.ws.sandbox.handler;
 
-import com.sun.xml.ws.util.PropertySet;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-
+import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,192 +30,145 @@ import java.util.Set;
 import java.util.Collection;
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.MessageContext;
 
 /**
  *
  * @author WS Development Team
  */
-public class MessageContextImpl extends PropertySet implements MessageContext {
-    
-    /**
-     * Value of {@link #MESSAGE_OUTBOUND_PROPERTY} property.
-     */
-    @Property(MessageContext.MESSAGE_OUTBOUND_PROPERTY)
-    public boolean messageOutBound;
-    
-    /**
-     * Value of {@link #INBOUND_MESSAGE_ATTACHMENTS} property
-     */
-    // TODO: do not compute these values eagerly.
-    // allow ContextProperty to be on a method so that
-    // this can be computed lazily
-    @Property(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)
-    public Map<String, DataHandler> inboundMessageAttachments;
 
-    /**
-     * Value of {@link #OUTBOUND_MESSAGE_ATTACHMENTS} property
-     */
-    @Property(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS)
-    public Map<String, DataHandler> outboundMessageAttachments;
+public class MessageContextImpl implements MessageContext {
     
-    
-    /**
-     * Value of {@link #WSDL_DESCRIPTION} property.
-     */
-    @Property(MessageContext.WSDL_DESCRIPTION)
-    public org.xml.sax.InputSource wsdlDescription;
-    
-    /**
-     * Value of {@link #WSDL_SERVICE} property.
-     */
-    @Property(MessageContext.WSDL_SERVICE)
-    public QName wsdlService;
-
-    /**
-     * Value of {@link #WSDL_PORT} property.
-     */
-    @Property(MessageContext.WSDL_PORT)
-    public QName wsdlPort;
-    
-    /**
-     * Value of {@link #WSDL_INTERFACE} property.
-     */
-    @Property(MessageContext.WSDL_INTERFACE)
-    public QName wsdlInterface;
-    
-    /**
-     * Value of {@link #WSDL_OPERATION} property.
-     */
-    @Property(MessageContext.WSDL_OPERATION)
-    public QName wsdlOperation;
-    
-    /**
-     * Value of {@link #HTTP_RESPONSE_CODE} property.
-     */
-    @Property(MessageContext.HTTP_RESPONSE_CODE)
-    public Integer httpResponseCode;
-     
-    /**
-     * Value of {@link #HTTP_REQUEST_HEADERS} property.
-     */
-    @Property(MessageContext.HTTP_REQUEST_HEADERS)
-    public Map<String, List<String>> httpRequestHeaders;
-    
-    /**
-     * Value of {@link #HTTP_RESPONSE_HEADERS} property.
-     */
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
-    public Map<String, List<String>> httpResponseHeaders;
-
-    /**
-     * Value of {@link #HTTP_REQUEST_METHOD} property.
-     */
-    @Property(MessageContext.HTTP_REQUEST_METHOD)
-    public String httpRequestMethod;
-    
-    /**
-     * Value of {@link #SERVLET_REQUEST} property.
-     */
-    @Property(MessageContext.SERVLET_REQUEST)
-    public Object servletRequest;
-    
-    /**
-     * Value of {@link #SERVLET_RESPONSE} property.
-     */
-    @Property(MessageContext.SERVLET_RESPONSE)
-    public Object servletResponse;
-    
-        
-    /**
-     * Value of {@link #SERVLET_CONTEXT} property.
-     */
-    @Property(MessageContext.SERVLET_CONTEXT)
-    public Object servletContext;
-    
+    Map<String,Object> internalMap = new HashMap<String,Object>(); 
+    Set<String> appScopeProps;
     /** Creates a new instance of MessageContextImpl */
-    public MessageContextImpl(Packet packet) {
-       //msgProps = msg.getProperties();
+    public MessageContextImpl(Packet packet) {       
+       
+       internalMap.putAll(packet.createMapView());
+       internalMap.putAll(packet.invocationProperties);
+       internalMap.putAll(packet.otherProperties);
+       appScopeProps =  packet.getApplicationScopePropertyNames(false);
+              
     }
     
-    public void setScope(String endpointURL, Scope scope) {
-        // TODO
-        throw new UnsupportedOperationException();
+    public void setScope(String name, Scope scope) {
+        //TODO: check in intrenalMap
+        if(scope == MessageContext.Scope.APPLICATION) {
+            appScopeProps.add(name);
+        } else {
+            appScopeProps.remove(name);
+                
+        }   
     }
 
-    public Scope getScope(String endpointURL) {
-        // TODO
-        throw new UnsupportedOperationException();
+    public Scope getScope(String name) {
+        if(appScopeProps.contains(name)) {
+            return MessageContext.Scope.APPLICATION;
+        } else {
+            return MessageContext.Scope.HANDLER;
+        }    
     }
     
-    /**
-     * Bag to capture "other" properties that do not have
-     * strongly-typed presence on this object.
-     *
-     * TODO: allocate this instance lazily.
-     */
-    private Map<String,Object> otherProperties = new HashMap<String, Object>();
-
-
-
-    private static final PropertyMap model;
-
-    static {
-        model = parse(MessageContextImpl.class);
-    }
-
-    protected PropertyMap getPropertyMap() {
-        return model;
-    }
-
-
     public int size() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.size();
     }
 
     public boolean isEmpty() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.isEmpty();
     }
 
     public boolean containsKey(Object key) {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.containsKey(key);
     }
 
     public boolean containsValue(Object value) {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.containsValue(value);
     }
-
+    
+    public Object put(String key, Object value) {
+        return internalMap.put(key,value);
+    }
     public Object get(Object key) {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.get(key);
     }
 
     public void putAll(Map<? extends String, ? extends Object> t) {
-        // TODO
-        throw new UnsupportedOperationException();
+        internalMap.putAll(t);
     }
-
+    
     public void clear() {
-        // TODO
-        throw new UnsupportedOperationException();
+        internalMap.clear();
     }
-
+    public Object remove(Object key){
+        return internalMap.remove(key);
+    }
     public Set<String> keySet() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.keySet();
     }
-
+    public Set<Map.Entry<String, Object>> entrySet(){
+        return internalMap.entrySet();
+    }
     public Collection<Object> values() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return internalMap.values();
     }
-
-    public Set<Entry<String, Object>> entrySet() {
-        // TODO
-        throw new UnsupportedOperationException();
+    
+    /**
+     * Fill a {@link Packet} with values of this {@link MessageContext}.
+     */
+    public void fill(Packet packet) {
+        System.out.println("internal" + internalMap.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
+        System.out.println("packet" + packet.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
+        //Remove properties which are removed by user.
+        for (String key : packet.createMapView().keySet()) {
+            if(!internalMap.containsKey(key)) {
+                packet.remove(key);
+                appScopeProps.remove(key);
+            } else {
+                Object value = internalMap.get(key);
+                if(value != null)
+                    packet.put(key,value);
+                internalMap.remove(key);
+            }
+        }
+        
+        //Remove properties which are removed by user.
+        for (String key : packet.otherProperties.keySet()) {
+            if(!internalMap.containsKey(key)) {
+                packet.otherProperties.remove(key);
+                appScopeProps.remove(key);
+            } else {
+                packet.otherProperties.put(key,internalMap.get(key));
+                internalMap.remove(key);
+            }
+        }
+        
+        //Remove properties which are removed by user.
+        for (String key : packet.invocationProperties.keySet()) {
+            if(!internalMap.containsKey(key)) {
+                packet.invocationProperties.remove(key);
+                appScopeProps.remove(key);
+            } else {
+                packet.invocationProperties.put(key,internalMap.get(key));
+                internalMap.remove(key);
+            }
+        }
+        
+        packet.invocationProperties.putAll(internalMap);
+        /*
+        for (Entry<String,Object> entry : internalMap.entrySet()) {
+                String key = entry.getKey();
+                if(packet.supports(key)) {
+                    packet.put(key,entry.getValue());
+                } else if(packet.otherProperties.containsKey(key)) {
+                    packet.otherProperties.put(key,entry.getValue());                        
+                } else {   
+                    packet.invocationProperties.put(key,entry.getValue());
+                }
+        }
+               
+        */
+        
     }
+    
 }

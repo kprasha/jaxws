@@ -81,12 +81,13 @@ public class SOAPHandlerPipe extends HandlerPipe {
         if(soapHandlers.isEmpty()) {
             return next.process(packet);
         }
-        MessageContext msgContext = new MessageContextImpl(packet);
+        MessageContextImpl msgContext = new MessageContextImpl(packet);
+        SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet,msgContext);
+        context.setRoles(roles);
+        Packet reply;
         try {
-            boolean isOneWay = packet.isOneWay;            
-            SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet,msgContext);
-            context.setRoles(roles);
-            boolean handlerResult = false;
+            boolean isOneWay = packet.isOneWay;
+            boolean handlerResult = false;            
             // Call handlers on Request
             try {
                 if(!soapHandlers.isEmpty()) {
@@ -105,21 +106,23 @@ public class SOAPHandlerPipe extends HandlerPipe {
                     throw pe;
                 }
             }
+            //Update Packet Properties
+            msgContext.fill(packet);
             
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
                 remedyActionTaken = true;
-                //TODO: return packet
+                //TODO: return packet                
                 return packet;
             }
             
             // Call next Pipe.process() on msg
-            Packet reply = next.process(packet);
+            reply = next.process(packet);
                         
             //TODO: For now create again
-            msgContext = new MessageContextImpl(packet);
+            msgContext = new MessageContextImpl(reply);
             
-            context =  new SOAPMessageContextImpl(binding,packet,msgContext);
+            context =  new SOAPMessageContextImpl(binding,reply,msgContext);
             context.setRoles(roles);
             // Call handlers on Response
             if(isClient) {
@@ -130,10 +133,13 @@ public class SOAPHandlerPipe extends HandlerPipe {
                 processor.callHandlersResponse(Direction.OUTBOUND,context);
             }
             
-            return reply;
         } finally {
             close(msgContext);
         }
+            //Update Packet Properties
+            context.updatePacket();
+            msgContext.fill(reply);
+            return reply;
     }
 
     /**
