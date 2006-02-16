@@ -4,16 +4,16 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
+import com.sun.xml.ws.api.pipe.TransportPipeFactory;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.sandbox.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.sandbox.handler.SOAPHandlerPipe;
-import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
@@ -37,7 +37,9 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     }
 
     protected Pipe createTransport(WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        return new HttpTransportPipe(binding);
+        return TransportPipeFactory.create(
+            Thread.currentThread().getContextClassLoader(),
+            wsdlModel, service, binding);
     }
    
     /**
