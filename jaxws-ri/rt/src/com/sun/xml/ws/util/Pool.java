@@ -2,6 +2,7 @@ package com.sun.xml.ws.util;
 
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -113,6 +114,22 @@ public abstract class Pool<T> {
 
         protected com.sun.xml.bind.api.BridgeContext create() {
             return context.createBridgeContext();
+        }
+    }
+
+    /**
+     * {@link Pipe} pool.
+     */
+    public static final class PipePool extends Pool<Pipe> {
+        private final Pipe master;
+
+        public PipePool(Pipe master) {
+            this.master = master;
+            recycle(master);    // we'll use master as a part of the pool, too.
+        }
+
+        protected Pipe create() {
+            return PipeCloner.clone(master);
         }
     }
 }
