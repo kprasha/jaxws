@@ -136,7 +136,7 @@ public final class RequestContext extends PropertySet {
     /**
      * Creates an empty {@link RequestContext}.
      */
-    public RequestContext() {
+    /*package*/ RequestContext() {
         others = new HashMap<String, Object>();
     }
 
