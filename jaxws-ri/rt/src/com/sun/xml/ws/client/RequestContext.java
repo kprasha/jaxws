@@ -91,6 +91,7 @@ import java.util.Map.Entry;
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings({"SuspiciousMethodCalls"})
 public final class RequestContext extends PropertySet {
     /**
      * Stores properties that don't fit the strongly-typed fields.
