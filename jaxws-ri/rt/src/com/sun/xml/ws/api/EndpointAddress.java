@@ -1,5 +1,7 @@
 package com.sun.xml.ws.api;
 
+import com.sun.corba.se.pept.protocol.ProtocolHandler;
+
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -9,19 +11,28 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.Iterator;
 
 /**
- * Represents the endpoint address.
+ * Represents the endpoint address URI.
  *
  * <p>
- * Conceptually this can be really thought of as an {@link URL},
+ * Conceptually this can be really thought of as an {@link URI},
  * but it hides some of the details that improve the performance.
+ *
+ * <p>
+ * Being an {@link URI} allows this class to represent custom made-up URIs
+ * (like "jms" for example.) Whenever possible, this object
+ * also creates an {@link URL} (this is only possible when the address
+ * has a registered {@link URLStreamHandler}), so that if the clients
+ * of this code wants to use it, it can do so.
+ *
  *
  * <h3>How it improves the performance</h3>
  * <ol>
  *  <li>
- *  Endpoint address is eventually turned into an {@link URL},
+ *  Endpoint address is often eventually turned into an {@link URLConnection},
  *  and given that generally this value is read more often than being set,
  *  it makes sense to eagerly turn it into an {@link URL},
  *  thereby avoiding a repeated conversion.
@@ -46,13 +57,19 @@ import java.util.Iterator;
  * @author Kohsuke Kawaguchi
  */
 public final class EndpointAddress {
-    private final URL url;
+    private URL url;    // can be null
+    private final URI uri;
     private final String stringForm;
     private final Proxy proxy;
 
-    public EndpointAddress(URL url) {
-        this.url = url;
-        this.stringForm = url.toString();
+    public EndpointAddress(URI uri) {
+        this.uri = uri;
+        this.stringForm = uri.toString();
+        try {
+            this.url = uri.toURL();
+        } catch (MalformedURLException e) {
+            // ignore
+        }
         proxy = chooseProxy();
     }
 
@@ -60,9 +77,14 @@ public final class EndpointAddress {
      *
      * @see #create(String)
      */
-    public EndpointAddress(String url) throws MalformedURLException {
-        this.url = new URL(url);
+    public EndpointAddress(String url) throws URISyntaxException {
+        this.uri = new URI(url);
         this.stringForm = url;
+        try {
+            this.url = new URL(url);
+        } catch (MalformedURLException e) {
+            // ignore
+        }
         proxy = chooseProxy();
     }
 
@@ -73,7 +95,7 @@ public final class EndpointAddress {
     public static EndpointAddress create(String url) {
         try {
             return new EndpointAddress(url);
-        } catch(MalformedURLException e) {
+        } catch(URISyntaxException e) {
             throw new WebServiceException("Illegal endpoint address: "+url,e);
         }
     }
@@ -95,24 +117,48 @@ public final class EndpointAddress {
             // user-defined proxy. may return a different proxy for each invocation
             return null;
 
-        try {
-            Iterator<Proxy> it = sel.select(new URI(stringForm)).iterator();
-            if(it.hasNext())
-                return it.next();
-        } catch (URISyntaxException e) {
-            // this shouldn't happen, but since it did,
-            // take the safer route and let the JDK decide proxy on its own
-            return null;
-        }
+        Iterator<Proxy> it = sel.select(uri).iterator();
+        if(it.hasNext())
+            return it.next();
 
         return Proxy.NO_PROXY;
     }
 
+    /**
+     * Returns an URL of this endpoint adress.
+     *
+     * @return
+     *      null if this endpoint address doesn't have a registered {@link URLStreamHandler}.
+     */
     public URL getURL() {
         return url;
     }
 
+    /**
+     * Returns an URI of the endpoint address.
+     *
+     * @return
+     *      always non-null.
+     */
+    public URI getURI() {
+        return uri;
+    }
+
+    /**
+     * Tries to open {@link URLConnection} for this endpoint.
+     *
+     * <p>
+     * This is possible only when an endpoint address has
+     * the corresponding {@link URLStreamHandler}.
+     *
+     * @throws IOException
+     *      if {@link URL#openConnection()} reports an error.
+     * @throws AssertionError
+     *      if this endpoint doesn't have an associated URL.
+     *      if the code is written correctly this shall never happen.
+     */
     public URLConnection openConnection() throws IOException {
+        assert url!=null : uri+" doesn't have the corresponding URL";
         return url.openConnection(proxy);
     }
 

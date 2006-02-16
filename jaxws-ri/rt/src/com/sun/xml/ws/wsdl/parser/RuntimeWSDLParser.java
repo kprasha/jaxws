@@ -21,22 +21,22 @@
 package com.sun.xml.ws.wsdl.parser;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
+import com.sun.xml.ws.model.wsdl.WSDLInputImpl;
 import com.sun.xml.ws.model.wsdl.WSDLMessageImpl;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOutputImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartDescriptorImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPartDescriptorImpl;
-import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
-import com.sun.xml.ws.model.wsdl.WSDLInputImpl;
-import com.sun.xml.ws.model.wsdl.WSDLOutputImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -52,7 +52,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
@@ -207,7 +207,7 @@ public class RuntimeWSDLParser {
         if(location!=null) {
             try {
                 port.setAddress(new EndpointAddress(location));
-            } catch (MalformedURLException e) {
+            } catch (URISyntaxException e) {
                 // TODO: JAX-RPC used to generate invalid values, so we don't want
                 // it to be a fatal failure. we might report it and should move on,
                 // as if no address was given.

@@ -9,7 +9,6 @@ import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.WebServiceException;
-import java.net.URL;
 import java.util.logging.Logger;
 
 /**
@@ -18,29 +17,41 @@ import java.util.logging.Logger;
  * <p>
  * At runtime, on the client side, JAX-WS (more specifically the default {@link PipelineAssembler}
  * of JAX-WS client runtime) relies on this factory to create a suitable transport {@link Pipe}
- * that can handle the given endpoint address.
+ * that can handle the given {@link EndpointAddress endpoint address}.
  *
  * <p>
  * JAX-WS extensions that provide additional transport support can
  * extend this class and implement the {@link #doCreate} method.
- * They are expected to check the protocol of the endpoint address
+ * They are expected to check the scheme of the endpoint address
  * (and possibly some other settings from bindings), and create
  * their transport pipe implementations accordingly.
  * (Endpoint address can be obtained from {@link WSDLPort#getAddress()}.)
+ * For example,
+ *
+ * <pre>
+ * class MyTransportPipeFactoryImpl {
+ *   Pipe doCreate(...) {
+ *     EndpointAddress address = wsdlModel.getAddress();
+ *     String scheme = address.getURI().getScheme();
+ *     if(scheme.equals("foo"))
+ *       return new MyTransport(...);
+ *     else
+ *       return null;
+ *   }
+ * }
+ * </pre>
  *
  * <p>
- * {@link TransportPipeFactory} look up follows the standard service
+ * {@link TransportPipeFactory} look-up follows the standard service
  * discovery mechanism, so you need
  * {@code META-INF/services/com.sun.xml.ws.api.pipe.TransportPipeFactory}.
+ *
+ *
  *
  * <h2>TODO</h2>
  * <p>
  * One of the JAX-WS operation mode is supposedly where it doesn't have no WSDL whatsoever.
  * How do we identify the endpoint in such case?
- *
- * <p>
- * {@link EndpointAddress} eagerly creates an {@link URL}, which is probably inconvenient
- * for a custom transport that wants to define custom scheme (like "jms", "xmpp", etc.)
  *
  * @author Kohsuke Kawaguchi
  * @see StandalonePipeAssembler
@@ -95,8 +106,8 @@ public abstract class TransportPipeFactory {
 
         // default built-in trasnports
         EndpointAddress address = wsdlModel.getAddress();
-        String protocol = address.getURL().getProtocol();
-        if(protocol.equalsIgnoreCase("http") || protocol.equalsIgnoreCase("https"))
+        String scheme = address.getURI().getScheme();
+        if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
             return new HttpTransportPipe(binding);
 
         throw new WebServiceException("Unsupported endpoint address: "+address);    // TODO: i18n
