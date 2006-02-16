@@ -122,7 +122,10 @@ public final class RequestContext extends PropertySet {
     }
 
     public void setEndPointAddressString(String s) {
-        this.endpointAddress = EndpointAddress.create(s);
+        if(s==null)
+            this.endpointAddress = null;
+        else
+            this.endpointAddress = EndpointAddress.create(s);
     }
 
     /**
