@@ -183,6 +183,7 @@ public class WSDLGenerator {
     private String schemaPrefix;
     private WSDLGeneratorExtension extension;
 
+    private String endpointAddress = REPLACE_WITH_ACTUAL_URL;
 
     /**
      * Creates the WSDLGenerator
@@ -199,6 +200,14 @@ public class WSDLGenerator {
         this.wsdlResolver = wsdlResolver;
         this.bindingId = bindingId;
         this.extension = new WSDLGeneratorExtensionFacade(extensions);
+    }
+
+    /**
+     * Sets the endpoint address string to be written.
+     * Defaults to {@link #REPLACE_WITH_ACTUAL_URL}.
+     */
+    public void setEndpointAddress(String address) {
+        this.endpointAddress = address;
     }
 
     /**
@@ -388,7 +397,7 @@ public class WSDLGenerator {
                 }
             }
         }
-        for (CheckedExceptionImpl exception : (List<CheckedExceptionImpl>) method.getCheckedExceptions()) {
+        for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
             QName tagName = exception.getDetailType().tagName;
             if (processedExceptions.contains(tagName))
                 continue;
@@ -423,7 +432,7 @@ public class WSDLGenerator {
                     break;
             }
             // faults
-            for (CheckedExceptionImpl exception : (List<CheckedExceptionImpl>) method.getCheckedExceptions()) {
+            for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
                 QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
                 FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
@@ -895,10 +904,10 @@ public class WSDLGenerator {
 
         if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
             com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress address = port._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress.class);
-            address.location(REPLACE_WITH_ACTUAL_URL);
+            address.location(endpointAddress);
         }else{
             SOAPAddress address = port._element(SOAPAddress.class);
-            address.location(REPLACE_WITH_ACTUAL_URL);
+            address.location(endpointAddress);
         }
     }
 
