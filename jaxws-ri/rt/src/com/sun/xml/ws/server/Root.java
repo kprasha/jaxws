@@ -138,15 +138,17 @@ public class Root {
                 if (!Provider.class.isAssignableFrom(implType))
                     throw new ServerRtException("not.implement.provider",implType);
 
-                // TODO: parse the primary WSDL to get 'wsdlPort'?
+
                 terminal =  new ProviderInvokerPipe((Class)implType,(InstanceResolver)ir,binding);
             } else {
                 // Create runtime model for non Provider endpoints
                 seiModel = createSEIModel(primaryWsdl, md, implType, serviceName, portName, binding);
+                /*
                 if (serviceName == null)
                     serviceName = seiModel.getServiceQName();
                 if (portName == null)
                     portName = seiModel.getPortName();
+                 */
                 portTypeName = seiModel.getPortTypeName();
 
                 wsdlPort = seiModel.getPort();
@@ -173,6 +175,31 @@ public class Root {
 
         SDDocumentImpl primaryDoc = null;
         List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
+        for(SDDocumentImpl doc : docList) {
+            if (doc instanceof SDDocument.WSDL) {
+                SDDocument.WSDL wsdlDoc = (SDDocument.WSDL)doc;
+                if (wsdlDoc.hasService()) {
+                    primaryDoc = doc;
+                    break;
+                }
+            }
+        }
+        
+        if (primaryDoc == null) {
+            if (implType.getAnnotation(WebServiceProvider.class)==null) {
+                // Generate WSDL for SEI endpoints(not for Provider endpoints)
+                primaryDoc = generateWSDL(binding,  seiModel, docList);
+            }
+
+        }
+        
+        if (wsdlPort == null && primaryDoc != null) {
+            // create WSDL model
+            wsdlPort = getWSDLPort(primaryDoc, md, implType, serviceName, portName);
+        }
+        
+        
+        /*
         if (primaryWsdl == null) {
             primaryDoc = generateWSDL(binding,  seiModel, docList);
             // create WSDL model
@@ -186,6 +213,7 @@ public class Root {
                 }
             }
         }
+         */
 
         {// error check
             String serviceNS = serviceName.getNamespaceURI();
@@ -264,16 +292,16 @@ public class Root {
      * Checks {@link @WebServiceProvider} and determines the service name.
      */
     private QName getDefaultServiceName(Class<?> implType) {
+        QName serviceName;
         WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
         if (wsProvider!=null) {
             String tns = wsProvider.targetNamespace();
             String local = wsProvider.serviceName();
-            if (local.length() > 0)
-                return new QName(tns, local);
+            serviceName = new QName(tns, local);
         } else {
-            return RuntimeModeler.getServiceName(implType);
+            serviceName = RuntimeModeler.getServiceName(implType);
         }
-        return null;
+        return serviceName;
     }
 
     /*
@@ -281,16 +309,16 @@ public class Root {
      * annotations on implementorClass to set PortName.
      */
     private QName getDefaultPortName(QName serviceName, Class<?> implType) {
+        QName portName;
         WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
         if (wsProvider!=null) {
             String tns = wsProvider.targetNamespace();
             String local = wsProvider.portName();
-            if (local.length() > 0)
-                return new QName(tns, local);
+            portName = new QName(tns, local);
         } else {
-            return RuntimeModeler.getPortName(implType, serviceName.getNamespaceURI());
+            portName = RuntimeModeler.getPortName(implType, serviceName.getNamespaceURI());
         }
-        return null;
+        return portName;
     }
 
     /**
