@@ -117,8 +117,6 @@ public class MessageContextImpl implements MessageContext {
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
     public void fill(Packet packet) {
-        System.out.println("internal" + internalMap.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
-        System.out.println("packet" + packet.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
         //Remove properties which are removed by user.
         for (String key : packet.createMapView().keySet()) {
             if(!internalMap.containsKey(key)) {
