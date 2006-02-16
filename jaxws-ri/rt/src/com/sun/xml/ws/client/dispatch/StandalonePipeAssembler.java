@@ -18,7 +18,8 @@ import com.sun.xml.ws.sandbox.handler.SOAPHandlerPipe;
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe head = createTransport(wsdlModel,service,binding);
-        if(!binding.getHandlerChain().isEmpty()) {
+        if((binding.getHandlerChain() != null) &&
+                !binding.getHandlerChain().isEmpty()) {
             boolean isClient = true;
             HandlerPipe soapHandlerPipe = null;
             //XML/HTTP Binding can have only LogicalHandlerPipe
@@ -49,7 +50,8 @@ public class StandalonePipeAssembler implements PipelineAssembler {
      */
     public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
         WSBinding binding = endpoint.getBinding();
-        if(!binding.getHandlerChain().isEmpty()) {
+        if((binding.getHandlerChain() != null) &&
+                !binding.getHandlerChain().isEmpty()) {
             boolean isClient = false;
             HandlerPipe logicalHandlerPipe = null;
             if(binding.getSOAPVersion() != null) {
