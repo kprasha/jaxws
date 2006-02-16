@@ -123,14 +123,28 @@ class SOAP12Fault extends SOAPFaultBuilder {
      protected Throwable getProtocolException(Message msg) {
         try {
             SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(Reason.texts().get(0).getText(), (Code != null)?Code.getValue():null);
-            if(Detail.getDetails() != null && Detail.getDetails().size() > 0 && Detail.getDetails().get(0) instanceof Detail){
+            if(Detail != null && Detail.getDetails() != null && Detail.getDetails().size() > 0 && Detail.getDetails().get(0) instanceof Detail){
                 Node n = fault.getOwnerDocument().importNode((Detail)Detail.getDetails().get(0), true);
                 fault.appendChild(n);
             }
-            throw new SOAPFaultException(fault);
+            if(Code != null)
+                fillFaultSubCodes(fault, Code.getSubcode());
+
+            return new SOAPFaultException(fault);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
+    }
+
+    /**
+     * Recursively populate the Subcodes
+     */
+    private void fillFaultSubCodes(SOAPFault fault, SubcodeType subcode) throws SOAPException {
+        if(subcode != null){
+            fault.appendFaultSubcode(subcode.getValue());
+            fillFaultSubCodes(fault, subcode.getSubcode());
+        }
+        return;
     }
 }
 

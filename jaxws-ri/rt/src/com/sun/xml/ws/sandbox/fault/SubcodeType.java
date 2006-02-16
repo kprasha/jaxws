@@ -45,4 +45,12 @@ class SubcodeType {
 
     public SubcodeType() {
     }
+
+    QName getValue() {
+        return Value;
+    }
+
+    SubcodeType getSubcode() {
+        return Subcode;
+    }
 }

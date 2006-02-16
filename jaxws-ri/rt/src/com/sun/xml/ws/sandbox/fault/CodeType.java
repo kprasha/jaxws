@@ -51,4 +51,8 @@ class CodeType {
     QName getValue(){
         return Value;
     }
+
+    SubcodeType getSubcode(){
+        return Subcode;
+    }
 }
