@@ -29,6 +29,7 @@ import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
@@ -78,7 +79,7 @@ import java.util.Set;
 
 
 /**
- * Class used to generate WSDLs from a <code>RunTimeModel</code>
+ * Class used to generate WSDLs from a {@link SEIModel}.
  *
  * @author WS Development Team
  */

@@ -9,7 +9,7 @@ import com.sun.xml.txw2.TypedXmlWriter;
 import java.lang.reflect.Method;
 
 /**
- * {@link WSDLGeneratExtension} that delegates to
+ * {@link WSDLGeneratorExtension} that delegates to
  * multiple {@link WSDLGeneratorExtension}s.
  *
  * <p>
