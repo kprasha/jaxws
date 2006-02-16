@@ -152,8 +152,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         } catch (JAXBException e) {
             //TODO: i18nify
             throw new DeserializationException("failed.to.read.response",e);
-        } catch(HTTPException e){
-            throw e;
         } catch(WebServiceException e){
             throw e;
         } catch(Throwable e){
