@@ -37,6 +37,7 @@ import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import javax.jws.WebService;
 import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
@@ -178,13 +179,12 @@ public class DeploymentDescriptorParser<A> {
                 String implementationName =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_IMPLEMENTATION);
                 Class implementorClass = getImplementorClass(implementationName);
+                verifyImplementorClass(implementorClass);
 
                 SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
 
                 QName serviceName = getQNameAttribute(attrs, ATTR_SERVICE);
-                if (serviceName == null) {
-                    serviceName = RuntimeModeler.getServiceName(implementorClass);
-                }
+                serviceName = getServiceName(serviceName, implementorClass);
 
                 QName portName = getQNameAttribute(attrs, ATTR_PORT);
 
@@ -243,7 +243,53 @@ public class DeploymentDescriptorParser<A> {
     public static interface AdapterFactory<A> {
         A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
     }
-
+    
+    /**
+     * If DD doesn't have a WSDL service name, it creates service name using
+     * annotations on the implementor class.
+     *
+     * @param serviceName
+     *      serviceName from DD. Can be null.
+     *
+     * @return
+     *      WSDL service name. Can NOT be null.
+     */
+    private QName getServiceName(QName serviceName, Class<?> implementorClass) {
+        if (serviceName == null) {
+            WebServiceProvider wsProvider = (WebServiceProvider)implementorClass.getAnnotation(
+                        WebServiceProvider.class);
+            WebService ws = (WebService)implementorClass.getAnnotation(WebService.class);
+            if (wsProvider != null) {
+                String tns = wsProvider.targetNamespace();
+                String local = wsProvider.serviceName();
+                serviceName = new QName(tns, local);
+            } else {
+                serviceName = RuntimeModeler.getServiceName(implementorClass);
+            }
+        }
+        assert serviceName != null;
+        return serviceName;
+    }
+    
+    /**
+     * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider
+     * annotation
+     * @throws java.lang.IllegalArgumentException
+     *      If it doesn't have any one of @WebService or @WebServiceProvider
+     *      If it has both @WebService and @WebServiceProvider annotations
+     *
+     */
+    private void verifyImplementorClass(Class<?> implementorClass) {
+        WebServiceProvider wsProvider = (WebServiceProvider)implementorClass.getAnnotation(
+                    WebServiceProvider.class);
+        WebService ws = (WebService)implementorClass.getAnnotation(WebService.class);
+        if (wsProvider == null && ws == null) {
+            throw new IllegalArgumentException(implementorClass+" has neither @WebSerivce nor @WebServiceProvider annotation");
+        }
+        if (wsProvider != null && ws != null) {
+            throw new IllegalArgumentException(implementorClass+" has both @WebSerivce and @WebServiceProvider annotations");
+        }
+    }
 
     /**
      * Checks the deployment descriptor or {@link @WebServiceProvider} annotation
