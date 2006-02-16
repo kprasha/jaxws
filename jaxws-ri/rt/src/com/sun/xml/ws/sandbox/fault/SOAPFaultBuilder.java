@@ -52,7 +52,7 @@ public abstract class SOAPFaultBuilder {
      */
     public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions, Message msg) throws JAXBException {
         DetailType dt = getDetail();
-        if ((dt == null) || (dt.getDetails().size() != 1)) {
+        if ((dt == null) || (dt.getDetails().size() != 1) || (exceptions == null)) {
             // No soap detail, doesnt look like its a checked exception
             // throw a protocol exception
             return getProtocolException(msg);
