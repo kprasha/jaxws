@@ -50,12 +50,11 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -209,7 +208,7 @@ public class RuntimeWSDLParser {
         if(location!=null) {
             try {
                 port.setAddress(new EndpointAddress(location));
-            } catch (MalformedURLException e) {
+            } catch (URISyntaxException e) {
                 //TODO:i18nify
                 throw new WebServiceException("Malformed URL: "+location, e);
             }
