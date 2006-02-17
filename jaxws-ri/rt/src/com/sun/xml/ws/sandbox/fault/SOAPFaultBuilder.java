@@ -271,7 +271,7 @@ public abstract class SOAPFaultBuilder {
     /**
      * This {@link JAXBContext} can handle SOAP 1.1/1.2 faults.
      */
-    public static final JAXBContext JAXB_CONTEXT;
+    private static final JAXBContext JAXB_CONTEXT;
 
     private static final Marshaller JAXB_MARSHALLER;
 
