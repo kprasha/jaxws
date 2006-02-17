@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.transport.local.client;
+package com.sun.xml.ws.transport.local;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
-import com.sun.xml.ws.transport.local.server.LocalConnectionImpl;
 
 import javax.xml.ws.WebServiceException;
 import java.util.Arrays;
@@ -46,7 +45,7 @@ import java.io.IOException;
  *
  * @author jitu
  */
-public class LocalTransportPipe implements Pipe {
+final class LocalTransportPipe implements Pipe {
 
     /**
      * Represents the service running inside the local transport.

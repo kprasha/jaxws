@@ -1,15 +1,14 @@
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
+import com.sun.xml.ws.util.Pool.PipePool;
 
-import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
-import java.util.Map.Entry;
 import java.util.Map;
 
 /**
@@ -28,22 +27,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
     /**
      * Reuse pipelines as it's expensive to create.
      */
-    protected final Pool<Pipe> pipes = new Pool<Pipe>() {
-        protected Pipe create() {
-            return PipeCloner.clone(master);
-        }
-    };
-
-    /**
-     * Master {@link Pipe} instance from which
-     * copies are created.
-     * <p>
-     * We'll always keep at least one {@link Pipe}
-     * so that we can copy new ones. Note that
-     * this pipe is also in {@link #pipes} and therefore
-     * can be used to process messages like any other pipes.
-     */
-    private final Pipe master;
+    private final Pool<Pipe> pipes;
 
     protected final BindingImpl binding;
 
@@ -71,10 +55,9 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      *      could be overridden by {@link RequestContext}.
      */
     protected Stub(Pipe master, BindingImpl binding, EndpointAddress defaultEndPointAddress) {
-        this.master = master;
+        this.pipes = new PipePool(master);
         this.binding = binding;
         this.defaultEndPointAddress = defaultEndPointAddress;
-        pipes.recycle(master);
     }
 
     /**
@@ -100,7 +83,6 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
      */
     protected final Packet process(Packet packet, RequestContext requestContext, ResponseContextReceiver receiver) {
         {// fill in Packet
-
             packet.proxy = this;
             packet.endpointAddress = defaultEndPointAddress;
 
@@ -124,7 +106,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
         return reply;
     }
 
-    public final Binding getBinding() {
+    public final WSBinding getBinding() {
         return binding;
     }
 

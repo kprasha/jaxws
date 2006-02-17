@@ -139,7 +139,7 @@ public class XMLStreamReaderFactory {
                     InputSource inputSource = new InputSource(in);
                     inputSource.setSystemId(systemId);
                     SunStAXReflection.XMLReaderImpl_setInputSource.invoke(xsr, inputSource);
-                }                
+                }
                 return (XMLStreamReader) xsr;
             }
             else {

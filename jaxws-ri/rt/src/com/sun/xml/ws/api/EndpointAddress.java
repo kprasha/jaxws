@@ -57,20 +57,18 @@ import java.util.Iterator;
  */
 public final class EndpointAddress {
     private URL url;    // can be null
-    private URI uri;
-    private String stringForm;
-    private Proxy proxy;
+    private final URI uri;
+    private final String stringForm;
+    private Proxy proxy; // null if url is null
 
     public EndpointAddress(URI uri) {
-        if(uri != null) {
-            this.uri = uri;
-            this.stringForm = uri.toString();
-            try {
-                this.url = uri.toURL();
-            } catch (MalformedURLException e) {
-                // ignore
-            }
+        this.uri = uri;
+        this.stringForm = uri.toString();
+        try {
+            this.url = uri.toURL();
             proxy = chooseProxy();
+        } catch (MalformedURLException e) {
+            // ignore
         }
     }
 
@@ -79,15 +77,13 @@ public final class EndpointAddress {
      * @see #create(String)
      */
     public EndpointAddress(String url) throws URISyntaxException {
-        if(url != null) {
-            this.uri = new URI(url);
-            this.stringForm = url;
-            try {
-                this.url = new URL(url);
-            } catch (MalformedURLException e) {
-                // ignore
-            }
+        this.uri = new URI(url);
+        this.stringForm = url;
+        try {
+            this.url = new URL(url);
             proxy = chooseProxy();
+        } catch (MalformedURLException e) {
+            // ignore
         }
     }
 

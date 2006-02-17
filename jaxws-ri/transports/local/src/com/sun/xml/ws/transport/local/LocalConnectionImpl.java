@@ -18,7 +18,7 @@
  * [name of copyright owner]
  */
 
-package com.sun.xml.ws.transport.local.server;
+package com.sun.xml.ws.transport.local;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.WSConnectionImpl;
@@ -30,11 +30,11 @@ import java.security.Principal;
 
 
 /**
- * @author WS Development Team
- *
  * Server-side Local transport implementation
+ *
+ * @author WS Development Team
  */
-public final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
+final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
     private ByteArrayBuffer baos;
 
     public LocalConnectionImpl() {

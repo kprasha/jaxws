@@ -14,10 +14,17 @@ import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.sandbox.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.sandbox.handler.SOAPHandlerPipe;
+import com.sun.xml.ws.util.pipe.DumpPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe head = createTransport(wsdlModel,service,binding);
+
+        if(dump)
+            // for debugging inject a dump pipe. this is left in the production code,
+            // as it would be very handy for a trouble-shooting at the production site.
+            head = new DumpPipe(System.out,head);
+
         if((binding.getHandlerChain() != null) &&
                 !binding.getHandlerChain().isEmpty()) {
             boolean isClient = true;
@@ -27,22 +34,25 @@ public class StandalonePipeAssembler implements PipelineAssembler {
                 soapHandlerPipe = new SOAPHandlerPipe(binding, head, isClient);
                 head = soapHandlerPipe;
             }
-            
+
             //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and 
             //SOAPHandlerPipe here.            
-            
+
             HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, head, soapHandlerPipe, isClient);
             head = logicalHandlerPipe;
-        }         
+        }
         return head;
     }
 
+    /**
+     * Creates a transport pipe (for client), which becomes the terminal pipe.
+     */
     protected Pipe createTransport(WSDLPort wsdlModel, WSService service, WSBinding binding) {
         return TransportPipeFactory.create(
             Thread.currentThread().getContextClassLoader(),
             wsdlModel, service, binding);
     }
-   
+
     /**
      * On Server-side, HandlerChains cannot be changed after it is deployed.
      * During assembling the Pipelines, we can decide if we really need a 
@@ -63,19 +73,34 @@ public class StandalonePipeAssembler implements PipelineAssembler {
                 //XML/HTTP Binding can have only LogicalHandlers
                 logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal, isClient);
                 terminal = logicalHandlerPipe;
-            }    
-            
+            }
+
             //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and 
             //SOAPHandlerPipe here.
-            
-            if(binding.getSOAPVersion() != null) {     
+
+            if(binding.getSOAPVersion() != null) {
                 if(!((SOAPBindingImpl)binding).getSOAPHandlerChain().isEmpty()) {
                     HandlerPipe soapHandlerPipe;
-                    soapHandlerPipe= new SOAPHandlerPipe(binding,terminal, logicalHandlerPipe, isClient);                    
+                    soapHandlerPipe= new SOAPHandlerPipe(binding,terminal, logicalHandlerPipe, isClient);
                     terminal = soapHandlerPipe;
-                }                
-            }            
+                }
+            }
         }
         return terminal;
+    }
+
+    /**
+     * Are we going to dump the message to System.out?
+     */
+    private static final boolean dump;
+
+    static {
+        boolean b = false;
+        try {
+            b = Boolean.getBoolean(StandalonePipeAssembler.class.getName()+".dump");
+        } catch (Throwable t) {
+            // treat it as false
+        }
+        dump = b;
     }
 }
