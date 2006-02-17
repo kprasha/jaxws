@@ -124,8 +124,7 @@ public class MessageContextImpl implements MessageContext {
                 appScopeProps.remove(key);
             } else {
                 Object value = internalMap.get(key);
-                if(value != null)
-                    packet.put(key,value);
+                packet.put(key,value);
                 internalMap.remove(key);
             }
         }
