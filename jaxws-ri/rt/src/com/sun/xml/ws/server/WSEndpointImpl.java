@@ -96,7 +96,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                     return pipe.process(request);
                 } catch (WebServiceException e) {
                     // TODO: convert this to a fault, as required by the pipe contract
-                    throw new UnsupportedOperationException();
+                    throw new UnsupportedOperationException(e);
                 }
             }
         };
