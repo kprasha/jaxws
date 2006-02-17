@@ -35,7 +35,7 @@
         source="1.5">
       <classpath>
         <path refid="runtime.compile.classpath"/>
-        <fileset dir="lib" includes="*.jar" />
+        <!--fileset dir="lib" includes="*.jar" /-->
         <pathelement path="../../rt/build/classes" />
       </classpath>
     </javac>
