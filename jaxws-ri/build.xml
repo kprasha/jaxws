@@ -302,6 +302,9 @@ major-version=${release.impl.version}
 
   <!-- for now, this gets everything built -->
   <target name="image" depends="tools-build">
+    <ant dir="transports/local" target="dist" />
+    <!-- should I copy local transport jar to the build.home?  -->
+
     <copy todir="${build.home}">
         <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt" />
     </copy>
@@ -352,9 +355,7 @@ major-version=${release.impl.version}
     <chmod perm="+x" file="${dist20.home}/bin/wsgen.sh"/>
 
     <copy    todir="${dist20.home}/lib">
-	<fileset
-		dir="${build.home}/lib"
-		includes="*.jar"/>    	
+      <fileset dir="${build.home}/lib" includes="*.jar"/>
     </copy>
     	
     <copy    todir="${dist20.home}/docs">
