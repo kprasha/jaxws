@@ -34,8 +34,7 @@
         optimize="${compile.optimize}"
         source="1.5">
       <classpath>
-        <path refid="runtime.compile.classpath"/>
-        <!--fileset dir="lib" includes="*.jar" /-->
+        <fileset dir="../../lib" includes="*.jar" />
         <pathelement path="../../rt/build/classes" />
       </classpath>
     </javac>
@@ -43,8 +42,13 @@
   
   <target name="jar" depends="compile">
     <jar file="build/jaxws-local-transport.jar">
+      <manifest>
+        <attribute name="Build-Id" value="${build.id}" />
+        <attribute name="Build-Version" value="${build.version}" />
+        <attribute name="Major-Version" value="${release.impl.version}" />
+      </manifest>
       <fileset dir="build/classes" />
-      <fileset dir="src" includes="META-INF" />
+      <fileset dir="src" includes="META-INF/**/*" />
     </jar>
   </target>
   
