@@ -40,16 +40,16 @@ import javax.xml.ws.handler.MessageContext;
 
 public class MessageContextImpl implements MessageContext {
     
-    Map<String,Object> internalMap = new HashMap<String,Object>(); 
+    Map<String,Object> internalMap = new HashMap<String,Object>();
     Set<String> appScopeProps;
     /** Creates a new instance of MessageContextImpl */
-    public MessageContextImpl(Packet packet) {       
-       
-       internalMap.putAll(packet.createMapView());
-       internalMap.putAll(packet.invocationProperties);
-       internalMap.putAll(packet.otherProperties);
-       appScopeProps =  packet.getApplicationScopePropertyNames(false);
-              
+    public MessageContextImpl(Packet packet) {
+        
+        internalMap.putAll(packet.createMapView());
+        internalMap.putAll(packet.invocationProperties);
+        internalMap.putAll(packet.otherProperties);
+        appScopeProps =  packet.getApplicationScopePropertyNames(false);
+        
     }
     
     public void setScope(String name, Scope scope) {
@@ -58,30 +58,30 @@ public class MessageContextImpl implements MessageContext {
             appScopeProps.add(name);
         } else {
             appScopeProps.remove(name);
-                
-        }   
+            
+        }
     }
-
+    
     public Scope getScope(String name) {
         if(appScopeProps.contains(name)) {
             return MessageContext.Scope.APPLICATION;
         } else {
             return MessageContext.Scope.HANDLER;
-        }    
+        }
     }
     
     public int size() {
         return internalMap.size();
     }
-
+    
     public boolean isEmpty() {
         return internalMap.isEmpty();
     }
-
+    
     public boolean containsKey(Object key) {
         return internalMap.containsKey(key);
     }
-
+    
     public boolean containsValue(Object value) {
         return internalMap.containsValue(value);
     }
@@ -92,7 +92,7 @@ public class MessageContextImpl implements MessageContext {
     public Object get(Object key) {
         return internalMap.get(key);
     }
-
+    
     public void putAll(Map<? extends String, ? extends Object> t) {
         internalMap.putAll(t);
     }
@@ -123,8 +123,7 @@ public class MessageContextImpl implements MessageContext {
                 packet.remove(key);
                 appScopeProps.remove(key);
             } else {
-                Object value = internalMap.get(key);
-                packet.put(key,value);
+                packet.put(key,internalMap.get(key));
                 internalMap.remove(key);
             }
         }
@@ -158,13 +157,13 @@ public class MessageContextImpl implements MessageContext {
                 if(packet.supports(key)) {
                     packet.put(key,entry.getValue());
                 } else if(packet.otherProperties.containsKey(key)) {
-                    packet.otherProperties.put(key,entry.getValue());                        
-                } else {   
+                    packet.otherProperties.put(key,entry.getValue());
+                } else {
                     packet.invocationProperties.put(key,entry.getValue());
                 }
         }
-               
-        */
+         
+         */
         
     }
     
