@@ -16,11 +16,13 @@ import java.nio.channels.ReadableByteChannel;
 public class DecoderFacade implements Decoder {
     private final Decoder mimeMPSoapDecoder;
     private final Decoder soapHttpDecoder;
+    private final SOAPVersion soapVersion;
 
     //is multipart enough hint that the message is a Multipart/Related?
     private static final char[] mrIdentifier = {'m', 'u', 'l', 't', 'i', 'p', 'a', 'r', 't'};
 
     public DecoderFacade(SOAPVersion version) {
+        this.soapVersion = version;
         mimeMPSoapDecoder = MimeMultipartRelatedDecoder.get(version);
         soapHttpDecoder = StreamSOAPDecoder.create(version);
     }
@@ -40,7 +42,7 @@ public class DecoderFacade implements Decoder {
     }
 
     public Decoder copy() {
-        return null;
+        return new DecoderFacade(soapVersion);
     }
 
     private boolean isMultipartRelated(String contentType){
