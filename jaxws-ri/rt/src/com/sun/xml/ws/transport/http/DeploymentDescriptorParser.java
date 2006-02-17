@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.xml.sax.InputSource;
 
 /**
  * Parses {@code sun-jaxws.xml} into {@link WSEndpoint}.
@@ -122,7 +123,7 @@ public class DeploymentDescriptorParser<A> {
     public List<A> parse(InputStream is) {
         try {
             XMLStreamReader reader =
-                XMLStreamReaderFactory.createXMLStreamReader(is, true);
+                XMLStreamReaderFactory.createFreshXMLStreamReader(new InputSource(is), true);
             XMLStreamReaderUtil.nextElementContent(reader);
             return parseAdapters(reader);
         } catch (XMLStreamException e) {
