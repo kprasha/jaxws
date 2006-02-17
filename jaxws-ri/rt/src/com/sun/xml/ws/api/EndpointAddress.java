@@ -1,6 +1,5 @@
 package com.sun.xml.ws.api;
 
-import com.sun.corba.se.pept.protocol.ProtocolHandler;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -58,19 +57,21 @@ import java.util.Iterator;
  */
 public final class EndpointAddress {
     private URL url;    // can be null
-    private final URI uri;
-    private final String stringForm;
-    private final Proxy proxy;
+    private URI uri;
+    private String stringForm;
+    private Proxy proxy;
 
     public EndpointAddress(URI uri) {
-        this.uri = uri;
-        this.stringForm = uri.toString();
-        try {
-            this.url = uri.toURL();
-        } catch (MalformedURLException e) {
-            // ignore
+        if(uri != null) {
+            this.uri = uri;
+            this.stringForm = uri.toString();
+            try {
+                this.url = uri.toURL();
+            } catch (MalformedURLException e) {
+                // ignore
+            }
+            proxy = chooseProxy();
         }
-        proxy = chooseProxy();
     }
 
     /**
@@ -78,14 +79,16 @@ public final class EndpointAddress {
      * @see #create(String)
      */
     public EndpointAddress(String url) throws URISyntaxException {
-        this.uri = new URI(url);
-        this.stringForm = url;
-        try {
-            this.url = new URL(url);
-        } catch (MalformedURLException e) {
-            // ignore
+        if(url != null) {
+            this.uri = new URI(url);
+            this.stringForm = url;
+            try {
+                this.url = new URL(url);
+            } catch (MalformedURLException e) {
+                // ignore
+            }
+            proxy = chooseProxy();
         }
-        proxy = chooseProxy();
     }
 
     /**
