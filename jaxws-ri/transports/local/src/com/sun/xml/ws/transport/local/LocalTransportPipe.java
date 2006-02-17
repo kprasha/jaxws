@@ -73,6 +73,7 @@ final class LocalTransportPipe implements Pipe {
         this.adapter = adapter;
         this.encoder = encoder;
         this.decoder = decoder;
+        assert encoder!=null && decoder!=null && adapter!=null;
     }
 
     /**
