@@ -49,7 +49,7 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     private LogicalMessageImpl lm;
     private WSBinding binding;
 
-    public LogicalMessageContextImpl(WSBinding binding, Packet packet, MessageContext cxt) {
+    public LogicalMessageContextImpl(WSBinding binding, Packet packet, MessageContext ctxt) {
         this.binding = binding;
         this.packet = packet;
         this.ctxt = ctxt;
@@ -61,14 +61,17 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     }
 
     protected void updatePacket() {
-        //Check if LogicalMessageImpl has changed, if so construct new one
-        //TODO: Attachments are not used
-        // Packet are handled through MessageContext
-        if(lm.payloadSrc != null){
-            Message msg = packet.getMessage();
-            HeaderList headers = msg.getHeaders();
-            AttachmentSet attchments = msg.getAttachments();
-            packet.setMessage(new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion()));
+        //If LogicalMessage is not acccessed, its not modified.
+        if(lm != null) {
+            //Check if LogicalMessageImpl has changed, if so construct new one
+            //TODO: Attachments are not used
+            // Packet are handled through MessageContext
+            if(lm.payloadSrc != null){
+                Message msg = packet.getMessage();
+                HeaderList headers = msg.getHeaders();
+                AttachmentSet attchments = msg.getAttachments();
+                packet.setMessage(new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion()));
+            }
         }
     }
     public void setScope(String name, Scope scope) {
