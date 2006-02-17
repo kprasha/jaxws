@@ -35,8 +35,8 @@ public class SOAPHandlerProcessor<C extends SOAPMessageContext> extends HandlerP
     /**
      * Creates a new instance of SOAPHandlerProcessor
      */
-    public SOAPHandlerProcessor(WSBinding binding, List<Handler> chain) {
-    super(binding,chain);
+    public SOAPHandlerProcessor(WSBinding binding, List<Handler> chain, boolean isClient) {
+        super(binding,chain,isClient);
     }
     
     /**
@@ -131,20 +131,20 @@ public class SOAPHandlerProcessor<C extends SOAPMessageContext> extends HandlerP
             context.getMessage().getSOAPPart().getEnvelope();
         String uri = envelope.getNamespaceURI();
 
-        // client case
-        if ((Boolean) context.get(
-            MessageContext.MESSAGE_OUTBOUND_PROPERTY)) {
+        
+        if (isClient) {
+            // client case
             if (uri.equals(SOAP12NamespaceConstants.ENVELOPE)) {
                 return SOAP12Constants.FAULT_CODE_CLIENT;
             }
             return SOAPConstants.FAULT_CODE_CLIENT;
-        }
-
-        //server case
-        if (uri.equals(SOAP12NamespaceConstants.ENVELOPE)) {
-            return SOAP12Constants.FAULT_CODE_SERVER;
-        }
-        return SOAPConstants.FAULT_CODE_SERVER;
+        } else {            
+            //server case
+            if (uri.equals(SOAP12NamespaceConstants.ENVELOPE)) {
+                return SOAP12Constants.FAULT_CODE_SERVER;
+            }
+            return SOAPConstants.FAULT_CODE_SERVER;
+        }    
     }
 
 }

@@ -181,7 +181,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
         // should be used for the entire MEP
         logicalHandlers = new ArrayList<LogicalHandler>();
         logicalHandlers.addAll(((BindingImpl)binding).getLogicalHandlerChain());
-        processor = new LogicalHandlerProcessor(binding,logicalHandlers);
+        processor = new LogicalHandlerProcessor(binding,logicalHandlers,isClient);
     }
     
 }

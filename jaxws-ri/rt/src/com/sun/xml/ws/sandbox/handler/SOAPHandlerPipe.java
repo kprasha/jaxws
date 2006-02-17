@@ -189,7 +189,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         soapHandlers.addAll(((BindingImpl)binding).getSOAPHandlerChain());
         roles = new HashSet<String>();
         roles.addAll(((SOAPBindingImpl)binding).getRoles());
-        processor = new SOAPHandlerProcessor(binding,soapHandlers);
+        processor = new SOAPHandlerProcessor(binding,soapHandlers, isClient);
     }
     
 }

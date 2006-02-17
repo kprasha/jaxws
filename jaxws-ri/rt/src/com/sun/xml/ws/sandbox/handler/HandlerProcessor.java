@@ -59,7 +59,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
     
     public static final String IGNORE_FAULT_PROPERTY =
             "ignore fault in message";
-    
+    protected boolean isClient;
     protected static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".handler");
     
@@ -81,12 +81,13 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * @param chain A list of handler objects, which can
      * be protocol or logical handlers.
      */
-    public HandlerProcessor(WSBinding binding, List<Handler> chain) {
+    public HandlerProcessor(WSBinding binding, List<Handler> chain, boolean isClient) {
         if (chain == null) { // should only happen in testing
             chain = new ArrayList<Handler>();
         }
         handlers = chain;
         this.binding = binding;
+        this.isClient = isClient;
     }
     
     /**

@@ -23,8 +23,8 @@ public class LogicalHandlerProcessor<C extends LogicalMessageContext> extends Ha
     /**
      * Creates a new instance of LogicalHandlerProcessor
      */
-    public LogicalHandlerProcessor(WSBinding binding, List<Handler> chain) {
-    super(binding,chain);
+    public LogicalHandlerProcessor(WSBinding binding, List<Handler> chain, boolean isClient) {
+        super(binding,chain, isClient);
     }
     
     void insertFaultMessage(C context,
