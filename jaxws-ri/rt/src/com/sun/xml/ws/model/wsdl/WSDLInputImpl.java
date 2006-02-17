@@ -21,10 +21,7 @@ public class WSDLInputImpl extends AbstractExtensibleImpl implements WSDLInput {
     }
 
     public String getName() {
-        if(name == null){
-            return operation.isOneWay()?operation.getName().getLocalPart():operation.getName().getLocalPart()+"Request";
-        }
-        return name;
+        return (name == null)?operation.getName().getLocalPart()+"Request":name;
     }
 
     public WSDLMessage getMessage() {
