@@ -302,7 +302,7 @@ major-version=${release.impl.version}
 
   <!-- for now, this gets everything built -->
   <target name="image" depends="tools-build">
-    <ant dir="transports/local" target="dist" />
+    <ant dir="transports/local" target="dist" inheritrefs="true" />
     <!-- should I copy local transport jar to the build.home?  -->
 
     <copy todir="${build.home}">
