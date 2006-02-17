@@ -16,6 +16,7 @@ import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 import java.lang.reflect.Method;
@@ -91,7 +92,12 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;
                 packets.set(request);
-                return pipe.process(request);
+                try {
+                    return pipe.process(request);
+                } catch (WebServiceException e) {
+                    // TODO: convert this to a fault, as required by the pipe contract
+                    throw new UnsupportedOperationException();
+                }
             }
         };
     }
