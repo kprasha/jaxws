@@ -23,6 +23,8 @@ import java.io.FileInputStream;
  */
 public final class LocalTransportFactory extends TransportPipeFactory {
     public Pipe doCreate(WSDLPort wsdlModel, WSService service, WSBinding binding) {
+        if(wsdlModel==null)
+            return null;    // no WSDL, no address.
         URI adrs = wsdlModel.getAddress().getURI();
         if(!adrs.getScheme().equals("local"))
             return null;
