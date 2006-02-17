@@ -69,6 +69,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
      */
     protected SOAPHandlerPipe(SOAPHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
+        this.binding = that.binding;
         this.isClient = that.isClient;
     }
     
@@ -86,7 +87,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         context.setRoles(roles);
         Packet reply;
         try {
-            boolean isOneWay = packet.isOneWay;
+            boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
             boolean handlerResult = false;            
             // Call handlers on Request
             try {
@@ -107,6 +108,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
                 }
             }
             //Update Packet Properties
+            context.updatePacket();
             msgContext.fill(packet);
             
             // the only case where no message is sent

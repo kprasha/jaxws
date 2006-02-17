@@ -64,6 +64,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
     
     protected LogicalHandlerPipe(LogicalHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
+        this.binding = that.binding;
         this.isClient = that.isClient;               
     }
     
@@ -80,7 +81,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
         LogicalMessageContextImpl context =  new LogicalMessageContextImpl(binding,packet,msgContext);
         Packet reply;
         try {
-            boolean isOneWay = packet.isOneWay;
+            boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
             boolean handlerResult = false;
             
             // Call handlers on Request
