@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
@@ -22,10 +23,8 @@ import java.io.FileInputStream;
  * @author Kohsuke Kawaguchi
  */
 public final class LocalTransportFactory extends TransportPipeFactory {
-    public Pipe doCreate(WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        if(wsdlModel==null)
-            return null;    // no WSDL, no address.
-        URI adrs = wsdlModel.getAddress().getURI();
+    public Pipe doCreate(EndpointAddress addres, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+        URI adrs = addres.getURI();
         if(!adrs.getScheme().equals("local"))
             return null;
 

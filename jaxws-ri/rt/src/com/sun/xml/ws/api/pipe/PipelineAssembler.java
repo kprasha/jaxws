@@ -3,6 +3,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
@@ -44,6 +45,11 @@ public interface PipelineAssembler {
      * a {@link Service}, JAX-WS runtime internally uses this method
      * to create a new pipeline as a part of the initilization.
      *
+     * @param address
+     *      The endpoint address. Always non-null. This parameter is taken separately
+     *      from {@link WSDLPort} (even though there's {@link WSDLPort#getAddress()})
+     *      because sometimes WSDL is not available.
+     *
      * @param wsdlModel
      *      The created pipeline will be used to serve this port.
      *      Null if the service isn't associated with any port definition in WSDL,
@@ -66,7 +72,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(WSDLPort wsdlModel, WSService rootOwner, WSBinding binding);
+    Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService rootOwner, WSBinding binding);
 
     /**
      * Creates a new pipeline for servers.

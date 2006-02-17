@@ -5,6 +5,7 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
@@ -17,8 +18,8 @@ import com.sun.xml.ws.sandbox.handler.SOAPHandlerPipe;
 import com.sun.xml.ws.util.pipe.DumpPipe;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
-    public Pipe createClient(WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        Pipe head = createTransport(wsdlModel,service,binding);
+    public Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+        Pipe head = createTransport(address,wsdlModel,service,binding);
 
         if(dump)
             // for debugging inject a dump pipe. this is left in the production code,
@@ -47,10 +48,10 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     /**
      * Creates a transport pipe (for client), which becomes the terminal pipe.
      */
-    protected Pipe createTransport(WSDLPort wsdlModel, WSService service, WSBinding binding) {
+    protected Pipe createTransport(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
         return TransportPipeFactory.create(
             Thread.currentThread().getContextClassLoader(),
-            wsdlModel, service, binding);
+            address, wsdlModel, service, binding);
     }
 
     /**

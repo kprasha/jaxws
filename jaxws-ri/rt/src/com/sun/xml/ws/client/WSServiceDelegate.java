@@ -5,9 +5,9 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
@@ -29,7 +29,6 @@ import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
-import com.sun.xml.ws.server.RuntimeContext;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
@@ -41,7 +40,6 @@ import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
-import javax.xml.ws.handler.PortInfo;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import java.lang.reflect.Method;
@@ -95,8 +93,11 @@ public class WSServiceDelegate extends WSService {
      * This includes ports statically known to WSDL, as well as
      * ones that are dynamically added
      * through {@link #addPort(QName, String, String)}.
+     *
+     * For statically known ports we'll have {@link SEIPortInfo}.
+     * For dynamically added ones we'll have {@link PortInfo}.
      */
-    private final Map<QName,PortInfoBase> ports = new HashMap<QName, PortInfoBase>();
+    private final Map<QName,PortInfo> ports = new HashMap<QName,PortInfo>();
 
     private HandlerResolver handlerResolver;
 
@@ -122,7 +123,7 @@ public class WSServiceDelegate extends WSService {
     /**
      * Information about SEI, keyed by their interface type.
      */
-    private final Map<Class,EndpointIFContext> seiContext = new HashMap<Class,EndpointIFContext>();
+    private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
 
     private final HashMap<QName,Set<String>> rolesMap = new HashMap<QName,Set<String>>();
 
@@ -175,7 +176,7 @@ public class WSServiceDelegate extends WSService {
         // fill in statically known ports
         for (WSDLPortImpl port : wsdlContext.getPorts(serviceName) ) {
             ports.put(port.getName(),
-                new PortInfoBase(port.getAddress(), port.getName(), port.getBinding().getBindingId()));
+                new PortInfo(this, port.getAddress(), port.getName(), port.getBinding().getBindingId()));
         }
     }
 
@@ -208,7 +209,7 @@ public class WSServiceDelegate extends WSService {
 
     public <T> T getPort(Class<T> portInterface) throws WebServiceException {
         // pick the port name
-        QName portName = seiContext.get(portInterface).getPortName();
+        QName portName = seiContext.get(portInterface).portName;
         return getPort(portName, portInterface);
     }
 
@@ -216,52 +217,43 @@ public class WSServiceDelegate extends WSService {
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
             ports.put(portName,
-                new PortInfoBase(EndpointAddress.create(endpointAddress), portName, bindingId));
+                new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bindingId));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
 
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
-        //Note: may not be the most performant way to do this- needs review
-        BindingImpl binding = getBinding(portName);
-        return Stubs.createDispatch(portName, this, binding, aClass, mode,
-             createPipeline(portName,binding));
+        PortInfo port = ports.get(portName);
+        BindingImpl binding = port.createBinding();
+        return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port,binding));
     }
 
     /**
      * Creates a new pipeline for the given port name.
      */
-    private Pipe createPipeline(QName portName, BindingImpl binding) {
-        WSDLPort port = null;
-        String bindingId = binding.getBindingId();
-
-        if(wsdlService !=null) {
-            port = wsdlService.get(portName);
-            // TODO: error check for port==null?
-        }
+    private Pipe createPipeline(PortInfo portInfo, WSBinding binding) {
+        String bindingId = portInfo.bindingId;
 
         PipelineAssembler assembler = PipelineAssemblerFactory.create(Thread.currentThread().getContextClassLoader(), bindingId);
         if(assembler==null)
             throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
-        return assembler.createClient(port,this,binding);
+        return assembler.createClient(
+            portInfo.targetEndpoint,
+            portInfo.getWSDLModel(),
+            this,binding);
     }
 
     public EndpointAddress getEndpointAddress(QName qName) {
-        PortInfoBase dispatchPort = ports.get(qName);
-        return dispatchPort.getTargetEndpoint();
-
-    }
-
-    private BindingImpl getBinding(QName portName) {
-        PortInfoBase dispatchPort = ports.get(portName);
-        return createBinding(portName, dispatchPort.getBindingId());
+        return ports.get(qName).targetEndpoint;
 
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        BindingImpl binding = getBinding(portName);
-        return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,createPipeline(portName,binding));
+        PortInfo port = ports.get(portName);
+        BindingImpl binding = port.createBinding();
+        return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,
+            createPipeline(port,binding));
     }
 
     public QName getServiceName() {
@@ -281,29 +273,21 @@ public class WSServiceDelegate extends WSService {
     }
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {
-        if (!seiContext.isEmpty())
-            addSEI(portInterface);  // KK: this if block doesn't make sense to me. why not just always call addSEI?
-
         if (!wsdlContext.contains(serviceName, portName)) {
             throw new WebServiceException("WSDLPort " + portName + "is not found in service " + serviceName);
         }
 
-        EndpointIFContext eif = seiContext.get(portInterface);
-        if (wsdlContext != null) {
-            eif.setServiceName(serviceName);
-            eif.setPortInfo(getPortModel(portName));
-        }
+        SEIPortInfo eif = seiContext.get(portInterface);
 
         //apply parameter bindings
-        SOAPSEIModel model = eif.getModel();
+        SOAPSEIModel model = eif.model;
         if (portName != null) {
             WSDLBoundPortTypeImpl binding = getPortModel(portName).getBinding();
-            eif.setBindingID(binding.getBindingId());
             model.applyParameterBinding(binding);
         }
 
-        BindingImpl binding = createBinding(portName, eif.getBindingID());
-        SEIStub pis = new SEIStub(this, binding, model, createPipeline(portName,binding));
+        BindingImpl binding = eif.createBinding();
+        SEIStub pis = new SEIStub(this, binding, model, createPipeline(eif,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{ portInterface, BindingProvider.class }, pis));
@@ -317,7 +301,7 @@ public class WSServiceDelegate extends WSService {
         // get handler chain
         List<Handler> handlerChain;
         if (handlerResolver != null) {
-            PortInfo portInfo = new PortInfoImpl(bindingId, portName, serviceName);
+            javax.xml.ws.handler.PortInfo portInfo = new PortInfoImpl(bindingId, portName, serviceName);
             handlerChain = handlerResolver.getHandlerChain(portInfo);
         } else {
             handlerChain = new ArrayList<Handler>();
@@ -357,51 +341,47 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * Contributes to the construction of {@link WSServiceDelegate} by filling in
-     * {@link EndpointIFContext} about a given SEI (linked from the {@link Service}-derived class.)
+     * {@link SEIPortInfo} about a given SEI (linked from the {@link Service}-derived class.)
      */
     //todo: valid port in wsdl
     private void addSEI(Class portInterface) throws WebServiceException {
-        EndpointIFContext eifc = seiContext.get(portInterface);
-        if (eifc == null) {
-            eifc = new EndpointIFContext(portInterface);
-            seiContext.put(eifc.getSei(),eifc);
+        SEIPortInfo spi = seiContext.get(portInterface);
+        if (spi != null)    return;
 
-            //toDo:
-            QName portName = eifc.getPortName();
-            if (portName == null)
-                portName = guessPortName(portInterface);
 
-            if (portName == null) {
-                portName = wsdlContext.getPortName();
-            }
+        QName portName = guessPortName(portInterface);
+        if (portName == null) {
+            portName = wsdlContext.getPortName();
+        }
 
-            //todo:use SCAnnotations and put in map
-            WSDLPortImpl wsdlPort = wsdlService.get(portName);
-            // TODO: error check against wsdlPort==null
-            RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort,false);
-            modeler.setPortName(portName);
-            AbstractSEIModelImpl model = modeler.buildRuntimeModel();
+        //todo:use SCAnnotations and put in map
+        WSDLPortImpl wsdlPort = wsdlService.get(portName);
+        // TODO: error check against wsdlPort==null
+        RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort,false);
+        modeler.setPortName(portName);
+        AbstractSEIModelImpl model = modeler.buildRuntimeModel();
 
-            eifc.setModel((SOAPSEIModel)model);
+        spi = new SEIPortInfo(this,wsdlPort.getAddress(),portName,
+            wsdlPort.getBinding().getBindingId(),portInterface, (SOAPSEIModel)model,wsdlPort);
+        seiContext.put(spi.sei,spi);
 
-            // get handler information
-            HandlerAnnotationInfo chainInfo =
-                HandlerAnnotationProcessor.buildHandlerInfo(portInterface,
-                    model.getServiceQName(), model.getPortName(), getBinding(wsdlPort.getName()));
+        // get handler information
+        HandlerAnnotationInfo chainInfo =
+            HandlerAnnotationProcessor.buildHandlerInfo(portInterface,
+                model.getServiceQName(), model.getPortName(), spi.createBinding() );
 
-            if (chainInfo != null) {
-                if(handlerResolver==null)
-                    handlerResolver = new HandlerResolverImpl();
+        if (chainInfo != null) {
+            if(handlerResolver==null)
+                handlerResolver = new HandlerResolverImpl();
 
-                // the following cast to HandlerResolverImpl always succeed, as the addPort method
-                // is only used during the construction of WSServiceDelegate
-                ((HandlerResolverImpl)handlerResolver).setHandlerChain(new PortInfoImpl(
-                    wsdlPort.getBinding().getBindingId(),
-                    model.getPortName(),
-                    model.getServiceQName()),
-                    chainInfo.getHandlers());
-                rolesMap.put(portName,chainInfo.getRoles());
-            }
+            // the following cast to HandlerResolverImpl always succeed, as the addPort method
+            // is only used during the construction of WSServiceDelegate
+            ((HandlerResolverImpl)handlerResolver).setHandlerChain(new PortInfoImpl(
+                wsdlPort.getBinding().getBindingId(),
+                model.getPortName(),
+                model.getServiceQName()),
+                chainInfo.getHandlers());
+            rolesMap.put(portName,chainInfo.getRoles());
         }
     }
 

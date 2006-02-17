@@ -20,36 +20,45 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.binding.BindingImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
 /**
- * Information about a port dynamically added through {@link Service#addPort(QName, String, String)}.
+ * Information about a port.
+ *
+ * This object is owned by {@link WSServiceDelegate} to keep track of a port,
+ * since a port maybe added dynamically.
  *
  * @author JAXWS Development Team
  */
-final class PortInfoBase {
+class PortInfo {
+    private final WSServiceDelegate owner;
 
-    private final EndpointAddress targetEndpoint;
-    private final QName portName;
-    private final String bindingId;
+    public final QName portName;
+    public final EndpointAddress targetEndpoint;
+    public final String bindingId;
 
-    public PortInfoBase(EndpointAddress targetEndpoint, QName name, String bindingId) {
+    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, String bindingId) {
+        this.owner = owner;
         this.targetEndpoint = targetEndpoint;
         this.portName = name;
         this.bindingId = bindingId;
     }
 
-    public QName getName() {
-        return portName;
+    public BindingImpl createBinding() {
+        return owner.createBinding(portName,bindingId);
     }
 
-    public EndpointAddress getTargetEndpoint() {
-        return targetEndpoint;
-    }
-
-    public String getBindingId() {
-        return bindingId;
+    /**
+     * Gets the {@link WSDLPort} model for this port, if any
+     *
+     * @return
+     *      can be null.
+     */
+    public WSDLPort getWSDLModel() {
+        return null;
     }
 }

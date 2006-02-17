@@ -25,13 +25,11 @@ import java.util.logging.Logger;
  * They are expected to check the scheme of the endpoint address
  * (and possibly some other settings from bindings), and create
  * their transport pipe implementations accordingly.
- * (Endpoint address can be obtained from {@link WSDLPort#getAddress()}.)
  * For example,
  *
  * <pre>
  * class MyTransportPipeFactoryImpl {
  *   Pipe doCreate(...) {
- *     EndpointAddress address = wsdlModel.getAddress();
  *     String scheme = address.getURI().getScheme();
  *     if(scheme.equals("foo"))
  *       return new MyTransport(...);
@@ -61,6 +59,11 @@ public abstract class TransportPipeFactory {
      * Creates a transport {@link Pipe} for the given port, if this factory can do so,
      * or return null.
      *
+     * @param address
+     *      The endpoint address. Always non-null. This parameter is taken separately
+     *      from {@link WSDLPort} (even though there's {@link WSDLPort#getAddress()})
+     *      because sometimes WSDL is not available.
+     *
      * @param wsdlModel
      *      The created transport pipe will be used to serve this port.
      *      Null if the service isn't associated with any port definition in WSDL,
@@ -84,7 +87,7 @@ public abstract class TransportPipeFactory {
      *      back to the user application, and no further {@link TransportPipeFactory}s
      *      are consulted.
      */
-    public abstract Pipe doCreate(WSDLPort wsdlModel, WSService service, WSBinding binding);
+    public abstract Pipe doCreate(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding);
 
     /**
      * Locates {@link PipelineAssemblerFactory}s and create
@@ -95,9 +98,9 @@ public abstract class TransportPipeFactory {
      * @return
      *      Always non-null, since we fall back to our default {@link PipelineAssembler}.
      */
-    public static Pipe create(ClassLoader classLoader, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+    public static Pipe create(ClassLoader classLoader, EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
         for (TransportPipeFactory factory : ServiceFinder.find(TransportPipeFactory.class,classLoader)) {
-            Pipe pipe = factory.doCreate(wsdlModel,service,binding);
+            Pipe pipe = factory.doCreate(address,wsdlModel,service,binding);
             if(pipe!=null) {
                 logger.fine(factory.getClass()+" successfully created "+pipe);
                 return pipe;
@@ -105,7 +108,6 @@ public abstract class TransportPipeFactory {
         }
 
         // default built-in trasnports
-        EndpointAddress address = wsdlModel.getAddress();
         String scheme = address.getURI().getScheme();
         if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
             return new HttpTransportPipe(binding);
