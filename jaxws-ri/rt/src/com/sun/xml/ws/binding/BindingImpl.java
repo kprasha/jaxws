@@ -25,10 +25,8 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.binding.http.HTTPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
-import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
-import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
@@ -37,7 +35,6 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
