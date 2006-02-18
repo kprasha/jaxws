@@ -1,5 +1,6 @@
 package com.sun.xml.ws.transport.http;
 
+import com.sun.tools.xjc.reader.xmlschema.Messages;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.Adapter;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,21 +85,35 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     final class HttpToolkit extends Adapter.Toolkit implements TransportBackChannel {
         private WSConnection con;
+        private boolean closed;
 
         public void handle(WSConnection con) throws IOException {
             this.con = con;
+            this.closed = false;
             String ct = con.getRequestHeader("Content-Type");
             InputStream in = con.getInput();
             Packet packet = new Packet();
             decoder.decode(in, ct, packet);
             con.wrapUpRequestPacket(packet);
-            packet = head.process(packet,con.getWebServiceContextDelegate(),this);
+            try {
+                packet = head.process(packet,con.getWebServiceContextDelegate(),this);
+            } catch(Exception e) {
+                e.printStackTrace();
+                if (!closed) {
+                    writeInternalServerError(con);
+                }
+                return;
+            }
+            if (closed) {
+                return;                 // Connection is already closed
+            }
 
             ct = encoder.getStaticContentType();
             if (ct == null) {
                 throw new UnsupportedOperationException();
             } else {
                 //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
+                //con.setStatus(packet.HTTP_RESPONSE_CODE);
                 Headers headers = new Headers();
                 headers.put("Content-Type", Collections.singletonList(ct));
                 con.setResponseHeaders(headers);
@@ -110,6 +126,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
 
         public void close() {
+            closed = true;
             // close the response channel now
             con.setStatus(WSConnection.ONEWAY);
             con.closeOutput();
@@ -175,7 +192,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             return;
         }
 
-        con.setStatus(SC_OK);
+        con.setStatus(HttpURLConnection.HTTP_OK);
         setContentType(con, "application/xml");
 
         OutputStream os = con.getOutput();
@@ -190,7 +207,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     }
 
     private void writeNotFoundErrorPage(WSConnection con, String message) throws IOException {
-        con.setStatus(SC_NOT_FOUND);
+        con.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
         setContentType(con, "text/html; charset=UTF-8");
 
         PrintWriter out = new PrintWriter(new OutputStreamWriter(con.getOutput(),"UTF-8"));
@@ -207,6 +224,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         out.println("</body>");
         out.println("</html>");
     }
+    
+    private void writeInternalServerError(WSConnection con) throws IOException {
+        con.setStatus(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        con.getOutput();        // Sets the status code
+    }
 
     /**
      * Sets the Content-Type as the only header.
@@ -219,7 +241,4 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     private static final LocalizableMessageFactory messageFactory =
         new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
 
-
-    private static final int SC_OK = 200;
-    private static final int SC_NOT_FOUND = 404;
 }

@@ -87,11 +87,12 @@ public class HttpTransportPipe implements Pipe {
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
+            
+            if (request.isOneWay==Boolean.TRUE
+                || con.statusCode==WSConnection.ONEWAY) {
+                return new Packet(null);    // one way. no response given.
+            }
             ct = getContentType(respHeaders);
-            if(request.isOneWay==Boolean.TRUE
-            || con.statusCode==WSConnection.ONEWAY)
-                return null;    // one way. no response given.
-
             Packet reply = request.createResponse(null);
             decoder.decode(con.getInput(), ct, reply);
             return reply;
@@ -103,7 +104,11 @@ public class HttpTransportPipe implements Pipe {
     }
 
     private String getContentType(Map<String, List<String>> headers) {
-        return headers.get("Content-Type").get(0);
+        List<String> cts = headers.get("Content-Type");
+        if (cts != null) {
+            return cts.get(0);
+        }
+        return null;
     }
 
     public void preDestroy() {
