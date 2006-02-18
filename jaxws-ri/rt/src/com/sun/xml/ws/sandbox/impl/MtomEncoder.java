@@ -75,6 +75,7 @@ public class MtomEncoder implements Encoder {
 
     public String encode(Packet packet, OutputStream out) throws IOException {
         //get the current boundary thaat will be reaturned from this method
+        mtomAttachmentStream.clear();
         String currBoundary = boundary;
         this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         if(packet.getMessage() != null){
@@ -90,6 +91,13 @@ public class MtomEncoder implements Encoder {
 
                 int numOfAttachments = 0;
                 Iterator<Attachment> mimeAttSet = packet.getMessage().getAttachments().iterator();
+
+                //if there no other mime parts to be written, write the end boundary
+                if(!mimeAttSet.hasNext() && mtomAttachmentStream.size() == 0){
+                    OutputUtil.writeAsAscii("--"+boundary, out);
+                        OutputUtil.writeAsAscii("--", out);
+                }
+
                 for(ByteArrayOutputStream bos : mtomAttachmentStream){
                     out.write(bos.toByteArray());
                     OutputUtil.writeln(out);
@@ -97,6 +105,7 @@ public class MtomEncoder implements Encoder {
                         OutputUtil.writeAsAscii("--"+boundary, out);
                         OutputUtil.writeAsAscii("--", out);
                     }
+                    bos.reset();
                 }
 
                 //now write out the attachments in the message
