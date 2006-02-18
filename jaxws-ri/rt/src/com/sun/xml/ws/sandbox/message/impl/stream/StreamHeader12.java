@@ -22,7 +22,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.sandbox.message.impl.Util;
-import com.sun.xml.bind.v2.util.FinalArrayList;
+import com.sun.istack.FinalArrayList;
 
 import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamReader;

@@ -21,7 +21,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.v2.util.FinalArrayList;
+import com.sun.istack.FinalArrayList;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
