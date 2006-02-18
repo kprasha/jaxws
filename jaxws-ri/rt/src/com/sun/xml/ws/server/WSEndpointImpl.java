@@ -1,6 +1,8 @@
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -12,6 +14,7 @@ import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.annotation.PreDestroy;
@@ -27,7 +30,7 @@ import java.util.logging.Logger;
  * {@link WSEndpoint} implementation.
  *
  * @author Kohsuke Kawaguchi
- * @author Jitu
+ * @author Jitendra Kotamraju
  */
 public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final WSBinding binding;
@@ -38,6 +41,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     private final Pipe masterPipeline;
     private final ServiceDefinitionImpl serviceDef;
+    private final SOAPVersion soapVersion;
 
     /**
      * Set to true once we start shutting down this endpoint.
@@ -50,6 +54,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, InstanceResolver<T> instanceResolver, ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
         this.binding = binding;
+        this.soapVersion = binding.getSOAPVersion();
         this.container = container;
         this.port = port;
         this.instanceResolver = instanceResolver;
@@ -92,12 +97,19 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;
                 packets.set(request);
+                Packet response;
                 try {
-                    return pipe.process(request);
-                } catch (WebServiceException e) {
-                    // TODO: convert this to a fault, as required by the pipe contract
-                    throw new UnsupportedOperationException(e);
+                    response = pipe.process(request);
+                } catch (RuntimeException re) {
+                    // Catch all runtime exceptions so that transport doesn't
+                    // have to worry about converting to wire message
+                    // TODO XML/HTTP binding
+                    re.printStackTrace();
+                    Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
+                            soapVersion, null, re);
+                    response = new Packet(faultMsg);
                 }
+                return response;
             }
         };
     }

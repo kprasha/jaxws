@@ -19,6 +19,7 @@
  */
 package com.sun.xml.ws.server.sei;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -29,7 +30,11 @@ import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.QNameMap;
+import com.sun.xml.ws.encoding.soap.SOAPConstants;
+import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+
 
 import javax.xml.namespace.QName;
 
@@ -47,9 +52,10 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
     private final QNameMap<EndpointMethodHandler> methodHandlers;
     private static final String EMPTY_PAYLOAD_LOCAL = "";
     private static final String EMPTY_PAYLOAD_NSURI = "";
-
+    private final SOAPVersion soapVersion;
 
     public SEIInvokerPipe(AbstractSEIModelImpl model,InstanceResolver instanceResolver, WSBinding binding) {
+        this.soapVersion = binding.getSOAPVersion();
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         // fill in methodHandlers.
         for( JavaMethodImpl m : model.getJavaMethods() ) {
@@ -75,7 +81,20 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
             nsUri = msg.getPayloadNamespaceURI();
         }
         EndpointMethodHandler handler = methodHandlers.get(nsUri, localPart);
-        Packet res = handler.invoke(req);
+        Packet res;
+        if (handler == null) {
+            // TODO optimize
+            String faultString = "Cannot find dispatch method for "+
+                    "{"+nsUri+"}"+localPart;
+            QName faultCode = (soapVersion == SOAPVersion.SOAP_11)
+                ? SOAPConstants.FAULT_CODE_CLIENT
+                : SOAP12Constants.FAULT_CODE_CLIENT;
+            Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
+                    soapVersion, faultString, faultCode);
+            res = new Packet(faultMsg);
+        } else {
+            res = handler.invoke(req);
+        }
         res.invocationProperties.putAll(req.invocationProperties);
 
         return res;

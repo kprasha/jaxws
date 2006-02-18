@@ -245,8 +245,6 @@ final class EndpointMethodHandler {
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
             Packet res = new Packet(responseMessage);
-            // TODO: some properties need to be copied from request packet to the response packet
-            res.invocationProperties.putAll(req.invocationProperties);
             return new Packet(responseMessage);
         } finally {
             pool.recycle(m);
