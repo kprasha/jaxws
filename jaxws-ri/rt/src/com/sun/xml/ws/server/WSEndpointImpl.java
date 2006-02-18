@@ -3,27 +3,27 @@ package com.sun.xml.ws.server;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.TransportBackChannel;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -122,19 +122,22 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         masterPipeline.preDestroy();
         instanceResolver.dispose();
 
-        for (Handler handler : binding.getHandlerChain()) {
-            for (Method method : handler.getClass().getMethods()) {
-                if (method.getAnnotation(PreDestroy.class) == null) {
-                    continue;
+        List<Handler> handlerChain = binding.getHandlerChain();
+        if(handlerChain!=null) {
+            for (Handler handler : handlerChain) {
+                for (Method method : handler.getClass().getMethods()) {
+                    if (method.getAnnotation(PreDestroy.class) == null) {
+                        continue;
+                    }
+                    try {
+                        method.invoke(handler);
+                    } catch (Exception e) {
+                        logger.warning("exception ignored from handler " +
+                            "@PreDestroy method: " +
+                            e.getMessage());
+                    }
+                    break;
                 }
-                try {
-                    method.invoke(handler);
-                } catch (Exception e) {
-                    logger.warning("exception ignored from handler " +
-                        "@PreDestroy method: " +
-                        e.getMessage());
-                }
-                break;
             }
         }
     }
