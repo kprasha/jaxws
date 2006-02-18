@@ -364,6 +364,7 @@ public class WSServiceDelegate extends WSService {
         spi = new SEIPortInfo(this,wsdlPort.getAddress(),portName,
             wsdlPort.getBinding().getBindingId(),portInterface, (SOAPSEIModel)model,wsdlPort);
         seiContext.put(spi.sei,spi);
+        ports.put(spi.portName,spi);
 
         // get handler information
         HandlerAnnotationInfo chainInfo =
