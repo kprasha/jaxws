@@ -39,7 +39,7 @@ public class DumpPipe extends AbstractFilterPipeImpl {
     private DumpPipe(DumpPipe that, PipeCloner cloner) {
         super(that,cloner);
         this.out = that.out;
-        this.staxOut = XMLOutputFactory.newInstance();
+        this.staxOut = that.staxOut;
     }
 
     public Packet process(Packet packet) {
