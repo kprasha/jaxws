@@ -20,28 +20,26 @@ import com.sun.xml.ws.util.pipe.DumpPipe;
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe head = createTransport(address,wsdlModel,service,binding);
-
+        
         if(dump)
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
             head = new DumpPipe(System.out,head);
-
-        if((binding.getHandlerChain() != null) &&
-                !binding.getHandlerChain().isEmpty()) {
-            boolean isClient = true;
-            HandlerPipe soapHandlerPipe = null;
-            //XML/HTTP Binding can have only LogicalHandlerPipe
-            if(binding.getSOAPVersion() != null) {
-                soapHandlerPipe = new SOAPHandlerPipe(binding, head, isClient);
-                head = soapHandlerPipe;
-            }
-
-            //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and 
-            //SOAPHandlerPipe here.            
-
-            HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, head, soapHandlerPipe, isClient);
-            head = logicalHandlerPipe;
+        
+        boolean isClient = true;
+        HandlerPipe soapHandlerPipe = null;
+        //XML/HTTP Binding can have only LogicalHandlerPipe
+        if(binding.getSOAPVersion() != null) {
+            soapHandlerPipe = new SOAPHandlerPipe(binding, head, isClient);
+            head = soapHandlerPipe;
         }
+        
+        //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and
+        //SOAPHandlerPipe here.
+        
+        HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, head, soapHandlerPipe, isClient);
+        head = logicalHandlerPipe;
+        
         return head;
     }
 
