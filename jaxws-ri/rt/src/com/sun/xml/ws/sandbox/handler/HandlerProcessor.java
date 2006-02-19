@@ -144,6 +144,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
     public boolean callHandlersRequest(Direction direction,
             C context,
             boolean responseExpected) {
+        setDirection(direction,context);
         boolean result = true;
         // call handlers
         try {
@@ -207,6 +208,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
      */
     public void callHandlersResponse(Direction direction,
             C context) {
+        setDirection(direction,context);
         // call handlers
         try {
             if (direction == Direction.OUTBOUND) {
@@ -228,6 +230,18 @@ abstract class HandlerProcessor<C extends MessageContext> {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         } else {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, true);
+        }
+    }
+    
+    /**
+     * Sets the Message Direction.
+     * MessageContext.MESSAGE_OUTBOUND_PROPERTY is changed.
+     */
+    public void setDirection(Direction direction, C context){
+        if(direction == Direction.OUTBOUND){
+            context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, true);
+        } else {
+            context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         }
     }
     

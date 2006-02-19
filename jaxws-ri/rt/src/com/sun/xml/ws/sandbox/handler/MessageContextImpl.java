@@ -117,41 +117,6 @@ public class MessageContextImpl implements MessageContext {
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
     public void fill(Packet packet) {
-        //Remove properties which are removed by user.
-        for (String key : packet.createMapView().keySet()) {
-            if(!internalMap.containsKey(key)) {
-                packet.remove(key);
-                appScopeProps.remove(key);
-            } else {
-                packet.put(key,internalMap.get(key));
-                internalMap.remove(key);
-            }
-        }
-        
-        //Remove properties which are removed by user.
-        for (String key : packet.otherProperties.keySet()) {
-            if(!internalMap.containsKey(key)) {
-                packet.otherProperties.remove(key);
-                appScopeProps.remove(key);
-            } else {
-                packet.otherProperties.put(key,internalMap.get(key));
-                internalMap.remove(key);
-            }
-        }
-        
-        //Remove properties which are removed by user.
-        for (String key : packet.invocationProperties.keySet()) {
-            if(!internalMap.containsKey(key)) {
-                packet.invocationProperties.remove(key);
-                appScopeProps.remove(key);
-            } else {
-                packet.invocationProperties.put(key,internalMap.get(key));
-                internalMap.remove(key);
-            }
-        }
-        
-        packet.invocationProperties.putAll(internalMap);
-        /*
         for (Entry<String,Object> entry : internalMap.entrySet()) {
                 String key = entry.getKey();
                 if(packet.supports(key)) {
@@ -162,9 +127,12 @@ public class MessageContextImpl implements MessageContext {
                     packet.invocationProperties.put(key,entry.getValue());
                 }
         }
-         
-         */
         
+        //Remove properties which are removed by user.
+        packet.createMapView().keySet().retainAll(internalMap.keySet());
+        packet.otherProperties.keySet().retainAll(internalMap.keySet());
+        packet.invocationProperties.keySet().retainAll(internalMap.keySet());
+        packet.getApplicationScopePropertyNames(false).retainAll(internalMap.keySet());
     }
     
 }
