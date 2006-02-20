@@ -59,6 +59,8 @@ abstract class HandlerProcessor<C extends MessageContext> {
     
     public static final String IGNORE_FAULT_PROPERTY =
             "ignore fault in message";
+    public static final String HANDLE_FAULT_PROPERTY =
+            "handle fault on message";
     protected boolean isClient;
     protected static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".handler");
@@ -153,27 +155,25 @@ abstract class HandlerProcessor<C extends MessageContext> {
             } else {
                 result = callHandleMessage(context,handlers.size()-1,0);
             }
-        } catch (RuntimeException re) {
-            logger.log(Level.FINER, "exception in handler chain", re);
-            if (responseExpected && re instanceof ProtocolException) {
-                //insert fault message if its not a falut message
-                insertFaultMessage(context, (ProtocolException) re);                
+        } catch (ProtocolException pe) {
+            logger.log(Level.FINER, "exception in handler chain", pe);
+            if (responseExpected) {
+                //insert fault message if its not a fault message
+                insertFaultMessage(context, (ProtocolException) pe);                
                 // reverse direction
                 reverseDirection(direction,context);
+                //Put handleFault in MessageContext
+                addHandleFaultProperty(context);
                 // call handle fault                
-                try {
-                    if(direction == Direction.OUTBOUND) {
-                        callHandleFault(context, getIndex()-1, 0);
-                    } else {
-                        callHandleFault(context,getIndex()+1,handlers.size()-1);
-                    }
-                } catch (ProtocolException re1) {
-                    addIgnoreFaultProperty(context);
-                    re = re1;
-                } catch (RuntimeException re2) {
-                    re = re2;
+                if(direction == Direction.OUTBOUND) {
+                    callHandleFault(context, getIndex()-1, 0);
+                } else {
+                    callHandleFault(context,getIndex()+1,handlers.size()-1);
                 }
             }
+            return false;
+        } catch (RuntimeException re) {
+            logger.log(Level.FINER, "exception in handler chain", re);
             throw re;
         }
         
@@ -183,9 +183,9 @@ abstract class HandlerProcessor<C extends MessageContext> {
                 reverseDirection(direction,context);
                 // call handle message
                 if(direction == Direction.OUTBOUND) {
-                    callHandleMessage(context, getIndex()-1, 0);
+                    callHandleMessageReverse(context, getIndex()-1, 0);
                 } else {
-                    callHandleMessage(context,getIndex()+1,handlers.size()-1);
+                    callHandleMessageReverse(context,getIndex()+1,handlers.size()-1);
                 }
             }
             return false;
@@ -209,18 +209,30 @@ abstract class HandlerProcessor<C extends MessageContext> {
     public void callHandlersResponse(Direction direction,
             C context) {
         setDirection(direction,context);
-        // call handlers
+        boolean callHandleFault = (context.get(IGNORE_FAULT_PROPERTY) == null)? 
+            false:(Boolean) context.get(IGNORE_FAULT_PROPERTY);
         try {
-            if (direction == Direction.OUTBOUND) {
-                callHandleMessage(context,0,handlers.size()-1);
+            if(callHandleFault) {
+                // call handleFault on handlers
+                if(direction == Direction.OUTBOUND) {
+                    callHandleFault(context,0,handlers.size()-1);
+                } else {
+                    callHandleFault(context,handlers.size()-1,0);
+                }
             } else {
-                callHandleMessage(context,handlers.size()-1,0);
+                // call handleMessage on handlers                
+                if (direction == Direction.OUTBOUND) {
+                    callHandleMessageReverse(context,0,handlers.size()-1);
+                } else {
+                    callHandleMessageReverse(context,handlers.size()-1,0);
+                }
             }
         } catch (RuntimeException re) {
             logger.log(Level.FINER, "exception in handler chain", re);
             throw re;
         }        
     }
+    
     /**
      * Reverses the Message Direction.
      * MessageContext.MESSAGE_OUTBOUND_PROPERTY is changed.
@@ -243,6 +255,14 @@ abstract class HandlerProcessor<C extends MessageContext> {
         } else {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         }
+    }
+    
+    /**
+     * When this property is set HandlerPipes can call handleFault() on the 
+     * message
+     */
+    private void addHandleFaultProperty(C context) {
+        context.put(HANDLE_FAULT_PROPERTY, Boolean.TRUE);
     }
     
     /**
@@ -307,6 +327,40 @@ abstract class HandlerProcessor<C extends MessageContext> {
             setIndex(i);
             throw e;
         }
+        return true;
+    }
+    
+    /*
+     * Calls handleMessage on the handlers. Indices are
+     * inclusive. Exceptions get passed up the chain, and an
+     * exception or return of 'false' ends processing.
+     * setIndex() is not called.
+     */
+    private boolean callHandleMessageReverse(C context, int start, int end) {
+        /* Do we need this check?
+        if (handlers.isEmpty() ||
+                start == -1 ||
+                start == handlers.size()) {
+            return false;
+        }
+         */
+        int i = start;
+        
+        if (start > end) {
+            while(i >= end) {
+                if(handlers.get(i).handleMessage(context) == false) {
+                    return false;
+                }
+                i--;
+            }
+        } else {
+            while(i <= end) {
+                if(handlers.get(i).handleMessage(context) == false) {
+                    return false;
+                }
+                i++;
+            }
+        }        
         return true;
     }
     

@@ -84,23 +84,15 @@ public class LogicalHandlerPipe extends HandlerPipe {
             boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
             boolean handlerResult = false;
             
-            // Call handlers on Request
-            try {
-                if(isClient) {
-                    //CLIENT-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-                } else {
-                    //SERVER-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
-                }    
-                
-            } catch (ProtocolException pe) {
-                handlerResult = false;
-                if (MessageContextUtil.ignoreFaultInMessage(msgContext)) {
-                    // ignore fault in this case and use exception
-                    throw pe;
-                }
-            }
+            // Call handlers on Request            
+            if(isClient) {
+                //CLIENT-SIDE
+                handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
+            } else {
+                //SERVER-SIDE
+                handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+            }    
+            
             //Update Packet Properties
             context.updatePacket();
             msgContext.fill(packet);
@@ -118,15 +110,17 @@ public class LogicalHandlerPipe extends HandlerPipe {
             //TODO: For now create again
             msgContext = new MessageContextImpl(reply);
             context =  new LogicalMessageContextImpl(binding,reply,msgContext);
-            // Call handlers on Response
-            if(isClient) {
-                //CLIENT-SIDE
-                processor.callHandlersResponse(Direction.INBOUND,context);                
-            } else {                
-                //SERVER-SIDE                
-                processor.callHandlersResponse(Direction.OUTBOUND,context);
-            }            
-            
+            //If null, it is oneway
+            if(reply.getMessage()!= null){                
+                // Call handlers on Response
+                if(isClient) {
+                    //CLIENT-SIDE
+                    processor.callHandlersResponse(Direction.INBOUND,context);
+                } else {
+                    //SERVER-SIDE
+                    processor.callHandlersResponse(Direction.OUTBOUND,context);
+                }            
+            }
         } finally {
             close(msgContext);            
         }
@@ -139,15 +133,37 @@ public class LogicalHandlerPipe extends HandlerPipe {
     }
     
     /**
-     * Close SOAPHandlers first and then LogicalHandlers
+     * Close SOAPHandlers first and then LogicalHandlers on Client
+     * Close LogicalHandlers first and then SOAPHandlers on Server
      */
     public void close(MessageContext msgContext){
-        if(cousinPipe != null){
-            // Close SOAPHandlers
-            cousinPipe.close(msgContext);
+        if(isClient){
+            //cousinPipe is null in XML/HTTP Binding
+            if(cousinPipe != null){
+                // Close SOAPHandlerPipe
+                cousinPipe.closeCall(msgContext);
+            }
+            if(processor != null)
+                closeLogicalHandlers(msgContext);
+        } else {
+            if(binding.getSOAPVersion() != null) {
+                //SOAPHandlerPipe will drive the closing of LogicalHandlerPipe
+            } else {
+                if(processor != null)
+                    closeLogicalHandlers(msgContext);
+            }
         }
-        if(processor != null)
-            closeLogicalHandlers(msgContext);
+        
+        
+        
+        
+    }
+    /**
+     * This is called from cousinPipe.
+     * Close this Pipes's handlers.
+     */
+    public void closeCall(MessageContext msgContext){
+        closeLogicalHandlers(msgContext);
     }
     
     //TODO:

@@ -43,10 +43,16 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     }
     
     /**
-     * Close SOAPHandlers first and then LogicalHandlers
+     * Close SOAPHandlers first and then LogicalHandlers on Client
+     * Close LogicalHandlers first and then SOAPHandlers on Server
      */
     public abstract void close(MessageContext msgContext);
     
+    /**
+     * This is called from cousinPipe.
+     * Close this Pipes's handlers.
+     */
+    public abstract void closeCall(MessageContext msgContext);
     
     /**
      * This class is used primarily to exchange information or status between 
