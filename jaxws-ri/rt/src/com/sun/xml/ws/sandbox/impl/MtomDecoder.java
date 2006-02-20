@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Iterator;
+import java.util.Arrays;
 import java.net.URLDecoder;
 
 import org.jvnet.staxex.XMLStreamReaderEx;
@@ -37,6 +38,13 @@ public class MtomDecoder implements Decoder{
     private XMLStreamReader reader;
     private Base64Data base64AttData;
     private boolean xopReferencePresent = false;
+
+    //values that will set to whether mtom or not as caller can call getPcData or getTextCharacters
+    private int textLength;
+    private int textStart;
+
+    //To be used with #getTextCharacters
+    private char[] base64EncodedText;
 
     public MtomDecoder(MimeMultipartRelatedDecoder mimeMultipartDecoder, SOAPVersion soapVersion) {
         this.decoder = (StreamSOAPDecoder)StreamSOAPDecoder.create(soapVersion);
@@ -122,7 +130,7 @@ public class MtomDecoder implements Decoder{
 
         public int getTextLength() {
             if (xopReferencePresent)
-                return base64AttData.getDataLen();
+                return textLength;
             return reader.getTextLength();
         }
 
@@ -144,6 +152,8 @@ public class MtomDecoder implements Decoder{
                     StreamAttachment att = mimeMultipartDecoder.getMIMEPart(href);
                     base64AttData = new Base64Data();
                     base64AttData.set(att.asByteArray(), att.asByteArray().length, att.getContentType());
+                    textLength = base64AttData.getDataLen();
+                    textStart = 0;
                     xopReferencePresent = true;
                 } catch (IOException e) {
                     throw new WebServiceException(e);
@@ -156,8 +166,12 @@ public class MtomDecoder implements Decoder{
                 }
                 return XMLStreamConstants.CHARACTERS;
             }
-            if(xopReferencePresent)
+            if(xopReferencePresent){
                 xopReferencePresent = false;
+                textStart = 0;
+                textLength = 0;
+                base64EncodedText = null;
+            }
             return event;
         }
 
@@ -219,6 +233,7 @@ public class MtomDecoder implements Decoder{
             if (xopReferencePresent) {
                 char[] chars = new char[(base64AttData.getDataLen()+2)*4/3];
                 base64AttData.writeTo(chars, 0);
+                textLength = chars.length;
                 return chars;
             }
             return reader.getTextCharacters();
@@ -229,7 +244,48 @@ public class MtomDecoder implements Decoder{
         }
 
         public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
-            //TODO: handle xop reference
+            if(xopReferencePresent){
+                int event = reader.getEventType();
+                if(event != XMLStreamConstants.CHARACTERS){
+                    //its invalid state - delegate it to underlying reader to throw the corrrect exception so that user
+                    // always sees the uniform exception from the XMLStreamReader
+                    throw new XMLStreamException("Invalid state: Expected CHARACTERS found :");
+                }
+                if(target == null){
+                    throw new NullPointerException("target char array can't be null") ;
+                }
+
+                if(targetStart < 0 || length < 0 || sourceStart < 0 || targetStart >= target.length ||
+                        (targetStart + length ) > target.length) {
+                    throw new IndexOutOfBoundsException();
+                }
+
+                if(base64EncodedText != null){
+                    base64EncodedText = new char[(base64AttData.getDataLen()+2)*4/3];
+                    base64AttData.writeTo(base64EncodedText, 0);
+                    textLength = base64EncodedText.length;
+                    textStart = 0;
+                }
+
+                if((textStart + sourceStart) > textLength)
+                    throw new IndexOutOfBoundsException();
+
+                int copiedLength = 0;
+                int available = textLength - sourceStart;
+                if(available < 0){
+                    throw new IndexOutOfBoundsException("sourceStart is greater than" +
+                            "number of characters associated with this event");
+                }
+                if(available < length){
+                    copiedLength = available;
+                } else{
+                    copiedLength = length;
+                }
+
+                System.arraycopy(base64EncodedText, getTextStart() + sourceStart , target, targetStart, copiedLength);
+                textStart = sourceStart;
+                return copiedLength;
+            }
             return reader.getTextCharacters(sourceStart, target, targetStart, length);
         }
 
@@ -267,7 +323,8 @@ public class MtomDecoder implements Decoder{
 
         public String getText() {
             if (xopReferencePresent) {
-                return base64AttData.toString();
+                String text =  base64AttData.toString();
+                textLength = text.length();
             }
             return reader.getText();
         }
