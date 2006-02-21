@@ -177,7 +177,8 @@ public class SOAPHandlerPipe extends HandlerPipe {
           }
       } else {
           //Close all handlers in the chain
-          processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
+           if(processor != null)
+               processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
       }
     }
     

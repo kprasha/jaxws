@@ -56,7 +56,8 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     }
 
     public LogicalMessage getMessage() {
-        lm = new LogicalMessageImpl(packet);
+        if(lm == null)
+            lm = new LogicalMessageImpl(packet);
         return lm;
     }
 
