@@ -96,8 +96,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     static {
         boolean b = false;
         try {
-            //b = Boolean.getBoolean(StandalonePipeAssembler.class.getName()+".dump");
-            b = Boolean.getBoolean("log");
+            b = Boolean.getBoolean(StandalonePipeAssembler.class.getName()+".dump");            
         } catch (Throwable t) {
             // treat it as false
         }
