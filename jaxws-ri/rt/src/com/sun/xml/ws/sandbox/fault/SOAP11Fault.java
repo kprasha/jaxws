@@ -133,7 +133,7 @@ class SOAP11Fault extends SOAPFaultBuilder {
                 Node n = fault.getOwnerDocument().importNode((Detail)detail.getDetails().get(0), true);
                 fault.appendChild(n);
             }
-            throw new SOAPFaultException(fault);
+            return new SOAPFaultException(fault);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
