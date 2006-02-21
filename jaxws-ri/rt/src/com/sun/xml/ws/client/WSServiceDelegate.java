@@ -335,7 +335,7 @@ public class WSServiceDelegate extends WSService {
     private WSDLPortImpl getPortModel(QName portName) {
         WSDLPortImpl port = wsdlService.get(portName);
         if(port==null)
-            throw new WebServiceException("No ports found for service " + serviceName);
+            throw new WebServiceException("Port \""+portName+"\" not found in service \"" + serviceName+"\"");
         return port;
     }
 
@@ -355,7 +355,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         //todo:use SCAnnotations and put in map
-        WSDLPortImpl wsdlPort = wsdlService.get(portName);
+        WSDLPortImpl wsdlPort = getPortModel(portName);
         // TODO: error check against wsdlPort==null
         RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort,false);
         modeler.setPortName(portName);
