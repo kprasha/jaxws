@@ -162,6 +162,9 @@ public class WSDLModeler extends WSDLModelerBase {
             if (_options.getProperty(ProcessorOptions.USE_MEX).equals("true")) {
                 parser.setUseMex(true);
             }
+            if (_options.getProperty(ProcessorOptions.USE_WXF).equals("true")) {
+                parser.setUseWxf(true);
+            }
             document =
                 parser.parse();
             document.validateLocally();

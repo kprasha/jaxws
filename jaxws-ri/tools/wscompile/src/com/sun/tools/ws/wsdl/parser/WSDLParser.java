@@ -81,6 +81,7 @@ import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.mex.HTTPMexClient;
+import com.sun.tools.ws.wsdl.wxf.HTTPWxfClient;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
 import com.sun.tools.ws.wsdl.framework.ParseException;
@@ -169,6 +170,14 @@ public class WSDLParser {
 
     public void setUseMex(boolean b) {
         useMex = b;
+    }
+
+    public boolean getUseWxf() {
+        return useWxf;
+    }
+
+    public void setUseWxf(boolean b) {
+        useWxf = b;
     }
 
 //    public WSDLDocument parse(InputSource source) {
@@ -262,6 +271,8 @@ public class WSDLParser {
             Document document = null;
             if (useMex && systemId.startsWith("http")) {
                 document = getMexClient().getWSDLDocument(systemId);
+            } else if (useWxf && systemId.startsWith("http")) {
+                document = getWxfClient().getWSDLDocument(systemId);
             } else {
                 DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
                 builderFactory.setNamespaceAware(true);
@@ -1473,6 +1484,17 @@ public class WSDLParser {
         return mexClient;
     }
 
+    /*
+     * Used to avoid creating a new one every time
+     * a request is made.
+     */
+    private HTTPWxfClient getWxfClient() {
+        if (wxfClient == null) {
+            wxfClient = new HTTPWxfClient();
+        }
+        return wxfClient;
+    }
+
     private boolean _followImports;
     private String _targetNamespaceURI;
     private Map _extensionHandlers;
@@ -1483,4 +1505,6 @@ public class WSDLParser {
     private HashSet hSet = null;
     private boolean useMex = false;
     private HTTPMexClient mexClient;
+    private boolean useWxf = false;
+    private HTTPWxfClient wxfClient;
 }

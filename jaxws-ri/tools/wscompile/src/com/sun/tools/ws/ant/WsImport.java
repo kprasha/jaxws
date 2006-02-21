@@ -363,6 +363,24 @@ public class WsImport extends MatchingTask {
         this.mex = mex;
     }
     
+    private boolean wxf = false;
+    
+    /**
+     * @return Whether or not wsimport is using WS-Transfer
+     * to retrieve wsdl.
+     */
+    public boolean getWxf() {
+        return wxf;
+    }
+
+    /**
+     * @param wxf Set to true to tell wsimport to make
+     * a WS-Transfer request rather than an HTTP GET.
+     */
+    public void setWxf(boolean wxf) {
+        this.wxf = wxf;
+    }
+    
     public void addConfiguredBinding( FileSet fs ) {
         DirectoryScanner ds = fs.getDirectoryScanner(project);
         String[] includedFiles = ds.getIncludedFiles();
@@ -433,6 +451,11 @@ public class WsImport extends MatchingTask {
         // mex option
         if (getMex()) {
             cmd.createArgument().setValue("-mex");
+        }
+
+        // wxf option
+        if (getWxf()) {
+            cmd.createArgument().setValue("-wxf");
         }
 
         //wsdl

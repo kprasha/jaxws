@@ -17,12 +17,12 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.tools.ws.wsdl.mex;
+package com.sun.tools.ws.wsdl.wxf;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
@@ -31,18 +31,16 @@ import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 import com.sun.tools.ws.wsdl.framework.ParseException;
 
 /**
- * A class for making mex requests over http to retrieve
+ * A class for making ws transfer requests over http to retrieve
  * a WSDL.
  *
  * Big TODO: Pull the common http connection code out of the MEX and
@@ -52,13 +50,13 @@ import com.sun.tools.ws.wsdl.framework.ParseException;
  *
  * @author WS Development Team
  */
-public class HTTPMexClient {
+public class HTTPWxfClient {
     
     private JAXBContext jaxbContext;
 
     public Document getWSDLDocument(String address) {
         try {
-            String request = getMexWsdlRequest(address);
+            String request = getWxfWsdlRequest(address);
             InputStream response = makeHTTPCall(request, address);
             return convertResponse(response);
         } catch (Exception e) {
@@ -68,26 +66,23 @@ public class HTTPMexClient {
         }
     }
 
-    private String getMexWsdlRequest(String address) {
+    private String getWxfWsdlRequest(String address) {
         return "<?xml version=\"1.0\"?>" +
             "<soapenv:Envelope " +
             "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-            "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" " +
-            "xmlns:wsx=\"http://schemas.xmlsoap.org/ws/2004/09/mex\">" +
+            "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">" +
             "<soapenv:Header><wsa:Action>" +
-            "http://schemas.xmlsoap.org/ws/2004/09/mex/GetMetadata/Request" +
-            "</wsa:Action><wsa:MessageID>urn:GetMetadata</wsa:MessageID>" +
-            "<wsa:ReplyTo><wsa:Address>" +
-            "http://www.w3.org/2005/08/addressing/anonymous" +
-            "</wsa:Address></wsa:ReplyTo><wsa:To>" +
+            "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get" +
+            "</wsa:Action><wsa:MessageID>urn:Get</wsa:MessageID>" +
+            "<wsa:To>" +
             address +
-            "</wsa:To></soapenv:Header><soapenv:Body>" +
-            "<wsx:GetMetadata/>" + // empty request maps to wsdl
-            "</soapenv:Body></soapenv:Envelope>";
+            "</wsa:To></soapenv:Header>" +
+            "<soapenv:Body/></soapenv:Envelope>";
     }
 
     private InputStream makeHTTPCall(String request, String address)
         throws Exception {
+        
         URL url = new URL(address);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("SOAPAction", "");
@@ -119,11 +114,12 @@ public class HTTPMexClient {
         } while (state != reader.START_ELEMENT ||
             !reader.getLocalName().equalsIgnoreCase("metadata"));
         
-        Unmarshaller uMarshaller = jaxbContext.createUnmarshaller();
-        Metadata mexResponse = (Metadata) uMarshaller.unmarshal(reader);
-        MetadataSection wsdlSection = mexResponse.getMetadataSection().get(0);
-        Node wsdlNode = (Node) wsdlSection.getAny().get(0);
-        return wsdlNode.getOwnerDocument();
+//        Unmarshaller uMarshaller = jaxbContext.createUnmarshaller();
+//        Metadata wxfResponse = (Metadata) uMarshaller.unmarshal(reader);
+//        MetadataSection wsdlSection = wxfResponse.getMetadataSection().get(0);
+//        Node wsdlNode = (Node) wsdlSection.getAny().get(0);
+//        return wsdlNode.getOwnerDocument();
+        return null;
     }
     
     private void outputErrorStream(HttpURLConnection conn) {
@@ -151,7 +147,7 @@ public class HTTPMexClient {
     private void createJAXBContext() throws JAXBException {
         if (jaxbContext == null) {
             jaxbContext = JAXBContext.newInstance(
-                com.sun.tools.ws.wsdl.mex.ObjectFactory.class);
+                com.sun.tools.ws.wsdl.wxf.ObjectFactory.class);
         }
     }
 }

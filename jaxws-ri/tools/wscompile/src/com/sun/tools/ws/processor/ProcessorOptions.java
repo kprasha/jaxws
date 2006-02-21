@@ -50,4 +50,5 @@ public class ProcessorOptions {
     public final static String WSDL_LOCATION = "wsdllocation";
     public final static String DEFAULT_PACKAGE = "defaultpackage";
     public final static String USE_MEX = "useMex";
+    public final static String USE_WXF = "useWxf";
 }
