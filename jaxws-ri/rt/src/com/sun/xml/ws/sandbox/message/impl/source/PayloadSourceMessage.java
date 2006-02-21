@@ -13,12 +13,17 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.ASCIIUtility;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
+import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.LocatorImpl;
 
@@ -42,6 +47,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  * Payloadsource message that can be constructed for the StreamSource, SAXSource and DOMSource.
@@ -212,32 +218,28 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         Message msg = null;
         if(sourceUtils.isStreamSource()){
             StreamSource ss = (StreamSource)src;
-            //byte[] bytes = ASCIIUtility.getBytes(ss.getInputStream());
-            System.out.println("MESSAGE: " + new String(payloadbytes) + "===END");
             ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
             StreamSource newSource = new StreamSource(bis, src.getSystemId());
             newSource.setReader(ss.getReader());
             return new PayloadSourceMessage(headers, newSource, soapVersion);
         }else if(sourceUtils.isSaxSource()){
             SAXSource saxSrc = (SAXSource)src;
-            InputSource is = saxSrc.getInputSource();
-            InputSource newIs = is;
-            if(is.getByteStream() != null){
-                try {
-                    byte[] bytes = ASCIIUtility.getBytes(is.getByteStream());
-                    newIs = new InputSource(new ByteArrayInputStream(bytes));
-                    newIs.setSystemId(is.getSystemId());
-                    newIs.setEncoding(is.getEncoding());
-                } catch (IOException e) {
-                    throw new WebServiceException(e);
-                }
-            }else if(is.getCharacterStream() != null){
-                newIs = new InputSource(is.getCharacterStream());
-                newIs.setSystemId(is.getSystemId());
-                newIs.setEncoding(is.getEncoding());
+            try {
+                XMLStreamBuffer xsb = new XMLStreamBuffer();
+                XMLReader reader = saxSrc.getXMLReader();
+                if(reader == null)
+                    reader = new SAXBufferProcessor();
+                saxSrc.setXMLReader(reader);
+                reader.setContentHandler(new SAXBufferCreator(xsb));
+                reader.parse(saxSrc.getInputSource());
+                src = new XMLStreamBufferSource(xsb);
+                return new PayloadSourceMessage(HeaderList.copy(headers),
+                        new XMLStreamBufferSource(xsb), soapVersion);
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            } catch (SAXException e) {
+                throw new WebServiceException(e);
             }
-            SAXSource newSaxSrc = new SAXSource(saxSrc.getXMLReader(), newIs);
-            msg =  new PayloadSourceMessage(headers, newSaxSrc, soapVersion);
         }else if(sourceUtils.isDOMSource()){
             DOMSource ds = (DOMSource)src;
             try {
