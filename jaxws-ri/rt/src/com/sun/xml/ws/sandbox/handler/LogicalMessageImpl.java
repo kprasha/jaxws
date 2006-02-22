@@ -20,18 +20,30 @@
 
 package com.sun.xml.ws.sandbox.handler;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
+import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.encoding.soap.SerializationException;
-import com.sun.xml.ws.handler.*;
-import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
+import com.sun.xml.ws.util.ASCIIUtility;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.WebServiceException;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  * Implementation of {@link LogicalMessage}. This class implements the methods
@@ -53,8 +65,8 @@ import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 public class LogicalMessageImpl implements LogicalMessage {
     private Packet packet;
     // This holds the (modified)payload set by User
-    protected Source payloadSrc = null; 
-    
+    protected Source payloadSrc = null;
+        
     /** Creates a new instance of LogicalMessageImplRearch */
     public LogicalMessageImpl(Packet packet) {
         // don't create extract payload until Users wants it.
@@ -62,10 +74,32 @@ public class LogicalMessageImpl implements LogicalMessage {
     }
     
     public Source getPayload() {                
+        
         if(payloadSrc == null) {
             payloadSrc = packet.getMessage().readPayloadAsSource();
         }
-        return payloadSrc;
+        if(payloadSrc instanceof DOMSource){
+            return payloadSrc;
+        } else {
+            try {
+            Transformer transformer = XmlUtil.newTransformer();
+            DOMResult domResult = new DOMResult();
+            transformer.transform(payloadSrc, domResult);
+            payloadSrc = new DOMSource(domResult.getNode());
+            return payloadSrc;
+            } catch(TransformerException te) {
+                throw new WebServiceException(te);
+            }
+        }
+        /*
+        Source copySrc;
+        if(payloadSrc instanceof DOMSource){
+            copySrc = payloadSrc;
+        } else {
+            copySrc = copy(payloadSrc);
+        }
+        return copySrc;
+         */
     }
     
     public void setPayload(Source payload) {
@@ -74,10 +108,8 @@ public class LogicalMessageImpl implements LogicalMessage {
     
     public Object getPayload(JAXBContext context) {
         try {
-            if(payloadSrc == null) {
-                payloadSrc = packet.getMessage().readPayloadAsSource();
-            } 
-            return JAXBTypeSerializer.deserialize(payloadSrc, context);   
+            Source src = getPayload(); 
+            return JAXBTypeSerializer.deserialize(src, context);   
         } catch (DeserializationException e){
             // As per Spec, try to give the original JAXBException
             throw new WebServiceException(e.getCause());
@@ -91,5 +123,40 @@ public class LogicalMessageImpl implements LogicalMessage {
             // As per Spec, try to give the original JAXBException
             throw new WebServiceException(e.getCause());
         }        
-    }    
+    }
+    /*
+    private Source copy(Source src) {
+        if(src instanceof StreamSource){
+            StreamSource origSrc = (StreamSource)src;
+            byte[] payloadbytes;
+            try {
+                payloadbytes = ASCIIUtility.getBytes(origSrc.getInputStream());
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            }
+            ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
+            origSrc.setInputStream(new ByteArrayInputStream(payloadbytes));
+            StreamSource copySource = new StreamSource(bis, src.getSystemId());
+            return copySource;
+        } else if(src instanceof SAXSource){
+            SAXSource saxSrc = (SAXSource)src;
+            try {
+                XMLStreamBuffer xsb = new XMLStreamBuffer();
+                XMLReader reader = saxSrc.getXMLReader();
+                if(reader == null)
+                    reader = new SAXBufferProcessor();
+                saxSrc.setXMLReader(reader);
+                reader.setContentHandler(new SAXBufferCreator(xsb));
+                reader.parse(saxSrc.getInputSource());
+                src = new XMLStreamBufferSource(xsb);
+                return new XMLStreamBufferSource(xsb);
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            } catch (SAXException e) {
+                throw new WebServiceException(e);
+            }
+        }
+        throw new WebServiceException("Copy is not needed for this Source");
+    }
+     */
 }
