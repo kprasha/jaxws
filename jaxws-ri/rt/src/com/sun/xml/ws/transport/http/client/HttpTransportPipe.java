@@ -87,7 +87,7 @@ public class HttpTransportPipe implements Pipe {
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
-            
+
             if (request.isOneWay==Boolean.TRUE
                 || con.statusCode==WSConnection.ONEWAY) {
                 return new Packet(null);    // one way. no response given.
@@ -104,11 +104,12 @@ public class HttpTransportPipe implements Pipe {
     }
 
     private String getContentType(Map<String, List<String>> headers) {
-        List<String> cts = headers.get("Content-Type");
-        if (cts != null) {
-            return cts.get(0);
+        for(String key : headers.keySet()){
+            if(key!= null && key.equalsIgnoreCase("Content-Type"))
+                return headers.get(key).get(0);
         }
-        return null;
+        //the response is invalid
+        throw new WebServiceException("No Content-Type in the header!");
     }
 
     public void preDestroy() {
