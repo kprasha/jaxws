@@ -415,17 +415,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         sortedMembers.addAll(sortedMap.values());
         return sortedMembers;
     }
-    
-    private ArrayList<MemberInfo> sortMembers(ArrayList<MemberInfo> members) {
-        Map<String, MemberInfo> sortedMap = new java.util.TreeMap<String, MemberInfo>();
-        for (MemberInfo member : members) {
-            sortedMap.put(member.getParamName(), member);
-        }
-        ArrayList<MemberInfo> sortedMembers = new ArrayList<MemberInfo>();
-        sortedMembers.addAll(sortedMap.values());
-        return sortedMembers;
-    }
-    
+        
     private void writeMembers(JDefinedClass cls, ArrayList<MemberInfo> members) throws IOException {
         if (cls == null)
             return;
