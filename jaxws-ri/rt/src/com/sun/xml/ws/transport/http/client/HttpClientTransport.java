@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.message.Packet;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
+import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.net.ssl.HostnameVerifier;
@@ -157,61 +158,9 @@ final class HttpClientTransport {
     }
 
     public Map<String, List<String>> collectResponseMimeHeaders() {
-
-       /* MimeHeaders mimeHeaders = new MimeHeaders();
-        for (int i = 1; ; ++i) {
-            String key = httpConnection.getHeaderFieldKey(i);
-            if (key == null) {
-                break;
-            }
-            String value = httpConnection.getHeaderField(i);
-            try {
-                mimeHeaders.addHeader(key, value);
-            } catch (IllegalArgumentException e) {
-                // ignore headers that are illegal in MIME
-            }
-        }
-
-        Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        for (Iterator iter = mimeHeaders.getAllHeaders(); iter.hasNext();) {
-            MimeHeader header = (MimeHeader)iter.next();
-            List<String> h = new ArrayList<String>();
-            h.add(header.getValue());
-            headers.put (header.getName (), h);
-        }
+        Map<String, List<String>> headers = new Headers();
+        headers.putAll(httpConnection.getHeaderFields());
         return headers;
-        */
-        return httpConnection.getHeaderFields();
-    }
-
-    public MimeHeaders collectMimeHeaders() {
-
-        MimeHeaders mimeHeaders = new MimeHeaders();
-        for (int i = 1; ; ++i) {
-            String key = httpConnection.getHeaderFieldKey(i);
-            if (key == null) {
-                break;
-            }
-            String value = httpConnection.getHeaderField(i);
-            try {
-                mimeHeaders.addHeader(key, value);
-            } catch (IllegalArgumentException e) {
-                // ignore headers that are illegal in MIME
-            }
-             mimeHeaders.addHeader("Content-Type", "text/xml");
-             mimeHeaders.addHeader("Content-Transfer-Encoding", "binary");
-        }
-        return mimeHeaders;
-       /* Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        for (Iterator iter = mimeHeaders.getAllHeaders(); iter.hasNext();) {
-            MimeHeader header = (MimeHeader)iter.next();
-            List<String> h = new ArrayList<String>();
-            h.add(header.getValue());
-            headers.put (header.getName (), h);
-        }
-        return headers;
-        */
-        //return httpConnection.getHeaderFields();
     }
 
     protected void connectForResponse()

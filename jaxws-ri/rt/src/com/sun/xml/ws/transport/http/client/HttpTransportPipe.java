@@ -104,12 +104,12 @@ public class HttpTransportPipe implements Pipe {
     }
 
     private String getContentType(Map<String, List<String>> headers) {
-        for(String key : headers.keySet()){
-            if(key!= null && key.equalsIgnoreCase("Content-Type"))
-                return headers.get(key).get(0);
+        List<String> keys = headers.get("Content-type");
+        if (keys == null) {
+            //the response is invalid
+            throw new WebServiceException("No Content-Type in the header!");
         }
-        //the response is invalid
-        throw new WebServiceException("No Content-Type in the header!");
+        return keys.get(0);
     }
 
     public void preDestroy() {
