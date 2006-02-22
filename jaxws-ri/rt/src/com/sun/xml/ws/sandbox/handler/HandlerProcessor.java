@@ -61,6 +61,8 @@ abstract class HandlerProcessor<C extends MessageContext> {
             "ignore fault in message";
     public static final String HANDLE_FAULT_PROPERTY =
             "handle fault on message";
+    public static final String HANDLE_FALSE_PROPERTY =
+            "handle false on message";
     protected boolean isClient;
     protected static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".handler");
@@ -209,8 +211,16 @@ abstract class HandlerProcessor<C extends MessageContext> {
     public void callHandlersResponse(Direction direction,
             C context) {
         setDirection(direction,context);
-        boolean callHandleFault = (context.get(IGNORE_FAULT_PROPERTY) == null)? 
-            false:(Boolean) context.get(IGNORE_FAULT_PROPERTY);
+        boolean callHandleFalse = (context.get(HANDLE_FALSE_PROPERTY) == null)? 
+            false:(Boolean) context.get(HANDLE_FALSE_PROPERTY);
+        if(callHandleFalse){
+            // Cousin HandlerPipe returned false during Response processing.
+            // Don't call handlers.
+            return;
+        }
+        
+        boolean callHandleFault = (context.get(HANDLE_FAULT_PROPERTY) == null)? 
+            false:(Boolean) context.get(HANDLE_FAULT_PROPERTY);
         try {
             if(callHandleFault) {
                 // call handleFault on handlers
@@ -263,6 +273,14 @@ abstract class HandlerProcessor<C extends MessageContext> {
      */
     private void addHandleFaultProperty(C context) {
         context.put(HANDLE_FAULT_PROPERTY, Boolean.TRUE);
+    }
+    
+    /**
+     * When this property is set HandlerPipes will not call 
+     * handleMessage() during Response processing.
+     */
+    private void addHandleFalseProperty(C context) {
+        context.put(HANDLE_FALSE_PROPERTY, Boolean.TRUE);
     }
     
     /**
@@ -333,8 +351,11 @@ abstract class HandlerProcessor<C extends MessageContext> {
     /*
      * Calls handleMessage on the handlers. Indices are
      * inclusive. Exceptions get passed up the chain, and an
-     * exception or return of 'false' ends processing.
+     * exception (or) 
+     * return of 'false' calls addHandleFalseProperty(context) and 
+     * ends processing.
      * setIndex() is not called.
+     *
      */
     private boolean callHandleMessageReverse(C context, int start, int end) {
         /* Do we need this check?
@@ -349,6 +370,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
         if (start > end) {
             while(i >= end) {
                 if(handlers.get(i).handleMessage(context) == false) {
+                    addHandleFalseProperty(context);
                     return false;
                 }
                 i--;
@@ -356,6 +378,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
         } else {
             while(i <= end) {
                 if(handlers.get(i).handleMessage(context) == false) {
+                    addHandleFalseProperty(context);
                     return false;
                 }
                 i++;
