@@ -74,7 +74,7 @@ public class ResponseContext extends AbstractMap<String,Object> {
     }
 
     public boolean containsKey(Object key) {
-        if(packet.containsKey(key))
+        if(packet.supports(key))
             return true;    // strongly typed
 
         if(packet.invocationProperties.containsKey(key) || packet.otherProperties.containsKey(key))
