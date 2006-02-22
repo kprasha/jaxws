@@ -195,7 +195,7 @@ public class Root {
         
         if (wsdlPort == null && primaryDoc != null) {
             // create WSDL model
-            wsdlPort = getWSDLPort(primaryDoc, md, implType, serviceName, portName);
+            wsdlPort = getWSDLPort(primaryDoc, docList, implType, serviceName, portName);
         }
         
         
@@ -340,7 +340,7 @@ public class Root {
         }
 
         // Generate WSDL and schema documents using runtime model
-        WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortName());
+        WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortTypeName());
         WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding.getBindingId());
         wsdlGen.doGeneration();
         return wsdlResolver.updateDocs();
@@ -365,7 +365,7 @@ public class Root {
         return r;
     }
     
-    private WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<SDDocumentSource> metadata,
+    private WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
         Class<?> implType, QName serviceName, QName portName) {
         URL wsdlUrl = primaryWsdl.getSystemId();
         try {

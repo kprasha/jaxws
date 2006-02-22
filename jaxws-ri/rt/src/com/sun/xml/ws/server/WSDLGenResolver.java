@@ -56,12 +56,12 @@ final class WSDLGenResolver implements WSDLResolver {
     private final Map<String, List<SDDocumentImpl>> nsMapping = new HashMap<String,List<SDDocumentImpl>>();
 
     private final QName serviceName;
-    private final QName portName;
+    private final QName portTypeName;
 
-    public WSDLGenResolver(List<SDDocumentImpl> docs,QName serviceName,QName portName) {
+    public WSDLGenResolver(List<SDDocumentImpl> docs,QName serviceName,QName portTypeName) {
         this.docs = docs;
         this.serviceName = serviceName;
-        this.portName = portName;
+        this.portTypeName = portTypeName;
 
         for (SDDocumentImpl doc : docs) {
             if(doc.isWSDL()) {
@@ -180,7 +180,7 @@ final class WSDLGenResolver implements WSDLResolver {
     
     public SDDocumentImpl updateDocs() {
         for (SDDocumentSource doc : newDocs) {
-            SDDocumentImpl docImpl = SDDocumentImpl.create(doc,serviceName,portName);
+            SDDocumentImpl docImpl = SDDocumentImpl.create(doc,serviceName,portTypeName);
             if (doc == concreteWsdlSource) {
                 concreteWsdl = docImpl;
             }
