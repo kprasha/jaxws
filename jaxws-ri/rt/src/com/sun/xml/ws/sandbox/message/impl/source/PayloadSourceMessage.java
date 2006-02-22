@@ -81,7 +81,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
             XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
             //move the cursor to the payload element
             XMLStreamReaderUtil.next(reader);
-            streamMessage = new StreamMessage(null, reader, soapVersion);
+            streamMessage = new StreamMessage(headers, reader, soapVersion);
         }
     }
 
@@ -221,7 +221,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
             ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
             StreamSource newSource = new StreamSource(bis, src.getSystemId());
             newSource.setReader(ss.getReader());
-            return new PayloadSourceMessage(headers, newSource, soapVersion);
+            return new PayloadSourceMessage(HeaderList.copy(headers), newSource, soapVersion);
         }else if(sourceUtils.isSaxSource()){
             SAXSource saxSrc = (SAXSource)src;
             try {
@@ -246,7 +246,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
                 SAX2DOMEx s2d = new SAX2DOMEx();
                 writePayloadTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
                 Source newDomSrc = new DOMSource(s2d.getDOM(), ds.getSystemId());
-                msg = new PayloadSourceMessage(headers, newDomSrc, soapVersion);
+                msg = new PayloadSourceMessage(HeaderList.copy(headers), newDomSrc, soapVersion);
             } catch (ParserConfigurationException e) {
                 throw new WebServiceException(e);
             } catch (SAXException e) {
@@ -256,6 +256,5 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         return msg;
     }
 
-    private static final Attributes EMPTY_ATTS = new AttributesImpl();
     private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }
