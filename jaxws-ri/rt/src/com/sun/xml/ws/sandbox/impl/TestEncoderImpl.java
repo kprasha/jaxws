@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
@@ -25,11 +26,11 @@ public final class TestEncoderImpl implements Encoder {
         this.contentType = contentType;
     }
 
-    public String getStaticContentType() {
-        return contentType;
+    public ContentType getStaticContentType(Packet packet) {
+        return getContentType(packet.soapAction);
     }
 
-    public String encode(Packet packet, OutputStream out) {
+    public ContentType encode(Packet packet, OutputStream out) {
         if (packet.getMessage() != null) {
             XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
             try {
@@ -38,10 +39,10 @@ public final class TestEncoderImpl implements Encoder {
                 throw new WebServiceException(e);
             }
         }
-        return contentType;
+        return getContentType(packet.soapAction);
     }
 
-    public String encode(Packet packet, WritableByteChannel buffer) {
+    public ContentType encode(Packet packet, WritableByteChannel buffer) {
         //TODO: not yet implemented
         throw new UnsupportedOperationException();
     }
@@ -65,5 +66,13 @@ public final class TestEncoderImpl implements Encoder {
         default:
             throw new AssertionError();
         }
+    }
+
+    private ContentType getContentType(String soapAction){
+        if((soapAction != null) && contentType.equals("application/soap+xml"))
+            return new ContentTypeImpl(contentType + ";action=\""+soapAction+"\"", null);
+
+        String action = (soapAction == null)?"":soapAction;
+        return new ContentTypeImpl(contentType, action);
     }
 }

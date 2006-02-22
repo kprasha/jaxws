@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 
@@ -44,12 +45,23 @@ public class MtomEncoder implements Encoder {
     private String messageContentType;
     private final String soapContentType;
     private XMLStreamWriter writer;
+    private final SOAPVersion version;
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
     private final List<ByteArrayOutputStream> mtomAttachmentStream = new ArrayList<ByteArrayOutputStream>();
 
-    public MtomEncoder(String contentType){
-        this.soapContentType = contentType;
+    MtomEncoder(SOAPVersion version){
+        this.version = version;
+        switch(version){
+            case SOAP_11:
+                this.soapContentType = "text/xml";
+                break;
+            case SOAP_12:
+                this.soapContentType = "application/soap+xml";
+                break;
+            default:
+                throw new AssertionError();
+        }
         createConteTypeHeader();
         this.soapXopContentType = xopContentType+";charset=utf-8;type=\""+soapContentType+"\"";
     }
@@ -65,18 +77,32 @@ public class MtomEncoder implements Encoder {
      *
      * @return A non-null content type for soap11 or soap 1.2 content type
      */
-    public String getStaticContentType() {
-        return messageContentType;
+    public ContentType getStaticContentType(Packet packet) {
+        return getContentType(packet);
+    }
+
+    private ContentType getContentType(Packet packet){
+        switch(version){
+            case SOAP_11:
+                return new ContentTypeImpl(messageContentType, (packet.soapAction == null)?"":packet.soapAction);
+            case SOAP_12:
+                if(packet.soapAction != null){
+                    messageContentType += ";action=\""+packet.soapAction+"\"";
+                }
+                return new ContentTypeImpl(messageContentType, null);
+        }
+        //never happens
+        return null;                
     }
 
     private OutputStream writeMtomBinary(String contentType){
         throw new UnsupportedOperationException();
     }
 
-    public String encode(Packet packet, OutputStream out) throws IOException {
+    public ContentType encode(Packet packet, OutputStream out) throws IOException {
         //get the current boundary thaat will be reaturned from this method
         mtomAttachmentStream.clear();
-        String currBoundary = boundary;
+        ContentType contentType = getContentType(packet);
         this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         if(packet.getMessage() != null){
             try {
@@ -116,7 +142,7 @@ public class MtomEncoder implements Encoder {
         }
         //now create the boundary for next encode() call
         createConteTypeHeader();
-        return currBoundary;
+        return contentType;
     }
 
     private static final String XOP_LOCALNAME = "Include";
@@ -172,7 +198,7 @@ public class MtomEncoder implements Encoder {
         }
     }
 
-    public String encode(Packet packet, WritableByteChannel buffer) {
+    public ContentType encode(Packet packet, WritableByteChannel buffer) {
         throw new UnsupportedOperationException();
     }
 
@@ -211,8 +237,8 @@ public class MtomEncoder implements Encoder {
         return name + cid;
     }
 
-    public static final Encoder SOAP11 = new MtomEncoder("text/xml");
-    public static final Encoder SOAP12 = new MtomEncoder("application/soap+xml");
+    public static final Encoder SOAP11 = new MtomEncoder(SOAPVersion.SOAP_11);
+    public static final Encoder SOAP12 = new MtomEncoder(SOAPVersion.SOAP_12);
 
     public static Encoder get(SOAPVersion version) {
         if(version==null)

@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
@@ -71,19 +72,22 @@ public class HttpTransportPipe implements Pipe {
 
             HttpClientTransport con = new HttpClientTransport(request,reqHeaders);
 
-            String ct = encoder.getStaticContentType();
+            ContentType ct = encoder.getStaticContentType(request);
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 ct = encoder.encode(request, buf);
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
-                reqHeaders.put("Content-Type", Arrays.asList(ct));
+                reqHeaders.put("Content-Type", Arrays.asList(ct.getContentType()));
+                writeSOAPAction(reqHeaders, ct.getSOAPAction());
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
-                reqHeaders.put("Content-Type", Arrays.asList(ct));
+                reqHeaders.put("Content-Type", Arrays.asList(ct.getContentType()));
+                writeSOAPAction(reqHeaders, ct.getSOAPAction());
                 encoder.encode(request, con.getOutput());
             }
+
             con.closeOutput();
 
             Map<String, List<String>> respHeaders = con.getHeaders();
@@ -92,14 +96,23 @@ public class HttpTransportPipe implements Pipe {
                 || con.statusCode==WSConnection.ONEWAY) {
                 return new Packet(null);    // one way. no response given.
             }
-            ct = getContentType(respHeaders);
+            String contentType = getContentType(respHeaders);
             Packet reply = request.createResponse(null);
-            decoder.decode(con.getInput(), ct, reply);
+            decoder.decode(con.getInput(), contentType, reply);
             return reply;
         } catch(WebServiceException wex) {
             throw wex;
         } catch(Exception ex) {
             throw new WebServiceException(ex);
+        }
+    }
+
+    /**
+     * write SOAPAction header if the soapAction parameter is non-null
+     */
+    private void writeSOAPAction(Map<String, List<String>> reqHeaders, String soapAction) {
+        if(soapAction != null){
+            reqHeaders.put("SOAPAction", Arrays.asList(soapAction));
         }
     }
 

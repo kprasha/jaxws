@@ -1,6 +1,6 @@
 package com.sun.xml.ws.transport.http;
 
-import com.sun.tools.xjc.reader.xmlschema.Messages;
+
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.Adapter;
@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.TransportBackChannel;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
@@ -108,7 +109,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 return;                 // Connection is already closed
             }
 
-            ct = encoder.getStaticContentType();
+            ContentType contentType = encoder.getStaticContentType(packet);
+            ct = contentType.getContentType();
             if (ct == null) {
                 throw new UnsupportedOperationException();
             } else {

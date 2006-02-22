@@ -74,7 +74,7 @@ public interface Encoder {
      *      null if the content-type may change from a {@link Message} to {@link Message}.
      *      Otherwise return the static content type, like "application/xml".
      */
-    String getStaticContentType();
+    ContentType getStaticContentType(Packet packaet);
 
     /**
      * Encodes an XML infoset portion of the {@link Message}
@@ -96,7 +96,7 @@ public interface Encoder {
      * @throws IOException
      *      if a {@link OutputStream} throws {@link IOException}.
      */
-    String encode( Packet packet, OutputStream out ) throws IOException;
+    ContentType encode( Packet packet, OutputStream out ) throws IOException;
 
     /**
      * The version of {@link #encode(Packet,OutputStream)}
@@ -106,7 +106,7 @@ public interface Encoder {
      * TODO: for the convenience of implementation, write
      * an adapter that wraps {@link WritableByteChannel} to {@link OutputStream}.
      */
-    String encode( Packet packet, WritableByteChannel buffer );
+    ContentType encode( Packet packet, WritableByteChannel buffer );
     
     /*
      * The following methods need to be documented and implemented.

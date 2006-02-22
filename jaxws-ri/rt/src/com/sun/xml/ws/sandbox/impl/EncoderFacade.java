@@ -1,6 +1,7 @@
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
 
@@ -26,15 +27,15 @@ public class EncoderFacade implements Encoder {
         this.binding = binding;
     }
 
-    public String getStaticContentType() {
-        return getEncoder().getStaticContentType();
+    public ContentType getStaticContentType(Packet packet) {
+        return getEncoder().getStaticContentType(packet);
     }
 
-    public String encode(Packet packet, OutputStream out) throws IOException {
+    public ContentType encode(Packet packet, OutputStream out) throws IOException {
         return getEncoder().encode(packet, out);
     }
 
-    public String encode(Packet packet, WritableByteChannel buffer) {
+    public ContentType encode(Packet packet, WritableByteChannel buffer) {
         return getEncoder().encode(packet, buffer);
     }
 

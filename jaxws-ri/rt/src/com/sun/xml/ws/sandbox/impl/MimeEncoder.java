@@ -1,8 +1,8 @@
 package com.sun.xml.ws.sandbox.impl;
 
-import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -25,20 +25,20 @@ public class MimeEncoder implements Encoder {
     /**
      * TODO: can we generate a content-id ? otherwise, buffering is required
      */
-    public String getStaticContentType() {
+    public ContentType getStaticContentType(Packet packet) {
         return null;
     }
 
     // TODO: preencode String literals to byte[] so that they don't have to
     // go through char[]->byte[] conversion at runtime.
 
-    public String encode(Packet packet, OutputStream out) throws IOException {
+    public ContentType encode(Packet packet, OutputStream out) throws IOException {
         Message msg = packet.getMessage();
 
         String primaryCid = null;           // TODO
         String primaryCt = null;           // TODO
 
-        ContentType contentType = new ContentType("multipart", "related", null);
+        com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType contentType = new com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType("multipart", "related", null);
         String boundary = UniqueValue.getUniqueBoundaryValue();
         contentType.setParameter("type", "text/xml");   // TODO
         contentType.setParameter("boundary", boundary);
@@ -72,10 +72,10 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeAsAscii(startBoundary, out);    // write --boundary
         OutputUtil.writeAsAscii("--", out);
 
-        return "multipart/related";
+        return new ContentTypeImpl("multipart/related", null);
     }
 
-    public String encode(Packet packet, WritableByteChannel buffer) {
+    public ContentType encode(Packet packet, WritableByteChannel buffer) {
         //TODO: not yet implemented
         throw new UnsupportedOperationException();
     }
