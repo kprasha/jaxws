@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
+import javax.xml.ws.WebServiceException;
 
 /**
  * TODO: this class seems to be pointless. Just merge it with {@link HttpTransportPipe}.
@@ -266,6 +267,7 @@ final class HttpClientTransport {
                 isFailure = true;
             }
         } catch (IOException e) {
+            throw new WebServiceException(e);
             // on JDK1.3.1_01, we end up here, but then getResponseCode() succeeds!
 //            if (httpConnection.getResponseCode()
 //                    == HttpURLConnection.HTTP_INTERNAL_ERROR) {
