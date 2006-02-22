@@ -210,8 +210,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
 
         w.writeEndElement();
         w.writeEndDocument();
-         w.flush();
-         w.close();
+        w.flush();
     }
 
     public Message copy() {
