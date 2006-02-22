@@ -84,7 +84,7 @@ public class ResponseContext extends AbstractMap<String,Object> {
     }
 
     public Object get(Object key) {
-        if(packet.containsKey(key))
+        if(packet.supports(key))
             return packet.get(key);    // strongly typed
 
         if(!packet.getApplicationScopePropertyNames(true).contains(key))
