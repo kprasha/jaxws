@@ -109,8 +109,10 @@ public abstract class TransportPipeFactory {
 
         // default built-in trasnports
         String scheme = address.getURI().getScheme();
-        if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
-            return new HttpTransportPipe(binding);
+        if (scheme != null) {
+            if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
+                return new HttpTransportPipe(binding);
+        }
 
         throw new WebServiceException("Unsupported endpoint address: "+address);    // TODO: i18n
     }
