@@ -96,7 +96,7 @@ final class LocalTransportPipe implements Pipe {
                 reqHeaders.putAll(request.httpRequestHeaders);
             con.setResponseHeaders(reqHeaders);
 
-            String contentType = encoder.encode(request, con.getOutput());
+            String contentType = encoder.encode(request, con.getOutput()).getContentType();
 
             reqHeaders.put("Content-Type", Arrays.asList(contentType));
             con.setRequestHeaders(reqHeaders);
