@@ -358,13 +358,13 @@ abstract class HandlerProcessor<C extends MessageContext> {
      *
      */
     private boolean callHandleMessageReverse(C context, int start, int end) {
-        /* Do we need this check?
+        
         if (handlers.isEmpty() ||
                 start == -1 ||
                 start == handlers.size()) {
             return false;
         }
-         */
+        
         int i = start;
         
         if (start > end) {
@@ -395,9 +395,12 @@ abstract class HandlerProcessor<C extends MessageContext> {
     
     private boolean callHandleFault(C context, int start, int end) {
         
-        if (handlers.isEmpty()) {
-            return true;
+        if (handlers.isEmpty() ||
+                start == -1 ||
+                start == handlers.size()) {
+            return false;
         }
+        
         int i = start;
         if (start > end) {
             try {
