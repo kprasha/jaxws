@@ -279,6 +279,7 @@ public abstract class SOAPFaultBuilder {
                         code.setSubcode(sct);
                         subcode = sct;
                         first = false;
+                        continue;
                     }
                     subcode = fillSubcodes(subcode, value);
                 }
