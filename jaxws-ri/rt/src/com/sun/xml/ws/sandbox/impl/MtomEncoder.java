@@ -30,6 +30,7 @@ import java.net.URLEncoder;
 
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.jvnet.staxex.NamespaceContextEx;
+import org.jvnet.staxex.Base64Data;
 
 /**
  * Mtom messge Encoder. It can be used even for non-soap message's mtom encoding.
@@ -92,7 +93,7 @@ public class MtomEncoder implements Encoder {
                 return new ContentTypeImpl(messageContentType, null);
         }
         //never happens
-        return null;                
+        return null;
     }
 
     private OutputStream writeMtomBinary(String contentType){
@@ -186,7 +187,7 @@ public class MtomEncoder implements Encoder {
     }
 
     private void writeMtomBinary(DataHandler dataHandler){
-
+        throw new UnsupportedOperationException();
     }
 
     private void writeAttachments(AttachmentSet attachments, OutputStream out) throws IOException {
@@ -268,7 +269,14 @@ public class MtomEncoder implements Encoder {
         }
 
         public void writePCDATA(CharSequence data) throws XMLStreamException {
-            throw new UnsupportedOperationException();
+            if(data == null)
+                return;
+            if(data instanceof Base64Data){
+                Base64Data binaryData = (Base64Data)data;
+                writeBinary(binaryData.getExact(), 0, binaryData.getDataLen(), binaryData.getMimeType());
+                return;
+            }            
+            writeCharacters(data.toString());
         }
 
         private class MtomNamespaceContextEx implements NamespaceContextEx {
