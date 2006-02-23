@@ -283,8 +283,6 @@ public abstract class SOAPFaultBuilder {
                     }
                     subcode = fillSubcodes(subcode, value);
                 }
-            }else{
-
             }
             faultString = soapFaultException.getFault().getFaultString();
             faultActor = soapFaultException.getFault().getFaultActor();
