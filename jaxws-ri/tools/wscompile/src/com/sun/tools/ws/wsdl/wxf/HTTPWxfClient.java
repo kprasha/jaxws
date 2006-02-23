@@ -87,7 +87,8 @@ public class HTTPWxfClient {
         
         URL url = new URL(address);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestProperty("SOAPAction", "");
+        conn.setRequestProperty("SOAPAction",
+            "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get");
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
