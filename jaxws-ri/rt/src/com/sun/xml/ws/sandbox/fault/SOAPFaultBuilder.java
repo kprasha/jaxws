@@ -317,7 +317,10 @@ public abstract class SOAPFaultBuilder {
                 faultCode = getDefaultFaultCode(soapVersion);
             }
         }
-        return new JAXBMessage(JAXB_MARSHALLER, new SOAP12Fault(code, reason, null, null, new DetailType(detailNode)), soapVersion);
+        DetailType detailType = null;
+        if(detailNode != null)
+            detailType = new DetailType(detailNode);
+        return new JAXBMessage(JAXB_MARSHALLER, new SOAP12Fault(code, reason, null, null, detailType), soapVersion);
     }
 
     private static SubcodeType fillSubcodes(SubcodeType parent, QName value){
