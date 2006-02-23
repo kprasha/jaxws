@@ -77,8 +77,19 @@ public class LogicalHandlerPipe extends HandlerPipe {
         if(logicalHandlers.isEmpty()) {
             return next.process(packet);
         }
+        
         MessageContextImpl msgContext = new MessageContextImpl(packet);
         LogicalMessageContextImpl context =  new LogicalMessageContextImpl(binding,packet,msgContext);
+        // Doing this just for Spec compliance
+        // This check is done to cover handler returning false in Oneway request 
+        boolean handleFalse = processor.checkHandlerFalseProperty(context);
+        if(handleFalse){
+            // Cousin HandlerPipe returned false during Oneway Request processing.
+            // Dont call handlers and dispatch the message.
+            remedyActionTaken = true;
+            return next.process(packet);
+        }
+        
         Packet reply;
         try {
             boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
@@ -96,11 +107,11 @@ public class LogicalHandlerPipe extends HandlerPipe {
             //Update Packet Properties
             context.updatePacket();
             msgContext.fill(packet);
-            
-            // the only case where no message is sent
-            if (!isOneWay && !handlerResult) {
+            if(!handlerResult) {
                 remedyActionTaken = true;
-                //TODO: return packet
+            }
+            // the only case where no message is sent
+            if (!isOneWay && !handlerResult) {                
                 return packet;
             }
             

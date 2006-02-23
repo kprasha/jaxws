@@ -74,7 +74,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
     private List<Handler> handlers; // may be logical/soap mixed
     
     private WSBinding binding;
-    private int index=0;
+    private int index = -1;
     
     /**
      * The handlers that are passed in will be sorted into
@@ -189,6 +189,11 @@ abstract class HandlerProcessor<C extends MessageContext> {
                 } else {
                     callHandleMessageReverse(context,getIndex()+1,handlers.size()-1);
                 }
+            } else {
+                // Oneway, dispatch the message
+                // cousinPipe should n't call handleMessage() anymore.
+                // Set a property for it.
+                addHandleFalseProperty(context);
             }
             return false;
         }
@@ -281,6 +286,11 @@ abstract class HandlerProcessor<C extends MessageContext> {
      */
     private void addHandleFalseProperty(C context) {
         context.put(HANDLE_FALSE_PROPERTY, Boolean.TRUE);
+    }
+    
+    public boolean checkHandlerFalseProperty(C context) {
+        Boolean handleFalse = (Boolean) context.get(HANDLE_FALSE_PROPERTY);
+        return (handleFalse == null)? false:handleFalse;        
     }
     
     /**
@@ -438,8 +448,8 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * inclusive to allow both directions more easily.
      */
     protected void closeHandlers(MessageContext context, int start, int end) {
-        
-        if (handlers.isEmpty()) {
+        if (handlers.isEmpty() || 
+                start == -1) {
             return;
         }
         if (start > end) {

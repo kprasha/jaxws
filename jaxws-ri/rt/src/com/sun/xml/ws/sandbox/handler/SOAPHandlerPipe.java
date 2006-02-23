@@ -85,6 +85,17 @@ public class SOAPHandlerPipe extends HandlerPipe {
         MessageContextImpl msgContext = new MessageContextImpl(packet);
         SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet,msgContext);
         context.setRoles(roles);
+        
+        // Doing this just for Spec compliance
+        // This check is done to cover handler returning false in Oneway request 
+        boolean handleFalse = processor.checkHandlerFalseProperty(context);
+        if(handleFalse){
+            // Cousin HandlerPipe returned false during Oneway Request processing.
+            // Dont call handlers and dispatch the message.
+            remedyActionTaken = true;
+            return next.process(packet);
+        }
+        
         Packet reply;
         try {
             boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
@@ -103,11 +114,11 @@ public class SOAPHandlerPipe extends HandlerPipe {
             //Update Packet Properties
             context.updatePacket();
             msgContext.fill(packet);
-            
+            if(!handlerResult) {
+                remedyActionTaken = true;
+            }
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
-                remedyActionTaken = true;
-                //TODO: return packet                
                 return packet;
             }
             
