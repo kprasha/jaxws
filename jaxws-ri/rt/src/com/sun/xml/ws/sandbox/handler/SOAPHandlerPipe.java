@@ -166,19 +166,26 @@ public class SOAPHandlerPipe extends HandlerPipe {
     
     //TODO:
     private void closeSOAPHandlers(MessageContext msgContext){
+        if(processor == null)
+            return;
         if(remedyActionTaken){
           //Close only invoked handlers in the chain
           if(isClient){
               //CLIENT-SIDE
-              processor.closeHandlers(msgContext,0,processor.getIndex());              
+              processor.closeHandlers(msgContext,processor.getIndex(),0);              
           } else {
               //SERVER-SIDE
-              processor.closeHandlers(msgContext,soapHandlers.size()-1,processor.getIndex());
+              processor.closeHandlers(msgContext,processor.getIndex(),soapHandlers.size()-1);
           }
       } else {
           //Close all handlers in the chain
-           if(processor != null)
-               processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
+          if(isClient){
+              //CLIENT-SIDE
+              processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
+          } else {
+              //SERVER-SIDE
+              processor.closeHandlers(msgContext,0,soapHandlers.size()-1);
+          }    
       }
     }
     

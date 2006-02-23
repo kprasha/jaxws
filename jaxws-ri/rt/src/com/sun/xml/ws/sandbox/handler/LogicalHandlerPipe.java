@@ -168,18 +168,26 @@ public class LogicalHandlerPipe extends HandlerPipe {
     
     //TODO:
     private void closeLogicalHandlers(MessageContext msgContext){
-      if(remedyActionTaken){
+        if(processor == null)
+            return;
+        if(remedyActionTaken){
           //Close only invoked handlers in the chain
           if(isClient){
               //CLIENT-SIDE
-              processor.closeHandlers(msgContext,0,processor.getIndex());
+              processor.closeHandlers(msgContext,processor.getIndex(),0);
           } else {
               //SERVER-SIDE
-              processor.closeHandlers(msgContext,logicalHandlers.size()-1,processor.getIndex());
+              processor.closeHandlers(msgContext,processor.getIndex(),logicalHandlers.size()-1);
           }
       } else {
           //Close all handlers in the chain
-          processor.closeHandlers(msgContext,logicalHandlers.size()-1,0);
+          if(isClient){
+              //CLIENT-SIDE
+              processor.closeHandlers(msgContext,logicalHandlers.size()-1,0);
+          } else {
+              //SERVER-SIDE
+              processor.closeHandlers(msgContext,0,logicalHandlers.size()-1);
+          }          
       }
     }
     
