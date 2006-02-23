@@ -38,9 +38,8 @@ class SubcodeType {
     @XmlElements(@XmlElement(namespace = ns))
     private SubcodeType Subcode;
 
-    public SubcodeType(QName value, SubcodeType subcode) {
+    public SubcodeType(QName value) {
         Value = value;
-        Subcode = subcode;
     }
 
     public SubcodeType() {
@@ -52,5 +51,9 @@ class SubcodeType {
 
     SubcodeType getSubcode() {
         return Subcode;
+    }
+
+    void setSubcode(SubcodeType subcode) {
+        Subcode = subcode;
     }
 }

@@ -55,4 +55,8 @@ class CodeType {
     SubcodeType getSubcode(){
         return Subcode;
     }
+
+    void setSubcode(SubcodeType subcode) {
+        Subcode = subcode;
+    }
 }
