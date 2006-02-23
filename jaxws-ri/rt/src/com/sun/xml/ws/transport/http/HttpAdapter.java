@@ -131,6 +131,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             closed = true;
             // close the response channel now
             con.setStatus(WSConnection.ONEWAY);
+            con.getOutput();        // Sets Status Code on the connection
             con.closeOutput();
         }
     }
