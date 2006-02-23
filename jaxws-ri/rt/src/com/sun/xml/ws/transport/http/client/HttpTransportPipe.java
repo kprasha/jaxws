@@ -94,7 +94,7 @@ public class HttpTransportPipe implements Pipe {
 
             if (request.isOneWay==Boolean.TRUE
                 || con.statusCode==WSConnection.ONEWAY) {
-                return new Packet(null);    // one way. no response given.
+                return request.createResponse(null);    // one way. no response given.
             }
             String contentType = getContentType(respHeaders);
             Packet reply = request.createResponse(null);
