@@ -59,6 +59,8 @@ public class HTTPMexClient {
     public Document getWSDLDocument(String address) {
         try {
             String request = getMexWsdlRequest(address);
+            System.out.println("Request message (this output is temporary)\n" +
+                request + "\n");
             InputStream response = makeHTTPCall(request, address);
             return convertResponse(response);
         } catch (Exception e) {
@@ -71,7 +73,7 @@ public class HTTPMexClient {
     private String getMexWsdlRequest(String address) {
         return "<?xml version=\"1.0\"?>" +
             "<soapenv:Envelope " +
-            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\" " +
             "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" " +
             "xmlns:wsx=\"http://schemas.xmlsoap.org/ws/2004/09/mex\">" +
             "<soapenv:Header><wsa:Action>" +

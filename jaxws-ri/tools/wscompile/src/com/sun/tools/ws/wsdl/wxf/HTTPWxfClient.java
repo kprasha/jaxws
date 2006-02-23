@@ -57,6 +57,8 @@ public class HTTPWxfClient {
     public Document getWSDLDocument(String address) {
         try {
             String request = getWxfWsdlRequest(address);
+            System.out.println("Request message (this output is temporary)\n" +
+                request + "\n");
             InputStream response = makeHTTPCall(request, address);
             return convertResponse(response);
         } catch (Exception e) {
@@ -69,7 +71,7 @@ public class HTTPWxfClient {
     private String getWxfWsdlRequest(String address) {
         return "<?xml version=\"1.0\"?>" +
             "<soapenv:Envelope " +
-            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\" " +
             "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">" +
             "<soapenv:Header><wsa:Action>" +
             "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get" +
