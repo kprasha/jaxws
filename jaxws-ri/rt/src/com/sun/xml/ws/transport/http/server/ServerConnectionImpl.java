@@ -187,7 +187,7 @@ final class ServerConnectionImpl extends WSConnectionImpl implements WebServiceC
     }
 
     public String getRequestHeader(String headerName) {
-        return httpExchange.getResponseHeaders().getFirst(headerName);
+        return httpExchange.getRequestHeaders().getFirst(headerName);
     }
 
     public String getQueryString() {
