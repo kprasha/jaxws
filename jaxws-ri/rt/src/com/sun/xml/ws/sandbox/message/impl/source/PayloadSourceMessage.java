@@ -65,6 +65,13 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     private Message streamMessage;
     private byte[] payloadbytes;
 
+    /**
+     * Gets the {@link Message} based on {@link Source} representing payload.
+     *
+     * @param headers may be null
+     * @param src must be non-null
+     * @param soapVersion  must be non-null, posible values are {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
+     */
     public PayloadSourceMessage(HeaderList headers, Source src, SOAPVersion soapVersion) {
         super(soapVersion);
         this.headers = headers;
