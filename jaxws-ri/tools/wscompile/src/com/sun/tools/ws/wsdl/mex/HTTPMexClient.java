@@ -71,21 +71,29 @@ public class HTTPMexClient {
     }
 
     private String getMexWsdlRequest(String address) {
-        return "<?xml version=\"1.0\"?>" +
-            "<soapenv:Envelope " +
-            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\" " +
-            "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" " +
-            "xmlns:wsx=\"http://schemas.xmlsoap.org/ws/2004/09/mex\">" +
-            "<soapenv:Header><wsa:Action>" +
+        return "<?xml version=\"1.0\"?><s12:Envelope " +
+            "xmlns:s12='http://www.w3.org/2003/05/soap-envelope' " +
+            "xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' " +
+            "xmlns:wsx='http://schemas.xmlsoap.org/ws/2004/09/mex'>" +
+            "<s12:Header>" +
+            "<wsa:Action>" +
             "http://schemas.xmlsoap.org/ws/2004/09/mex/GetMetadata/Request" +
-            "</wsa:Action><wsa:MessageID>urn:GetMetadata</wsa:MessageID>" +
-            "<wsa:ReplyTo><wsa:Address>" +
-            "http://www.w3.org/2005/08/addressing/anonymous" +
-            "</wsa:Address></wsa:ReplyTo><wsa:To>" +
-            address +
-            "</wsa:To></soapenv:Header><soapenv:Body>" +
-            "<wsx:GetMetadata/>" + // empty request maps to wsdl
-            "</soapenv:Body></soapenv:Envelope>";
+            "</wsa:Action>" +
+            "<wsa:MessageID>" +
+            "uuid:0000010e-0000-0000-C000-000000000046" +
+            "</wsa:MessageID>" +
+            "<wsa:To>" + address + "</wsa:To>" +
+            "</s12:Header>" +
+            "<s12:Body><wsx:GetMetadata/></s12:Body>" +
+            "</s12:Envelope>";
+
+//            "<wsa:ReplyTo><wsa:Address>" +
+//            "http://www.w3.org/2005/08/addressing/anonymous" +
+//            "</wsa:Address></wsa:ReplyTo><wsa:To>" +
+//            address +
+//            "</wsa:To></soapenv:Header><soapenv:Body>" +
+//            "<wsx:GetMetadata/>" + // empty request maps to wsdl
+//            "</soapenv:Body></soapenv:Envelope>";
     }
 
     private InputStream makeHTTPCall(String request, String address)
@@ -97,7 +105,8 @@ public class HTTPMexClient {
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "text/xml; charset=\"utf-8\"");
+        conn.setRequestProperty("Content-Type",
+            "application/soap+xml;charset=utf-8;action=\"http://schemas.xmlsoap.org/ws/2004/09/transfer/Get\"");
         
         Writer writer = new OutputStreamWriter(conn.getOutputStream());
         writer.write(request);

@@ -69,30 +69,36 @@ public class HTTPWxfClient {
     }
 
     private String getWxfWsdlRequest(String address) {
-        return "<?xml version=\"1.0\"?>" +
-            "<soapenv:Envelope " +
-            "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope\" " +
-            "xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">" +
-            "<soapenv:Header><wsa:Action>" +
+        return "<s12:Envelope " +
+            "xmlns:s12='http://www.w3.org/2003/05/soap-envelope' " +
+            "xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' " +
+            "xmlns:wxf='http://schemas.xmlsoap.org/ws/2004/09/transfer' >" +
+            "<s12:Header>" +
+            "<wsa:Action>" +
             "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get" +
-            "</wsa:Action><wsa:MessageID>urn:Get</wsa:MessageID>" +
-            "<wsa:To>" +
-            address +
-            "</wsa:To></soapenv:Header>" +
-            "<soapenv:Body/></soapenv:Envelope>";
+            "</wsa:Action>" +
+            "<wsa:MessageID>" +
+            "uuid:0000010e-0000-0000-C000-000000000046" +
+            "</wsa:MessageID>" +
+            "<wsa:To>" + address + "</wsa:To>" +
+            "</s12:Header>" +
+            "<s12:Body/>" +
+            "</s12:Envelope>";
     }
 
     private InputStream makeHTTPCall(String request, String address)
         throws Exception {
-        
+        System.out.println("Address is " + address);
         URL url = new URL(address);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestProperty("SOAPAction",
-            "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get");
+        //conn.setRequestProperty("SOAPAction",
+          //  "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get");
         conn.setDoOutput(true);
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "text/xml; charset=\"utf-8\"");
+        conn.setRequestProperty("Content-Transfer-Encoding", "8bit");
+        conn.setRequestProperty("Content-Type",
+            "application/soap+xml;charset=utf-8;action=\"http://schemas.xmlsoap.org/ws/2004/09/transfer/Get\"");
         
         Writer writer = new OutputStreamWriter(conn.getOutputStream());
         writer.write(request);
