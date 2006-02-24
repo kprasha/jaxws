@@ -24,10 +24,12 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.transform.Source;
 
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.handler.LogicalMessageContext;
@@ -71,7 +73,12 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
                 Message msg = packet.getMessage();
                 HeaderList headers = msg.getHeaders();
                 AttachmentSet attchments = msg.getAttachments();
-                packet.setMessage(new PayloadSourceMessage(headers, lm.getModifiedPayload(),binding.getSOAPVersion()));
+                Source modifiedPayload = lm.getModifiedPayload();
+                if(modifiedPayload == null){
+                    packet.setMessage(new EmptyMessageImpl(headers,binding.getSOAPVersion()));
+                } else {
+                    packet.setMessage(new PayloadSourceMessage(headers,modifiedPayload ,binding.getSOAPVersion()));
+                }
             }
         }
     }
