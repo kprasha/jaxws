@@ -30,7 +30,7 @@ public class LogicalHandlerProcessor<C extends LogicalMessageContext> extends Ha
     void insertFaultMessage(C context,
             ProtocolException exception) {
         
-        if (context == null) {
+        if (context != null) {
             // non-soap case
             LogicalMessage msg = context.getMessage();
             if (msg != null) {

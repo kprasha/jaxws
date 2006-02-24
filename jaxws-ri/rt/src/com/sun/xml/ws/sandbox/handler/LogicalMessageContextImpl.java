@@ -67,11 +67,11 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
             //Check if LogicalMessageImpl has changed, if so construct new one
             //TODO: Attachments are not used
             // Packet are handled through MessageContext
-            if(lm.payloadSrc != null){
+            if(lm.isPayloadModifed()){
                 Message msg = packet.getMessage();
                 HeaderList headers = msg.getHeaders();
                 AttachmentSet attchments = msg.getAttachments();
-                packet.setMessage(new PayloadSourceMessage(headers, lm.payloadSrc,binding.getSOAPVersion()));
+                packet.setMessage(new PayloadSourceMessage(headers, lm.getModifiedPayload(),binding.getSOAPVersion()));
             }
         }
     }

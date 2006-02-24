@@ -65,7 +65,9 @@ import org.xml.sax.XMLReader;
 public class LogicalMessageImpl implements LogicalMessage {
     private Packet packet;
     // This holds the (modified)payload set by User
-    protected Source payloadSrc = null;
+    private Source payloadSrc = null;
+    // Flag to check if the PayloadSrc is accessed/modified
+    private boolean payloadModifed = false;
         
     /** Creates a new instance of LogicalMessageImplRearch */
     public LogicalMessageImpl(Packet packet) {
@@ -73,10 +75,19 @@ public class LogicalMessageImpl implements LogicalMessage {
         this.packet = packet;
     }
     
-    public Source getPayload() {                
+    protected boolean isPayloadModifed(){
+        return payloadModifed;
+    }
+    protected Source getModifiedPayload(){
+        if(!payloadModifed)
+            throw new RuntimeException("Payload not modified.");
+        return payloadSrc;
         
-        if(payloadSrc == null) {
+    }
+    public Source getPayload() {                
+        if(!payloadModifed) {
             payloadSrc = packet.getMessage().readPayloadAsSource();
+            payloadModifed = true;
         }
         if(payloadSrc instanceof DOMSource){
             return payloadSrc;
@@ -103,6 +114,7 @@ public class LogicalMessageImpl implements LogicalMessage {
     }
     
     public void setPayload(Source payload) {
+        payloadModifed = true;
         payloadSrc = payload;
     }
     
@@ -117,6 +129,7 @@ public class LogicalMessageImpl implements LogicalMessage {
     }
     
     public void setPayload(Object payload, JAXBContext context) {
+        payloadModifed = true;
         try {
             payloadSrc = JAXBTypeSerializer.serialize(payload, context);            
         } catch(SerializationException e) {
