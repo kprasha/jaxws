@@ -66,7 +66,6 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
         Object parameter = model.getParameter(request.getMessage());
         Provider servant = instanceResolver.resolve(request);
         logger.fine("Invoking Provider Endpoint "+servant);
-        Packet response = null;
         Object returnValue = null;
         try {
             returnValue = servant.invoke(parameter);
@@ -74,23 +73,18 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
             // TODO exception handling for XML/HTTP binding
             e.printStackTrace();
             Message responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
-            response = new Packet(responseMessage);
+            return request.createResponse(responseMessage);
         }
         if (returnValue == null) {
             // Oneway. Send response code immediately for transports(like HTTP)
+            // Don't do this above, since close() may generate some exceptions
             if (request.transportBackChannel != null) {
                 request.transportBackChannel.close();
             }
+            return request.createResponse(null);
+        } else {
+            return request.createResponse(model.getResponseMessage(returnValue));
         }
-
-        if (response == null) {
-            response = (returnValue == null)
-                    ? new Packet(null)
-                    : new Packet(model.getResponseMessage(returnValue));
-        }
-        // TODO: some properties need to be copied from request packet to the response packet
-        response.invocationProperties.putAll(request.invocationProperties);
-        return response;
     }
 
     public Pipe copy(PipeCloner cloner) {
