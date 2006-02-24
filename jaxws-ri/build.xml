@@ -112,7 +112,7 @@
 
   <target name="javadocs" depends="image">
     <javadoc packagenames=".,com.sun.xml.ws.*,com.sun.pept.*,javax.xml.ws.*,javax.xml.soap.*,javax.xml.bind.*,com.sun.tools.ws.*"
-         sourcepath="all-source-path"
+         sourcepathref="all-source-path"
          destdir="${build.home}/javadocs/"
          author="false"
          version="false"
