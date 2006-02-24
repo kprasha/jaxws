@@ -29,15 +29,17 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 
 import com.sun.tools.ws.wsdl.framework.ParseException;
+import org.w3c.dom.Node;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * A class for making ws transfer requests over http to retrieve
@@ -52,8 +54,6 @@ import com.sun.tools.ws.wsdl.framework.ParseException;
  */
 public class HTTPWxfClient {
     
-    private JAXBContext jaxbContext;
-
     public Document getWSDLDocument(String address) {
         try {
             String request = getWxfWsdlRequest(address);
@@ -72,7 +72,7 @@ public class HTTPWxfClient {
         return "<s12:Envelope " +
             "xmlns:s12='http://www.w3.org/2003/05/soap-envelope' " +
             "xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' " +
-            "xmlns:wxf='http://schemas.xmlsoap.org/ws/2004/09/transfer' >" +
+            "xmlns:wxf='http://schemas.xmlsoap.org/ws/2004/09/transfer'>" +
             "<s12:Header>" +
             "<wsa:Action>" +
             "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get" +
@@ -88,7 +88,6 @@ public class HTTPWxfClient {
 
     private InputStream makeHTTPCall(String request, String address)
         throws Exception {
-        System.out.println("Address is " + address);
         URL url = new URL(address);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         //conn.setRequestProperty("SOAPAction",
@@ -113,22 +112,26 @@ public class HTTPWxfClient {
     }
 
     private Document convertResponse(InputStream stream) throws Exception {
-        createJAXBContext();
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLStreamReader reader = factory.createXMLStreamReader(stream);
-        
-        int state = 0;
-        do {
-            state = reader.next();
-        } while (state != reader.START_ELEMENT ||
-            !reader.getLocalName().equalsIgnoreCase("metadata"));
-        
-//        Unmarshaller uMarshaller = jaxbContext.createUnmarshaller();
-//        Metadata wxfResponse = (Metadata) uMarshaller.unmarshal(reader);
-//        MetadataSection wsdlSection = wxfResponse.getMetadataSection().get(0);
-//        Node wsdlNode = (Node) wsdlSection.getAny().get(0);
-//        return wsdlNode.getOwnerDocument();
-        return null;
+        DocumentBuilderFactory factory =
+            DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setValidating(false);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        builder.setErrorHandler(new ErrorHandler() {
+            public void error(SAXParseException e) throws SAXException {}
+            public void fatalError(SAXParseException e) throws SAXException {
+                throw e;
+            }
+            public void warning(SAXParseException e) throws SAXException {
+                throw e;
+            }
+        });
+        Document responseDoc = builder.parse(stream);
+        Node envelope = responseDoc.getFirstChild();
+        Node body = envelope.getFirstChild().getNextSibling();
+        Node wsdl = body.getFirstChild();
+        responseDoc.replaceChild(wsdl, envelope);
+        return responseDoc;
     }
     
     private void outputErrorStream(HttpURLConnection conn) {
@@ -153,10 +156,4 @@ public class HTTPWxfClient {
         }
     }
     
-    private void createJAXBContext() throws JAXBException {
-        if (jaxbContext == null) {
-            jaxbContext = JAXBContext.newInstance(
-                com.sun.tools.ws.wsdl.wxf.ObjectFactory.class);
-        }
-    }
 }
