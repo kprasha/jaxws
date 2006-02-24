@@ -122,7 +122,13 @@ public class LogicalHandlerPipe extends HandlerPipe {
             msgContext = new MessageContextImpl(reply);
             context =  new LogicalMessageContextImpl(binding,reply,msgContext);
             //If null, it is oneway
-            if(reply.getMessage()!= null){                
+            if(reply.getMessage()!= null){
+                if(!isClient) {
+                    if(reply.getMessage().isFault()) {
+                        //handleFault() is called on handlers
+                        processor.addHandleFaultProperty(context);
+                    }
+                }
                 // Call handlers on Response
                 if(isClient) {
                     //CLIENT-SIDE

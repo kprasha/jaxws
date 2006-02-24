@@ -226,6 +226,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
         
         boolean callHandleFault = (context.get(HANDLE_FAULT_PROPERTY) == null)? 
             false:(Boolean) context.get(HANDLE_FAULT_PROPERTY);
+        
         try {
             if(callHandleFault) {
                 // call handleFault on handlers
@@ -276,7 +277,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * When this property is set HandlerPipes can call handleFault() on the 
      * message
      */
-    private void addHandleFaultProperty(C context) {
+    public void addHandleFaultProperty(C context) {
         context.put(HANDLE_FAULT_PROPERTY, Boolean.TRUE);
     }
     
@@ -284,7 +285,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
      * When this property is set HandlerPipes will not call 
      * handleMessage() during Response processing.
      */
-    private void addHandleFalseProperty(C context) {
+    public void addHandleFalseProperty(C context) {
         context.put(HANDLE_FALSE_PROPERTY, Boolean.TRUE);
     }
     

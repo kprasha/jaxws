@@ -131,7 +131,13 @@ public class SOAPHandlerPipe extends HandlerPipe {
             context =  new SOAPMessageContextImpl(binding,reply,msgContext);
             context.setRoles(roles);
             //If null, it is oneway
-            if(reply.getMessage()!= null){                
+            if(reply.getMessage()!= null){
+                if(!isClient) {
+                    if(reply.getMessage().isFault()) {
+                        //handleFault() is called on handlers
+                        processor.addHandleFaultProperty(context);
+                    }
+                }
                 // Call handlers on Response
                 if(isClient) {
                     //CLIENT-SIDE
