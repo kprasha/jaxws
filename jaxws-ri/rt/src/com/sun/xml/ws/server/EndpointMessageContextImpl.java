@@ -25,6 +25,7 @@ import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.ws.handler.MessageContext;
 
 /**
  * Implements WebServiceContext's MessageContext on top of {@link Packet}.
@@ -44,7 +45,7 @@ import java.util.Set;
  * @author Jitendra Kotamraju
  */
 
-public class EndpointMessageContextImpl extends AbstractMap<String,Object> {
+public class EndpointMessageContextImpl extends AbstractMap<String,Object> implements MessageContext {
     
     /**
      * Lazily computed.
@@ -141,6 +142,13 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> {
             entrySet = new EntrySet();
         }
         return entrySet;
+    }
+
+    public void setScope(String name, MessageContext.Scope scope) {
+    }
+
+    public MessageContext.Scope getScope(String name) {
+        return null;
     }
     
     private class EntrySet extends AbstractSet<Map.Entry<String, Object>> {
