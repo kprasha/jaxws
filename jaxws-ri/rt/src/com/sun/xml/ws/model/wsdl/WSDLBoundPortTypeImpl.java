@@ -146,6 +146,13 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         }
     }
 
+    /**
+     * TODO seems like most of this logic(like populating payloadMap should be
+     * done much before. Here, it requires only lookup
+     *
+     * Also payloadMap is not used.
+     *
+     */
     public WSDLBoundOperation getOperation(String namespaceUri, String localName) {
         boolean emptyPayload = false;
         /**
@@ -173,6 +180,10 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
             if(name == null && emptyPayload){
                 emptyPayloadOperation = op;
                 return op;
+            }
+            
+            if (emptyPayload) {
+                return emptyPayloadOperation;
             }
 
             if(name != null && name.equals(new QName(namespaceUri, localName))){
