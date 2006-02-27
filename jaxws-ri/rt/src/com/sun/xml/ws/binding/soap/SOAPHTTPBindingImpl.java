@@ -16,8 +16,8 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public final class SOAPHTTPBindingImpl extends SOAPBindingImpl {
-    public SOAPHTTPBindingImpl(List<Handler> handlerChain, SOAPVersion soapVersion, QName serviceName) {
-        super(handlerChain,soapVersion,soapVersion.httpBindingId,serviceName);
+    public SOAPHTTPBindingImpl(String bindingId, List<Handler> handlerChain, SOAPVersion soapVersion, QName serviceName) {
+        super(handlerChain,soapVersion,bindingId,serviceName);
     }
 
     public Encoder createEncoder() {

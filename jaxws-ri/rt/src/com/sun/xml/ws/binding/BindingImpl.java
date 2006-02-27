@@ -149,9 +149,10 @@ public abstract class BindingImpl implements WSBinding {
             }
         }
         if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING)
-            || bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)
-            || bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
-            return new SOAPHTTPBindingImpl(null, SOAPVersion.fromHttpBinding(bindingId), serviceName);
+            || bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
+            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(bindingId), serviceName);
+        } else if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {   
+            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(SOAPBinding.SOAP12HTTP_BINDING), serviceName);
         } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
             return new HTTPBindingImpl(null);
         } else {
@@ -164,6 +165,6 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public static WSBinding getDefaultBinding(QName serviceName) {
-        return new SOAPHTTPBindingImpl(null,SOAPVersion.SOAP_11,serviceName);
+        return new SOAPHTTPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING, null,SOAPVersion.SOAP_11,serviceName);
     }
 }

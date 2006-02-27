@@ -310,7 +310,7 @@ public class WSServiceDelegate extends WSService {
         // create binding
         if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
             bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            SOAPBindingImpl bindingImpl = new SOAPHTTPBindingImpl(
+            SOAPBindingImpl bindingImpl = new SOAPHTTPBindingImpl(bindingId,
                 handlerChain, SOAPVersion.fromHttpBinding(bindingId), serviceName);
 
             Set<String> roles = rolesMap.get(portName);
