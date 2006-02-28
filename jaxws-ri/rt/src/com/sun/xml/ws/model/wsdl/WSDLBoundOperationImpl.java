@@ -23,6 +23,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
+import com.sun.istack.Nullable;
 
 import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.WebParam.Mode;
@@ -170,7 +171,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         this.style = style;
     }
 
-    public QName getPayloadName() {
+    public @Nullable QName getPayloadName() {
         if(style.equals(Style.RPC)){
             return name;
         }else{
