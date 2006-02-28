@@ -59,7 +59,7 @@ public class WSRtObjectFactoryImpl extends WSRtObjectFactory {
     public WSBinding createBinding(String bindingId) {
         if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
                 bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            return new SOAPHTTPBindingImpl(null, SOAPVersion.fromHttpBinding(bindingId),null);
+            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(bindingId),null);
         } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
             return new HTTPBindingImpl(null);
         }
