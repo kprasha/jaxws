@@ -1,13 +1,13 @@
 package com.sun.xml.ws.util;
 
 import javax.xml.namespace.QName;
-import java.util.Map;
-import java.util.Set;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.AbstractSet;
+import java.util.Set;
 
 /**
  * Map keyed by {@link QName}.
@@ -155,6 +155,14 @@ public final class QNameMap<V> {
 
         for( Entry<? extends V> e : map.entrySet() )
             put(e.nsUri,e.localName,e.getValue());
+        return this;
+    }
+
+    public QNameMap<V> putAll(Map<QName,? extends V> map) {
+        for (Map.Entry<QName, ? extends V> e : map.entrySet()) {
+            QName qn = e.getKey();
+            put(qn.getNamespaceURI(),qn.getLocalPart(),e.getValue());
+        }
         return this;
     }
 
