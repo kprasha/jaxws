@@ -71,15 +71,12 @@ public class HTTPWxfClient {
     private String getWxfWsdlRequest(String address) {
         return "<s12:Envelope " +
             "xmlns:s12='http://www.w3.org/2003/05/soap-envelope' " +
-            "xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' " +
+            "xmlns:wsa='http://www.w3.org/2005/08/addressing' " +
             "xmlns:wxf='http://schemas.xmlsoap.org/ws/2004/09/transfer'>" +
             "<s12:Header>" +
             "<wsa:Action>" +
             "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get" +
             "</wsa:Action>" +
-            "<wsa:MessageID>" +
-            "uuid:0000010e-0000-0000-C000-000000000046" +
-            "</wsa:MessageID>" +
             "<wsa:To>" + address + "</wsa:To>" +
             "</s12:Header>" +
             "<s12:Body/>" +
