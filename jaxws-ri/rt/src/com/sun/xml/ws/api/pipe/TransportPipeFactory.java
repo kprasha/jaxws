@@ -7,6 +7,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.client.dispatch.StandalonePipeAssembler;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.WebServiceException;
 import java.util.logging.Logger;
@@ -87,7 +89,7 @@ public abstract class TransportPipeFactory {
      *      back to the user application, and no further {@link TransportPipeFactory}s
      *      are consulted.
      */
-    public abstract Pipe doCreate(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding);
+    public abstract Pipe doCreate(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService service, @NotNull WSBinding binding);
 
     /**
      * Locates {@link PipelineAssemblerFactory}s and create
@@ -98,7 +100,7 @@ public abstract class TransportPipeFactory {
      * @return
      *      Always non-null, since we fall back to our default {@link PipelineAssembler}.
      */
-    public static Pipe create(ClassLoader classLoader, EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+    public static Pipe create(@Nullable ClassLoader classLoader, @NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService service, @NotNull WSBinding binding) {
         for (TransportPipeFactory factory : ServiceFinder.find(TransportPipeFactory.class,classLoader)) {
             Pipe pipe = factory.doCreate(address,wsdlModel,service,binding);
             if(pipe!=null) {

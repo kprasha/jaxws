@@ -6,6 +6,8 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Provider;
@@ -72,7 +74,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService rootOwner, WSBinding binding);
+    Pipe createClient(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService rootOwner, @NotNull WSBinding binding);
 
     /**
      * Creates a new pipeline for servers.

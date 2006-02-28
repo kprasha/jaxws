@@ -20,6 +20,9 @@
 
 package com.sun.xml.ws.util;
 
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -124,7 +127,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
     private static final String prefix = "META-INF/services/";
 
     private final Class<T> serviceClass;
-    private final ClassLoader classLoader;
+    private final @Nullable ClassLoader classLoader;
 
     /**
      * Locates and incrementally instantiates the available providers of a
@@ -151,7 +154,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      *                                   or names a provider class that cannot be found and instantiated
      * @see #find(Class)
      */
-    public static <T> ServiceFinder<T> find(Class<T> service, ClassLoader loader) {
+    public static <T> ServiceFinder<T> find(@NotNull Class<T> service, @Nullable ClassLoader loader) {
         return new ServiceFinder<T>(service,loader);
     }
 
@@ -307,7 +310,7 @@ public final class ServiceFinder<T> implements Iterable<T> {
      */
     private static class LazyIterator<T> implements Iterator<T> {
         Class<T> service;
-        ClassLoader loader;
+        @Nullable ClassLoader loader;
         Enumeration<URL> configs = null;
         Iterator<String> pending = null;
         Set<String> returned = new TreeSet<String>();

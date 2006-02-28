@@ -19,12 +19,12 @@
  */
 package com.sun.xml.ws.client;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
 
 /**
  * Information about a port.
@@ -35,11 +35,11 @@ import javax.xml.ws.Service;
  * @author JAXWS Development Team
  */
 class PortInfo {
-    private final WSServiceDelegate owner;
+    private final @NotNull WSServiceDelegate owner;
 
-    public final QName portName;
-    public final EndpointAddress targetEndpoint;
-    public final String bindingId;
+    public final @NotNull QName portName;
+    public final @NotNull EndpointAddress targetEndpoint;
+    public final @NotNull String bindingId;
 
     public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, String bindingId) {
         this.owner = owner;

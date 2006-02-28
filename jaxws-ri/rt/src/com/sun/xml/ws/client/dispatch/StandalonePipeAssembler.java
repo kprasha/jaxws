@@ -16,6 +16,8 @@ import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.sandbox.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.sandbox.handler.SOAPHandlerPipe;
 import com.sun.xml.ws.util.pipe.DumpPipe;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
@@ -46,7 +48,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     /**
      * Creates a transport pipe (for client), which becomes the terminal pipe.
      */
-    protected Pipe createTransport(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+    protected Pipe createTransport(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService service, @NotNull WSBinding binding) {
         return TransportPipeFactory.create(
             Thread.currentThread().getContextClassLoader(),
             address, wsdlModel, service, binding);
