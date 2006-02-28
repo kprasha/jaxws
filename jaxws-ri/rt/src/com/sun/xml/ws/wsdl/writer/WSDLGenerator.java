@@ -750,10 +750,13 @@ public class WSDLGenerator {
     }
 
     protected void generateSOAP12BindingOperation(JavaMethodImpl method, Binding binding) {
-        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
+//        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
+        BindingOperationType operation = binding.operation().name(method.getOperationName());
         String targetNamespace = model.getTargetNamespace();
-        QName requestMessage = method.getOperation().getName();
-        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
+//        QName requestMessage = method.getOperation().getName();
+//        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
+        QName requestMessage = new QName(targetNamespace, method.getOperationName());
+        QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
 
         ArrayList<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
         ArrayList<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
