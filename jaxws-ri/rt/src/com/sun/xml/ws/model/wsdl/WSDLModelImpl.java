@@ -21,26 +21,23 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 
-import javax.xml.namespace.QName;
 import javax.jws.WebParam.Mode;
-
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  * Implementation of {@link WSDLModel}
@@ -73,6 +70,7 @@ public final class WSDLModelImpl implements WSDLModel {
     }
 
     public void addBinding(WSDLBoundPortTypeImpl boundPortType){
+        assert !bindings.containsValue(boundPortType);
         bindings.put(boundPortType.getName(), boundPortType);
     }
 
