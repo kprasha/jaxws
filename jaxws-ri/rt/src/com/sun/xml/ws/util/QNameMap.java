@@ -265,6 +265,16 @@ public final class QNameMap<V> {
         return r;
     }
 
+    public Iterable<V> values() {
+        return views;
+    }
+
+    private transient Iterable<V> views = new Iterable<V>() {
+        public Iterator<V> iterator() {
+            return new ValueIterator();
+        }
+    };
+
     private abstract class HashIterator<E> implements Iterator<E> {
         Entry<V> next;	// next entry to return
         int index;		// current slot
@@ -302,6 +312,12 @@ public final class QNameMap<V> {
 
         public void remove() {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    private class ValueIterator extends HashIterator<V> {
+        public V next() {
+            return nextEntry().value;
         }
     }
 
