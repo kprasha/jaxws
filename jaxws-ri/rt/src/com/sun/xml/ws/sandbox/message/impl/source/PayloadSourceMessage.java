@@ -3,6 +3,10 @@ package com.sun.xml.ws.sandbox.message.impl.source;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
+import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -13,26 +17,17 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.ASCIIUtility;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
-import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
-import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.LocatorImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -47,7 +42,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.Reader;
 
 /**
  * Payloadsource message that can be constructed for the StreamSource, SAXSource and DOMSource.
