@@ -24,6 +24,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.util.QNameMap;
+import com.sun.istack.NotNull;
 
 import javax.jws.WebParam.Mode;
 import javax.jws.soap.SOAPBinding;
@@ -41,7 +42,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private final QName portTypeName;
     private WSDLPortTypeImpl portType;
     private String bindingId;
-    private WSDLModelImpl wsdlDoc;
+    private final @NotNull WSDLModelImpl owner;
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
 
@@ -54,17 +55,21 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
      */
     private WSDLBoundOperationImpl emptyPayloadOperation;
 
-    private Map<QName,WSDLMessageImpl> messages;
 
 
-
-    public WSDLBoundPortTypeImpl(QName name, QName portTypeName) {
+    public WSDLBoundPortTypeImpl(@NotNull WSDLModelImpl owner, QName name, QName portTypeName) {
+        this.owner = owner;
         this.name = name;
         this.portTypeName = portTypeName;
+        owner.addBinding(this);
     }
 
     public QName getName() {
         return name;
+    }
+
+    public @NotNull WSDLModelImpl getOwner() {
+        return owner;
     }
 
     public WSDLBoundOperationImpl get(QName operationName) {
@@ -100,10 +105,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
 
     public void setBindingId(String bindingId) {
         this.bindingId = bindingId;
-    }
-
-    public void setWsdlDocument(WSDLModelImpl wsdlDoc) {
-        this.wsdlDoc = wsdlDoc;
     }
 
     /**
@@ -152,7 +153,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
      */
     public void finalizeRpcLitBinding() {
         if (!finalized) {
-            wsdlDoc.finalizeRpcLitBinding(this);
+            owner.finalizeRpcLitBinding(this);
             finalized = true;
         }
     }
@@ -168,20 +169,20 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return SOAPVersion.fromHttpBinding(bindingId);
     }
 
-    Map<QName,WSDLMessageImpl> getMessages(){
-        return messages;
-    }
-
-    void freeze(WSDLModelImpl owner) {
-        messages = owner.getMessages();
+    void freeze() {
         portType = owner.getPortType(portTypeName);
+        // TODO: error check for portType==null. that's an error in WSDL that needs to be reported
         portType.freeze(owner);
-        // TODO: error check for null. that's an error in WSDL that needs to be reported
+
         for (WSDLBoundOperationImpl op : bindingOperations.values()) {
             op.freeze(this);
         }
 
-        if(style==Style.RPC) {
+        freezePayloadMap();
+    }
+
+    private void freezePayloadMap() {
+        if(style== Style.RPC) {
             // If the style is rpc then the tag name should be
             // same as operation name so return the operation that matches the tag name.
             payloadMap = bindingOperations;

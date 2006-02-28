@@ -235,7 +235,7 @@ public final class WSDLModelImpl implements WSDLModel {
             service.freeze(this);
         }
         for (WSDLBoundPortTypeImpl bp : bindings.values()) {
-            bp.freeze(this);
+            bp.freeze();
         }
     }
 }

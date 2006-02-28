@@ -203,7 +203,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private Map<QName, WSDLMessageImpl> messages;
 
     void freeze(WSDLBoundPortTypeImpl parent) {
-        messages = parent.getMessages();
+        messages = parent.getOwner().getMessages();
         operation = parent.getPortType().get(name.getLocalPart());
     }
 }

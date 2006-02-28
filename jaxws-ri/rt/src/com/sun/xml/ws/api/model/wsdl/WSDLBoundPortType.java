@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPBinding;
@@ -21,6 +22,11 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      * as the namespace uri.
      */
     QName getName();
+
+    /**
+     * Gets the {@link WSDLModel} that owns this port type.
+     */
+    @NotNull WSDLModel getOwner();
 
     /**
      * Gets the {@link WSDLBoundOperation} for a given operation name

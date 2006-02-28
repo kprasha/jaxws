@@ -226,10 +226,8 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        WSDLBoundPortTypeImpl binding = new WSDLBoundPortTypeImpl(new QName(targetNamespace, bindingName),
+        WSDLBoundPortTypeImpl binding = new WSDLBoundPortTypeImpl(wsdlDoc, new QName(targetNamespace, bindingName),
                 ParserUtil.getQName(reader, portTypeName));
-        binding.setWsdlDocument(wsdlDoc);
-        wsdlDoc.addBinding(binding);
 
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
