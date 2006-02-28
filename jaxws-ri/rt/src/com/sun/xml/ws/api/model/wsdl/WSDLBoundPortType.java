@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPBinding;
@@ -90,8 +91,9 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      *
      * @param namespaceUri namespace of the payload element.
      * @param localName local name of the payload
-     * @return null if no operation with the given tag name is found
      * @throws NullPointerException if localName is null and namespaceUri is not.
+     * @return
+     *      null if no operation with the given tag name is found.
      */
-    WSDLBoundOperation getOperation(String namespaceUri, String localName);
+    @Nullable WSDLBoundOperation getOperation(String namespaceUri, String localName);
 }
