@@ -19,18 +19,16 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.QNameMap;
 
-import javax.xml.namespace.QName;
 import javax.jws.WebParam.Mode;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
-import java.util.Hashtable;
+import javax.xml.namespace.QName;
 import java.util.Map;
 
 /**
@@ -45,7 +43,20 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private String bindingId;
     private WSDLModelImpl wsdlDoc;
     private boolean finalized = false;
-    private final Map<QName, WSDLBoundOperationImpl> bindingOperations = new Hashtable<QName, WSDLBoundOperationImpl>();
+    private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
+
+    /**
+     * Operations keyed by the payload tag name.
+     */
+    private QNameMap<WSDLBoundOperationImpl> payloadMap;
+    /**
+     * {@link #payloadMap} doesn't allow null key, so we store the value for it here.
+     */
+    private WSDLBoundOperationImpl emptyPayloadOperation;
+
+    private Map<QName,WSDLMessageImpl> messages;
+
+
 
     public WSDLBoundPortTypeImpl(QName name, QName portTypeName) {
         this.name = name;
@@ -146,68 +157,21 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         }
     }
 
-    /**
-     * TODO seems like most of this logic(like populating payloadMap should be
-     * done much before. Here, it requires only lookup
-     *
-     * Also payloadMap is not used.
-     *
-     */
     public WSDLBoundOperation getOperation(String namespaceUri, String localName) {
-        boolean emptyPayload = false;
-        /**
-         * If the style is rpc then the tag name should be
-         * same as operation name so return the operation that matches the tag name.
-         */
-        if(style==Style.RPC) {
-            assert (namespaceUri != null && localName != null);
-            return bindingOperations.get(new QName(namespaceUri,localName));
-        }
-
-        /**
-         * For doclit The tag will be the operation that has the same input part descriptor value
-         */
-        if(namespaceUri==null && localName == null){
-            emptyPayload = true;
-            if(emptyPayloadOperation != null){
-                return emptyPayloadOperation;
-            }
-        }
-
-        for(WSDLBoundOperationImpl op:bindingOperations.values()){
-            QName name = op.getPayloadName();
-            //empty payload
-            if(name == null && emptyPayload){
-                emptyPayloadOperation = op;
-                return op;
-            }
-            
-            if (emptyPayload) {
-                return emptyPayloadOperation;
-            }
-
-            if(name != null && name.equals(new QName(namespaceUri, localName))){
-                payloadMap.put(name, op);
-                return op;
-            }
-        }
-
-        //not found, return null
-        return null;
+        if(namespaceUri==null && localName == null)
+            return emptyPayloadOperation;
+        else
+            return payloadMap.get(namespaceUri,localName);
     }
-
-    private WSDLBoundOperationImpl emptyPayloadOperation;
-    private final QNameMap<WSDLBoundOperationImpl> payloadMap = new QNameMap<WSDLBoundOperationImpl>();
 
     public SOAPVersion getSOAPVersion(){
         return SOAPVersion.fromHttpBinding(bindingId);
     }
 
-    private Map<QName, WSDLMessageImpl> messages;
-
-    Map<QName, WSDLMessageImpl> getMessages(){
+    Map<QName,WSDLMessageImpl> getMessages(){
         return messages;
     }
+
     void freeze(WSDLModelImpl owner) {
         messages = owner.getMessages();
         portType = owner.getPortType(portTypeName);
@@ -215,6 +179,25 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         // TODO: error check for null. that's an error in WSDL that needs to be reported
         for (WSDLBoundOperationImpl op : bindingOperations.values()) {
             op.freeze(this);
+        }
+
+        if(style==Style.RPC) {
+            // If the style is rpc then the tag name should be
+            // same as operation name so return the operation that matches the tag name.
+            payloadMap = bindingOperations;
+        } else {
+            payloadMap = new QNameMap<WSDLBoundOperationImpl>();
+            // For doclit The tag will be the operation that has the same input part descriptor value
+            for(WSDLBoundOperationImpl op : bindingOperations.values()){
+                QName name = op.getPayloadName();
+                if(name == null){
+                    //empty payload
+                    emptyPayloadOperation = op;
+                    continue;
+                }
+
+                payloadMap.put(name, op);
+            }
         }
     }
 }
