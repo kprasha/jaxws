@@ -124,10 +124,30 @@ public class HTTPWxfClient {
             }
         });
         Document responseDoc = builder.parse(stream);
+        
         Node envelope = responseDoc.getFirstChild();
         Node body = envelope.getFirstChild().getNextSibling();
         Node wsdl = body.getFirstChild();
+        while (!wsdl.getLocalName().equalsIgnoreCase("definitions")) {
+            Node nextNode = wsdl.getFirstChild();
+            if (nextNode == null) {
+                throw new ParseException("no wsdl in response");
+            }
+            wsdl = nextNode;
+        }
         responseDoc.replaceChild(wsdl, envelope);
+        if (true) { // temporary
+            javax.xml.transform.Transformer xFormer =
+                javax.xml.transform.TransformerFactory.newInstance().
+                newTransformer();
+            xFormer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT,
+                "yes");
+            System.err.println("------------------------------");
+            xFormer.transform(new javax.xml.transform.dom.DOMSource(responseDoc),
+                new javax.xml.transform.stream.StreamResult(System.err));
+            System.err.println("\n------------------------------");
+        }
+        
         return responseDoc;
     }
     

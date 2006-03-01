@@ -73,7 +73,7 @@ public class HTTPMexClient {
     private String getMexWsdlRequest(String address) {
         return "<?xml version=\"1.0\"?><s12:Envelope " +
             "xmlns:s12='http://www.w3.org/2003/05/soap-envelope' " +
-            "xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' " +
+            "xmlns:wsa='http://www.w3.org/2005/08/addressing' " +
             "xmlns:wsx='http://schemas.xmlsoap.org/ws/2004/09/mex'>" +
             "<s12:Header>" +
             "<wsa:Action>" +
