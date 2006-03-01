@@ -625,16 +625,15 @@ public class WSDLGenerator {
             if (first) {
                 SOAPBinding sBinding = method.getBinding();
                 SOAPVersion soapVersion = sBinding.getSOAPVersion();
-
-                if(soapVersion.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
+                if (soapVersion.toString().equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
                     com.sun.xml.ws.wsdl.writer.document.soap12.SOAPBinding soapBinding = binding.soap12Binding();
                     soapBinding.transport(SOAP12_HTTP_TRANSPORT);
                     if (sBinding.getStyle().equals(Style.DOCUMENT))
                         soapBinding.style(DOCUMENT);
                     else
                         soapBinding.style(RPC);
-                }else{
-                    com.sun.xml.ws.wsdl.writer.document.soap.SOAPBinding soapBinding = binding.soapBinding();
+                } else {
+                com.sun.xml.ws.wsdl.writer.document.soap.SOAPBinding soapBinding = binding.soapBinding();
                     soapBinding.transport(SOAP_HTTP_TRANSPORT);
                     if (sBinding.getStyle().equals(Style.DOCUMENT))
                         soapBinding.style(DOCUMENT);
