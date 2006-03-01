@@ -625,7 +625,7 @@ public class WSDLGenerator {
             if (first) {
                 SOAPBinding sBinding = method.getBinding();
                 SOAPVersion soapVersion = sBinding.getSOAPVersion();
-                if (soapVersion.toString().equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
+                if (soapVersion == SOAPVersion.SOAP_12){
                     com.sun.xml.ws.wsdl.writer.document.soap12.SOAPBinding soapBinding = binding.soap12Binding();
                     soapBinding.transport(SOAP12_HTTP_TRANSPORT);
                     if (sBinding.getStyle().equals(Style.DOCUMENT))
