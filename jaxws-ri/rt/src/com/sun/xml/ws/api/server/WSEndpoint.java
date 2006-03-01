@@ -210,6 +210,8 @@ public abstract class WSEndpoint<T> {
      * Gets the description of the service.
      *
      * <p>
+     * A description is a set of WSDL/schema and other documents that together
+     * describes a service.
      * A service is not required to have a description, and when it doesn't,
      * this method returns null.
      *
