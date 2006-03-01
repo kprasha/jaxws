@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.istack.NotNull;
 
 /**
  * Root of the unparsed WSDL and other resources referenced from it.
@@ -41,5 +42,5 @@ public interface ServiceDefinition extends Iterable<SDDocument> {
      * @return
      *      always non-null.
      */
-    SDDocument getPrimary();
+    @NotNull SDDocument getPrimary();
 }

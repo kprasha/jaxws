@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 
@@ -21,8 +22,8 @@ import java.util.Map;
 public final class ServiceDefinitionImpl implements ServiceDefinition {
     private final List<SDDocumentImpl> docs;
 
-    private final Map<String, SDDocumentImpl> bySystemId;
-    private final SDDocumentImpl primaryWsdl;
+    private final Map<String,SDDocumentImpl> bySystemId;
+    private final @NotNull SDDocumentImpl primaryWsdl;
 
     /**
      * Set when {@link WSEndpointImpl} is created.
@@ -35,7 +36,7 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
      *      There must be at least one entry.
      *      The first document is considered {@link #getPrimary() primary}.
      */
-    public ServiceDefinitionImpl(List<SDDocumentImpl> docs, SDDocumentImpl primaryWsdl) {
+    public ServiceDefinitionImpl(List<SDDocumentImpl> docs, @NotNull SDDocumentImpl primaryWsdl) {
         assert docs.contains(primaryWsdl);
         this.docs = docs;
         this.primaryWsdl = primaryWsdl;
@@ -57,7 +58,7 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
         this.owner = owner;
     }
 
-    public SDDocument getPrimary() {
+    public @NotNull SDDocument getPrimary() {
         return primaryWsdl;
     }
 
