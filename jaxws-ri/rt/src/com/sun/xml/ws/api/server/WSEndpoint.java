@@ -7,6 +7,7 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.spi.runtime.Container;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
@@ -216,7 +217,7 @@ public abstract class WSEndpoint<T> {
      * this method returns null.
      *
      * @return
-     *      Possible null, but always the same value.
+     *      Possibly null, but always the same value.
      */
-    public abstract ServiceDefinition getServiceDefinition();
+    public abstract @Nullable ServiceDefinition getServiceDefinition();
 }
