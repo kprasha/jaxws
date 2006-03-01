@@ -124,7 +124,7 @@ public class XMLStreamReaderToXMLStreamWriter {
         for (int i = 0; i < nsCount; i++) {
             out.writeNamespace(
                 in.getNamespacePrefix(i),
-                in.getNamespaceURI(i));
+                fixNull(in.getNamespaceURI(i)));    // zephyr doesn't like null, I don't know what is correct, so just fix null to "" for now
         }
 
         // write attributes
@@ -175,5 +175,10 @@ public class XMLStreamReaderToXMLStreamWriter {
 
     protected void handleCDATA() throws XMLStreamException {
         out.writeCData(in.getText());
+    }
+
+    private static String fixNull(String s) {
+        if(s==null)     return "";
+        else            return s;
     }
 }
