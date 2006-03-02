@@ -92,7 +92,7 @@ public class DOMUtil {
      * @param node
      * @param writer
      */
-    public static void serializeNode(Node node, XMLStreamWriter writer) throws XMLStreamException {
+    public static void serializeNode(Element node, XMLStreamWriter writer) throws XMLStreamException {
         writer.writeStartElement(
             fixNull(node.getPrefix()),
             node.getLocalName(),
@@ -149,8 +149,8 @@ public class DOMUtil {
                     case Node.TEXT_NODE:
                         writer.writeCharacters(child.getNodeValue());
                         break;
-                    default:
-                        serializeNode(child, writer);
+                    case Node.ELEMENT_NODE:
+                        serializeNode((Element)child,writer);
                         break;
                 }
             }
@@ -175,5 +175,17 @@ public class DOMUtil {
     private static @NotNull String fixNull(@Nullable String s) {
         if(s==null)     return "";
         else            return s;
+    }
+
+    /**
+     * Gets the first element child.
+     */
+    public static @Nullable Element getFirstElementChild(Node parent) {
+        for( Node n=parent.getFirstChild(); n!=null; n=n.getNextSibling() ) {
+            if(n.getNodeType()==Node.ELEMENT_NODE) {
+                return (Element)n;
+            }
+        }
+        return null;
     }
 }

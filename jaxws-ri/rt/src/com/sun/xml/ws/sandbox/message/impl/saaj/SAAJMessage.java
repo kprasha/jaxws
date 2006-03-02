@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -69,7 +70,7 @@ public class SAAJMessage extends Message {
     private String payloadLocalName;
     private String payloadNamspace;
     private AttachmentSet attSet;
-    private Node payload;
+    private Element payload;
 
     private boolean parsedHeader;
 
@@ -78,7 +79,7 @@ public class SAAJMessage extends Message {
 
         try {
             Node body = sm.getSOAPBody();
-            payload = body.getFirstChild();
+            payload = DOMUtil.getFirstElementChild(body);
             // hope this is correct. Caching the localname and namespace of the payload should be fine
             // but what about if a Handler replaces the payload with something else? Weel, may be it
             // will be error condition anyway
