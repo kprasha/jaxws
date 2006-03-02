@@ -37,6 +37,9 @@ import javax.xml.XMLConstants;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+
 /**
  * $author: JAXWS Development Team
  */
@@ -103,7 +106,7 @@ public class DOMUtil {
             // Zephyr will try to fix it and we end up getting inconsistent namespace bindings.
             for(int i = 0; i < numOfAttributes; i++){
                 Node attr = attrs.item(i);
-                String nsUri = attr.getNamespaceURI();
+                String nsUri = fixNull(attr.getNamespaceURI());
                 if(nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
                     // this is a namespace declaration, not an attribute
                     writer.writeNamespace(attr.getLocalName(),attr.getNodeValue());
@@ -111,11 +114,11 @@ public class DOMUtil {
             }
             for(int i = 0; i < numOfAttributes; i++){
                 Node attr = attrs.item(i);
-                String nsUri = attr.getNamespaceURI();
+                String nsUri = fixNull(attr.getNamespaceURI());
                 if(!nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
                     writer.writeAttribute(
                         fixNull(attr.getPrefix()),
-                        fixNull(nsUri),
+                        nsUri,
                         attr.getLocalName(),
                         attr.getNodeValue());
                 }
@@ -163,7 +166,7 @@ public class DOMUtil {
         return null;
     }
 
-    private static String fixNull(String s) {
+    private static @NotNull String fixNull(@Nullable String s) {
         if(s==null)     return "";
         else            return s;
     }
