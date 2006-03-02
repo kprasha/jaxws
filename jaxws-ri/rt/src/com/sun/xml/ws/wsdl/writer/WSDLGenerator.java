@@ -770,7 +770,7 @@ public class WSDLGenerator {
         boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
         if (soapBinding.getUse().equals(Use.LITERAL)) {
             body.use(LITERAL);
-            if (headerParams.size() > 0) {
+            if (bodyParams.size() > 0) {
                 ParameterImpl param = bodyParams.iterator().next();
                 if (isRpc) {
                     StringBuffer parts = new StringBuffer();
