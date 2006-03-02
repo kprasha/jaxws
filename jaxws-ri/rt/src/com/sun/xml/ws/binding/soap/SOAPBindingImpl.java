@@ -49,7 +49,6 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  */
 public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
-
     public static final String X_SOAP12HTTP_BINDING =
         "http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/";
 
@@ -60,6 +59,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
     protected boolean enableMtom = false;
     private Set<QName> handlerUnderstoodHeaders;
     protected final SOAPVersion soapVersion;
+    protected final boolean canGenerateWsdl;
 
 
     protected SOAPBindingImpl(
@@ -69,6 +69,18 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         this.soapVersion = soapVersion;
         setup(getBindingId());
         setupSystemHandlerDelegate(serviceName);
+        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
+            bindingId.equals(X_SOAP12HTTP_BINDING)) {
+            canGenerateWsdl = true;
+        } else if (bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING)) {
+            canGenerateWsdl = true;
+            enableMtom = true;
+        } else if (bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
+            canGenerateWsdl = false;
+            enableMtom = true;
+        } else {
+            canGenerateWsdl = false;
+        }
     }
 
     // if the binding id is unknown, no roles are added
@@ -85,6 +97,11 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
         roles = new HashSet<String>();
         addRequiredRoles();        
+    }
+    
+    @Override
+    public boolean canGenerateWsdl() {
+        return canGenerateWsdl;
     }
 
     /*
@@ -144,14 +161,6 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
     public Set<QName> getHandlerUnderstoodHeaders() {
         return handlerUnderstoodHeaders;
     }
-    
-    /*
-    * Use this to distinguish SOAP12HTTP_BINDING or X_SOAP12HTTP_BINDING
-    */
-    @Override
-    public String getActualBindingId() {
-        return super.getBindingId();
-    }
 
     protected void addRequiredRoles() {
         roles.addAll(requiredRoles);
@@ -187,6 +196,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
      *
      * @return true or false
      */
+    @Override
     public boolean isMTOMEnabled() {
         return enableMtom;
     }

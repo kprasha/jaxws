@@ -114,10 +114,14 @@ public abstract class BindingImpl implements WSBinding {
         return bindingId;
     }
 
-    public String getActualBindingId() {
-        return bindingId;
+    public boolean canGenerateWsdl() {
+        return false;
     }
 
+    public boolean isMTOMEnabled() {
+        return false;
+    }
+        
     public SystemHandlerDelegate getSystemHandlerDelegate() {
         return systemHandlerDelegate;
     }

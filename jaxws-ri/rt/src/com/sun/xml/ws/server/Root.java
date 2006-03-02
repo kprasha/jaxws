@@ -327,9 +327,8 @@ public class Root {
      */
     private SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
         BindingImpl bindingImpl = (BindingImpl)binding;
-        String bindingId = bindingImpl.getActualBindingId();
-        if (!bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) &&
-            !bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
+        String bindingId = bindingImpl.getBindingId();
+        if (!bindingImpl.canGenerateWsdl()) {
             throw new ServerRtException("can.not.generate.wsdl", bindingId);
         }
 
@@ -344,10 +343,6 @@ public class Root {
         WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding.getBindingId());
         wsdlGen.doGeneration();
         return wsdlResolver.updateDocs();
-/*
-        // TODO: feed back the generated documents into the metadata list.
-        throw new UnsupportedOperationException();
- */
     }
 
     /**
