@@ -672,21 +672,23 @@ public class WSDLGenerator {
         boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
         if (soapBinding.getUse()==Use.LITERAL) {
             body.use(LITERAL);
-            if (bodyParams.size() > 0) {
-                ParameterImpl param = bodyParams.iterator().next();
-                if (isRpc) {
-                    StringBuffer parts = new StringBuffer();
-                    int i=0;
-                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                        if (i++>0)
-                            parts.append(' ');
-                        parts.append(parameter.getPartName());
+            if (headerParams.size() > 0) {
+                if (bodyParams.size() > 0) {
+                    ParameterImpl param = bodyParams.iterator().next();
+                    if (isRpc) {
+                        StringBuffer parts = new StringBuffer();
+                        int i=0;
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                            if (i++>0)
+                                parts.append(' ');
+                            parts.append(parameter.getPartName());
+                        }
+                        body.parts(parts.toString());
+                    } else if (param.isWrapperStyle()) {
+                        body.parts(PARAMETERS);
+                    } else {
+                       body.parts(param.getPartName());
                     }
-                    body.parts(parts.toString());
-                } else if (param.isWrapperStyle()) {
-                    body.parts(PARAMETERS);
-                } else {
-                   body.parts(param.getPartName());
                 }
                 generateSOAPHeaders(input, headerParams, requestMessage);
             }
@@ -770,21 +772,23 @@ public class WSDLGenerator {
         boolean isRpc = soapBinding.getStyle().equals(Style.RPC);
         if (soapBinding.getUse().equals(Use.LITERAL)) {
             body.use(LITERAL);
-            if (bodyParams.size() > 0) {
-                ParameterImpl param = bodyParams.iterator().next();
-                if (isRpc) {
-                    StringBuffer parts = new StringBuffer();
-                    int i=0;
-                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                        if (i++>0)
-                            parts.append(' ');
-                        parts.append(parameter.getPartName());
+            if (headerParams.size() > 0) {
+                if (bodyParams.size() > 0) {
+                    ParameterImpl param = bodyParams.iterator().next();
+                    if (isRpc) {
+                        StringBuffer parts = new StringBuffer();
+                        int i=0;
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                            if (i++>0)
+                                parts.append(' ');
+                            parts.append(parameter.getPartName());
+                        }
+                        body.parts(parts.toString());
+                    } else if (param.isWrapperStyle()) {
+                        body.parts(PARAMETERS);
+                    } else {
+                       body.parts(param.getPartName());
                     }
-                    body.parts(parts.toString());
-                } else if (param.isWrapperStyle()) {
-                    body.parts(PARAMETERS);
-                } else {
-                   body.parts(param.getPartName());
                 }
                 generateSOAP12Headers(input, headerParams, requestMessage);
             }
