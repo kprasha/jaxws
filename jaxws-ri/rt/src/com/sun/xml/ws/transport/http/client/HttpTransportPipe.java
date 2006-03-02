@@ -98,6 +98,7 @@ public class HttpTransportPipe implements Pipe {
             }
             String contentType = getContentType(respHeaders);
             Packet reply = request.createResponse(null);
+            reply.httpResponseHeaders = respHeaders;
             decoder.decode(con.getInput(), contentType, reply);
             return reply;
         } catch(WebServiceException wex) {
