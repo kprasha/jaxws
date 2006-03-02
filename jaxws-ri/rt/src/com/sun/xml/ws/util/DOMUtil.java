@@ -116,10 +116,16 @@ public class DOMUtil {
                 Node attr = attrs.item(i);
                 String nsUri = fixNull(attr.getNamespaceURI());
                 if(!nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+                    String localName = attr.getLocalName();
+                    if(localName==null) {
+                        // TODO: this is really a bug in the caller for not creating proper DOM tree.
+                        // will remove this workaround after plugfest
+                        localName=attr.getNodeName();
+                    }
                     writer.writeAttribute(
                         fixNull(attr.getPrefix()),
                         nsUri,
-                        attr.getLocalName(),
+                        localName,
                         attr.getNodeValue());
                 }
             }
