@@ -29,19 +29,16 @@ public interface SOAPMessageContext
     
     /**
      * If there is a SOAPMessage already, use getSOAPMessage(). Ignore all other methods
-     * @return
      */
     public boolean isAlreadySoap();
     
     /**
      * Returns InternalMessage's BodyBlock value
-     * @return
      */
     public Object getBody();
 
     /**
      * Returns InternalMessage's HeaderBlock values
-     * @return
      */
     public List getHeaders();
 

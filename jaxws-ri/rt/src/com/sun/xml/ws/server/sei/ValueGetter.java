@@ -1,6 +1,7 @@
 package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.model.ParameterImpl;
+import com.sun.xml.ws.api.model.Parameter;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.ws.Holder;

@@ -13,7 +13,6 @@ import com.sun.xml.ws.api.model.SEIModel;
  * Instance of this class is used to handle header parameters and attachment parameters.
  * They add things to {@link Message}.
  *
- * @see BodyBuilder
  * @author Kohsuke Kawaguchi
  */
 abstract class MessageFiller {
