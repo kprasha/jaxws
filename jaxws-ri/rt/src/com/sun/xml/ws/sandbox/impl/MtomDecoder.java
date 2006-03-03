@@ -44,7 +44,7 @@ public class MtomDecoder implements Decoder{
     private char[] base64EncodedText;
 
     public MtomDecoder(MimeMultipartRelatedDecoder mimeMultipartDecoder, SOAPVersion soapVersion) {
-        this.decoder = (StreamSOAPDecoder)StreamSOAPDecoder.create(soapVersion);
+        this.decoder = StreamSOAPDecoder.create(soapVersion);
         this.mimeMultipartDecoder = mimeMultipartDecoder;
     }
 
@@ -267,18 +267,14 @@ public class MtomDecoder implements Decoder{
                 if((textStart + sourceStart) > textLength)
                     throw new IndexOutOfBoundsException();
 
-                int copiedLength = 0;
                 int available = textLength - sourceStart;
                 if(available < 0){
                     throw new IndexOutOfBoundsException("sourceStart is greater than" +
                             "number of characters associated with this event");
                 }
-                if(available < length){
-                    copiedLength = available;
-                } else{
-                    copiedLength = length;
-                }
 
+                int copiedLength = Math.min(available,length);
+                
                 System.arraycopy(base64EncodedText, getTextStart() + sourceStart , target, targetStart, copiedLength);
                 textStart = sourceStart;
                 return copiedLength;
