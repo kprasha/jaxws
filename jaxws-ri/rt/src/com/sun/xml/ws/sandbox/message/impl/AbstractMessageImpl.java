@@ -19,29 +19,27 @@
  */
 package com.sun.xml.ws.sandbox.message.impl;
 
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
-
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
-
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.LocatorImpl;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 
 /**
  * Partial {@link Message} implementation.
@@ -173,6 +171,6 @@ public abstract class AbstractMessageImpl extends Message {
     }
 
 
-    protected static final Attributes EMPTY_ATTS = new AttributesImpl();
+    protected static final AttributesImpl EMPTY_ATTS = new AttributesImpl();
     protected static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }

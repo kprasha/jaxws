@@ -27,13 +27,15 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.sandbox.impl.TagInfoset;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
-import org.xml.sax.Attributes;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -41,16 +43,17 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
-import java.util.Map;
 
-public class StreamMessage extends AbstractMessageImpl {
+/**
+ * {@link Message} implementation backed by {@link XMLStreamReader}.
+ */
+public final class StreamMessage extends AbstractMessageImpl {
     /**
      * flag that tells whether StreamMessage is created with the
      * XMLStreamReader that points to the payload or soapenv:Envelop
@@ -60,32 +63,27 @@ public class StreamMessage extends AbstractMessageImpl {
      */
     private boolean isPayload;
 
-    private String bodyQname ="";
-    private String envQname ="";
-    private String headerQname ="";
-
-
     /**
      * The reader will be positioned at
      * the first child of the SOAP body
      */
-    protected XMLStreamReader reader;
+    private @NotNull XMLStreamReader reader;
 
     // lazily created
-    private HeaderList headers;
+    private @Nullable HeaderList headers;
 
     private final String payloadLocalName;
 
     private final String payloadNamespaceURI;
-    Map<String,String> soapHdrNSDecls;
-    Map<String,String> bodyNSDecls;
-    Map<String,String> envNSDecls;
-    Attributes shAttrs ;
-    Attributes bodyAttrs ;
-    Attributes envAttrs ;
-    private QName envelope;
-    private QName soapHeader;
-    private QName body;
+
+    /**
+     * infoset about the SOAP envelope, header, and body.
+     *
+     * <p>
+     * If the creater of this object didn't care about those,
+     * we use stock values.
+     */
+    private /*almost final*/ @NotNull TagInfoset envelopeTag,headerTag,bodyTag;
 
     /**
      * Creates a {@link StreamMessage} from a {@link XMLStreamReader}
@@ -98,14 +96,15 @@ public class StreamMessage extends AbstractMessageImpl {
      *      if null, it means no headers. if non-null,
      *      it will be owned by this message.
      * @param reader
-     *      must not be null.
+     *      points at the start element of the payload (or the end element of the &lt;s:Body>
+     *      if there's no payload)
      */
-    public StreamMessage(HeaderList headers, XMLStreamReader reader, SOAPVersion soapVersion) {
+    public StreamMessage(@Nullable HeaderList headers, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
         this.headers = headers;
         this.reader = reader;
         isPayload = true;
-        //if the reader is pointing to the end element <soapenv:Body/> then its empty message
+        //if the reader is pointing to the end element </soapenv:Body> then its empty message
         // or no payload
         if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
             String body = reader.getLocalName();
@@ -123,48 +122,31 @@ public class StreamMessage extends AbstractMessageImpl {
             this.payloadLocalName = reader.getLocalName();
             this.payloadNamespaceURI = reader.getNamespaceURI();
         }
+
+        // use the default infoset representation for headers
+        int base = soapVersion.ordinal()*3;
+        this.envelopeTag = DEFAULT_TAGS[base];
+        this.headerTag = DEFAULT_TAGS[base+1];
+        this.bodyTag = DEFAULT_TAGS[base+2];
     }
 
-    public StreamMessage(QName soapEnvelope,Map<String,String> envNSDecl,Attributes envAttrs,QName soapHeader,Map<String,String> headerNSDecl,Attributes shAttrs,HeaderList headers, XMLStreamReader reader,QName soapBody,Map<String,String>bodyNSDecls,Attributes bodyAttrs, SOAPVersion soapVersion) {
-        super(soapVersion);
-        this.headers = headers;
-        this.reader = reader;
-        this.soapHdrNSDecls = headerNSDecl;
-        this.envNSDecls = envNSDecl;
-        this.envAttrs = envAttrs;
-        this.shAttrs = shAttrs;
-        this.bodyAttrs = bodyAttrs;
-        this.bodyNSDecls = bodyNSDecls;
-        this.body = soapBody;
-        this.envelope = soapEnvelope;
-        this.soapHeader = soapHeader;
-        if(this.envAttrs == null){
-            this.envAttrs = EMPTY_ATTS;
-        }
-
-
-        if(this.shAttrs == null){
-            this.shAttrs = EMPTY_ATTS;
-        }
-        isPayload = true;
-        //if the reader is pointing to the end element <soapenv:Body/> then its empty message
-        // or no payload
-        if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
-            String body = reader.getLocalName();
-            String nsUri = reader.getNamespaceURI();
-            assert body != null;
-            assert nsUri != null;
-            //if its not soapenv:Body then throw exception, we received malformed stream
-            if(body.equals("Body") && nsUri.equals(soapVersion.nsUri)){
-                this.payloadLocalName = null;
-                this.payloadNamespaceURI = null;
-            }else{ //TODO: i18n and also we should be throwing better message that this
-                throw new WebServiceException("Malformed stream: {"+nsUri+"}"+body);
-            }
-        }else{
-            this.payloadLocalName = reader.getLocalName();
-            this.payloadNamespaceURI = reader.getNamespaceURI();
-        }
+    /**
+     * Creates a {@link StreamMessage} from a {@link XMLStreamReader}
+     * and the complete infoset of the SOAP envelope.
+     *
+     * <p>
+     * See {@link #StreamMessage(HeaderList, XMLStreamReader, SOAPVersion)} for
+     * the description of the basic parameters.
+     *
+     * @param headerTag
+     *      Null if the message didn't have a header tag.
+     *
+     */
+    public StreamMessage(@NotNull TagInfoset envelopeTag, @Nullable TagInfoset headerTag, @Nullable HeaderList headers, @NotNull TagInfoset bodyTag, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
+        this(headers,reader,soapVersion);
+        this.envelopeTag = envelopeTag;
+        this.headerTag = headerTag!=null ? headerTag : DEFAULT_TAGS[soapVersion.ordinal()*3+1];
+        this.bodyTag = bodyTag;
     }
 
 
@@ -253,20 +235,18 @@ public class StreamMessage extends AbstractMessageImpl {
      */
     private void writeEnvelope(XMLStreamWriter writer) throws XMLStreamException {
         assert unconsumed();
-        writer.writeStartElement("soapenv", "Envelope", soapVersion.nsUri);
-        writer.writeNamespace("soapenv", soapVersion.nsUri);
-        //TODO: collect all the namespaces from the payload and add to Envelope element
+        envelopeTag.writeStart(writer);
 
         //write headers
         HeaderList hl = getHeaders();
         if(hl.size() > 0){
-            writer.writeStartElement("soapenv", "Header", soapVersion.nsUri);
+            headerTag.writeStart(writer);
             for(Header h:hl){
                 h.writeTo(writer);
             }
             writer.writeEndElement();
         }
-        writer.writeStartElement("soapenv", "Body", soapVersion.nsUri);
+        bodyTag.writeStart(writer);
         if(hasPayload())
             writePayloadTo(writer);
         writer.writeEndElement();
@@ -315,7 +295,8 @@ public class StreamMessage extends AbstractMessageImpl {
     public void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
         contentHandler.setDocumentLocator(NULL_LOCATOR);
         contentHandler.startDocument();
-        writeEnvelopeandHeader(contentHandler);
+        envelopeTag.writeStart(contentHandler);
+        headerTag.writeStart(contentHandler);
         if(hasHeaders()) {
             HeaderList headers = getHeaders();
             int len = headers.size();
@@ -324,105 +305,12 @@ public class StreamMessage extends AbstractMessageImpl {
                 headers.get(i).writeTo(contentHandler,errorHandler);
             }
         }
-        writeEndHeader(contentHandler);
-        writeBodyTag(contentHandler);
-        // write the body
-
+        headerTag.writeEnd(contentHandler);
+        bodyTag.writeStart(contentHandler);
         writePayloadTo(contentHandler,errorHandler);
-        writeEndEnvelope(contentHandler);
+        bodyTag.writeEnd(contentHandler);
+        envelopeTag.writeEnd(contentHandler);
 
-    }
-
-    protected void writeBodyTag(ContentHandler contentHandler) throws SAXException{
-        StringBuilder sb = new StringBuilder();
-        if(bodyNSDecls != null){
-            for(String key: bodyNSDecls.keySet()){
-                contentHandler.startPrefixMapping(key, bodyNSDecls.get(key));
-            }
-        }
-
-        String qname ="";
-        if(body.getPrefix().length()>0){
-            sb.append(body.getPrefix());
-            sb.append(":");
-            sb.append(body.getLocalPart());
-            qname = sb.toString();
-        }
-
-
-        bodyQname = qname;
-        contentHandler.startElement(body.getNamespaceURI(),body.getLocalPart(),qname, EMPTY_ATTS);//bodyAttrs
-
-    }
-
-
-
-    protected void writeEndEnvelope(ContentHandler contentHandler) throws SAXException{
-        contentHandler.endElement(body.getNamespaceURI(),body.getLocalPart(),bodyQname);
-        if(bodyNSDecls != null){
-            for(String key: bodyNSDecls.keySet()){
-                contentHandler.endPrefixMapping(key);
-            }
-        }
-        contentHandler.endElement(envelope.getNamespaceURI(),envelope.getLocalPart(),envQname);
-        if(envNSDecls != null){
-            for(String key: envNSDecls.keySet()){
-                contentHandler.endPrefixMapping(key);
-            }
-        }
-    }
-
-    protected void writeEndHeader(ContentHandler contentHandler) throws SAXException{
-        contentHandler.endElement(soapHeader.getNamespaceURI(),soapHeader.getLocalPart(),headerQname);
-        if(soapHdrNSDecls != null){
-            for(String key: soapHdrNSDecls.keySet()){
-                contentHandler.endPrefixMapping(key);
-            }
-        }
-    }
-
-    protected void writeEnvelopeandHeader(ContentHandler contentHandler) throws SAXException{
-        if(envelope != null){
-
-            StringBuilder sb = new StringBuilder();
-            if(envNSDecls != null){
-                for(String key: envNSDecls.keySet()){
-                    contentHandler.startPrefixMapping(key, envNSDecls.get(key));
-                }
-            }
-
-            String qname ="";
-            if(envelope.getPrefix().length()>0){
-                sb.append(envelope.getPrefix());
-
-                sb.append(":");
-                sb.append(envelope.getLocalPart());
-                qname = sb.toString();
-            }
-            envQname = qname;
-            contentHandler.startElement(envelope.getNamespaceURI(),envelope.getLocalPart(),qname, envAttrs);
-            sb.setLength(0);
-            qname ="";
-            if(soapHeader.getPrefix().length()>0){
-                sb.append(soapHeader.getPrefix());
-                sb.append(":");
-                sb.append(soapHeader.getLocalPart());
-                qname = sb.toString();
-            }
-            headerQname = qname;
-
-            if(soapHdrNSDecls != null){
-                for(String key: soapHdrNSDecls.keySet()){
-                    contentHandler.startPrefixMapping(key, soapHdrNSDecls.get(key));
-                }
-            }
-            contentHandler.startElement(soapHeader.getNamespaceURI(),soapHeader.getLocalPart(),qname,shAttrs);
-        }else{
-            String soapNsUri = soapVersion.nsUri;
-            contentHandler.startPrefixMapping("S",soapNsUri);
-            contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
-            contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
-        }
     }
 
     /**
@@ -442,4 +330,24 @@ public class StreamMessage extends AbstractMessageImpl {
      * Used only for debugging. This records where the message was consumed.
      */
     private Throwable consumedAt;
+
+    /**
+     * Default s:Envelope, s:Header, and s:Body tag infoset definitions.
+     *
+     * We need 3 for SOAP 1.1, 3 for SOAP 1.2.
+     */
+    private static final TagInfoset[] DEFAULT_TAGS;
+
+    static {
+        DEFAULT_TAGS = new TagInfoset[6];
+        create(SOAPVersion.SOAP_11);
+        create(SOAPVersion.SOAP_12);
+    }
+
+    private static void create(SOAPVersion v) {
+        int base = SOAPVersion.SOAP_11.ordinal()*3;
+        DEFAULT_TAGS[base  ] = new TagInfoset(v.nsUri,"Envelope","S",EMPTY_ATTS,"S",v.nsUri);
+        DEFAULT_TAGS[base+1] = new TagInfoset(v.nsUri,"Header","S",EMPTY_ATTS);
+        DEFAULT_TAGS[base+2] = new TagInfoset(v.nsUri,"Body","S",EMPTY_ATTS);
+    }
 }

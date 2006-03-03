@@ -14,9 +14,7 @@ import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import org.xml.sax.helpers.AttributesImpl;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -31,25 +29,19 @@ import java.util.Map;
  *
  * @author Paul Sandoz
  */
+@SuppressWarnings({"StringEquality"})
 public abstract class StreamSOAPDecoder implements Decoder {
 
     private static final String SOAP_ENVELOPE = "Envelope";
     private static final String SOAP_HEADER = "Header";
     private static final String SOAP_BODY = "Body";
 
-    protected final String SOAP_NAMESPACE_URI;
-    protected QName envelope = null;
-    protected QName soapHeader = null;
-    protected QName soapBody = null;
-    protected Map<String, String> envelopeNSDecls = null;
-    protected Map<String, String> soapHeaderNSDecls = null;
-    protected Map<String, String> bodyNSDecls = null;
-    protected AttributesImpl envAttrs = new AttributesImpl();
-    protected AttributesImpl shAttrs = new AttributesImpl();
-    protected AttributesImpl bodyAttrs = new AttributesImpl();
-    
-    protected StreamSOAPDecoder(String namespace) {
-        SOAP_NAMESPACE_URI = namespace;
+    private final String SOAP_NAMESPACE_URI;
+    private final SOAPVersion soapVersion;
+
+    /*package*/ StreamSOAPDecoder(SOAPVersion soapVersion) {
+        SOAP_NAMESPACE_URI = soapVersion.nsUri;
+        this.soapVersion = soapVersion;
     }
 
     // consider caching
@@ -75,30 +67,10 @@ public abstract class StreamSOAPDecoder implements Decoder {
                 javax.xml.stream.XMLStreamConstants.START_ELEMENT);
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_ENVELOPE);
 
+        TagInfoset envelopeTag = new TagInfoset(reader);
+
         // Collect namespaces on soap:Envelope
-        Map<String,String> namespaces = new HashMap();
-        envelopeNSDecls = new HashMap<String,String>();
-        envelope = reader.getName();
-        for(int i=0; i< reader.getNamespaceCount();i++){
-            namespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
-            envelopeNSDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
-        }
-
-        StringBuilder qn = new StringBuilder();
-        for(int i=0; i< reader.getAttributeCount();i++){
-            qn.setLength(0);
-            QName name = reader.getAttributeName(i);
-            String qname = "";
-            if(name.getPrefix().length() == 0){
-                qn.append(name.getPrefix());
-                qn.append(":");
-                qn.append(name.getLocalPart());
-                qname = qn.toString();
-            }
-
-            envAttrs.addAttribute(reader.getAttributeNamespace(i),reader.getAttributeLocalName(i),
-                    qname, reader.getAttributeType(i),reader.getAttributeValue(i));
-        }
+        Map<String,String> namespaces = new HashMap<String,String>();
 
         // Move to next element
         XMLStreamReaderUtil.nextElementContent(reader);
@@ -106,28 +78,15 @@ public abstract class StreamSOAPDecoder implements Decoder {
                 javax.xml.stream.XMLStreamConstants.START_ELEMENT);
 
         HeaderList headers = null;
+        TagInfoset headerTag = null;
+
         if (reader.getLocalName() == SOAP_HEADER
                 && reader.getNamespaceURI() == SOAP_NAMESPACE_URI) {
+            headerTag = new TagInfoset(reader);
+
             // Collect namespaces on soap:Header
-            soapHeaderNSDecls = new HashMap<String,String>();
-            soapHeader = reader.getName();
             for(int i=0; i< reader.getNamespaceCount();i++){
                 namespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
-                soapHeaderNSDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
-
-            }
-            for(int i=0; i< reader.getAttributeCount();i++){
-                qn.setLength(0);
-                QName name = reader.getAttributeName(i);
-                String qname = "";
-                if(name.getPrefix().length() == 0){
-                    qn.append(name.getPrefix());
-                    qn.append(":");
-                    qn.append(name.getLocalPart());
-                    qname = qn.toString();
-                }
-                shAttrs.addAttribute(reader.getAttributeNamespace(i),reader.getAttributeLocalName(i),
-                        qname,reader.getAttributeType(i),reader.getAttributeValue(i));
             }
             // skip <soap:Header>
             XMLStreamReaderUtil.nextElementContent(reader);
@@ -154,31 +113,13 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
         // Verify that <soap:Body> is present
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_BODY);
-        soapBody = reader.getName();
-        bodyNSDecls = new HashMap<String,String>();
-        for(int i=0; i< reader.getNamespaceCount();i++){
-            bodyNSDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
+        TagInfoset bodyTag = new TagInfoset(reader);
 
-        }
-        // TODO: Cache attributes on body
-        for(int i=0; i< reader.getAttributeCount();i++){
-            qn.setLength(0);
-            QName name = reader.getAttributeName(i);
-            String qname = "";
-            if(name.getPrefix().length() == 0){
-                qn.append(name.getPrefix());
-                qn.append(":");
-                qn.append(name.getLocalPart());
-                qname = qn.toString();
-            }
-            bodyAttrs.addAttribute(reader.getAttributeNamespace(i),reader.getAttributeLocalName(i),
-                    qname,reader.getAttributeType(i),reader.getAttributeValue(i));
-        }
         XMLStreamReaderUtil.nextElementContent(reader);
         if (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
             // Payload is present
             // XMLStreamReader is positioned at the first child
-            return createMessage(headers, reader);
+            return new StreamMessage(envelopeTag,headerTag,headers,bodyTag,reader,soapVersion);
         } else {
             // Empty payload <soap:Body/>
             return new EmptyMessageImpl(headers, SOAPVersion.fromNsUri(SOAP_NAMESPACE_URI));
@@ -227,8 +168,6 @@ public abstract class StreamSOAPDecoder implements Decoder {
     }
 
     protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBufferMark mark);
-
-    protected abstract StreamMessage createMessage(HeaderList headers, XMLStreamReader reader);
 
     protected XMLStreamReader createXMLStreamReader(InputStream in) {
         // TODO: we should definitely let Decode owns one XMLStreamReader instance
