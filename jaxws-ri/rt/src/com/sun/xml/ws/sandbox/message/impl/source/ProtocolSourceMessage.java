@@ -4,16 +4,14 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -30,7 +28,7 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
     private HeaderList headers;
     private AttachmentSet attSet;
     private Source src;
-    private StreamMessage sm;
+    private Message sm;
 
     public ProtocolSourceMessage(Source source) {
         super((SOAPVersion)null);
@@ -39,9 +37,7 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
         if (sourceUtils.isStreamSource()) {
             StreamSource streamSource = (StreamSource) src;
             XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
-            //move the cursor to the payload element
-            XMLStreamReaderUtil.next(reader);
-            sm = new StreamMessage(reader);
+            sm = Messages.create(reader);
         }
     }
 
