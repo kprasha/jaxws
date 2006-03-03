@@ -201,14 +201,15 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 reqNamespace = reqWrapper.targetNamespace();
         }
         builder.log("requestWrapper: "+requestClassName);
-        if (duplicateName(requestClassName)) {
-            builder.onError("webserviceap.method.request.wrapper.bean.name.not.unique",
-                             new Object[] {typeDecl.getQualifiedName(), method.toString()});
-        }
         boolean canOverwriteRequest = builder.canOverWriteClass(requestClassName);
         if (!canOverwriteRequest) {
             builder.log("Class " + requestClassName + " exists. Not overwriting.");
+        } 
+        if (duplicateName(requestClassName) && canOverwriteRequest) {
+            builder.onError("webserviceap.method.request.wrapper.bean.name.not.unique",
+                             new Object[] {typeDecl.getQualifiedName(), method.toString()});
         }
+
         String responseClassName = null;
         boolean canOverwriteResponse = canOverwriteRequest;
         if (!isOneway) {
@@ -222,13 +223,13 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 if (resWrapper.targetNamespace().length() > 0)
                     resNamespace = resWrapper.targetNamespace();
             }
-            if (duplicateName(responseClassName)) {
-                builder.onError("webserviceap.method.response.wrapper.bean.name.not.unique",
-                                 new Object[] {typeDecl.getQualifiedName(), method.toString()});
-            }
             canOverwriteResponse = builder.canOverWriteClass(requestClassName);
             if (!canOverwriteResponse) {
                 builder.log("Class " + responseClassName + " exists. Not overwriting.");
+            }
+            if (duplicateName(responseClassName) && canOverwriteResponse) {
+                builder.onError("webserviceap.method.response.wrapper.bean.name.not.unique",
+                                 new Object[] {typeDecl.getQualifiedName(), method.toString()});
             }
         }
         ArrayList<MemberInfo> reqMembers = new ArrayList<MemberInfo>();
@@ -245,8 +246,6 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             seiContext.setResWrapperOperation(method, resWrapperInfo);
         try {
             if (!canOverwriteRequest && !canOverwriteResponse) {
-                getWrapperMembers(reqWrapperInfo);
-                getWrapperMembers(resWrapperInfo);
                 return false;
             }
 
@@ -277,38 +276,6 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             throw new ModelerException("modeler.nestedGeneratorError",e);
         }
         return true;
-    }
-
-    private void getWrapperMembers(WrapperInfo wrapperInfo) throws Exception {
-        if (wrapperInfo == null)
-            return;
-        TypeDeclaration type = builder.getTypeDeclaration(wrapperInfo.getWrapperName());
-        Collection<FieldDeclaration> fields = type.getFields();
-        ArrayList<MemberInfo> members = new ArrayList<MemberInfo>();
-        MemberInfo member;
-        int i=0;
-        for (FieldDeclaration field : fields) {
-            XmlElement xmlElement = field.getAnnotation(XmlElement.class);
-            String fieldName = field.getSimpleName();
-//            String typeName = field.getType().toString();
-            String elementName = xmlElement != null ? xmlElement.name() : fieldName;
-            String namespace =  xmlElement != null ? xmlElement.namespace() : "";
-
-            String idxStr = fieldName.substring(3);
-            int index = Integer.parseInt(idxStr);
-            member = new MemberInfo(index, field.getType(),
-                                    field.getSimpleName(),
-                                    new QName(namespace, elementName));
-            int j=0;
-            while (j<members.size() && members.get(j++).getParamIndex() < index) {
-                break;
-            }
-            members.add(j, member);
-            i++;
-        }
-        for (MemberInfo member2 : members) {
-            wrapperInfo.addMember(member2);
-        }
     }
     
     private void collectMembers(MethodDeclaration method, String operationName, String namespace,
