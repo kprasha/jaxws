@@ -8,7 +8,9 @@ import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.ProtocolSourceMessage;
+import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.istack.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -19,6 +21,8 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamConstants;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -163,6 +167,20 @@ public abstract class Messages {
      */
     public static Message createEmpty(SOAPVersion soapVersion) {
         return new EmptyMessageImpl(soapVersion);
+    }
+
+    /**
+     * Creates a {@link Message} from {@link XMLStreamReader} that points to
+     * the start of the envelope.
+     *
+     * @param reader
+     *      can point to the start document or the start element (of &lt;s:Envelope>)
+     */
+    public static @NotNull Message create(@NotNull XMLStreamReader reader) {
+        assert reader.getEventType()== XMLStreamConstants.START_ELEMENT;
+        SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
+
+        return StreamSOAPDecoder.create(ver).decode(reader);
     }
 
     /**

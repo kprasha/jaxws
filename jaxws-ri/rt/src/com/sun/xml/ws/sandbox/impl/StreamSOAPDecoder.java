@@ -18,6 +18,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
@@ -52,19 +53,22 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         XMLStreamReader reader = createXMLStreamReader(in);
-        packet.setMessage(decode(reader, contentType));
+        packet.setMessage(decode(reader));
     }
 
-    Message decode(XMLStreamReader reader, String contentType) throws IOException {
-
-        // Check at the start of the document
-        XMLStreamReaderUtil.verifyReaderState(reader,
-                javax.xml.stream.XMLStreamConstants.START_DOCUMENT);
+    /**
+     * Decodes a message from {@link XMLStreamReader} that points to
+     * the beginning of a SOAP infoset.
+     *
+     * @param reader
+     *      can point to the start document or the start element.
+     */
+    public final Message decode(XMLStreamReader reader) {
 
         // Move to soap:Envelope and verify
-        XMLStreamReaderUtil.nextElementContent(reader);
-        XMLStreamReaderUtil.verifyReaderState(reader,
-                javax.xml.stream.XMLStreamConstants.START_ELEMENT);
+        if(reader.getEventType()!=XMLStreamConstants.START_ELEMENT)
+            XMLStreamReaderUtil.nextElementContent(reader);
+        XMLStreamReaderUtil.verifyReaderState(reader,XMLStreamConstants.START_ELEMENT);
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_ENVELOPE);
 
         TagInfoset envelopeTag = new TagInfoset(reader);
@@ -98,12 +102,11 @@ public abstract class StreamSOAPDecoder implements Decoder {
                 try {
                     // Cache SOAP header blocks
                     cacheHeaders(reader, namespaces, headers);
-                } catch (Exception e) {
+                } catch (XMLStreamException e) {
                     // TODO need to throw more meaningful exception
-                    IOException io = new IOException();
-                    io.initCause(e);
-
-                    throw io;
+                    throw new WebServiceException(e);
+                } catch (XMLStreamBufferException e) {
+                    throw new WebServiceException(e);
                 }
             }
 
@@ -187,7 +190,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
     /**
      * Creates a new {@link StreamSOAPDecoder} instance.
      */
-    public static Decoder create(SOAPVersion version) {
+    public static StreamSOAPDecoder create(SOAPVersion version) {
         if(version==null)
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();

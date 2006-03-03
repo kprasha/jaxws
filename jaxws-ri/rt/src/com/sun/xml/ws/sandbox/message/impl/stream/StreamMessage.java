@@ -52,17 +52,11 @@ import javax.xml.ws.WebServiceException;
 
 /**
  * {@link Message} implementation backed by {@link XMLStreamReader}.
+ *
+ * TODO: we need another message class that keeps {@link XMLStreamReader} that points
+ * at the start of the envelope element.
  */
 public final class StreamMessage extends AbstractMessageImpl {
-    /**
-     * flag that tells whether StreamMessage is created with the
-     * XMLStreamReader that points to the payload or soapenv:Envelop
-     *
-     * Probably we may need different classes for payload and Envelope.
-     * Lets keep this way for the timebeing.
-     */
-    private boolean isPayload;
-
     /**
      * The reader will be positioned at
      * the first child of the SOAP body
@@ -103,7 +97,6 @@ public final class StreamMessage extends AbstractMessageImpl {
         super(soapVersion);
         this.headers = headers;
         this.reader = reader;
-        isPayload = true;
         //if the reader is pointing to the end element </soapenv:Body> then its empty message
         // or no payload
         if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
@@ -147,24 +140,6 @@ public final class StreamMessage extends AbstractMessageImpl {
         this.envelopeTag = envelopeTag;
         this.headerTag = headerTag!=null ? headerTag : DEFAULT_TAGS[soapVersion.ordinal()*3+1];
         this.bodyTag = bodyTag;
-    }
-
-
-    /**
-     * Creates a {@link StreamMessage}  from a {@link XMLStreamReader}
-     * that points at the start element of &lt;S:Envelope>.
-     *
-     * <p>
-     * This method creates a message from a complete message,
-     * and parses headers and so on within itself.
-     *
-     * @param reader
-     *      must not be null.
-     */
-    public StreamMessage(XMLStreamReader reader) {
-        // TODO: implement this method later
-        super((SOAPVersion)null);
-        throw new UnsupportedOperationException();
     }
 
     public boolean hasHeaders() {
@@ -221,12 +196,7 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException{
-        if(isPayload){
-            writeEnvelope(sw);
-        }else{
-            // TODO: implement this method later
-            throw new UnsupportedOperationException();
-        }
+        writeEnvelope(sw);
     }
 
     /**
