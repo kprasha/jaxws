@@ -1,30 +1,27 @@
 package com.sun.xml.ws.sandbox.impl;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamAttachment;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import org.jvnet.staxex.Base64Data;
+import org.jvnet.staxex.NamespaceContextEx;
+import org.jvnet.staxex.XMLStreamReaderEx;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.Location;
-import javax.xml.ws.WebServiceException;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
-
-import java.io.InputStream;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Iterator;
-import java.util.Arrays;
-import java.net.URLDecoder;
-
-import org.jvnet.staxex.XMLStreamReaderEx;
-import org.jvnet.staxex.NamespaceContextEx;
-import org.jvnet.staxex.Base64Data;
 
 /**
  * @author Vivek Pandey
@@ -53,7 +50,7 @@ public class MtomDecoder implements Decoder{
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         reader = XMLStreamReaderFactory.createXMLStreamReader(in, true);
-        packet.setMessage(decoder.decode(getXmlStreamReaderEx(), contentType));
+        packet.setMessage(decoder.decode(getXmlStreamReaderEx()));
     }
 
     public void decode(ReadableByteChannel in, String contentType, Packet packet) {
