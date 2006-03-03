@@ -7,7 +7,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
