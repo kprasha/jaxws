@@ -1,31 +1,30 @@
-
 package com.sun.xml.ws.sandbox.impl;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
-import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import org.xml.sax.helpers.AttributesImpl;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamConstants;
-
-import org.jvnet.staxex.XMLStreamReaderEx;
 
 /**
  * A stream SOAP decoder.
@@ -39,7 +38,16 @@ public abstract class StreamSOAPDecoder implements Decoder {
     private static final String SOAP_BODY = "Body";
 
     protected final String SOAP_NAMESPACE_URI;
-
+    protected QName envelope = null;
+    protected QName soapHeader = null;
+    protected QName soapBody = null;
+    protected Map<String, String> envelopeNSDecls = null;
+    protected Map<String, String> soapHeaderNSDecls = null;
+    protected Map<String, String> bodyNSDecls = null;
+    protected AttributesImpl envAttrs = new AttributesImpl();
+    protected AttributesImpl shAttrs = new AttributesImpl();
+    protected AttributesImpl bodyAttrs = new AttributesImpl();
+    
     protected StreamSOAPDecoder(String namespace) {
         SOAP_NAMESPACE_URI = namespace;
     }
@@ -68,9 +76,28 @@ public abstract class StreamSOAPDecoder implements Decoder {
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_ENVELOPE);
 
         // Collect namespaces on soap:Envelope
-        Map<String, String> namespaces = new HashMap();
-        for (int i = 0; i < reader.getNamespaceCount(); i++) {
+        Map<String,String> namespaces = new HashMap();
+        envelopeNSDecls = new HashMap<String,String>();
+        envelope = reader.getName();
+        for(int i=0; i< reader.getNamespaceCount();i++){
             namespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
+            envelopeNSDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
+        }
+
+        StringBuilder qn = new StringBuilder();
+        for(int i=0; i< reader.getAttributeCount();i++){
+            qn.setLength(0);
+            QName name = reader.getAttributeName(i);
+            String qname = "";
+            if(name.getPrefix().length() == 0){
+                qn.append(name.getPrefix());
+                qn.append(":");
+                qn.append(name.getLocalPart());
+                qname = qn.toString();
+            }
+
+            envAttrs.addAttribute(reader.getAttributeNamespace(i),reader.getAttributeLocalName(i),
+                    qname, reader.getAttributeType(i),reader.getAttributeValue(i));
         }
 
         // Move to next element
@@ -81,12 +108,27 @@ public abstract class StreamSOAPDecoder implements Decoder {
         HeaderList headers = null;
         if (reader.getLocalName() == SOAP_HEADER
                 && reader.getNamespaceURI() == SOAP_NAMESPACE_URI) {
-
             // Collect namespaces on soap:Header
-            for (int i = 0; i < reader.getNamespaceCount(); i++) {
+            soapHeaderNSDecls = new HashMap<String,String>();
+            soapHeader = reader.getName();
+            for(int i=0; i< reader.getNamespaceCount();i++){
                 namespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
-            }
+                soapHeaderNSDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
 
+            }
+            for(int i=0; i< reader.getAttributeCount();i++){
+                qn.setLength(0);
+                QName name = reader.getAttributeName(i);
+                String qname = "";
+                if(name.getPrefix().length() == 0){
+                    qn.append(name.getPrefix());
+                    qn.append(":");
+                    qn.append(name.getLocalPart());
+                    qname = qn.toString();
+                }
+                shAttrs.addAttribute(reader.getAttributeNamespace(i),reader.getAttributeLocalName(i),
+                        qname,reader.getAttributeType(i),reader.getAttributeValue(i));
+            }
             // skip <soap:Header>
             XMLStreamReaderUtil.nextElementContent(reader);
 
@@ -112,9 +154,26 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
         // Verify that <soap:Body> is present
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_BODY);
+        soapBody = reader.getName();
+        bodyNSDecls = new HashMap<String,String>();
+        for(int i=0; i< reader.getNamespaceCount();i++){
+            bodyNSDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
 
+        }
         // TODO: Cache attributes on body
-
+        for(int i=0; i< reader.getAttributeCount();i++){
+            qn.setLength(0);
+            QName name = reader.getAttributeName(i);
+            String qname = "";
+            if(name.getPrefix().length() == 0){
+                qn.append(name.getPrefix());
+                qn.append(":");
+                qn.append(name.getLocalPart());
+                qname = qn.toString();
+            }
+            bodyAttrs.addAttribute(reader.getAttributeNamespace(i),reader.getAttributeLocalName(i),
+                    qname,reader.getAttributeType(i),reader.getAttributeValue(i));
+        }
         XMLStreamReaderUtil.nextElementContent(reader);
         if (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
             // Payload is present
@@ -136,7 +195,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
     }
 
     private XMLStreamBuffer cacheHeaders(XMLStreamReader reader,
-                                         Map<String, String> namespaces, HeaderList headers) throws XMLStreamException, XMLStreamBufferException {
+            Map<String, String> namespaces, HeaderList headers) throws XMLStreamException, XMLStreamBufferException {
         XMLStreamBuffer buffer = createXMLStreamBuffer();
         StreamReaderBufferCreator creator = new StreamReaderBufferCreator();
         creator.setXMLStreamBuffer(buffer);
@@ -194,12 +253,12 @@ public abstract class StreamSOAPDecoder implements Decoder {
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();
         switch(version) {
-        case SOAP_11:
-            return new StreamSOAP11Decoder();
-        case SOAP_12:
-            return new StreamSOAP12Decoder();
-        default:
-            throw new AssertionError();
+            case SOAP_11:
+                return new StreamSOAP11Decoder();
+            case SOAP_12:
+                return new StreamSOAP12Decoder();
+            default:
+                throw new AssertionError();
         }
     }
 

@@ -33,6 +33,7 @@ import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -40,12 +41,14 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
+import java.util.Map;
 
 public class StreamMessage extends AbstractMessageImpl {
     /**
@@ -56,6 +59,11 @@ public class StreamMessage extends AbstractMessageImpl {
      * Lets keep this way for the timebeing.
      */
     private boolean isPayload;
+
+    private String bodyQname ="";
+    private String envQname ="";
+    private String headerQname ="";
+
 
     /**
      * The reader will be positioned at
@@ -69,6 +77,15 @@ public class StreamMessage extends AbstractMessageImpl {
     private final String payloadLocalName;
 
     private final String payloadNamespaceURI;
+    Map<String,String> soapHdrNSDecls;
+    Map<String,String> bodyNSDecls;
+    Map<String,String> envNSDecls;
+    Attributes shAttrs ;
+    Attributes bodyAttrs ;
+    Attributes envAttrs ;
+    private QName envelope;
+    private QName soapHeader;
+    private QName body;
 
     /**
      * Creates a {@link StreamMessage} from a {@link XMLStreamReader}
@@ -107,6 +124,49 @@ public class StreamMessage extends AbstractMessageImpl {
             this.payloadNamespaceURI = reader.getNamespaceURI();
         }
     }
+
+    public StreamMessage(QName soapEnvelope,Map<String,String> envNSDecl,Attributes envAttrs,QName soapHeader,Map<String,String> headerNSDecl,Attributes shAttrs,HeaderList headers, XMLStreamReader reader,QName soapBody,Map<String,String>bodyNSDecls,Attributes bodyAttrs, SOAPVersion soapVersion) {
+        super(soapVersion);
+        this.headers = headers;
+        this.reader = reader;
+        this.soapHdrNSDecls = headerNSDecl;
+        this.envNSDecls = envNSDecl;
+        this.envAttrs = envAttrs;
+        this.shAttrs = shAttrs;
+        this.bodyAttrs = bodyAttrs;
+        this.bodyNSDecls = bodyNSDecls;
+        this.body = soapBody;
+        this.envelope = soapEnvelope;
+        this.soapHeader = soapHeader;
+        if(this.envAttrs == null){
+            this.envAttrs = EMPTY_ATTS;
+        }
+
+
+        if(this.shAttrs == null){
+            this.shAttrs = EMPTY_ATTS;
+        }
+        isPayload = true;
+        //if the reader is pointing to the end element <soapenv:Body/> then its empty message
+        // or no payload
+        if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
+            String body = reader.getLocalName();
+            String nsUri = reader.getNamespaceURI();
+            assert body != null;
+            assert nsUri != null;
+            //if its not soapenv:Body then throw exception, we received malformed stream
+            if(body.equals("Body") && nsUri.equals(soapVersion.nsUri)){
+                this.payloadLocalName = null;
+                this.payloadNamespaceURI = null;
+            }else{ //TODO: i18n and also we should be throwing better message that this
+                throw new WebServiceException("Malformed stream: {"+nsUri+"}"+body);
+            }
+        }else{
+            this.payloadLocalName = reader.getLocalName();
+            this.payloadNamespaceURI = reader.getNamespaceURI();
+        }
+    }
+
 
     /**
      * Creates a {@link StreamMessage}  from a {@link XMLStreamReader}
@@ -249,6 +309,119 @@ public class StreamMessage extends AbstractMessageImpl {
             throw new WebServiceException("Failed to copy a message",e);
         } catch (XMLStreamBufferException e) {
             throw new WebServiceException("Failed to copy a message",e);
+        }
+    }
+
+    public void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
+        contentHandler.setDocumentLocator(NULL_LOCATOR);
+        contentHandler.startDocument();
+        writeEnvelopeandHeader(contentHandler);
+        if(hasHeaders()) {
+            HeaderList headers = getHeaders();
+            int len = headers.size();
+            for( int i=0; i<len; i++ ) {
+                // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
+                headers.get(i).writeTo(contentHandler,errorHandler);
+            }
+        }
+        writeEndHeader(contentHandler);
+        writeBodyTag(contentHandler);
+        // write the body
+
+        writePayloadTo(contentHandler,errorHandler);
+        writeEndEnvelope(contentHandler);
+
+    }
+
+    protected void writeBodyTag(ContentHandler contentHandler) throws SAXException{
+        StringBuilder sb = new StringBuilder();
+        if(bodyNSDecls != null){
+            for(String key: bodyNSDecls.keySet()){
+                contentHandler.startPrefixMapping(key, bodyNSDecls.get(key));
+            }
+        }
+
+        String qname ="";
+        if(body.getPrefix().length()>0){
+            sb.append(body.getPrefix());
+            sb.append(":");
+            sb.append(body.getLocalPart());
+            qname = sb.toString();
+        }
+
+
+        bodyQname = qname;
+        contentHandler.startElement(body.getNamespaceURI(),body.getLocalPart(),qname, EMPTY_ATTS);//bodyAttrs
+
+    }
+
+
+
+    protected void writeEndEnvelope(ContentHandler contentHandler) throws SAXException{
+        contentHandler.endElement(body.getNamespaceURI(),body.getLocalPart(),bodyQname);
+        if(bodyNSDecls != null){
+            for(String key: bodyNSDecls.keySet()){
+                contentHandler.endPrefixMapping(key);
+            }
+        }
+        contentHandler.endElement(envelope.getNamespaceURI(),envelope.getLocalPart(),envQname);
+        if(envNSDecls != null){
+            for(String key: envNSDecls.keySet()){
+                contentHandler.endPrefixMapping(key);
+            }
+        }
+    }
+
+    protected void writeEndHeader(ContentHandler contentHandler) throws SAXException{
+        contentHandler.endElement(soapHeader.getNamespaceURI(),soapHeader.getLocalPart(),headerQname);
+        if(soapHdrNSDecls != null){
+            for(String key: soapHdrNSDecls.keySet()){
+                contentHandler.endPrefixMapping(key);
+            }
+        }
+    }
+
+    protected void writeEnvelopeandHeader(ContentHandler contentHandler) throws SAXException{
+        if(envelope != null){
+
+            StringBuilder sb = new StringBuilder();
+            if(envNSDecls != null){
+                for(String key: envNSDecls.keySet()){
+                    contentHandler.startPrefixMapping(key, envNSDecls.get(key));
+                }
+            }
+
+            String qname ="";
+            if(envelope.getPrefix().length()>0){
+                sb.append(envelope.getPrefix());
+
+                sb.append(":");
+                sb.append(envelope.getLocalPart());
+                qname = sb.toString();
+            }
+            envQname = qname;
+            contentHandler.startElement(envelope.getNamespaceURI(),envelope.getLocalPart(),qname, envAttrs);
+            sb.setLength(0);
+            qname ="";
+            if(soapHeader.getPrefix().length()>0){
+                sb.append(soapHeader.getPrefix());
+                sb.append(":");
+                sb.append(soapHeader.getLocalPart());
+                qname = sb.toString();
+            }
+            headerQname = qname;
+
+            if(soapHdrNSDecls != null){
+                for(String key: soapHdrNSDecls.keySet()){
+                    contentHandler.startPrefixMapping(key, soapHdrNSDecls.get(key));
+                }
+            }
+            contentHandler.startElement(soapHeader.getNamespaceURI(),soapHeader.getLocalPart(),qname,shAttrs);
+        }else{
+            String soapNsUri = soapVersion.nsUri;
+            contentHandler.startPrefixMapping("S",soapNsUri);
+            contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
+            contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
         }
     }
 

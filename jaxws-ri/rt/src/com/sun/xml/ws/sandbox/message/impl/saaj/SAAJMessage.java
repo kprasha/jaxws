@@ -29,6 +29,8 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
+import org.w3c.dom.Attr;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.ContentHandler;
@@ -251,47 +253,6 @@ public class SAAJMessage extends Message {
         }
     }
 
-    /**
-     * Writes the whole SOAP message (but not attachments)
-     * to the given writer.
-     * <p/>
-     * This consumes the message.
-     */
-    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-
-        String soapNsUri = null;
-        try {
-            soapNsUri = sm.getSOAPBody().getNamespaceURI();
-        } catch (SOAPException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        w.writeStartDocument();
-       // w.writeNamespace("S",soapNsUri);
-        w.writeStartElement("S","Envelope",soapNsUri);
-        w.writeNamespace("S",soapNsUri);
-
-        //write soapenv:Header
-        w.writeStartElement("S","Header",soapNsUri);
-        if(hasHeaders()) {
-            int len = headers.size();
-            for( int i=0; i<len; i++ ) {
-                headers.get(i).writeTo(w);
-            }
-        }
-        w.writeEndElement();
-
-        // write the body
-        w.writeStartElement("S","Body",soapNsUri);
-        if (payload != null)
-            DOMUtil.serializeNode(payload, w);
-        w.writeEndElement();
-
-        w.writeEndElement();
-        w.writeEndDocument();
-        w.flush();
-        w.close();        
-    }
-
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         DOMScanner ds = new DOMScanner();
         ds.setContentHandler(contentHandler);
@@ -468,4 +429,47 @@ public class SAAJMessage extends Message {
             return map;
         }
     }
+
+
+    public void writeTo( XMLStreamWriter writer ) throws XMLStreamException {
+        try {
+            writer.writeStartDocument();
+            SOAPEnvelope env;
+
+            env = sm.getSOAPPart().getEnvelope();
+
+            writer.writeStartElement(env.getPrefix(),"Envelope", env.getNamespaceURI());
+            writeAttributes(env.getAttributes(),writer);
+            writer.writeStartElement(env.getPrefix(),"Header",env.getNamespaceURI());
+            if(hasHeaders()) {
+                int len = headers.size();
+                for( int i=0; i<len; i++ ) {
+                    headers.get(i).writeTo(writer);
+                }
+            }
+            writer.writeEndElement();
+
+            DOMUtil.serializeNode(sm.getSOAPBody(),writer);
+            writer.writeEndElement();
+            writer.writeEndDocument();
+            writer.flush();
+        } catch (SOAPException ex) {
+            ex.printStackTrace();
+            throw new XMLStreamException(ex);
+            //for now. ask jaxws team what to do.
+        }
+
+    }
+
+    private void writeAttributes(NamedNodeMap attrs , XMLStreamWriter writer)throws XMLStreamException{
+        for(int i=0;i< attrs.getLength();i++){
+            Attr attr = (Attr)attrs.item(i);
+            if(attr.getNamespaceURI().equals("http://www.w3.org/2000/xmlns/")){
+                writer.writeNamespace(attr.getLocalName(),attr.getValue());
+            } else{
+                writer.writeAttribute(attr.getPrefix(),attr.getNamespaceURI(),attr.getLocalName(),attr.getValue());
+            }
+        }
+    }
+
 }
