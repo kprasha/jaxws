@@ -192,6 +192,8 @@ public final class StreamMessage extends AbstractMessageImpl {
 
     public void writePayloadTo(XMLStreamWriter writer)throws XMLStreamException {
         assert unconsumed();
+        if(payloadLocalName==null)
+            return; // no body
         new XMLStreamReaderToXMLStreamWriter().bridge(reader,writer);
     }
 
@@ -226,6 +228,9 @@ public final class StreamMessage extends AbstractMessageImpl {
     public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         assert unconsumed();
         try {
+            if(payloadLocalName==null)
+                return; // no body
+
             XMLStreamReaderToContentHandler conv =
                 new XMLStreamReaderToContentHandler(reader,contentHandler,true);
             conv.bridge();
