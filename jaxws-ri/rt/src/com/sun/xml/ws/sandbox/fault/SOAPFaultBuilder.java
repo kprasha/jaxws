@@ -1,38 +1,36 @@
 package com.sun.xml.ws.sandbox.fault;
 
 import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.ExceptionType;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.model.CheckedExceptionImpl;
-import com.sun.xml.ws.util.StringUtils;
-import com.sun.xml.ws.encoding.soap.SerializationException;
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.encoding.soap.SOAPConstants;
+import com.sun.xml.ws.encoding.soap.SerializationException;
+import com.sun.xml.ws.model.CheckedExceptionImpl;
+import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.util.StringUtils;
 import org.w3c.dom.Node;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
-import javax.xml.transform.dom.DOMResult;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Base class that represents SOAP 1.1 or SOAP 1.2 fault. This class can be used by the invocation handlers to create
  * an Exception from a received messge.
- * <p/>
- * <p/>
  *
  * @author Vivek Pandey
  */
@@ -87,16 +85,17 @@ public abstract class SOAPFaultBuilder {
      *
      * @param ceModel     {@link CheckedExceptionImpl} model that provides useful informations such as the detail tagname
      *                    and the Exception associated with it. Caller of this constructor should get the CheckedException
-     *                    model by calling {@link com.sun.xml.ws.model.JavaMethodImpl#getCheckedException(Class)}, where
+     *                    model by calling {@link JavaMethodImpl#getCheckedException(Class)}, where
      *                    Class is t.getClass().
-     *                    <p/>
+     *                    <p>
      *                    If its null then this is not a checked exception  and in that case the soap fault will be
      *                    serialized only from the exception as described below.
      * @param ex          Exception that needs to be translated into soapenv:Fault, always non-null.
-     *                    <p/>
-     *                    <li>If t is instance of {@link javax.xml.ws.soap.SOAPFaultException} then its serilaized as protocol exception.
-     *                    <li>If t.getCause() is instance of {@link javax.xml.ws.soap.SOAPFaultException} and t is a checked exception then
+     *                    <ul>
+     *                    <li>If t is instance of {@link SOAPFaultException} then its serilaized as protocol exception.
+     *                    <li>If t.getCause() is instance of {@link SOAPFaultException} and t is a checked exception then
      *                    the soap fault detail is serilaized from t and the fault actor/string/role is taken from t.getCause().
+     *                    </ul>
      * @param soapVersion non-null
      */
     public static Message createSOAPFaultMessage(SOAPVersion soapVersion, CheckedExceptionImpl ceModel, Throwable ex) {
@@ -112,18 +111,21 @@ public abstract class SOAPFaultBuilder {
      * @param soapVersion {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
      * @param faultString must be non-null
      * @param faultCode   For SOAP 1.1, it must be one of
+     *                    <ul>
      *                    <li>{@link SOAPConstants#FAULT_CODE_CLIENT}
      *                    <li>{@link SOAPConstants#FAULT_CODE_SERVER}
      *                    <li>{@link SOAPConstants#FAULT_CODE_MUST_UNDERSTAND}
      *                    <li>{@link SOAPConstants#FAULT_CODE_VERSION_MISMATCH}
-     *                    <p/>
+     *                    </ul>
+     *
      *                    For SOAP 1.2
-     *                    <p/>
+     *                    <ul>
      *                    <li>{@link SOAP12Constants#FAULT_CODE_CLIENT}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_SERVER}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_MUST_UNDERSTAND}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_VERSION_MISMATCH}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_DATA_ENCODING_UNKNOWN}
+     *                    </ul>
      * @return non-null {@link Message}
      */
     public static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode) {
