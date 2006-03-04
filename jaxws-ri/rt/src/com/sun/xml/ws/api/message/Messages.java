@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.sandbox.message.impl.DOMMessage;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
@@ -192,9 +193,8 @@ public abstract class Messages {
      * worked out. This method is here just to show the concept of
      * {@link Messages}.
      */
-    public static Message create(Throwable t) {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException();
+    public static Message create(Throwable t, SOAPVersion soapVersion) {
+        return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, t);
     }
 
     /**
