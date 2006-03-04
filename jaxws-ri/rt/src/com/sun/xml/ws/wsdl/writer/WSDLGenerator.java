@@ -689,6 +689,8 @@ public class WSDLGenerator {
                     } else {
                        body.parts(param.getPartName());
                     }
+                } else {
+                    body.parts("");
                 }
                 generateSOAPHeaders(input, headerParams, requestMessage);
             }
@@ -712,25 +714,27 @@ public class WSDLGenerator {
             body = output._element(Body.class);
             body.use(LITERAL);
             if (headerParams.size() > 0) {
-                ParameterImpl param = bodyParams.iterator().hasNext() ? bodyParams.iterator().next() : null;
                 String parts = "";
-                if (isRpc) {
-                    int i=0;
-                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                        if (i++>0)
-                            parts += " ";
-                        parts += parameter.getPartName();
-                    }
-                } else {
-                    if (param != null) {
-                        if (param.isWrapperStyle()) {
-                            // if its not really wrapper style dont use the same name as input message
-                            if (unwrappable)
-                                parts = RESULT;
-                            else
-                                parts = UNWRAPPABLE_RESULT;
-                        } else {
-                            parts = param.getPartName();
+                if (bodyParams.size() > 0) {
+                    ParameterImpl param = bodyParams.iterator().hasNext() ? bodyParams.iterator().next() : null;
+                    if (isRpc) {
+                        int i=0;
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                            if (i++>0)
+                                parts += " ";
+                            parts += parameter.getPartName();
+                        }
+                    } else {
+                        if (param != null) {
+                            if (param.isWrapperStyle()) {
+                                // if its not really wrapper style dont use the same name as input message
+                                if (unwrappable)
+                                    parts = RESULT;
+                                else
+                                    parts = UNWRAPPABLE_RESULT;
+                            } else {
+                                parts = param.getPartName();
+                            }
                         }
                     }
                 }
@@ -789,6 +793,8 @@ public class WSDLGenerator {
                     } else {
                        body.parts(param.getPartName());
                     }
+                } else {
+                    body.parts("");
                 }
                 generateSOAP12Headers(input, headerParams, requestMessage);
             }
@@ -811,24 +817,28 @@ public class WSDLGenerator {
             body = output._element(com.sun.xml.ws.wsdl.writer.document.soap12.Body.class);
             body.use(LITERAL);
             if (headerParams.size() > 0) {
-                ParameterImpl param = bodyParams.iterator().next();
-                if (isRpc) {
-                    String parts = "";
-                    int i=0;
-                    for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
-                        if (i++>0)
-                            parts += " ";
-                        parts += parameter.getPartName();
+                if (bodyParams.size() > 0) {
+                    ParameterImpl param = bodyParams.iterator().next();
+                    if (isRpc) {
+                        String parts = "";
+                        int i=0;
+                        for (ParameterImpl parameter : ((WrapperParameter)param).getWrapperChildren()) {
+                            if (i++>0)
+                                parts += " ";
+                            parts += parameter.getPartName();
+                        }
+                        body.parts(parts);
+                    } else if (param.isWrapperStyle()) {
+                        // if its not really wrapper style dont use the same name as input message
+                        if (unwrappable)
+                            body.parts(RESULT);
+                        else
+                            body.parts(UNWRAPPABLE_RESULT);
+                    } else {
+                        body.parts(param.getPartName());
                     }
-                    body.parts(parts);
-                } else if (param.isWrapperStyle()) {
-                    // if its not really wrapper style dont use the same name as input message
-                    if (unwrappable)
-                        body.parts(RESULT);
-                    else
-                        body.parts(UNWRAPPABLE_RESULT);
                 } else {
-                    body.parts(param.getPartName());
+                    body.parts("");
                 }
                 generateSOAP12Headers(output, headerParams, responseMessage);
             }
