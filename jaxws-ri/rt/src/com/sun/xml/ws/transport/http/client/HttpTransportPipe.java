@@ -34,8 +34,11 @@ import java.util.HashMap;
 import javax.xml.ws.WebServiceException;
 import java.util.List;
 import java.util.Map;
+import java.io.InputStream;
+import java.io.IOException;
 
 /**
+ * {@link Pipe} that sends a request to a remote HTTP server.
  *
  * @author jitu
  */
@@ -80,12 +83,21 @@ public class HttpTransportPipe implements Pipe {
                 reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
                 reqHeaders.put("Content-Type", Arrays.asList(ct.getContentType()));
                 writeSOAPAction(reqHeaders, ct.getSOAPAction());
+                if(dump)
+                    dump(buf, "HTTP request");
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
                 reqHeaders.put("Content-Type", Arrays.asList(ct.getContentType()));
                 writeSOAPAction(reqHeaders, ct.getSOAPAction());
-                encoder.encode(request, con.getOutput());
+                if(dump) {
+                    ByteArrayBuffer buf = new ByteArrayBuffer();
+                    encoder.encode(request, buf);
+                    dump(buf, "HTTP request");
+                    buf.writeTo(con.getOutput());
+                } else {
+                    encoder.encode(request, con.getOutput());
+                }
             }
 
             con.closeOutput();
@@ -99,7 +111,15 @@ public class HttpTransportPipe implements Pipe {
             String contentType = getContentType(respHeaders);
             Packet reply = request.createResponse(null);
             reply.httpResponseHeaders = respHeaders;
-            decoder.decode(con.getInput(), contentType, reply);
+            InputStream response = con.getInput();
+            if(dump) {
+                ByteArrayBuffer buf = new ByteArrayBuffer();
+                buf.write(response);
+                dump(buf,"HTTP response");
+                response = buf.newInputStream();
+            }
+            decoder.decode(response, contentType, reply);
+
             return reply;
         } catch(WebServiceException wex) {
             throw wex;
@@ -131,5 +151,25 @@ public class HttpTransportPipe implements Pipe {
 
     public Pipe copy(PipeCloner cloner) {
         return new HttpTransportPipe(this,cloner);
+    }
+
+    private void dump(ByteArrayBuffer buf, String caption) throws IOException {
+        System.out.println("---["+caption +"]---");
+        buf.writeTo(System.out);
+    }
+
+    /**
+     * Dumps what goes across HTTP transport.
+     */
+    private static final boolean dump;
+
+    static {
+        boolean b;
+        try {
+            b = Boolean.getBoolean(HttpTransportPipe.class.getName()+".dump");
+        } catch( Throwable t ) {
+            b = false;
+        }
+        dump = b;
     }
 }
