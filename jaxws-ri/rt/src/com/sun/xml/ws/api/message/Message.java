@@ -28,6 +28,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.xml.sax.ContentHandler;
@@ -210,6 +212,11 @@ public abstract class Message {
      * This method relies on {@link WSDLBoundPortType#getOperation(String, String)} but
      * it does so in an efficient way.
      *
+     * <p>
+     * This method works only for a request. A pipe can determine an operation for a request,
+     * and then keep it in a local variable to use it with a response, so there should be
+     * no need to find out operation from a response (besides, there might not be any response!).  
+     *
      * @param boundPortType
      *      This represents the port for which this message is used.
      *      Most {@link Pipe}s should get this information when they are created,
@@ -219,9 +226,9 @@ public abstract class Message {
      *      Null if the operation was not found. This is possible, for example when a protocol
      *      message is sent through a pipeline, or when we receive an invalid request on the server,
      *      or when we are on the client and the user appliation sends a random DOM through
-     *      {@link Dispatch}.
+     *      {@link Dispatch}, so this error needs to be handled gracefully.
      */
-    public final WSDLBoundOperation getOperation(WSDLBoundPortType boundPortType) {
+    public final @Nullable WSDLBoundOperation getOperation(@NotNull WSDLBoundPortType boundPortType) {
         if(operation==null)
             operation = boundPortType.getOperation(getPayloadNamespaceURI(),getPayloadLocalPart());
         return operation;
@@ -231,7 +238,7 @@ public abstract class Message {
      * The same as {@link #getOperation(WSDLBoundPortType)} but
      * takes {@link WSDLPort} for convenience.
      */
-    public final WSDLBoundOperation getOperation(WSDLPort port) {
+    public final @Nullable WSDLBoundOperation getOperation(@NotNull WSDLPort port) {
         return getOperation(port.getBinding());
     }
 
