@@ -137,6 +137,7 @@ public final class StreamMessage extends AbstractMessageImpl {
      */
     public StreamMessage(@NotNull TagInfoset envelopeTag, @Nullable TagInfoset headerTag, @Nullable HeaderList headers, @NotNull TagInfoset bodyTag, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
         this(headers,reader,soapVersion);
+        assert envelopeTag!=null && bodyTag!=null;
         this.envelopeTag = envelopeTag;
         this.headerTag = headerTag!=null ? headerTag : DEFAULT_TAGS[soapVersion.ordinal()*3+1];
         this.bodyTag = bodyTag;
