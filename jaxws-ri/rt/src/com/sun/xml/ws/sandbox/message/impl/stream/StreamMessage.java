@@ -259,7 +259,7 @@ public final class StreamMessage extends AbstractMessageImpl {
 
             reader = xsb.processUsingXMLStreamReader();
 
-            return new StreamMessage(HeaderList.copy(headers), xsb.processUsingXMLStreamReader(), soapVersion);
+            return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, xsb.processUsingXMLStreamReader(), soapVersion);
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message",e);
         } catch (XMLStreamBufferException e) {
