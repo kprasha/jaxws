@@ -11,6 +11,7 @@ import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.ProtocolSourceMessage;
 import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.istack.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -178,16 +179,11 @@ public abstract class Messages {
      *      can point to the start document or the start element (of &lt;s:Envelope>)
      */
     public static @NotNull Message create(@NotNull XMLStreamReader reader) {
-        // temp code
-        if (reader.getEventType() == XMLStreamConstants.START_DOCUMENT) {
-            try {
-                reader.next();
-            } catch (javax.xml.stream.XMLStreamException e) {
-                throw new WebServiceException(e);
-            }
-        }
-        // end temp
+        // skip until the root element
+        if(reader.getEventType()!=XMLStreamConstants.START_ELEMENT)
+            XMLStreamReaderUtil.nextElementContent(reader);
         assert reader.getEventType()== XMLStreamConstants.START_ELEMENT;
+
         SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
 
         return StreamSOAPDecoder.create(ver).decode(reader);
