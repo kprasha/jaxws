@@ -178,6 +178,15 @@ public abstract class Messages {
      *      can point to the start document or the start element (of &lt;s:Envelope>)
      */
     public static @NotNull Message create(@NotNull XMLStreamReader reader) {
+        // temp code
+        if (reader.getEventType() == XMLStreamConstants.START_DOCUMENT) {
+            try {
+                reader.next();
+            } catch (javax.xml.stream.XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
+        }
+        // end temp
         assert reader.getEventType()== XMLStreamConstants.START_ELEMENT;
         SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
 
