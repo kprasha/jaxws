@@ -115,7 +115,7 @@ public class HttpTransportPipe implements Pipe {
             if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 buf.write(response);
-                dump(buf,"HTTP response");
+                dump(buf,"HTTP response "+con.statusCode);
                 response = buf.newInputStream();
             }
             decoder.decode(response, contentType, reply);
