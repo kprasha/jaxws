@@ -81,7 +81,7 @@ public final class PipeCloner {
         if(r==null) {
             r = p.copy(this);
             // the pipe must puts its copy to the map by itself
-            assert master2copy.get(p)==r;
+            assert master2copy.get(p)==r : "the pipe must call the add(...) method to register itself before start copying other pipes, but "+p+" hasn't done so";
         }
         return (T)r;
     }
