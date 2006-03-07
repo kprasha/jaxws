@@ -19,6 +19,7 @@ import com.sun.xml.ws.sandbox.handler.HandlerProcessor.Direction;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.ws.ProtocolException;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
@@ -65,11 +66,11 @@ public class LogicalHandlerPipe extends HandlerPipe {
     protected LogicalHandlerPipe(LogicalHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
         this.binding = that.binding;
-        this.isClient = that.isClient;               
+        this.isClient = that.isClient;
     }
     
     @Override
-    public Packet process( Packet packet) {
+            public Packet process( Packet packet) {
         // This is done here instead of the constructor, since User can change
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
@@ -81,7 +82,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
         MessageContextImpl msgContext = new MessageContextImpl(packet);
         LogicalMessageContextImpl context =  new LogicalMessageContextImpl(binding,packet,msgContext);
         // Doing this just for Spec compliance
-        // This check is done to cover handler returning false in Oneway request 
+        // This check is done to cover handler returning false in Oneway request
         boolean handleFalse = processor.checkHandlerFalseProperty(context);
         if(handleFalse){
             // Cousin HandlerPipe returned false during Oneway Request processing.
@@ -94,16 +95,27 @@ public class LogicalHandlerPipe extends HandlerPipe {
         try {
             boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
             boolean handlerResult = false;
-            
-            // Call handlers on Request            
-            if(isClient) {
-                //CLIENT-SIDE
-                handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-            } else {
-                //SERVER-SIDE
-                handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
-            }    
-            
+            try {
+                // Call handlers on Request
+                if(isClient) {
+                    //CLIENT-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
+                } else {
+                    //SERVER-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+                }
+            } catch(WebServiceException wse) {
+                remedyActionTaken = true;
+                //no rewrapping
+                throw wse;
+            } catch(RuntimeException re){
+                remedyActionTaken = true;
+                if(isClient){                    
+                    throw new WebServiceException(re);
+                } else {
+                    throw re;
+                }
+            }
             //Update Packet Properties
             context.updatePacket();
             msgContext.fill(packet);
@@ -111,35 +123,49 @@ public class LogicalHandlerPipe extends HandlerPipe {
                 remedyActionTaken = true;
             }
             // the only case where no message is sent
-            if (!isOneWay && !handlerResult) {                
+            if (!isOneWay && !handlerResult) {
                 return packet;
             }
+            
             
             // Call next Pipe.process() on msg
             reply = next.process(packet);
             
+            
             //TODO: For now create again
             msgContext = new MessageContextImpl(reply);
             context =  new LogicalMessageContextImpl(binding,reply,msgContext);
-            //If null, it is oneway
-            if(reply.getMessage()!= null){
-                if(!isClient) {
-                    if(reply.getMessage().isFault()) {
-                        //handleFault() is called on handlers
-                        processor.addHandleFaultProperty(context);
+            try {
+                //If null, it is oneway
+                if(reply.getMessage()!= null){
+                    if(!isClient) {
+                        if(reply.getMessage().isFault()) {
+                            //handleFault() is called on handlers
+                            processor.addHandleFaultProperty(context);
+                        }
+                    }
+                    // Call handlers on Response
+                    if(isClient) {
+                        //CLIENT-SIDE
+                        processor.callHandlersResponse(Direction.INBOUND,context);
+                    } else {
+                        //SERVER-SIDE
+                        processor.callHandlersResponse(Direction.OUTBOUND,context);
                     }
                 }
-                // Call handlers on Response
-                if(isClient) {
-                    //CLIENT-SIDE
-                    processor.callHandlersResponse(Direction.INBOUND,context);
+            } catch(WebServiceException wse) {
+                //no rewrapping
+                throw wse;
+            } catch(RuntimeException re){
+                if(isClient){
+                    throw new WebServiceException(re);
                 } else {
-                    //SERVER-SIDE
-                    processor.callHandlersResponse(Direction.OUTBOUND,context);
-                }            
+                    throw re;
+                }
             }
+            
         } finally {
-            close(msgContext);            
+            close(msgContext);
         }
         //Update Packet Properties
         context.updatePacket();
@@ -187,25 +213,25 @@ public class LogicalHandlerPipe extends HandlerPipe {
     private void closeLogicalHandlers(MessageContext msgContext){
         if(processor == null)
             return;
-        if(remedyActionTaken){
-          //Close only invoked handlers in the chain
-          if(isClient){
-              //CLIENT-SIDE
-              processor.closeHandlers(msgContext,processor.getIndex(),0);
-          } else {
-              //SERVER-SIDE
-              processor.closeHandlers(msgContext,processor.getIndex(),logicalHandlers.size()-1);
-          }
-      } else {
-          //Close all handlers in the chain
-          if(isClient){
-              //CLIENT-SIDE
-              processor.closeHandlers(msgContext,logicalHandlers.size()-1,0);
-          } else {
-              //SERVER-SIDE
-              processor.closeHandlers(msgContext,0,logicalHandlers.size()-1);
-          }          
-      }
+        if(remedyActionTaken) {
+            //Close only invoked handlers in the chain
+            if(isClient){
+                //CLIENT-SIDE
+                processor.closeHandlers(msgContext,processor.getIndex(),0);
+            } else {
+                //SERVER-SIDE
+                processor.closeHandlers(msgContext,processor.getIndex(),logicalHandlers.size()-1);
+            }
+        } else {
+            //Close all handlers in the chain
+            if(isClient){
+                //CLIENT-SIDE
+                processor.closeHandlers(msgContext,logicalHandlers.size()-1,0);
+            } else {
+                //SERVER-SIDE
+                processor.closeHandlers(msgContext,0,logicalHandlers.size()-1);
+            }
+        }
     }
     
     /**

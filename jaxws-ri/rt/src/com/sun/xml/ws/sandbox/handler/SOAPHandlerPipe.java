@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.ws.ProtocolException;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -46,7 +47,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         if(binding.getSOAPVersion() != null) {
             // SOAPHandlerPipe should n't be used for bindings other than SOAP.
             // TODO: throw Exception
-        }        
+        }
         this.binding = binding;
         this.isClient = isClient;
     }
@@ -74,7 +75,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
     }
     
     @Override
-    public Packet process( Packet packet) {
+            public Packet process( Packet packet) {
         // This is done here instead of the constructor, since User can change
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
@@ -87,7 +88,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         context.setRoles(roles);
         
         // Doing this just for Spec compliance
-        // This check is done to cover handler returning false in Oneway request 
+        // This check is done to cover handler returning false in Oneway request
         boolean handleFalse = processor.checkHandlerFalseProperty(context);
         if(handleFalse){
             // Cousin HandlerPipe returned false during Oneway Request processing.
@@ -102,13 +103,25 @@ public class SOAPHandlerPipe extends HandlerPipe {
             boolean handlerResult = false;
             
             // Call handlers on Request
-            
-            if(isClient) {
-                //CLIENT-SIDE
-                handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-            } else {
-                //SERVER-SIDE
-                handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+            try {
+                if(isClient) {
+                    //CLIENT-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
+                } else {
+                    //SERVER-SIDE
+                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+                }
+            } catch(WebServiceException wse) {
+                remedyActionTaken = true;
+                //no rewrapping
+                throw wse;
+            } catch(RuntimeException re){
+                remedyActionTaken = true;
+                if(isClient){
+                    throw new WebServiceException(re);
+                } else {
+                    throw re;
+                }
             }
             
             //Update Packet Properties
@@ -124,27 +137,38 @@ public class SOAPHandlerPipe extends HandlerPipe {
             
             // Call next Pipe.process() on msg
             reply = next.process(packet);
-                        
+            
             //TODO: For now create again
             msgContext = new MessageContextImpl(reply);
             
             context =  new SOAPMessageContextImpl(binding,reply,msgContext);
             context.setRoles(roles);
             //If null, it is oneway
-            if(reply.getMessage()!= null){
-                if(!isClient) {
-                    if(reply.getMessage().isFault()) {
-                        //handleFault() is called on handlers
-                        processor.addHandleFaultProperty(context);
+            try {
+                if(reply.getMessage()!= null){
+                    if(!isClient) {
+                        if(reply.getMessage().isFault()) {
+                            //handleFault() is called on handlers
+                            processor.addHandleFaultProperty(context);
+                        }
+                    }
+                    // Call handlers on Response
+                    if(isClient) {
+                        //CLIENT-SIDE
+                        processor.callHandlersResponse(Direction.INBOUND,context);
+                    } else {
+                        //SERVER-SIDE
+                        processor.callHandlersResponse(Direction.OUTBOUND,context);
                     }
                 }
-                // Call handlers on Response
-                if(isClient) {
-                    //CLIENT-SIDE
-                    processor.callHandlersResponse(Direction.INBOUND,context);
+            } catch(WebServiceException wse) {
+                //no rewrapping
+                throw wse;
+            } catch(RuntimeException re){
+                if(isClient){
+                    throw new WebServiceException(re);
                 } else {
-                    //SERVER-SIDE
-                    processor.callHandlersResponse(Direction.OUTBOUND,context);
+                    throw re;
                 }
             }
             
@@ -156,7 +180,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         msgContext.fill(reply);
         return reply;
     }
-
+    
     /**
      * Close SOAPHandlers first and then LogicalHandlers on Client
      * Close LogicalHandlers first and then SOAPHandlers on Server
@@ -165,13 +189,13 @@ public class SOAPHandlerPipe extends HandlerPipe {
         if(!isClient){
             if(cousinPipe != null){
                 // Close LogicalHandlerPipe
-                cousinPipe.closeCall(msgContext);            
+                cousinPipe.closeCall(msgContext);
             }
             if(processor != null)
                 closeSOAPHandlers(msgContext);
             
         }
-                
+        
     }
     /**
      * This is called from cousinPipe.
@@ -185,25 +209,25 @@ public class SOAPHandlerPipe extends HandlerPipe {
     private void closeSOAPHandlers(MessageContext msgContext){
         if(processor == null)
             return;
-        if(remedyActionTaken){
-          //Close only invoked handlers in the chain
-          if(isClient){
-              //CLIENT-SIDE
-              processor.closeHandlers(msgContext,processor.getIndex(),0);              
-          } else {
-              //SERVER-SIDE
-              processor.closeHandlers(msgContext,processor.getIndex(),soapHandlers.size()-1);
-          }
-      } else {
-          //Close all handlers in the chain
-          if(isClient){
-              //CLIENT-SIDE
-              processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
-          } else {
-              //SERVER-SIDE
-              processor.closeHandlers(msgContext,0,soapHandlers.size()-1);
-          }    
-      }
+        if(remedyActionTaken) {
+            //Close only invoked handlers in the chain
+            if(isClient){
+                //CLIENT-SIDE
+                processor.closeHandlers(msgContext,processor.getIndex(),0);
+            } else {
+                //SERVER-SIDE
+                processor.closeHandlers(msgContext,processor.getIndex(),soapHandlers.size()-1);
+            }
+        } else {
+            //Close all handlers in the chain
+            if(isClient){
+                //CLIENT-SIDE
+                processor.closeHandlers(msgContext,soapHandlers.size()-1,0);
+            } else {
+                //SERVER-SIDE
+                processor.closeHandlers(msgContext,0,soapHandlers.size()-1);
+            }
+        }
     }
     
     /**
@@ -216,7 +240,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
     }
     
     private void setUpProcessor() {
-        // Take a snapshot, User may change chain after invocation, Same chain 
+        // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
         soapHandlers = new ArrayList<SOAPHandler>();
         soapHandlers.addAll(((BindingImpl)binding).getSOAPHandlerChain());
