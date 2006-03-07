@@ -185,7 +185,7 @@ public abstract class Messages {
         // skip until the root element
         if(reader.getEventType()!=XMLStreamConstants.START_ELEMENT)
             XMLStreamReaderUtil.nextElementContent(reader);
-        assert reader.getEventType()== XMLStreamConstants.START_ELEMENT;
+        assert reader.getEventType()== XMLStreamConstants.START_ELEMENT :reader.getEventType();
 
         SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
 
