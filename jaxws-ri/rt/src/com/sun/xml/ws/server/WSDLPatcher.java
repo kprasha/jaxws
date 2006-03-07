@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
+import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -102,18 +103,14 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
             // patch this attribute value.
 
             String relPath = in.getAttributeValue(i);
-            //if (isPatchable(relPath)) {
-                String absPath = getPatchedImportLocation(relPath);
-                if (absPath == null) {
-                    //logger.warning("Couldn't fix the relative location:"+relPath);
-                    // Not patching
-                    super.handleAttribute(i);
-                    return;
-                }
+            String actualPath = getPatchedImportLocation(relPath);
+            if (actualPath == null) {
+                return; // skip this attribute to leave it up to "implicit reference".
+            }
 
-                logger.fine("Fixing the relative location:"+relPath
-                        +" with absolute location:"+absPath);
-            writeAttribute(i, absPath);
+            logger.fine("Fixing the relative location:"+relPath
+                    +" with absolute location:"+actualPath);
+            writeAttribute(i, actualPath);
             return;
         }
 
@@ -172,15 +169,21 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
         super.handleStartElement();
     }
 
-    /*
-     * return patchedlocation  null if we don't how to patch this location 
+    /**
+     * Returns the location to be placed into the generated document.
+     *
+     * @return
+     *      null to leave it to the "implicit reference".
      */
-    private String getPatchedImportLocation(String relPath) {
+    private @Nullable String getPatchedImportLocation(String relPath) {
         try {
+            ServiceDefinitionImpl def = endpoint.getServiceDefinition();
+            assert def !=null; // this code is only used by ServieDefinitionImpl, so this must not be null.
+
             URL ref = new URL(current.getURL(), relPath);
-            SDDocument refDoc = endpoint.getServiceDefinition().getBySystemId(ref);
+            SDDocument refDoc = def.getBySystemId(ref);
             if(refDoc==null)
-                return null;
+                return relPath;  // not something we know. just leave it as is.
 
             return resolver.getRelativeAddressFor(current,refDoc);
         } catch(MalformedURLException mue) {

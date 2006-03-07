@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 /**
  * Resolves relative references among {@link SDDocument}s.
@@ -17,6 +18,20 @@ import com.sun.istack.NotNull;
  * necessarily done in a transport-dependent way), and then
  * serve description documents.
  *
+ *
+ *
+ * <h2>Usage Example 1</h2>
+ * <p>
+ * HTTP servlet transport chose to expose those metadata documents
+ * to HTTP GET requests where each {@link SDDocument} is identified
+ * by a simple query string "?<i>ID</i>". (HTTP servlet transport
+ * assigns such IDs by itself.)
+ *
+ * <p>
+ * In this nameing scheme, when {@link SDDocument} X refers to
+ * {@link SDDocument} Y, it can put a reference as "?<i>IDofY</i>".
+ * By implementing {@link DocumentAddressResolver} it can do so.
+ *
  * @author Kohsuke Kawaguchi
  */
 public interface DocumentAddressResolver {
@@ -30,7 +45,9 @@ public interface DocumentAddressResolver {
      * @return
      *      The reference to be put inside {@code current} to refer to
      *      {@code referenced}. This can be a relative URL as well as
-     *      an absolute.
+     *      an absolute. If null is returned, then the {@link SDDocument}
+     *      will produce a "implicit reference" (for example, &lt;xs:import>
+     *      without the @schemaLocation attribute, etc).
      */
-    @NotNull String getRelativeAddressFor(@NotNull SDDocument current, @NotNull SDDocument referenced);
+    @Nullable String getRelativeAddressFor(@NotNull SDDocument current, @NotNull SDDocument referenced);
 }
