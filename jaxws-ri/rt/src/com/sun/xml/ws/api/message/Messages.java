@@ -1,18 +1,20 @@
 package com.sun.xml.ws.api.message;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
 import com.sun.xml.ws.sandbox.message.impl.DOMMessage;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import com.sun.xml.ws.sandbox.message.impl.source.ProtocolSourceMessage;
-import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
-import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.streaming.XMLStreamReaderException;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -21,10 +23,11 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamConstants;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -187,6 +190,25 @@ public abstract class Messages {
         SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
 
         return StreamSOAPDecoder.create(ver).decode(reader);
+    }
+
+    /**
+     * Creates a {@link Message} from {@link XMLStreamBuffer} that retains the
+     * whole envelope infoset.
+     *
+     * @param xsb
+     *      This buffer must contain the infoset of the whole envelope.
+     */
+    public static @NotNull Message create(@NotNull XMLStreamBuffer xsb) {
+        // TODO: we should be able to let Messae know that it's working off from a buffer,
+        // to make some of the operations more efficient.
+        // meanwhile, adding this as an API so that our users can take advantage of it
+        // when we get around to such an implementation later.
+        try {
+            return create(xsb.processUsingXMLStreamReader());
+        } catch (XMLStreamException e) {
+            throw new XMLStreamReaderException(e);
+        }
     }
 
     /**
