@@ -1,5 +1,7 @@
 package com.sun.xml.ws.api.server;
 
+import com.sun.istack.NotNull;
+
 /**
  * Resolves relative references among {@link SDDocument}s.
  *
@@ -22,13 +24,13 @@ public interface DocumentAddressResolver {
      * Produces a relative reference from one document to another.
      *
      * @param current
-     *      The document that is being generated. Always non-null.
+     *      The document that is being generated.
      * @param referenced
-     *      The document that is referenced. Always non-null.
+     *      The document that is referenced.
      * @return
      *      The reference to be put inside {@code current} to refer to
      *      {@code referenced}. This can be a relative URL as well as
-     *      an absolute. Must not be null.
+     *      an absolute.
      */
-    String getRelativeAddressFor(SDDocument current, SDDocument referenced);
+    @NotNull String getRelativeAddressFor(@NotNull SDDocument current, @NotNull SDDocument referenced);
 }
