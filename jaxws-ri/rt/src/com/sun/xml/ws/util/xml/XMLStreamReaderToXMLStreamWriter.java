@@ -114,7 +114,7 @@ public class XMLStreamReaderToXMLStreamWriter {
             out.writeStartElement(in.getLocalName());
         else
             out.writeStartElement(
-                in.getPrefix(),
+                fixNull(in.getPrefix()),
                 in.getLocalName(),
                 nsUri
             );
