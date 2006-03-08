@@ -121,10 +121,12 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 con.setResponseHeaders(headers);
                 if (packet.getMessage()==null) {
                     con.setStatus(WSConnection.ONEWAY);
+                    con.getOutput();        // Sets Status Code on the connecti
                 } else {
                     encoder.encode(packet, con.getOutput());
                 }
             }
+            con.closeOutput();
         }
 
         public void close() {
