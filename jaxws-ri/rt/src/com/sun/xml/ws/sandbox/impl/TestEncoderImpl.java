@@ -35,6 +35,7 @@ public final class TestEncoderImpl implements Encoder {
             XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
             try {
                 packet.getMessage().writeTo(writer);
+                writer.flush();
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
