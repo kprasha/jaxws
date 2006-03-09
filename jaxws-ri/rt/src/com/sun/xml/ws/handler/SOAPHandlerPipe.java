@@ -6,7 +6,7 @@
  *
  */
 
-package com.sun.xml.ws.sandbox.handler;
+package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
@@ -14,9 +14,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.handler.HandlerPipe;
-import com.sun.xml.ws.handler.MessageContextUtil;
-import com.sun.xml.ws.sandbox.handler.HandlerProcessor.Direction;
+import com.sun.xml.ws.handler.HandlerProcessor.Direction;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

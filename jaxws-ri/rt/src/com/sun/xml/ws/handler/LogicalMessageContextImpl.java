@@ -19,46 +19,69 @@
  */
 package com.sun.xml.ws.handler;
 
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
+import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import javax.xml.transform.Source;
 
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.MessageContext;
 
 /**
  * Implementation of LogicalMessageContext. This class is used at runtime
  * to pass to the handlers for processing logical messages.
  *
- * <p>Class has to defer information to HandlerContext so that properties
- * are shared between this and SOAPMessageContext.
+ * <p>This Class delegates most of the fuctionality to Packet
  *
- * @see MessageContextImpl
+ * @see Packet
  *
  * @author WS Development Team
  */
 public class LogicalMessageContextImpl implements LogicalMessageContext {
-    
-    SOAPHandlerContext handlerCtxt;
-    MessageContext ctxt;
+    private Packet packet;
+    private MessageContext ctxt;
+    private LogicalMessageImpl lm;
+    private WSBinding binding;
 
-    public LogicalMessageContextImpl(SOAPHandlerContext handlerCtxt) {
-        this.handlerCtxt = handlerCtxt;
-        ctxt = handlerCtxt.getMessageContext();
-    }
-
-    public HandlerContext getHandlerContext() {
-        return handlerCtxt;
+    public LogicalMessageContextImpl(WSBinding binding, Packet packet, MessageContext ctxt) {
+        this.binding = binding;
+        this.packet = packet;
+        this.ctxt = ctxt;
     }
 
     public LogicalMessage getMessage() {
-        return new LogicalMessageImpl(handlerCtxt);
+        if(lm == null)
+            lm = new LogicalMessageImpl(packet);
+        return lm;
     }
 
+    protected void updatePacket() {
+        //If LogicalMessage is not acccessed, its not modified.
+        if(lm != null) {
+            //Check if LogicalMessageImpl has changed, if so construct new one
+            //TODO: Attachments are not used
+            // Packet are handled through MessageContext
+            if(lm.isPayloadModifed()){
+                Message msg = packet.getMessage();
+                HeaderList headers = msg.getHeaders();
+                AttachmentSet attchments = msg.getAttachments();
+                Source modifiedPayload = lm.getModifiedPayload();
+                if(modifiedPayload == null){
+                    packet.setMessage(new EmptyMessageImpl(headers,binding.getSOAPVersion()));
+                } else {
+                    packet.setMessage(new PayloadSourceMessage(headers,modifiedPayload ,binding.getSOAPVersion()));
+                }
+            }
+        }
+    }
     public void setScope(String name, Scope scope) {
         ctxt.setScope(name, scope);
     }
@@ -68,7 +91,7 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
     }
 
     /* java.util.Map methods below here */
-    
+
     public void clear() {
         ctxt.clear();
     }

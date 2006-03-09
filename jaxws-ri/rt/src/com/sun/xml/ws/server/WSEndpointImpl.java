@@ -15,7 +15,7 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.sandbox.handler.MessageContextImpl;
+import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.annotation.PreDestroy;

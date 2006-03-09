@@ -23,7 +23,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.util.ByteArrayDataSource;
 
-import static com.sun.xml.ws.handler.HandlerChainCaller.IGNORE_FAULT_PROPERTY;
+import static com.sun.xml.ws.handler.HandlerProcessor.IGNORE_FAULT_PROPERTY;
 
 import java.util.List;
 import java.util.Map;

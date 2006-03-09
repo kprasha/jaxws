@@ -5,7 +5,7 @@
  * 
  */
 
-package com.sun.xml.ws.sandbox.handler;
+package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import java.util.List;

@@ -20,7 +20,6 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.ws.handler.HandlerContext;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
 //import com.sun.xml.ws.api.model.SEIModel;
@@ -46,14 +45,5 @@ public class RuntimeContext {
         return (model != null)?model.getBridgeContext():null;
     }
 
-    public HandlerContext getHandlerContext() {
-        return handlerContext;
-    }
-
-    public void setHandlerContext(HandlerContext handlerContext) {
-        this.handlerContext = handlerContext;
-    }
-
-    private SOAPSEIModel model;
-    private HandlerContext handlerContext;
+    private SOAPSEIModel model;    
 }

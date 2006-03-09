@@ -17,17 +17,13 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.sandbox.handler;
+package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
-import com.sun.xml.ws.handler.HandlerContext;
-import com.sun.xml.ws.handler.HandlerException;
-import com.sun.xml.ws.handler.XMLHandlerContext;
-import com.sun.xml.ws.handler.MessageContextUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;

@@ -18,30 +18,26 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.handler;
-import com.sun.xml.ws.pept.ept.MessageInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.xml.sax.InputSource;
 
 /**
  * Implementation of SOAPMessageContext. This class is used at runtime
@@ -53,83 +49,62 @@ import org.xml.sax.InputSource;
  */
 public class SOAPMessageContextImpl implements SOAPMessageContext {
 
-    private SOAPHandlerContext handlerCtxt;
+    private Packet packet;
     private MessageContext ctxt;
     private Set<String> roles;
-    private static Map<String, Class> allowedTypes = null;
-    private boolean failure;
+    protected SOAPMessage soapMsg = null;
+    private WSBinding binding;
 
-    public SOAPMessageContextImpl(SOAPHandlerContext handlerCtxt) {
-        this.handlerCtxt = handlerCtxt;
-        this.ctxt = handlerCtxt.getMessageContext();
-        if (allowedTypes == null) {
-            allowedTypes = new HashMap<String, Class>();
-            allowedTypes.put(MessageContext.INBOUND_MESSAGE_ATTACHMENTS, Map.class);
-            allowedTypes.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS, Map.class);
-            allowedTypes.put(MessageContext.WSDL_DESCRIPTION, InputSource.class);
-            allowedTypes.put(MessageContext.WSDL_SERVICE, QName.class);
-            allowedTypes.put(MessageContext.WSDL_PORT, QName.class);
-            allowedTypes.put(MessageContext.WSDL_INTERFACE, QName.class);
-            allowedTypes.put(MessageContext.WSDL_OPERATION, QName.class);
-            allowedTypes.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, Boolean.class);
-        }
+    public SOAPMessageContextImpl(WSBinding binding, Packet packet, MessageContext ctxt) {
+        this.binding = binding;
+        this.packet = packet;
+        this.ctxt = ctxt;
+
     }
 
     public SOAPMessage getMessage() {
-        // commented out as a part of server side rearch
-        throw new UnsupportedOperationException();
-        //SOAPMessage soap = handlerCtxt.getSOAPMessage();
-        //InternalMessage intr = handlerCtxt.getInternalMessage();
-        //if (intr == null && soap != null) {
-        //    // Not much to do
-        //} else if (intr != null && soap != null) {
-        //    // Overlay BodyBlock of InternalMessage on top of existing SOAPMessage
-        //    MessageInfo messageInfo = handlerCtxt.getMessageInfo();
-        //    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-        //    soap = eptf.getSOAPEncoder().toSOAPMessage(intr, soap);
-        //    setMessage(soap);        // It also sets InernalMessage to null
-        //} else if (intr != null && soap == null) {
-        //    // Convert InternalMessage to a SOAPMessage
-        //    MessageInfo messageInfo = handlerCtxt.getMessageInfo();
-        //    SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-        //    soap = eptf.getSOAPEncoder().toSOAPMessage(intr, messageInfo);
-        //    setMessage(soap);        // It also sets InernalMessage to null
-        //} else {
-        //    throw new WebServiceException("Don't have SOAPMessage");
-        //}
-        //return soap;
-    }
-
-    public void setMessage(SOAPMessage soapMessage) {
-        handlerCtxt.setSOAPMessage(soapMessage);
-        // current InternalMessage is not valid anymore. So reset it.
-        handlerCtxt.setInternalMessage(null);
-    }
-
-    
-    public Object[] getHeaders(QName header, JAXBContext jaxbContext, boolean allRoles) {
-        try {
-            List beanList = new ArrayList();
-            SOAPMessage msg = getMessage();
-            SOAPHeader sHeader = msg.getSOAPHeader();
-            if (sHeader == null) {
-                return new Object[0];
+        if(soapMsg == null) {
+            try {
+                soapMsg = packet.getMessage().readAsSOAPMessage();
+            } catch (SOAPException e) {
+                throw new WebServiceException(e);
             }
-            Iterator i = sHeader.getChildElements(header);
-            while(i.hasNext()) {
-                SOAPHeaderElement child = (SOAPHeaderElement)i.next();
-                if(allRoles) {                   
-                    //If allRoles is true, add all headers
-                    Source source = new DOMSource(child);
-                    beanList.add(JAXBTypeSerializer.deserialize(source, jaxbContext));
-                } else { 
-                    //If allRoles is false, add only headers with matching roles and headers with no role
-                    if( (child.getActor() == null)|| 
-                        (getRoles().contains(child.getActor()))  ) {                   
-                        Source source = new DOMSource(child);
-                        beanList.add(JAXBTypeSerializer.deserialize(source, jaxbContext));
-                    }    
-                }   
+        }
+        return soapMsg;
+    }
+
+    public void setMessage(SOAPMessage soapMsg) {
+        try {
+            this.soapMsg = soapMsg;
+        } catch(Exception e) {
+            throw new WebServiceException(e);
+        }
+    }
+    protected void updatePacket() {
+        //Check if SOAPMessage has changed, if so construct new one,
+        // Packet are handled through MessageContext
+        if(soapMsg != null) {
+            packet.setMessage(new SAAJMessage(soapMsg));
+        }
+    }
+
+    public Object[] getHeaders(QName header, JAXBContext jaxbContext, boolean allRoles) {
+        List<Object> beanList = new ArrayList<Object>();
+        try {
+            Iterator<Header> itr = packet.getMessage().getHeaders().getHeaders(header.getNamespaceURI(),header.getLocalPart());
+            if(allRoles) {
+                while(itr.hasNext()) {
+                    beanList.add(itr.next().readAsJAXB(jaxbContext.createUnmarshaller()));
+                }
+            } else {
+                while(itr.hasNext()) {
+                    Header soapHeader = itr.next();
+                    //Check if the role is one of the roles on this Binding
+                    // Also Add if there is no role or actor
+                    if((soapHeader.getRole()== null) || getRoles().contains(soapHeader.getRole())) {
+                        beanList.add(soapHeader.readAsJAXB(jaxbContext.createUnmarshaller()));
+                    }
+                }
             }
             return beanList.toArray();
         } catch(Exception e) {
@@ -145,17 +120,6 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         this.roles = roles;
     }
 
-    private boolean validateProperty(String name, Object value) {
-        if (allowedTypes.containsKey(name)) {
-            Class clazz = allowedTypes.get(name);
-            if (!(clazz.isInstance(value)))
-                throw new HandlerException("handler.messageContext.invalid.class",
-                        new Object[] { value, name });
-        }
-
-        return true;
-    }
-
     public void setScope(String name, Scope scope) {
         ctxt.setScope(name, scope);
     }
@@ -165,7 +129,7 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     }
 
     /* java.util.Map methods below here */
-    
+
     public void clear() {
         ctxt.clear();
     }
@@ -194,14 +158,8 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
         return ctxt.keySet();
     }
 
-    public Object put(String name, Object value) {
-        try {
-            return ctxt.put(name, value);
-        } catch (IllegalArgumentException e) {
-            // Packet throws this exception if the type doesn't match
-            throw new HandlerException("handler.messageContext.invalid.class",
-                    new Object[] { value, name });
-        }
+    public Object put(String str, Object obj) {
+        return ctxt.put(str, obj);
     }
 
     public void putAll(Map<? extends String, ? extends Object> map) {
@@ -219,5 +177,5 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
     public Collection<Object> values() {
         return ctxt.values();
     }
-    
+
 }

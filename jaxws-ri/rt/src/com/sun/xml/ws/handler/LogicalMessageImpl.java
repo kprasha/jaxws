@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the "License").  You may not use this file except
  * in compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://jwsdp.dev.java.net/CDDLv1.0.html
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * HEADER in each file and include the License file at
  * https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
@@ -17,164 +17,159 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
+
 package com.sun.xml.ws.handler;
 
-import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import com.sun.xml.ws.encoding.soap.internal.BodyBlock;
-import com.sun.xml.ws.encoding.soap.internal.InternalMessage;
-
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
+import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.ws.encoding.soap.SerializationException;
+import com.sun.xml.ws.util.ASCIIUtility;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
- * Implementation of LogicalMessage. This class implements the methods
+ * Implementation of {@link LogicalMessage}. This class implements the methods
  * used by LogicalHandlers to get/set the request or response either
  * as a JAXB object or as javax.xml.transform.Source.
  *
- * <p>The {@link HandlerContext} that is passed into the constructor
+ * <p>The {@link Message} that is passed into the constructor
  * is used to retrieve the payload of the request or response.
  *
- * @see HandlerContext
+ * @see Message
  * @see LogicalMessageContextImpl
  *
  * @author WS Development Team
  */
+/**
+* TODO: Take care of variations in behavior wrt to vaious sources.
+* DOMSource : changes made should be reflected, StreamSource or SAXSource, Give copy
+*/
 public class LogicalMessageImpl implements LogicalMessage {
-
-    private SOAPHandlerContext ctxt;
-
-    public LogicalMessageImpl(SOAPHandlerContext ctxt) {
-        this.ctxt = ctxt;
+    private Packet packet;
+    // This holds the (modified)payload set by User
+    private Source payloadSrc = null;
+    // Flag to check if the PayloadSrc is accessed/modified
+    private boolean payloadModifed = false;
+        
+    /** Creates a new instance of LogicalMessageImplRearch */
+    public LogicalMessageImpl(Packet packet) {
+        // don't create extract payload until Users wants it.
+        this.packet = packet;
     }
-
-    /*
-     * If the payload is DOMSource, return it
-     * If the payload is Source/SOAPFaultInfo/JAXBBridgeInfo/JAXBBeanInfo,
-     * convert to DOMSource and return it. DOMSource is also stored in BodyBlock
-     */
-    public Source getPayload() {
-        throw new UnsupportedOperationException();
-        //try {
-        //    InternalMessage internalMessage = ctxt.getInternalMessage();
-        //    if (internalMessage == null) {
-        //        SOAPMessage soapMessage = ctxt.getSOAPMessage();
-        //        if (soapMessage == null) {
-        //            return null;
-        //        } else {
-        //            Node node = soapMessage.getSOAPBody().getFirstChild();
-        //            if (node != null) {
-        //                setSource(new DOMSource(node));
-        //            } else {
-        //                return null;
-        //            }
-        //        }
-        //    }
-        //    internalMessage = ctxt.getInternalMessage();
-        //    BodyBlock bodyBlock = internalMessage.getBody();
-        //    if (bodyBlock == null) {
-        //        return null;
-        //    } else {
-        //        Object obj = bodyBlock.getValue();
-        //        if (obj instanceof DOMSource) {
-        //            return (Source)obj;
-        //        } else if (obj instanceof Source) {
-        //            Source source = (Source)obj;
-        //            Transformer transformer = XmlUtil.newTransformer();
-        //            DOMResult domResult = new DOMResult();
-        //            transformer.transform(source, domResult);
-        //            DOMSource domSource = new DOMSource(domResult.getNode());
-        //            bodyBlock.setSource(domSource);
-        //            return domSource;
-        //        } else if (obj instanceof JAXBBridgeInfo) {
-        //            MessageInfo messageInfo = ctxt.getMessageInfo();
-        //            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-        //            SOAPEncoder encoder = eptf.getSOAPEncoder();
-        //            DOMSource domSource = encoder.toDOMSource((JAXBBridgeInfo)obj, messageInfo);
-        //            bodyBlock.setSource(domSource);
-        //            return domSource;
-        //        } else if (obj instanceof JAXBBeanInfo) {
-        //            DOMSource domSource = ((JAXBBeanInfo)obj).toDOMSource();
-        //            bodyBlock.setSource(domSource);
-        //            return domSource;
-        //        } else if (obj instanceof RpcLitPayload) {
-        //            MessageInfo messageInfo = ctxt.getMessageInfo();
-        //            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-        //            SOAPEncoder encoder = eptf.getSOAPEncoder();
-        //            DOMSource domSource = encoder.toDOMSource((RpcLitPayload)obj, messageInfo);
-        //            bodyBlock.setSource(domSource);
-        //            return domSource;
-        //        } else if (obj instanceof SOAPFaultInfo) {
-        //            MessageInfo messageInfo = ctxt.getMessageInfo();
-        //            SOAPEPTFactory eptf = (SOAPEPTFactory)messageInfo.getEPTFactory();
-        //            SOAPEncoder encoder = eptf.getSOAPEncoder();
-        //            DOMSource domSource = encoder.toDOMSource((SOAPFaultInfo)obj, messageInfo);
-        //            bodyBlock.setSource(domSource);
-        //            return domSource;
-        //        } else {
-        //            throw new WebServiceException("Unknown type "+obj.getClass()+" in BodyBlock");
-        //        }
-        //    }
-        //} catch(TransformerException te) {
-        //    throw new WebServiceException(te);
-        //} catch(SOAPException se) {
-        //    throw new WebServiceException(se);
-        //}
+    
+    protected boolean isPayloadModifed(){
+        return payloadModifed;
     }
-
-    /*
-     * Sets the Source as payload in the BodyBlock of InternalMessage.
-     */
-    public void setPayload(Source source) {
-        setSource(source);
+    protected Source getModifiedPayload(){
+        if(!payloadModifed)
+            throw new RuntimeException("Payload not modified.");
+        return payloadSrc;
+        
     }
-
-    /*
-     * Converts to DOMSource and keeps it in BodyBlock. Then it unmarshalls this
-     * DOMSource to a jaxb object. Any changes done in jaxb object are lost if
-     * the object isn't set again.
-     */
-    public Object getPayload(JAXBContext jaxbContext) {
-        return JAXBTypeSerializer.deserialize(getPayload(), jaxbContext);
-    }
-
-    /*
-     * The object is marshalled into DOMSource and stored in BodyBlock. If an
-     * error occurs when using the supplied JAXBContext to marshall the
-     * payload, it throws a JAXWSException.
-     */
-    public void setPayload(Object bean, JAXBContext jaxbContext) {
-        Source source;
-        try {
-            source = JAXBTypeSerializer.serialize(bean,jaxbContext);
-        } catch(Exception e) {
-            throw new WebServiceException(e);
+    public Source getPayload() {                
+        if(!payloadModifed) {
+            payloadSrc = packet.getMessage().readPayloadAsSource();
+            payloadModifed = true;
         }
-        setSource(source);              // set Source in BodyBlock
-    }
-
-    public HandlerContext getHandlerContext() {
-        return ctxt;
-    }
-
-    /*
-     * It stores Source in the BodyBlock. If necessary, it creates
-     * InternalMessage, and BodyBlock
-     */
-    private void setSource(Source source) {
-        InternalMessage internalMessage = ctxt.getInternalMessage();
-        if (internalMessage == null) {
-            internalMessage = new InternalMessage();
-            ctxt.setInternalMessage(internalMessage);
-        }
-        BodyBlock bodyBlock = internalMessage.getBody();
-        if (bodyBlock == null) {
-            bodyBlock = new BodyBlock(source);
-            internalMessage.setBody(bodyBlock);
+        if(payloadSrc instanceof DOMSource){
+            return payloadSrc;
         } else {
-            bodyBlock.setSource(source);
+            try {
+            Transformer transformer = XmlUtil.newTransformer();
+            DOMResult domResult = new DOMResult();
+            transformer.transform(payloadSrc, domResult);
+            payloadSrc = new DOMSource(domResult.getNode());
+            return payloadSrc;
+            } catch(TransformerException te) {
+                throw new WebServiceException(te);
+            }
+        }
+        /*
+        Source copySrc;
+        if(payloadSrc instanceof DOMSource){
+            copySrc = payloadSrc;
+        } else {
+            copySrc = copy(payloadSrc);
+        }
+        return copySrc;
+         */
+    }
+    
+    public void setPayload(Source payload) {
+        payloadModifed = true;
+        payloadSrc = payload;
+    }
+    
+    public Object getPayload(JAXBContext context) {
+        try {
+            Source src = getPayload(); 
+            return JAXBTypeSerializer.deserialize(src, context);   
+        } catch (DeserializationException e){
+            // As per Spec, try to give the original JAXBException
+            throw new WebServiceException(e.getCause());
         }
     }
-
+    
+    public void setPayload(Object payload, JAXBContext context) {
+        payloadModifed = true;
+        try {
+            payloadSrc = JAXBTypeSerializer.serialize(payload, context);            
+        } catch(SerializationException e) {
+            // As per Spec, try to give the original JAXBException
+            throw new WebServiceException(e.getCause());
+        }        
+    }
+    /*
+    private Source copy(Source src) {
+        if(src instanceof StreamSource){
+            StreamSource origSrc = (StreamSource)src;
+            byte[] payloadbytes;
+            try {
+                payloadbytes = ASCIIUtility.getBytes(origSrc.getInputStream());
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            }
+            ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
+            origSrc.setInputStream(new ByteArrayInputStream(payloadbytes));
+            StreamSource copySource = new StreamSource(bis, src.getSystemId());
+            return copySource;
+        } else if(src instanceof SAXSource){
+            SAXSource saxSrc = (SAXSource)src;
+            try {
+                XMLStreamBuffer xsb = new XMLStreamBuffer();
+                XMLReader reader = saxSrc.getXMLReader();
+                if(reader == null)
+                    reader = new SAXBufferProcessor();
+                saxSrc.setXMLReader(reader);
+                reader.setContentHandler(new SAXBufferCreator(xsb));
+                reader.parse(saxSrc.getInputSource());
+                src = new XMLStreamBufferSource(xsb);
+                return new XMLStreamBufferSource(xsb);
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            } catch (SAXException e) {
+                throw new WebServiceException(e);
+            }
+        }
+        throw new WebServiceException("Copy is not needed for this Source");
+    }
+     */
 }
