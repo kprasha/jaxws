@@ -49,6 +49,15 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     }
     
     public Packet process( Packet packet) {
+        // This check is done to cover handler returning false in Oneway request
+        Boolean handleFalse = (Boolean) packet.otherProperties.get(HandlerProcessor.HANDLE_FALSE_PROPERTY);
+        if((handleFalse == null)? false:handleFalse){
+            // Cousin HandlerPipe returned false during Oneway Request processing.
+            // Dont call handlers and dispatch the message.
+            remedyActionTaken = true;
+            return next.process(packet);
+        }
+        
         // This is done here instead of the constructor, since User can change
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
@@ -56,92 +65,42 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         if(isHandlerChainEmpty()) {
             return next.process(packet);
         }
+        
         MessageUpdatableContext context = getContext(packet);
-        
-        // Doing this just for Spec compliance
-        // This check is done to cover handler returning false in Oneway request
-        boolean handleFalse = processor.checkHandlerFalseProperty(context);
-        if(handleFalse){
-            // Cousin HandlerPipe returned false during Oneway Request processing.
-            // Dont call handlers and dispatch the message.
-            remedyActionTaken = true;
-            return next.process(packet);
-        }
-        
+        boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
         Packet reply;
         try {
-            boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
-            boolean handlerResult = false;
-            
             // Call handlers on Request
-            try {
-                if(isClient) {
-                    //CLIENT-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-                } else {
-                    //SERVER-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
-                }
-            } catch(WebServiceException wse) {
-                remedyActionTaken = true;
-                //no rewrapping
-                throw wse;
-            } catch(RuntimeException re){
-                remedyActionTaken = true;
-                if(isClient){
-                    throw new WebServiceException(re);
-                } else {
-                    throw re;
-                }
-            }
-            
+            boolean handlerResult = callHandlersOnRequest(context, isOneWay);
             //Update Packet with user modifications
-            context.updatePacket();
+            context.updatePacket();            
             
-            
-            if(!handlerResult) {
-                remedyActionTaken = true;
-            }
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
                 return packet;
-            }
-            
+            }            
             // Call next Pipe.process() on msg
             reply = next.process(packet);
             
-            //TODO: For now create again
+            //RELOOK: For now create again
             context =  getContext(reply);
             
+            //TODO: Server-side oneway is not correct
+            //TODO: HandleFault incorrect
+            
             //If null, it is oneway
-            try {
-                if(reply.getMessage()!= null){
-                    if(!isClient) {
-                        if(reply.getMessage().isFault()) {
-                            //handleFault() is called on handlers
-                            processor.addHandleFaultProperty(context);
-                        }
+            if(reply.getMessage()!= null){
+                if(!isClient) {
+                    if(reply.getMessage().isFault()) {
+                        //handleFault() is called on handlers
+                        processor.addHandleFaultProperty(context);
                     }
-                    // Call handlers on Response
-                    if(isClient) {
-                        //CLIENT-SIDE
-                        processor.callHandlersResponse(Direction.INBOUND,context);
-                    } else {
-                        //SERVER-SIDE
-                        processor.callHandlersResponse(Direction.OUTBOUND,context);
-                    }
-                }
-            } catch(WebServiceException wse) {
-                //no rewrapping
-                throw wse;
-            } catch(RuntimeException re){
-                if(isClient){
-                    throw new WebServiceException(re);
-                } else {
-                    throw re;
                 }
             }
-            
+            if(reply.getMessage()!= null){
+                // Call handlers on Response
+                callHandlersOnResponse(context);
+            }
         } finally {
             close(context.getMessageContext());
         }
@@ -149,6 +108,56 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         context.updatePacket();
         
         return reply;
+    }
+    
+    private boolean callHandlersOnRequest(MessageUpdatableContext context, boolean isOneWay){
+        
+        boolean handlerResult = false;
+        try {
+            if(isClient) {
+                //CLIENT-SIDE
+                handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
+            } else {
+                //SERVER-SIDE
+                handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
+            }
+        } catch(WebServiceException wse) {
+            remedyActionTaken = true;
+            //no rewrapping
+            throw wse;
+        } catch(RuntimeException re){
+            remedyActionTaken = true;
+            if(isClient){
+                throw new WebServiceException(re);
+            } else {
+                throw re;
+            }
+        }
+        if(!handlerResult) {
+                remedyActionTaken = true;
+        }
+        return handlerResult;
+    }
+    
+    private void callHandlersOnResponse(MessageUpdatableContext context){
+        try {
+            if(isClient) {
+                //CLIENT-SIDE
+                processor.callHandlersResponse(Direction.INBOUND,context);
+            } else {
+                //SERVER-SIDE
+                processor.callHandlersResponse(Direction.OUTBOUND,context);
+            }            
+        } catch(WebServiceException wse) {
+            //no rewrapping
+            throw wse;
+        } catch(RuntimeException re){
+            if(isClient){
+                throw new WebServiceException(re);
+            } else {
+                throw re;
+            }
+        }
     }
     
     abstract void setUpProcessor();
@@ -170,13 +179,13 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     
     protected HandlerPipeExchange exchange;
     /**
-     * This class is used primarily to exchange information or status between 
+     * This class is used primarily to exchange information or status between
      * LogicalHandlerPipe and SOAPHandlerPipe
      */
     
     public class HandlerPipeExchange {
-     //TODO: get the requirements from different scenarios
-     String dummy;    
+        //TODO: get the requirements from different scenarios
+        String dummy;
     }
     
 }
