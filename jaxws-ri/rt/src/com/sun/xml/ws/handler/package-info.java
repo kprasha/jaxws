@@ -2,7 +2,7 @@
  * <h1>JAX-WS 2.0 Handler Runtime</h1>
  * <p>This document describes the architecture of the handler code
  * in the JAX-WS 2.0 runtime.
- *
+ * TODO: Need to modify with re-arch
  * <p>Handlers may be specified by the deployment descriptor on the
  * server side, or by a wsdl customization or Java annotation. In the
  * case of a wsdl customization, wsimport will create the Java interface

@@ -45,16 +45,13 @@ import javax.xml.ws.handler.MessageContext;
  *
  * @author WS Development Team
  */
-public class LogicalMessageContextImpl implements LogicalMessageContext {
-    private Packet packet;
-    private MessageContext ctxt;
+public class LogicalMessageContextImpl extends MessageUpdatableContext implements LogicalMessageContext {
     private LogicalMessageImpl lm;
     private WSBinding binding;
 
-    public LogicalMessageContextImpl(WSBinding binding, Packet packet, MessageContext ctxt) {
-        this.binding = binding;
-        this.packet = packet;
-        this.ctxt = ctxt;
+    public LogicalMessageContextImpl(WSBinding binding, Packet packet) {
+        super(packet);
+        this.binding = binding;  
     }
 
     public LogicalMessage getMessage() {
@@ -63,7 +60,7 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
         return lm;
     }
 
-    protected void updatePacket() {
+    protected void updateMessage() {
         //If LogicalMessage is not acccessed, its not modified.
         if(lm != null) {
             //Check if LogicalMessageImpl has changed, if so construct new one
@@ -81,63 +78,6 @@ public class LogicalMessageContextImpl implements LogicalMessageContext {
                 }
             }
         }
-    }
-    public void setScope(String name, Scope scope) {
-        ctxt.setScope(name, scope);
-    }
-
-    public Scope getScope(String name) {
-        return ctxt.getScope(name);
-    }
-
-    /* java.util.Map methods below here */
-
-    public void clear() {
-        ctxt.clear();
-    }
-
-    public boolean containsKey(Object obj) {
-        return ctxt.containsKey(obj);
-    }
-
-    public boolean containsValue(Object obj) {
-        return ctxt.containsValue(obj);
-    }
-
-    public Set<Entry<String, Object>> entrySet() {
-        return ctxt.entrySet();
-    }
-
-    public Object get(Object obj) {
-        return ctxt.get(obj);
-    }
-
-    public boolean isEmpty() {
-        return ctxt.isEmpty();
-    }
-
-    public Set<String> keySet() {
-        return ctxt.keySet();
-    }
-
-    public Object put(String str, Object obj) {
-        return ctxt.put(str, obj);
-    }
-
-    public void putAll(Map<? extends String, ? extends Object> map) {
-        ctxt.putAll(map);
-    }
-
-    public Object remove(Object obj) {
-        return ctxt.remove(obj);
-    }
-
-    public int size() {
-        return ctxt.size();
-    }
-
-    public Collection<Object> values() {
-        return ctxt.values();
-    }
-
+    }    
+    
 }

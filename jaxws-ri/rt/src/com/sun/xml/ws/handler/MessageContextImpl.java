@@ -52,6 +52,9 @@ public class MessageContextImpl implements MessageContext {
         
     }
     
+    protected void updatePacket() {
+        throw new UnsupportedOperationException("wrong call");
+    }
     public void setScope(String name, Scope scope) {
         //TODO: check in intrenalMap
         if(scope == MessageContext.Scope.APPLICATION) {
@@ -116,7 +119,7 @@ public class MessageContextImpl implements MessageContext {
     /**
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
-    public void fill(Packet packet) {
+    protected void fill(Packet packet) {
         for (Entry<String,Object> entry : internalMap.entrySet()) {
                 String key = entry.getKey();
                 if(packet.supports(key)) {

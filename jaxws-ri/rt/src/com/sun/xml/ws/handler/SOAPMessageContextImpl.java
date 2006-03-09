@@ -47,19 +47,15 @@ import java.util.Set;
  *
  * @author WS Development Team
  */
-public class SOAPMessageContextImpl implements SOAPMessageContext {
+public class SOAPMessageContextImpl extends MessageUpdatableContext implements SOAPMessageContext {
 
-    private Packet packet;
-    private MessageContext ctxt;
     private Set<String> roles;
     protected SOAPMessage soapMsg = null;
     private WSBinding binding;
 
-    public SOAPMessageContextImpl(WSBinding binding, Packet packet, MessageContext ctxt) {
-        this.binding = binding;
-        this.packet = packet;
-        this.ctxt = ctxt;
-
+    public SOAPMessageContextImpl(WSBinding binding, Packet packet) {
+        super(packet);
+        this.binding = binding;        
     }
 
     public SOAPMessage getMessage() {
@@ -80,7 +76,8 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
             throw new WebServiceException(e);
         }
     }
-    protected void updatePacket() {
+    
+    protected void updateMessage() {
         //Check if SOAPMessage has changed, if so construct new one,
         // Packet are handled through MessageContext
         if(soapMsg != null) {
@@ -118,64 +115,5 @@ public class SOAPMessageContextImpl implements SOAPMessageContext {
 
     void setRoles(Set<String> roles) {
         this.roles = roles;
-    }
-
-    public void setScope(String name, Scope scope) {
-        ctxt.setScope(name, scope);
-    }
-
-    public Scope getScope(String name) {
-        return ctxt.getScope(name);
-    }
-
-    /* java.util.Map methods below here */
-
-    public void clear() {
-        ctxt.clear();
-    }
-
-    public boolean containsKey(Object obj) {
-        return ctxt.containsKey(obj);
-    }
-
-    public boolean containsValue(Object obj) {
-        return ctxt.containsValue(obj);
-    }
-
-    public Set<Entry<String, Object>> entrySet() {
-        return ctxt.entrySet();
-    }
-
-    public Object get(Object obj) {
-        return ctxt.get(obj);
-    }
-
-    public boolean isEmpty() {
-        return ctxt.isEmpty();
-    }
-
-    public Set<String> keySet() {
-        return ctxt.keySet();
-    }
-
-    public Object put(String str, Object obj) {
-        return ctxt.put(str, obj);
-    }
-
-    public void putAll(Map<? extends String, ? extends Object> map) {
-        ctxt.putAll(map);
-    }
-
-    public Object remove(Object obj) {
-        return ctxt.remove(obj);
-    }
-
-    public int size() {
-        return ctxt.size();
-    }
-
-    public Collection<Object> values() {
-        return ctxt.values();
-    }
-
+    }    
 }

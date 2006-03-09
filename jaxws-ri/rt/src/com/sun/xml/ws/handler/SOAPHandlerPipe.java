@@ -33,21 +33,17 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 public class SOAPHandlerPipe extends HandlerPipe {
     
     private WSBinding binding;
-    private SOAPHandlerProcessor processor;
     private List<SOAPHandler> soapHandlers;
-    protected Set<String> roles;
-    private boolean remedyActionTaken = false;
-    private final boolean isClient;
+    protected Set<String> roles;    
     
     /** Creates a new instance of SOAPHandlerPipe */
     public SOAPHandlerPipe(WSBinding binding, Pipe next, boolean isClient) {
-        super(next);
+        super(next, isClient);
         if(binding.getSOAPVersion() != null) {
             // SOAPHandlerPipe should n't be used for bindings other than SOAP.
             // TODO: throw Exception
         }
-        this.binding = binding;
-        this.isClient = isClient;
+        this.binding = binding;        
     }
     
     // Handle to LogicalHandlerPipe means its used on SERVER-SIDE
@@ -58,9 +54,8 @@ public class SOAPHandlerPipe extends HandlerPipe {
      * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
      */
     public SOAPHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe, boolean isClient) {
-        super(next,cousinPipe);
+        super(next,cousinPipe,isClient);
         this.binding = binding;
-        this.isClient = isClient;
     }
     
     /**
@@ -69,114 +64,10 @@ public class SOAPHandlerPipe extends HandlerPipe {
     protected SOAPHandlerPipe(SOAPHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
         this.binding = that.binding;
-        this.isClient = that.isClient;
     }
     
-    @Override
-            public Packet process( Packet packet) {
-        // This is done here instead of the constructor, since User can change
-        // the roles and handlerchain after a stub/proxy is created.
-        setUpProcessor();
-        
-        if(soapHandlers.isEmpty()) {
-            return next.process(packet);
-        }
-        MessageContextImpl msgContext = new MessageContextImpl(packet);
-        SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet,msgContext);
-        context.setRoles(roles);
-        
-        // Doing this just for Spec compliance
-        // This check is done to cover handler returning false in Oneway request
-        boolean handleFalse = processor.checkHandlerFalseProperty(context);
-        if(handleFalse){
-            // Cousin HandlerPipe returned false during Oneway Request processing.
-            // Dont call handlers and dispatch the message.
-            remedyActionTaken = true;
-            return next.process(packet);
-        }
-        
-        Packet reply;
-        try {
-            boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
-            boolean handlerResult = false;
-            
-            // Call handlers on Request
-            try {
-                if(isClient) {
-                    //CLIENT-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-                } else {
-                    //SERVER-SIDE
-                    handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
-                }
-            } catch(WebServiceException wse) {
-                remedyActionTaken = true;
-                //no rewrapping
-                throw wse;
-            } catch(RuntimeException re){
-                remedyActionTaken = true;
-                if(isClient){
-                    throw new WebServiceException(re);
-                } else {
-                    throw re;
-                }
-            }
-            
-            //Update Packet Properties
-            context.updatePacket();
-            msgContext.fill(packet);
-            if(!handlerResult) {
-                remedyActionTaken = true;
-            }
-            // the only case where no message is sent
-            if (!isOneWay && !handlerResult) {
-                return packet;
-            }
-            
-            // Call next Pipe.process() on msg
-            reply = next.process(packet);
-            
-            //TODO: For now create again
-            msgContext = new MessageContextImpl(reply);
-            
-            context =  new SOAPMessageContextImpl(binding,reply,msgContext);
-            context.setRoles(roles);
-            //If null, it is oneway
-            try {
-                if(reply.getMessage()!= null){
-                    if(!isClient) {
-                        if(reply.getMessage().isFault()) {
-                            //handleFault() is called on handlers
-                            processor.addHandleFaultProperty(context);
-                        }
-                    }
-                    // Call handlers on Response
-                    if(isClient) {
-                        //CLIENT-SIDE
-                        processor.callHandlersResponse(Direction.INBOUND,context);
-                    } else {
-                        //SERVER-SIDE
-                        processor.callHandlersResponse(Direction.OUTBOUND,context);
-                    }
-                }
-            } catch(WebServiceException wse) {
-                //no rewrapping
-                throw wse;
-            } catch(RuntimeException re){
-                if(isClient){
-                    throw new WebServiceException(re);
-                } else {
-                    throw re;
-                }
-            }
-            
-        } finally {
-            close(msgContext);
-        }
-        //Update Packet Properties
-        context.updatePacket();
-        msgContext.fill(reply);
-        return reply;
+    boolean isHandlerChainEmpty() {
+        return soapHandlers.isEmpty();
     }
     
     /**
@@ -237,7 +128,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         return new SOAPHandlerPipe(this,cloner);
     }
     
-    private void setUpProcessor() {
+    void setUpProcessor() {
         // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
         soapHandlers = new ArrayList<SOAPHandler>();
@@ -245,6 +136,12 @@ public class SOAPHandlerPipe extends HandlerPipe {
         roles = new HashSet<String>();
         roles.addAll(((SOAPBindingImpl)binding).getRoles());
         processor = new SOAPHandlerProcessor(binding,soapHandlers, isClient);
+    }
+    
+    MessageUpdatableContext getContext(Packet packet){
+        SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet);
+        context.setRoles(roles);
+        return context;
     }
     
 }
