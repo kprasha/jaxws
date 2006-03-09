@@ -135,12 +135,11 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      * Writes out an {@code i}-th attribute but with a different value.
      */
     private void writeAttribute(int i, String value) throws XMLStreamException {
-        out.writeAttribute(
-            in.getAttributePrefix(i),
-            in.getAttributeNamespace(i) == null ? "" : in.getAttributeNamespace(i) ,    // TODO hack
-            in.getAttributeLocalName(i),
-            value
-        );
+        String nsUri = in.getAttributeNamespace(i);
+        if(nsUri!=null)
+            out.writeAttribute( in.getAttributePrefix(i), nsUri, in.getAttributeLocalName(i), value );
+        else
+            out.writeAttribute( in.getAttributeLocalName(i), value );
     }
 
     @Override
