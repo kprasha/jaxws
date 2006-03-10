@@ -1,6 +1,7 @@
 package com.sun.xml.ws.transport.http;
 
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.Adapter;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.xml.ws.handler.MessageContext;
 
 /**
  * {@link Adapter} that receives messages in HTTP.
@@ -114,15 +116,27 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             if (ct == null) {
                 throw new UnsupportedOperationException();
             } else {
-                //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
-                //con.setStatus(packet.HTTP_RESPONSE_CODE);
-                Headers headers = new Headers();
-                headers.put("Content-Type", Collections.singletonList(ct));
-                con.setResponseHeaders(headers);
-                if (packet.getMessage()==null) {
+                Message responseMessage = packet.getMessage(); 
+                if (responseMessage==null) {
                     con.setStatus(WSConnection.ONEWAY);
-                    con.getOutput();        // Sets Status Code on the connecti
+                    con.getOutput();        // Sets Status Code on the connection
                 } else {
+                    // TODO add HTTP_RESPONSE_CODE as a property on Packet ??
+                    Integer statusObj = (Integer)packet.get(MessageContext.HTTP_RESPONSE_CODE);
+                    int statusCode;
+                    if (statusObj != null) {
+                        statusCode = statusObj;
+                    } else {
+                        statusCode = responseMessage.isFault()
+                            ? HttpURLConnection.HTTP_INTERNAL_ERROR
+                            : HttpURLConnection.HTTP_OK;
+                    }
+                    con.setStatus(statusCode);
+                    Headers headers = new Headers();
+                    headers.put("Content-Type", Collections.singletonList(ct));
+                    // TODO headers from Packet's properties ?
+                    //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
+                    con.setResponseHeaders(headers);
                     encoder.encode(packet, con.getOutput());
                 }
             }
