@@ -20,6 +20,7 @@
 package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -58,7 +59,7 @@ class PortInfo {
      * @return
      *      can be null.
      */
-    public WSDLPort getWSDLModel() {
+    public @Nullable WSDLPort getWSDLModel() {
         return null;
     }
 }
