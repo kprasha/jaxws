@@ -399,13 +399,16 @@ public class WSDLGenerator {
         }
         for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
             QName tagName = exception.getDetailType().tagName;
-            if (processedExceptions.contains(tagName))
+            String messageName = exception.getMessageName();
+            QName messageQName = new QName(model.getTargetNamespace(), messageName);
+            if (processedExceptions.contains(messageQName))
                 continue;
-            message = portDefinitions.message().name(tagName.getLocalPart());
+            message = portDefinitions.message().name(messageName);
+
             extension.addFaultMessageExtension(message, method.getMethod());
-            part = message.part().name(tagName.getLocalPart());
+            part = message.part().name("fault");//tagName.getLocalPart());
             part.element(tagName);
-            processedExceptions.add(tagName);
+            processedExceptions.add(messageQName);
         }
     }
 
@@ -434,10 +437,10 @@ public class WSDLGenerator {
             // faults
             for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
                 QName tagName = exception.getDetailType().tagName;
-                QName messageName = new QName(model.getTargetNamespace(), tagName.getLocalPart());
-                FaultType paramType = operation.fault().name(tagName.getLocalPart()).message(messageName);
+                QName messageName = new QName(model.getTargetNamespace(), exception.getMessageName());
+                FaultType paramType = operation.fault().name(exception.getMessageName()).message(messageName);
                 extension.addOperationFaultExtension(paramType, method.getMethod(), exception);        
-            }
+            }            
         }
     }
 
@@ -746,12 +749,10 @@ public class WSDLGenerator {
             }
         }
         for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
-            QName tagName = exception.getDetailType().tagName;
-            Fault fault = operation.fault().name(tagName.getLocalPart());
-            SOAPFault soapFault = fault._element(SOAPFault.class).name(tagName.getLocalPart());
-//                extension.addBindingOperationFaultExtension(fault, method.getMethod(), exception);
+            Fault fault = operation.fault().name(exception.getMessageName());
+            SOAPFault soapFault = fault._element(SOAPFault.class).name(exception.getMessageName());
             soapFault.use(LITERAL);
-        }
+        }        
     }
 
     protected void generateSOAP12BindingOperation(JavaMethodImpl method, Binding binding) {
@@ -847,11 +848,10 @@ public class WSDLGenerator {
             }
         }
         for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
-            QName tagName = exception.getDetailType().tagName;
-            Fault fault = operation.fault().name(tagName.getLocalPart());
-            com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault soapFault = fault._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault.class).name(tagName.getLocalPart());
-            soapFault.use(LITERAL);
-        }
+            Fault fault = operation.fault().name(exception.getMessageName());
+            com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault soapFault = fault._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPFault.class).name(exception.getMessageName());
+            soapFault.use(LITERAL);                
+        }            
     }
 
     /**

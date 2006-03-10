@@ -970,6 +970,7 @@ public class RuntimeModeler {
             TypeReference typeRef = new TypeReference(faultName, exceptionBean, anns);
             CheckedExceptionImpl checkedException =
                 new CheckedExceptionImpl(javaMethod, exception, typeRef, exceptionType);
+            checkedException.setMessageName(((Class)exception).getSimpleName());            
             javaMethod.addException(checkedException);
         }
     }
