@@ -56,6 +56,10 @@ class PortInfo {
     /**
      * Gets the {@link WSDLPort} model for this port, if any
      *
+     * <p>
+     * A port may be dynamically added by an user without having the corresponding WSDL
+     * definition, in which case this method returns null.
+     *
      * @return
      *      can be null.
      */
