@@ -72,6 +72,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             for (SDDocument sdd : sdef) {
                 if (sdd == sdef.getPrimary()) {
                     wsdls.put("wsdl", sdd);
+                    wsdls.put("WSDL", sdd);
                 } else {
                     if(sdd.isWSDL()) {
                         wsdls.put("wsdl="+(wsdlnum++),sdd);
@@ -126,7 +127,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                     con.getOutput();        // Sets Status Code on the connection
                 } else {
                     // TODO add HTTP_RESPONSE_CODE as a property on Packet ??
-                    Integer statusObj = (Integer)packet.get(MessageContext.HTTP_RESPONSE_CODE);
+                    Integer statusObj = (Integer)packet.invocationProperties.get(MessageContext.HTTP_RESPONSE_CODE);
                     int statusCode;
                     if (statusObj != null) {
                         statusCode = statusObj;
