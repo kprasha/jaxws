@@ -6,6 +6,7 @@ import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.spi.runtime.WSConnection;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ final class ServletAdapter extends HttpAdapter {
      * Servlet URL pattern with which this {@link HttpAdapter} is associated.
      */
     final String urlPattern;
+    
 
     /**
      * The application class that ultimately implements the service.
@@ -37,8 +39,8 @@ final class ServletAdapter extends HttpAdapter {
      */
     final Class<?> implementationType;
 
-    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, Class<?> implementationType) {
-        super(endpoint);
+    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, Class<?> implementationType, Map<String, String> addressMap) {
+        super(endpoint, addressMap);
         this.name = name;
         this.urlPattern = urlPattern;
         this.implementationType = implementationType;
@@ -97,14 +99,14 @@ final class ServletAdapter extends HttpAdapter {
         addrBuf.append(':');
         addrBuf.append(request.getServerPort());
         addrBuf.append(request.getContextPath());
-        addrBuf.append(getValidPath());
+        //addrBuf.append(getValidPath());
 
         return addrBuf.toString();
     }
 
     static final AdapterFactory<ServletAdapter> FACTORY = new AdapterFactory<ServletAdapter>() {
-        public ServletAdapter createAdapter(String name, String urlPattern, WSEndpoint endpoint, Class implementorClass) {
-            return new ServletAdapter(name,urlPattern,endpoint,implementorClass);
+        public ServletAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap) {
+            return new ServletAdapter(name,urlPattern,endpoint,implementorClass, addressMap);
         }
     };
 }

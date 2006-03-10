@@ -6,6 +6,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.util.Pool;
+import java.util.Map;
 
 /**
  * Receives incoming messages from a transport (such as HTTP, JMS, etc)
@@ -47,7 +48,10 @@ import com.sun.xml.ws.util.Pool;
  * @author Kohsuke Kawaguchi
  */
 public abstract class Adapter<TK extends Adapter.Toolkit> {
+    
     protected final WSEndpoint<?> endpoint;
+    
+    protected final Map<String, String> addressMap;
 
     /**
      * Object that groups all thread-unsafe resources.
@@ -88,8 +92,17 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
      * messages to the given endpoint.
      */
     protected Adapter(WSEndpoint endpoint) {
+        this(endpoint, null);
+    }
+    
+    /**
+     * Creates an {@link Adapter} that delivers
+     * messages to the given endpoint.
+     */
+    protected Adapter(WSEndpoint endpoint, Map<String, String> addressMap) {
         assert endpoint!=null;
         this.endpoint = endpoint;
+        this.addressMap = addressMap;
     }
 
     /**

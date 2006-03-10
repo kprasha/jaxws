@@ -19,6 +19,7 @@
  */
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -58,9 +59,9 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      * Document that is being patched.
      */
     private final SDDocumentImpl current;
-    private String serviceAddress;
 
     private final DocumentAddressResolver resolver;
+    private final PortAddressResolver portAddressResolver;
 
 
     //
@@ -85,10 +86,11 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      *      Consulted to generate references among  {@link SDDocument}s.
      *      Must not be null.
      */
-    public WSDLPatcher(WSEndpointImpl<?> endpoint, SDDocumentImpl current, String serviceAddress, DocumentAddressResolver resolver) {
+    public WSDLPatcher(WSEndpointImpl<?> endpoint, SDDocumentImpl current,
+            PortAddressResolver portAddressResolver, DocumentAddressResolver resolver) {
         this.endpoint = endpoint;
         this.current = current;
-        this.serviceAddress = serviceAddress;
+        this.portAddressResolver = portAddressResolver;
         this.resolver = resolver;
     }
 
@@ -196,13 +198,10 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      */
     private String getAddressLocation() {
         WSDLPort port = endpoint.getPort();
-        if(!port.getName().equals(portName))
-            return null;
-
-        if(!port.getOwner().getName().equals(serviceName))
-            return null;
-
-        return serviceAddress;
+        if(port.getOwner().getName().equals(serviceName)) {
+            return (portAddressResolver == null) ? null :portAddressResolver.getAddressFor(portName.getLocalPart());
+        }
+        return null;
     }
 }
     

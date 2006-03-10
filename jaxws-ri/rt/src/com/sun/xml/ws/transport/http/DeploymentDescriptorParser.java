@@ -21,6 +21,7 @@
 package com.sun.xml.ws.transport.http;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -155,6 +156,7 @@ public class DeploymentDescriptorParser<A> {
         }
 
         List<A> adapters = new ArrayList<A>();
+        Map<String, String> portAddressMap = new HashMap<String, String>();
 
         Attributes attrs = XMLStreamReaderUtil.getAttributes(reader);
         String version = getMandatoryNonEmptyAttribute(reader, attrs, ATTR_VERSION);
@@ -223,7 +225,15 @@ public class DeploymentDescriptorParser<A> {
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
                     );
-                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint, implementorClass));
+                WSDLPort port = endpoint.getPort();
+                if (port != null) {
+                    String path = urlPattern;
+                    if (urlPattern.endsWith("/*")) {
+                        path = urlPattern.substring(0, urlPattern.length() - 2);
+                    } 
+                    portAddressMap.put(port.getName().getLocalPart(), path);
+                }
+                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint, implementorClass, portAddressMap));
             } else {
                 failWithLocalName("runtime.parser.invalidElement", reader);
             }
@@ -242,7 +252,7 @@ public class DeploymentDescriptorParser<A> {
      * But the parser doesn't require that to be of any particular type.
      */
     public static interface AdapterFactory<A> {
-        A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
+        A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap);
     }
     
     /**

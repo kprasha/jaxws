@@ -41,7 +41,7 @@ final class HttpEndpoint {
     private final HttpAdapter adapter;
 
     public HttpEndpoint(WSEndpoint endpoint) {
-        this.adapter = new HttpAdapter(endpoint);
+        this.adapter = new HttpAdapter(endpoint, null);
     }
 
     public void publish(String address) {

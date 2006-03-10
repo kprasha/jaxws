@@ -1,5 +1,6 @@
 package com.sun.xml.ws.api.server;
 
+import com.sun.istack.Nullable;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.namespace.QName;
@@ -54,12 +55,12 @@ public interface SDDocument {
      * <p>
      * Since {@link ServiceDefinition} doesn't know which endpoint address
      * {@link Adapter} is serving to, (and often it serves multiple URLs
-     * simultaneously), this method takes the address as a parameter,
+     * simultaneously), this method takes the PortAddressResolver as a parameter,
      * so that it can produce the corret address information in the generated WSDL.
      *
-     * @param endpointAddress
-     *      The URL that represents the endpoint address,
-     *      such as "http://ws.sun.com/foo/". Must not be null.
+     * @param portAddressResolver
+     *      An endpoint address resolver that gives endpoint address for a WSDL
+     *      port. Can be null.
      * @param resolver
      *      Used to resolve relative references among documents.
      * @param os
@@ -68,7 +69,8 @@ public interface SDDocument {
      * @throws IOException
      *      if there was a failure reported from the {@link OutputStream}.
      */
-    void writeTo(String endpointAddress, DocumentAddressResolver resolver, OutputStream os) throws IOException;
+    void writeTo(@Nullable PortAddressResolver portAddressResolver,
+            DocumentAddressResolver resolver, OutputStream os) throws IOException;
 
     /**
      * Writes the document to the given {@link XMLStreamWriter}.
@@ -85,7 +87,8 @@ public interface SDDocument {
      * @throws XMLStreamException
      *      if the {@link XMLStreamWriter} reports an error.
      */
-    void writeTo(String endpointAddress, DocumentAddressResolver resolver, XMLStreamWriter out) throws XMLStreamException, IOException;
+    void writeTo(PortAddressResolver portAddressResolver,
+            DocumentAddressResolver resolver, XMLStreamWriter out) throws XMLStreamException, IOException;
 
     /**
      * {@link SDDocument} that represents an XML Schema.

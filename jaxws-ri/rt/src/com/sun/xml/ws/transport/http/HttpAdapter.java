@@ -1,6 +1,7 @@
 package com.sun.xml.ws.transport.http;
 
 
+import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
@@ -52,9 +53,12 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      */
     public final Map<SDDocument,String> revWsdls;
 
-
     public HttpAdapter(WSEndpoint endpoint) {
-        super(endpoint);
+        this(endpoint, null);
+    }
+
+    public HttpAdapter(WSEndpoint endpoint, Map<String, String> addressMap) {
+        super(endpoint, addressMap);
 
         // fill in WSDL map
         ServiceDefinition sdef = this.endpoint.getServiceDefinition();
@@ -212,17 +216,50 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
 
         con.setStatus(HttpURLConnection.HTTP_OK);
-        setContentType(con, "application/xml");
+        setContentType(con, "text/xml");
 
         OutputStream os = con.getOutput();
         DocumentAddressResolver resolver = new DocumentAddressResolver() {
             public String getRelativeAddressFor(SDDocument current, SDDocument referenced) {
                 // the map on endpoint should account for all SDDocument
                 assert revWsdls.containsKey(referenced);
-                return baseAddress+'?'+ revWsdls.get(referenced);
+                String urlPattern = "";
+                if (addressMap != null) {
+                    String portName = endpoint.getPort().getName().getLocalPart();
+                    urlPattern = addressMap.get(portName);
+                    if (urlPattern == null) {
+                        urlPattern = "";
+                    }
+                }
+                return baseAddress+urlPattern+'?'+ revWsdls.get(referenced);
             }
         };
-        doc.writeTo(baseAddress,resolver,os);
+        PortAddressResolver portAddressResolver = new PortAddressResolverImpl(baseAddress, addressMap);
+        doc.writeTo(portAddressResolver, resolver, os);
+    }
+    
+    static class PortAddressResolverImpl implements PortAddressResolver {
+
+        final String baseAddress;
+        final Map<String, String> addressMap;
+        
+        PortAddressResolverImpl(String baseAddress, Map<String, String> addressMap) {
+            this.baseAddress = baseAddress;
+            this.addressMap = addressMap;
+System.out.println("Address Map="+addressMap);
+        }
+        
+        public String getAddressFor(String portName) {
+            if (addressMap != null) {
+                String urlPattern = addressMap.get(portName);
+                if (urlPattern != null) {
+System.out.println("Address="+(baseAddress+urlPattern));                    
+                    return baseAddress+urlPattern;
+                }
+            }
+            return null;
+        }
+        
     }
 
     private void writeNotFoundErrorPage(WSConnection con, String message) throws IOException {

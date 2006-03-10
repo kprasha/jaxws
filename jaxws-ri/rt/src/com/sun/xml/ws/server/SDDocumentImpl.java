@@ -1,6 +1,7 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
+import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -161,22 +162,24 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         return url;
     }
 
-    public void writeTo(String endpointAddress, DocumentAddressResolver resolver, OutputStream os) throws IOException {
+    public void writeTo(PortAddressResolver portAddressResolver, DocumentAddressResolver resolver, OutputStream os) throws IOException {
         try {
             XMLStreamWriter w = xof.createXMLStreamWriter(os);
             w.writeStartDocument();
-            writeTo(endpointAddress,resolver,w);
+            writeTo(portAddressResolver,resolver,w);
             w.writeEndDocument();
-            w.close();
+            w.flush();
+            //w.close();
         } catch (XMLStreamException e) {
+            e.printStackTrace();
             IOException ioe = new IOException(e.getMessage());
             ioe.initCause(e);
             throw ioe;
         }
     }
 
-    public void writeTo(String endpointAddress, DocumentAddressResolver resolver, XMLStreamWriter out) throws XMLStreamException, IOException {
-        new WSDLPatcher(owner.owner,this,endpointAddress,resolver).bridge(
+    public void writeTo(PortAddressResolver portAddressResolver, DocumentAddressResolver resolver, XMLStreamWriter out) throws XMLStreamException, IOException {
+        new WSDLPatcher(owner.owner,this,portAddressResolver,resolver).bridge(
             source.read(xif),
             out
         );

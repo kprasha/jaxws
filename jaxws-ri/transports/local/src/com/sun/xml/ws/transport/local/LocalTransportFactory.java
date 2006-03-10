@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.util.Map;
 
 /**
  * {@link TransportPipeFactory} for the local transport.
@@ -64,7 +65,7 @@ public final class LocalTransportFactory extends TransportPipeFactory {
             Thread.currentThread().getContextClassLoader(),
             new FileSystemResourceLoader(new File(outputDir)), null,
             new AdapterFactory<WSEndpoint>() {
-                public WSEndpoint createAdapter(String name, String urlPattern, WSEndpoint endpoint, Class implementorClass) {
+                public WSEndpoint createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap) {
                     return endpoint;
                 }
             });

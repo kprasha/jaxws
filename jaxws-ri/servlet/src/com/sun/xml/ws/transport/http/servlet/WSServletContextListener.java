@@ -93,7 +93,7 @@ public final class WSServletContextListener
 
             context.setAttribute(WSServlet.JAXWS_RI_RUNTIME_INFO,delegate);
             
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.log(
                 Level.SEVERE,
                 localizer.localize(
