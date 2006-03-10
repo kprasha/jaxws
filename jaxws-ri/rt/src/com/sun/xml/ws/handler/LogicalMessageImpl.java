@@ -117,7 +117,11 @@ public class LogicalMessageImpl implements LogicalMessage {
         payloadModifed = true;
         payloadSrc = payload;
     }
-    
+    /*
+     * Converts to DOMSource and then it unmarshalls this  DOMSource 
+     * to a jaxb object. Any changes done in jaxb object are lost if
+     * the object isn't set again.
+     */
     public Object getPayload(JAXBContext context) {
         try {
             Source src = getPayload(); 

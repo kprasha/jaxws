@@ -27,6 +27,9 @@ public class LogicalHandlerProcessor<C extends LogicalMessageContext> extends Ha
         super(binding,chain, isClient);
     }
     
+    /*
+     * TODO: This is valid only for XML/HTTP binding
+     */
     void insertFaultMessage(C context,
             ProtocolException exception) {
         
