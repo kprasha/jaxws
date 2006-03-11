@@ -3,7 +3,7 @@ package com.sun.xml.ws.sandbox.fault;
 
 import org.w3c.dom.Node;
 
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -50,7 +50,7 @@ import com.sun.xml.ws.api.SOAPVersion;
  * @author Vivek Pandey
  */
 @XmlRootElement(name = "Fault", namespace = "http://www.w3.org/2003/05/soap-envelope")
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "Code",
     "Reason",

@@ -11,7 +11,7 @@ package com.sun.tools.ws.wsdl.wxf;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlType;
@@ -35,7 +35,7 @@ import javax.xml.namespace.QName;
  * 
  * 
  */
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ReplyAfterType", propOrder = {
     "value"
 })

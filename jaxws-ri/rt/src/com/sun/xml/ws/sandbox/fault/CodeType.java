@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.namespace.QName;
 
 /**
@@ -20,7 +20,7 @@ import javax.xml.namespace.QName;
  *  &lt;/env:Code>
  * </pre>
  */
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CodeType", namespace = "http://www.w3.org/2003/05/soap-envelope", propOrder = {
     "Value",
     "Subcode"

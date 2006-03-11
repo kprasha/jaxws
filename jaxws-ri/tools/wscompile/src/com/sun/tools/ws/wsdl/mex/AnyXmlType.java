@@ -9,7 +9,7 @@ package com.sun.tools.ws.wsdl.mex;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AnyXmlType", namespace = "http://schemas.xmlsoap.org/ws/2004/09/mex")
 public class AnyXmlType {
 

@@ -8,7 +8,7 @@
 
 package com.sun.tools.ws.wsdl.wxf;
 
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
@@ -36,7 +36,7 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CreateResponseType", namespace = "http://schemas.xmlsoap.org/ws/2004/09/transfer", propOrder = {
     "resourceCreated",
     "any"

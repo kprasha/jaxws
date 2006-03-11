@@ -3,7 +3,7 @@ package com.sun.xml.ws.sandbox.fault;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.SOAPVersion;
 
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -42,7 +42,7 @@ import org.w3c.dom.Node;
  * @author Vivek Pandey
  */
 
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
         "faultcode",
         "faultstring",

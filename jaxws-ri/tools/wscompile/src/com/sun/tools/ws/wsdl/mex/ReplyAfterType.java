@@ -10,7 +10,7 @@ package com.sun.tools.ws.wsdl.mex;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlType;
@@ -35,7 +35,7 @@ import com.sun.tools.ws.wsdl.mex.ReplyAfterType;
  * 
  * 
  */
-@XmlAccessorType(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ReplyAfterType")
 public class ReplyAfterType {
 
