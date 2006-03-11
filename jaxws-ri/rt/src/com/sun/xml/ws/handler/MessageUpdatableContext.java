@@ -19,6 +19,7 @@
  */
 package com.sun.xml.ws.handler;
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import java.util.Collection;
 import java.util.Map;
@@ -46,10 +47,31 @@ public abstract class MessageUpdatableContext implements MessageContext {
     public void fill(Packet packet) {
         ctxt.fill(packet);
     }
-    
+    /**
+     * Updates Message in the packet with user modifications
+     */
     abstract void updateMessage(); 
     
-    public void updatePacket() {
+    /**
+     * Updates Message in the packet with user modifications
+     * returns the new packet's message
+     */
+    Message getPacketMessage(){
+        updateMessage();
+        return packet.getMessage();
+    }
+    
+    /**
+     * Sets Message in the packet
+     * Any user modifications done on previous Message are lost. 
+     */
+    abstract void setPacketMessage(Message newMessage);
+    
+    /**
+     * Updates the complete packet with user modfications to the message and 
+     * properties cahnges in MessageContext
+     */
+    void updatePacket() {
         updateMessage();
         fill(packet);
     }

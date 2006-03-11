@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * 
  * @author WS Development Team
  */
-abstract class HandlerProcessor<C extends MessageContext> {
+abstract class HandlerProcessor<C extends MessageUpdatableContext> {
     
     public static final String IGNORE_FAULT_PROPERTY =
             "ignore fault in message";
@@ -69,7 +69,7 @@ abstract class HandlerProcessor<C extends MessageContext> {
     private Set<QName> understoodHeaders;
     private List<Handler> handlers; // may be logical/soap mixed
     
-    private WSBinding binding;
+    protected WSBinding binding;
     private int index = -1;
     
     /**

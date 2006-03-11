@@ -59,7 +59,15 @@ public class LogicalMessageContextImpl extends MessageUpdatableContext implement
             lm = new LogicalMessageImpl(packet);
         return lm;
     }
-
+    
+    void setPacketMessage(Message newMessage){
+        if(newMessage != null) {
+            packet.setMessage(newMessage);
+            lm = null;
+        }
+    }
+    
+    
     protected void updateMessage() {
         //If LogicalMessage is not acccessed, its not modified.
         if(lm != null) {
@@ -75,9 +83,11 @@ public class LogicalMessageContextImpl extends MessageUpdatableContext implement
                     packet.setMessage(new EmptyMessageImpl(headers,binding.getSOAPVersion()));
                 } else {
                     packet.setMessage(new PayloadSourceMessage(headers,modifiedPayload ,binding.getSOAPVersion()));
-                }
+                }                
             }
+            lm = null;
         }
+        
     }    
     
 }

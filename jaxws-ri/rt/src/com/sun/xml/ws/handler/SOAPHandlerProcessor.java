@@ -9,6 +9,8 @@
 package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
@@ -30,7 +32,7 @@ import javax.xml.ws.soap.SOAPFaultException;
  *
  * @author WS Development Team
  */
-public class SOAPHandlerProcessor<C extends SOAPMessageContext> extends HandlerProcessor<C> {
+public class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends HandlerProcessor<C> {
     
     /**
      * Creates a new instance of SOAPHandlerProcessor
@@ -46,58 +48,15 @@ public class SOAPHandlerProcessor<C extends SOAPMessageContext> extends HandlerP
      */
     void insertFaultMessage(C context,
         ProtocolException exception) {
-
         try {
-            SOAPMessage message = context.getMessage();
-            SOAPEnvelope envelope = message.getSOAPPart().getEnvelope();
-            SOAPBody body = envelope.getBody();
-            if (body.hasFault()) {
-                return;
-            }
-            if (envelope.getHeader() != null) {
-                envelope.getHeader().detachNode();
-            }
-
-            body.removeContents();
-            SOAPFault fault = body.addFault();
-            String envelopeNamespace = envelope.getNamespaceURI();
-
-            if (exception instanceof SOAPFaultException) {
-                SOAPFaultException sfe = (SOAPFaultException) exception;
-                SOAPFault userFault = sfe.getFault();
-
-                QName faultCode = userFault.getFaultCodeAsQName();
-                if (faultCode == null) {
-                    faultCode = determineFaultCode(context);
-                }
-                fault.setFaultCode(faultCode);
-
-                String faultString = userFault.getFaultString();
-                if (faultString == null) {
-                    if (sfe.getMessage() != null) {
-                        faultString = sfe.getMessage();
-                    } else {
-                        faultString = sfe.toString();
-                    }
-                }
-                fault.setFaultString(faultString);
-
-                String faultActor = userFault.getFaultActor();
-                if (faultActor == null) {
-                    faultActor = "";
-                }
-                fault.setFaultActor(faultActor);
-
-                if (userFault.getDetail() != null) {
-                    fault.addChildElement(userFault.getDetail());
-                }
-            } else {
-                fault.setFaultCode(determineFaultCode(context));
-                if (exception.getMessage() != null) {
-                    fault.setFaultString(exception.getMessage());
+            if(!context.getPacketMessage().isFault()) {
+                Message faultMessage;
+                if (exception instanceof SOAPFaultException) {
+                    faultMessage = Messages.create(((SOAPFaultException)exception).getFault());
                 } else {
-                    fault.setFaultString(exception.toString());
+                    faultMessage = Messages.create(exception,binding.getSOAPVersion());
                 }
+                context.setPacketMessage(faultMessage);
             }
         } catch (Exception e) {
             // severe since this is from runtime and not handler

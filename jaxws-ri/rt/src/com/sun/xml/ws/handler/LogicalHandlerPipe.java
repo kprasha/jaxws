@@ -83,11 +83,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
                 if(processor != null)
                     closeLogicalHandlers(msgContext);
             }
-        }
-        
-        
-        
-        
+        }        
     }
     /**
      * This is called from cousinPipe.
@@ -136,7 +132,13 @@ public class LogicalHandlerPipe extends HandlerPipe {
         // should be used for the entire MEP
         logicalHandlers = new ArrayList<LogicalHandler>();
         logicalHandlers.addAll(((BindingImpl)binding).getLogicalHandlerChain());
-        processor = new LogicalHandlerProcessor(binding,logicalHandlers,isClient);
+        if(binding.getSOAPVersion() == null) {
+            processor = new XMLHandlerProcessor(binding,
+                    logicalHandlers,isClient);
+        } else {
+            processor = new SOAPHandlerProcessor(binding,
+                    logicalHandlers,isClient);
+        }            
     }
     
     

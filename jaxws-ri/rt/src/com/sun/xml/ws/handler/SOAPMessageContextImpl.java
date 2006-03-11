@@ -77,11 +77,19 @@ public class SOAPMessageContextImpl extends MessageUpdatableContext implements S
         }
     }
     
+    void setPacketMessage(Message newMessage){
+        if(newMessage != null) {
+            packet.setMessage(newMessage);
+            soapMsg = null;
+        }
+    }
+    
     protected void updateMessage() {
         //Check if SOAPMessage has changed, if so construct new one,
         // Packet are handled through MessageContext
         if(soapMsg != null) {
             packet.setMessage(new SAAJMessage(soapMsg));
+            soapMsg = null;
         }
     }
 
