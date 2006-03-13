@@ -345,24 +345,6 @@ public class WsImport extends MatchingTask {
         dependsSet.add(new File(wsdl));
     }
     
-    private boolean mex = false;
-    
-    /**
-     * @return Whether or not wsimport is using MEX
-     * to retrieve wsdl.
-     */
-    public boolean getMex() {
-        return mex;
-    }
-
-    /**
-     * @param mex Set to true to tell wsimport to make
-     * a MEX GetMetada request rather than an HTTP GET.
-     */
-    public void setMex(boolean mex) {
-        this.mex = mex;
-    }
-    
     private boolean wxf = false;
     
     /**
@@ -446,11 +428,6 @@ public class WsImport extends MatchingTask {
         // verbose option
         if (getVerbose()) {
             cmd.createArgument().setValue("-verbose");
-        }
-
-        // mex option
-        if (getMex()) {
-            cmd.createArgument().setValue("-mex");
         }
 
         // wxf option

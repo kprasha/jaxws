@@ -80,7 +80,6 @@ import com.sun.tools.ws.wsdl.document.WSDLDocument;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.mex.HTTPMexClient;
 import com.sun.tools.ws.wsdl.wxf.HTTPWxfClient;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
@@ -162,14 +161,6 @@ public class WSDLParser {
             return;
         }
         _listeners.remove(l);
-    }
-
-    public boolean getUseMex() {
-        return useMex;
-    }
-
-    public void setUseMex(boolean b) {
-        useMex = b;
     }
 
     public boolean getUseWxf() {
@@ -269,9 +260,7 @@ public class WSDLParser {
     private void buildDocumentFromWSDL(String systemId, InputSource source, String expectedTargetNamespaceURI) {
         try {
             Document document = null;
-            if (useMex && systemId.startsWith("http")) {
-                document = getMexClient().getWSDLDocument(systemId);
-            } else if (useWxf && systemId.startsWith("http")) {
+            if (useWxf && systemId.startsWith("http")) {
                 document = getWxfClient().getWSDLDocument(systemId);
             } else {
                 DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -1477,17 +1466,6 @@ public class WSDLParser {
      * Used to avoid creating a new one every time
      * a request is made.
      */
-    private HTTPMexClient getMexClient() {
-        if (mexClient == null) {
-            mexClient = new HTTPMexClient();
-        }
-        return mexClient;
-    }
-
-    /*
-     * Used to avoid creating a new one every time
-     * a request is made.
-     */
     private HTTPWxfClient getWxfClient() {
         if (wxfClient == null) {
             wxfClient = new HTTPWxfClient();
@@ -1503,8 +1481,6 @@ public class WSDLParser {
     private LocalizableMessageFactory _messageFactory = null;
     private Localizer _localizer;
     private HashSet hSet = null;
-    private boolean useMex = false;
-    private HTTPMexClient mexClient;
     private boolean useWxf = false;
     private HTTPWxfClient wxfClient;
 }

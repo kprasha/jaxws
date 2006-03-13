@@ -25,30 +25,30 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
-
-import com.sun.tools.ws.wsdl.framework.ParseException;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import com.sun.tools.ws.wsdl.framework.ParseException;
 
 /**
  * A class for making ws transfer requests over http to retrieve
  * a WSDL.
  *
- * Big TODO: Pull the common http connection code out of the MEX and
- * WXF classes into a common utility class. Need to determine where
- * this will live after figuring out if these classes will live in
- * wsimport code or not.
+ * TODO: error handling, localization
  *
  * @author WS Development Team
  */
@@ -128,12 +128,12 @@ public class HTTPWxfClient {
         Node envelope = responseDoc.getFirstChild();
         Node body = envelope.getFirstChild().getNextSibling();
         Node wsdl = body.getFirstChild();
-        while (!wsdl.getLocalName().equalsIgnoreCase("definitions")) {
-            Node nextNode = wsdl.getFirstChild();
-            if (nextNode == null) {
-                throw new ParseException("no wsdl in response");
+        if (!wsdl.getLocalName().equalsIgnoreCase("definitions")) {
+            if (wsdl.getLocalName().equalsIgnoreCase("metadata")) {
+                wsdl = parseMetadata(wsdl);
+            } else {
+                throw new ParseException("unexpected response: " + wsdl);
             }
-            wsdl = nextNode;
         }
         responseDoc.replaceChild(wsdl, envelope);
         if (true) { // temporary
@@ -172,5 +172,56 @@ public class HTTPWxfClient {
             }
         }
     }
-    
+
+    /*
+     * Currently, only using first wsdl found. If two schemas are included
+     * with the same namespace, only using the first one.
+     */
+    private Node parseMetadata(Node metadata) {
+        NodeList nodes = metadata.getChildNodes();
+        Node wsdl = null;
+        Map<String, Node> schemas = new HashMap<String, Node>();
+        
+        // parse Metadata elements and store schemas
+        for (int i=0; i<nodes.getLength(); i++) {
+            Node metadataSection = nodes.item(i);
+            Node data = metadataSection.getFirstChild();
+            if (data.getLocalName().equalsIgnoreCase("definitions")) {
+                if (wsdl == null) {
+                    wsdl = data;
+                }
+            } else if (data.getLocalName().equalsIgnoreCase("schema")) {
+                NamedNodeMap attributes = data.getAttributes();
+                Node att = attributes.getNamedItem("targetNamespace");
+                String targetNamespace = att.getNodeValue();
+                if (!schemas.containsKey(targetNamespace)) {
+                    schemas.put(targetNamespace, data);
+                }
+            } else {
+                System.err.println("warning: found unknown data: " +
+                    data.getLocalName());
+            }
+        }
+        
+        // inline schemas into the wsdl
+        if (!schemas.isEmpty()) {
+            Node types = wsdl.getFirstChild();
+            NodeList schemaNodes = types.getChildNodes();
+            for (int i=0; i<schemaNodes.getLength(); i++) {
+                Node schemaNode = schemaNodes.item(i);
+                Node node = schemaNode.getFirstChild();
+                if (node.getLocalName().equalsIgnoreCase("import")) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    Node namespaceNode = attributes.getNamedItem("namespace");
+                    String namespace = namespaceNode.getNodeValue();
+                    if (schemas.containsKey(namespace)) {
+                        types.replaceChild(schemas.get(namespace),
+                            schemaNode);
+                    }
+                }
+            }
+        }
+        
+        return wsdl;
+    }
 }

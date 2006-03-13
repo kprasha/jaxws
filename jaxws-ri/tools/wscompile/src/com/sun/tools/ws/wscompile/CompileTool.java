@@ -160,9 +160,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             } else if (args[i].equals("-keep")) {
                 keepGenerated = true;
                 args[i] = null;
-            } else if (args[i].equals("-mex")) {
-                useMex = true;
-                args[i] = null;
             } else if (args[i].equals("-wxf")) {
                 useWxf = true;
                 args[i] = null;
@@ -804,8 +801,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         if(defaultPackage != null)
             properties.setProperty(ProcessorOptions.DEFAULT_PACKAGE, defaultPackage);
         properties.setProperty(ProcessorOptions.DONOT_OVERWRITE_CLASSES, (doNotOverWrite ? TRUE : FALSE));
-        properties.setProperty(ProcessorOptions.USE_MEX,
-            (useMex ? TRUE : FALSE));
         properties.setProperty(ProcessorOptions.USE_WXF,
             (useWxf ? TRUE : FALSE));
     }
@@ -921,7 +916,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     protected boolean verbose = false;
     protected boolean keepGenerated = false;
     protected boolean doNotOverWrite = false;
-    protected boolean useMex = false;
     protected boolean useWxf = false;
     protected boolean extensions = false;
     protected String userClasspath = null;
