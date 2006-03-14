@@ -219,9 +219,10 @@ public abstract class StreamHeader implements Header {
             DOMResult result = new DOMResult();
             t.transform(source, result);
             Node d = result.getNode();
-
+            if(d.getNodeType() == Node.DOCUMENT_NODE)
+                d = d.getFirstChild();
             SOAPHeader header = saaj.getSOAPHeader();
-            Node node = header.getOwnerDocument().importNode(result.getNode(), true);
+            Node node = header.getOwnerDocument().importNode(d, true);
             header.appendChild(node);
         } catch (Exception e) {
             throw new SOAPException(e);
