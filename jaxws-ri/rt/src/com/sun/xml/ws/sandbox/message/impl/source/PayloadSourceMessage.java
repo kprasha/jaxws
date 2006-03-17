@@ -3,7 +3,7 @@ package com.sun.xml.ws.sandbox.message.impl.source;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
@@ -225,7 +225,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         }else if(sourceUtils.isSaxSource()){
             SAXSource saxSrc = (SAXSource)src;
             try {
-                XMLStreamBuffer xsb = new XMLStreamBuffer();
+                MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
                 XMLReader reader = saxSrc.getXMLReader();
                 if(reader == null)
                     reader = new SAXBufferProcessor();

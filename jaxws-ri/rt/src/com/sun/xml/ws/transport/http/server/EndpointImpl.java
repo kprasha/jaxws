@@ -21,7 +21,7 @@
 
 package com.sun.xml.ws.transport.http.server;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -217,7 +217,7 @@ public class EndpointImpl extends Endpoint {
         if (metadata != null) {
             Transformer transformer = XmlUtil.newTransformer();
             for(Source source: metadata) {
-                XMLStreamBuffer xsb = new XMLStreamBuffer();
+                MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
                 try {
                     transformer.transform(source, new XMLStreamBufferResult(xsb));
                     String systemId = source.getSystemId();

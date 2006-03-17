@@ -1,5 +1,6 @@
 package com.sun.xml.ws.sandbox.impl;
 
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
@@ -140,7 +141,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
     private XMLStreamBuffer cacheHeaders(XMLStreamReader reader,
             Map<String, String> namespaces, HeaderList headers) throws XMLStreamException, XMLStreamBufferException {
-        XMLStreamBuffer buffer = createXMLStreamBuffer();
+        MutableXMLStreamBuffer buffer = createXMLStreamBuffer();
         StreamReaderBufferCreator creator = new StreamReaderBufferCreator();
         creator.setXMLStreamBuffer(buffer);
 
@@ -178,12 +179,12 @@ public abstract class StreamSOAPDecoder implements Decoder {
         return XMLStreamReaderFactory.createXMLStreamReader(in,true);
     }
 
-    private XMLStreamBuffer createXMLStreamBuffer() {
+    private MutableXMLStreamBuffer createXMLStreamBuffer() {
         // TODO: Decode should own one XMLStreamBuffer for reuse
         // since it is more efficient. ISSUE: possible issue with
         // lifetime of information in the buffer if accessed beyond
         // the pipe line.
-        return new XMLStreamBuffer();
+        return new MutableXMLStreamBuffer();
     }
 
 

@@ -59,7 +59,7 @@ public abstract class SDDocumentSource {
     public static SDDocumentSource create(final URL systemId, final XMLStreamBuffer xsb) {
         return new SDDocumentSource() {
             public XMLStreamReader read(XMLInputFactory xif) throws XMLStreamException {
-                return xsb.processUsingXMLStreamReader();
+                return xsb.readAsXMLStreamReader();
             }
 
             public URL getSystemId() {

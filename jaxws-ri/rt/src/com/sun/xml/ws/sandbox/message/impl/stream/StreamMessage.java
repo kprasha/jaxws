@@ -21,6 +21,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -255,12 +256,12 @@ public final class StreamMessage extends AbstractMessageImpl {
         assert unconsumed();
         try {
             // copy the payload
-            XMLStreamBuffer xsb = new XMLStreamBuffer();
+            MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
             xsb.createFromXMLStreamReader(reader);
 
-            reader = xsb.processUsingXMLStreamReader();
+            reader = xsb.readAsXMLStreamReader();
 
-            return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, xsb.processUsingXMLStreamReader(), soapVersion);
+            return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, xsb.readAsXMLStreamReader(), soapVersion);
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message",e);
         } catch (XMLStreamBufferException e) {

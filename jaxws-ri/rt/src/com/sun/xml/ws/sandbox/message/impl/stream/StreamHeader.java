@@ -22,6 +22,7 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.istack.FinalArrayList;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
@@ -47,7 +48,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import java.util.List;
-
 
 /**
  * {@link Header} whose physical data representation is an XMLStreamBuffer.
@@ -136,8 +136,9 @@ public abstract class StreamHeader implements Header {
         _namespaceURI = reader.getNamespaceURI();
         attributes = processHeaderAttributes(reader);
         // cache the body
-        _mark = new XMLStreamBuffer();
-        _mark.createFromXMLStreamReader(reader);
+        MutableXMLStreamBuffer b = new MutableXMLStreamBuffer();
+        b.createFromXMLStreamReader(reader);
+        _mark = b;
     }
 
     public boolean isMustUnderstood() {
@@ -179,21 +180,23 @@ public abstract class StreamHeader implements Header {
      * Reads the header as a {@link XMLStreamReader}
      */
     public XMLStreamReader readHeader() throws XMLStreamException {
-        return _mark.processUsingXMLStreamReader();
+        return _mark.readAsXMLStreamReader();
     }
 
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         // TODO: How can the unmarshaller process this as a fragment?
         try {
-            return (T)unmarshaller.unmarshal(_mark.processUsingXMLStreamReader());
+            return (T)unmarshaller.unmarshal(_mark.readAsXMLStreamReader());
         } catch (XMLStreamException e) {
+            throw new JAXBException(e);
+        } catch (Exception e) {
             throw new JAXBException(e);
         }
     }
 
     public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
         try {
-            return bridge.unmarshal(context,_mark.processUsingXMLStreamReader());
+            return bridge.unmarshal(context,_mark.readAsXMLStreamReader());
         } catch (XMLStreamException e) {
             throw new JAXBException(e);
         }
@@ -202,7 +205,7 @@ public abstract class StreamHeader implements Header {
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
             // TODO what about in-scope namespaces
-            _mark.processUsingXMLStreamWriter(w);
+            _mark.writeToXMLStreamWriter(w);
         } catch (XMLStreamBufferException e) {
             throw new XMLStreamException2(e);
         }
@@ -230,7 +233,7 @@ public abstract class StreamHeader implements Header {
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        _mark.processUsingSAXContentHandler(contentHandler);
+        _mark.writeTo(contentHandler);
     }
 
     protected abstract FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader);

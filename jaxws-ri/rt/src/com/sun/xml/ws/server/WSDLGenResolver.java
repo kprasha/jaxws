@@ -20,6 +20,7 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.server.SDDocument;
@@ -97,7 +98,7 @@ final class WSDLGenResolver implements WSDLResolver {
      * TODO: but it's not returning null. What am I missing!? - KK
      */
     public Result getWSDL(String filename) {
-        XMLStreamBuffer xsb = new XMLStreamBuffer();
+        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
         concreteWsdlSource = SDDocumentSource.create(createURL(filename),xsb);
         newDocs.add(concreteWsdlSource);
 
@@ -133,7 +134,7 @@ final class WSDLGenResolver implements WSDLResolver {
             return null;                // Don't generate abstract WSDL
         }
 
-        XMLStreamBuffer xsb = new XMLStreamBuffer();
+        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
         abstractWsdlSource = SDDocumentSource.create(createURL(filename.value),xsb);
         newDocs.add(abstractWsdlSource);
 /*
@@ -165,7 +166,7 @@ final class WSDLGenResolver implements WSDLResolver {
             return null;            // Don't generate schema
         }
 
-        XMLStreamBuffer xsb = new XMLStreamBuffer();
+        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
         SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
         /*
 

@@ -205,7 +205,7 @@ public abstract class Messages {
         // meanwhile, adding this as an API so that our users can take advantage of it
         // when we get around to such an implementation later.
         try {
-            return create(xsb.processUsingXMLStreamReader());
+            return create(xsb.readAsXMLStreamReader());
         } catch (XMLStreamException e) {
             throw new XMLStreamReaderException(e);
         }

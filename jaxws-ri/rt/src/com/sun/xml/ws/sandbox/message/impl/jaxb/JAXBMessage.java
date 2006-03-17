@@ -21,7 +21,7 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.marshaller.SAX2DOMEx;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -30,7 +30,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -43,8 +42,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.util.JAXBResult;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -213,11 +210,12 @@ public final class JAXBMessage extends AbstractMessageImpl {
     public XMLStreamReader readPayload() throws XMLStreamException {
         try {
             if(infoset==null) {
-                infoset = new XMLStreamBuffer();
-                XMLStreamBufferResult sbr = new XMLStreamBufferResult(infoset);
+                MutableXMLStreamBuffer mutableInfoset = new MutableXMLStreamBuffer();                
+                XMLStreamBufferResult sbr = new XMLStreamBufferResult(mutableInfoset);
                 bridge.marshal(context,jaxbObject,sbr);
+                infoset = mutableInfoset;
             }
-            return infoset.processUsingXMLStreamReader();
+            return infoset.readAsXMLStreamReader();
         } catch (JAXBException e) {
             throw new XMLStreamException2(e);
         }

@@ -21,7 +21,7 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.util.AttributesImpl;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -139,11 +139,12 @@ public final class JAXBHeader extends AbstractHeaderImpl {
     public XMLStreamReader readHeader() throws XMLStreamException {
         try {
             if(infoset==null) {
-                infoset = new XMLStreamBuffer();
-                XMLStreamBufferResult sbr = new XMLStreamBufferResult(infoset);
+                MutableXMLStreamBuffer mutableInfoset = new MutableXMLStreamBuffer();
+                XMLStreamBufferResult sbr = new XMLStreamBufferResult(mutableInfoset);
                 bridge.marshal(context,jaxbObject,sbr);
+                infoset = mutableInfoset;
             }
-            return infoset.processUsingXMLStreamReader();
+            return infoset.readAsXMLStreamReader();
         } catch (JAXBException e) {
             throw new XMLStreamException2(e);
         }
