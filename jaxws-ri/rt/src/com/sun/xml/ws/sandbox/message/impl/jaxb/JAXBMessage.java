@@ -35,6 +35,8 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import java.io.OutputStream;
+import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -236,8 +238,20 @@ public final class JAXBMessage extends AbstractMessageImpl {
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
             // TODO: XOP handling
-            bridge.marshal(context,jaxbObject,sw);
-        } catch (JAXBException e) {
+            
+            // If writing to Zephyr, get output stream and use JAXB UTF-8 writer
+            if (sw instanceof Map) {
+                OutputStream os = (OutputStream) ((Map) sw).get("sjsxp-outputstream");
+                if (os != null) {
+                    sw.writeCharacters("");        // Force completion of open elems
+                    bridge.marshal(context, jaxbObject, os, null);
+                }
+                return;
+            }
+            
+            bridge.marshal(context,jaxbObject,sw);                
+        } 
+        catch (JAXBException e) {
             throw new XMLStreamException2(e);
         }
     }
