@@ -245,8 +245,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
                 if (os != null) {
                     sw.writeCharacters("");        // Force completion of open elems
                     bridge.marshal(context, jaxbObject, os, null);
+                    return;
                 }
-                return;
             }
             
             bridge.marshal(context,jaxbObject,sw);                
