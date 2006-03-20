@@ -203,10 +203,6 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return operation;
     }
 
-    public WSDLFault getFault(QName faultDetailName) {
-        return operation.getFault(faultDetailName);
-    }
-
     public void setInputExplicitBodyParts(boolean b) {
         explicitInputSOAPBodyParts = b;
     }

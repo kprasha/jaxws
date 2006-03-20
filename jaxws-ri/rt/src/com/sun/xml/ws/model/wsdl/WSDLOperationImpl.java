@@ -23,6 +23,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.util.QNameMap;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -39,11 +40,13 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
     private WSDLInputImpl input;
     private WSDLOutputImpl output;
     private final List<WSDLFaultImpl> faults;
+    private final QNameMap<WSDLFaultImpl> faultMap;
     protected Iterable<WSDLMessageImpl> messages;
 
     public WSDLOperationImpl(QName name) {
         this.name = name;
         this.faults = new ArrayList<WSDLFaultImpl>();
+        this.faultMap = new QNameMap<WSDLFaultImpl>();
     }
 
     public QName getName() {
@@ -82,12 +85,18 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         return faults;
     }
 
-    WSDLFault getFault(QName faultDetailName) {
+    public WSDLFault getFault(QName faultDetailName) {
+        WSDLFaultImpl fault = faultMap.get(faultDetailName);
+        if(fault != null)
+            return fault;
+
         for(WSDLFaultImpl fi:faults){
             assert fi.getMessage().parts().iterator().hasNext();
             WSDLPartImpl part = fi.getMessage().parts().iterator().next();
-            if(part.getDescriptor().name().equals(faultDetailName))
+            if(part.getDescriptor().name().equals(faultDetailName)){
+                faultMap.put(faultDetailName, fi);
                 return fi;
+            }
         }
         return null;
     }

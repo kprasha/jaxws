@@ -40,4 +40,44 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
      * Gets the {link WSDLFault} corresponding to wsdl:fault of this operation.
      */
     Iterable<? extends WSDLFault> getFaults();
+
+    /**
+     * Gives {@link WSDLFault} for the given soap fault detail value.
+     *
+     * <pre>
+     *
+     * Given a wsdl fault:
+     *
+     * &lt;wsdl:message nae="faultMessage">
+     *  &lt;wsdl:part name="fault" element="<b>ns:myException</b>/>
+     * &lt;/wsdl:message>
+     *
+     * &lt;wsdl:portType>
+     *  &lt;wsdl:operation ...>
+     *      &lt;wsdl:fault name="aFault" message="faultMessage"/>
+     *  &lt;/wsdl:operation>
+     * &lt;wsdl:portType>
+     *
+     *
+     * For example given a soap 11 soap message:
+     *
+     * &lt;soapenv:Fault>
+     *      ...
+     *      &lt;soapenv:detail>
+     *          &lt;<b>ns:myException</b>>
+     *              ...
+     *          &lt;/ns:myException>
+     *      &lt;/soapenv:detail>
+     *
+     * QName faultQName = new QName(ns, "myException");
+     * WSDLFault wsdlFault  = getFault(faultQName);
+     *
+     * The above call will return a WSDLFault that abstracts wsdl:portType/wsdl:operation/wsdl:fault.
+     *
+     * </pre>
+     *
+     * @param faultDetailName tag name of the element inside soaenv:Fault/detail/, must be non-null.
+     * @return returns null if a wsdl fault corresponding to the detail entry name not found.
+     */
+    WSDLFault getFault(QName faultDetailName);
 }
