@@ -37,6 +37,8 @@ import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.util.Pool;
 
@@ -378,10 +380,10 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      *
      * Returns attachment parameters if/any.
      */
-    private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, WSDLBoundPortType boundPortType, Mode mode) {
+    private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, WSDLBoundPortTypeImpl boundPortType, Mode mode) {
         QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
         RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
-        WSDLBoundOperation bo = boundPortType.get(opName);
+        WSDLBoundOperationImpl bo = boundPortType.get(opName);
         Map<Integer, ParameterImpl> bodyParams = new HashMap<Integer, ParameterImpl>();
         List<ParameterImpl> unboundParams = new ArrayList<ParameterImpl>();
         List<ParameterImpl> attachParams = new ArrayList<ParameterImpl>();
@@ -404,7 +406,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                     attachParams.add(param);
                 }else if(paramBinding.isBody()){
                     if(bo != null){
-                        WSDLPart p = bo.getPart(param.getPartName(), mode);
+                        WSDLPartImpl p = bo.getPart(param.getPartName(), mode);
                         if(p != null)
                             bodyParams.put(p.getIndex(), param);
                         else

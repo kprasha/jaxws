@@ -129,7 +129,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
 
 
     public ParameterBinding getBinding(QName operation, String part, Mode mode) {
-        WSDLBoundOperation op = get(operation);
+        WSDLBoundOperationImpl op = get(operation);
         if (op == null) {
             //TODO throw exception
             return null;
@@ -141,7 +141,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public String getMimeType(QName operation, String part, Mode mode) {
-        WSDLBoundOperation op = get(operation);
+        WSDLBoundOperationImpl op = get(operation);
         if (Mode.IN == mode)
             return op.getMimeTypeForInputPart(part);
         else

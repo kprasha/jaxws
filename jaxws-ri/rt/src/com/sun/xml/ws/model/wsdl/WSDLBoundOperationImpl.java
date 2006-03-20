@@ -81,7 +81,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
      * @param mode     must be non-null
      * @return null if no part is found
      */
-    public WSDLPart getPart(String partName, Mode mode){
+    public WSDLPartImpl getPart(String partName, Mode mode){
         if(mode==Mode.IN){
             return inParts.get(partName);
         }else if(mode==Mode.OUT){
