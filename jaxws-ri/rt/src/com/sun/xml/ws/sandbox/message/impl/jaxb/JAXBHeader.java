@@ -35,6 +35,8 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import java.io.OutputStream;
+import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -160,10 +162,21 @@ public final class JAXBHeader extends AbstractHeaderImpl {
         return bridge.unmarshal(context,new JAXBBridgeSource(this.bridge,this.context,jaxbObject));
     }
 
-    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
+    public void writeTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
-            bridge.marshal(context,jaxbObject,w);
-        } catch (JAXBException e) {
+            // If writing to Zephyr, get output stream and use JAXB UTF-8 writer
+            if (sw instanceof Map) {
+                OutputStream os = (OutputStream) ((Map) sw).get("sjsxp-outputstream");
+                if (os != null) {
+                    sw.writeCharacters("");        // Force completion of open elems
+                    bridge.marshal(context, jaxbObject, os, sw.getNamespaceContext());
+                    return;
+                }
+            }
+            
+            bridge.marshal(context,jaxbObject,sw);
+        } 
+        catch (JAXBException e) {
             throw new XMLStreamException2(e);
         }
     }
