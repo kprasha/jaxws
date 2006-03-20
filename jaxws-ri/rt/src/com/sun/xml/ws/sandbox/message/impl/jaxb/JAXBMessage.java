@@ -244,7 +244,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
                 OutputStream os = (OutputStream) ((Map) sw).get("sjsxp-outputstream");
                 if (os != null) {
                     sw.writeCharacters("");        // Force completion of open elems
-                    bridge.marshal(context, jaxbObject, os, null);
+                    bridge.marshal(context, jaxbObject, os, sw.getNamespaceContext());
                     return;
                 }
             }
