@@ -17,11 +17,6 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
     QName getName();
 
     /**
-     * Gets the local name portion of {@link #getName()}.
-     */
-    String getLocalName();
-
-    /**
      * Gets the wsdl:input of this operation
      */
     WSDLInput getInput();
@@ -34,13 +29,15 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
      */
     WSDLOutput getOutput();
 
+
+
     /**
      * Returns true if this operation is an one-way operation.
      */
     boolean isOneWay();
 
     /**
-     * Gets the fault message of this operation.
+     * Gets the {link WSDLFault} corresponding to wsdl:fault of this operation.
      */
     Iterable<? extends WSDLFault> getFaults();
 }

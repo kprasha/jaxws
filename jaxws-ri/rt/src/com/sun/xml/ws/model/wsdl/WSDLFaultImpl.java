@@ -22,7 +22,7 @@ public class WSDLFaultImpl extends AbstractExtensibleImpl implements WSDLFault {
         return name;
     }
 
-    public WSDLMessage getMessage() {
+    public WSDLMessageImpl getMessage() {
         return message;
     }
 

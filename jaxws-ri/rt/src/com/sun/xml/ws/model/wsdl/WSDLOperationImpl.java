@@ -50,10 +50,6 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         return name;
     }
 
-    public String getLocalName() {
-        return name.getLocalPart();
-    }
-
     public String getParameterOrder() {
         return parameterOrder;
     }
@@ -84,6 +80,16 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
 
     public Iterable<WSDLFaultImpl> getFaults() {
         return faults;
+    }
+
+    WSDLFault getFault(QName faultDetailName) {
+        for(WSDLFaultImpl fi:faults){
+            assert fi.getMessage().parts().iterator().hasNext();
+            WSDLPartImpl part = fi.getMessage().parts().iterator().next();
+            if(part.getDescriptor().name().equals(faultDetailName))
+                return fi;
+        }
+        return null;
     }
 
     public void addFault(WSDLFaultImpl fault) {

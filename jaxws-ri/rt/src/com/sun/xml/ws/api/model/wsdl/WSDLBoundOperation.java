@@ -18,83 +18,48 @@ public interface WSDLBoundOperation extends WSDLObject, WSDLExtensible {
     QName getName();
 
     /**
-     * Short-cut for {@code getOperation().getLocalName()}
-     */
-    String getLocalName();
-
-    /**
-     * Gets {@link com.sun.xml.ws.api.model.wsdl.WSDLPart} for the given wsdl:input or wsdl:output part
-     *
-     * @param partName must be non-null
-     * @param mode     must be non-null
-     * @return null if no part is found
-     */
-    WSDLPart getPart(String partName, Mode mode);
-
-    /**
-     * Map of wsdl:input part name and the binding as {@link ParameterBinding}
-     *
-     * @return empty Map if there is no parts
-     */
-    Map<String, ParameterBinding> getInputParts();
-
-    /**
-     * Map of wsdl:output part name and the binding as {@link ParameterBinding}
-     *
-     * @return empty Map if there is no parts
-     */
-    Map<String, ParameterBinding> getOutputParts();
-
-    /**
-     * Map of mime:content@part and the mime type from mime:content@type for wsdl:output
-     *
-     * @return empty Map if there is no parts
-     */
-    Map<String, String> getInputMimeTypes();
-
-    /**
-     * Map of mime:content@part and the mime type from mime:content@type for wsdl:output
-     *
-     * @return empty Map if there is no parts
-     */
-    Map<String, String> getOutputMimeTypes();
-
-    /**
-     * Gets {@link ParameterBinding} for a given wsdl part in wsdl:input
-     *
-     * @param part Name of wsdl:part, must be non-null
-     * @return null if the part is not found.
-     */
-    ParameterBinding getInputBinding(String part);
-
-    /**
-     * Gets {@link ParameterBinding} for a given wsdl part in wsdl:output
-     *
-     * @param part Name of wsdl:part, must be non-null
-     * @return null if the part is not found.
-     */
-    ParameterBinding getOutputBinding(String part);
-
-    /**
-     * Gets the MIME type for a given wsdl part in wsdl:input
-     *
-     * @param part Name of wsdl:part, must be non-null
-     * @return null if the part is not found.
-     */
-    String getMimeTypeForInputPart(String part);
-
-    /**
-     * Gets the MIME type for a given wsdl part in wsdl:output
-     *
-     * @param part Name of wsdl:part, must be non-null
-     * @return null if the part is not found.
-     */
-    String getMimeTypeForOutputPart(String part);
-
-    /**
      * Gets the wsdl:portType/wsdl:operation model - {@link WSDLOperation},
      * associated with this binding operation.
      * @return non-null {@link WSDLOperation}
      */
     public WSDLOperation getOperation();
+
+    /**
+     * Gives {@link WSDLFault} for the given soap fault detail value.
+     *
+     * <pre>
+     *
+     * Given a wsdl fault:
+     *
+     * &lt;wsdl:message nae="faultMessage">
+     *  &lt;wsdl:part name="fault" element="<b>ns:myException</b>/>
+     * &lt;/wsdl:message>
+     *
+     * &lt;wsdl:portType>
+     *  &lt;wsdl:operation ...>
+     *      &lt;wsdl:fault name="aFault" message="faultMessage"/>
+     *  &lt;/wsdl:operation>
+     * &lt;wsdl:portType>
+     *
+     *
+     * For example given a soap 11 soap message:
+     *
+     * &lt;soapenv:Fault>
+     *      ...
+     *      &lt;soapenv:detail>
+     *          &lt;<b>ns:myException</b>>
+     *              ...
+     *          &lt;/ns:myException>
+     *      &lt;/soapenv:detail>
+     *
+     * QName faultQName = new QName(ns, "myException");
+     * WSDLFault wsdlFault  = getFault(faultQName);
+     *
+     * The above call will return a WSDLFault that abstracts wsdl:portType/wsdl:operation/wsdl:fault.
+     *
+     * </pre>
+     *
+     * @return returns null if a wsdl fault corresponding to the detail entry name not found.
+     */
+    WSDLFault getFault(QName faultDetailName);
 }

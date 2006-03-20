@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 
@@ -1302,7 +1303,7 @@ public class RuntimeModeler {
 
     private WSDLPart getPart(QName opName, String partName, Mode mode){
         if(binding != null){
-            WSDLBoundOperation bo = binding.getBinding().get(opName);
+            WSDLBoundOperationImpl bo = binding.getBinding().get(opName);
             if(bo != null)
                 return bo.getPart(partName, mode);
         }

@@ -23,6 +23,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.istack.Nullable;
 
 import javax.jws.soap.SOAPBinding.Style;
@@ -53,7 +54,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
 
     private final Map<String, WSDLPartImpl> inParts;
     private final Map<String, WSDLPartImpl> outParts;
-    private WSDLOperation operation;
+    private WSDLOperationImpl operation;
 
     /**
      *
@@ -73,10 +74,13 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return name;
     }
 
-    public String getLocalName() {
-        return name.getLocalPart();
-    }
-
+    /**
+     * Gets {@link com.sun.xml.ws.api.model.wsdl.WSDLPart} for the given wsdl:input or wsdl:output part
+     *
+     * @param partName must be non-null
+     * @param mode     must be non-null
+     * @return null if no part is found
+     */
     public WSDLPart getPart(String partName, Mode mode){
         if(mode==Mode.IN){
             return inParts.get(partName);
@@ -93,22 +97,48 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
             outParts.put(part.getName(), part);
     }
 
+    /**
+     * Map of wsdl:input part name and the binding as {@link ParameterBinding}
+     *
+     * @return empty Map if there is no parts
+     */
     public Map<String, ParameterBinding> getInputParts() {
         return inputParts;
     }
 
+    /**
+     * Map of wsdl:output part name and the binding as {@link ParameterBinding}
+     *
+     * @return empty Map if there is no parts
+     */
     public Map<String, ParameterBinding> getOutputParts() {
         return outputParts;
     }
 
+    /**
+     * Map of mime:content@part and the mime type from mime:content@type for wsdl:output
+     *
+     * @return empty Map if there is no parts
+     */
     public Map<String, String> getInputMimeTypes() {
         return inputMimeTypes;
     }
 
+    /**
+     * Map of mime:content@part and the mime type from mime:content@type for wsdl:output
+     *
+     * @return empty Map if there is no parts
+     */
     public Map<String, String> getOutputMimeTypes() {
         return outputMimeTypes;
     }
 
+    /**
+     * Gets {@link ParameterBinding} for a given wsdl part in wsdl:input
+     *
+     * @param part Name of wsdl:part, must be non-null
+     * @return null if the part is not found.
+     */
     public ParameterBinding getInputBinding(String part){
         if(emptyInputBody == null){
             if(inputParts.get(" ") != null)
@@ -126,6 +156,12 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return block;
     }
 
+    /**
+     * Gets {@link ParameterBinding} for a given wsdl part in wsdl:output
+     *
+     * @param part Name of wsdl:part, must be non-null
+     * @return null if the part is not found.
+     */
     public ParameterBinding getOutputBinding(String part){
         if(emptyOutputBody == null){
             if(outputParts.get(" ") != null)
@@ -143,19 +179,32 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return block;
     }
 
+    /**
+     * Gets the MIME type for a given wsdl part in wsdl:input
+     *
+     * @param part Name of wsdl:part, must be non-null
+     * @return null if the part is not found.
+     */
     public String getMimeTypeForInputPart(String part){
         return inputMimeTypes.get(part);
     }
 
+    /**
+     * Gets the MIME type for a given wsdl part in wsdl:output
+     *
+     * @param part Name of wsdl:part, must be non-null
+     * @return null if the part is not found.
+     */
     public String getMimeTypeForOutputPart(String part){
         return outputMimeTypes.get(part);
     }
 
-    /**
-     * TODO
-     */
     public WSDLOperation getOperation() {
         return operation;
+    }
+
+    public WSDLFault getFault(QName faultDetailName) {
+        return operation.getFault(faultDetailName);
     }
 
     public void setInputExplicitBodyParts(boolean b) {
