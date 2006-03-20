@@ -140,7 +140,87 @@ public abstract class WSDLParserExtension {
     public boolean portTypeOperationFault(WSDLOperation op, XMLStreamReader reader) {
         return false;
     }
+    
+    public boolean definitionsElements(XMLStreamReader reader) {
+        return false;
+    }
+    
+    public boolean bindingElements(WSDLBoundPortType binding, XMLStreamReader reader) {
+        return false;
+    }
+    
+    public void bindingAttributes(WSDLBoundPortType binding, XMLStreamReader reader) {
+    }
+    
+    public boolean portTypeElements(WSDLPortType portType, XMLStreamReader reader) {
+        return false;
+    }
+    
+    public void portTypeAttributes(WSDLPortType portType, XMLStreamReader reader) {
+    }
 
+    public boolean portTypeOperationElements(WSDLOperation operation, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void portTypeOperationAttributes(WSDLOperation operation, XMLStreamReader reader) {
+    }
+
+    public boolean bindingOperationElements(WSDLBoundOperation operation, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void bindingOperationAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
+    }
+
+    public boolean messageElements(WSDLMessage msg, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void messageAttributes(WSDLMessage msg, XMLStreamReader reader) {
+    }
+
+    public boolean portTypeOperationInputElements(WSDLInput input, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void portTypeOperationInputAttributes(WSDLInput input, XMLStreamReader reader) {
+    }
+
+    public boolean portTypeOperationOutputElements(WSDLOutput output, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void portTypeOperationOutputAttributes(WSDLOutput output, XMLStreamReader reader) {
+    }
+
+    public boolean portTypeOperationFaultElements(WSDLFault fault, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void portTypeOperationFaultAttributes(WSDLFault fault, XMLStreamReader reader) {
+    }
+
+    public boolean bindingOperationInputElements(WSDLBoundOperation operation, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void bindingOperationInputAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
+    }
+
+    public boolean bindingOperationOutputElements(WSDLBoundOperation operation, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void bindingOperationOutputAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
+    }
+
+    public boolean bindingOperationFaultElements(WSDLBoundOperation operation, XMLStreamReader reader) {
+        return false;
+    }
+
+    public void bindingOperationFaultAttributes(WSDLBoundOperation operation, XMLStreamReader reader) {
+    }
 
     // TODO: complete the rest of the callback
 
