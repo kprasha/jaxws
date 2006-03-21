@@ -19,7 +19,7 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
-import com.sun.xml.stream.buffer.XMLStreamBufferMark;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.sandbox.message.impl.Util;
 import com.sun.istack.FinalArrayList;
@@ -35,7 +35,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class StreamHeader12 extends StreamHeader {
 
-    public StreamHeader12(XMLStreamReader reader, XMLStreamBufferMark mark) {
+    public StreamHeader12(XMLStreamReader reader, XMLStreamBuffer mark) {
         super(reader, mark);
     }
 
