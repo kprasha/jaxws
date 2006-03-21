@@ -21,7 +21,6 @@ package com.sun.xml.ws.sandbox.message.impl.jaxb;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -212,10 +211,9 @@ public final class JAXBMessage extends AbstractMessageImpl {
     public XMLStreamReader readPayload() throws XMLStreamException {
         try {
             if(infoset==null) {
-                MutableXMLStreamBuffer mutableInfoset = new MutableXMLStreamBuffer();                
-                XMLStreamBufferResult sbr = new XMLStreamBufferResult(mutableInfoset);
+                XMLStreamBufferResult sbr = new XMLStreamBufferResult();
                 bridge.marshal(context,jaxbObject,sbr);
-                infoset = mutableInfoset;
+                infoset = sbr.getXMLStreamBuffer();
             }
             return infoset.readAsXMLStreamReader();
         } catch (JAXBException e) {

@@ -50,7 +50,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
     // private final XMLStreamReader reader;
 
     // consider caching
-    // private final XMLStreamBuffer buffer;
+    // private final MutableXMLStreamBuffer buffer;
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         XMLStreamReader reader = createXMLStreamReader(in);
@@ -158,7 +158,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
             }
 
             // Mark
-            XMLStreamBufferMark mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
+            XMLStreamBuffer mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
             // Create Header
             headers.add(createHeader(reader, mark));
 
@@ -171,7 +171,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
         return buffer;
     }
 
-    protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBufferMark mark);
+    protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark);
 
     protected XMLStreamReader createXMLStreamReader(InputStream in) {
         // TODO: we should definitely let Decode owns one XMLStreamReader instance
@@ -180,7 +180,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
     }
 
     private MutableXMLStreamBuffer createXMLStreamBuffer() {
-        // TODO: Decode should own one XMLStreamBuffer for reuse
+        // TODO: Decode should own one MutableXMLStreamBuffer for reuse
         // since it is more efficient. ISSUE: possible issue with
         // lifetime of information in the buffer if accessed beyond
         // the pipe line.

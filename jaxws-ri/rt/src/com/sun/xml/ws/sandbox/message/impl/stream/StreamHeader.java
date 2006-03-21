@@ -22,10 +22,8 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.istack.FinalArrayList;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
-import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
@@ -115,7 +113,7 @@ public abstract class StreamHeader implements Header {
      * @param mark
      *      The start of the buffered header content.
      */
-    protected StreamHeader(XMLStreamReader reader, XMLStreamBufferMark mark) {
+    protected StreamHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
         assert reader!=null && mark!=null;
         _mark = mark;
         _localName = reader.getLocalName();
@@ -136,9 +134,7 @@ public abstract class StreamHeader implements Header {
         _namespaceURI = reader.getNamespaceURI();
         attributes = processHeaderAttributes(reader);
         // cache the body
-        MutableXMLStreamBuffer b = new MutableXMLStreamBuffer();
-        b.createFromXMLStreamReader(reader);
-        _mark = b;
+        _mark = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
     }
 
     public boolean isMustUnderstood() {

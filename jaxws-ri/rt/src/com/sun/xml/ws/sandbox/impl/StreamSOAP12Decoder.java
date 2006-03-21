@@ -1,6 +1,6 @@
 package com.sun.xml.ws.sandbox.impl;
 
-import com.sun.xml.stream.buffer.XMLStreamBufferMark;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader12;
@@ -18,7 +18,7 @@ final class StreamSOAP12Decoder extends StreamSOAPDecoder{
         super(SOAPVersion.SOAP_12);
     }
 
-    protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBufferMark mark) {
+    protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
         return new StreamHeader12(reader, mark);
     }
 }

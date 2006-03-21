@@ -256,9 +256,7 @@ public final class StreamMessage extends AbstractMessageImpl {
         assert unconsumed();
         try {
             // copy the payload
-            MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-            xsb.createFromXMLStreamReader(reader);
-
+            XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
             reader = xsb.readAsXMLStreamReader();
 
             return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, xsb.readAsXMLStreamReader(), soapVersion);

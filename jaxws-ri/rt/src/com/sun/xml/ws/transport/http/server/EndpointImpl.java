@@ -217,12 +217,12 @@ public class EndpointImpl extends Endpoint {
         if (metadata != null) {
             Transformer transformer = XmlUtil.newTransformer();
             for(Source source: metadata) {
-                MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
                 try {
-                    transformer.transform(source, new XMLStreamBufferResult(xsb));
+                    XMLStreamBufferResult xsbr = new XMLStreamBufferResult();
+                    transformer.transform(source, xsbr);
                     String systemId = source.getSystemId();
 
-                    r.add(SDDocumentSource.create(new URL(systemId),xsb));
+                    r.add(SDDocumentSource.create(new URL(systemId),xsbr.getXMLStreamBuffer()));
                 } catch (TransformerException te) {
                     throw new ServerRtException("server.rt.err",te);
                 } catch (IOException te) {
