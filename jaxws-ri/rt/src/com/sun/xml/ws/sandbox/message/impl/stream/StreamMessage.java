@@ -322,7 +322,7 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     private static void create(SOAPVersion v) {
-        int base = SOAPVersion.SOAP_11.ordinal()*3;
+        int base = v.ordinal()*3;
         DEFAULT_TAGS[base  ] = new TagInfoset(v.nsUri,"Envelope","S",EMPTY_ATTS,"S",v.nsUri);
         DEFAULT_TAGS[base+1] = new TagInfoset(v.nsUri,"Header","S",EMPTY_ATTS);
         DEFAULT_TAGS[base+2] = new TagInfoset(v.nsUri,"Body","S",EMPTY_ATTS);
