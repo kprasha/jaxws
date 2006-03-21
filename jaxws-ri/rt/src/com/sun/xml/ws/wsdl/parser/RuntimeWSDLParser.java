@@ -177,6 +177,7 @@ public class RuntimeWSDLParser {
         }
         targetNamespace = oldTargetNamespace;
         reader.close();
+        extension.finished(wsdlDoc);
     }
     
     private void parseService(XMLStreamReader reader) {
