@@ -21,9 +21,12 @@
 package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.server.ServerRtException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hides {@link HttpContext} so that {@link EndpointImpl}
@@ -41,7 +44,13 @@ final class HttpEndpoint {
     private final HttpAdapter adapter;
 
     public HttpEndpoint(WSEndpoint endpoint) {
-        this.adapter = new HttpAdapter(endpoint, null);
+        Map<String, String> addressMap = null;
+        WSDLPort port = endpoint.getPort();
+        if (port != null) {
+            addressMap = new HashMap<String, String>();
+            addressMap.put(port.getName().getLocalPart(), "");
+        }
+        this.adapter = new HttpAdapter(endpoint, addressMap);
     }
 
     public void publish(String address) {
