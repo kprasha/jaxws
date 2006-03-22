@@ -97,6 +97,7 @@ public class RuntimeWSDLParser {
         RuntimeWSDLParser parser = new RuntimeWSDLParser(new EntityResolverWrapper(resolver),extensions);
         parser.parseWSDL(wsdlLoc);
         parser.wsdlDoc.freeze();
+        parser.extension.finished(parser.wsdlDoc);
         return parser.wsdlDoc;
     }
     
@@ -105,6 +106,7 @@ public class RuntimeWSDLParser {
         RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver,extensions);
         parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
+        parser.extension.finished(parser.wsdlDoc);
         return parser.wsdlDoc;
     }
     
@@ -177,7 +179,6 @@ public class RuntimeWSDLParser {
         }
         targetNamespace = oldTargetNamespace;
         reader.close();
-        extension.finished(wsdlDoc);
     }
     
     private void parseService(XMLStreamReader reader) {
