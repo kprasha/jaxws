@@ -21,13 +21,7 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.model.wsdl.*;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -44,7 +38,7 @@ import java.util.Map;
  *
  * @author Vivek Pandey
  */
-public final class WSDLModelImpl implements WSDLModel {
+public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLModel {
     private final Map<QName, WSDLMessageImpl> messages = new HashMap<QName, WSDLMessageImpl>();
     private final Map<QName, WSDLPortTypeImpl> portTypes = new HashMap<QName, WSDLPortTypeImpl>();
     private final Map<QName, WSDLBoundPortTypeImpl> bindings = new HashMap<QName, WSDLBoundPortTypeImpl>();

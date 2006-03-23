@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides abstraction of a wsdl document.
+ * Provides abstraction of wsdl:definitions.
  *
  * @author Vivek Pandey
  */
-public interface WSDLModel {
+public interface WSDLModel extends WSDLObject, WSDLExtensible{
 
     /**
      * Gets {@link WSDLPortType} that models <code>wsdl:portType</code>
