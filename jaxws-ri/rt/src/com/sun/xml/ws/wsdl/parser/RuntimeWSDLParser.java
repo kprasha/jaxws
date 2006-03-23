@@ -184,6 +184,7 @@ public class RuntimeWSDLParser {
     private void parseService(XMLStreamReader reader) {
         String serviceName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
         WSDLServiceImpl service = new WSDLServiceImpl(new QName(targetNamespace, serviceName));
+        extension.serviceAttributes(service,reader);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
             if(WSDLConstants.QNAME_PORT.equals(name)){
@@ -205,6 +206,8 @@ public class RuntimeWSDLParser {
         QName bindingName = ParserUtil.getQName(reader, binding);
         QName portQName = new QName(service.getName().getNamespaceURI(), portName);
         WSDLPortImpl port = new WSDLPortImpl(service, portQName, bindingName);
+        
+        extension.portAttributes(port,reader);
         
         String location = null;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
