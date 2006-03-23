@@ -135,7 +135,6 @@ public class HTTPWxfClient {
                 throw new ParseException("unexpected response: " + wsdl);
             }
         }
-        responseDoc.replaceChild(wsdl, envelope);
         if (true) { // temporary
             javax.xml.transform.Transformer xFormer =
                 javax.xml.transform.TransformerFactory.newInstance().
@@ -147,6 +146,7 @@ public class HTTPWxfClient {
                 new javax.xml.transform.stream.StreamResult(System.err));
             System.err.println("\n------------------------------");
         }
+        responseDoc.replaceChild(wsdl, envelope);
         
         return responseDoc;
     }
