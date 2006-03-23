@@ -8,7 +8,10 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.handler.HandlerProcessor.Direction;
+import com.sun.istack.Nullable;
+
 import java.util.List;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
@@ -27,10 +30,13 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     protected final boolean isClient;
     protected HandlerProcessor processor;
     protected boolean remedyActionTaken = false;
+
+    private final @Nullable WSDLPort port;
     
     
-    public HandlerPipe(Pipe next, boolean isClient) {
+    public HandlerPipe(Pipe next, WSDLPort port, boolean isClient) {
         super(next);
+        this.port = port;
         this.isClient = isClient;
     }
     
@@ -38,14 +44,16 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         super(next);
         this.cousinPipe = cousinPipe;
         this.isClient = isClient;
+        this.port = cousinPipe.port;
     }
     
     /**
-     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
+     * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
     protected HandlerPipe(HandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
         this.isClient = that.isClient;
+        this.port = that.port;
     }
     
     public Packet process( Packet packet) {
@@ -67,7 +75,13 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         }
         
         MessageUpdatableContext context = getContext(packet);
-        boolean isOneWay = (packet.isOneWay== null?false:packet.isOneWay);
+        boolean isOneWay = port!=null ?
+            packet.getMessage().isOneWay(port) /* we can determine this value from WSDL */ :
+            /*
+              otherwise use this value as an approximation, since this carries
+              the appliation's intention --- whether it was invokeOneway vs invoke,etc.
+             */
+            packet.expectReply;
         Packet reply;
         try {
             // Call handlers on Request

@@ -53,7 +53,7 @@ final class SyncMethodHandler extends MethodHandler {
 
     private final String soapAction;
 
-    private final Boolean isOneWay;
+    private final boolean isOneWay;
 
     private final SEIModel seiModel;
 
@@ -205,7 +205,8 @@ final class SyncMethodHandler extends MethodHandler {
             Packet req = new Packet(createRequestMessage(args));
 
             req.soapAction = soapAction;
-            req.isOneWay = isOneWay;
+            req.expectReply = isOneWay;
+            req.getMessage().assertOneWay(isOneWay);
 
             // process the message
             Packet reply = owner.doProcess(req,rc,receiver);

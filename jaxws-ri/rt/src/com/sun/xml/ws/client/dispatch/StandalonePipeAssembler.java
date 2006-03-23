@@ -32,7 +32,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
         HandlerPipe soapHandlerPipe = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
         if(binding.getSOAPVersion() != null) {
-            soapHandlerPipe = new SOAPHandlerPipe(binding, head, isClient);
+            soapHandlerPipe = new SOAPHandlerPipe(binding, wsdlModel, head, isClient);
             head = soapHandlerPipe;
         }
         
@@ -67,12 +67,12 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             HandlerPipe logicalHandlerPipe = null;
             if(binding.getSOAPVersion() != null) {
                 if(!((SOAPBindingImpl)binding).getLogicalHandlerChain().isEmpty()) {
-                    logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal, isClient);
+                    logicalHandlerPipe = new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
                     terminal = logicalHandlerPipe;
                 }
             } else {
                 //XML/HTTP Binding can have only LogicalHandlers
-                logicalHandlerPipe = new LogicalHandlerPipe(binding, terminal, isClient);
+                logicalHandlerPipe = new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
                 terminal = logicalHandlerPipe;
             }
 

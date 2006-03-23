@@ -16,7 +16,6 @@ import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
-import com.sun.xml.bind.api.BridgeContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
@@ -24,10 +23,8 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.http.HTTPException;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -175,8 +172,8 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         Packet response = process(request,requestContext,this);
     }
 
-    void setProperties(Packet packet, boolean isOneWay) {
-        packet.isOneWay = isOneWay;
+    void setProperties(Packet packet, boolean expectReply) {
+        packet.expectReply = expectReply;
 
         //not needed but leave for now --maybe mode is needed
         packet.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);

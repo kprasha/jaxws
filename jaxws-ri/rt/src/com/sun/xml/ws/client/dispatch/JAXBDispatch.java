@@ -105,8 +105,8 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
     }
 
     @Override
-    void setProperties(Packet packet, boolean isOneWay) {
-        super.setProperties(packet, isOneWay);
+    void setProperties(Packet packet, boolean expectReply) {
+        super.setProperties(packet,expectReply);
 
         setHttpRequestHeaders(packet);
         packet.otherProperties.put(JAXB_CONTEXT_PROPERTY, jaxbcontext); // KK - do we really need this?

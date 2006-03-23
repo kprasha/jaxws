@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
 import org.jvnet.staxex.XMLStreamReaderEx;
@@ -241,6 +242,76 @@ public abstract class Message {
     public final @Nullable WSDLBoundOperation getOperation(@NotNull WSDLPort port) {
         return getOperation(port.getBinding());
     }
+
+    private Boolean isOneWay;
+
+    /**
+     * Returns true if this message is a request message for a
+     * one way operation according to the given WSDL. False otherwise.
+     *
+     * <p>
+     * This method is functionally equivalent as doing
+     * {@code getOperation(port).getOperation().isOneWay()}
+     * (with proper null check and all.) But this method
+     * can sometimes work faster than that (for example,
+     * on the client side when used with SEI.)
+     *
+     * @param port
+     *      {@link Message}s are always created under the context of
+     *      one {@link WSDLPort} and they never go outside that context.
+     *      Pass in that "governing" {@link WSDLPort} object here.
+     *      We chose to receive this as a parameter instead of
+     *      keeping {@link WSDLPort} in a message, just to save the storage.
+     *
+     *      <p>
+     *      The implementation of this method involves caching the return
+     *      value, so the behavior is undefined if multiple callers provide
+     *      different {@link WSDLPort} objects, which is a bug of the caller.
+     */
+    public final boolean isOneWay(@NotNull WSDLPort port) {
+        if(isOneWay==null) {
+            // we don't know, so compute.
+            WSDLBoundOperation op = getOperation(port);
+            if(op!=null)
+                isOneWay = op.getOperation().isOneWay();
+            else
+                // the contract is to return true only when it's known to be one way.
+                isOneWay = false;
+        }
+        return isOneWay;
+    }
+
+    /**
+     * Makes an assertion that this {@link Message} is
+     * a request message for an one-way operation according
+     * to the context WSDL.
+     *
+     * <p>
+     * This method is really only intended to be invoked from within
+     * the JAX-WS runtime, and not by any code building on top of it.
+     *
+     * <p>
+     * This method can be invoked only when the caller "knows" what
+     * WSDL says. Also, there's no point in invoking this method if the caller
+     * is doing  {@code getOperation(port).getOperation().isOneWay()},
+     * or sniffing the payload tag name.
+     * In particular, this includes {@link DispatchImpl}.
+     *
+     * <p>
+     * Once called, this allows {@link #isOneWay(WSDLPort)} method
+     * to return a value quickly.
+     *
+     * @see #isOneWay(WSDLPort)
+     */
+    public final void assertOneWay(boolean value) {
+        // if two callers make different assertions, that's a bug.
+        // this is an assertion, not a runtime check because
+        // nobody outside JAX-WS should be using this.
+        assert isOneWay==null || isOneWay==value;
+
+        isOneWay = value;
+    }
+
 
     /**
      * Gets the local name of the payload element.

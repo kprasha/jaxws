@@ -105,11 +105,8 @@ final class LocalTransportPipe implements Pipe {
 
             String ct = getContentType(con);
 
-            if (request.isOneWay == Boolean.TRUE
-                || con.getStatus() == WSConnection.ONEWAY) {
-                request = new Packet(null);    // one way. no response given.
-                request.isOneWay = true;
-                return request;
+            if (con.getStatus() == WSConnection.ONEWAY) {
+                return request.createResponse(null);    // one way. no response given.
             }
 
             Packet reply = request.createResponse(null);

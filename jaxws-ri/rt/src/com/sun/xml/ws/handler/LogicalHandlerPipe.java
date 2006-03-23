@@ -9,6 +9,7 @@
 package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
@@ -32,8 +33,8 @@ public class LogicalHandlerPipe extends HandlerPipe {
     private WSBinding binding;    
     private List<LogicalHandler> logicalHandlers;    
     /** Creates a new instance of LogicalHandlerPipe */
-    public LogicalHandlerPipe(WSBinding binding, Pipe next, boolean isClient) {
-        super(next, isClient);
+    public LogicalHandlerPipe(WSBinding binding, WSDLPort port, Pipe next, boolean isClient) {
+        super(next, port, isClient);
         this.binding = binding;
     }
     
@@ -118,11 +119,6 @@ public class LogicalHandlerPipe extends HandlerPipe {
         }
     }
     
-    /**
-     * TODO:
-     * @param cloner
-     * @return
-     */
     public Pipe copy(PipeCloner cloner) {
         return new LogicalHandlerPipe(this,cloner);
     }

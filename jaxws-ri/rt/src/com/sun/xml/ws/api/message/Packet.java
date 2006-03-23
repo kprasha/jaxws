@@ -20,6 +20,8 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
@@ -29,6 +31,7 @@ import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.Dispatch;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -249,7 +252,10 @@ public final class Packet extends PropertySet {
      * Used only on the server side so that the transport
      * can close the connection early.
      *
-     * This field can be null.
+     * <p>
+     * This field can be null. While a message is being processed,
+     * this field can be set explicitly to null, to prevent
+     * future pipes from closing a transport.
      *
      * <p>
      * This property is set from the parameter
@@ -293,36 +299,77 @@ public final class Packet extends PropertySet {
     public String soapAction;
 
     /**
-     * Indicates whether the current message is a request of
-     * an one-way operation.
+     * A hint indicating that whether a transport should expect
+     * a reply back from the server.
      *
      * <p>
      * This property is used on the client-side for
-     * outbound messages, so that the producer of a {@link Message}
-     * can communicate to the intermediate (and terminal) {@link Pipe}s
-     * about its knowledge.
+     * outbound messages, so that a pipeline
+     * can communicate to the terminal (or intermediate) {@link Pipe}s
+     * about this knowledge.
      *
      * <p>
-     * When this property is {@link Boolean#TRUE}, it means that the producer of
-     * the {@link Message} definitely knows that it's a request
-     * {@link Message} is for an one-way operation.
+     * This property <b>MUST NOT</b> be used by 2-way transports
+     * that have the transport back channel. Those transports
+     * must always check a reply coming through the transport back
+     * channel regardless of this value, and act accordingly.
+     * (This is because the expectation of the client and
+     * that of the server can be different, for example because
+     * of a bug in user's configuration.)
      *
      * <p>
-     * When this property is {@link Boolean#FALSE}, it means that the producer of
-     * the {@link Message} definitely knows that it's expecting
-     * a response for this message.
+     * This property is for one-way transports, and more
+     * specifically for the coordinator that correlates sent requests
+     * and incoming replies, to decide whether to block
+     * until a response is received.
      *
      * <p>
-     * When this property is null, it means that the producer
-     * of the {@link Message} does not know if a reply is expected
-     * or not.
-     * (To give you some idea about when this can happen,
-     * sometimes we don't have any WSDL and so we can't tell.)
+     * Also note that this property is related to
+     * {@link WSDLOperation#isOneWay()} but not the same thing.
+     * In fact in general, they are completely orthogonal.
+     *
+     * For example, the calling application can choose to invoke
+     * {@link Dispatch#invoke(Object)} or {@link Dispatch#invokeOneWay(Object)}
+     * with an operation (which determines the value of this property),
+     * regardless of whether WSDL actually says it's one way or not.
+     * So these two booleans can take any combinations.
+     *
      *
      * <p>
+     * When this property is {@link Boolean#TRUE}, it means that
+     * the pipeline does not expect a reply from a server (and therefore
+     * the correlator should not block for a reply message
+     * -- if such a reply does arrive, it can be just ignored.)
+     *
+     * <p>
+     * When this property is {@link Boolean#FALSE}, it means that
+     * the pipeline expects a reply from a server (and therefore
+     * the correlator should block to see if a reply message is received,
+     *
+     * <p>
+     * This property is always set to {@link Boolean#TRUE} or
+     * {@link Boolean#FALSE} when used on the request message
+     * on the client side.
      * No other {@link Boolean} instances are allowed.
+     * <p>
+     *
+     * In all other situations, this property is null.
+     *
      */
     @Property(BindingProviderProperties.ONE_WAY_OPERATION)
+    public Boolean expectReply;
+
+
+    /**
+     * This property will be removed in a near future.
+     *
+     * <p>
+     * A part of what this flag represented moved to
+     * {@link #expectReply} and the other part was moved
+     * to {@link Message#isOneWay(WSDLPort)}. Please update
+     * your code soon, or risk breaking your build!!
+     */
+    @Deprecated
     public Boolean isOneWay;
 
     /**

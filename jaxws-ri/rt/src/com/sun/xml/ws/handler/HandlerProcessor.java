@@ -67,7 +67,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
     public enum RequestOrResponse { REQUEST, RESPONSE }
     public enum Direction { OUTBOUND, INBOUND }
     private Set<QName> understoodHeaders;
-    private List<Handler> handlers; // may be logical/soap mixed
+    private List<? extends Handler> handlers; // may be logical/soap mixed
     
     protected WSBinding binding;
     private int index = -1;
@@ -81,7 +81,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * @param chain A list of handler objects, which can
      * be protocol or logical handlers.
      */
-    public HandlerProcessor(WSBinding binding, List<Handler> chain, boolean isClient) {
+    public HandlerProcessor(WSBinding binding, List<? extends Handler> chain, boolean isClient) {
         if (chain == null) { // should only happen in testing
             chain = new ArrayList<Handler>();
         }
@@ -110,7 +110,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      *
      * @return The list of handlers, sorted by logical and then protocol.
      */
-    public List<Handler> getHandlerChain() {
+    public List<? extends Handler> getHandlerChain() {
         return handlers;
     }
     

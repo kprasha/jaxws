@@ -104,8 +104,7 @@ public class HttpTransportPipe implements Pipe {
 
             Map<String, List<String>> respHeaders = con.getHeaders();
 
-            if (request.isOneWay==Boolean.TRUE
-                || con.statusCode==WSConnection.ONEWAY) {
+            if (con.statusCode==WSConnection.ONEWAY) {
                 return request.createResponse(null);    // one way. no response given.
             }
             String contentType = getContentType(respHeaders);
