@@ -27,6 +27,16 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
         this.extensions = extensions;
     }
 
+    public void start(TypedXmlWriter root) {
+        for (WSDLGeneratorExtension e : extensions) 
+            e.start(root);
+    }
+
+    public void addDefinitionsExtension(TypedXmlWriter definitions) {
+        for (WSDLGeneratorExtension e : extensions) 
+            e.addDefinitionsExtension(definitions);
+    }
+
     public void addServiceExtension(TypedXmlWriter service) {
         for (WSDLGeneratorExtension e : extensions) 
             e.addServiceExtension(service);

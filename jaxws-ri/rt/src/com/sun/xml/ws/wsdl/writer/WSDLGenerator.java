@@ -263,6 +263,7 @@ public class WSDLGenerator {
         else
             serviceDefinitions._namespace(SOAP11_NAMESPACE, SOAP_PREFIX);
         serviceDefinitions.name(model.getServiceQName().getLocalPart());
+        extension.start(serviceDefinitions);
         if (serviceStream != portStream && portStream != null) {
             // generate an abstract and concrete wsdl
             portDefinitions = TXW.create(Definitions.class, portStream);
@@ -285,6 +286,7 @@ public class WSDLGenerator {
             Import _import = serviceDefinitions._import().namespace(model.getTargetNamespace());
             _import.location(schemaLoc);            
         }
+        extension.addDefinitionsExtension(serviceDefinitions);
 
         if (portDefinitions != null) {
             generateTypes();

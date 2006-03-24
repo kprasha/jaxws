@@ -37,6 +37,26 @@ import java.lang.reflect.Method;
  */
 public abstract class WSDLGeneratorExtension {
     /**
+     * This method is invoked so that the root element can be manipulated before
+     * any tags have been written. This allows to set e.g. namespace prefixes.
+     * <p/>
+     *
+     * @param definitions This is the root element of the generated WSDL.
+     */
+    public void start(TypedXmlWriter root) {
+    }
+
+    /**
+     * This method is invoked so that extensions to a <code>wsdl:definitions</code>
+     * element can be generated.
+     * <p/>
+     *
+     * @param definitions This is the <code>wsdl:defintions</code> element that the extension can be added to.
+     */
+    public void addDefinitionsExtension(TypedXmlWriter definitions) {
+    }
+
+    /**
      * This method is invoked so that extensions to a <code>wsdl:service</code>
      * element can be generated.
      * <p/>
