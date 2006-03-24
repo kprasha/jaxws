@@ -185,7 +185,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
                 methodDoc.addThrows(fault.getExceptionClass());
                 wsdlOp.putFault(fault.getName(), fault.getExceptionClass());
             }
-            
+
             //It should be the last thing to invoke after JMethod is built completely
             extension.writeMethodAnnotations(wsdlOp, m);
         }
