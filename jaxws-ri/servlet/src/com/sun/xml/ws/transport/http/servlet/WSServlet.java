@@ -54,6 +54,20 @@ public final class WSServlet extends HttpServlet {
             delegate.doGet(request,response,getServletContext());
         }
     }
+    
+    protected void doPut( HttpServletRequest request, HttpServletResponse response)
+        throws ServletException {
+        if (delegate != null) {
+            delegate.doPut(request,response,getServletContext());
+        }
+    }
+        
+    protected void doDelete( HttpServletRequest request, HttpServletResponse response)
+        throws ServletException {
+        if (delegate != null) {
+            delegate.doDelete(request,response,getServletContext());
+        }
+    }
 
     private WSServletDelegate delegate = null;
 
@@ -64,8 +78,6 @@ public final class WSServlet extends HttpServlet {
         "com.sun.xml.ws.server.http.servletDelegate";
     public static final String JAXWS_RI_PROPERTY_PUBLISH_WSDL =
         "com.sun.xml.ws.server.http.publishWSDL";
-    public static final String JAXWS_RI_PROPERTY_PUBLISH_MODEL =
-        "com.sun.xml.ws.server.http.publishModel";
     public static final String JAXWS_RI_PROPERTY_PUBLISH_STATUS_PAGE =
         "com.sun.xml.ws.server.http.publishStatusPage";
 

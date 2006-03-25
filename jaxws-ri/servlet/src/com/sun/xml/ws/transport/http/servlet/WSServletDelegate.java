@@ -177,6 +177,60 @@ final class WSServletDelegate {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
+    
+    /**
+     * Handles HTTP PUT for XML/HTTP binding based endpoints
+     */
+    public void doPut(HttpServletRequest request, HttpServletResponse response, ServletContext context)
+        throws ServletException {
+
+        try {
+            ServletAdapter target = getTarget(request);
+            if (target != null) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest(defaultLocalizer.localize(
+                            messageFactory.getMessage(
+                                "servlet.trace.gotRequestForEndpoint",
+                                target.name)));
+                }
+            } else {
+                Localizer localizer = getLocalizerFor(request);
+                writeNotFoundErrorPage(localizer, response, "Invalid request");
+                return;
+            }
+            WSBinding binding = target.getEndpoint().getBinding();
+            if (binding.getBindingId().equals(HTTPBinding.HTTP_BINDING)) {
+                target.handle(context, request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            }
+        } catch (JAXWSExceptionBase e) {
+            logger.log(Level.SEVERE, defaultLocalizer.localize(e), e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (Throwable e) {
+            if (e instanceof Localizable) {
+                logger.log(
+                    Level.SEVERE,
+                    defaultLocalizer.localize((Localizable) e),
+                    e);
+            } else {
+                logger.log(Level.SEVERE, "caught throwable", e);
+            }
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    
+    /**
+     * Handles HTTP DELETE for XML/HTTP binding based endpoints
+     */
+    public void doDelete(HttpServletRequest request, HttpServletResponse response, ServletContext context)
+        throws ServletException {
+
+        // At preseent, there is no difference for between PUT and DELETE processing
+        doPut(request, response, context);
+    }
+
 
     protected void writeNotFoundErrorPage(
         Localizer localizer,
