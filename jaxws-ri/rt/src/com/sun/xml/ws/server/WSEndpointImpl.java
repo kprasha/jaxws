@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
@@ -53,7 +54,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private boolean disposed;
 
 
-    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, InstanceResolver<T> instanceResolver, ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
+    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, InstanceResolver<T> instanceResolver, @Nullable ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
         this.binding = binding;
         this.soapVersion = binding.getSOAPVersion();
         this.container = container;
@@ -61,7 +62,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         this.instanceResolver = instanceResolver;
         this.serviceDef = serviceDef;
         this.seiModel = seiModel;
-        serviceDef.setOwner(this);
+        if (serviceDef != null) {
+            serviceDef.setOwner(this);
+        }
 
         PipelineAssembler assembler = PipelineAssemblerFactory.create(
                 Thread.currentThread().getContextClassLoader(), binding.getBindingId());

@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.server.Root;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import java.net.MalformedURLException;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
@@ -60,7 +61,7 @@ import java.util.concurrent.Executor;
  * <p>
  * This object also allows accumulated information to be retrieved.
  *
- * @author WS Development Team
+ * @author Jitendra Kotamraju
  */
 public class EndpointImpl extends Endpoint {
 
@@ -83,6 +84,7 @@ public class EndpointImpl extends Endpoint {
     private List<Source> metadata;
     private Executor executor;
     private Map<String,Object> properties = Collections.emptyMap(); // always non-null
+    private boolean stopped;
 
 
 
@@ -112,20 +114,40 @@ public class EndpointImpl extends Endpoint {
     public Object getImplementor() {
         return implementor;
     }
-
+    
     public void publish(String address) {
+        canPublish();
+        URL url;
+        try {
+            url = new URL(address);
+        } catch (MalformedURLException ex) {
+            throw new IllegalArgumentException("Cannot create URL for this address "+address);
+        }
+        if (!url.getProtocol().equals("http")) {
+            throw new IllegalArgumentException(url.getProtocol()+" protocol based address is not supported");
+        }
+        if (!url.getPath().startsWith("/")) {
+            throw new IllegalArgumentException("Incorrect WebService address="+address+
+                    ". The address's path should start with /");
+        }
         createEndpoint();
         ((HttpEndpoint)actualEndpoint).publish(address);
     }
 
     public void publish(Object serverContext) {
+        canPublish();
+        if (!com.sun.net.httpserver.HttpContext.class.isAssignableFrom(serverContext.getClass())) {
+            throw new IllegalArgumentException(serverContext.getClass()+" is not a supported context.");
+        }
         createEndpoint();
         ((HttpEndpoint)actualEndpoint).publish(serverContext);
     }
 
     public void stop() {
-        if(actualEndpoint!=null) {
+        if (isPublished()) {
             ((HttpEndpoint)actualEndpoint).stop();
+            actualEndpoint = null;
+            stopped = true;
         }
     }
 
@@ -139,10 +161,9 @@ public class EndpointImpl extends Endpoint {
 
     public void setMetadata(java.util.List<Source> metadata) {
         if (isPublished()) {
-            throw new IllegalStateException("Cannot set Metadata. Already published");
+            throw new IllegalStateException("Cannot set Metadata. Endpoint is already published");
         }
         this.metadata = metadata;
-
     }
 
     public Executor getExecutor() {
@@ -150,7 +171,6 @@ public class EndpointImpl extends Endpoint {
     }
 
     public void setExecutor(Executor executor) {
-        // TODO: the executor doesn't seem to be used by anyone.
         this.executor = executor;
     }
 
@@ -167,9 +187,6 @@ public class EndpointImpl extends Endpoint {
     * Also it checks if there is an available HTTP server implementation.
     */
     private void createEndpoint() {
-        if(isPublished())
-            throw new IllegalArgumentException("Already published");
-
         // Checks permission for "publishEndpoint"
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -233,4 +250,16 @@ public class EndpointImpl extends Endpoint {
 
         return r;
     }
+    
+    private void canPublish() {
+        if (isPublished()) {
+            throw new IllegalStateException(
+                "Cannot publish this endpoint. Endpoint has been already published.");
+        }
+        if (stopped) {
+            throw new IllegalStateException(
+                "Cannot publish this endpoint. Endpoint has been already stopped.");
+        }
+    }
+
 }
