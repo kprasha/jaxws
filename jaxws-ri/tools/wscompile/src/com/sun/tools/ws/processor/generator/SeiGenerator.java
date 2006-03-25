@@ -32,41 +32,25 @@ import com.sun.tools.ws.processor.model.java.JavaMethod;
 import com.sun.tools.ws.processor.model.java.JavaParameter;
 import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.JAXBTypeAndAnnotation;
-import com.sun.tools.ws.processor.util.DirectoryUtil;
-import com.sun.tools.ws.processor.util.GeneratedFileInfo;
-import com.sun.tools.ws.processor.util.IndentingWriter;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.ServiceFinder;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
-import javax.jws.HandlerChain;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.ws.Holder;
 import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileOutputStream;
+import javax.xml.ws.Holder;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Properties;
-import java.util.Map;
 
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
     private TJavaGeneratorExtension extension;
-
     public SeiGenerator() {
     }
 
@@ -133,10 +117,10 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
 
         //@WebService
         JAnnotationUse webServiceAnn = cls.annotate(cm.ref(WebService.class));
-        writeWebServiceAnnotation(service, port, webServiceAnn);
+        writeWebServiceAnnotation(port, webServiceAnn);
 
         //@HandlerChain
-        writeHandlerConfig(port, cls);
+        writeHandlerConfig(env.getNames().customJavaTypeClassName(port.getJavaInterface()), cls, wsdlModelInfo);
 
         //@SOAPBinding
         writeSOAPBinding(port, cls);
@@ -432,33 +416,10 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         }
     }
 
-    private void writeHandlerConfig(Port port, JDefinedClass cls) {
-        Element e = wsdlModelInfo.getHandlerConfig();
-        if(e == null)
-            return;
-        JAnnotationUse handlerChainAnn = cls.annotate(cm.ref(HandlerChain.class));
-        String fullName = env.getNames().customJavaTypeClassName(port.getJavaInterface());
-        NodeList nl = e.getElementsByTagNameNS(
-            "http://java.sun.com/xml/ns/javaee", "handler-chain");
-        if(nl.getLength() > 0){
-            Element hn = (Element)nl.item(0);
-            String fName = getHandlerConfigFileName(fullName);
-            handlerChainAnn.param("file", fName);
-            generateHandlerChainFile(e, fullName);
-        }
-    }
-
-     private String getHandlerConfigFileName(String fullName){
-        String name = Names.stripQualifier(fullName);
-        return name+"_handler.xml";
-    }
-
-    private void writeWebServiceAnnotation(Service service, Port port, JAnnotationUse wsa) {
-        String serviceName = service.getName().getLocalPart();
+    private void writeWebServiceAnnotation(Port port, JAnnotationUse wsa) {
         QName name = (QName) port.getProperty(ModelProperties.PROPERTY_WSDL_PORT_TYPE_NAME);
         wsa.param("name", name.getLocalPart());
         wsa.param("targetNamespace", name.getNamespaceURI());
-        wsa.param("wsdlLocation", wsdlLocation);
     }
 
 
@@ -494,38 +455,6 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             throw new GeneratorException(
                 "generator.nestedGeneratorError",
                 e);
-        }
-    }
-
-    private void generateHandlerChainFile(Element hChains, String name) {
-        String hcName = getHandlerConfigFileName(name);
-
-        File packageDir = DirectoryUtil.getOutputDirectoryFor(name, destDir, env);
-        File hcFile = new File(packageDir, hcName);
-
-        /* adding the file name and its type */
-        GeneratedFileInfo fi = new GeneratedFileInfo();
-        fi.setFile(hcFile);
-        fi.setType("HandlerConfig");
-        env.addGeneratedFile(fi);
-
-        try {
-            IndentingWriter p =
-                new IndentingWriter(
-                    new OutputStreamWriter(new FileOutputStream(hcFile)));
-            Transformer it = XmlUtil.newTransformer();
-
-            it.setOutputProperty(OutputKeys.METHOD, "xml");
-            it.setOutputProperty(OutputKeys.INDENT, "yes");
-            it.setOutputProperty(
-                "{http://xml.apache.org/xslt}indent-amount",
-                "2");
-            it.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            it.transform( new DOMSource(hChains), new StreamResult(p) );
-        } catch (Exception e) {
-            throw new GeneratorException(
-                    "generator.nestedGeneratorError",
-                    e);
         }
     }
 }
