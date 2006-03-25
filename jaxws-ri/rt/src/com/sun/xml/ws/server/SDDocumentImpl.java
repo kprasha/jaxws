@@ -74,8 +74,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
                         if (WSDLConstants.QNAME_PORT_TYPE.equals(name)) {
                             String pn = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
                             if (portTypeName != null) {
-                                if(!portTypeName.getLocalPart().equals(pn)
-                                   || !portTypeName.getNamespaceURI().equals(tns)) {
+                                if(portTypeName.getLocalPart().equals(pn)&&portTypeName.getNamespaceURI().equals(tns)) {
                                     hasPortType = true;
                                 }
                             }

@@ -168,13 +168,24 @@ public class Root {
 
 
         SDDocumentImpl primaryDoc = null;
+        boolean foundConcrete = false;
+        boolean foundAbstract = false;
         List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
         for(SDDocumentImpl doc : docList) {
             if (doc instanceof SDDocument.WSDL) {
                 SDDocument.WSDL wsdlDoc = (SDDocument.WSDL)doc;
                 if (wsdlDoc.hasService()) {
                     primaryDoc = doc;
-                    break;
+                    if (foundConcrete) {
+                        throw new ServerRtException("duplicate.primary.wsdl", doc.getSystemId() );
+                    }
+                    foundConcrete = true;
+                }
+                if (wsdlDoc.hasPortType()) {
+                    if (foundAbstract) {
+                        throw new ServerRtException("duplicate.abstract.wsdl", doc.getSystemId());
+                    }
+                    foundAbstract = true;
                 }
             }
         }
