@@ -101,7 +101,7 @@ public class EndpointImpl extends Endpoint {
      *      This is a backdoor method. Don't use it unless you know what you are doing.
      */
     public EndpointImpl(WSEndpoint wse, Object serverContext) {
-        actualEndpoint = new HttpEndpoint(wse);
+        actualEndpoint = new HttpEndpoint(wse, executor);
         ((HttpEndpoint)actualEndpoint).publish(serverContext);
         binding = wse.getBinding();
         implementor = null; // this violates the semantics, but hey, this is a backdoor.
@@ -212,7 +212,7 @@ public class EndpointImpl extends Endpoint {
             null
         );
         // Don't load HttpEndpoint class before as it may load HttpServer classes
-        actualEndpoint = new HttpEndpoint(wse);
+        actualEndpoint = new HttpEndpoint(wse, executor);
     }
 
     private <T> T getProperty(Class<T> type, String key) {

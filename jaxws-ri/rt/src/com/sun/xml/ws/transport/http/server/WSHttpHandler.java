@@ -20,6 +20,8 @@
 
 package com.sun.xml.ws.transport.http.server;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
@@ -30,19 +32,23 @@ import com.sun.xml.ws.util.localization.Localizer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * {@link HttpHandler} implementation that serves the actual request.
  *
- * @author WS Development Team
+ * @author Jitendra Kotamraju
  * @author Kohsuke Kawaguhi
  */
 final class WSHttpHandler implements HttpHandler {
 
     private static final String GET_METHOD = "GET";
     private static final String POST_METHOD = "POST";
+    private static final String HEAD_METHOD = "HEAD";
+    private static final String PUT_METHOD = "PUT";
+    private static final String DELETE_METHOD = "DELETE";
 
     private static final Logger logger =
         Logger.getLogger(
@@ -52,18 +58,32 @@ final class WSHttpHandler implements HttpHandler {
         new LocalizableMessageFactory("com.sun.xml.ws.resources.httpserver");
 
     private final HttpAdapter adapter;
+    private final Executor executor;
 
-    public WSHttpHandler(HttpAdapter adapter) {
+    public WSHttpHandler(@NotNull HttpAdapter adapter, @Nullable Executor executor) {
         assert adapter!=null;
         this.adapter = adapter;
+        this.executor = executor;
+    }
+    
+    /**
+     * Called by HttpServer when there is a matching request for the context
+     */
+    public void handle(HttpExchange msg) {
+        logger.fine("Received HTTP request:"+msg.getRequestURI());
+        if (executor != null) {
+            // Use application's Executor to handle request. Application may
+            // have set an executor using Endpoint.setExecutor().
+            executor.execute(new HttpHandlerRunnable(msg));
+        } else {
+            handleExchange(msg);
+        }
     }
 
-    public void handle(HttpExchange msg) {
+    public void handleExchange(HttpExchange msg) {
         WSConnection con = new ServerConnectionImpl(msg);
-
         try {
             logger.fine("Received HTTP request:"+msg.getRequestURI());
-
             String method = msg.getRequestMethod();
             if (method.equals(GET_METHOD)) {
                 String queryString = msg.getRequestURI().getQuery();
@@ -73,23 +93,41 @@ final class WSHttpHandler implements HttpHandler {
                 } else {
                     adapter.handle(con);
                 }
-            } else if (method.equals(POST_METHOD)) {
+            } else if (method.equals(POST_METHOD) || method.equals(HEAD_METHOD)
+                        || method.equals(PUT_METHOD) || method.equals(DELETE_METHOD)) {
                 adapter.handle(con);
             } else {
-                logger.warning(
-                    localizer.localize(
-                        messageFactory.getMessage(
-                            "unexpected.http.method", method)));
+                logger.warning(localizer.localize(messageFactory.getMessage(
+                        "unexpected.http.method", method)));
             }
         } catch(IOException e) {
-            logger.log(Level.WARNING, e.getMessage(),e);
+            logger.log(Level.WARNING, e.getMessage(), e);
         } finally {
             con.close();
         }
     }
+    
+    /**
+     * Wrapping the processing of request in a Runnable so that it can be
+     * executed in Executor.
+     */
+    class HttpHandlerRunnable implements Runnable {
+        final HttpExchange msg;
+
+        HttpHandlerRunnable(HttpExchange msg) {
+            this.msg = msg;
+        }
+
+        public void run() {
+            handleExchange(msg);
+        }
+    }
+
 
     /**
-     * Computes the address that was requested.
+     * Computes the Endpoint's address from the request. Use "Host" header
+     * so that it has correct address(IP address or someother hostname) through
+     * which the application reached the endpoint.
      *
      * @return
      *      a string like "http://foo.bar:1234/abc/def"

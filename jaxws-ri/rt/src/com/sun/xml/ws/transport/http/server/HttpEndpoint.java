@@ -27,6 +27,7 @@ import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.server.ServerRtException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Hides {@link HttpContext} so that {@link EndpointImpl}
@@ -36,18 +37,21 @@ import java.util.Map;
  * all the publish operations will fail way. Why is it better to defer
  * the failure, as opposed to cause the failure as earyl as possible? -KK
  *
- * @author WS Development Team
+ * @author Jitendra Kotamraju
  */
 final class HttpEndpoint {
     private String address;
     private HttpContext httpContext;
     private final HttpAdapter adapter;
+    private final Executor executor;
 
-    public HttpEndpoint(WSEndpoint endpoint) {
+    public HttpEndpoint(WSEndpoint endpoint, Executor executor) {
+        this.executor = executor;
         Map<String, String> addressMap = null;
         WSDLPort port = endpoint.getPort();
         if (port != null) {
             addressMap = new HashMap<String, String>();
+            // Maps port --> urlPattern. There is no url pattern for SE Endpoint
             addressMap.put(port.getName().getLocalPart(), "");
         }
         this.adapter = new HttpAdapter(endpoint, addressMap);
@@ -83,7 +87,7 @@ final class HttpEndpoint {
     }
 
     private void publish (HttpContext context) {
-        context.setHandler(new WSHttpHandler(adapter));
+        context.setHandler(new WSHttpHandler(adapter, executor));
     }
 
 }

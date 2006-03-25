@@ -192,7 +192,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     public final boolean isMetadataQuery(String query) {
         // we intentionally return true even if documents don't exist,
         // so that they get 404.
-        return query != null && (query.startsWith("wsdl") || query.startsWith("xsd="));
+        return query != null && (query.equals("WSDL") || query.startsWith("wsdl") || query.startsWith("xsd="));
     }
 
     /**
