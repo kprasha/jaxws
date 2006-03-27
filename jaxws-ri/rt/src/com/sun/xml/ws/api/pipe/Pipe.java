@@ -273,8 +273,19 @@ public interface Pipe {
      * Invoked before the last copy of the pipeline is about to be discarded,
      * to give {@link Pipe}s a chance to clean up any resources.
      *
+     * <p>
      * This can be used to invoke {@link PreDestroy} lifecycle methods
-     * on user handler. The invocation of it is optional on the client side.
+     * on user handler. The invocation of it is optional on the client side,
+     * but mandatory on the server side.
+     *
+     * <p>
+     * When multiple copies of pipelines are created, this method is called
+     * only on one of them.
+     *
+     * @throws WebServiceException
+     *      If the clean up fails, {@link WebServiceException} can be thrown.
+     *      This exception will be propagated to users (if this is client),
+     *      or recorded (if this is server.)
      */
     void preDestroy();
 

@@ -1,5 +1,6 @@
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
@@ -9,6 +10,7 @@ import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.PipePool;
 
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 import java.util.Map;
 
 /**
@@ -22,12 +24,14 @@ import java.util.Map;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Stub implements BindingProvider, ResponseContextReceiver {
+public abstract class Stub implements BindingProvider, ResponseContextReceiver, Closeable {
 
     /**
      * Reuse pipelines as it's expensive to create.
+     *
+     * Set to null when {@link #close() closed}.
      */
-    private final Pool<Pipe> pipes;
+    private Pool<Pipe> pipes;
 
     protected final BindingImpl binding;
 
@@ -91,12 +95,16 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
 
         Packet reply;
 
+        Pool<Pipe> pool = pipes;
+        if(pool==null)
+            throw new WebServiceException("close method has already been invoked"); // TODO: i18n
+
         // then send it away!
-        Pipe pipe = pipes.take();
+        Pipe pipe = pool.take();
         try {
             reply = pipe.process(packet);
         } finally {
-            pipes.recycle(pipe);
+            pool.recycle(pipe);
         }
 
         // not that Packet can still be updated after
@@ -104,6 +112,17 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver {
         receiver.setResponseContext(new ResponseContext(reply));
 
         return reply;
+    }
+
+    public void close() {
+        if(pipes!=null) {
+            // multi-thread safety of 'close' needs to be considered more carefully.
+            // some calls might be pending while this method is invoked. Should we
+            // block until they are complete, or should we abort them (but how?)
+            Pipe p = pipes.take();
+            pipes = null;
+            p.preDestroy();
+        }
     }
 
     public final WSBinding getBinding() {

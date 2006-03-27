@@ -29,6 +29,7 @@ import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
+import com.sun.xml.ws.Closeable;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
@@ -290,7 +291,7 @@ public class WSServiceDelegate extends WSService {
         SEIStub pis = new SEIStub(this, binding, model, createPipeline(eif,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
-            new Class[]{ portInterface, BindingProvider.class }, pis));
+            new Class[]{ portInterface, BindingProvider.class, Closeable.class }, pis));
     }
 
     /**
