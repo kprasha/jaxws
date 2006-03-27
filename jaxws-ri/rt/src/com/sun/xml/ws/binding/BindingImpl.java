@@ -156,7 +156,7 @@ public abstract class BindingImpl implements WSBinding {
             || bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
             return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(bindingId), serviceName);
         } else if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {   
-            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(SOAPBinding.SOAP12HTTP_BINDING), serviceName);
+            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.SOAP_12, serviceName);
         } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
             return new HTTPBindingImpl(null);
         } else {
