@@ -267,9 +267,8 @@ public class DeploymentDescriptorParser<A> {
      */
     private QName getServiceName(QName serviceName, Class<?> implementorClass) {
         if (serviceName == null) {
-            WebServiceProvider wsProvider = (WebServiceProvider)implementorClass.getAnnotation(
-                        WebServiceProvider.class);
-            WebService ws = (WebService)implementorClass.getAnnotation(WebService.class);
+            WebServiceProvider wsProvider = implementorClass.getAnnotation(WebServiceProvider.class);
+
             if (wsProvider != null) {
                 String tns = wsProvider.targetNamespace();
                 String local = wsProvider.serviceName();
@@ -291,9 +290,8 @@ public class DeploymentDescriptorParser<A> {
      *
      */
     private void verifyImplementorClass(Class<?> implementorClass) {
-        WebServiceProvider wsProvider = (WebServiceProvider)implementorClass.getAnnotation(
-                    WebServiceProvider.class);
-        WebService ws = (WebService)implementorClass.getAnnotation(WebService.class);
+        WebServiceProvider wsProvider = implementorClass.getAnnotation(WebServiceProvider.class);
+        WebService ws = implementorClass.getAnnotation(WebService.class);
         if (wsProvider == null && ws == null) {
             throw new IllegalArgumentException(implementorClass+" has neither @WebSerivce nor @WebServiceProvider annotation");
         }
