@@ -20,8 +20,8 @@ import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
-import com.sun.xml.ws.server.provider.SoapProviderInvokerPipe;
-import com.sun.xml.ws.server.provider.XmlProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Root {
+public class EndpointFactory {
     /*
     no need to take WebServiceContext implementation. That's hidden inside our system.
     We shall only take delegate to getUserPrincipal and isUserInRole from adapter. 
@@ -146,9 +146,9 @@ public class Root {
                 ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
                 if (binding instanceof SOAPBinding) {
                     SOAPVersion soapVersion = binding.getSOAPVersion();
-                    terminal =  new SoapProviderInvokerPipe((InstanceResolver)ir, model, soapVersion);
+                    terminal =  new SOAPProviderInvokerPipe((InstanceResolver)ir, model, soapVersion);
                 } else {
-                    terminal =  new XmlProviderInvokerPipe((InstanceResolver)ir, model);
+                    terminal =  new XMLProviderInvokerPipe((InstanceResolver)ir, model);
                 }
             } else {
                 // Create runtime model for non Provider endpoints

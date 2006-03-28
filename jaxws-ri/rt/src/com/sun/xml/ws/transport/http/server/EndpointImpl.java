@@ -28,7 +28,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.server.Root;
+import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.istack.NotNull;
@@ -201,7 +201,7 @@ public class EndpointImpl extends Endpoint {
             throw new UnsupportedOperationException("NOT SUPPORTED");
         }
 
-        WSEndpoint wse = new Root().createEndpoint(
+        WSEndpoint wse = new EndpointFactory().createEndpoint(
             (Class) implementor.getClass(),
             InstanceResolver.createSingleton(implementor),
             getProperty(QName.class, Endpoint.WSDL_SERVICE),

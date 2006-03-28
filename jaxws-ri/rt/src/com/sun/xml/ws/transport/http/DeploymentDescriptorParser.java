@@ -28,7 +28,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.server.Root;
+import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.streaming.Attributes;
@@ -190,11 +190,11 @@ public class DeploymentDescriptorParser<A> {
 
                 QName serviceName = getQNameAttribute(attrs, ATTR_SERVICE);
                 if(serviceName == null)
-                    serviceName = Root.getDefaultServiceName(implementorClass);
+                    serviceName = EndpointFactory.getDefaultServiceName(implementorClass);
 
                 QName portName = getQNameAttribute(attrs, ATTR_PORT);
                 if(portName == null)
-                    serviceName = Root.getDefaultPortName(serviceName,implementorClass);
+                    serviceName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
                 
                 BindingID bindingId = null;
                 {//set Binding using DD, annotation, or default one(in that order)
@@ -231,7 +231,7 @@ public class DeploymentDescriptorParser<A> {
                 // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
 
-                WSEndpoint<?> endpoint = new Root().createEndpoint(
+                WSEndpoint<?> endpoint = new EndpointFactory().createEndpoint(
                     implementorClass,
                     InstanceResolver.createSingleton(getImplementor(implementorClass)),
                     serviceName, portName, container, binding,
