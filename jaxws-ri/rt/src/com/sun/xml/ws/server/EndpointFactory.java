@@ -18,8 +18,8 @@ import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
-import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.ProviderSOAPInvokerPipe;
 import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
@@ -28,8 +28,6 @@ import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
@@ -63,7 +61,7 @@ import java.util.logging.Logger;
 public class EndpointFactory {
     /*
     no need to take WebServiceContext implementation. That's hidden inside our system.
-    We shall only take delegate to getUserPrincipal and isUserInRole from adapter. 
+    We shall only take delegate to getUserPrincipal and isUserInRole from adapter.
     */
 
     /**
@@ -347,8 +345,7 @@ public class EndpointFactory {
         }
 
         if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
-            String msg = localizer.localize(
-                messageFactory.getMessage("generate.non.standard.wsdl"));
+            String msg = ServerMessages.GENERATE_NON_STANDARD_WSDL();
             logger.warning(msg);
         }
 
@@ -424,7 +421,4 @@ public class EndpointFactory {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.endpoint");
-    private static final Localizer localizer = new Localizer();
-    private static final LocalizableMessageFactory messageFactory =
-        new LocalizableMessageFactory("com.sun.xml.ws.resources.server");
 }
