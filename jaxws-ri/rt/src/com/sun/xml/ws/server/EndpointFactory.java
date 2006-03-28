@@ -20,7 +20,7 @@ import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
-import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.ProviderSOAPInvokerPipe;
 import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.spi.runtime.Container;
@@ -146,7 +146,7 @@ public class EndpointFactory {
                 ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
                 if (binding instanceof SOAPBinding) {
                     SOAPVersion soapVersion = binding.getSOAPVersion();
-                    terminal =  new SOAPProviderInvokerPipe((InstanceResolver)ir, model, soapVersion);
+                    terminal =  new ProviderSOAPInvokerPipe((InstanceResolver)ir, model, soapVersion);
                 } else {
                     terminal =  new XMLProviderInvokerPipe((InstanceResolver)ir, model);
                 }
