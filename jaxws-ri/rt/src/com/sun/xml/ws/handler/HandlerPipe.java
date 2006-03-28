@@ -44,7 +44,10 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         super(next);
         this.cousinPipe = cousinPipe;
         this.isClient = isClient;
-        this.port = cousinPipe.port;
+        if(cousinPipe != null)
+            this.port = cousinPipe.port;
+        else
+            this.port = null;
     }
     
     /**
