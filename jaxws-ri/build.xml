@@ -80,20 +80,6 @@
     <mkdir dir="${build.home}/samples"/>
   </target>
   
-  <target name="generate-code" depends="prepare"
-          description="build and run all the code generators">
-    <ant dir="tools/resourcegen" target="jar" />
-    <taskdef name="resgen" classname="com.sun.tools.resourcegen.ResourceGenTask">
-      <classpath>
-        <path refid="runtime.compile.classpath" />
-        <pathelement path="tools/resourcegen/build/resourcegen.jar" />
-      </classpath>
-    </taskdef>
-    <resgen destdir="rt/build/gen-src">
-      <resource dir="rt/src" includes="com/sun/xml/ws/resources/*.properties" />
-    </resgen>
-  </target>
-
   <target name="runtime-compile" depends="prepare">
     <ant dir="${basedir}/rt"      target="compile" inheritrefs="true"/>
     <ant dir="${basedir}/servlet" target="compile" inheritrefs="true"/>
