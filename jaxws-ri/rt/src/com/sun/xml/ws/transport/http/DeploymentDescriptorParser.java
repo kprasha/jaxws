@@ -20,14 +20,15 @@
 
 package com.sun.xml.ws.transport.http;
 
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.handler.HandlerChainsModel;
+import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.spi.runtime.Container;
@@ -35,14 +36,11 @@ import com.sun.xml.ws.streaming.Attributes;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.handler.HandlerChainsModel;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 import javax.jws.WebService;
-import org.xml.sax.EntityResolver;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -61,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.xml.sax.InputSource;
 
 /**
  * Parses {@code sun-jaxws.xml} into {@link WSEndpoint}.
@@ -175,10 +172,7 @@ public class DeploymentDescriptorParser<A> {
                 String name = getMandatoryNonEmptyAttribute(reader, attrs, ATTR_NAME);
                 if (!names.add(name)) {
                     logger.warning(
-                        localizer.localize(
-                            messageFactory.getMessage(
-                                "servlet.warning.duplicateEndpointName",
-                                name)));
+                        WsservletMessages.SERVLET_WARNING_DUPLICATE_ENDPOINT_NAME(/*name*/));
                 }
 
                 String implementationName =
@@ -195,7 +189,7 @@ public class DeploymentDescriptorParser<A> {
                 QName portName = getQNameAttribute(attrs, ATTR_PORT);
                 if(portName == null)
                     serviceName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
-                
+
                 BindingID bindingId = null;
                 {//set Binding using DD, annotation, or default one(in that order)
                     String attr = getAttribute(attrs, ATTR_BINDING);
@@ -242,7 +236,7 @@ public class DeploymentDescriptorParser<A> {
                     String path = urlPattern;
                     if (urlPattern.endsWith("/*")) {
                         path = urlPattern.substring(0, urlPattern.length() - 2);
-                    } 
+                    }
                     portAddressMap.put(port.getName().getLocalPart(), path);
                 }
                 adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint, implementorClass, portAddressMap));
@@ -266,7 +260,7 @@ public class DeploymentDescriptorParser<A> {
     public static interface AdapterFactory<A> {
         A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap);
     }
-    
+
     /**
      * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider
      * annotation
@@ -521,7 +515,4 @@ public class DeploymentDescriptorParser<A> {
     private static final Logger logger =
         Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".server.http");
-    private final Localizer localizer = new Localizer();
-    private final LocalizableMessageFactory messageFactory =
-        new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
 }

@@ -1,21 +1,21 @@
 package com.sun.xml.ws.transport.http;
 
 
-import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
+import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.TransportBackChannel;
-import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.Headers;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
 
+import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.xml.ws.handler.MessageContext;
 
 /**
  * {@link Adapter} that receives messages in HTTP.
@@ -270,14 +269,10 @@ System.out.println("Address="+(baseAddress+urlPattern));
         PrintWriter out = new PrintWriter(new OutputStreamWriter(con.getOutput(),"UTF-8"));
         out.println("<html>");
         out.println("<head><title>");
-        out.println(
-            localizer.localize(
-                messageFactory.getMessage("servlet.html.title")));
+        out.println(WsservletMessages.SERVLET_HTML_TITLE());
         out.println("</title></head>");
         out.println("<body>");
-        out.println(
-            localizer.localize(
-                messageFactory.getMessage("servlet.html.notFound", message)));
+        out.println(WsservletMessages.SERVLET_HTML_NOT_FOUND(message));
         out.println("</body>");
         out.println("</html>");
     }
@@ -293,9 +288,4 @@ System.out.println("Address="+(baseAddress+urlPattern));
     private void setContentType(WSConnection con, String contentType) {
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
     }
-
-    private static final Localizer localizer = new Localizer();
-    private static final LocalizableMessageFactory messageFactory =
-        new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
-
 }

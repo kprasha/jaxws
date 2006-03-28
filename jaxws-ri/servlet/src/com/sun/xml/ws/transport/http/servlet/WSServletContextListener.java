@@ -19,10 +19,9 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
-import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
@@ -65,17 +64,13 @@ public final class WSServletContextListener
         }
 
         if (logger.isLoggable(Level.INFO)) {
-            logger.info(
-                localizer.localize(
-                    messageFactory.getMessage("listener.info.destroy")));
+            logger.info(WsservletMessages.LISTENER_INFO_DESTROY());
         }
     }
 
     public void contextInitialized(ServletContextEvent event) {
         if (logger.isLoggable(Level.INFO)) {
-            logger.info(
-                localizer.localize(
-                    messageFactory.getMessage("listener.info.initialize")));
+            logger.info(WsservletMessages.LISTENER_INFO_INITIALIZE());
         }
         ServletContext context = event.getServletContext();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -94,23 +89,14 @@ public final class WSServletContextListener
             context.setAttribute(WSServlet.JAXWS_RI_RUNTIME_INFO,delegate);
             
         } catch (Throwable e) {
-            logger.log(
-                Level.SEVERE,
-                localizer.localize(
-                    messageFactory.getMessage(
-                        "listener.parsingFailed",
-                        e.toString())),
-                e);
+            logger.log(Level.SEVERE,
+                WsservletMessages.LISTENER_PARSING_FAILED(e),e);
             context.removeAttribute(WSServlet.JAXWS_RI_RUNTIME_INFO);
             throw new WSServletException("listener.parsingFailed", e);
         }
     }
     
     private static final String JAXWS_RI_RUNTIME = "/WEB-INF/sun-jaxws.xml";
-
-    private static final Localizer localizer = new Localizer();
-    private static final LocalizableMessageFactory messageFactory =
-        new LocalizableMessageFactory("com.sun.xml.ws.resources.wsservlet");
 
     private static final Logger logger =
         Logger.getLogger(

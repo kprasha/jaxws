@@ -25,10 +25,9 @@ import com.sun.istack.Nullable;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
+import com.sun.xml.ws.resources.HttpserverMessages;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,9 +52,6 @@ final class WSHttpHandler implements HttpHandler {
     private static final Logger logger =
         Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".server.http");
-    private static final Localizer localizer = new Localizer();
-    private static final LocalizableMessageFactory messageFactory =
-        new LocalizableMessageFactory("com.sun.xml.ws.resources.httpserver");
 
     private final HttpAdapter adapter;
     private final Executor executor;
@@ -97,8 +93,7 @@ final class WSHttpHandler implements HttpHandler {
                         || method.equals(PUT_METHOD) || method.equals(DELETE_METHOD)) {
                 adapter.handle(con);
             } else {
-                logger.warning(localizer.localize(messageFactory.getMessage(
-                        "unexpected.http.method", method)));
+                logger.warning(HttpserverMessages.UNEXPECTED_HTTP_METHOD(method));
             }
         } catch(IOException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
@@ -106,7 +101,7 @@ final class WSHttpHandler implements HttpHandler {
             con.close();
         }
     }
-    
+
     /**
      * Wrapping the processing of request in a Runnable so that it can be
      * executed in Executor.

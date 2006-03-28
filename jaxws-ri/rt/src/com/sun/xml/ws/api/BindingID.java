@@ -41,8 +41,6 @@ import java.io.UnsupportedEncodingException;
  * Such technologies are free to extend this class and expose more characterstics.
  *
  * <p>
- *
- * <p>
  * Even though this class defines a few well known constants, {@link BindingID}
  * instances do not necessarily have singleton semantics. Use {@link #equals(Object)}
  * for the comparison.

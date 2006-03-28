@@ -26,6 +26,7 @@ import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
+import com.sun.xml.ws.resources.WsservletMessages;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -78,9 +79,7 @@ final class WSServletDelegate {
         localizerMap.put(defaultLocalizer.getLocale(), defaultLocalizer);
 
         if (logger.isLoggable(Level.INFO)) {
-            logger.info(
-                defaultLocalizer.localize(
-                    messageFactory.getMessage("servlet.info.initialize")));
+            logger.info(WsservletMessages.SERVLET_INFO_INITIALIZE());
         }
 
         String publishStatusPageParam =
@@ -92,9 +91,7 @@ final class WSServletDelegate {
 
     public void destroy() {
         if (logger.isLoggable(Level.INFO)) {
-            logger.info(
-                defaultLocalizer.localize(
-                    messageFactory.getMessage("servlet.info.destroy")));
+            logger.info(WsservletMessages.SERVLET_INFO_DESTROY());
         }
 
         for(ServletAdapter a : adapters) {
@@ -150,10 +147,8 @@ final class WSServletDelegate {
             ServletAdapter target = getTarget(request);
             if (target != null) {
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest(defaultLocalizer.localize(
-                            messageFactory.getMessage(
-                                "servlet.trace.gotRequestForEndpoint",
-                                target.name)));
+                    logger.finest(
+                        WsservletMessages.SERVLET_TRACE_GOT_REQUEST_FOR_ENDPOINT(target.name));
                 }
             } else {
                 Localizer localizer = getLocalizerFor(request);
@@ -188,10 +183,8 @@ final class WSServletDelegate {
             ServletAdapter target = getTarget(request);
             if (target != null) {
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest(defaultLocalizer.localize(
-                            messageFactory.getMessage(
-                                "servlet.trace.gotRequestForEndpoint",
-                                target.name)));
+                    logger.finest(
+                        WsservletMessages.SERVLET_TRACE_GOT_REQUEST_FOR_ENDPOINT(target.name));
                 }
             } else {
                 Localizer localizer = getLocalizerFor(request);
@@ -242,14 +235,10 @@ final class WSServletDelegate {
         PrintWriter out = response.getWriter();
         out.println("<html>");
         out.println("<head><title>");
-        out.println(
-            localizer.localize(
-                messageFactory.getMessage("servlet.html.title")));
+        out.println(WsservletMessages.SERVLET_HTML_TITLE());
         out.println("</title></head>");
         out.println("<body>");
-        out.println(
-            localizer.localize(
-                messageFactory.getMessage("servlet.html.notFound", message)));
+        out.println(WsservletMessages.SERVLET_HTML_NOT_FOUND(message));
         out.println("</body>");
         out.println("</html>");
     }
@@ -264,24 +253,17 @@ final class WSServletDelegate {
         PrintWriter out = response.getWriter();
         out.println("<html>");
         out.println("<head><title>");
-        out.println(
-            localizer.localize(
-                messageFactory.getMessage("servlet.html.title")));
+        out.println(WsservletMessages.SERVLET_HTML_TITLE());
         out.println("</title></head>");
         out.println("<body>");
-        out.println(
-            localizer.localize(
-                messageFactory.getMessage("servlet.html.method", message)));
+        out.println(WsservletMessages.SERVLET_HTML_METHOD());
         out.println("</body>");
         out.println("</html>");
 
     }
 
     protected void warnMissingContextInformation() {
-        logger.warning(
-            defaultLocalizer.localize(
-                messageFactory.getMessage(
-                    "servlet.warning.missingContextInformation")));
+        logger.warning(WsservletMessages.SERVLET_WARNING_MISSING_CONTEXT_INFORMATION());
     }
 
     protected static MimeHeaders getHeaders(HttpServletRequest req) {
@@ -302,19 +284,13 @@ final class WSServletDelegate {
         if (urlPattern.indexOf("*.") != -1) {
             // cannot deal with implicit mapping right now
             logger.warning(
-                defaultLocalizer.localize(
-                    messageFactory.getMessage(
-                        "servlet.warning.ignoringImplicitUrlPattern",
-                        a.name)));
+                WsservletMessages.SERVLET_WARNING_IGNORING_IMPLICIT_URL_PATTERN(a.name));
         } else if (urlPattern.endsWith("/*")) {
             pathUrlPatternEndpoints.add(a);
         } else {
             if (fixedUrlPatternEndpoints.containsKey(urlPattern)) {
                 logger.warning(
-                    defaultLocalizer.localize(
-                        messageFactory.getMessage(
-                            "servlet.warning.duplicateEndpointUrlPattern",
-                            a.name)));
+                    WsservletMessages.SERVLET_WARNING_DUPLICATE_ENDPOINT_URL_PATTERN(a.name));
             } else {
                 fixedUrlPatternEndpoints.put(urlPattern, a);
             }
@@ -415,21 +391,15 @@ final class WSServletDelegate {
             out.println("<html>");
             out.println("<head><title>");
             // out.println("Web Services");
-            out.println(
-                localizer.localize(
-                    messageFactory.getMessage("servlet.html.title")));
+            out.println(WsservletMessages.SERVLET_HTML_TITLE());
             out.println("</title></head>");
             out.println("<body>");
             // out.println("<h1>Web Services</h1>");
-            out.println(
-                localizer.localize(
-                    messageFactory.getMessage("servlet.html.title2")));
+            out.println(WsservletMessages.SERVLET_HTML_TITLE_2());
+
             if (adapters.isEmpty()) {
                 // out.println("<p>No JAX-WS context information available.</p>");
-                out.println(
-                    localizer.localize(
-                        messageFactory.getMessage(
-                            "servlet.html.noInfoAvailable")));
+                out.println(WsservletMessages.SERVLET_HTML_NO_INFO_AVAILABLE());
             } else {
                 out.println("<table width='100%' border='1'>");
                 out.println("<tr>");
