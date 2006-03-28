@@ -27,6 +27,7 @@ import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.txw2.output.ResultFactory;
 import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -177,7 +178,7 @@ public class WSDLGenerator {
      */
     private static final String REPLACE_WITH_ACTUAL_URL = "REPLACE_WITH_ACTUAL_URL";
     private Set<QName> processedExceptions = new HashSet<QName>();
-    private String bindingId;
+    private BindingID bindingId;
     private String wsdlLocation;
     private String portWSDLID;
     private String schemaPrefix;
@@ -193,7 +194,7 @@ public class WSDLGenerator {
      * @param extensions an array {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
      */    
-    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, String bindingId,
+    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, BindingID bindingId,
             WSDLGeneratorExtension... extensions) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
@@ -258,7 +259,7 @@ public class WSDLGenerator {
         serviceDefinitions._namespace(XSD_NAMESPACE, XSD_PREFIX);
         serviceDefinitions.targetNamespace(model.getServiceQName().getNamespaceURI());
         serviceDefinitions._namespace(model.getServiceQName().getNamespaceURI(), TNS_PREFIX);
-        if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING))
+        if(bindingId.getSOAPVersion()== SOAPVersion.SOAP_12)
             serviceDefinitions._namespace(SOAP12_NAMESPACE, SOAP12_PREFIX);
         else
             serviceDefinitions._namespace(SOAP11_NAMESPACE, SOAP_PREFIX);
@@ -647,7 +648,7 @@ public class WSDLGenerator {
                 }
                 first = false;
             }
-            if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING))
+            if(bindingId.getSOAPVersion()==SOAPVersion.SOAP_12)
                 generateSOAP12BindingOperation(method, binding);
             else
                 generateBindingOperation(method, binding);
@@ -920,7 +921,7 @@ public class WSDLGenerator {
         if (model.getJavaMethods().size() == 0)
             return;
 
-        if(bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)){
+        if(bindingId.getSOAPVersion()== SOAPVersion.SOAP_12){
             com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress address = port._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress.class);
             address.location(endpointAddress);
         }else{

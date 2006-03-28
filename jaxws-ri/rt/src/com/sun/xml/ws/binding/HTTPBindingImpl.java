@@ -17,23 +17,20 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.binding.http;
+package com.sun.xml.ws.binding;
 
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
-import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
-import java.util.ArrayList;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.http.HTTPBinding;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,17 +38,12 @@ import java.util.List;
  */
 public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
 
-    public HTTPBindingImpl(List<Handler> handlerChain) {
+    /**
+     * Use {@link BindingImpl#create(BindingID, QName)} to create this.
+     */
+    HTTPBindingImpl(List<Handler> handlerChain) {
         // TODO: implement a real encoder/decoder for these
-        super(handlerChain, HTTPBinding.HTTP_BINDING, null);
-    }
-
-    public Encoder createEncoder() {
-        return TestEncoderImpl.INSTANCE11;
-    }
-
-    public Decoder createDecoder() {
-        return TestDecoderImpl.INSTANCE11;
+        super(handlerChain, BindingID.XML_HTTP, null);
     }
 
     /**
@@ -77,9 +69,5 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
                 logicalHandlers.add((LogicalHandler) handler);
             }            
         }        
-    }
-    
-    public SOAPVersion getSOAPVersion() {
-        return null;
     }
 }

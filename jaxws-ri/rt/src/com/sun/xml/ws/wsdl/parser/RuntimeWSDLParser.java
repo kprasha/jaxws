@@ -19,18 +19,11 @@
  */
 
 package com.sun.xml.ws.wsdl.parser;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.api.model.wsdl.WSDLInput;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
-import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
@@ -59,7 +52,6 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -113,15 +105,6 @@ public class RuntimeWSDLParser {
     private RuntimeWSDLParser(XMLEntityResolver resolver, WSDLParserExtension... extensions) {
         this.resolver = resolver;
         this.extension = new WSDLParserExtensionFacade(extensions);
-    }
-    
-    /**
-     * Make sure to return a "fresh" reader each time it is called because
-     * more than one active reader may be needed within a single thread
-     * to parse a WSDL file.
-     */
-    private static XMLStreamReader createReader(InputSource source) {
-        return XMLStreamReaderFactory.createFreshXMLStreamReader(source,true);
     }
     
     private void parseWSDL(URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
@@ -247,7 +230,7 @@ public class RuntimeWSDLParser {
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
             if (WSDLConstants.NS_SOAP_BINDING.equals(name)) {
-                binding.setBindingId(SOAPBinding.SOAP11HTTP_BINDING);
+                binding.setBindingId(BindingID.SOAP11_HTTP);
                 String style = reader.getAttributeValue(null, "style");
                 
                 if((style != null) && (style.equals("rpc"))) {
@@ -257,7 +240,7 @@ public class RuntimeWSDLParser {
                 }
                 XMLStreamReaderUtil.next(reader);
             } else if (WSDLConstants.NS_SOAP12_BINDING.equals(name)) {
-                binding.setBindingId(SOAPBinding.SOAP12HTTP_BINDING);
+                binding.setBindingId(BindingID.SOAP12_HTTP);
                 String style = reader.getAttributeValue(null, "style");
                 if((style != null) && (style.equals("rpc"))) {
                     binding.setStyle(Style.RPC);

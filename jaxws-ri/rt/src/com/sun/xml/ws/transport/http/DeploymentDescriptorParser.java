@@ -21,6 +21,7 @@
 package com.sun.xml.ws.transport.http;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -191,9 +192,16 @@ public class DeploymentDescriptorParser<A> {
 
                 QName portName = getQNameAttribute(attrs, ATTR_PORT);
 
-                //set Binding using DD, annotation, or default one(in that order)
-                String bindingId = getAttribute(attrs, ATTR_BINDING);
-                WSBinding binding = BindingImpl.getBinding(bindingId,implementorClass, serviceName, true);
+                BindingID bindingId = null;
+                {//set Binding using DD, annotation, or default one(in that order)
+                    String attr = getAttribute(attrs, ATTR_BINDING);
+                    if(attr!=null)
+                        bindingId = BindingID.parse(attr);
+                    else
+                        bindingId = BindingID.parse(implementorClass);
+                }
+
+                WSBinding binding = BindingImpl.create(bindingId, serviceName);
 
                 //get enable-mtom attribute value
                 String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);

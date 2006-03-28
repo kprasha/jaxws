@@ -19,22 +19,18 @@
  */
 package com.sun.xml.ws.transport.http.servlet;
 
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.http.HTTPBindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
-import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.spi.runtime.WSRtObjectFactory;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -57,13 +53,7 @@ public class WSRtObjectFactoryImpl extends WSRtObjectFactory {
 
     @Override
     public WSBinding createBinding(String bindingId) {
-        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-                bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(bindingId),null);
-        } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
-            return new HTTPBindingImpl(null);
-        }
-        return BindingImpl.getDefaultBinding();
+        return BindingImpl.create(BindingID.parse(bindingId),null);
     }
 
     /**

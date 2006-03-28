@@ -1,22 +1,22 @@
 package com.sun.xml.ws.server;
 
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.model.RuntimeModeler;
-import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.ServiceDefinition;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.spi.runtime.Container;
@@ -127,7 +127,8 @@ public class Root {
 
         // setting a default binding
         if (binding == null)
-            binding = BindingImpl.getBinding(null,implType,serviceName,true);
+            binding = BindingImpl.create(
+                BindingID.parse(implType), serviceName);
 
         Pipe terminal;
         WSDLPort wsdlPort = null;
@@ -139,7 +140,7 @@ public class Root {
                     throw new ServerRtException("not.implement.provider",implType);
 
 
-                terminal =  new ProviderInvokerPipe((Class)implType,(InstanceResolver)ir,binding);
+                terminal =  new ProviderInvokerPipe(implType.asSubclass(Provider.class),(InstanceResolver)ir,binding);
             } else {
                 // Create runtime model for non Provider endpoints
                 seiModel = createSEIModel(primaryWsdl, md, implType, serviceName, portName, binding);
@@ -254,13 +255,20 @@ public class Root {
                     if(service == null)
                         throw new ServerRtException("runtime.parser.wsdl.noservice", serviceName, wsdlUrl);
 
-                    String bindingId = binding.getBindingId();
-                    List<WSDLBoundPortType> bindings = wsdlDoc.getBindings(service, bindingId);
-                    if(bindings.size() == 0)
-                        throw new ServerRtException("runtime.parser.wsdl.nobinding", bindingId, serviceName, wsdlUrl);
+                    BindingID bindingId = binding.getBindingId();
 
-                    if(bindings.size() > 1)
-                        throw new ServerRtException("runtime.parser.wsdl.multiplebinding", bindingId, serviceName, wsdlUrl);
+                    // make sure there's one and only one port for the given binding
+                    boolean hasPort = false;
+                    for (WSDLPort p : service.getPorts()) {
+                        if(p.getBinding().getBindingId().equals(bindingId)) {
+                            if(hasPort)
+                                throw new ServerRtException("runtime.parser.wsdl.multiplebinding", bindingId, serviceName, wsdlUrl);
+                            hasPort = true;
+                        }
+                    }
+
+                    if(!hasPort)
+                        throw new ServerRtException("runtime.parser.wsdl.nobinding", bindingId, serviceName, wsdlUrl);
                 }
                 //now we got the Binding so lets build the model
                 RuntimeModeler rap = new RuntimeModeler(implType, serviceName, wsdlPort, false);
@@ -320,8 +328,8 @@ public class Root {
      */
     private SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
         BindingImpl bindingImpl = (BindingImpl)binding;
-        String bindingId = bindingImpl.getBindingId();
-        if (!bindingImpl.canGenerateWsdl()) {
+        BindingID bindingId = bindingImpl.getBindingId();
+        if (!bindingId.canGenerateWSDL()) {
             throw new ServerRtException("can.not.generate.wsdl", bindingId);
         }
 
@@ -361,12 +369,10 @@ public class Root {
             WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                 new Parser(primaryWsdl), new EntityResolverImpl(metadata),
                 ServiceFinder.find(WSDLParserExtension.class).toArray());
-            WSDLPortImpl wsdlPort = null;
             if(serviceName == null)
                 serviceName = RuntimeModeler.getServiceName(implType);
-            if(portName != null){
-                wsdlPort = wsdlDoc.getService(serviceName).get(portName);
-                return wsdlPort;
+            if(portName != null) {
+                return wsdlDoc.getService(serviceName).get(portName);
             }
         } catch (IOException e) {
             throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);

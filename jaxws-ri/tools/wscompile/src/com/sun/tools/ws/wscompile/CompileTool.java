@@ -23,6 +23,7 @@ import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
+import com.sun.tools.ws.ToolVersion;
 import com.sun.tools.ws.processor.Processor;
 import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.ProcessorNotificationListener;
@@ -40,18 +41,20 @@ import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
 import com.sun.tools.ws.processor.util.GeneratedFileInfo;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.processor.util.ProcessorEnvironmentBase;
+import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.util.JavaCompilerHelper;
 import com.sun.tools.ws.util.ToolBase;
-import com.sun.tools.ws.util.ForkEntityResolver;
-import com.sun.tools.ws.ToolVersion;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.VersionUtil;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
@@ -73,8 +76,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import org.xml.sax.EntityResolver;
 
 /**
  *    This is the real implementation class for both WsGen and WsImport. 
@@ -596,15 +597,14 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 // this should never happen
                 environment.error(getMessage("wsgen.class.not.found", endpoint));
             }
-            String bindingID = getBindingID(protocol);
+            BindingID bindingID = getBindingID(protocol);
             if (bindingID == null) {
                 BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
                 if (bindingType != null &&
                     bindingType.value().length()>0)
-                    bindingID = bindingType.value();
+                    bindingID = BindingID.parse(bindingType.value());
             }
-            com.sun.xml.ws.model.RuntimeModeler rtModeler =
-                    new com.sun.xml.ws.model.RuntimeModeler(endpointClass, serviceName, bindingID, true);
+            RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, serviceName, bindingID, true);
             rtModeler.setClassLoader(classLoader);
             if (portName != null)
                 rtModeler.setPortName(portName);
@@ -640,11 +640,11 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         }
     }
 
-    static public String getBindingID(String protocol) {
+    static public BindingID getBindingID(String protocol) {
         if (protocol.equals(SOAP11))
-            return SOAP11_ID;
+            return BindingID.SOAP11_HTTP;
         if (protocol.equals(X_SOAP12))
-            return SOAP12_ID;
+            return BindingID.SOAP12_HTTP;
         return null;
     }
 

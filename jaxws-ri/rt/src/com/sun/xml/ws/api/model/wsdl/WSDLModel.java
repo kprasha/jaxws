@@ -1,8 +1,10 @@
 package com.sun.xml.ws.api.model.wsdl;
 
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.BindingID;
+
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.SOAPBinding;
 import java.util.List;
 import java.util.Map;
 
@@ -34,22 +36,21 @@ public interface WSDLModel extends WSDLObject, WSDLExtensible{
     /**
      * Give a {@link WSDLBoundPortType} for the given wsdl:service and wsdl:port names.
      *
-     * @param serviceName non-null service QName
-     * @param portName    non-null port QName
+     * @param serviceName service QName
+     * @param portName    port QName
      * @return A {@link WSDLBoundPortType}. null if the Binding for the given wsd:service and wsdl:port name are not
      *         found.
      */
-    WSDLBoundPortType getBinding(QName serviceName, QName portName);
+    WSDLBoundPortType getBinding(@NotNull QName serviceName, @NotNull QName portName);
 
     /**
      * Returns the bindings for the given bindingId
      *
      * @param service   non-null service
-     * @param bindingId non-null - can be either {@link SOAPBinding#SOAP11HTTP_BINDING} or
-     *                  {@link SOAPBinding#SOAP12HTTP_BINDING}
+     * @param bindingId The binding ID of the port to obtain.
      * @return empty List if no wsdl:binding corresponding to the bindingId is found.
      */
-    List<WSDLBoundPortType> getBindings(WSDLService service, String bindingId);
+    List<WSDLBoundPortType> getBindings(@NotNull WSDLService service, @NotNull BindingID bindingId);
 
     /**
      * Gets {@link WSDLService} that models <code>wsdl:service</code>

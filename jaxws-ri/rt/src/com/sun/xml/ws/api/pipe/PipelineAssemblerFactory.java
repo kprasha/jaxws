@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.xml.ws.api.BindingID;
 
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.logging.Logger;
@@ -38,7 +39,7 @@ public abstract class PipelineAssemblerFactory {
      * @return
      *      null if this factory doesn't recognize the given binding ID.
      */
-    public abstract PipelineAssembler doCreate(String bindingId);
+    public abstract PipelineAssembler doCreate(BindingID bindingId);
 
     /**
      * Locates {@link PipelineAssemblerFactory}s and create
@@ -50,7 +51,7 @@ public abstract class PipelineAssemblerFactory {
      * @return
      *      Always non-null, since we fall back to our default {@link PipelineAssembler}.
      */
-    public static PipelineAssembler create(ClassLoader classLoader, String bindingId) {
+    public static PipelineAssembler create(ClassLoader classLoader, BindingID bindingId) {
         for (PipelineAssemblerFactory factory : ServiceFinder.find(PipelineAssemblerFactory.class,classLoader)) {
             PipelineAssembler assembler = factory.doCreate(bindingId);
             if(assembler!=null) {

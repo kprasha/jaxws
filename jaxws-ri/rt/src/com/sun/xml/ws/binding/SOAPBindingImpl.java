@@ -17,10 +17,10 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.binding.soap;
+package com.sun.xml.ws.binding;
 
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
@@ -28,26 +28,26 @@ import com.sun.xml.ws.spi.runtime.SystemHandlerDelegateFactory;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
-import java.util.ArrayList;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.soap.SOAPBinding;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.xml.ws.handler.LogicalHandler;
-import javax.xml.ws.handler.soap.SOAPHandler;
 
 
 
 /**
  * @author WS Development Team
  */
-public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
+public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
     public static final String X_SOAP12HTTP_BINDING =
         "http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/";
@@ -56,35 +56,27 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
 
     protected Set<String> requiredRoles;
     protected Set<String> roles;
-    protected boolean enableMtom = false;
+    protected boolean enableMtom;
     private Set<QName> handlerUnderstoodHeaders;
     protected final SOAPVersion soapVersion;
-    protected final boolean canGenerateWsdl;
 
 
-    protected SOAPBindingImpl(
-        List<Handler> handlerChain, SOAPVersion soapVersion, String bindingId, QName serviceName) {
+    /**
+     * Use {@link BindingImpl#create(BindingID, QName)} to create this.
+     */
+    SOAPBindingImpl(
+        BindingID bindingId, List<Handler> handlerChain, SOAPVersion soapVersion, QName serviceName) {
 
         super(handlerChain, bindingId, serviceName);
         this.soapVersion = soapVersion;
-        setup(getBindingId());
+        setup();
         setupSystemHandlerDelegate(serviceName);
-        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-            bindingId.equals(X_SOAP12HTTP_BINDING)) {
-            canGenerateWsdl = true;
-        } else if (bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING)) {
-            canGenerateWsdl = true;
-            enableMtom = true;
-        } else if (bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
-            canGenerateWsdl = false;
-            enableMtom = true;
-        } else {
-            canGenerateWsdl = false;
-        }
+
+        this.enableMtom = bindingId.isMTOMEnabled();
     }
 
     // if the binding id is unknown, no roles are added
-    protected void setup(String bindingId) {
+    private void setup() {
         requiredRoles = new HashSet<String>();
         switch(soapVersion) {
         case SOAP_11:
@@ -97,23 +89,6 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
         roles = new HashSet<String>();
         addRequiredRoles();        
-    }
-    
-    @Override
-    public boolean canGenerateWsdl() {
-        return canGenerateWsdl;
-    }
-
-    /*
-    * For a non standard SOAP1.2 binding, return actual SOAP1.2 binding
-    */
-    @Override
-    public String getBindingId() {
-        String bindingId = super.getBindingId();
-        if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
-            return SOAP12HTTP_BINDING;
-        }
-        return bindingId;
     }
     
     /**
@@ -131,7 +106,7 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
                 logicalHandlers.add((LogicalHandler) handler);
             } else if (SOAPHandler.class.isAssignableFrom(handler.getClass())) {
                 soapHandlers.add((SOAPHandler) handler);
-                Set<QName> headers = ((SOAPHandler) handler).getHeaders();
+                Set<QName> headers = ((SOAPHandler<?>) handler).getHeaders();
                 if (headers != null) {
                     handlerUnderstoodHeaders.addAll(headers);
                 }
@@ -193,18 +168,13 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
 
     /**
      * Used typically by the runtime to enable/disable Mtom optimization
-     *
-     * @return true or false
      */
-    @Override
     public boolean isMTOMEnabled() {
         return enableMtom;
     }
 
     /**
-     * Client application can set if the Mtom optimization should be enabled
-     *
-     * @param b
+     * Client application can override if the MTOM optimization should be enabled
      */
     public void setMTOMEnabled(boolean b) {
         this.enableMtom = b;
@@ -213,7 +183,6 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
     public SOAPFactory getSOAPFactory() {
         return soapVersion.saajSoapFactory;
     }
-
 
     public MessageFactory getMessageFactory() {
         return soapVersion.saajMessageFactory;
@@ -225,9 +194,5 @@ public abstract class SOAPBindingImpl extends BindingImpl implements SOAPBinding
         if (shdFactory != null) {
             setSystemHandlerDelegate(shdFactory.getDelegate(serviceName));
         }
-    }
-
-    public SOAPVersion getSOAPVersion() {
-        return soapVersion;
     }
 }

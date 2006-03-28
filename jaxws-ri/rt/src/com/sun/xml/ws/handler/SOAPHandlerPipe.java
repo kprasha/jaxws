@@ -14,29 +14,24 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.handler.HandlerProcessor.Direction;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.xml.namespace.QName;
-import javax.xml.ws.ProtocolException;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 /**
  * TODO: Kohsuke put a comment that packet.isOneWay may be null
  * @author WS Development Team
  */
 public class SOAPHandlerPipe extends HandlerPipe {
-    
+
     private WSBinding binding;
     private List<SOAPHandler> soapHandlers;
-    protected Set<String> roles;    
-    
+    protected Set<String> roles;
+
     /** Creates a new instance of SOAPHandlerPipe */
     public SOAPHandlerPipe(WSBinding binding, WSDLPort port, Pipe next, boolean isClient) {
         super(next,port,isClient);
@@ -44,9 +39,9 @@ public class SOAPHandlerPipe extends HandlerPipe {
             // SOAPHandlerPipe should n't be used for bindings other than SOAP.
             // TODO: throw Exception
         }
-        this.binding = binding;        
+        this.binding = binding;
     }
-    
+
     // Handle to LogicalHandlerPipe means its used on SERVER-SIDE
     /**
      * This constructor is used on client-side where, LogicalHandlerPipe is created
@@ -58,7 +53,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         super(next,cousinPipe,isClient);
         this.binding = binding;
     }
-    
+
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
@@ -66,11 +61,11 @@ public class SOAPHandlerPipe extends HandlerPipe {
         super(that,cloner);
         this.binding = that.binding;
     }
-    
+
     boolean isHandlerChainEmpty() {
         return soapHandlers.isEmpty();
     }
-    
+
     /**
      * Close SOAPHandlers first and then LogicalHandlers on Client
      * Close LogicalHandlers first and then SOAPHandlers on Server
@@ -83,9 +78,9 @@ public class SOAPHandlerPipe extends HandlerPipe {
             }
             if(processor != null)
                 closeSOAPHandlers(msgContext);
-            
+
         }
-        
+
     }
     /**
      * This is called from cousinPipe.
@@ -94,7 +89,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
     public void closeCall(MessageContext msgContext){
         closeSOAPHandlers(msgContext);
     }
-    
+
     //TODO:
     private void closeSOAPHandlers(MessageContext msgContext){
         if(processor == null)
@@ -119,11 +114,11 @@ public class SOAPHandlerPipe extends HandlerPipe {
             }
         }
     }
-    
+
     public Pipe copy(PipeCloner cloner) {
         return new SOAPHandlerPipe(this,cloner);
     }
-    
+
     void setUpProcessor() {
         // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
@@ -133,11 +128,11 @@ public class SOAPHandlerPipe extends HandlerPipe {
         roles.addAll(((SOAPBindingImpl)binding).getRoles());
         processor = new SOAPHandlerProcessor(binding,soapHandlers, isClient);
     }
-    
+
     MessageUpdatableContext getContext(Packet packet){
         SOAPMessageContextImpl context =  new SOAPMessageContextImpl(binding,packet);
         context.setRoles(roles);
         return context;
     }
-    
+
 }

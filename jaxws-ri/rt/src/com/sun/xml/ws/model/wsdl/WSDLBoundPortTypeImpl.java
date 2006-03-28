@@ -19,18 +19,18 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.util.QNameMap;
-import com.sun.istack.NotNull;
 
 import javax.jws.WebParam.Mode;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
-import java.util.Map;
 
 /**
  * Implementation of {@link WSDLBoundPortType}
@@ -41,7 +41,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private final QName name;
     private final QName portTypeName;
     private WSDLPortTypeImpl portType;
-    private String bindingId;
+    private BindingID bindingId;
     private final @NotNull WSDLModelImpl owner;
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
@@ -99,11 +99,11 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return bindingOperations.values();
     }
 
-    public String getBindingId() {
+    public BindingID getBindingId() {
         return bindingId;
     }
 
-    public void setBindingId(String bindingId) {
+    public void setBindingId(BindingID bindingId) {
         this.bindingId = bindingId;
     }
 
@@ -166,7 +166,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public SOAPVersion getSOAPVersion(){
-        return SOAPVersion.fromHttpBinding(bindingId);
+        return bindingId.getSOAPVersion();
     }
 
     void freeze() {

@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.Binding;
 
@@ -22,6 +23,9 @@ public interface WSBinding extends Binding {
      *
      * TODO: clarify what to do with XML/HTTP binding
      *
+     * <p>
+     * This is just a shor-cut for  {@code getBindingID().getSOAPVersion()}
+     *
      * @return
      *      If the binding is using SOAP, this method returns
      *      a {@link SOAPVersion} constant.
@@ -35,18 +39,18 @@ public interface WSBinding extends Binding {
     /**
      * Creates a new {@link Encoder} for this binding.
      *
-     * @return
-     *      Always non-null.
+     * <p>
+     * This is just a short-cut for {@code getBindingID().createEncoder()}
      */
-    Encoder createEncoder();
+    @NotNull Encoder createEncoder();
 
     /**
      * Creates a new {@link Decoder} for this binding.
      *
-     * @return
-     *      Always non-null.
+     * <p>
+     * This is just a short-cut for {@code getBindingID().createDecoder()}
      */
-    Decoder createDecoder();
+    @NotNull Decoder createDecoder();
 
     /**
      * Gets the binding ID, which uniquely identifies the binding.
@@ -59,5 +63,5 @@ public interface WSBinding extends Binding {
      * @return
      *      Always non-null same value.
      */
-    String getBindingId();
+    @NotNull BindingID getBindingId();
 }

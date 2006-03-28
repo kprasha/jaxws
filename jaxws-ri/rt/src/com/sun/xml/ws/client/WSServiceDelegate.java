@@ -3,8 +3,9 @@
  */
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.Closeable;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -13,9 +14,6 @@ import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.http.HTTPBindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
@@ -29,7 +27,6 @@ import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
-import com.sun.xml.ws.Closeable;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
@@ -41,7 +38,6 @@ import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
-import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -218,7 +214,8 @@ public class WSServiceDelegate extends WSService {
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
             ports.put(portName,
-                new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bindingId));
+                new PortInfo(this, EndpointAddress.create(endpointAddress), portName,
+                    BindingID.parse(bindingId)));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
@@ -234,9 +231,10 @@ public class WSServiceDelegate extends WSService {
      * Creates a new pipeline for the given port name.
      */
     private Pipe createPipeline(PortInfo portInfo, WSBinding binding) {
-        String bindingId = portInfo.bindingId;
+        BindingID bindingId = portInfo.bindingId;
 
-        PipelineAssembler assembler = PipelineAssemblerFactory.create(Thread.currentThread().getContextClassLoader(), bindingId);
+        PipelineAssembler assembler = PipelineAssemblerFactory.create(
+            Thread.currentThread().getContextClassLoader(), bindingId);
         if(assembler==null)
             throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
         return assembler.createClient(
@@ -297,7 +295,7 @@ public class WSServiceDelegate extends WSService {
     /**
      * Determines the binding of the given port.
      */
-    protected BindingImpl createBinding(QName portName, String bindingId) {
+    protected BindingImpl createBinding(QName portName, BindingID bindingId) {
 
         // get handler chain
         List<Handler> handlerChain;
@@ -309,23 +307,18 @@ public class WSServiceDelegate extends WSService {
         }
 
         // create binding
-        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-            bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            SOAPBindingImpl bindingImpl = new SOAPHTTPBindingImpl(bindingId,
-                handlerChain, SOAPVersion.fromHttpBinding(bindingId), serviceName);
+        BindingImpl bindingImpl = BindingImpl.create(bindingId,serviceName);
 
+        if(bindingImpl instanceof SOAPBinding) {
             Set<String> roles = rolesMap.get(portName);
             if (roles != null) {
-                bindingImpl.setRoles(roles);
+                ((SOAPBinding)bindingImpl).setRoles(roles);
             }
-            return bindingImpl;
-        } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
-            return new HTTPBindingImpl(handlerChain);
         }
 
-        // TODO: what does this mean?
-        // is this a configuration error or assertion failure?
-        throw new Error();
+        bindingImpl.setHandlerChain(handlerChain);
+
+        return bindingImpl;
     }
 
     /**

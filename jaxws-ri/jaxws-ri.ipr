@@ -230,7 +230,9 @@
       <module fileurl="file://$PROJECT_DIR$/rt/rt.iml" filepath="$PROJECT_DIR$/rt/rt.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" group="transports" />
       <module fileurl="file://$PROJECT_DIR$/../test-rearch/test/test.iml" filepath="$PROJECT_DIR$/../test-rearch/test/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../test-harness/test-harness.iml" filepath="$PROJECT_DIR$/../test-harness/test-harness.iml" group="test-harness" />
       <module fileurl="file://$PROJECT_DIR$/../test-rearch/testutil/testutil.iml" filepath="$PROJECT_DIR$/../test-rearch/testutil/testutil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../test-harness/modules/tools/tools.iml" filepath="$PROJECT_DIR$/../test-harness/modules/tools/tools.iml" group="test-harness" />
       <module fileurl="file://$PROJECT_DIR$/tools/wscompile/wscompile.iml" filepath="$PROJECT_DIR$/tools/wscompile/wscompile.iml" />
     </modules>
   </component>

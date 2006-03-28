@@ -22,6 +22,7 @@ package com.sun.xml.ws.client;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 
@@ -40,9 +41,9 @@ class PortInfo {
 
     public final @NotNull QName portName;
     public final @NotNull EndpointAddress targetEndpoint;
-    public final @NotNull String bindingId;
+    public final @NotNull BindingID bindingId;
 
-    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, String bindingId) {
+    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId) {
         this.owner = owner;
         this.targetEndpoint = targetEndpoint;
         this.portName = name;

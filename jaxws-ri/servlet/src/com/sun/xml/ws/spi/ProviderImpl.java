@@ -20,6 +20,7 @@
 package com.sun.xml.ws.spi;
 
 
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
@@ -27,8 +28,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.net.URL;
 
 /**
  * @author WS Development Team
@@ -37,23 +37,20 @@ public class ProviderImpl extends Provider {
 
     @Override
     public Endpoint createEndpoint(String bindingId, Object implementor) {
-        return new EndpointImpl(bindingId, implementor);
+        return new EndpointImpl( BindingID.parse(bindingId), implementor);
     }
 
     @Override
-    public ServiceDelegate createServiceDelegate(
-         java.net.URL wsdlDocumentLocation,
-         QName serviceName, Class serviceClass) {
-
-
-
+    public ServiceDelegate createServiceDelegate( URL wsdlDocumentLocation, QName serviceName, Class serviceClass) {
          return new WSServiceDelegate(wsdlDocumentLocation, serviceName, serviceClass);
     }
 
     @Override
     public Endpoint createAndPublishEndpoint(String address,
                                              Object implementor) {
-        Endpoint endpoint = new EndpointImpl((String)null, implementor);
+        Endpoint endpoint = new EndpointImpl(
+            BindingID.parse(implementor.getClass()),
+            implementor);
         endpoint.publish(address);
         return endpoint;
     }

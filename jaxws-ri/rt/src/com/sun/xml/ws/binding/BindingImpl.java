@@ -20,20 +20,18 @@
 
 package com.sun.xml.ws.binding;
 
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.binding.http.HTTPBindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.binding.soap.SOAPHTTPBindingImpl;
-import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,14 +54,10 @@ public abstract class BindingImpl implements WSBinding {
     protected List<SOAPHandler> soapHandlers;
     
     
-    private final String bindingId;
+    private final BindingID bindingId;
     protected final QName serviceName;
 
-    // called by DispatchImpl
-    protected BindingImpl(List<Handler> handlerChain, String bindingId, QName serviceName) {
-        /*
-        if(handlerChain==null)
-            handlerChain = Collections.emptyList(); */
+    protected BindingImpl(List<Handler> handlerChain, BindingID bindingId, QName serviceName) {
         this.handlers = handlerChain;
         sortHandlers();
         this.bindingId = bindingId;
@@ -97,7 +91,6 @@ public abstract class BindingImpl implements WSBinding {
     public void setHandlerChain(List<Handler> chain) {
         handlers = chain;
         sortHandlers();
-            
     }
     
     protected abstract void sortHandlers();
@@ -110,18 +103,22 @@ public abstract class BindingImpl implements WSBinding {
         return logicalHandlers;
     }
     
-    public String getBindingId(){
+    public @NotNull BindingID getBindingId(){
         return bindingId;
     }
 
-    public boolean canGenerateWsdl() {
-        return false;
+    public final SOAPVersion getSOAPVersion() {
+        return bindingId.getSOAPVersion();
     }
 
-    public boolean isMTOMEnabled() {
-        return false;
+    public final @NotNull Encoder createEncoder() {
+        return bindingId.createEncoder();
     }
-        
+
+    public final @NotNull Decoder createDecoder() {
+        return bindingId.createDecoder();
+    }
+
     public SystemHandlerDelegate getSystemHandlerDelegate() {
         return systemHandlerDelegate;
     }
@@ -130,38 +127,11 @@ public abstract class BindingImpl implements WSBinding {
         systemHandlerDelegate = delegate;
     }
 
-    /**
-     * @deprecated
-     *      This ugly it-does-all method needs refactoring!
-     */
-    public static WSBinding getBinding(String bindingId, Class implementorClass, QName serviceName, boolean tokensOK) {
-
-        if (bindingId == null) {
-            // Gets bindingId from @BindingType annotation
-            bindingId = RuntimeModeler.getBindingId(implementorClass);
-            if (bindingId == null) {            // Default one
-                bindingId = SOAPBinding.SOAP11HTTP_BINDING;
-            }
-        }
-        if (tokensOK) {
-            if (bindingId.equals("##SOAP11_HTTP")) {
-                bindingId = SOAPBinding.SOAP11HTTP_BINDING;
-            } else if (bindingId.equals("##SOAP12_HTTP")) {
-                bindingId = SOAPBinding.SOAP12HTTP_BINDING;
-            } else if (bindingId.equals("##XML_HTTP")) {
-                bindingId = HTTPBinding.HTTP_BINDING;
-            }
-        }
-        if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING)
-            || bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
-            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.fromHttpBinding(bindingId), serviceName);
-        } else if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {   
-            return new SOAPHTTPBindingImpl(bindingId, null, SOAPVersion.SOAP_12, serviceName);
-        } else if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
+    public static BindingImpl create(@NotNull BindingID bindingId, QName serviceName) {
+        if(bindingId.equals(BindingID.XML_HTTP))
             return new HTTPBindingImpl(null);
-        } else {
-            throw new IllegalArgumentException("Wrong bindingId "+bindingId);
-        }
+        else
+            return new SOAPBindingImpl(bindingId, null, bindingId.getSOAPVersion(), serviceName);
     }
 
     public static WSBinding getDefaultBinding() {
@@ -169,6 +139,6 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public static WSBinding getDefaultBinding(QName serviceName) {
-        return new SOAPHTTPBindingImpl(SOAPBinding.SOAP11HTTP_BINDING, null,SOAPVersion.SOAP_11,serviceName);
+        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, null, SOAPVersion.SOAP_11, serviceName);
     }
 }

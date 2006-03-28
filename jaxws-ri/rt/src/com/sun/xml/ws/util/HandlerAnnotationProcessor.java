@@ -19,6 +19,7 @@
  */
 package com.sun.xml.ws.util;
 
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -31,8 +32,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -87,16 +86,16 @@ public class HandlerAnnotationProcessor {
      * in has no handler chain annotation.
      */
     public static HandlerAnnotationInfo buildHandlerInfo(
-        Class clazz, QName serviceName, QName portName, WSBinding binding) {
+        Class<?> clazz, QName serviceName, QName portName, WSBinding binding) {
 
 //        clazz = checkClass(clazz);
         HandlerChain handlerChain =
-            (HandlerChain) clazz.getAnnotation(HandlerChain.class);
+            clazz.getAnnotation(HandlerChain.class);
         if (handlerChain == null) {
             clazz = getSEI(clazz);
             if (clazz != null)
             handlerChain =
-                (HandlerChain) clazz.getAnnotation(HandlerChain.class);
+                clazz.getAnnotation(HandlerChain.class);
             if (handlerChain == null)
                 return null;
         }
@@ -119,14 +118,14 @@ public class HandlerAnnotationProcessor {
                 className);
         } catch (ClassNotFoundException e) {
             throw new UtilException("util.handler.class.not.found",
-                new Object[] {className});
+                className);
         }
     }
 
     static Class getSEI(Class clazz) {
         if (!clazz.isAnnotationPresent(WebService.class)) {
             throw new UtilException("util.handler.no.webservice.annotation",
-                new Object[] {clazz.getCanonicalName()});
+                clazz.getCanonicalName());
         }
 
         WebService webService =
@@ -137,7 +136,7 @@ public class HandlerAnnotationProcessor {
             clazz = getClass(webService.endpointInterface());
             if (!clazz.isAnnotationPresent(WebService.class)) {
                 throw new UtilException("util.handler.endpoint.interface.no.webservice",
-                                    new Object[] {webService.endpointInterface()});
+                    webService.endpointInterface());
             }
             return clazz;
         }
@@ -187,17 +186,17 @@ public class HandlerAnnotationProcessor {
                         "but bindingId passed to parser is null");
                 }
 
-                String bindingId = binding.getBindingId();
+                BindingID bindingId = binding.getBindingId();
 
                 String bindingList = XMLStreamReaderUtil.getElementText(reader);
                 boolean skipThisChain = true;
-                if (bindingId.equals(HTTPBinding.HTTP_BINDING) &&
+                if (bindingId.equals(BindingID.XML_HTTP) &&
                     bindingList.indexOf(PROTOCOL_XML_TOKEN) != -1) {
                     skipThisChain = false;
-                } else if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) &&
+                } else if (bindingId.equals(BindingID.SOAP11_HTTP) &&
                     bindingList.indexOf(PROTOCOL_SOAP11_TOKEN) != -1) {
                     skipThisChain = false;
-                } else if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING) &&
+                } else if (bindingId.equals(BindingID.SOAP12_HTTP) &&
                     bindingList.indexOf(PROTOCOL_SOAP12_TOKEN) != -1) {
                     skipThisChain = false;
                 }
@@ -224,7 +223,7 @@ public class HandlerAnnotationProcessor {
 
             // process all <handler> elements
             while (reader.getName().equals(QNAME_HANDLER)) {
-                Handler handler = null;
+                Handler handler;
 
                 XMLStreamReaderUtil.nextContent(reader);
                 if (reader.getName().equals(QNAME_HANDLER_NAME)) {
@@ -299,10 +298,9 @@ public class HandlerAnnotationProcessor {
     static void failWithLocalName(String key,
                                   XMLStreamReader reader, String arg) {
         throw new UtilException(key,
-            new Object[] {
-                Integer.toString(reader.getLocation().getLineNumber()),
-                reader.getLocalName(),
-                arg });
+            Integer.toString(reader.getLocation().getLineNumber()),
+            reader.getLocalName(),
+            arg);
     }
 
     static Class loadClass(ClassLoader loader, String name) {
@@ -361,13 +359,13 @@ public class HandlerAnnotationProcessor {
         }
         if (url == null) {
             throw new UtilException("util.failed.to.find.handlerchain.file",
-                new Object[] {clazz.getName(), chain.file()});
+                clazz.getName(), chain.file());
         }
         try {
             return url.openStream();
         } catch (IOException e) {
             throw new UtilException("util.failed.to.parse.handlerchain.file",
-                new Object[] {clazz.getName(), chain.file()});
+                clazz.getName(), chain.file());
         }
     }
 

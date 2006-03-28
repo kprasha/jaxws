@@ -20,6 +20,7 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -47,7 +48,7 @@ final class SEIPortInfo extends PortInfo {
      */
     public final WSDLPort portModel;
 
-    public SEIPortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, String bindingId, Class sei, SOAPSEIModel model, WSDLPort portModel) {
+    public SEIPortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, Class sei, SOAPSEIModel model, WSDLPort portModel) {
         super(owner, targetEndpoint, name, bindingId);
         this.sei = sei;
         this.model = model;

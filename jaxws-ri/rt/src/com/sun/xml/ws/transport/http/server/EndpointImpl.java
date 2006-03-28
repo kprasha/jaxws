@@ -21,9 +21,9 @@
 
 package com.sun.xml.ws.transport.http.server;
 
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.server.Root;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.istack.NotNull;
 import java.net.MalformedURLException;
 
 import javax.xml.namespace.QName;
@@ -88,8 +89,8 @@ public class EndpointImpl extends Endpoint {
 
 
 
-    public EndpointImpl(String bindingId, Object impl) {
-        binding = BindingImpl.getBinding(bindingId, impl.getClass(), null, false);
+    public EndpointImpl(@NotNull BindingID bindingId, @NotNull Object impl) {
+        binding = BindingImpl.create(bindingId, null);
         implementor = impl;
     }
 

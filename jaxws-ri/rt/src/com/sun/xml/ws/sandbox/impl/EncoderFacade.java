@@ -1,13 +1,13 @@
 package com.sun.xml.ws.sandbox.impl;
 
-import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.Encoder;
 
-import javax.xml.ws.soap.SOAPBinding;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 
 /**
@@ -19,9 +19,9 @@ import java.nio.channels.WritableByteChannel;
 public class EncoderFacade implements Encoder {
     private final Encoder mtomEncoder;
     private final Encoder soapEncoder;
-    private final SOAPBinding binding;
+    private final BindingID binding;
 
-    public EncoderFacade(SOAPVersion version, SOAPBinding binding) {
+    public EncoderFacade(SOAPVersion version, BindingID binding) {
         mtomEncoder = MtomEncoder.get(version);
         soapEncoder = TestEncoderImpl.get(version);
         this.binding = binding;

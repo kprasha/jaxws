@@ -59,7 +59,7 @@
  * objects, the handler caller is not created until needed, and it sets
  * the handlers and roles (if present) on the handler chain caller then.
  * See {@link com.sun.xml.ws.binding.BindingImpl#getHandlerChainCaller}
- * and {@link com.sun.xml.ws.binding.soap.SOAPBindingImpl#getHandlerChainCaller}
+ * and {@link com.sun.xml.ws.binding.SOAPBindingImpl#getHandlerChainCaller}
  * for more details.
  * 
  * <p>The handler chain caller does the handler invocation and controls the

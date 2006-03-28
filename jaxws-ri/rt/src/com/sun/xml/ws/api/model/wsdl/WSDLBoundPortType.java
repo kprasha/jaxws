@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
 
@@ -52,10 +53,10 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
     Iterable<? extends WSDLBoundOperation> getBindingOperations();
 
     /**
-     * Returns {@link SOAPBinding#SOAP11HTTP_BINDING} or {@link SOAPBinding#SOAP12HTTP_BINDING}. This
-     * would typically determined by the binding extension elements in wsdl:binding.
+     * Returns the binding ID.
+     * This would typically determined by the binding extension elements in wsdl:binding.
      */
-    String getBindingId();
+    BindingID getBindingId();
 
     /**
      * Gets the {@link ParameterBinding} for a given operation, part name and the direction - IN/OUT

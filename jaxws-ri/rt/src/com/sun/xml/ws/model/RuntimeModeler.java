@@ -19,20 +19,18 @@
  */
 package com.sun.xml.ws.model;
 
-import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.api.CompositeStructure;
+import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.ExceptionType;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -44,13 +42,11 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
-import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.Response;
 import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebFault;
-import javax.xml.ws.http.HTTPBinding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -71,7 +67,7 @@ import java.util.concurrent.Future;
  * @author WS Developement Team
  */
 public class RuntimeModeler {
-    private String bindingId;
+    private BindingID bindingId;
     private Class portClass;
     private AbstractSEIModelImpl model;
     private com.sun.xml.ws.model.soap.SOAPBindingImpl defaultBinding;
@@ -124,7 +120,7 @@ public class RuntimeModeler {
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
      * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
      */
-    public RuntimeModeler(Class portClass, QName serviceName, String bindingId, boolean compatibilityMode) {
+    public RuntimeModeler(Class portClass, QName serviceName, BindingID bindingId, boolean compatibilityMode) {
         this.portClass = portClass;
         this.serviceName = serviceName;
         this.binding = null;
@@ -158,7 +154,7 @@ public class RuntimeModeler {
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
      * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, String bindingId,boolean compatibilityMode) {
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BindingID bindingId,boolean compatibilityMode) {
         this(portClass, serviceName, bindingId, compatibilityMode);
         this.implementor = implementor;
     }
@@ -232,14 +228,14 @@ public class RuntimeModeler {
         WebService webService = getPrivClassAnnotation(portClass, WebService.class);
         if (webService == null) {
             throw new RuntimeModelerException("runtime.modeler.no.webservice.annotation",
-                                       new Object[] {portClass.getCanonicalName()});
+                portClass.getCanonicalName());
         }
         if (webService.endpointInterface().length() > 0) {
             clazz = getClass(webService.endpointInterface());
             WebService seiService = getPrivClassAnnotation(clazz, WebService.class);
             if (seiService == null) {
                 throw new RuntimeModelerException("runtime.modeler.endpoint.interface.no.webservice",
-                                    new Object[] {webService.endpointInterface()});
+                    webService.endpointInterface());
             }
         }
         if (serviceName == null)
@@ -257,7 +253,7 @@ public class RuntimeModeler {
             portName = new QName(serviceName.getNamespaceURI(), portLocalName);
         if (!portName.getNamespaceURI().equals(serviceName.getNamespaceURI())) {
             throw new RuntimeModelerException("runtime.modeler.portname.servicename.namespace.mismatch",
-                    new Object[] {serviceName, portName});
+                serviceName, portName);
         }
         model.setPortName(portName);
 
@@ -289,7 +285,7 @@ public class RuntimeModeler {
                 return classLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
             throw new RuntimeModelerException("runtime.modeler.class.not.found",
-                             new Object[] {className});
+                className);
         }
     }
 
@@ -404,9 +400,7 @@ public class RuntimeModeler {
             new com.sun.xml.ws.model.soap.SOAPBindingImpl();
         Style style = soapBinding!=null ? soapBinding.style() : Style.DOCUMENT;
         rtSOAPBinding.setStyle(style);
-        //default soap version is 1.1, change it to soap 1.2 if the binding id says so
-        if(SOAPVersion.SOAP_12.httpBindingId.equals(bindingId))
-            rtSOAPBinding.setSOAPVersion(SOAPVersion.SOAP_12);
+        rtSOAPBinding.setSOAPVersion(bindingId.getSOAPVersion());
         return rtSOAPBinding;
     }
 
@@ -473,7 +467,7 @@ public class RuntimeModeler {
                 javaMethod = new JavaMethodImpl(model,tmpMethod);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeModelerException("runtime.modeler.method.not.found",
-                    new Object[] {method.getName(), portClass.getName()});
+                    method.getName(), portClass.getName());
             }
         }
         String methodName = method.getName();
@@ -717,7 +711,7 @@ public class RuntimeModeler {
                 if (paramMode!=Mode.IN) {
                     if (isOneway) {
                         throw new RuntimeModelerException("runtime.modeler.oneway.operation.no.out.parameters",
-                                new Object[] {portClass.getCanonicalName(), methodName});
+                            portClass.getCanonicalName(), methodName);
                     }
                     responseWrapper.addWrapperChild(param);
                 }
@@ -913,7 +907,7 @@ public class RuntimeModeler {
                 if(!param.isIN()){
                     if (isOneway) {
                             throw new RuntimeModelerException("runtime.modeler.oneway.operation.no.out.parameters",
-                                    new Object[] {portClass.getCanonicalName(), methodName});
+                                portClass.getCanonicalName(), methodName);
                     }
                     WSDLPart p = getPart(new QName(targetNamespace,operationName), partName, Mode.OUT);
                     if(p == null)
@@ -944,7 +938,7 @@ public class RuntimeModeler {
                 continue;
             Class exceptionBean;
             Annotation[] anns;
-            WebFault webFault = getPrivClassAnnotation((Class)exception, WebFault.class);            
+            WebFault webFault = getPrivClassAnnotation(exception, WebFault.class);
             Method faultInfoMethod = getWSDLExceptionFaultInfo(exception);
             ExceptionType exceptionType = ExceptionType.WSDLException;
             String namespace = targetNamespace;
@@ -971,7 +965,7 @@ public class RuntimeModeler {
             TypeReference typeRef = new TypeReference(faultName, exceptionBean, anns);
             CheckedExceptionImpl checkedException =
                 new CheckedExceptionImpl(javaMethod, exception, typeRef, exceptionType);
-            checkedException.setMessageName(((Class)exception).getSimpleName());            
+            checkedException.setMessageName(exception.getSimpleName());
             javaMethod.addException(checkedException);
         }
     }
@@ -1170,7 +1164,7 @@ public class RuntimeModeler {
         WebService webService = implClass.getAnnotation(WebService.class);
         if (webService == null) {
             throw new RuntimeModelerException("runtime.modeler.no.webservice.annotation",
-                                    new Object[] {implClass.getCanonicalName()});
+                implClass.getCanonicalName());
         }
         if (webService.serviceName().length() > 0) {
             name = webService.serviceName();
@@ -1180,7 +1174,7 @@ public class RuntimeModeler {
             targetNamespace = webService.targetNamespace();
         } else if (targetNamespace == null) {
             throw new RuntimeModelerException("runtime.modeler.no.package",
-                             new Object[] {implClass.getName()});
+                implClass.getName());
         }
 
 
@@ -1198,7 +1192,7 @@ public class RuntimeModeler {
         WebService webService = implClass.getAnnotation(WebService.class);
         if (webService == null) {
             throw new RuntimeModelerException("runtime.modeler.no.webservice.annotation",
-                new Object[] {implClass.getCanonicalName()});
+                implClass.getCanonicalName());
         }
         String name;
         if (webService.portName().length() > 0) {
@@ -1220,7 +1214,7 @@ public class RuntimeModeler {
                 targetNamespace = getNamespace(packageName);
                 if (targetNamespace == null) {
                     throw new RuntimeModelerException("runtime.modeler.no.package",
-                        new Object[] {implClass.getName()});
+                        implClass.getName());
                 }
             }
 
@@ -1267,27 +1261,9 @@ public class RuntimeModeler {
         if (tns.length() == 0)
             tns = getNamespace(clazz.getPackage().getName());
         if (tns == null) {
-            throw new RuntimeModelerException("runtime.modeler.no.package",
-                new Object[] {clazz.getName()});
+            throw new RuntimeModelerException("runtime.modeler.no.package", clazz.getName());
         }
         return new QName(tns, name);
-    }
-
-    public static String getBindingId(Class<?> implClass) {
-        BindingType bindingType = implClass.getAnnotation(BindingType.class);
-        if (bindingType != null) {
-            String bindingId = bindingType.value();
-            if (bindingId.length() > 0) {
-                if (!bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING)
-                    && !bindingId.equals(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
-                    && !bindingId.equals(HTTPBinding.HTTP_BINDING)
-                    && !bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
-                    throw new IllegalArgumentException("Wrong binding id "+bindingId+" in @BindingType");
-                }
-                return bindingId;
-            }
-        }
-        return null;
     }
 
     private ParameterBinding getBinding(String operation, String part, boolean isHeader, Mode mode){
@@ -1309,10 +1285,4 @@ public class RuntimeModeler {
         }
         return null;
     }
-
-
-    public String getBindingId() {
-        return bindingId;
-    }
-
 }

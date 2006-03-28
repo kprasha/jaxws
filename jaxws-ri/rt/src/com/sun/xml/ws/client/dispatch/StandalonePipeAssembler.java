@@ -11,7 +11,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.TransportPipeFactory;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.binding.soap.SOAPBindingImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.handler.SOAPHandlerPipe;

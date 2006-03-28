@@ -22,6 +22,7 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.*;
+import com.sun.xml.ws.api.BindingID;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -125,22 +126,7 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
         return port;
     }
 
-
     /**
-     * Returns biningId of the first port
-     */
-    @Deprecated   // is this method still in use?
-    public String getBindingId(){
-        WSDLPort port = getFirstPort();
-        if(port == null)
-            return null;
-        WSDLBoundPortType boundPortType = port.getBinding();
-        if(boundPortType == null)
-            return null;
-        return boundPortType.getBindingId();
-    }
-
-     /**
      *
      * @param serviceName non-null service QName
      * @param portName    non-null port QName
@@ -162,13 +148,13 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
      * @param service  non-null service
      * @param bindingId  non-null binding id
      */
-    public List<WSDLBoundPortType> getBindings(WSDLService service, String bindingId){
+    public List<WSDLBoundPortType> getBindings(WSDLService service, BindingID bindingId){
         List<WSDLBoundPortType> bs = new ArrayList<WSDLBoundPortType>();
         for (WSDLPort port : service.getPorts()) {
             WSDLBoundPortTypeImpl b = bindings.get(port.getName());
             if(b == null)
                 return bs;
-            if(b.equals(bindingId))
+            if(b.getBindingId().equals(bindingId))
                 bs.add(b);
         }
         return bs;
