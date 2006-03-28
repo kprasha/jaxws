@@ -106,9 +106,9 @@ public class ResourceGenTask extends Task {
                 Localizer localizer = new Localizer();
             */
 
-            JClass lmf_class = null;
-            JClass l_class   = null;
-            JClass lable_class   = null;
+            JClass lmf_class;
+            JClass l_class;
+            JClass lable_class;
             try {
                 lmf_class = cm.parseType("com.sun.xml.ws.util.localization.LocalizableMessageFactory").boxify();
                 l_class = cm.parseType("com.sun.xml.ws.util.localization.Localizer").boxify();
