@@ -53,6 +53,8 @@ public class ResourceGenTask extends Task {
         if(destDir==null)
             throw new BuildException("No destdir attribute is specified");
 
+        destDir.mkdirs();
+
         JCodeModel cm = new JCodeModel();
 
         DirectoryScanner ds = resources.getDirectoryScanner(getProject());
@@ -61,11 +63,20 @@ public class ResourceGenTask extends Task {
 
         for (String value : includedFiles) {
             File res = new File(baseDir, value);
-            log("Processing "+res,Project.MSG_INFO);
+
+            String className = getClassName(res);
 
             String bundleName = value.substring(0, value.lastIndexOf('.')).replace('/', '.').replace('\\', '.');// cut off '.properties'
+            String dirName = bundleName.substring(0, bundleName.lastIndexOf('.'));
 
-            JPackage pkg = cm._package(bundleName.substring(0,bundleName.lastIndexOf('.')));
+            File destFile = new File(new File(destDir,dirName.replace('.','/')),className+".java");
+            if(destFile.lastModified() >= res.lastModified()) {
+                log("Skipping "+res,Project.MSG_INFO);
+                continue;
+            }
+
+            log("Processing "+res,Project.MSG_INFO);
+            JPackage pkg = cm._package(dirName);
 
             Properties props = new Properties();
             try {
@@ -78,10 +89,15 @@ public class ResourceGenTask extends Task {
 
             JDefinedClass clazz;
             try {
-                clazz = pkg._class(JMod.PUBLIC | JMod.FINAL, getClassName(res));
+                clazz = pkg._class(JMod.PUBLIC | JMod.FINAL, className);
             } catch (JClassAlreadyExistsException e) {
-                throw new BuildException("Name conflict "+getClassName(res));
+                throw new BuildException("Name conflict "+className);
             }
+
+            clazz.javadoc().add(
+                "Defines string formatting method for each constant in the resource file"
+            );
+
             /*
               [RESULT]
 
@@ -92,9 +108,11 @@ public class ResourceGenTask extends Task {
 
             JClass lmf_class = null;
             JClass l_class   = null;
+            JClass lable_class   = null;
             try {
                 lmf_class = cm.parseType("com.sun.xml.ws.util.localization.LocalizableMessageFactory").boxify();
                 l_class = cm.parseType("com.sun.xml.ws.util.localization.Localizer").boxify();
+                lable_class = cm.parseType("com.sun.xml.ws.util.localization.Localizable").boxify();
             } catch (ClassNotFoundException e) {
                 throw new BuildException(e); // impossible -- but why parseType throwing ClassNotFoundExceptoin!?
             }
@@ -115,7 +133,7 @@ public class ResourceGenTask extends Task {
                 // }
                 String methodBaseName = NameConverter.smart.toConstantName(key.toString());
 
-                JMethod method = clazz.method(JMod.PUBLIC | JMod.STATIC, String.class, methodBaseName+"_localizable");
+                JMethod method = clazz.method(JMod.PUBLIC | JMod.STATIC, lable_class, methodBaseName+"_localizable");
 
                 int countArgs = countArgs(props.getProperty(key.toString()));
 
@@ -128,13 +146,14 @@ public class ResourceGenTask extends Task {
                 method.body()._return(format);
 
                 JMethod method2 = clazz.method(JMod.PUBLIC|JMod.STATIC, String.class, methodBaseName);
+                method2.javadoc().add(props.get(key));
 
                 JInvocation localize = JExpr.invoke(method);
                 for( int i=0; i<countArgs; i++ ) {
                     localize.arg( method2.param(Object.class,"arg"+i));
                 }
 
-                method.body()._return($localizer.invoke("localize").arg(localize));
+                method2.body()._return($localizer.invoke("localize").arg(localize));
             }
         }
 
