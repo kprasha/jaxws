@@ -35,10 +35,11 @@ import com.sun.xml.ws.streaming.Attributes;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
-import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.handler.HandlerChainsModel;
+
 import javax.jws.WebService;
 import org.xml.sax.EntityResolver;
 
@@ -188,10 +189,13 @@ public class DeploymentDescriptorParser<A> {
                 SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
 
                 QName serviceName = getQNameAttribute(attrs, ATTR_SERVICE);
-                serviceName = getServiceName(serviceName, implementorClass);
+                if(serviceName == null)
+                    serviceName = Root.getDefaultServiceName(implementorClass);
 
                 QName portName = getQNameAttribute(attrs, ATTR_PORT);
-
+                if(portName == null)
+                    serviceName = Root.getDefaultPortName(serviceName,implementorClass);
+                
                 BindingID bindingId = null;
                 {//set Binding using DD, annotation, or default one(in that order)
                     String attr = getAttribute(attrs, ATTR_BINDING);
@@ -227,7 +231,7 @@ public class DeploymentDescriptorParser<A> {
                 // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
 
-                WSEndpoint<?> endpoint = new Root().createSEIEndpoint(
+                WSEndpoint<?> endpoint = new Root().createEndpoint(
                     implementorClass,
                     InstanceResolver.createSingleton(getImplementor(implementorClass)),
                     serviceName, portName, container, binding,
@@ -261,32 +265,6 @@ public class DeploymentDescriptorParser<A> {
      */
     public static interface AdapterFactory<A> {
         A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap);
-    }
-    
-    /**
-     * If DD doesn't have a WSDL service name, it creates service name using
-     * annotations on the implementor class.
-     *
-     * @param serviceName
-     *      serviceName from DD. Can be null.
-     *
-     * @return
-     *      WSDL service name. Can NOT be null.
-     */
-    private QName getServiceName(QName serviceName, Class<?> implementorClass) {
-        if (serviceName == null) {
-            WebServiceProvider wsProvider = implementorClass.getAnnotation(WebServiceProvider.class);
-
-            if (wsProvider != null) {
-                String tns = wsProvider.targetNamespace();
-                String local = wsProvider.serviceName();
-                serviceName = new QName(tns, local);
-            } else {
-                serviceName = RuntimeModeler.getServiceName(implementorClass);
-            }
-        }
-        assert serviceName != null;
-        return serviceName;
     }
     
     /**
@@ -422,12 +400,12 @@ public class DeploymentDescriptorParser<A> {
         if (XMLStreamReaderUtil.nextElementContent(reader) ==
             XMLStreamConstants.END_ELEMENT ||
             !reader.getName().equals(
-            HandlerAnnotationProcessor.QNAME_HANDLER_CHAINS)) {
+            HandlerChainsModel.QNAME_HANDLER_CHAINS)) {
 
             return;
         }
 
-        HandlerAnnotationInfo handlerInfo = HandlerAnnotationProcessor.parseHandlerFile(
+        HandlerAnnotationInfo handlerInfo = HandlerChainsModel.parseHandlerFile(
             reader, classLoader,serviceName, portName, binding);
 
         binding.setHandlerChain(handlerInfo.getHandlers());

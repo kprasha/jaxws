@@ -100,7 +100,7 @@ public class Root {
      * @throws WebServiceException
      *      if the endpoint set up fails.
      */
-    public <T> WSEndpoint<T> createSEIEndpoint(
+    public <T> WSEndpoint<T> createEndpoint(
         Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
         Container container, WSBinding binding,
         SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
@@ -148,7 +148,16 @@ public class Root {
 
                 wsdlPort = seiModel.getPort();
 
-                if (binding.getHandlerChain() == null) {
+                //set mtom processing
+                if(binding instanceof SOAPBindingImpl){
+                    seiModel.enableMtom(((SOAPBinding)binding).isMTOMEnabled());
+                }
+                terminal= new SEIInvokerPipe(seiModel,ir,binding);
+            }
+
+            //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
+
+            if (binding.getHandlerChain() == null) {
                     HandlerAnnotationInfo chainInfo =
                         HandlerAnnotationProcessor.buildHandlerInfo(
                         implType, serviceName, portName, binding);
@@ -159,12 +168,6 @@ public class Root {
                         }
                     }
                 }
-                //set momt processing
-                if(binding instanceof SOAPBindingImpl){
-                    seiModel.enableMtom(((SOAPBinding)binding).isMTOMEnabled());
-                }
-                terminal= new SEIInvokerPipe(seiModel,ir,binding);
-            }
         }
 
 
@@ -292,7 +295,7 @@ public class Root {
     /**
      * Checks {@link @WebServiceProvider} and determines the service name.
      */
-    private QName getDefaultServiceName(Class<?> implType) {
+    public static QName getDefaultServiceName(Class<?> implType) {
         QName serviceName;
         WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
         if (wsProvider!=null) {
@@ -302,6 +305,7 @@ public class Root {
         } else {
             serviceName = RuntimeModeler.getServiceName(implType);
         }
+        assert serviceName != null;
         return serviceName;
     }
 
@@ -309,7 +313,7 @@ public class Root {
      * If portName is not already set via DD or programmatically, it uses
      * annotations on implementorClass to set PortName.
      */
-    private QName getDefaultPortName(QName serviceName, Class<?> implType) {
+    public static QName getDefaultPortName(QName serviceName, Class<?> implType) {
         QName portName;
         WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
         if (wsProvider!=null) {

@@ -15,7 +15,6 @@ import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
-import com.sun.xml.ws.handler.HandlerResolverImpl;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -23,8 +22,6 @@ import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
-import com.sun.xml.ws.util.HandlerAnnotationInfo;
-import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
 
@@ -39,6 +36,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.jws.HandlerChain;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -51,6 +49,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * <code>Service</code> objects provide the client view of a Web service.
@@ -137,7 +137,7 @@ public class WSServiceDelegate extends WSService {
     private WSDLServiceImpl wsdlService;
 
 
-    public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class<? extends Service> serviceClass) {
+    public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, final Class<? extends Service> serviceClass) {
         this.serviceName = serviceName;
         this.serviceClass = serviceClass;
 
@@ -149,6 +149,18 @@ public class WSServiceDelegate extends WSService {
 
             if(wsdlDocumentLocation!=null)
                 parseWSDL(wsdlDocumentLocation);
+
+            //if @HandlerChain present, set HandlerResolver on service context
+            HandlerChain handlerChain = (HandlerChain)
+            AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                return serviceClass.getAnnotation(HandlerChain.class);
+            }
+            });
+            if(handlerChain != null) {
+                HandlerResolverImpl hresolver = new HandlerResolverImpl(this);
+                setHandlerResolver(hresolver);
+            }
 
             for (Class clazz : serviceCAnnotations.classes)
                 addSEI(clazz);
@@ -259,6 +271,18 @@ public class WSServiceDelegate extends WSService {
         return serviceName;
     }
 
+    protected Class getServiceClass() {
+        return serviceClass;
+    }
+
+    protected Set<String> getRoles(QName portName) {
+        return rolesMap.get(portName);
+    }
+
+    protected void setRoles(QName portName,Set<String> roles) {
+        rolesMap.put(portName,roles);
+    }
+
     public Iterator<QName> getPorts() throws WebServiceException {
         // KK: the spec seems to be ambigous about whether
         // this returns ports that are dynamically added or not.
@@ -360,24 +384,6 @@ public class WSServiceDelegate extends WSService {
         seiContext.put(spi.sei,spi);
         ports.put(spi.portName,spi);
 
-        // get handler information
-        HandlerAnnotationInfo chainInfo =
-            HandlerAnnotationProcessor.buildHandlerInfo(portInterface,
-                model.getServiceQName(), model.getPortName(), spi.createBinding() );
-
-        if (chainInfo != null) {
-            if(handlerResolver==null)
-                handlerResolver = new HandlerResolverImpl();
-
-            // the following cast to HandlerResolverImpl always succeed, as the addPort method
-            // is only used during the construction of WSServiceDelegate
-            ((HandlerResolverImpl)handlerResolver).setHandlerChain(new PortInfoImpl(
-                wsdlPort.getBinding().getBindingId(),
-                model.getPortName(),
-                model.getServiceQName()),
-                chainInfo.getHandlers());
-            rolesMap.put(portName,chainInfo.getRoles());
-        }
     }
 
     /**

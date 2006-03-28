@@ -24,6 +24,8 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.UtilException;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.BindingID;
 
 import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
@@ -148,7 +150,7 @@ public class HandlerChainsModel {
     /**
      * <p>This method is called internally by HandlerAnnotationProcessor,
      * and by
-     * {@link com.sun.xml.ws.transport.http.servlet.RuntimeEndpointInfoParser}
+     * {@link com.sun.xml.ws.transport.http.DeploymentDescriptorParser}
      * directly when it reaches the handler chains element in the
      * descriptor file it is parsing.
      *
@@ -157,7 +159,8 @@ public class HandlerChainsModel {
      */
     public static HandlerAnnotationInfo parseHandlerFile(XMLStreamReader reader,
             ClassLoader classLoader, QName serviceName, QName portName,
-            String bindingId) {
+            WSBinding wsbinding) {
+        BindingID bindingId = wsbinding.getBindingId();
         
         HandlerAnnotationInfo info = new HandlerAnnotationInfo();
         
@@ -226,7 +229,7 @@ public class HandlerChainsModel {
             
             // process all <handler> elements
             while (reader.getName().equals(QNAME_HANDLER)) {
-                Handler handler = null;
+                Handler handler;
                 
                 XMLStreamReaderUtil.nextContent(reader);
                 if (reader.getName().equals(QNAME_HANDLER_NAME)) {
@@ -396,11 +399,10 @@ public class HandlerChainsModel {
     
     static void failWithLocalName(String key,
             XMLStreamReader reader, String arg) {
-        throw new UtilException(key,
-                new Object[] {
+        throw new UtilException(key,               
             Integer.toString(reader.getLocation().getLineNumber()),
             reader.getLocalName(),
-            arg });
+            arg );
     }
     
     public static final String PROTOCOL_SOAP11_TOKEN = "##SOAP11_HTTP";

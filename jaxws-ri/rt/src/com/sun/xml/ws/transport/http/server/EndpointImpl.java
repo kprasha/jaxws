@@ -201,7 +201,7 @@ public class EndpointImpl extends Endpoint {
             throw new UnsupportedOperationException("NOT SUPPORTED");
         }
 
-        WSEndpoint wse = new Root().createSEIEndpoint(
+        WSEndpoint wse = new Root().createEndpoint(
             (Class) implementor.getClass(),
             InstanceResolver.createSingleton(implementor),
             getProperty(QName.class, Endpoint.WSDL_SERVICE),
