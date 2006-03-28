@@ -148,7 +148,7 @@ public class WSServiceDelegate extends WSService {
         if (serviceClass != Service.class) {
             SCAnnotations serviceCAnnotations = new SCAnnotations(serviceClass);
 
-            if(wsdlDocumentLocation!=null)
+            if(wsdlDocumentLocation==null)
                 wsdlDocumentLocation = serviceCAnnotations.wsdlLocation;
 
             if(wsdlDocumentLocation!=null)
