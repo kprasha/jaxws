@@ -21,17 +21,21 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.*;
-import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.istack.NotNull;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,15 +89,15 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
         return messages;
     }
 
-    public Map<QName, WSDLPortTypeImpl> getPortTypes() {
+    public @NotNull Map<QName, WSDLPortTypeImpl> getPortTypes() {
         return portTypes;
     }
 
-    public Map<QName, WSDLBoundPortType> getBindings() {
+    public @NotNull Map<QName, WSDLBoundPortType> getBindings() {
         return unmBindings;
     }
 
-    public Map<QName, WSDLServiceImpl> getServices(){
+    public @NotNull Map<QName, WSDLServiceImpl> getServices(){
         return services;
     }
 
@@ -141,23 +145,6 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
                 return port.getBinding();
         }
         return null;
-    }
-
-    /**
-     * Returns the bindings for the given bindingId
-     * @param service  non-null service
-     * @param bindingId  non-null binding id
-     */
-    public List<WSDLBoundPortType> getBindings(WSDLService service, BindingID bindingId){
-        List<WSDLBoundPortType> bs = new ArrayList<WSDLBoundPortType>();
-        for (WSDLPort port : service.getPorts()) {
-            WSDLBoundPortTypeImpl b = bindings.get(port.getName());
-            if(b == null)
-                return bs;
-            if(b.getBindingId().equals(bindingId))
-                bs.add(b);
-        }
-        return bs;
     }
 
     void finalizeRpcLitBinding(WSDLBoundPortTypeImpl boundPortType){
