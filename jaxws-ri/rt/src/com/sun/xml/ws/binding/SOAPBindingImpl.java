@@ -24,10 +24,8 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.spi.runtime.SystemHandlerDelegateFactory;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -154,12 +152,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
             roles = new HashSet<String>();
         }
         if (roles.contains(ROLE_NONE)) {
-            LocalizableMessageFactory messageFactory =
-                new LocalizableMessageFactory("com.sun.xml.ws.resources.client");
-            Localizer localizer = new Localizer();
-            Localizable locMessage =
-                messageFactory.getMessage("invalid.soap.role.none");
-            throw new WebServiceException(localizer.localize(locMessage));
+            throw new WebServiceException(ClientMessages.INVALID_SOAP_ROLE_NONE());
         }
         this.roles = roles;
         addRequiredRoles();        

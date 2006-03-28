@@ -20,16 +20,13 @@
 package com.sun.xml.ws.binding;
 
 import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.localization.Localizer;
+import com.sun.xml.ws.resources.ClientMessages;
 
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.http.HTTPBinding;
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,14 +54,7 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
             return;
         for (Handler handler : handlers) {
             if (!(handler instanceof LogicalHandler)) {
-                LocalizableMessageFactory messageFactory =
-                    new LocalizableMessageFactory(
-                    "com.sun.xml.ws.resources.client");
-                Localizer localizer = new Localizer();
-                Localizable locMessage =
-                    messageFactory.getMessage("non.logical.handler.set",
-                    handler.getClass().toString());
-                throw new WebServiceException(localizer.localize(locMessage));
+                throw new WebServiceException(ClientMessages.NON_LOGICAL_HANDLER_SET(handler.getClass()));
             } else {
                 logicalHandlers.add((LogicalHandler) handler);
             }            
