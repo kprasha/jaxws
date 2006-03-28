@@ -37,23 +37,14 @@ import java.util.logging.Logger;
  *
  * @author Jitendra Kotamraju
  */
-public class ProviderInvokerPipe extends AbstractPipeImpl {
+public abstract class ProviderInvokerPipe extends AbstractPipeImpl {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
-    private final ProviderEndpointModel model;
     private final InstanceResolver<? extends Provider> instanceResolver;
-    private final SOAPVersion soapVersion;
 
-    public ProviderInvokerPipe(Class<? extends Provider> implType, InstanceResolver<? extends Provider> instanceResolver, WSBinding binding) {
+    public ProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver) {
         this.instanceResolver = instanceResolver;
-        soapVersion = binding.getSOAPVersion();
-        if (soapVersion != null) {
-            model = new SOAPProviderEndpointModel(implType,soapVersion);
-        } else {
-            model = new XMLProviderEndpointModel(implType);
-        }
-        model.createModel();
     }
 
     /*
@@ -63,16 +54,15 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
      * through the Pipeline to transport.
      */
     public Packet process(Packet request) {
-        Object parameter = model.getParameter(request.getMessage());
+        Object parameter = getParameter(request.getMessage());
         Provider servant = instanceResolver.resolve(request);
         logger.fine("Invoking Provider Endpoint "+servant);
         Object returnValue = null;
         try {
             returnValue = servant.invoke(parameter);
         } catch(RuntimeException e) {
-            // TODO exception handling for XML/HTTP binding
             e.printStackTrace();
-            Message responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
+            Message responseMessage = getResponseMessage(e);
             return request.createResponse(responseMessage);
         }
         if (returnValue == null) {
@@ -83,9 +73,13 @@ public class ProviderInvokerPipe extends AbstractPipeImpl {
             }
             return request.createResponse(null);
         } else {
-            return request.createResponse(model.getResponseMessage(returnValue));
+            return request.createResponse(getResponseMessage(returnValue));
         }
     }
+    
+    public abstract Object getParameter(Message msg);
+    public abstract Message getResponseMessage(Object returnValue);
+    public abstract Message getResponseMessage(Exception e);
 
     public Pipe copy(PipeCloner cloner) {
         cloner.add(this,this);

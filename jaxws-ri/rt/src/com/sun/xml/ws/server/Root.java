@@ -1,6 +1,7 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
@@ -17,7 +18,10 @@ import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.SoapProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.XmlProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
@@ -139,8 +143,13 @@ public class Root {
                 if (!Provider.class.isAssignableFrom(implType))
                     throw new ServerRtException("not.implement.provider",implType);
 
-
-                terminal =  new ProviderInvokerPipe(implType.asSubclass(Provider.class),(InstanceResolver)ir,binding);
+                ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
+                if (binding instanceof SOAPBinding) {
+                    SOAPVersion soapVersion = binding.getSOAPVersion();
+                    terminal =  new SoapProviderInvokerPipe((InstanceResolver)ir, model, soapVersion);
+                } else {
+                    terminal =  new XmlProviderInvokerPipe((InstanceResolver)ir, model);
+                }
             } else {
                 // Create runtime model for non Provider endpoints
                 seiModel = createSEIModel(primaryWsdl, md, implType, serviceName, portName, binding);
