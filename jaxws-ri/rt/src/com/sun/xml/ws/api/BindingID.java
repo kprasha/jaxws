@@ -311,7 +311,7 @@ public abstract class BindingID {
         }
 
         public Encoder createEncoder() {
-            return new EncoderFacade(version, this);
+            return new EncoderFacade(this);
         }
 
         public Decoder createDecoder() {
