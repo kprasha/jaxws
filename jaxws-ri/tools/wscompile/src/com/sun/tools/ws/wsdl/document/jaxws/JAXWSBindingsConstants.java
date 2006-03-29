@@ -32,6 +32,7 @@ public interface JAXWSBindingsConstants {
 
     public static String NS_JAXWS_BINDINGS = "http://java.sun.com/xml/ns/jaxws";
     public static String NS_JAXB_BINDINGS = "http://java.sun.com/xml/ns/jaxb";
+    public static String NS_XJC_BINDINGS = "http://java.sun.com/xml/ns/jaxb/xjc";
 
     /**
      * jaxws:bindings schema component
