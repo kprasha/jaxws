@@ -182,20 +182,6 @@ public abstract class BindingID {
      *      If the binding ID is not understood.
      */
     public static @NotNull BindingID parse(String lexical) {
-        // these constants are used in JSR-109 as short-forms.
-        // since JAX-WS spec does let us interpret non-standard binding ID,
-        // let's just recognize them in all the places.
-        //
-        // if we should not recognize them in everywhere, this should be moved
-        // to another place.
-        if (lexical.equals("##SOAP11_HTTP")) {
-            return SOAP11_HTTP;
-        } else if (lexical.equals("##SOAP12_HTTP")) {
-            return SOAP12_HTTP;
-        } else if (lexical.equals("##XML_HTTP")) {
-            return XML_HTTP;
-        }
-
         if(lexical.equals(XML_HTTP.toString()))
             return XML_HTTP;
         if(belongsTo(lexical,SOAP11_HTTP.toString()))

@@ -20,6 +20,7 @@
 
 package com.sun.xml.ws.transport.http;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -37,6 +38,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import javax.xml.ws.http.HTTPBinding;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
@@ -193,9 +195,11 @@ public class DeploymentDescriptorParser<A> {
                 BindingID bindingId = null;
                 {//set Binding using DD, annotation, or default one(in that order)
                     String attr = getAttribute(attrs, ATTR_BINDING);
-                    if(attr!=null)
+                    if(attr!=null) {
+                        // Convert short-form tokens to API's binding ids
+                        attr = getBindingIdForToken(attr);
                         bindingId = BindingID.parse(attr);
-                    else
+                    } else
                         bindingId = BindingID.parse(implementorClass);
                 }
 
@@ -248,6 +252,31 @@ public class DeploymentDescriptorParser<A> {
         reader.close();
 
         return adapters;
+    }
+    
+    /**
+     * JSR-109 defines short-form tokens for standard binding Ids. These are
+     * used only in DD. So stand alone deployment descirptor should also honor
+     * these tokens. This method converts the tokens to API's standard
+     * binding ids
+     *
+     * @param lexical binding attribute value from DD. Always not null
+     *
+     * @return returns corresponding API's binding ID or the same lexical
+     */
+    private @NotNull String getBindingIdForToken(@NotNull String lexical) {
+        if (lexical.equals("##SOAP11_HTTP")) {
+            return SOAPBinding.SOAP11HTTP_BINDING;
+        } else if (lexical.equals("##SOAP11_HTTP_MTOM")) {
+            return SOAPBinding.SOAP11HTTP_MTOM_BINDING;
+        } else if (lexical.equals("##SOAP12_HTTP")) {
+            return SOAPBinding.SOAP12HTTP_BINDING;
+        } else if (lexical.equals("##SOAP12_HTTP_MTOM")) {
+            return SOAPBinding.SOAP12HTTP_MTOM_BINDING;
+        } else if (lexical.equals("##XML_HTTP")) {
+            return HTTPBinding.HTTP_BINDING;
+        }
+        return lexical;
     }
 
     /**
