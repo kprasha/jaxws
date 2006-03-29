@@ -144,7 +144,7 @@ public class Internalizer {
             //target = wsdlDocuments.get(wsdlLocation);
             target = get(wsdlLocation);
             if(target==null) {
-                env.error(WsdlMessages.INTERNALIZER_TARGET_NOT_FOUND_localizable(wsdlLocation));
+                env.error(WsdlMessages.localizableINTERNALIZER_TARGET_NOT_FOUND(wsdlLocation));
                 return; // abort processing this <JAXWS:bindings>
             }
         }
@@ -207,7 +207,7 @@ public class Internalizer {
 
     private boolean isGlobalBinding(Node bindings){
         if(bindings.getNamespaceURI() == null){
-            env.warn(WsdlMessages.INVALID_CUSTOMIZATION_NAMESPACE_localizable(bindings.getLocalName()));
+            env.warn(WsdlMessages.localizableINVALID_CUSTOMIZATION_NAMESPACE(bindings.getLocalName()));
             return false;
         }
         return  (bindings.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS) &&
@@ -237,25 +237,25 @@ public class Internalizer {
             xpath.setNamespaceContext(namespaceContext);
             nlst = (NodeList)xpath.evaluate(expression, target, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVALUATION_ERROR_localizable(e.getMessage()));
+            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVALUATION_ERROR(e.getMessage()));
             if(env.verbose())
                 e.printStackTrace();
             return null; // abort processing this <jaxb:bindings>
         }
 
         if( nlst.getLength()==0 ) {
-            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVALUATES_TO_NO_TARGET_localizable(expression));
+            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVALUATES_TO_NO_TARGET(expression));
             return null; // abort
         }
 
         if( nlst.getLength()!=1 ) {
-            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVAULATES_TO_TOO_MANY_TARGETS_localizable(expression, nlst.getLength()));
+            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVAULATES_TO_TOO_MANY_TARGETS(expression, nlst.getLength()));
             return null; // abort
         }
 
         Node rnode = nlst.item(0);
         if(!(rnode instanceof Element )) {
-            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVALUATES_TO_NON_ELEMENT_localizable(expression));
+            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVALUATES_TO_NON_ELEMENT(expression));
             return null; // abort
         }
         return (Element)rnode;
