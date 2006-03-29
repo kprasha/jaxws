@@ -66,7 +66,7 @@ public abstract class BindingID {
      *      If the binding is using SOAP, this method returns
      *      a {@link SOAPVersion} constant.
      *
-     *      If the binding is not baksed on SOAP, this method
+     *      If the binding is not based on SOAP, this method
      *      returns null. See {@link Message} for how a non-SOAP
      *      binding shall be handled by {@link Pipe}s.
      */
@@ -75,18 +75,22 @@ public abstract class BindingID {
     /**
      * Creates a new {@link Encoder} for this binding.
      *
-     * @return
-     *      Always non-null.
+     * @param binding
+     *      Ocassionally some aspects of binding can be overridden by
+     *      {@link WSBinding} at runtime by users, so some {@link Encoder}s
+     *      need to have access to {@link WSBinding} that it's working for.
      */
-    public abstract Encoder createEncoder();
+    public abstract @NotNull Encoder createEncoder(@NotNull WSBinding binding);
 
     /**
      * Creates a new {@link Decoder} for this binding.
      *
-     * @return
-     *      Always non-null.
+     * @param binding
+     *      Ocassionally some aspects of binding can be overridden by
+     *      {@link WSBinding} at runtime by users, so some {@link Decoder}s
+     *      need to have access to {@link WSBinding} that it's working for.
      */
-    public abstract Decoder createDecoder();
+    public abstract @NotNull Decoder createDecoder(@NotNull WSBinding binding);
 
     /**
      * Gets the binding ID, which uniquely identifies the binding.
@@ -266,11 +270,11 @@ public abstract class BindingID {
      * Constant that represents REST.
      */
     public static final BindingID XML_HTTP = new Impl(null, HTTPBinding.HTTP_BINDING,false) {
-        public Encoder createEncoder() {
+        public Encoder createEncoder(WSBinding _) {
             return TestEncoderImpl.INSTANCE11;
         }
 
-        public Decoder createDecoder() {
+        public Decoder createDecoder(WSBinding _) {
             return TestDecoderImpl.INSTANCE11;
         }
     };
@@ -310,11 +314,11 @@ public abstract class BindingID {
             super(version, lexical, canGenerateWSDL);
         }
 
-        public Encoder createEncoder() {
-            return new EncoderFacade(this);
+        public Encoder createEncoder(WSBinding binding) {
+            return new EncoderFacade(binding);
         }
 
-        public Decoder createDecoder() {
+        public Decoder createDecoder(WSBinding binding) {
             return new DecoderFacade(version);
         }
 

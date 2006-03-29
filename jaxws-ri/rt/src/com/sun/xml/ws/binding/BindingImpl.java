@@ -112,11 +112,11 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public final @NotNull Encoder createEncoder() {
-        return bindingId.createEncoder();
+        return bindingId.createEncoder(this);
     }
 
     public final @NotNull Decoder createDecoder() {
-        return bindingId.createDecoder();
+        return bindingId.createDecoder(this);
     }
 
     public SystemHandlerDelegate getSystemHandlerDelegate() {
