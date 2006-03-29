@@ -323,6 +323,17 @@ public class Internalizer {
                 target.setAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "jaxb:version", JAXWSBindingsConstants.JAXB_BINDING_VERSION);
             }
 
+            // HACK: allow XJC extension all the time. This allows people to specify
+            // the <xjc:someExtension> in the external bindings. Otherwise users lack the ability
+            // to specify jaxb:extensionBindingPrefixes, so it won't work.
+            //
+            // the current workaround is still problematic in the sense that
+            // it can't support user-defined extensions.
+            if(!target.hasAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "extensionBindingPrefixes")){
+                target.setAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "jaxb:extensionBindingPrefixes", "xjc");
+                target.setAttributeNS(Constants.NS_XMLNS, "xmlns:xjc", JAXWSBindingsConstants.NS_XJC_BINDINGS);
+            }
+
             //insert xs:annotation/xs:appinfo where in jaxb:binding will be put
             target = refineSchemaTarget(target);
             copyInscopeNSAttributes(decl);
