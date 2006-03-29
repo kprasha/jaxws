@@ -133,7 +133,7 @@ public class ResourceGenTask extends Task {
                 // }
                 String methodBaseName = NameConverter.smart.toConstantName(key.toString());
 
-                JMethod method = clazz.method(JMod.PUBLIC | JMod.STATIC, lable_class, methodBaseName+"_localizable");
+                JMethod method = clazz.method(JMod.PUBLIC | JMod.STATIC, lable_class, "localizable"+methodBaseName);
 
                 int countArgs = countArgs(props.getProperty(key.toString()));
 
