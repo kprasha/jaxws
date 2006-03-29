@@ -24,6 +24,8 @@ import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.tools.xjc.util.DOMUtils;
 import com.sun.xml.ws.util.JAXWSUtils;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -173,7 +175,7 @@ public class Internalizer {
 
     private Node getWSDLDefintionNode(Node target){
         return evaluateXPathNode(target, "wsdl:definitions",
-            new javax.xml.namespace.NamespaceContext(){
+            new NamespaceContext(){
                 public String getNamespaceURI(String prefix){
                     return "http://schemas.xmlsoap.org/wsdl/";
                 }
@@ -190,11 +192,7 @@ public class Internalizer {
             return false;
         String localName = target.getLocalName();
         String nsURI = target.getNamespaceURI();
-        if(((localName != null) && localName.equals("definitions")) &&
-            (nsURI != null && nsURI.equals("http://schemas.xmlsoap.org/wsdl/")))
-            return true;
-        return false;
-
+        return fixNull(localName).equals("definitions") && fixNull(nsURI).equals("http://schemas.xmlsoap.org/wsdl/");
     }
 
     private boolean isTopLevelBinding(Node node){
@@ -208,7 +206,7 @@ public class Internalizer {
     }
 
     private boolean isGlobalBinding(Node bindings){
-        if((bindings.getNamespaceURI() == null)){
+        if(bindings.getNamespaceURI() == null){
             env.warn(WsdlMessages.INVALID_CUSTOMIZATION_NAMESPACE_localizable(bindings.getLocalName()));
             return false;
         }
@@ -293,15 +291,11 @@ public class Internalizer {
     }
 
     private boolean isJAXBBindingElement(Element e){
-        if((e.getNamespaceURI() != null ) && e.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXB_BINDINGS))
-            return true;
-        return false;
+        return fixNull(e.getNamespaceURI()).equals(JAXWSBindingsConstants.NS_JAXB_BINDINGS);
     }
 
     private boolean isJAXWSBindingElement(Element e){
-        if((e.getNamespaceURI() != null ) && e.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS))
-            return true;
-        return false;
+        return fixNull(e.getNamespaceURI()).equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS);
     }
 
     /**
@@ -462,5 +456,10 @@ public class Internalizer {
             parent.insertBefore( child, children.item(0) );
 
         return child;
+    }
+
+    private static @NotNull String fixNull(@Nullable String s) {
+        if(s==null) return "";
+        else        return s;
     }
 }
