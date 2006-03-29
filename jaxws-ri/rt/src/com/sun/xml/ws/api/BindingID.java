@@ -107,6 +107,11 @@ public abstract class BindingID {
 
     /**
      * Returns true if this binding implies using MTOM.
+     *
+     * <p>
+     * Note that MTOM can be enabled/disabled at runtime through
+     * {@link WSBinding}, so this value merely controls how things
+     * are configured by default.
      */
     public boolean isMTOMEnabled() {
         return false;
@@ -270,11 +275,11 @@ public abstract class BindingID {
      * Constant that represents REST.
      */
     public static final BindingID XML_HTTP = new Impl(null, HTTPBinding.HTTP_BINDING,false) {
-        public Encoder createEncoder(WSBinding _) {
+        public @NotNull Encoder createEncoder(WSBinding _) {
             return TestEncoderImpl.INSTANCE11;
         }
 
-        public Decoder createDecoder(WSBinding _) {
+        public @NotNull Decoder createDecoder(WSBinding _) {
             return TestDecoderImpl.INSTANCE11;
         }
     };
@@ -314,11 +319,11 @@ public abstract class BindingID {
             super(version, lexical, canGenerateWSDL);
         }
 
-        public Encoder createEncoder(WSBinding binding) {
+        public @NotNull Encoder createEncoder(WSBinding binding) {
             return new EncoderFacade(binding);
         }
 
-        public Decoder createDecoder(WSBinding binding) {
+        public @NotNull Decoder createDecoder(WSBinding binding) {
             return new DecoderFacade(version);
         }
 
