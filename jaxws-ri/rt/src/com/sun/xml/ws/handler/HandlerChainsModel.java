@@ -26,6 +26,7 @@ import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.UtilException;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 
 import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
@@ -202,11 +203,12 @@ public class HandlerChainsModel {
                 List<String> bindingList = new ArrayList<String>();
                 while(stk.hasMoreTokens()) {
                     String tokenOrURI = stk.nextToken();
-                    String binding = tokenBindingMap.get(tokenOrURI);
-                    if(binding == null) {
-                        //Unknown binding or Unknown token, Put it as it is
-                        binding = tokenOrURI;
-                    }
+                    /*
+                    Convert short-form tokens to API's binding ids
+                    Unknown token, Put it as it is
+                    */
+                    tokenOrURI = DeploymentDescriptorParser.getBindingIdForToken(tokenOrURI);
+                    String binding = BindingID.parse(tokenOrURI).toString();
                     bindingList.add(binding);
                 }
                 if(bindingList.contains(bindingId)){
@@ -443,16 +445,6 @@ public class HandlerChainsModel {
             new QName(NS_109, "soap-header");
     public static final QName QNAME_HANDLER_ROLE =
             new QName(NS_109, "soap-role");
-    protected static final Map<String,String> tokenBindingMap;
-    //Populate the token map
-    static {
-        tokenBindingMap = new HashMap<String,String>();
-        tokenBindingMap.put("##SOAP11_HTTP",SOAPBinding.SOAP11HTTP_BINDING);
-        tokenBindingMap.put("##SOAP11_HTTP_MTOM",SOAPBinding.SOAP11HTTP_MTOM_BINDING);
-        tokenBindingMap.put("##SOAP12_HTTP",SOAPBinding.SOAP12HTTP_BINDING);
-        tokenBindingMap.put("##SOAP12_HTTP_MTOM",SOAPBinding.SOAP12HTTP_MTOM_BINDING);
-        tokenBindingMap.put("##XML_HTTP",HTTPBinding.HTTP_BINDING);
-    }
 
     static class HandlerChainType {
         //constraints
@@ -494,12 +486,13 @@ public class HandlerChainsModel {
             return this.protocolBindings;
         }
 
-        public void addProtocolBinding(String tokenorURI){
-            String binding = tokenBindingMap.get(tokenorURI);
-            if(binding == null) {
-                //Unknown binding or Unknown token, Put it as it is
-                binding = tokenorURI;
-            }
+        public void addProtocolBinding(String tokenOrURI){
+            /*
+            Convert short-form tokens to API's binding ids
+            Unknown token, Put it as it is
+            */
+            tokenOrURI = DeploymentDescriptorParser.getBindingIdForToken(tokenOrURI);
+            String binding = BindingID.parse(tokenOrURI).toString();
             protocolBindings.add(binding);
             constraintSet = true;
         }
