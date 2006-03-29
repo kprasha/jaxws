@@ -19,6 +19,23 @@
  */
 package com.sun.tools.ws.wsdl.parser;
 
+import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.resources.WsdlMessages;
+import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
+import com.sun.tools.xjc.util.DOMUtils;
+import com.sun.xml.ws.util.JAXWSUtils;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,29 +44,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.namespace.QName;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.sun.tools.xjc.util.DOMUtils;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.xml.ws.util.JAXWSUtils;
-import com.sun.xml.ws.util.JAXWSUtils;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
-import com.sun.tools.ws.util.xml.XmlUtil;
 
 
 /**
@@ -60,14 +54,14 @@ public class Internalizer {
     private Map<String, Document> wsdlDocuments;
     private static final XPathFactory xpf = XPathFactory.newInstance();
     private final XPath xpath = xpf.newXPath();
-    private final  LocalizableMessageFactory messageFactory = new LocalizableMessageFactory("com.sun.tools.ws.resources.wsdl");;
     private ProcessorEnvironment env;
+
     public  void transform(Set<Element> JAXWSBindings, Map<String, Document> wsdlDocuments, ProcessorEnvironment env) {
         if(JAXWSBindings == null)
             return;
         this.env = env;
         this.wsdlDocuments = wsdlDocuments;
-        Map targetNodes = new HashMap<Element, Node>();
+        Map<Element,Node> targetNodes = new HashMap<Element,Node>();
 
         // identify target nodes for all <JAXWS:bindings>
         for(Element JAXWSBinding : JAXWSBindings) {
@@ -148,7 +142,7 @@ public class Internalizer {
             //target = wsdlDocuments.get(wsdlLocation);
             target = get(wsdlLocation);
             if(target==null) {
-                error("internalizer.targetNotFound", new Object[]{wsdlLocation});
+                env.error(WsdlMessages.INTERNALIZER_TARGET_NOT_FOUND_localizable(wsdlLocation));
                 return; // abort processing this <JAXWS:bindings>
             }
         }
@@ -173,8 +167,8 @@ public class Internalizer {
 
         // look for child <JAXWS:bindings> and process them recursively
         Element[] children = getChildElements( bindings, JAXWSBindingsConstants.NS_JAXWS_BINDINGS);
-        for( int i=0; i<children.length; i++ )
-            buildTargetNodeMap( children[i], target, result );
+        for (Element child : children)
+            buildTargetNodeMap(child, target, result);
     }
 
     private Node getWSDLDefintionNode(Node target){
@@ -215,7 +209,7 @@ public class Internalizer {
 
     private boolean isGlobalBinding(Node bindings){
         if((bindings.getNamespaceURI() == null)){
-            warn("invalid.customization.namespace", new Object[]{bindings.getLocalName()});
+            env.warn(WsdlMessages.INVALID_CUSTOMIZATION_NAMESPACE_localizable(bindings.getLocalName()));
             return false;
         }
         return  (bindings.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS) &&
@@ -227,16 +221,16 @@ public class Internalizer {
     }
 
     private static Element[] getChildElements(Element parent, String nsUri) {
-        ArrayList a = new ArrayList();
+        ArrayList<Element> a = new ArrayList<Element>();
         NodeList children = parent.getChildNodes();
         for( int i=0; i<children.getLength(); i++ ) {
             Node item = children.item(i);
             if(!(item instanceof Element ))     continue;
 
             if(nsUri.equals(item.getNamespaceURI()))
-                a.add(item);
+                a.add((Element)item);
         }
-        return (Element[]) a.toArray(new Element[a.size()]);
+        return a.toArray(new Element[a.size()]);
     }
 
     private Node evaluateXPathNode(Node target, String expression, NamespaceContext namespaceContext) {
@@ -245,25 +239,25 @@ public class Internalizer {
             xpath.setNamespaceContext(namespaceContext);
             nlst = (NodeList)xpath.evaluate(expression, target, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            error("internalizer.XPathEvaluationError", new Object[]{e.getMessage()});
+            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVALUATION_ERROR_localizable(e.getMessage()));
             if(env.verbose())
                 e.printStackTrace();
             return null; // abort processing this <jaxb:bindings>
         }
 
         if( nlst.getLength()==0 ) {
-            error("internalizer.XPathEvaluatesToNoTarget", new Object[]{expression});
+            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVALUATES_TO_NO_TARGET_localizable(expression));
             return null; // abort
         }
 
         if( nlst.getLength()!=1 ) {
-            error("internalizer.XPathEvaulatesToTooManyTargets", new Object[]{expression, nlst.getLength()});
+            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVAULATES_TO_TOO_MANY_TARGETS_localizable(expression, nlst.getLength()));
             return null; // abort
         }
 
         Node rnode = nlst.item(0);
         if(!(rnode instanceof Element )) {
-            error("internalizer.XPathEvaluatesToNonElement", new Object[]{expression});
+            env.error(WsdlMessages.INTERNALIZER_X_PATH_EVALUATES_TO_NON_ELEMENT_localizable(expression));
             return null; // abort
         }
         return (Element)rnode;
@@ -354,7 +348,6 @@ public class Internalizer {
         // finally move the declaration to the target node.
         if( target.getOwnerDocument()!=decl.getOwnerDocument() ) {
             // if they belong to different DOM documents, we need to clone them
-            Element original = decl;
             decl = (Element)target.getOwnerDocument().importNode(decl,true);
 
         }
@@ -369,7 +362,7 @@ public class Internalizer {
      */
     private void copyInscopeNSAttributes(Element e){
         Element p = e;
-        Set inscopes = new HashSet();
+        Set<String> inscopes = new HashSet<String>();
         while(true) {
             NamedNodeMap atts = p.getAttributes();
             for( int i=0; i<atts.getLength(); i++ ) {
@@ -470,29 +463,4 @@ public class Internalizer {
 
         return child;
     }
-    protected void warn(Localizable msg) {
-        env.warn(msg);
-    }
-
-
-    protected void error(String key, Object[] args) {
-        env.error(messageFactory.getMessage(key, args));
-    }
-
-    protected void warn(String key) {
-        env.warn(messageFactory.getMessage(key));
-    }
-
-    protected void warn(String key, Object[] args) {
-        env.warn(messageFactory.getMessage(key, args));
-    }
-
-    protected void info(String key) {
-        env.info(messageFactory.getMessage(key));
-    }
-
-    protected void info(String key, String arg) {
-        env.info(messageFactory.getMessage(key, arg));
-    }
-
 }
