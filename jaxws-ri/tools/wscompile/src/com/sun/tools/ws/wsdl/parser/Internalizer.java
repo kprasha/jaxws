@@ -328,7 +328,7 @@ public class Internalizer {
             // to specify jaxb:extensionBindingPrefixes, so it won't work.
             //
             // the current workaround is still problematic in the sense that
-            // it can't support user-defined extensions.
+            // it can't support user-defined extensions. This needs more careful thought.
             if(!target.hasAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "extensionBindingPrefixes")){
                 target.setAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "jaxb:extensionBindingPrefixes", "xjc");
                 target.setAttributeNS(Constants.NS_XMLNS, "xmlns:xjc", JAXWSBindingsConstants.NS_XJC_BINDINGS);
