@@ -182,7 +182,7 @@ public interface JAXWSBindingsConstants {
      * jaxb:bindgs QName
      */
     public static QName JAXB_BINDINGS = new QName(NS_JAXB_BINDINGS, "bindings");
-    public static String JAXB_BINDING_VERSION = "1.0";
+    public static String JAXB_BINDING_VERSION = "2.0";
     public static QName XSD_APPINFO = new QName(Constants.NS_XSD, "appinfo");
     public static QName XSD_ANNOTATION = new QName(Constants.NS_XSD, "annotation");
 }
