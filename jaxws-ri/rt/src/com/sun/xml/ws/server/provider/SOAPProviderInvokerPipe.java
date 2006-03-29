@@ -17,13 +17,13 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Jitendra Kotamraju
  */
-public class ProviderSOAPInvokerPipe extends ProviderInvokerPipe {
+public class SOAPProviderInvokerPipe extends ProviderInvokerPipe {
     
     private final boolean isSource;
     private final Service.Mode mode;
     private final SOAPVersion soapVersion;
     
-    public ProviderSOAPInvokerPipe(InstanceResolver<? extends Provider> instanceResolver, ProviderEndpointModel model, SOAPVersion soapVersion) {
+    public SOAPProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver, ProviderEndpointModel model, SOAPVersion soapVersion) {
         super(instanceResolver);
         this.isSource = model.isSource();
         this.mode = model.getServiceMode();
