@@ -149,15 +149,9 @@ final class ServletConnectionImpl extends WSConnectionImpl implements WebService
 
     @Override
     public void wrapUpRequestPacket(Packet p) {
-        // TODO need to add these properties, right now there is an error
-        /*
-        p.put(MessageContext.SERVLET_CONTEXT, context);
-        p.put(MessageContext.SERVLET_REQUEST, request);
-        p.put(MessageContext.SERVLET_RESPONSE, response);
-         */
-
-        // other properties that can be inferred from request/response
-        // should be implemented as a virtual property
+        p.invocationProperties.put(MessageContext.SERVLET_CONTEXT, context);
+        p.invocationProperties.put(MessageContext.SERVLET_REQUEST, request);
+        p.invocationProperties.put(MessageContext.SERVLET_RESPONSE, response);
     }
 
     public String getRequestMethod() {

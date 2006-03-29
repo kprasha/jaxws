@@ -102,6 +102,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             Packet packet = new Packet();
             decoder.decode(in, ct, packet);
             con.wrapUpRequestPacket(packet);
+            packet.httpRequestHeaders = con.getRequestHeaders();
             try {
                 packet = head.process(packet,con.getWebServiceContextDelegate(),this);
             } catch(Exception e) {
