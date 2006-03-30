@@ -5,10 +5,13 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.sandbox.impl.DecoderFacade;
 import com.sun.xml.ws.sandbox.impl.EncoderFacade;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
 import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
+import com.sun.xml.ws.sandbox.impl.XMLHTTPDecoder;
+import com.sun.xml.ws.sandbox.impl.XMLHTTPEncoder;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.BindingType;
@@ -197,7 +200,8 @@ public abstract class BindingID {
             return customize(lexical,SOAP11_HTTP);
         if(belongsTo(lexical,SOAP12_HTTP.toString()))
             return customize(lexical,SOAP12_HTTP);
-
+        if(lexical.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING))
+            return customize(lexical,X_SOAP12_HTTP);
 
         // OK, it's none of the values JAX-WS understands.
         for( BindingIDFactory f : ServiceFinder.find(BindingIDFactory.class) ) {
@@ -261,6 +265,13 @@ public abstract class BindingID {
     }
 
     /**
+     * Constant that represents implementation specific SOAP1.2/HTTP which is
+     * used to generate non-standard WSDLs
+     */
+    public static final SOAPHTTPImpl X_SOAP12_HTTP = new SOAPHTTPImpl(
+        SOAPVersion.SOAP_12, SOAPBinding.SOAP12HTTP_BINDING, true);
+    
+    /**
      * Constant that represents SOAP1.2/HTTP.
      */
     public static final SOAPHTTPImpl SOAP12_HTTP = new SOAPHTTPImpl(
@@ -275,12 +286,11 @@ public abstract class BindingID {
      * Constant that represents REST.
      */
     public static final BindingID XML_HTTP = new Impl(null, HTTPBinding.HTTP_BINDING,false) {
-        public @NotNull Encoder createEncoder(WSBinding _) {
-            return TestEncoderImpl.INSTANCE11;
+        public Encoder createEncoder(WSBinding binding) {
+            return XMLHTTPEncoder.INSTANCE;
         }
-
-        public @NotNull Decoder createDecoder(WSBinding _) {
-            return TestDecoderImpl.INSTANCE11;
+        public Decoder createDecoder(WSBinding binding) {
+            return XMLHTTPDecoder.INSTANCE;
         }
     };
 
