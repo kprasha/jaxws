@@ -231,6 +231,10 @@ public abstract class BindingID {
         // is quite simple-minded.
         SOAPHTTPImpl r = new SOAPHTTPImpl(base.getSOAPVersion(), lexical, base.canGenerateWSDL());
         try {
+            // With X_SOAP12_HTTP, base != lexical and lexical does n't have any query string
+            if(lexical.indexOf('?') == -1) {
+                return r;
+            }
             String query = URLDecoder.decode(lexical.substring(lexical.indexOf('?')+1),"UTF-8");
             for( String token : query.split("&") ) {
                 int idx = token.indexOf('=');
