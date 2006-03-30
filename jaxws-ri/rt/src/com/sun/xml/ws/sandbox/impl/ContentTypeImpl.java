@@ -5,7 +5,7 @@ import com.sun.xml.ws.api.pipe.ContentType;
 /**
  * @author Vivek Pandey
  */
-class ContentTypeImpl implements ContentType {
+public final class ContentTypeImpl implements ContentType {
     private final String contentType;
     private final String soapAction;
 
