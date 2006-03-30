@@ -285,7 +285,7 @@ public abstract class BindingID {
     /**
      * Constant that represents REST.
      */
-    public static final BindingID XML_HTTP = new Impl(null, HTTPBinding.HTTP_BINDING,false) {
+    public static final BindingID XML_HTTP = new Impl(SOAPVersion.SOAP_11, HTTPBinding.HTTP_BINDING,false) {
         public Encoder createEncoder(WSBinding binding) {
             return XMLHTTPEncoder.INSTANCE;
         }

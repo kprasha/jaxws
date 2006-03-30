@@ -18,6 +18,7 @@ import com.sun.xml.ws.handler.SOAPHandlerPipe;
 import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import javax.xml.ws.soap.SOAPBinding;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
@@ -31,7 +32,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
         boolean isClient = true;
         HandlerPipe soapHandlerPipe = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
-        if(binding.getSOAPVersion() != null) {
+        if(binding instanceof SOAPBinding) {
             soapHandlerPipe = new SOAPHandlerPipe(binding, wsdlModel, head, isClient);
             head = soapHandlerPipe;
         }

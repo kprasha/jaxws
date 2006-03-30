@@ -136,6 +136,11 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
 
 
     public Source readPayloadAsSource() {
+        if(sourceUtils.isStreamSource()){
+            ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
+            StreamSource newSource = new StreamSource(bis, src.getSystemId());
+            return newSource;
+        }
         return src;
     }
 
