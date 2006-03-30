@@ -269,7 +269,7 @@ public abstract class BindingID {
      * Constant that represents SOAP1.1/HTTP.
      */
     public static final SOAPHTTPImpl SOAP11_HTTP = new SOAPHTTPImpl(
-        SOAPVersion.SOAP_12, SOAPBinding.SOAP11HTTP_BINDING, true);
+        SOAPVersion.SOAP_11, SOAPBinding.SOAP11HTTP_BINDING, true);
 
     /**
      * Constant that represents REST.

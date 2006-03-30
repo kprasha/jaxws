@@ -190,7 +190,7 @@ public class DeploymentDescriptorParser<A> {
 
                 QName portName = getQNameAttribute(attrs, ATTR_PORT);
                 if(portName == null)
-                    serviceName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
+                    portName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
 
                 BindingID bindingId = null;
                 {//set Binding using DD, annotation, or default one(in that order)
