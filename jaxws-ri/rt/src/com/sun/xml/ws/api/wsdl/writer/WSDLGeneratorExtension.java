@@ -41,7 +41,8 @@ public abstract class WSDLGeneratorExtension {
      * any tags have been written. This allows to set e.g. namespace prefixes.
      * <p/>
      *
-     * @param definitions This is the root element of the generated WSDL.
+     * @param root
+     *  This is the root element of the generated WSDL.
      */
     public void start(TypedXmlWriter root) {
     }
