@@ -168,7 +168,7 @@ public class HandlerChainsModel {
             ClassLoader classLoader, QName serviceName, QName portName,
             WSBinding wsbinding) {
         ensureProperName(reader,QNAME_HANDLER_CHAINS);
-        BindingID bindingId = wsbinding.getBindingId();
+        String bindingId = wsbinding.getBindingId().toString();
         HandlerAnnotationInfo info = new HandlerAnnotationInfo();
 
         XMLStreamReaderUtil.nextElementContent(reader);
