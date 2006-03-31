@@ -79,9 +79,9 @@ public class EndpointFactory {
      *      Optional resolver used to de-reference resources referenced from
      *      WSDL. Must be null if the {@code url} is null.
      * @param serviceName
-     *      Optional service name to override the one given by the implementation clas.
+     *      Optional service name to override the one given by the implementation class.
      * @param portName
-     *      Optional port name to override the one given by the implementation clas.
+     *      Optional port name to override the one given by the implementation class.
      *
      * TODO: DD has a configuration for MTOM threshold.
      * Maybe we need something more generic so that other technologies
@@ -300,7 +300,7 @@ public class EndpointFactory {
 
 
     /**
-     * Checks {@link @WebServiceProvider} and determines the service name.
+     * Checks {@link WebServiceProvider} and determines the service name.
      */
     public static QName getDefaultServiceName(Class<?> implType) {
         QName serviceName;
@@ -316,7 +316,7 @@ public class EndpointFactory {
         return serviceName;
     }
 
-    /*
+    /**
      * If portName is not already set via DD or programmatically, it uses
      * annotations on implementorClass to set PortName.
      */
