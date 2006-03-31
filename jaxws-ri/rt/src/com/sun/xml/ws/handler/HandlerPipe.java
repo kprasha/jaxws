@@ -68,43 +68,37 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             remedyActionTaken = true;
             return next.process(packet);
         }
-        
+
         // This is done here instead of the constructor, since User can change
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
-        
+
         if(isHandlerChainEmpty()) {
             return next.process(packet);
         }
-        
+
         MessageUpdatableContext context = getContext(packet);
-        boolean isOneWay = port!=null ?
-            packet.getMessage().isOneWay(port) /* we can determine this value from WSDL */ :
-            /*
-              otherwise use this value as an approximation, since this carries
-              the appliation's intention --- whether it was invokeOneway vs invoke,etc.
-             */
-            packet.expectReply;
+        boolean isOneWay = checkOneWay(packet);
         Packet reply;
         try {
             // Call handlers on Request
             boolean handlerResult = callHandlersOnRequest(context, isOneWay);
             //Update Packet with user modifications
-            context.updatePacket();            
-            
+            context.updatePacket();
+
             // the only case where no message is sent
             if (!isOneWay && !handlerResult) {
                 return packet;
-            }            
+            }
             // Call next Pipe.process() on msg
             reply = next.process(packet);
-            
+
             //RELOOK: For now create again
             context =  getContext(reply);
-            
+
             //TODO: Server-side oneway is not correct
             //TODO: HandleFault incorrect
-            
+
             //If null, it is oneway
             if(reply.getMessage()!= null){
                 if(!isClient) {
@@ -123,12 +117,25 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         }
         //Update Packet with user modifications
         context.updatePacket();
-        
+
         return reply;
     }
-    
+
+    private boolean checkOneWay(Packet packet) {
+        if (port != null) {
+            /* we can determine this value from WSDL */
+            return packet.getMessage().isOneWay(port);
+        } else {
+            /*
+              otherwise use this value as an approximation, since this carries
+              the appliation's intention --- whether it was invokeOneway vs invoke,etc.
+             */
+            return (packet.expectReply != null ? packet.expectReply : false);
+        }
+    }
+
     private boolean callHandlersOnRequest(MessageUpdatableContext context, boolean isOneWay){
-        
+
         boolean handlerResult = false;
         try {
             if(isClient) {
@@ -155,7 +162,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         }
         return handlerResult;
     }
-    
+
     private void callHandlersOnResponse(MessageUpdatableContext context){
         try {
             if(isClient) {
@@ -164,7 +171,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             } else {
                 //SERVER-SIDE
                 processor.callHandlersResponse(Direction.OUTBOUND,context);
-            }            
+            }
         } catch(WebServiceException wse) {
             //no rewrapping
             throw wse;
@@ -176,7 +183,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             }
         }
     }
-    
+
     abstract void setUpProcessor();
     abstract boolean isHandlerChainEmpty();
     abstract MessageUpdatableContext getContext(Packet p);
