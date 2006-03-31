@@ -9,7 +9,6 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -38,7 +37,6 @@ import org.xml.sax.SAXException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Provider;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
@@ -52,55 +50,20 @@ import java.util.logging.Logger;
 
 /**
  * Entry point to the JAX-WS RI server-side runtime.
- * TODO: rename.
- *
- * TODO: more create method.
  *
  * @author Kohsuke Kawaguchi
  */
 public class EndpointFactory {
     /*
-    no need to take WebServiceContext implementation. That's hidden inside our system.
-    We shall only take delegate to getUserPrincipal and isUserInRole from adapter.
+      no need to take WebServiceContext implementation. That's hidden inside our system.
+      We shall only take delegate to getUserPrincipal and isUserInRole from adapter.
     */
 
     /**
-     * Used for "from-Java" deployment.
+     * Implements {@link WSEndpoint#createEndpoint}.
      *
      * <p>
-     * This method works like the following:
-     * <ol>
-     * <li>{@link ServiceDefinition} is modeleed from the given SEI type.
-     * <li>{@link InstanceResolver} that always serves <tt>implementationObject</tt> will be used.
-     * <li>TODO: where does the binding come from?
-     * </ol>
-     *
-     * @param resolver
-     *      Optional resolver used to de-reference resources referenced from
-     *      WSDL. Must be null if the {@code url} is null.
-     * @param serviceName
-     *      Optional service name to override the one given by the implementation class.
-     * @param portName
-     *      Optional port name to override the one given by the implementation class.
-     *
-     * TODO: DD has a configuration for MTOM threshold.
-     * Maybe we need something more generic so that other technologies
-     * like Tango can get information from DD.
-     *
-     * TODO: does it really make sense for this to take EntityResolver?
-     * Given that all metadata has to be given as a list anyway.
-     *
-     * @param primaryWsdl
-     *      The {@link ServiceDefinition#getPrimary() primary} WSDL.
-     *      If null, it'll be generated based on the SEI (if this is an SEI)
-     *      or no WSDL is associated (if it's a provider.)
-     *      TODO: shouldn't the implementation find this from the metadata list?
-     * @param metadata
-     *      Other documents that become {@link SDDocument}s. Can be null.
-     *
-     * @return newly constructed {@link WSEndpoint}.
-     * @throws WebServiceException
-     *      if the endpoint set up fails.
+     * Nobody else should be calling this method.
      */
     public static <T> WSEndpoint<T> createEndpoint(
         Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,

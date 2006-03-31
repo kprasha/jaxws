@@ -229,7 +229,7 @@ public class DeploymentDescriptorParser<A> {
                 // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
 
-                WSEndpoint<?> endpoint = EndpointFactory.createEndpoint(
+                WSEndpoint<?> endpoint = WSEndpoint.create(
                     implementorClass,
                     InstanceResolver.createSingleton(getImplementor(implementorClass)),
                     serviceName, portName, container, binding,

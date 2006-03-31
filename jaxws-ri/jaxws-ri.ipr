@@ -229,6 +229,7 @@
       <module fileurl="file://$PROJECT_DIR$/transports/local/local.iml" filepath="$PROJECT_DIR$/transports/local/local.iml" group="transports" />
       <module fileurl="file://$PROJECT_DIR$/tools/resourcegen/resourcegen.iml" filepath="$PROJECT_DIR$/tools/resourcegen/resourcegen.iml" />
       <module fileurl="file://$PROJECT_DIR$/rt/rt.iml" filepath="$PROJECT_DIR$/rt/rt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rt-fi/rt-fi.iml" filepath="$PROJECT_DIR$/rt-fi/rt-fi.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" group="transports" />
       <module fileurl="file://$PROJECT_DIR$/../test-rearch/test/test.iml" filepath="$PROJECT_DIR$/../test-rearch/test/test.iml" />
       <module fileurl="file://$PROJECT_DIR$/../test-harness/test-harness.iml" filepath="$PROJECT_DIR$/../test-harness/test-harness.iml" group="test-harness" />

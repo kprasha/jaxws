@@ -8,9 +8,14 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.spi.runtime.Container;
+import com.sun.xml.ws.server.EndpointFactory;
 
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
+import javax.xml.namespace.QName;
+import java.util.Collection;
+
+import org.xml.sax.EntityResolver;
 
 /**
  * Root object that hosts the {@link Packet} processing code
@@ -206,4 +211,52 @@ public abstract class WSEndpoint<T> {
      *      Possibly null, but always the same value.
      */
     public abstract @Nullable ServiceDefinition getServiceDefinition();
+
+
+
+    /**
+     * Used for "from-Java" deployment.
+     *
+     * <p>
+     * This method works like the following:
+     * <ol>
+     * <li>{@link ServiceDefinition} is modeleed from the given SEI type.
+     * <li>{@link InstanceResolver} that always serves <tt>implementationObject</tt> will be used.
+     * <li>TODO: where does the binding come from?
+     * </ol>
+     *
+     * @param resolver
+     *      Optional resolver used to de-reference resources referenced from
+     *      WSDL. Must be null if the {@code url} is null.
+     * @param serviceName
+     *      Optional service name to override the one given by the implementation class.
+     * @param portName
+     *      Optional port name to override the one given by the implementation class.
+     *
+     * TODO: DD has a configuration for MTOM threshold.
+     * Maybe we need something more generic so that other technologies
+     * like Tango can get information from DD.
+     *
+     * TODO: does it really make sense for this to take EntityResolver?
+     * Given that all metadata has to be given as a list anyway.
+     *
+     * @param primaryWsdl
+     *      The {@link ServiceDefinition#getPrimary() primary} WSDL.
+     *      If null, it'll be generated based on the SEI (if this is an SEI)
+     *      or no WSDL is associated (if it's a provider.)
+     *      TODO: shouldn't the implementation find this from the metadata list?
+     * @param metadata
+     *      Other documents that become {@link SDDocument}s. Can be null.
+     *
+     * @return newly constructed {@link WSEndpoint}.
+     * @throws WebServiceException
+     *      if the endpoint set up fails.
+     */
+    public static <T> WSEndpoint<T> create(
+        Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
+        Container container, WSBinding binding,
+        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
+        return EndpointFactory.createEndpoint(
+            implType,ir,serviceName,portName,container,binding,primaryWsdl,metadata,resolver);
+    }
 }
