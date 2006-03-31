@@ -192,7 +192,7 @@ public class DeploymentDescriptorParser<A> {
                 if(portName == null)
                     portName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
 
-                BindingID bindingId = null;
+                BindingID bindingId;
                 {//set Binding using DD, annotation, or default one(in that order)
                     String attr = getAttribute(attrs, ATTR_BINDING);
                     if(attr!=null) {
@@ -229,7 +229,7 @@ public class DeploymentDescriptorParser<A> {
                 // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
 
-                WSEndpoint<?> endpoint = new EndpointFactory().createEndpoint(
+                WSEndpoint<?> endpoint = EndpointFactory.createEndpoint(
                     implementorClass,
                     InstanceResolver.createSingleton(getImplementor(implementorClass)),
                     serviceName, portName, container, binding,
@@ -253,7 +253,7 @@ public class DeploymentDescriptorParser<A> {
 
         return adapters;
     }
-    
+
     /**
      * JSR-109 defines short-form tokens for standard binding Ids. These are
      * used only in DD. So stand alone deployment descirptor should also honor

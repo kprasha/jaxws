@@ -102,7 +102,7 @@ public class EndpointFactory {
      * @throws WebServiceException
      *      if the endpoint set up fails.
      */
-    public <T> WSEndpoint<T> createEndpoint(
+    public static <T> WSEndpoint<T> createEndpoint(
         Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
         Container container, WSBinding binding,
         SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
@@ -232,7 +232,7 @@ public class EndpointFactory {
     }
 
 
-    private AbstractSEIModelImpl createSEIModel(
+    private static AbstractSEIModelImpl createSEIModel(
         SDDocumentSource primaryWsdl, List<SDDocumentSource> metadata,
         Class<?> implType, QName serviceName, QName portName, WSBinding binding) {
 
@@ -337,7 +337,7 @@ public class EndpointFactory {
      * Generates the WSDL and XML Schema for the endpoint if necessary
      * It generates WSDL only for SOAP1.1, and for XSOAP1.2 bindings
      */
-    private SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
+    private static SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
         BindingID bindingId = binding.getBindingId();
         if (!bindingId.canGenerateWSDL()) {
             throw new ServerRtException("can.not.generate.wsdl", bindingId);
@@ -358,7 +358,7 @@ public class EndpointFactory {
     /**
      * Builds {@link SDDocumentImpl} from {@link SDDocumentSource}.
      */
-    private List<SDDocumentImpl> buildMetadata(
+    private static List<SDDocumentImpl> buildMetadata(
         List<SDDocumentSource> src, QName serviceName, QName portTypeName) {
 
         List<SDDocumentImpl> r = new ArrayList<SDDocumentImpl>(src.size());
@@ -370,7 +370,7 @@ public class EndpointFactory {
         return r;
     }
     
-    private WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
+    private static WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
         Class<?> implType, QName serviceName, QName portName) {
         URL wsdlUrl = primaryWsdl.getSystemId();
         try {

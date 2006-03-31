@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server;
 
+import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -16,7 +17,6 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.handler.MessageContextImpl;
 import com.sun.xml.ws.spi.runtime.Container;
 
 import javax.annotation.PreDestroy;
@@ -75,11 +75,11 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         instanceResolver.start(this,webServiceContext);
     }
 
-    public WSBinding getBinding() {
+    public @NotNull WSBinding getBinding() {
         return binding;
     }
 
-    public Container getContainer() {
+    public @NotNull Container getContainer() {
         return container;
     }
 
@@ -87,7 +87,19 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         return port;
     }
 
-    public SEIModel getSEIModel() {
+    /**
+     * Gets the {@link SEIModel} that represents the relationship
+     * between WSDL and Java SEI.
+     *
+     * <p>
+     * This method returns a non-null value if and only if this
+     * endpoint is ultimately serving an application through an SEI.
+     *
+     * @return
+     *      maybe null. See above for more discussion.
+     *      Always the same value.
+     */
+    public @Nullable SEIModel getSEIModel() {
         return seiModel;
     }
 
@@ -96,7 +108,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         return new PipeHead() {
             private final Pipe pipe = PipeCloner.clone(masterPipeline);
 
-            public Packet process(Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc) {
+            public @NotNull Packet process(Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc) {
                 request.webServiceContextDelegate = wscd;
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;

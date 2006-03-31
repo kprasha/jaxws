@@ -1,15 +1,14 @@
 package com.sun.xml.ws.api.server;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.spi.runtime.Container;
-import com.sun.istack.Nullable;
 
-import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 
@@ -58,8 +57,9 @@ import javax.xml.ws.WebServiceException;
  *
  * <h3>Implementation Notes</h3>
  * <p>
- * {@link WSEndpoint} owns a {@link WebServiceContext} implementation
- * (but a bulk of the work is delegated to {@link WebServiceContextDelegate}.)
+ * {@link WSEndpoint} owns a {@link WebServiceContext} implementation.
+ * But a bulk of the work is delegated to {@link WebServiceContextDelegate},
+ * which is passed in as a parameter to {@link PipeHead#process(Packet, WebServiceContextDelegate, TransportBackChannel)}.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -70,9 +70,9 @@ public abstract class WSEndpoint<T> {
      * is created for.
      *
      * @return
-     *      always non-null, same object.
+     *      always same object.
      */
-    public abstract WSBinding getBinding();
+    public abstract @NotNull WSBinding getBinding();
 
     /**
      * Gets the {@link Container} object.
@@ -82,37 +82,23 @@ public abstract class WSEndpoint<T> {
      * to communicate with the hosting environment.
      *
      * @return
-     *      always non-null, same object. If there's no valid {@link Container},
-     *      {@link Container#NONE} will be returned.
+     *      always same object. If no "real" {@link Container} instance
+     *      is given, {@link Container#NONE} will be returned.
      */
-    public abstract Container getContainer();
+    public abstract @NotNull Container getContainer();
 
     /**
      * Gets the port that this endpoint is serving.
      *
      * <p>
      * A service is not required to have a WSDL, and when it doesn't,
-     * this method returns null.
+     * this method returns null. Otherwise it returns an object that
+     * describes the port that this {@link WSEndpoint} is serving.
      *
      * @return
      *      Possibly null, but always the same value.
      */
-    public abstract WSDLPort getPort();
-
-    /**
-     * Gets the {@link SEIModel} that represents the relationship
-     * between WSDL and Java SEI.
-     *
-     * <p>
-     * This method returns a non-null value if and only if this
-     * endpoint is ultimately serving an application through an SEI.
-     * (That is 'T' is the SEI, not {@link Provider}.
-     *
-     * @return
-     *      maybe null. See above for more discussion.
-     *      Always the same value.
-     */
-    public abstract SEIModel getSEIModel();
+    public abstract @Nullable WSDLPort getPort();
 
     /**
      * Creates a new {@link PipeHead} to process
@@ -124,9 +110,9 @@ public abstract class WSEndpoint<T> {
      * {@link WSEndpoint class javadoc} for details.
      *
      * @return
-     *      always non-null.
+     *      A newly created {@link PipeHead} that's ready to serve.
      */
-    public abstract PipeHead createPipeHead();
+    public abstract @NotNull PipeHead createPipeHead();
 
     /**
      * Represents a resource local to a thread.
@@ -146,7 +132,7 @@ public abstract class WSEndpoint<T> {
          * and eventually return it as a return value.
          *
          * @param request
-         *      Must be non-null unconsumed {@link Packet} that represents
+         *      Unconsumed {@link Packet} that represents
          *      a request.
          * @param wscd
          *      {@link WebServiceContextDelegate} to be set to {@link Packet}.
@@ -158,7 +144,7 @@ public abstract class WSEndpoint<T> {
          *      See the {@code wscd} parameter javadoc for why this is a parameter.
          *      Can be null.
          * @return
-         *      always a non-null unconsumed {@link Packet} that represents
+         *      Unconsumed {@link Packet} that represents
          *      a reply to the request.
          *
          * @throws WebServiceException
@@ -177,8 +163,8 @@ public abstract class WSEndpoint<T> {
          *      allows developers to fix a bug.
          *
          */
-        Packet process(
-            Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc);
+        @NotNull Packet process(
+            @NotNull Packet request, @Nullable WebServiceContextDelegate wscd, @Nullable TransportBackChannel tbc);
     }
 
     /**
@@ -186,9 +172,9 @@ public abstract class WSEndpoint<T> {
      * consumes the message.
      *
      * @return
-     *      always non-null same object.
+     *      always same object.
      */
-    public abstract InstanceResolver<T> getInstanceResolver();
+    public abstract @NotNull InstanceResolver<T> getInstanceResolver();
 
     /**
      * Indicates that the {@link WSEndpoint} is about to be turned off,
@@ -197,7 +183,7 @@ public abstract class WSEndpoint<T> {
      * <p>
      * This method needs to be invoked for the JAX-WS RI to correctly
      * implement some of the spec semantics (TODO: pointer.)
-     * It's the responsibility of the code that "owns" a {@link WSEndpoint}
+     * It's the responsibility of the code that hosts a {@link WSEndpoint}
      * to invoke this method.
      *
      * <p>
