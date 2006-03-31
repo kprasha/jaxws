@@ -26,14 +26,10 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import javax.xml.transform.Source;
 
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.MessageContext;
 
 /**
  * Implementation of LogicalMessageContext. This class is used at runtime
@@ -51,7 +47,7 @@ public class LogicalMessageContextImpl extends MessageUpdatableContext implement
 
     public LogicalMessageContextImpl(WSBinding binding, Packet packet) {
         super(packet);
-        this.binding = binding;  
+        this.binding = binding;
     }
 
     public LogicalMessage getMessage() {
@@ -59,15 +55,15 @@ public class LogicalMessageContextImpl extends MessageUpdatableContext implement
             lm = new LogicalMessageImpl(packet);
         return lm;
     }
-    
+
     void setPacketMessage(Message newMessage){
         if(newMessage != null) {
             packet.setMessage(newMessage);
             lm = null;
         }
     }
-    
-    
+
+
     protected void updateMessage() {
         //If LogicalMessage is not acccessed, its not modified.
         if(lm != null) {
@@ -83,11 +79,11 @@ public class LogicalMessageContextImpl extends MessageUpdatableContext implement
                     packet.setMessage(new EmptyMessageImpl(headers,binding.getSOAPVersion()));
                 } else {
                     packet.setMessage(new PayloadSourceMessage(headers,modifiedPayload ,binding.getSOAPVersion()));
-                }                
+                }
             }
             lm = null;
         }
-        
-    }    
-    
+
+    }
+
 }

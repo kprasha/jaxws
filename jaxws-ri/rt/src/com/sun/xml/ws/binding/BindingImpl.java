@@ -20,13 +20,12 @@
 
 package com.sun.xml.ws.binding;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.spi.runtime.SystemHandlerDelegate;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.pipe.Encoder;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
@@ -48,7 +47,6 @@ import java.util.List;
  */
 public abstract class BindingImpl implements WSBinding {
 
-    private SystemHandlerDelegate systemHandlerDelegate;
     protected List<Handler> handlers; // may be logical/soap mixed
     protected List<LogicalHandler> logicalHandlers;
     protected List<SOAPHandler> soapHandlers;
@@ -117,14 +115,6 @@ public abstract class BindingImpl implements WSBinding {
 
     public final @NotNull Decoder createDecoder() {
         return bindingId.createDecoder(this);
-    }
-
-    public SystemHandlerDelegate getSystemHandlerDelegate() {
-        return systemHandlerDelegate;
-    }
-
-    public void setSystemHandlerDelegate(SystemHandlerDelegate delegate) {
-        systemHandlerDelegate = delegate;
     }
 
     public static BindingImpl create(@NotNull BindingID bindingId, QName serviceName) {

@@ -28,7 +28,7 @@ import java.util.Set;
 import javax.xml.ws.handler.MessageContext;
 
 /**
- * Implements WebServiceContext's MessageContext on top of {@link Packet}.
+ * Implements WebServiceContext's {@link MessageContext} on top of {@link Packet}.
  *
  * <p>
  * This class creates a {@link Map} view for APPLICATION scoped properties that

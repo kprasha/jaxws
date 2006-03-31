@@ -29,18 +29,15 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
- * Implementation of SOAPMessageContext. This class is used at runtime
+ * Implementation of {@link SOAPMessageContext}. This class is used at runtime
  * to pass to the handlers for processing soap messages.
  *
  * @see MessageContextImpl

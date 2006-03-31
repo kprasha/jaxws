@@ -30,8 +30,6 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
-import javax.xml.ws.BindingProvider;
-import javax.xml.soap.MimeHeaders;
 import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
 import java.io.IOException;
 import java.io.InputStream;

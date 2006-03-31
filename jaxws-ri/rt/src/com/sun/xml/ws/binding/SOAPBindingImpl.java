@@ -25,7 +25,6 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.resources.ClientMessages;
-import com.sun.xml.ws.spi.runtime.SystemHandlerDelegateFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -68,7 +67,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         super(handlerChain, bindingId, serviceName);
         this.soapVersion = soapVersion;
         setup();
-        setupSystemHandlerDelegate(serviceName);
 
         this.enableMtom = bindingId.isMTOMEnabled();
     }
@@ -179,13 +177,5 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
     public MessageFactory getMessageFactory() {
         return soapVersion.saajMessageFactory;
-    }
-
-    protected void setupSystemHandlerDelegate(QName serviceName) {
-        SystemHandlerDelegateFactory shdFactory =
-            SystemHandlerDelegateFactory.getFactory();
-        if (shdFactory != null) {
-            setSystemHandlerDelegate(shdFactory.getDelegate(serviceName));
-        }
     }
 }
