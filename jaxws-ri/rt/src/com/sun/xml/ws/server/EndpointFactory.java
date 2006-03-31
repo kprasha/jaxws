@@ -82,7 +82,7 @@ public class EndpointFactory {
      *      Optional service name to override the one given by the implementation clas.
      * @param portName
      *      Optional port name to override the one given by the implementation clas.
-     *      
+     *
      * TODO: DD has a configuration for MTOM threshold.
      * Maybe we need something more generic so that other technologies
      * like Tango can get information from DD.
@@ -208,7 +208,7 @@ public class EndpointFactory {
         if (primaryDoc == null) {
             if (implType.getAnnotation(WebServiceProvider.class)==null) {
                 // Generate WSDL for SEI endpoints(not for Provider endpoints)
-                primaryDoc = generateWSDL(binding,  seiModel, docList);
+                primaryDoc = generateWSDL(binding, seiModel, docList);
             }
 
         }
@@ -338,20 +338,19 @@ public class EndpointFactory {
      * It generates WSDL only for SOAP1.1, and for XSOAP1.2 bindings
      */
     private SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs) {
-        BindingImpl bindingImpl = (BindingImpl)binding;
-        BindingID bindingId = bindingImpl.getBindingId();
+        BindingID bindingId = binding.getBindingId();
         if (!bindingId.canGenerateWSDL()) {
             throw new ServerRtException("can.not.generate.wsdl", bindingId);
         }
 
-        if (bindingId.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
+        if (bindingId.toString().equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING)) {
             String msg = ServerMessages.GENERATE_NON_STANDARD_WSDL();
             logger.warning(msg);
         }
 
         // Generate WSDL and schema documents using runtime model
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortTypeName());
-        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding.getBindingId());
+        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, bindingId);
         wsdlGen.doGeneration();
         return wsdlResolver.updateDocs();
     }

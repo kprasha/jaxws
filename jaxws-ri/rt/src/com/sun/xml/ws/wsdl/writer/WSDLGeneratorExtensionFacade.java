@@ -2,6 +2,8 @@ package com.sun.xml.ws.wsdl.writer;
 
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.BindingID;
 
 import com.sun.xml.txw2.TypedXmlWriter;
 
@@ -27,9 +29,9 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
         this.extensions = extensions;
     }
 
-    public void start(TypedXmlWriter root) {
+    public void start(TypedXmlWriter root, SEIModel model, BindingID bindingID) {
         for (WSDLGeneratorExtension e : extensions) 
-            e.start(root);
+            e.start(root, model, bindingID);
     }
 
     public void addDefinitionsExtension(TypedXmlWriter definitions) {

@@ -22,6 +22,10 @@ package com.sun.xml.ws.api.wsdl.writer;
 import com.sun.xml.txw2.TypedXmlWriter;
 
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.istack.NotNull;
 
 import java.lang.reflect.Method;
 
@@ -30,27 +34,38 @@ import java.lang.reflect.Method;
  * of this interface can add their own WSDL extensions to the generated WSDL.
  * There are a number of methods that will be invoked allowing the extensions
  * to be generated on various WSDL elements.
- * <p/>
+ * <p>
  * The JAX-WS WSDLGenerator uses TXW to serialize the WSDL out to XML.
  * More information about TXW can be located at
  * <a href="http://txw.dev.java.net">http://txw.dev.java.net</a>.
  */
 public abstract class WSDLGeneratorExtension {
     /**
+     * Called at the very beginning of the process.
+     * <p>
      * This method is invoked so that the root element can be manipulated before
      * any tags have been written. This allows to set e.g. namespace prefixes.
-     * <p/>
+     *
+     * Another purpose of this method is to let extensions know what model
+     * we are generating a WSDL for.
      *
      * @param root
-     *  This is the root element of the generated WSDL.
+     *      This is the root element of the generated WSDL.
+     * @param model
+     *      WSDL is being generated from this {@link SEIModel}.
+     * @param bindingID
+     *      The binding ID for which we generate WSDL.
+     *      WSDL is generated at very early point of the runtime, before the user
+     *      gets any chance of modifying the endpoint setting, so we take {@link BindingID}
+     *      rather than {@link WSBinding} (which is really just the instanciated mutable
+     *      version of {@link BindingID}.)
      */
-    public void start(TypedXmlWriter root) {
+    public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull BindingID bindingID) {
     }
 
     /**
      * This method is invoked so that extensions to a <code>wsdl:definitions</code>
      * element can be generated.
-     * <p/>
      *
      * @param definitions This is the <code>wsdl:defintions</code> element that the extension can be added to.
      */
@@ -60,7 +75,6 @@ public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:service</code>
      * element can be generated.
-     * <p/>
      *
      * @param service This is the <code>wsdl:service</code> element that the extension can be added to.
      */
@@ -70,7 +84,6 @@ public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:port</code>
      * element can be generated.
-     * <p/>
      *
      * @param port This is the wsdl:port element that the extension can be added to.
      */
@@ -90,8 +103,8 @@ public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:binding</code>
      * element can be generated.
-     * <p/>
      *
+     * <p>
      * TODO:  Some other information may need to be passed
      *
      * @param binding This is the wsdl:binding element that the extension can be added to.
@@ -115,7 +128,6 @@ public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to a <code>wsdl:binding/wsdl:operation</code>
      * element can be generated.
-     * <p/>
      *
      * @param operation This is the wsdl:binding/wsdl:operation  element that the
      *                  extension can be added to.
@@ -128,7 +140,6 @@ public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to an input <code>wsdl:message</code>
      * element can be generated.
-     * <p/>
      *
      * @param message This is the input wsdl:message element that the
      *                extension can be added to.
@@ -141,7 +152,6 @@ public abstract class WSDLGeneratorExtension {
     /**
      * This method is invoked so that extensions to an output <code>wsdl:message</code>
      * element can be generated.
-     * <p/>
      *
      * @param message This is the output wsdl:message element that the
      *                extension can be added to.
@@ -156,7 +166,6 @@ public abstract class WSDLGeneratorExtension {
      * This method is invoked so that extensions to a
      * <code>wsdl:portType/wsdl:operation/wsdl:input</code>
      * element can be generated.
-     * <p/>
      *
      * @param input  This is the wsdl:portType/wsdl:operation/wsdl:input  element that the
      *               extension can be added to.
@@ -171,7 +180,6 @@ public abstract class WSDLGeneratorExtension {
      * This method is invoked so that extensions to a
      * <code>wsdl:portType/wsdl:operation/wsdl:output</code>
      * element can be generated.
-     * <p/>
      *
      * @param output This is the wsdl:portType/wsdl:operation/wsdl:output  element that the
      *               extension can be added to.
@@ -185,7 +193,6 @@ public abstract class WSDLGeneratorExtension {
      * This method is invoked so that extensions to a
      * <code>wsdl:binding/wsdl:operation/wsdl:input</code>
      * element can be generated.
-     * <p/>
      *
      * @param input  This is the wsdl:binding/wsdl:operation/wsdl:input  element that the
      *               extension can be added to.
@@ -200,7 +207,6 @@ public abstract class WSDLGeneratorExtension {
      * This method is invoked so that extensions to a
      * <code>wsdl:binding/wsdl:operation/wsdl:output</code>
      * element can be generated.
-     * <p/>
      *
      * @param output This is the wsdl:binding/wsdl:operation/wsdl:output  element that the
      *               extension can be added to.
@@ -213,11 +219,10 @@ public abstract class WSDLGeneratorExtension {
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
      * off checked exception class or detail bean that represents wsdl fault.
-     * <p/>
+     * <p>
      * This method is invoked so that extensions to a
      * <code>wsdl:binding/wsdl:operation/wsdl:fault</code>
      * element can be generated.
-     * <p/>
      *
      * @param fault  This is the wsdl:binding/wsdl:operation/wsdl:fault  element that the
      *               extension can be added to.
@@ -230,10 +235,9 @@ public abstract class WSDLGeneratorExtension {
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
      * off checked exception class or detail bean that represents wsdl fault.
-     * <p/>
+     * <p>
      * This method is invoked so that extensions to a fault <code>wsdl:message</code>
      * element can be generated.
-     * <p/>
      *
      * @param message This is the fault wsdl:message element that the
      *                extension can be added to.
@@ -246,11 +250,10 @@ public abstract class WSDLGeneratorExtension {
     /**
      * TODO: Probably it should be removed, apparaently there is no usecase where there is need to read annotations
      * off checked exception class or detail bean that represents wsdl fault.
-     * <p/>
+     * <p>
      * This method is invoked so that extensions to a
      * <code>wsdl:portType/wsdl:operation/wsdl:fault</code>
      * element can be generated.
-     * <p/>
      *
      * @param fault  This is the wsdl:portType/wsdl:operation/wsdl:fault  element that the
      *               extension can be added to.
