@@ -60,7 +60,7 @@ public class EndpointFactory {
     */
 
     /**
-     * Implements {@link WSEndpoint#createEndpoint}.
+     * Implements {@link WSEndpoint#create}.
      *
      * <p>
      * Nobody else should be calling this method.
