@@ -65,7 +65,7 @@ public final class LocalTransportFactory extends TransportPipeFactory {
             Thread.currentThread().getContextClassLoader(),
             new FileSystemResourceLoader(new File(outputDir)), null,
             new AdapterFactory<WSEndpoint>() {
-                public WSEndpoint createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap) {
+                public WSEndpoint createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
                     return endpoint;
                 }
             });

@@ -6,6 +6,7 @@ import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.spi.runtime.WSConnection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -39,8 +40,8 @@ final class ServletAdapter extends HttpAdapter {
      */
     final Class<?> implementationType;
 
-    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, Class<?> implementationType, Map<String, String> addressMap) {
-        super(endpoint, addressMap);
+    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, Class<?> implementationType, HttpAdapters<ServletAdapter> owner) {
+        super(endpoint, owner);
         this.name = name;
         this.urlPattern = urlPattern;
         this.implementationType = implementationType;
@@ -103,10 +104,23 @@ final class ServletAdapter extends HttpAdapter {
 
         return addrBuf.toString();
     }
-
-    static final AdapterFactory<ServletAdapter> FACTORY = new AdapterFactory<ServletAdapter>() {
-        public ServletAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap) {
-            return new ServletAdapter(name,urlPattern,endpoint,implementorClass, addressMap);
+    
+    public static class ServletAdapters extends HttpAdapters<ServletAdapter> {
+        Map<String, String> addressMap = new HashMap<String, String>();
+        
+        public ServletAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+            ServletAdapter adapter = new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
+            this.add(adapter);
+            return adapter;
+        }
+        public Map<String, String> getPortAddresses() {
+            if (addressMap.isEmpty()) {
+                for(ServletAdapter adapter : this) {
+                    addressMap.put(adapter.getPortName().getLocalPart(), adapter.getValidPath());
+                }
+            }
+            return addressMap;
         }
     };
+
 }

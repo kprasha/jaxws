@@ -50,8 +50,6 @@ import java.util.Map;
 public abstract class Adapter<TK extends Adapter.Toolkit> {
     
     protected final WSEndpoint<?> endpoint;
-    
-    protected final Map<String, String> addressMap;
 
     /**
      * Object that groups all thread-unsafe resources.
@@ -86,23 +84,14 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
             return createToolkit();
         }
     };
-
-    /**
-     * Creates an {@link Adapter} that delivers
-     * messages to the given endpoint.
-     */
-    protected Adapter(WSEndpoint endpoint) {
-        this(endpoint, null);
-    }
     
     /**
      * Creates an {@link Adapter} that delivers
      * messages to the given endpoint.
      */
-    protected Adapter(WSEndpoint endpoint, Map<String, String> addressMap) {
+    protected Adapter(WSEndpoint endpoint) {
         assert endpoint!=null;
         this.endpoint = endpoint;
-        this.addressMap = addressMap;
     }
 
     /**

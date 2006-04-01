@@ -14,6 +14,8 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.spi.runtime.WSConnection;
 import com.sun.xml.ws.transport.Headers;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 
 /**
  * {@link Adapter} that receives messages in HTTP.
@@ -51,13 +54,16 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * Reverse map of {@link #wsdls}. Read-only.
      */
     public final Map<SDDocument,String> revWsdls;
+    
+    public final HttpAdapters<? extends HttpAdapter> owner;
 
     public HttpAdapter(WSEndpoint endpoint) {
         this(endpoint, null);
     }
 
-    public HttpAdapter(WSEndpoint endpoint, Map<String, String> addressMap) {
-        super(endpoint, addressMap);
+    public HttpAdapter(WSEndpoint endpoint, HttpAdapters<? extends HttpAdapter> owner) {
+        super(endpoint);
+        this.owner = owner;
 
         // fill in WSDL map
         ServiceDefinition sdef = this.endpoint.getServiceDefinition();
@@ -220,6 +226,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         setContentType(con, "text/xml");
 
         OutputStream os = con.getOutput();
+        final Map<String, String> addressMap = owner.getPortAddresses();
         DocumentAddressResolver resolver = new DocumentAddressResolver() {
             public String getRelativeAddressFor(SDDocument current, SDDocument referenced) {
                 // the map on endpoint should account for all SDDocument
@@ -289,4 +296,10 @@ System.out.println("Address="+(baseAddress+urlPattern));
     private void setContentType(WSConnection con, String contentType) {
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
     }
+    
+    public static abstract class HttpAdapters<T extends HttpAdapter> extends ArrayList<T> implements AdapterFactory<T> {
+        public abstract T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
+        public abstract Map<String, String> getPortAddresses();
+    };
+    
 }

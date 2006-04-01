@@ -47,6 +47,7 @@ final class HttpEndpoint {
 
     public HttpEndpoint(WSEndpoint endpoint, Executor executor) {
         this.executor = executor;
+        /*
         Map<String, String> addressMap = null;
         WSDLPort port = endpoint.getPort();
         if (port != null) {
@@ -54,7 +55,8 @@ final class HttpEndpoint {
             // Maps port --> urlPattern. There is no url pattern for SE Endpoint
             addressMap.put(port.getName().getLocalPart(), "");
         }
-        this.adapter = new HttpAdapter(endpoint, addressMap);
+         */
+        this.adapter = new HttpAdapter(endpoint, null);
     }
 
     public void publish(String address) {
@@ -89,5 +91,27 @@ final class HttpEndpoint {
     private void publish (HttpContext context) {
         context.setHandler(new WSHttpHandler(adapter, executor));
     }
+    
+    /*
+    public static class EnpointAdapters extends HttpAdapters<HttpAdapter> {
+        Map<String, String> addressMap = new HashMap<String, String>();
+        
+        public HttpAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+
+            ServletAdapter adapter = new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
+            this.add(adapter);
+            return adapter;
+
+        }
+        public Map<String, String> getPortAddresses() {
+            if (addressMap.isEmpty()) {
+                for(ServletAdapter adapter : this) {
+                    addressMap.put(adapter.getPortName().getLocalPart(), adapter.getValidPath());
+                }
+            }
+            return addressMap;
+        }
+    };
+    */
 
 }

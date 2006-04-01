@@ -236,14 +236,8 @@ public class DeploymentDescriptorParser<A> {
                     primaryWSDL, docs.values(), createEntityResolver()
                     );
                 WSDLPort port = endpoint.getPort();
-                if (port != null) {
-                    String path = urlPattern;
-                    if (urlPattern.endsWith("/*")) {
-                        path = urlPattern.substring(0, urlPattern.length() - 2);
-                    }
-                    portAddressMap.put(port.getName().getLocalPart(), path);
-                }
-                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint, implementorClass, portAddressMap));
+
+                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint, implementorClass));
             } else {
                 failWithLocalName("runtime.parser.invalidElement", reader);
             }
@@ -287,7 +281,7 @@ public class DeploymentDescriptorParser<A> {
      * But the parser doesn't require that to be of any particular type.
      */
     public static interface AdapterFactory<A> {
-        A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass, Map<String, String> addressMap);
+        A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
     }
 
     /**
