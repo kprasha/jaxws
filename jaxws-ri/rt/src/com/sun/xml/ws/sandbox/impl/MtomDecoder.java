@@ -228,7 +228,7 @@ public class MtomDecoder implements Decoder{
 
         public char[] getTextCharacters() {
             if (xopReferencePresent) {
-                char[] chars = new char[(base64AttData.getDataLen()+2)*4/3];
+                char[] chars = new char[base64AttData.length()];
                 base64AttData.writeTo(chars, 0);
                 textLength = chars.length;
                 return chars;
@@ -258,7 +258,7 @@ public class MtomDecoder implements Decoder{
                 }
 
                 if(base64EncodedText != null){
-                    base64EncodedText = new char[(base64AttData.getDataLen()+2)*4/3];
+                    base64EncodedText = new char[base64AttData.length()];
                     base64AttData.writeTo(base64EncodedText, 0);
                     textLength = base64EncodedText.length;
                     textStart = 0;
