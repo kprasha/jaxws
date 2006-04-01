@@ -251,7 +251,8 @@ public abstract class Messages {
      *
      * @param soapVersion {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
      * @param pex a ProtocolException
-     * @param faultcode soap faultcode
+     * @param faultcode soap faultcode. Its ignored if the {@link ProtocolException} instance is {@link javax.xml.ws.soap.SOAPFaultException} and it has a
+     * faultcode present in the underlying {@link SOAPFault}.
      * @return {@link Message} representing SOAP fault
      */
     public static @NotNull Message create(@NotNull SOAPVersion soapVersion, @NotNull ProtocolException pex, @Nullable QName faultcode){
