@@ -87,7 +87,8 @@ public abstract class SOAPFaultBuilder {
      *
      * @param soapVersion {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
      * @param ex a ProtocolException
-     * @param faultcode soap faultcode
+     * @param faultcode soap faultcode. Its ignored if the {@link ProtocolException} instance is {@link SOAPFaultException} and it has a 
+     * faultcode present in the underlying {@link SOAPFault}.
      * @return {@link Message} representing SOAP fault
      */
     public static @NotNull Message createSOAPFaultMessage(@NotNull SOAPVersion soapVersion, @NotNull ProtocolException ex, @Nullable QName faultcode){
@@ -241,7 +242,7 @@ public abstract class SOAPFaultBuilder {
         }
         if (soapFaultException != null) {
             QName soapFaultCode = soapFaultException.getFault().getFaultCodeAsQName();
-            if(faultcode == null)
+            if(soapFaultCode != null)
                 faultcode = soapFaultCode;
 
             faultString = soapFaultException.getFault().getFaultString();
@@ -291,7 +292,7 @@ public abstract class SOAPFaultBuilder {
             SOAPFault fault = soapFaultException.getFault();
             QName soapFaultCode = fault.getFaultCodeAsQName();
             if(soapFaultCode != null){
-                if(faultcode == null)
+                if(soapFaultCode != null)
                     faultcode = soapFaultCode;
                 code = new CodeType(faultCode);
                 Iterator iter = fault.getFaultSubcodes();
