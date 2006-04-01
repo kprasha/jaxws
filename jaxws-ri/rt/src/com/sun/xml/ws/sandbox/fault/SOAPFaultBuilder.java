@@ -12,6 +12,8 @@ import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.StringUtils;
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
@@ -21,6 +23,7 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.ProtocolException;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -80,6 +83,21 @@ public abstract class SOAPFaultBuilder {
     }
 
     /**
+     * To be called to convert a  {@link ProtocolException} and faultcode for a given {@link SOAPVersion} in to a {@link Message}.
+     *
+     * @param soapVersion {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
+     * @param ex a ProtocolException
+     * @param faultcode soap faultcode
+     * @return {@link Message} representing SOAP fault
+     */
+    public static @NotNull Message createSOAPFaultMessage(@NotNull SOAPVersion soapVersion, @NotNull ProtocolException ex, @Nullable QName faultcode){
+        Object detail = getFaultDetail(null, ex);
+        if(soapVersion == SOAPVersion.SOAP_12)
+            return createSOAP12Fault(soapVersion, ex, detail, null, faultcode);
+        return createSOAP11Fault(soapVersion, ex, detail, null, faultcode);
+    }
+
+    /**
      * To be called by the server runtime in the situations when there is an Exception that needs to be transformed in
      * to a soapenv:Fault payload.
      *
@@ -101,8 +119,8 @@ public abstract class SOAPFaultBuilder {
     public static Message createSOAPFaultMessage(SOAPVersion soapVersion, CheckedExceptionImpl ceModel, Throwable ex) {
         Object detail = getFaultDetail(ceModel, ex);
         if(soapVersion == SOAPVersion.SOAP_12)
-            return createSOAP12Fault(soapVersion, ex, detail, ceModel);
-        return createSOAP11Fault(soapVersion, ex, detail, ceModel);
+            return createSOAP12Fault(soapVersion, ex, detail, ceModel, null);
+        return createSOAP11Fault(soapVersion, ex, detail, ceModel, null);
     }
 
     /**
@@ -210,7 +228,7 @@ public abstract class SOAPFaultBuilder {
         return "get" + StringUtils.capitalize(f.getName());
     }
 
-    private static Message createSOAP11Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce) {
+    private static Message createSOAP11Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultcode) {
         SOAPFaultException soapFaultException = null;
         QName faultCode = null;
         String faultString = null;
@@ -222,7 +240,10 @@ public abstract class SOAPFaultBuilder {
             soapFaultException = (SOAPFaultException) e.getCause();
         }
         if (soapFaultException != null) {
-            faultCode = soapFaultException.getFault().getFaultCodeAsQName();
+            QName soapFaultCode = soapFaultException.getFault().getFaultCodeAsQName();
+            if(faultcode == null)
+                faultcode = soapFaultCode;
+
             faultString = soapFaultException.getFault().getFaultString();
             faultActor = soapFaultException.getFault().getFaultActor();
         }
@@ -254,7 +275,7 @@ public abstract class SOAPFaultBuilder {
         return new JAXBMessage(JAXB_MARSHALLER, new SOAP11Fault(faultCode, faultString, null, detailNode), soapVersion);
     }
 
-    private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce) {
+    private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultcode) {
         SOAPFaultException soapFaultException = null;
         CodeType code = null;
         QName faultCode = null;
@@ -268,8 +289,10 @@ public abstract class SOAPFaultBuilder {
         }
         if (soapFaultException != null) {
             SOAPFault fault = soapFaultException.getFault();
-            faultCode = fault.getFaultCodeAsQName();
-            if(faultCode != null){
+            QName soapFaultCode = fault.getFaultCodeAsQName();
+            if(soapFaultCode != null){
+                if(faultcode == null)
+                    faultcode = soapFaultCode;
                 code = new CodeType(faultCode);
                 Iterator iter = fault.getFaultSubcodes();
                 boolean first = true;

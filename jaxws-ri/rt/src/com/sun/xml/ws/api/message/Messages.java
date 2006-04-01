@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -28,6 +29,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.ProtocolException;
+import javax.xml.namespace.QName;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -241,5 +244,17 @@ public abstract class Messages {
     public static Message create(SOAPFault fault) {
         SOAPVersion ver = SOAPVersion.fromNsUri(fault.getNamespaceURI());
         return new DOMMessage(ver,fault);
+    }
+
+    /**
+     * To be called to convert a  {@link ProtocolException} and faultcode for a given {@link SOAPVersion} in to a {@link Message}.
+     *
+     * @param soapVersion {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
+     * @param pex a ProtocolException
+     * @param faultcode soap faultcode
+     * @return {@link Message} representing SOAP fault
+     */
+    public static @NotNull Message create(@NotNull SOAPVersion soapVersion, @NotNull ProtocolException pex, @Nullable QName faultcode){
+        return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, pex, faultcode);
     }
 }
