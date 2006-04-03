@@ -11,6 +11,7 @@ import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -313,7 +314,7 @@ public class EndpointFactory {
 
         // Generate WSDL and schema documents using runtime model
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortTypeName());
-        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, bindingId);
+        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, bindingId, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
         wsdlGen.doGeneration();
         return wsdlResolver.updateDocs();
     }
