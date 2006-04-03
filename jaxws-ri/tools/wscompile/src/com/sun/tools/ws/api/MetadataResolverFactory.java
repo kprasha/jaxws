@@ -4,6 +4,9 @@ import org.xml.sax.EntityResolver;
 
 import java.net.URI;
 
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
+
 /**
  * Extension point for resolving metadata using wsimport.
  * <p/>
@@ -14,10 +17,9 @@ import java.net.URI;
  */
 public abstract class MetadataResolverFactory {
     /**
-     * get a {@link
+     * Gets a {@link MetaDataResolver}
      * @param location
      * @param resolver
-     * @return
      */
-    public abstract MetaDataResolver metadataResolver(URI location, EntityResolver resolver);
+    public abstract @NotNull MetaDataResolver metadataResolver(@NotNull URI location, @Nullable EntityResolver resolver);
 }
