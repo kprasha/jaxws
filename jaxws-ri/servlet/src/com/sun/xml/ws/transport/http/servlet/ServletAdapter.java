@@ -106,20 +106,9 @@ final class ServletAdapter extends HttpAdapter {
     }
     
     public static class ServletAdapters extends HttpAdapters<ServletAdapter> {
-        Map<String, String> addressMap = new HashMap<String, String>();
-        
-        public ServletAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
-            ServletAdapter adapter = new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
-            this.add(adapter);
-            return adapter;
-        }
-        public Map<String, String> getPortAddresses() {
-            if (addressMap.isEmpty()) {
-                for(ServletAdapter adapter : this) {
-                    addressMap.put(adapter.getPortName().getLocalPart(), adapter.getValidPath());
-                }
-            }
-            return addressMap;
+        @Override
+        protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+            return new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
         }
     };
 

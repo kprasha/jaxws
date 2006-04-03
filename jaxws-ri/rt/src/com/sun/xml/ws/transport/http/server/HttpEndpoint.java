@@ -24,6 +24,7 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.transport.http.HttpAdapter.HttpAdapters;
 import com.sun.xml.ws.server.ServerRtException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,16 +48,8 @@ final class HttpEndpoint {
 
     public HttpEndpoint(WSEndpoint endpoint, Executor executor) {
         this.executor = executor;
-        /*
-        Map<String, String> addressMap = null;
-        WSDLPort port = endpoint.getPort();
-        if (port != null) {
-            addressMap = new HashMap<String, String>();
-            // Maps port --> urlPattern. There is no url pattern for SE Endpoint
-            addressMap.put(port.getName().getLocalPart(), "");
-        }
-         */
-        this.adapter = new HttpAdapter(endpoint, null);
+        HttpAdapters factory = new EndpointHttpAdapters();
+        this.adapter = factory.createAdapter("", "", endpoint, null);
     }
 
     public void publish(String address) {
@@ -92,26 +85,11 @@ final class HttpEndpoint {
         context.setHandler(new WSHttpHandler(adapter, executor));
     }
     
-    /*
-    public static class EnpointAdapters extends HttpAdapters<HttpAdapter> {
-        Map<String, String> addressMap = new HashMap<String, String>();
-        
-        public HttpAdapter createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
-
-            ServletAdapter adapter = new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
-            this.add(adapter);
-            return adapter;
-
+    static class EndpointHttpAdapters extends HttpAdapters<HttpAdapter> {
+        @Override
+        protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+            return new HttpAdapter(endpoint, this);
         }
-        public Map<String, String> getPortAddresses() {
-            if (addressMap.isEmpty()) {
-                for(ServletAdapter adapter : this) {
-                    addressMap.put(adapter.getPortName().getLocalPart(), adapter.getValidPath());
-                }
-            }
-            return addressMap;
-        }
-    };
-    */
+    }; 
 
 }

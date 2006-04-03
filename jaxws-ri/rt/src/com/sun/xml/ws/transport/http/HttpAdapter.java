@@ -1,8 +1,10 @@
 package com.sun.xml.ws.transport.http;
 
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -38,6 +40,7 @@ import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
  * each {@link SDDocument} so that they can be served by HTTP GET requests.
  *
  * @author Kohsuke Kawaguchi
+ * @author Jitendra Kotamraju
  */
 public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
@@ -226,48 +229,18 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         setContentType(con, "text/xml");
 
         OutputStream os = con.getOutput();
-        final Map<String, String> addressMap = owner.getPortAddresses();
+        final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
+        final String address = portAddressResolver.getAddressFor(endpoint.getPort().getName().getLocalPart());
+        assert address != null;
         DocumentAddressResolver resolver = new DocumentAddressResolver() {
             public String getRelativeAddressFor(SDDocument current, SDDocument referenced) {
                 // the map on endpoint should account for all SDDocument
                 assert revWsdls.containsKey(referenced);
-                String urlPattern = "";
-                if (addressMap != null) {
-                    String portName = endpoint.getPort().getName().getLocalPart();
-                    urlPattern = addressMap.get(portName);
-                    if (urlPattern == null) {
-                        urlPattern = "";
-                    }
-                }
-                return baseAddress+urlPattern+'?'+ revWsdls.get(referenced);
+                return address+'?'+ revWsdls.get(referenced);
             }
         };
-        PortAddressResolver portAddressResolver = new PortAddressResolverImpl(baseAddress, addressMap);
-        doc.writeTo(portAddressResolver, resolver, os);
-    }
-    
-    static class PortAddressResolverImpl implements PortAddressResolver {
 
-        final String baseAddress;
-        final Map<String, String> addressMap;
-        
-        PortAddressResolverImpl(String baseAddress, Map<String, String> addressMap) {
-            this.baseAddress = baseAddress;
-            this.addressMap = addressMap;
-System.out.println("Address Map="+addressMap);
-        }
-        
-        public String getAddressFor(String portName) {
-            if (addressMap != null) {
-                String urlPattern = addressMap.get(portName);
-                if (urlPattern != null) {
-System.out.println("Address="+(baseAddress+urlPattern));                    
-                    return baseAddress+urlPattern;
-                }
-            }
-            return null;
-        }
-        
+        doc.writeTo(portAddressResolver, resolver, os);
     }
 
     private void writeNotFoundErrorPage(WSConnection con, String message) throws IOException {
@@ -297,9 +270,59 @@ System.out.println("Address="+(baseAddress+urlPattern));
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
     }
     
-    public static abstract class HttpAdapters<T extends HttpAdapter> extends ArrayList<T> implements AdapterFactory<T> {
-        public abstract T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
-        public abstract Map<String, String> getPortAddresses();
+    /**
+     * Some cases WAR file may contain multiple endpoints for ports in a WSDL.
+     * If the runtime knows these ports, their port addresses can be patched.
+     * This class keeps a list of HttpAdapters and use that information to patch
+     * multiple port addresses.
+     * 
+     * Concrete implementations of this class need to override createHttpAdapter
+     * method to create implementations of HttpAdapter
+     *
+     */
+    public static abstract class HttpAdapters<T extends HttpAdapter> implements AdapterFactory<T> {
+        private final List<T> adapters = new ArrayList<T>();
+        private final Map<String, String> addressMap = new HashMap<String, String>();
+        
+        public T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+            T t = createHttpAdapter(name, urlPattern, endpoint, implementorClass);
+            adapters.add(t);
+            WSDLPort port = endpoint.getPort();
+            if (port != null) {
+                addressMap.put(endpoint.getPort().getName().getLocalPart(), getValidPath(urlPattern));
+            }
+            return t;
+        }
+        
+        /**
+         * Implementations need to override this one to create a concrete class
+         * of HttpAdapter
+         */
+        protected abstract T createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
+        
+        /**
+         * @return urlPattern without "/*"
+         */
+        private String getValidPath(@NotNull String urlPattern) {
+            if (urlPattern.endsWith("/*")) {
+                return urlPattern.substring(0, urlPattern.length() - 2);
+            } else {
+                return urlPattern;
+            }
+        }
+        
+        /**
+         * Creates a PortAddressResolver that maps portname to its address
+         */
+        protected PortAddressResolver createPortAddressResolver(final String baseAddress) {
+            return new PortAddressResolver() {
+                public String getAddressFor(@NotNull String portName) {
+                    String urlPattern = addressMap.get(portName);
+                    return (urlPattern == null) ? null : baseAddress+urlPattern;
+                }
+            };
+        }
+
     };
     
 }
