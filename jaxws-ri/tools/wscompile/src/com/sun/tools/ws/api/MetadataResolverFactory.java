@@ -1,11 +1,8 @@
 package com.sun.tools.ws.api;
 
-import org.xml.sax.EntityResolver;
-
-import java.net.URI;
-
-import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import org.xml.sax.EntityResolver;
 
 /**
  * Extension point for resolving metadata using wsimport.
@@ -18,8 +15,10 @@ import com.sun.istack.NotNull;
 public abstract class MetadataResolverFactory {
     /**
      * Gets a {@link MetaDataResolver}
-     * @param location
+     *
      * @param resolver
      */
-    public abstract @NotNull MetaDataResolver metadataResolver(@NotNull URI location, @Nullable EntityResolver resolver);
+    public abstract
+    @NotNull
+    MetaDataResolver metadataResolver(@Nullable EntityResolver resolver);
 }
