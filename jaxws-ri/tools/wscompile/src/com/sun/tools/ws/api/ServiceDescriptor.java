@@ -15,11 +15,11 @@ public abstract class ServiceDescriptor {
      * Gives list of wsdls
      * @return List of WSDL documents as {@link Source}
      */
-    public abstract @NotNull List<Source> getWSDLs();
+    public abstract @NotNull List<? extends Source> getWSDLs();
 
     /**
      * Gives list of schemas
      * @return List of Schema documents as {@link Source}
      */
-    public abstract @NotNull List<Source> getSchemas();
+    public abstract @NotNull List<? extends Source> getSchemas();
 }
