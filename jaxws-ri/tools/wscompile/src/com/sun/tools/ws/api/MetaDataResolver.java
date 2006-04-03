@@ -12,7 +12,7 @@ import java.net.URI;
  *
  * @author Vivek Pandey
  */
-public abstract class MetadataResolver {
+public abstract class MetaDataResolver {
     /**
      * Gives {@link ServiceDescriptor} resolved from the given location.
      *
