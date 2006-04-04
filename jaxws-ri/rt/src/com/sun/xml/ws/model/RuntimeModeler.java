@@ -71,6 +71,7 @@ public class RuntimeModeler {
     private Class portClass;
     private AbstractSEIModelImpl model;
     private com.sun.xml.ws.model.soap.SOAPBindingImpl defaultBinding;
+    // can be empty but never null
     private String packageName;
     private String targetNamespace;
     private boolean isWrapped = true;
@@ -327,7 +328,7 @@ public class RuntimeModeler {
 
 
         targetNamespace = webService.targetNamespace();
-        packageName = null;
+        packageName = "";
         if (clazz.getPackage() != null)
             packageName = clazz.getPackage().getName();
         if (targetNamespace.length() == 0) {
