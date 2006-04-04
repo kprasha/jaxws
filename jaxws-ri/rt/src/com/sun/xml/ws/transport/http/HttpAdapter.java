@@ -57,7 +57,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * Reverse map of {@link #wsdls}. Read-only.
      */
     public final Map<SDDocument,String> revWsdls;
-    
+
     public final HttpAdapters<? extends HttpAdapter> owner;
 
     public HttpAdapter(WSEndpoint endpoint) {
@@ -130,7 +130,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             if (ct == null) {
                 throw new UnsupportedOperationException();
             } else {
-                Message responseMessage = packet.getMessage(); 
+                Message responseMessage = packet.getMessage();
                 if (responseMessage==null) {
                     con.setStatus(WSConnection.ONEWAY);
                     con.getOutput();        // Sets Status Code on the connection
@@ -257,7 +257,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         out.println("</body>");
         out.println("</html>");
     }
-    
+
     private void writeInternalServerError(WSConnection con) throws IOException {
         con.setStatus(HttpURLConnection.HTTP_INTERNAL_ERROR);
         con.getOutput();        // Sets the status code
@@ -269,13 +269,13 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     private void setContentType(WSConnection con, String contentType) {
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
     }
-    
+
     /**
      * Some cases WAR file may contain multiple endpoints for ports in a WSDL.
      * If the runtime knows these ports, their port addresses can be patched.
      * This class keeps a list of HttpAdapters and use that information to patch
      * multiple port addresses.
-     * 
+     *
      * Concrete implementations of this class need to override createHttpAdapter
      * method to create implementations of HttpAdapter
      *
@@ -283,9 +283,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     public static abstract class HttpAdapters<T extends HttpAdapter> implements AdapterFactory<T> {
         private final List<T> adapters = new ArrayList<T>();
         private final Map<String, String> addressMap = new HashMap<String, String>();
-        
-        public T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
-            T t = createHttpAdapter(name, urlPattern, endpoint, implementorClass);
+
+        public T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
+            T t = createHttpAdapter(name, urlPattern, endpoint);
             adapters.add(t);
             WSDLPort port = endpoint.getPort();
             if (port != null) {
@@ -293,13 +293,13 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             }
             return t;
         }
-        
+
         /**
          * Implementations need to override this one to create a concrete class
          * of HttpAdapter
          */
-        protected abstract T createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
-        
+        protected abstract T createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint);
+
         /**
          * @return urlPattern without "/*"
          */
@@ -310,7 +310,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 return urlPattern;
             }
         }
-        
+
         /**
          * Creates a PortAddressResolver that maps portname to its address
          */
@@ -324,5 +324,5 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
 
     };
-    
+
 }

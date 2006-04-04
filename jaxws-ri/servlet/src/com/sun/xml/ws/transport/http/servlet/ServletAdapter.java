@@ -112,7 +112,7 @@ public final class ServletAdapter extends HttpAdapter {
 
     public static class ServletAdapters extends HttpAdapters<ServletAdapter> {
         @Override
-        protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+        protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
             return new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
         }
     };

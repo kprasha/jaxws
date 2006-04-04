@@ -21,13 +21,10 @@
 package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.HttpAdapter.HttpAdapters;
 import com.sun.xml.ws.server.ServerRtException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -49,7 +46,7 @@ final class HttpEndpoint {
     public HttpEndpoint(WSEndpoint endpoint, Executor executor) {
         this.executor = executor;
         HttpAdapters factory = new EndpointHttpAdapters();
-        this.adapter = factory.createAdapter("", "", endpoint, null);
+        this.adapter = factory.createAdapter("", "", endpoint);
     }
 
     public void publish(String address) {
@@ -87,7 +84,7 @@ final class HttpEndpoint {
     
     static class EndpointHttpAdapters extends HttpAdapters<HttpAdapter> {
         @Override
-        protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {
+        protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
             return new HttpAdapter(endpoint, this);
         }
     }; 

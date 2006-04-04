@@ -237,7 +237,7 @@ public class DeploymentDescriptorParser<A> {
                     );
                 WSDLPort port = endpoint.getPort();
 
-                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint, implementorClass));
+                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
             } else {
                 failWithLocalName("runtime.parser.invalidElement", reader);
             }
@@ -281,7 +281,7 @@ public class DeploymentDescriptorParser<A> {
      * But the parser doesn't require that to be of any particular type.
      */
     public static interface AdapterFactory<A> {
-        A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass);
+        A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint);
     }
 
     /**
