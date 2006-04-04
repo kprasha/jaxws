@@ -22,7 +22,7 @@ package com.sun.xml.ws.transport.http.servlet;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.spi.runtime.WSRtObjectFactory;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.util.xml.XmlUtil;

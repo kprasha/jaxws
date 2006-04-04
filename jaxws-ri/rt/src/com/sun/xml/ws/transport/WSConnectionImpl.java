@@ -21,8 +21,8 @@
 package com.sun.xml.ws.transport;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.client.ClientTransportException;
-import com.sun.xml.ws.spi.runtime.WSConnection;
 
 import java.io.IOException;
 import java.io.InputStream;

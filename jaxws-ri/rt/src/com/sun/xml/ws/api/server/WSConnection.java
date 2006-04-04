@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.spi.runtime;
+package com.sun.xml.ws.api.server;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet.Property;

@@ -20,6 +20,7 @@
 package com.sun.xml.ws.spi.runtime;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.transport.http.servlet.WSRtObjectFactoryImpl;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import org.xml.sax.EntityResolver;

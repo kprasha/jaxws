@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <code>com.sun.xml.ws.spi.runtime.WSConnection</code> used by 
+ * <code>com.sun.xml.ws.api.server.WSConnection</code> used by
  * WSServletDelegate, uses <code>javax.servlet.http.HttpServletRequest</code>
  * and <code>javax.servlet.http.HttpServletResponse</code>
  *

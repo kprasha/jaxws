@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
 import com.sun.xml.ws.resources.HttpserverMessages;
-import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import java.io.IOException;

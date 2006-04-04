@@ -157,7 +157,7 @@
  * for SOAP 1.2. The MessageDispatcher invokes configured handlers and use the 
  * encoder to convert the InternalMessage to a {@link javax.xml.soap.SOAPMessage}.
  * The metadata from the MessageInfo is classified into {@link javax.xml.soap.MimeHeaders} 
- * of this SOAPMessage and context information for {@link com.sun.xml.ws.spi.runtime.WSConnection}. 
+ * of this SOAPMessage and context information for {@link com.sun.xml.ws.api.server.WSConnection}.
  * The SOAPMessge is then written to the output stream of the WSConnection
  * obtained from MessageInfo.
  *<P></P>

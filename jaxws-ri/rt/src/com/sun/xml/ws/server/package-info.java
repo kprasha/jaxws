@@ -112,7 +112,7 @@ inactive(E);
  * {@link com.sun.xml.ws.transport.http.servlet.WSServletDelegate WSServletDelegate}
  * or the {@link com.sun.xml.ws.transport.http.server.ServerConnectionImpl ServerConnectionImpl}.
  * Both of these classes find the appropriate {@link com.sun.xml.ws.server.RuntimeEndpointInfo RuntimeEndpointInfo}
- * and invokes the {@link com.sun.xml.ws.server.Tie#handle(com.sun.xml.ws.spi.runtime.WSConnection, 
+ * and invokes the {@link com.sun.xml.ws.server.Tie#handle(com.sun.xml.ws.api.server.WSConnection,
  * com.sun.xml.ws.spi.runtime.RuntimeEndpointInfo) Tie.handle}
  * method. This method first creates a {@link com.sun.pept.ept.MessageInfo MessageInfo}
  * used to gather inforrmation about the message to be received. A

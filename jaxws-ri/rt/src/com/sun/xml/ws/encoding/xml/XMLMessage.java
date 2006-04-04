@@ -29,7 +29,7 @@ import com.sun.xml.messaging.saaj.util.ByteInputStream;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.protocol.xml.XMLMessageException;
-import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.FastInfosetReflection;

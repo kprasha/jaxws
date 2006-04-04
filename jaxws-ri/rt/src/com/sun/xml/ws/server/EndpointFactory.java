@@ -23,7 +23,7 @@ import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
-import com.sun.xml.ws.spi.runtime.Container;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.ServiceConfigurationError;

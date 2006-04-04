@@ -7,7 +7,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.spi.runtime.Container;
 import com.sun.xml.ws.server.EndpointFactory;
 
 import javax.xml.ws.WebServiceContext;

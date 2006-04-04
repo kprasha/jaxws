@@ -27,7 +27,7 @@ import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
-import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import javax.xml.ws.WebServiceException;

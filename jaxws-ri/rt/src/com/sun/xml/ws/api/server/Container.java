@@ -1,4 +1,4 @@
-package com.sun.xml.ws.spi.runtime;
+package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
 

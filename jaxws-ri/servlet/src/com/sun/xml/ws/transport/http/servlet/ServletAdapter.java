@@ -1,13 +1,10 @@
 package com.sun.xml.ws.transport.http.servlet;
 
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.transport.http.HttpAdapter;
-import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 import com.sun.xml.ws.api.server.InstanceResolver;
-import com.sun.xml.ws.spi.runtime.WSConnection;
-import java.util.HashMap;
-import java.util.Map;
+import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -23,13 +20,13 @@ import java.io.IOException;
  * specified in the deployment (in particular those information are related
  * to how a request is routed to a {@link ServletAdapter}.
  */
-final class ServletAdapter extends HttpAdapter {
+public final class ServletAdapter extends HttpAdapter {
     final String name;
     /**
      * Servlet URL pattern with which this {@link HttpAdapter} is associated.
      */
     final String urlPattern;
-    
+
 
     /**
      * The application class that ultimately implements the service.
@@ -45,6 +42,14 @@ final class ServletAdapter extends HttpAdapter {
         this.name = name;
         this.urlPattern = urlPattern;
         this.implementationType = implementationType;
+    }
+
+    /**
+     * Gets the name of the endpoint as given in the <tt>sun-jaxws.xml</tt>
+     * deployment descriptor.
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -72,7 +77,7 @@ final class ServletAdapter extends HttpAdapter {
     }
 
     /**
-     * Version of {@link #handle(WSConnection)} 
+     * Version of {@link #handle(WSConnection)}
      * that takes convenient parameters for servlet.
      */
     public void handle(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -104,7 +109,7 @@ final class ServletAdapter extends HttpAdapter {
 
         return addrBuf.toString();
     }
-    
+
     public static class ServletAdapters extends HttpAdapters<ServletAdapter> {
         @Override
         protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint, Class implementorClass) {

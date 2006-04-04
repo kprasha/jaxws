@@ -38,7 +38,7 @@ import java.util.Map;
 
 
 /**
- * <code>com.sun.xml.ws.spi.runtime.WSConnection</code> used with Java SE endpoints
+ * <code>com.sun.xml.ws.api.server.WSConnection</code> used with Java SE endpoints
  *
  * @author WS Development Team
  */

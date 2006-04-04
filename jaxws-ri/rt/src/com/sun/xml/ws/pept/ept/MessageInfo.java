@@ -26,7 +26,7 @@ package com.sun.xml.ws.pept.ept;
 import com.sun.xml.ws.pept.encoding.Decoder;
 import com.sun.xml.ws.pept.encoding.Encoder;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
-import com.sun.xml.ws.spi.runtime.WSConnection;
+import com.sun.xml.ws.api.server.WSConnection;
 
 /**
  * <p>
