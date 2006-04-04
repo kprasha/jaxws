@@ -1,7 +1,6 @@
 package com.sun.xml.ws.transport.http.servlet;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
@@ -28,20 +27,10 @@ public final class ServletAdapter extends HttpAdapter {
     final String urlPattern;
 
 
-    /**
-     * The application class that ultimately implements the service.
-     *
-     * <p>
-     * At {@link ServletAdapter} we require that there be a single
-     * class that serves {@link InstanceResolver}.
-     */
-    final Class<?> implementationType;
-
-    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, Class<?> implementationType, HttpAdapters<ServletAdapter> owner) {
+    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, HttpAdapters<ServletAdapter> owner) {
         super(endpoint, owner);
         this.name = name;
         this.urlPattern = urlPattern;
-        this.implementationType = implementationType;
     }
 
     /**
@@ -113,7 +102,7 @@ public final class ServletAdapter extends HttpAdapter {
     public static class ServletAdapters extends HttpAdapters<ServletAdapter> {
         @Override
         protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
-            return new ServletAdapter(name, urlPattern, endpoint, implementorClass, this);
+            return new ServletAdapter(name, urlPattern, endpoint, this);
         }
     };
 

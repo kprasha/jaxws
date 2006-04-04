@@ -53,12 +53,15 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
      */
     private boolean disposed;
 
+    private final Class<T> implementationClass;
 
-    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, InstanceResolver<T> instanceResolver, @Nullable ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
+
+    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, InstanceResolver<T> instanceResolver, @Nullable ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
         this.binding = binding;
         this.soapVersion = binding.getSOAPVersion();
         this.container = container;
         this.port = port;
+        this.implementationClass = implementationClass;
         this.instanceResolver = instanceResolver;
         this.serviceDef = serviceDef;
         this.seiModel = seiModel;
@@ -73,6 +76,10 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         this.masterPipeline = assembler.createServer(port, this, terminalPipe);
 
         instanceResolver.start(this,webServiceContext);
+    }
+
+    public Class<T> getImplementationClass() {
+        return implementationClass;
     }
 
     public @NotNull WSBinding getBinding() {

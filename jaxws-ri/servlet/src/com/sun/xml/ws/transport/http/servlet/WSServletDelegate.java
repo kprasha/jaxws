@@ -451,7 +451,7 @@ final class WSServletDelegate {
                                 "servlet.html.information.table",
                                 endpointAddress,
                                 a.getPortName(),
-                                a.implementationType.getName()
+                                a.getEndpoint().getImplementationClass().getName()
                             )));
                     out.println("</td>");
                     out.println("</tr>");

@@ -70,6 +70,14 @@ import org.xml.sax.EntityResolver;
 public abstract class WSEndpoint<T> {
 
     /**
+     * Gets the application endpoint {@link Class} that eventually serves the request.
+     *
+     * <p>
+     * This is the same value given to the {@link #create} method.
+     */
+    public abstract @NotNull Class<T> getImplementationClass();
+
+    /**
      * Represents the binding for which this {@link WSEndpoint}
      * is created for.
      *
