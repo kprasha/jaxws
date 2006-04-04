@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.transport.http.HttpAdapterList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +28,7 @@ public final class ServletAdapter extends HttpAdapter {
     final String urlPattern;
 
 
-    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, HttpAdapters<ServletAdapter> owner) {
+    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, HttpAdapterList<ServletAdapter> owner) {
         super(endpoint, owner);
         this.name = name;
         this.urlPattern = urlPattern;
@@ -99,7 +100,7 @@ public final class ServletAdapter extends HttpAdapter {
         return addrBuf.toString();
     }
 
-    public static class ServletAdapters extends HttpAdapters<ServletAdapter> {
+    public static class ServletAdapters extends HttpAdapterList<ServletAdapter> {
         @Override
         protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
             return new ServletAdapter(name, urlPattern, endpoint, this);

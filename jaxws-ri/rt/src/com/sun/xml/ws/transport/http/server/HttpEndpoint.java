@@ -23,7 +23,7 @@ package com.sun.xml.ws.transport.http.server;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
-import com.sun.xml.ws.transport.http.HttpAdapter.HttpAdapters;
+import com.sun.xml.ws.transport.http.HttpAdapterList;
 import com.sun.xml.ws.server.ServerRtException;
 import java.util.concurrent.Executor;
 
@@ -45,7 +45,7 @@ final class HttpEndpoint {
 
     public HttpEndpoint(WSEndpoint endpoint, Executor executor) {
         this.executor = executor;
-        HttpAdapters factory = new EndpointHttpAdapters();
+        HttpAdapterList factory = new EndpointHttpAdapters();
         this.adapter = factory.createAdapter("", "", endpoint);
     }
 
@@ -82,7 +82,7 @@ final class HttpEndpoint {
         context.setHandler(new WSHttpHandler(adapter, executor));
     }
     
-    static class EndpointHttpAdapters extends HttpAdapters<HttpAdapter> {
+    static class EndpointHttpAdapters extends HttpAdapterList<HttpAdapter> {
         @Override
         protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
             return new HttpAdapter(endpoint, this);
