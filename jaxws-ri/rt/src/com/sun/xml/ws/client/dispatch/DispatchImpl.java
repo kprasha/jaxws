@@ -136,7 +136,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         Packet response = null;
         try {
             Packet message = createPacket(in);
-            setProperties(message,false);
+            setProperties(message,true);
             response = process(message,rc,receiver);
             Message msg = response.getMessage();
 
@@ -168,7 +168,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
     public final void invokeOneWay(T in) {
         Packet request = createPacket(in);
-        setProperties(request,true);
+        setProperties(request,false);
         Packet response = process(request,requestContext,this);
     }
 

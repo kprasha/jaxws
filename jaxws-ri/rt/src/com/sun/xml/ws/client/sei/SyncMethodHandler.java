@@ -205,7 +205,7 @@ final class SyncMethodHandler extends MethodHandler {
             Packet req = new Packet(createRequestMessage(args));
 
             req.soapAction = soapAction;
-            req.expectReply = isOneWay;
+            req.expectReply = !isOneWay;
             req.getMessage().assertOneWay(isOneWay);
 
             // process the message
