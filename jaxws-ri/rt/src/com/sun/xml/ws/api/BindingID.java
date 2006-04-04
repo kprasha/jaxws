@@ -6,6 +6,7 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.sandbox.impl.DecoderFacade;
 import com.sun.xml.ws.sandbox.impl.EncoderFacade;
 import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
@@ -60,6 +61,18 @@ import java.io.UnsupportedEncodingException;
  * @author Kohsuke Kawaguchi
  */
 public abstract class BindingID {
+
+    /**
+     * Creates an instance of {@link WSBinding} (which is conceptually an "use"
+     * of {@link BindingID}) from a {@link BindingID}.
+     *
+     * @return
+     *      Always a new instance.
+     */
+    public final @NotNull WSBinding createBinding() {
+        return BindingImpl.create(this);
+    }
+
     /**
      * Gets the SOAP version of this binding.
      *

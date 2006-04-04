@@ -48,6 +48,7 @@ import java.util.Enumeration;
 import javax.xml.ws.WebServiceException;
 import com.sun.org.apache.xml.internal.resolver.CatalogManager;
 import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
+import com.sun.istack.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
@@ -186,7 +187,7 @@ public class XmlUtil {
     /*
     * Gets an EntityResolver using XML catalog
     */
-    public static EntityResolver createEntityResolver(URL catalogUrl) {
+    public static EntityResolver createEntityResolver(@Nullable URL catalogUrl) {
         // set up a manager
         CatalogManager manager = new CatalogManager();
         manager.setIgnoreMissingProperties(true);

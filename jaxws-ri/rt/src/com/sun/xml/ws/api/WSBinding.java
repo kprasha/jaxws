@@ -12,6 +12,9 @@ import javax.xml.ws.Binding;
  * JAX-WS implementation of {@link Binding}.
  *
  * <p>
+ * This object can be created by {@link BindingID#createBinding()}.
+ *
+ * <p>
  * Binding conceptually includes the on-the-wire format of the message,
  * this this object owns {@link Encoder} and {@link Decoder}.
  *

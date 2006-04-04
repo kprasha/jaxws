@@ -8,11 +8,13 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.server.EndpointFactory;
+import com.sun.xml.ws.util.xml.XmlUtil;
 
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.net.URL;
 
 import org.xml.sax.EntityResolver;
 
@@ -262,8 +264,26 @@ public abstract class WSEndpoint<T> {
     public static <T> WSEndpoint<T> create(
         Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
         Container container, WSBinding binding,
-        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
+        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, @Nullable EntityResolver resolver) {
         return EndpointFactory.createEndpoint(
             implType,ir,serviceName,portName,container,binding,primaryWsdl,metadata,resolver);
+    }
+
+    /**
+     * The same as
+     * {@link #create(Class, InstanceResolver, QName, QName, Container, WSBinding, SDDocumentSource, Collection, EntityResolver)}
+     * except that this version takes an url of the <tt>jax-ws-catalog.xml</tt>.
+     *
+     * @param catalogUrl
+     *      if not null, an {@link EntityResolver} is created from it and used.
+     *      otherwise no resolution will be performed.
+     */
+    public static <T> WSEndpoint<T> create(
+        Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
+        Container container, WSBinding binding,
+        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, @Nullable URL catalogUrl) {
+        return create(
+            implType,ir,serviceName,portName,container,binding,primaryWsdl,metadata,
+            XmlUtil.createEntityResolver(catalogUrl));
     }
 }
