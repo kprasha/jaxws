@@ -129,6 +129,26 @@ public final class RequestContext extends PropertySet {
     }
 
     /**
+     * The value of {@link ContentNegotiation#PROPERTY} 
+     * property.
+     */
+    public ContentNegotiation contentNegotiation = ContentNegotiation.none;
+    
+    @Property(ContentNegotiation.PROPERTY)
+    public String getContentNegotiationString() {
+        return contentNegotiation.toString();
+    }
+
+    public void setContentNegotiationString(String s) {
+        if(s==null)
+            contentNegotiation = ContentNegotiation.none;
+        else {
+            // TODO should IllegalArgumentException be caught here?
+            contentNegotiation = ContentNegotiation.valueOf(s);
+        }
+    }
+    
+    /**
      * {@link Map} exposed to the user application.
      */
     private final MapView mapView = new MapView();

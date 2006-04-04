@@ -76,51 +76,95 @@ public interface BindingProviderProperties extends JAXWSProperties{
     public static final String XML_ENCODING_VALUE = "xml.encoding";                 // deprecated
     public static final String ACCEPT_ENCODING_PROPERTY = "accept.encoding";
 
+    /**
+     * HTTP Content-Type headser field.
+     */
     public static final String CONTENT_TYPE_PROPERTY = "Content-Type";
+    
+    /**
+     * HTTP Content-Type entity-header field.
+     */
     public static final String SOAP_ACTION_PROPERTY = "SOAPAction";
+    /**
+     * HTTP SOAPAction request-header field.
+     */
     public static final String ACCEPT_PROPERTY = "Accept";
 
-    // FI + SOAP 1.1
+    /**
+     * MIME type for a SOAP 1.1 Infoset encoded as a fast infoset document.
+     */
     public static final String FAST_INFOSET_TYPE_SOAP11 =
         "application/fastinfoset";
 
-    // FI + SOAP 1.2
+    /**
+     * MIME type for a SOAP 1.2 Infoset encoded as a fast infoset document.
+     */
     public static final String FAST_INFOSET_TYPE_SOAP12 =
         "application/soap+fastinfoset";
 
-    // XML + XOP + SOAP 1.1
+    /**
+     * MIME type for a XML Infoset encoded as a fast infoset document.
+     */
+    public static final String FAST_INFOSET_CONTENT_TYPE_VALUE =
+        "application/fastinfoset";
+    
+    /**
+     * MIME type for a SOAP 1.1 Infoset transformed using XOP and encoded as an
+     * XML document as a part of a XOP MIME package.
+     */
     public static final String XOP_SOAP11_XML_TYPE_VALUE =
         "application/xop+xml;type=\"text/xml\"";
 
-    // XML + XOP + SOAP 1.2
+    /**
+     * MIME type for a SOAP 1.2 Infoset transformed using XOP and encoded as an
+     * XML document as a part of a XOP MIME package.
+     */
     public static final String XOP_SOAP12_XML_TYPE_VALUE =
         "application/xop+xml;type=\"application/soap+xml\"";
 
+    /**
+     * MIME type for a XML Infoset encoded as an XML document.
+     */
     public static final String XML_CONTENT_TYPE_VALUE = "text/xml";
 
+    /**
+     * MIME type for a SOAP 1.2 Infoset encoded as an XML document.
+     */
     public static final String SOAP12_XML_CONTENT_TYPE_VALUE = "application/soap+xml";
 
+    /**
+     * Base HTTP Accept request-header.
+     */
     public static final String STANDARD_ACCEPT_VALUE =
         "application/xop+xml, text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2";
 
+    /**
+     * HTTP Accept request-header for SOAP 1.2 infosets encoded as XML documents.
+     */
     public static final String SOAP12_XML_ACCEPT_VALUE =
         "application/soap+xml" + ", " + STANDARD_ACCEPT_VALUE;
 
+    /**
+     * HTTP Accept request-header for SOAP 1.1 infosets encoded as XML documents.
+     */
     public static final String XML_ACCEPT_VALUE =
         XML_CONTENT_TYPE_VALUE + ", " + STANDARD_ACCEPT_VALUE;
 
-    public static final String XML_FI_ACCEPT_VALUE =
-        FAST_INFOSET_TYPE_SOAP11 + ", " + XML_ACCEPT_VALUE;
-
+    /**
+     * HTTP Accept request-header for SOAP 1.2 infosets encoded as fast infoset 
+     * documents, includes SOAP 1.2 infosets encoded as XML documents.
+     */
     public static final String SOAP12_XML_FI_ACCEPT_VALUE =
         FAST_INFOSET_TYPE_SOAP12 + ", " + SOAP12_XML_ACCEPT_VALUE;
+
+    /**
+     * HTTP Accept request-header for SOAP 1.1 infosets encoded as fast infoset 
+     * documents, includes SOAP 1.1 infosets encoded as XML documents.
+     */
+    public static final String XML_FI_ACCEPT_VALUE =
+        FAST_INFOSET_TYPE_SOAP11 + ", " + XML_ACCEPT_VALUE;
 
     public String DISPATCH_CONTEXT = "com.sun.xml.ws.client.dispatch.context";
 
     public static final String BINDING_ID_PROPERTY = "com.sun.xml.ws.binding";
-
-//    // Content negotiation property: values "none", "pessimistic" and "optimistic"
-//    public static final String CONTENT_NEGOTIATION_PROPERTY =
-//        "com.sun.xml.ws.client.ContentNegotiation";
-
 }
