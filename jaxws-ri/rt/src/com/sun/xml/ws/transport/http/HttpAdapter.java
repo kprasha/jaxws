@@ -253,7 +253,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         out.println("</html>");
     }
 
-    private void writeInternalServerError(WSConnection con) throws IOException {
+    private void writeInternalServerError(WSConnection con) {
         con.setStatus(HttpURLConnection.HTTP_INTERNAL_ERROR);
         con.getOutput();        // Sets the status code
     }
@@ -264,7 +264,4 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     private void setContentType(WSConnection con, String contentType) {
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
     }
-
-    ;
-
 }
