@@ -331,7 +331,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         // create binding
-        BindingImpl bindingImpl = BindingImpl.create(bindingId,serviceName);
+        BindingImpl bindingImpl = BindingImpl.create(bindingId);
 
         if(bindingImpl instanceof SOAPBinding) {
             Set<String> roles = rolesMap.get(portName);

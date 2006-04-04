@@ -203,7 +203,7 @@ public class DeploymentDescriptorParser<A> {
                         bindingId = BindingID.parse(implementorClass);
                 }
 
-                WSBinding binding = BindingImpl.create(bindingId, serviceName);
+                WSBinding binding = BindingImpl.create(bindingId);
 
                 //get enable-mtom attribute value
                 String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);

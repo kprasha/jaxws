@@ -94,7 +94,7 @@ public class EndpointFactory {
         // setting a default binding
         if (binding == null)
             binding = BindingImpl.create(
-                BindingID.parse(implType), serviceName);
+                BindingID.parse(implType));
 
         Pipe terminal;
         WSDLPort wsdlPort = null;

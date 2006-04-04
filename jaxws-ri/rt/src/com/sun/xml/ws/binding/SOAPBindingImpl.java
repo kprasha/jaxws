@@ -59,12 +59,12 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
 
     /**
-     * Use {@link BindingImpl#create(BindingID, QName)} to create this.
+     * Use {@link BindingImpl#create(BindingID)} to create this.
      */
     SOAPBindingImpl(
-        BindingID bindingId, List<Handler> handlerChain, SOAPVersion soapVersion, QName serviceName) {
+        BindingID bindingId, List<Handler> handlerChain, SOAPVersion soapVersion) {
 
-        super(handlerChain, bindingId, serviceName);
+        super(handlerChain, bindingId);
         this.soapVersion = soapVersion;
         setup();
         //Is this still required? comment out for now

@@ -53,13 +53,11 @@ public abstract class BindingImpl implements WSBinding {
     
     
     private final BindingID bindingId;
-    protected final QName serviceName;
 
-    protected BindingImpl(List<Handler> handlerChain, BindingID bindingId, QName serviceName) {
+    protected BindingImpl(List<Handler> handlerChain, BindingID bindingId) {
         this.handlers = handlerChain;
         sortHandlers();
         this.bindingId = bindingId;
-        this.serviceName = serviceName;
     }
 
 
@@ -117,18 +115,14 @@ public abstract class BindingImpl implements WSBinding {
         return bindingId.createDecoder(this);
     }
 
-    public static BindingImpl create(@NotNull BindingID bindingId, QName serviceName) {
+    public static BindingImpl create(@NotNull BindingID bindingId) {
         if(bindingId.equals(BindingID.XML_HTTP))
             return new HTTPBindingImpl(null);
         else
-            return new SOAPBindingImpl(bindingId, null, bindingId.getSOAPVersion(), serviceName);
+            return new SOAPBindingImpl(bindingId, null, bindingId.getSOAPVersion());
     }
 
     public static WSBinding getDefaultBinding() {
-        return getDefaultBinding(null);
-    }
-
-    public static WSBinding getDefaultBinding(QName serviceName) {
-        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, null, SOAPVersion.SOAP_11, serviceName);
+        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, null, SOAPVersion.SOAP_11);
     }
 }

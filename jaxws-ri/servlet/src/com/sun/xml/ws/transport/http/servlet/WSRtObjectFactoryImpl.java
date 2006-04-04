@@ -53,7 +53,7 @@ public class WSRtObjectFactoryImpl extends WSRtObjectFactory {
 
     @Override
     public WSBinding createBinding(String bindingId) {
-        return BindingImpl.create(BindingID.parse(bindingId),null);
+        return BindingImpl.create(BindingID.parse(bindingId));
     }
 
     /**

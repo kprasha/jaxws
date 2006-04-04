@@ -28,7 +28,6 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.istack.NotNull;
@@ -90,7 +89,7 @@ public class EndpointImpl extends Endpoint {
 
 
     public EndpointImpl(@NotNull BindingID bindingId, @NotNull Object impl) {
-        binding = BindingImpl.create(bindingId, null);
+        binding = BindingImpl.create(bindingId);
         implementor = impl;
     }
 

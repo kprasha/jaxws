@@ -22,7 +22,6 @@ package com.sun.xml.ws.binding;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.resources.ClientMessages;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
@@ -36,11 +35,11 @@ import java.util.List;
 public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
 
     /**
-     * Use {@link BindingImpl#create(BindingID, QName)} to create this.
+     * Use {@link BindingImpl#create(BindingID)} to create this.
      */
     HTTPBindingImpl(List<Handler> handlerChain) {
         // TODO: implement a real encoder/decoder for these
-        super(handlerChain, BindingID.XML_HTTP, null);
+        super(handlerChain, BindingID.XML_HTTP);
     }
 
     /**
