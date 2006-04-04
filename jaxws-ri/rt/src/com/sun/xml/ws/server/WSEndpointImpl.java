@@ -12,19 +12,15 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
-import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.api.server.Container;
 
 import javax.annotation.PreDestroy;
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.MessageContext;
 import java.lang.reflect.Method;
-import java.security.Principal;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -39,7 +35,6 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final SEIModel seiModel;
     private final @NotNull Container container;
     private final WSDLPort port;
-    private final InstanceResolver<T> instanceResolver;
 
     private final Pipe masterPipeline;
     private final ServiceDefinitionImpl serviceDef;
@@ -56,13 +51,12 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final Class<T> implementationClass;
 
 
-    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, InstanceResolver<T> instanceResolver, @Nullable ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
+    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, @Nullable ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
         this.binding = binding;
         this.soapVersion = binding.getSOAPVersion();
         this.container = container;
         this.port = port;
         this.implementationClass = implementationClass;
-        this.instanceResolver = instanceResolver;
         this.serviceDef = serviceDef;
         this.seiModel = seiModel;
         if (serviceDef != null) {
@@ -74,8 +68,6 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         assert assembler!=null;
 
         this.masterPipeline = assembler.createServer(port, this, terminalPipe);
-
-        instanceResolver.start(this,webServiceContext);
     }
 
     public @NotNull Class<T> getImplementationClass() {
@@ -111,7 +103,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     }
 
 
-    public PipeHead createPipeHead() {
+    public @NotNull PipeHead createPipeHead() {
         return new PipeHead() {
             private final Pipe pipe = PipeCloner.clone(masterPipeline);
 
@@ -119,7 +111,6 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 request.webServiceContextDelegate = wscd;
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;
-                packets.set(request);
                 Packet response;
                 try {
                     response = pipe.process(request);
@@ -143,7 +134,6 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         disposed = true;
 
         masterPipeline.preDestroy();
-        instanceResolver.dispose();
 
         List<Handler> handlerChain = binding.getHandlerChain();
         if(handlerChain!=null) {
@@ -165,48 +155,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         }
     }
 
-    public InstanceResolver<T> getInstanceResolver() {
-        return instanceResolver;
-    }
-
     public ServiceDefinitionImpl getServiceDefinition() {
         return serviceDef;
     }
-
-    public void setCurrentPacket(Packet p) {
-        packets.set(p);
-    }
-
-    /**
-     * Heart of {@link WebServiceContext}.
-     * Remembers which thread is serving which packet.
-     * This needs to be called by the ties.
-     */
-    private final ThreadLocal<Packet> packets = new ThreadLocal<Packet>();
-
-    private final WebServiceContext webServiceContext = new WebServiceContext() {
-
-        public MessageContext getMessageContext() {
-            return new EndpointMessageContextImpl(getCurrentPacket());
-        }
-
-        public Principal getUserPrincipal() {
-            Packet packet = getCurrentPacket();
-            return packet.webServiceContextDelegate.getUserPrincipal(packet);
-        }
-
-        private Packet getCurrentPacket() {
-            Packet p = packets.get();
-            assert p!=null; // invoker must set
-            return p;
-        }
-
-        public boolean isUserInRole(String role) {
-            Packet packet = getCurrentPacket();
-            return packet.webServiceContextDelegate.isUserInRole(packet,role);
-        }
-    };
-
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.endpoint");

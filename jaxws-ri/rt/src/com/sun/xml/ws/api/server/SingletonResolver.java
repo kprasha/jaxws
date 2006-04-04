@@ -31,7 +31,7 @@ final class SingletonResolver<T> extends InstanceResolver<T> {
         return singleton;
     }
 
-    public void start(WSEndpoint owner, WebServiceContext wsc) {
+    public void start(WebServiceContext wsc) {
         doFieldsInjection(wsc);
         doMethodsInjection(wsc);
         // notify that we are ready to serve

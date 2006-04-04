@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.server.InvokerPipe;
 
 import javax.xml.ws.Provider;
 import java.util.logging.Logger;
@@ -37,14 +38,13 @@ import java.util.logging.Logger;
  *
  * @author Jitendra Kotamraju
  */
-public abstract class ProviderInvokerPipe extends AbstractPipeImpl {
+public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
-    private final InstanceResolver<? extends Provider> instanceResolver;
 
-    public ProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver) {
-        this.instanceResolver = instanceResolver;
+    public ProviderInvokerPipe(InstanceResolver<? extends Provider<T>> instanceResolver) {
+        super(instanceResolver);
     }
 
     /*
@@ -54,10 +54,12 @@ public abstract class ProviderInvokerPipe extends AbstractPipeImpl {
      * through the Pipeline to transport.
      */
     public Packet process(Packet request) {
-        Object parameter = getParameter(request.getMessage());
-        Provider servant = instanceResolver.resolve(request);
+        T parameter = getParameter(request.getMessage());
+
+        Provider<T> servant = getServant(request);
         logger.fine("Invoking Provider Endpoint "+servant);
-        Object returnValue = null;
+
+        T returnValue;
         try {
             returnValue = servant.invoke(parameter);
         } catch(RuntimeException e) {
@@ -77,13 +79,7 @@ public abstract class ProviderInvokerPipe extends AbstractPipeImpl {
         }
     }
     
-    public abstract Object getParameter(Message msg);
-    public abstract Message getResponseMessage(Object returnValue);
+    public abstract T getParameter(Message msg);
+    public abstract Message getResponseMessage(T returnValue);
     public abstract Message getResponseMessage(Exception e);
-
-    public Pipe copy(PipeCloner cloner) {
-        cloner.add(this,this);
-        return this;
-    }
-
 }

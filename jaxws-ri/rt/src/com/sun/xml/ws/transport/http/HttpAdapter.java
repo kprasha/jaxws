@@ -14,6 +14,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSConnection;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.Headers;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
@@ -112,6 +113,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             InputStream in = con.getInput();
             Packet packet = new Packet();
             decoder.decode(in, ct, packet);
+            // TODO: deprecate wrapUpRequestPacket and instead have Packet
+            // go look for properties on WSConnection when asked by the user
             con.wrapUpRequestPacket(packet);
             packet.httpRequestHeaders = con.getRequestHeaders();
             try {
@@ -174,7 +177,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     /**
      * Receives the incoming HTTP connection and dispatches
-     * it to JAX-WS.
+     * it to JAX-WS. This method returns when JAX-WS completes
+     * processing the request and the whole reply is written
+     * to {@link WSConnection}.
      *
      * <p>
      * This method is invoked by the lower-level HTTP stack,
@@ -184,7 +189,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * To populate a request {@link Packet} with more info,
      * use {@link WSConnection#wrapUpRequestPacket(Packet)}.
      */
-    public void handle(WSConnection connection) throws IOException {
+    public void handle(@NotNull WSConnection connection) throws IOException {
         HttpToolkit tk = pool.take();
         try {
             tk.handle(connection);

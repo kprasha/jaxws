@@ -182,15 +182,6 @@ public abstract class WSEndpoint<T> {
     }
 
     /**
-     * Gets the instance resolver that determines which object ultimately
-     * consumes the message.
-     *
-     * @return
-     *      always same object.
-     */
-    public abstract @NotNull InstanceResolver<T> getInstanceResolver();
-
-    /**
      * Indicates that the {@link WSEndpoint} is about to be turned off,
      * and will no longer serve any packet anymore.
      *

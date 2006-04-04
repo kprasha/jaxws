@@ -23,18 +23,15 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
+import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.client.sei.MethodHandler;
+import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.server.InvokerPipe;
 import com.sun.xml.ws.util.QNameMap;
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
-import com.sun.xml.ws.encoding.soap.SOAP12Constants;
-
 
 import javax.xml.namespace.QName;
 
@@ -43,7 +40,7 @@ import javax.xml.namespace.QName;
  *
  * @author Jitendra Kotamraju
  */
-public class SEIInvokerPipe extends AbstractPipeImpl {
+public class SEIInvokerPipe extends InvokerPipe {
 
     /**
      * For each method on the port interface we have
@@ -55,11 +52,12 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
     private final SOAPVersion soapVersion;
 
     public SEIInvokerPipe(AbstractSEIModelImpl model,InstanceResolver instanceResolver, WSBinding binding) {
+        super(instanceResolver);
         this.soapVersion = binding.getSOAPVersion();
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         // fill in methodHandlers.
         for( JavaMethodImpl m : model.getJavaMethods() ) {
-            EndpointMethodHandler handler = new EndpointMethodHandler(model,m,binding, instanceResolver);
+            EndpointMethodHandler handler = new EndpointMethodHandler(this,model,m,binding);
             QName payloadName = model.getQNameForJM(m);     // TODO need a new method on JavaMethodImpl
             methodHandlers.put(payloadName.getNamespaceURI(), payloadName.getLocalPart(), handler);
         }
@@ -98,10 +96,5 @@ public class SEIInvokerPipe extends AbstractPipeImpl {
         res.invocationProperties.putAll(req.invocationProperties);
 
         return res;
-    }
-
-    public Pipe copy(PipeCloner cloner) {
-        cloner.add(this,this);
-        return this;
     }
 }

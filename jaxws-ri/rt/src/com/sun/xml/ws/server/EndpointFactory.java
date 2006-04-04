@@ -195,7 +195,7 @@ public class EndpointFactory {
 
         ServiceDefinitionImpl serviceDefiniton = (primaryDoc != null) ? new ServiceDefinitionImpl(docList, primaryDoc) : null;
 
-        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,implType,ir,serviceDefiniton,terminal);
+        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal);
     }
 
 

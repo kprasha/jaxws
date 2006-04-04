@@ -31,6 +31,7 @@ public abstract class HttpAdapterList<T extends HttpAdapter> extends AbstractLis
     private final List<T> adapters = new ArrayList<T>();
     private final Map<String, String> addressMap = new HashMap<String, String>();
 
+    // TODO: documented because it's used by AS
     public T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
         T t = createHttpAdapter(name, urlPattern, endpoint);
         adapters.add(t);

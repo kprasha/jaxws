@@ -1,30 +1,28 @@
 package com.sun.xml.ws.server.sei;
 
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
+import javax.jws.WebParam.Mode;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import javax.jws.WebParam.Mode;
 
 /**
  *
@@ -54,7 +52,6 @@ final class EndpointMethodHandler {
     private final Method method;
     private final int noOfArgs;
     private final JavaMethodImpl javaMethodModel;
-    private final InstanceResolver instanceResolver;
 
      private final Boolean isOneWay;
 
@@ -65,12 +62,13 @@ final class EndpointMethodHandler {
     private final EndpointResponseMessageBuilder bodyBuilder;
     private final MessageFiller[] outFillers;
 
+    private final SEIInvokerPipe owner;
 
-    public EndpointMethodHandler(SEIModel seiModel, JavaMethodImpl method, WSBinding binding, InstanceResolver instanceResolver) {
+    public EndpointMethodHandler(SEIInvokerPipe owner, SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
+        this.owner = owner;
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
         this.method = method.getMethod();
-        this.instanceResolver = instanceResolver;
         this.javaMethodModel = method;
         argumentsBuilder = createArgumentsBuilder();
         List<MessageFiller> fillers = new ArrayList<MessageFiller>();
@@ -211,7 +209,6 @@ final class EndpointMethodHandler {
         if (isOneWay && req.transportBackChannel != null) {
             req.transportBackChannel.close();
         }
-        Object proxy = instanceResolver.resolve(req);
         Message reqMsg = req.getMessage();
         Pool.Marshaller pool = seiModel.getMarshallerPool();
         Marshaller m = pool.take();
@@ -228,7 +225,7 @@ final class EndpointMethodHandler {
             }
             Message responseMessage;
             try {
-                Object ret = method.invoke(proxy, args);
+                Object ret = method.invoke(owner.getServant(req), args);
                 responseMessage = isOneWay ? null : createResponseMessage(args, ret);
             } catch (InvocationTargetException e) {
                 e.printStackTrace();

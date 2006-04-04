@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceContext;
 
@@ -44,11 +45,8 @@ public abstract class InstanceResolver<T> {
      * @param request
      *      Always non-null. Represents the request message to be served.
      *      The caller may not consume the {@link Message}.
-     *
-     * @return
-     *      Must return a non-null value.
      */
-    public abstract T resolve(Packet request);
+    public abstract @NotNull T resolve(Packet request);
 
     /**
      * Called by {@link WSEndpoint} when it's set up.
@@ -60,13 +58,14 @@ public abstract class InstanceResolver<T> {
      * @param wsc
      *      The {@link WebServiceContext} instance to be injected
      *      to the user instances (assuming {@link InstanceResolver}
-     *      supports it.
      */
-    public void start(WSEndpoint owner, WebServiceContext wsc) {}
+    public void start(@NotNull WebServiceContext wsc) {}
 
     /**
      * Called by {@link WSEndpoint}
      * when {@link WSEndpoint#dispose()} is called.
+     *
+     * This allows {@link InstanceResolver} to do final clean up.
      *
      * <p>
      * This method is guaranteed to be only called once by {@link WSEndpoint}.
