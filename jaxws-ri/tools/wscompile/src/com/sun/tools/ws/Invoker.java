@@ -19,6 +19,7 @@ final class Invoker {
      * List of packages that need to be loaded in {@link APTClassLoader}.
      */
     private static final String[] prefixes = {
+        "com.sun.istack.tools.",
         "com.sun.tools.jxc.",
         "com.sun.tools.xjc.",
         "com.sun.tools.apt.",
