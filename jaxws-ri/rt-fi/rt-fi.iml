@@ -13,10 +13,12 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/jaxws-rt-fi.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/FastInfoset.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../lib/FastInfoset.src.zip!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntryProperties />

@@ -208,7 +208,7 @@ public class EndpointFactory {
         // wsdlURL will be null, means we will generate WSDL. Hence no need to apply
         // bindings or need to look in the WSDL
         if(primaryWsdl == null){
-            RuntimeModeler rap = new RuntimeModeler(implType,serviceName, binding.getBindingId(), false);
+            RuntimeModeler rap = new RuntimeModeler(implType,serviceName, binding.getBindingId());
             if (portName != null) {
                 rap.setPortName(portName);
             }
@@ -248,7 +248,7 @@ public class EndpointFactory {
                         throw new ServerRtException("runtime.parser.wsdl.nobinding", bindingId, serviceName, wsdlUrl);
                 }
                 //now we got the Binding so lets build the model
-                RuntimeModeler rap = new RuntimeModeler(implType, serviceName, wsdlPort, false);
+                RuntimeModeler rap = new RuntimeModeler(implType, serviceName, wsdlPort);
                 if (portName != null) {
                     rap.setPortName(portName);
                 }

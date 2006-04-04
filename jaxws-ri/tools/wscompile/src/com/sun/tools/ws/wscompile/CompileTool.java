@@ -604,7 +604,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                     bindingType.value().length()>0)
                     bindingID = BindingID.parse(bindingType.value());
             }
-            RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, serviceName, bindingID, true);
+            RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, serviceName, bindingID);
             rtModeler.setClassLoader(classLoader);
             if (portName != null)
                 rtModeler.setPortName(portName);

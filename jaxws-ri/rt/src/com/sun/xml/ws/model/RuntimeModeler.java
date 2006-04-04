@@ -19,19 +19,17 @@
  */
 package com.sun.xml.ws.model;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
-import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
-import com.sun.istack.NotNull;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -101,33 +99,16 @@ public class RuntimeModeler {
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
 
     /**
-     * The same {@link SEIModel} is used by both the client (which uses the new architecture)
-     * and the server (which uses the old architecture.)
-     *
-     * <p>
-     * Since those two codebase uses {@link SEIModel} in a slightly different way,
-     * the {@link RuntimeModeler} needs to be aware of such a difference.
-     *
-     * If this flag is true, the modeler is building a model for the old server code.
-     * If false, the model is for the new architecture.
-     *
-     * @deprecated
-     *      shall be removed before this code base finalizes.
-     */
-    private final boolean compatibilityMode;
-
-    /**
      * creates an instance of RunTimeModeler given a <code>portClass</code> and <code>bindingId</code>
      * @param portClass The SEI class to be modeled.
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
      * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
      */
-    public RuntimeModeler(Class portClass, QName serviceName, BindingID bindingId, boolean compatibilityMode) {
+    public RuntimeModeler(Class portClass, QName serviceName, BindingID bindingId) {
         this.portClass = portClass;
         this.serviceName = serviceName;
         this.binding = null;
         this.bindingId = bindingId;
-        this.compatibilityMode = compatibilityMode;
     }
 
     /**
@@ -136,14 +117,12 @@ public class RuntimeModeler {
      * @param sei The SEI class to be modeled.
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
-     * <code>sei</code>.
      */
-    public RuntimeModeler(Class sei, QName serviceName, WSDLPortImpl binding, boolean compatibilityMode){
+    public RuntimeModeler(Class sei, QName serviceName, WSDLPortImpl binding){
         this.portClass = sei;
         this.serviceName = serviceName;
         this.bindingId = binding.getBinding().getBindingId();
         this.binding = binding;
-        this.compatibilityMode = compatibilityMode;
     }
 
     /**
@@ -156,8 +135,8 @@ public class RuntimeModeler {
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
      * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BindingID bindingId,boolean compatibilityMode) {
-        this(portClass, serviceName, bindingId, compatibilityMode);
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BindingID bindingId) {
+        this(portClass, serviceName, bindingId);
         this.implementor = implementor;
     }
 
@@ -169,10 +148,9 @@ public class RuntimeModeler {
      * @param portClass The SEI class to be modeled.
      * @param implementor The object on which service methods are invoked
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
-     * <code>sei</code>.
      */
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLPortImpl binding, boolean compatibilityMode) {
-        this(portClass, serviceName, binding, compatibilityMode);
+    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLPortImpl binding) {
+        this(portClass, serviceName, binding);
         this.implementor = implementor;
     }
 
@@ -754,7 +732,7 @@ public class RuntimeModeler {
             resElementName = new QName(targetNamespace, operationName+RESPONSE);
         }
 
-        Class wrapperType = compatibilityMode ? RpcLitPayload.class : CompositeStructure.class;
+        Class wrapperType = CompositeStructure.class;
         TypeReference typeRef = new TypeReference(reqElementName, wrapperType);
         WrapperParameter requestWrapper = new WrapperParameter(javaMethod, typeRef, Mode.IN, 0);
         requestWrapper.setInBinding(ParameterBinding.BODY);
