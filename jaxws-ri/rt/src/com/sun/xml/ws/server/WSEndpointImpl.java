@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final WSBinding binding;
     private final SEIModel seiModel;
-    private final Container container;
+    private final @NotNull Container container;
     private final WSDLPort port;
     private final InstanceResolver<T> instanceResolver;
 
@@ -78,7 +78,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         instanceResolver.start(this,webServiceContext);
     }
 
-    public Class<T> getImplementationClass() {
+    public @NotNull Class<T> getImplementationClass() {
         return implementationClass;
     }
 

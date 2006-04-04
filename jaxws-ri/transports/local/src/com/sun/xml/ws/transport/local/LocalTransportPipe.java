@@ -20,7 +20,6 @@
 package com.sun.xml.ws.transport.local;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
@@ -28,14 +27,15 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import javax.xml.ws.WebServiceException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
 
 /**
  * Transport {@link Pipe} that routes a message to a service that runs within it.
@@ -66,7 +66,8 @@ final class LocalTransportPipe implements Pipe {
     private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
     public LocalTransportPipe(WSEndpoint endpoint, WSBinding binding) {
-        this(new HttpAdapter(endpoint),binding.createEncoder(),binding.createDecoder());
+        this(HttpAdapter.createAlone(endpoint),
+            binding.createEncoder(),binding.createDecoder());
     }
 
     private LocalTransportPipe(HttpAdapter adapter, Encoder encoder, Decoder decoder) {

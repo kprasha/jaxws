@@ -262,9 +262,15 @@ public abstract class WSEndpoint<T> {
      *      if the endpoint set up fails.
      */
     public static <T> WSEndpoint<T> create(
-        Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
-        Container container, WSBinding binding,
-        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, @Nullable EntityResolver resolver) {
+        @NotNull Class<T> implType,
+        @NotNull InstanceResolver<T> ir,
+        @NotNull QName serviceName,
+        @NotNull QName portName,
+        @Nullable Container container,
+        @NotNull WSBinding binding,
+        @Nullable SDDocumentSource primaryWsdl,
+        @Nullable Collection<? extends SDDocumentSource> metadata,
+        @Nullable EntityResolver resolver) {
         return EndpointFactory.createEndpoint(
             implType,ir,serviceName,portName,container,binding,primaryWsdl,metadata,resolver);
     }

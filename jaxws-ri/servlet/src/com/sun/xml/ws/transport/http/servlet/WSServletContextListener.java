@@ -22,7 +22,7 @@ package com.sun.xml.ws.transport.http.servlet;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.HttpAdapter;
-import com.sun.xml.ws.transport.http.servlet.ServletAdapter.ServletAdapters;
+import com.sun.xml.ws.transport.http.servlet.ServletAdapterList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
@@ -81,7 +81,7 @@ public final class WSServletContextListener
         try {
             // Parse the descriptor file and build endpoint infos
             DeploymentDescriptorParser<ServletAdapter> parser = new DeploymentDescriptorParser<ServletAdapter>(
-                classLoader,new ServletResourceLoader(context),null, new ServletAdapters());
+                classLoader,new ServletResourceLoader(context),null, new ServletAdapterList());
             InputStream is = context.getResourceAsStream(JAXWS_RI_RUNTIME);
             List<ServletAdapter> adapters = parser.parse(is);
 

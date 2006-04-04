@@ -23,11 +23,10 @@ package com.sun.xml.ws.transport.http;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.handler.HandlerChainsModel;
 import com.sun.xml.ws.resources.WsservletMessages;
@@ -38,7 +37,6 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import javax.xml.ws.http.HTTPBinding;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
@@ -49,6 +47,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceProvider;
+import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -157,7 +156,6 @@ public class DeploymentDescriptorParser<A> {
         }
 
         List<A> adapters = new ArrayList<A>();
-        Map<String, String> portAddressMap = new HashMap<String, String>();
 
         Attributes attrs = XMLStreamReaderUtil.getAttributes(reader);
         String version = getMandatoryNonEmptyAttribute(reader, attrs, ATTR_VERSION);
@@ -235,7 +233,6 @@ public class DeploymentDescriptorParser<A> {
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
                     );
-                WSDLPort port = endpoint.getPort();
 
                 adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
             } else {

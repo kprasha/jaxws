@@ -55,11 +55,18 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     public final HttpAdapterList<? extends HttpAdapter> owner;
 
-    public HttpAdapter(WSEndpoint endpoint) {
-        this(endpoint, null);
+    /**
+     * Creates a lone {@link HttpAdapter} that does not know of any other
+     * {@link HttpAdapter}s.
+     *
+     * This is convenient for creating an {@link HttpAdapter} for an environment
+     * where they don't know each other (such as JavaSE deployment.)
+     */
+    public static HttpAdapter createAlone(WSEndpoint endpoint) {
+        return new DummyList().createAdapter("","",endpoint);
     }
 
-    public HttpAdapter(WSEndpoint endpoint, HttpAdapterList<? extends HttpAdapter> owner) {
+    protected HttpAdapter(WSEndpoint endpoint, HttpAdapterList<? extends HttpAdapter> owner) {
         super(endpoint);
         this.owner = owner;
 
@@ -263,5 +270,12 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      */
     private void setContentType(WSConnection con, String contentType) {
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
+    }
+
+    private static final class DummyList extends HttpAdapterList<HttpAdapter> {
+        @Override
+        protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
+            return new HttpAdapter(endpoint, this);
+        }
     }
 }

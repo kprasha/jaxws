@@ -32,6 +32,7 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import com.sun.istack.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
@@ -69,7 +70,7 @@ public class EndpointFactory {
     public static <T> WSEndpoint<T> createEndpoint(
         Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
         Container container, WSBinding binding,
-        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
+        SDDocumentSource primaryWsdl, @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
 
         if(ir==null || implType ==null)
             throw new IllegalArgumentException();
@@ -80,6 +81,9 @@ public class EndpointFactory {
 
         if(primaryWsdl!=null && !md.contains(primaryWsdl))
             md.add(primaryWsdl);
+
+        if(container==null)
+            container = Container.NONE;
 
         if(serviceName==null)
             serviceName = getDefaultServiceName(implType);
@@ -93,8 +97,7 @@ public class EndpointFactory {
 
         // setting a default binding
         if (binding == null)
-            binding = BindingImpl.create(
-                BindingID.parse(implType));
+            binding = BindingImpl.create(BindingID.parse(implType));
 
         Pipe terminal;
         WSDLPort wsdlPort = null;

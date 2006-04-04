@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import org.xml.sax.EntityResolver;
+
 
 /**
  * Implements {@link Endpoint}.
@@ -114,7 +116,7 @@ public class EndpointImpl extends Endpoint {
     public Object getImplementor() {
         return implementor;
     }
-    
+
     public void publish(String address) {
         canPublish();
         URL url;
@@ -209,7 +211,7 @@ public class EndpointImpl extends Endpoint {
             binding,
             null, /* TODO: how do we find a primary WSDL? */
             buildDocList(),
-            null
+            (EntityResolver)null
         );
         // Don't load HttpEndpoint class before as it may load HttpServer classes
         actualEndpoint = new HttpEndpoint(wse, executor);
@@ -250,7 +252,7 @@ public class EndpointImpl extends Endpoint {
 
         return r;
     }
-    
+
     private void canPublish() {
         if (isPublished()) {
             throw new IllegalStateException(

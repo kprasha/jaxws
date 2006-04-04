@@ -11,6 +11,10 @@ import java.net.URL;
 /**
  * SPI that provides the source of {@link SDDocument}.
  *
+ * <p>
+ * This abstract class could be implemented by appliations, or one of the
+ * {@link #create} methods can be used. 
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class SDDocumentSource {

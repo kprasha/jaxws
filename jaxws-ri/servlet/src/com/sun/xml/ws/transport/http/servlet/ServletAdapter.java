@@ -28,7 +28,7 @@ public final class ServletAdapter extends HttpAdapter {
     final String urlPattern;
 
 
-    public ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, HttpAdapterList<ServletAdapter> owner) {
+    protected ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, HttpAdapterList<ServletAdapter> owner) {
         super(endpoint, owner);
         this.name = name;
         this.urlPattern = urlPattern;
@@ -100,11 +100,6 @@ public final class ServletAdapter extends HttpAdapter {
         return addrBuf.toString();
     }
 
-    public static class ServletAdapters extends HttpAdapterList<ServletAdapter> {
-        @Override
-        protected ServletAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
-            return new ServletAdapter(name, urlPattern, endpoint, this);
-        }
-    };
+    ;
 
 }

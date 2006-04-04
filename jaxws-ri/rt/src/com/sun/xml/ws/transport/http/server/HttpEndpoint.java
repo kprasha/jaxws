@@ -45,8 +45,7 @@ final class HttpEndpoint {
 
     public HttpEndpoint(WSEndpoint endpoint, Executor executor) {
         this.executor = executor;
-        HttpAdapterList factory = new EndpointHttpAdapters();
-        this.adapter = factory.createAdapter("", "", endpoint);
+        this.adapter = HttpAdapter.createAlone(endpoint);
     }
 
     public void publish(String address) {
@@ -81,12 +80,4 @@ final class HttpEndpoint {
     private void publish (HttpContext context) {
         context.setHandler(new WSHttpHandler(adapter, executor));
     }
-    
-    static class EndpointHttpAdapters extends HttpAdapterList<HttpAdapter> {
-        @Override
-        protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
-            return new HttpAdapter(endpoint, this);
-        }
-    }; 
-
 }
