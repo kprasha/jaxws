@@ -3,18 +3,15 @@
  */
 package com.sun.xml.ws.handler;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.handler.HandlerProcessor.Direction;
-import com.sun.istack.Nullable;
 
-import java.util.List;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 
 /**
@@ -62,7 +59,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     public Packet process( Packet packet) {
         // This check is done to cover handler returning false in Oneway request
         Boolean handleFalse = (Boolean) packet.otherProperties.get(HandlerProcessor.HANDLE_FALSE_PROPERTY);
-        if((handleFalse == null)? false:handleFalse){
+        if(handleFalse != null && handleFalse){
             // Cousin HandlerPipe returned false during Oneway Request processing.
             // Dont call handlers and dispatch the message.
             remedyActionTaken = true;
