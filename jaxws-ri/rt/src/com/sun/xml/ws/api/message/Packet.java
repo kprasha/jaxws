@@ -85,7 +85,7 @@ import java.util.Set;
  *
  * <h3>Relationship to request/response context</h3>
  * <p>
- * {@link BindingProvider#getResponseContext() Request context} is used to
+ * {@link BindingProvider#getRequestContext() Request context} is used to
  * seed the initial values of {@link Packet}.
  * Some of those values go to strongly-typed fields, and others go to
  * {@link #invocationProperties}, as they need to be retained in the reply message.
