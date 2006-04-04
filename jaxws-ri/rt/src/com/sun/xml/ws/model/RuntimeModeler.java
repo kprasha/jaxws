@@ -31,6 +31,7 @@ import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.pept.presentation.MEP;
+import com.sun.istack.NotNull;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -407,11 +408,12 @@ public class RuntimeModeler {
 
     /**
      * gets the namespace <code>String</code> for a given <code>packageName</code>
-     * @param packageName the name of the package used to find a namespace
+     * @param packageName the name of the package used to find a namespace.
+     *      can be empty.
      * @return the namespace for the specified <code>packageName</code>
      */
-    public static String getNamespace(String packageName) {
-        if (packageName == null || packageName.length() == 0)
+    public static String getNamespace(@NotNull String packageName) {
+        if (packageName.length() == 0)
             return null;
 
         StringTokenizer tokenizer = new StringTokenizer(packageName, ".");
@@ -1158,7 +1160,7 @@ public class RuntimeModeler {
         }
 
         String name = implClass.getSimpleName()+SERVICE;
-        String packageName = null;
+        String packageName = "";
         if (implClass.getPackage() != null)
             packageName = implClass.getPackage().getName();
 
