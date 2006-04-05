@@ -50,8 +50,8 @@ public class MIMEMultipartRelated extends ExtensionImpl {
         _parts.add(part);
     }
 
-    public Iterator<MIMEPart> getParts() {
-        return _parts.iterator();
+    public Iterable<MIMEPart> getParts() {
+        return _parts;
     }
 
     public void withAllSubEntitiesDo(EntityAction action) {

@@ -90,6 +90,7 @@ import com.sun.tools.ws.wsdl.framework.ParserListener;
 import com.sun.tools.ws.wsdl.framework.ValidationException;
 import com.sun.tools.ws.wsdl.parser.SOAPEntityReferenceValidator;
 import com.sun.tools.ws.wsdl.parser.WSDLParser;
+import com.sun.tools.ws.resources.ModelerMessages;
 import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.tools.xjc.api.TypeAndAnnotation;
 import com.sun.tools.xjc.api.XJC;
@@ -123,7 +124,6 @@ public class WSDLModeler extends WSDLModelerBase {
     private ClassNameCollector classNameCollector;
     private boolean extensions = false;
     protected enum StyleAndUse  {RPC_LITERAL, DOC_LITERAL};
-    private ModelerUtils modelerUtils;
     private JAXBModelBuilder jaxbModelBuilder;
 
     /**
@@ -240,8 +240,8 @@ public class WSDLModeler extends WSDLModelerBase {
             ModelProperties.WSDL_MODELER_NAME);
 
         _javaTypes = new JavaSimpleTypeCreator();
-        _javaExceptions = new HashMap();
-        _bindingNameToPortMap = new HashMap();
+        _javaExceptions = new HashMap<String,JavaException>();
+        _bindingNameToPortMap = new HashMap<QName, Port>();
 
         // grab target namespace
         model.setTargetNamespaceURI(document.getDefinitions().getTargetNamespaceURI());
@@ -260,7 +260,7 @@ public class WSDLModeler extends WSDLModelerBase {
             }
         } else {
             // emit a warning if there are no service definitions
-            warn("wsdlmodeler.warning.noServiceDefinitionsFound");
+            warn(ModelerMessages.localizableWSDLMODELER_WARNING_NO_SERVICE_DEFINITIONS_FOUND());
         }
 
         return model;
@@ -785,11 +785,6 @@ public class WSDLModeler extends WSDLModelerBase {
         return info.operation;
     }
 
-    /**
-     *
-     * @param params
-     * @return
-     */
     private boolean validateParameterName(List<Parameter> params) {
         Message msg = getInputMessage();
         for(Parameter param : params){
@@ -879,9 +874,6 @@ public class WSDLModeler extends WSDLModelerBase {
         return true;
     }
 
-    /**
-     * @return
-     */
     private boolean enableMimeContent() {
         //first we look at binding operation
         JAXWSBinding jaxwsCustomization = (JAXWSBinding)getExtensionOfType(info.bindingOperation, JAXWSBinding.class);
@@ -952,13 +944,6 @@ public class WSDLModeler extends WSDLModelerBase {
             info.modelPort.addOperation(operation);
     }
 
-    /**
-     *
-     * @param syncOperation
-     * @param styleAndUse
-     * @param asyncType
-     * @return
-     */
     private Operation createAsyncOperation(Operation syncOperation, StyleAndUse styleAndUse, AsyncOperationType asyncType) {
         boolean isRequestResponse = info.portTypeOperation.getStyle() == OperationStyle.REQUEST_RESPONSE;
         if(!isRequestResponse)
@@ -1156,7 +1141,7 @@ public class WSDLModeler extends WSDLModelerBase {
         return false;
     }
 
-    protected void handleLiteralSOAPHeaders(Request request, Response response, Iterator headerParts, Set duplicateNames, List definitiveParameterList, boolean processRequest) {
+    protected void handleLiteralSOAPHeaders(Request request, Response response, Iterator headerParts, Set duplicateNames, List<String> definitiveParameterList, boolean processRequest) {
         QName headerName = null;
         Block headerBlock = null;
         JAXBType jaxbType = null;
@@ -1922,10 +1907,6 @@ public class WSDLModeler extends WSDLModelerBase {
         }
     }
 
-    /**
-     * @param name
-     * @return
-     */
     private JAXBType getJAXBType(QName name) {
         return jaxbModelBuilder.getJAXBType(name);
     }
@@ -2005,9 +1986,6 @@ public class WSDLModeler extends WSDLModelerBase {
         return false;
     }
 
-    /**
-     * @return
-     */
     private boolean getWrapperStyleCustomization() {
         //first we look into wsdl:portType/wsdl:operation
         com.sun.tools.ws.wsdl.document.Operation portTypeOperation = info.portTypeOperation;
@@ -2128,10 +2106,6 @@ public class WSDLModeler extends WSDLModelerBase {
         return "javax.activation.DataHandler";
     }
 
-    /**
-     * @param mimeContents
-     * @return
-     */
     private JAXBType getAttachmentType(List<MIMEContent> mimeContents, MessagePart part) {
         if(!enableMimeContent()){
             return getJAXBType(part);
@@ -2322,7 +2296,7 @@ public class WSDLModeler extends WSDLModelerBase {
 
         Response response = operation.getResponse();
         Iterator responseBodyBlocks = null;
-        Block responseBlock = null;
+        Block responseBlock;
         if (response != null) {
             responseBodyBlocks = response.getBodyBlocks();
             responseBlock =
@@ -2721,7 +2695,6 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     protected boolean validateWSDLBindingStyle(Binding binding) {
-        boolean mixedStyle = false;
         SOAPBinding soapBinding =
             (SOAPBinding)getExtensionOfType(binding, SOAPBinding.class);
 
