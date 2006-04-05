@@ -286,7 +286,7 @@ public abstract class BindingID {
      * used to generate non-standard WSDLs
      */
     public static final SOAPHTTPImpl X_SOAP12_HTTP = new SOAPHTTPImpl(
-        SOAPVersion.SOAP_12, SOAPBinding.SOAP12HTTP_BINDING, true);
+        SOAPVersion.SOAP_12, SOAPBindingImpl.X_SOAP12HTTP_BINDING, true);
     
     /**
      * Constant that represents SOAP1.2/HTTP.
@@ -299,6 +299,18 @@ public abstract class BindingID {
     public static final SOAPHTTPImpl SOAP11_HTTP = new SOAPHTTPImpl(
         SOAPVersion.SOAP_11, SOAPBinding.SOAP11HTTP_BINDING, true);
 
+    /**
+     * Constant that represents SOAP1.2/HTTP.
+     */
+    public static final SOAPHTTPImpl SOAP12_HTTP_MTOM = new SOAPHTTPImpl(
+        SOAPVersion.SOAP_12, SOAPBinding.SOAP12HTTP_MTOM_BINDING, false, true);
+    /**
+     * Constant that represents SOAP1.1/HTTP.
+     */
+    public static final SOAPHTTPImpl SOAP11_HTTP_MTOM = new SOAPHTTPImpl(
+        SOAPVersion.SOAP_11, SOAPBinding.SOAP11HTTP_MTOM_BINDING, true, true);
+    
+    
     /**
      * Constant that represents REST.
      */
@@ -341,9 +353,17 @@ public abstract class BindingID {
      */
     private static final class SOAPHTTPImpl extends Impl implements Cloneable {
         /*final*/ Map<String,String> parameters = new HashMap<String,String>();
+        static final String MTOM_PARAM = "mtom";
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL) {
             super(version, lexical, canGenerateWSDL);
+        }
+
+        public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL, 
+                           boolean mtomEnabled) {
+            super(version, lexical, canGenerateWSDL);
+            String mtomStr = mtomEnabled ? "true" : "false";
+            parameters.put(MTOM_PARAM, mtomStr);
         }
 
         public @NotNull Encoder createEncoder(WSBinding binding) {
@@ -355,7 +375,13 @@ public abstract class BindingID {
         }
 
         public boolean isMTOMEnabled() {
-            return getParameter("mtom","false").equals("true");
+            return getParameter(MTOM_PARAM,"false").equals("true");
         }
+        
+        public String getParameter(String parameterName, String defaultValue) {
+            if (parameters.get(parameterName) == null)
+                return super.getParameter(parameterName, defaultValue);
+            return parameters.get(parameterName);
+        }        
     }
 }

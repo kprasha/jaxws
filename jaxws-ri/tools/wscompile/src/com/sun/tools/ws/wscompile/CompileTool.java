@@ -55,12 +55,15 @@ import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import org.xml.sax.EntityResolver;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
+import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -382,15 +385,16 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                     value = value.substring(1);
                     index = value.indexOf('/');
                     if (index == -1) {
-                        protocol = value; //.toLowerCase();
+                        protocol = value; 
                         transport = HTTP;
                     } else {
-                        protocol = value.substring(0, index);//.toLowerCase();
+                        protocol = value.substring(0, index);
                         transport = value.substring(index + 1);
                     }
                     if (!isValidProtocol(protocol)) {
                         onError(getMessage("wsgen.invalid.protocol", protocol, VALID_PROTOCOLS));
                     }
+                    protocolSet = true;
                     if (!isValidTransport(transport)) {
                         onError(getMessage("wsgen.invalid.transport", transport, VALID_TRANSPORTS));
                     }
@@ -427,7 +431,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 if (program.equals(WSGEN)) {
                     if (!isValidWSGenClass(fileName))
                         return false;
-                }
+                } 
                 inputFiles.add(fileName);
             }
         }
@@ -449,20 +453,41 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         return true;
     }
 
-    protected boolean isValidWSGenClass(String className) {
+    protected boolean isValidWSGenClass(String className) {        
         Class clazz = getClass(className);
         if (clazz == null) {
             onError(getMessage("wsgen.class.not.found", className));
             return false;
-        }
+        }        
         if (clazz.isEnum() || clazz.isInterface() ||
             clazz.isPrimitive()) {
             onError(getMessage("wsgen.class.must.be.implementation.class", className));
             return false;
         }
+        if (genWsdl) {
+            BindingID binding = BindingID.parse(clazz);
+            if ((binding.equals(BindingID.SOAP12_HTTP) ||
+                 binding.equals(BindingID.SOAP12_HTTP_MTOM)) &&
+                    !(protocol.equals(X_SOAP12) && extensions)) {
+                onError(getMessage("wsgen.cannot.gen.wsdl.for.soap12.binding", 
+                        new Object[] {className, binding.toString()}));                                
+                return false;
+            }
+            if (binding.equals(BindingID.XML_HTTP)) {
+                onError(getMessage("wsgen.cannot.gen.wsdl.for.non.soap.binding", 
+                        new Object[] {className, binding.toString()})); 
+                return false;
+            }
+            if (binding.equals(BindingID.X_SOAP12_HTTP) &&
+                !extensions) {                
+                onError(getMessage("wsgen.cannot.gen.wsdl.for.xsoap12.binding.wo.extention", 
+                        new Object[] {className, binding.toString()}));                                
+                return false;
+            }
+        }
         return true;
     }
-
+    
     protected boolean validateArguments() {
         if (!genWsdl) {
             if (serviceName != null) {
@@ -487,8 +512,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
 
     static public boolean isValidProtocol(String protocol) {
-        System.out.println("protocol: "+protocol);
-        return (protocol.equalsIgnoreCase(SOAP11) ||
+        return (protocol.equalsIgnoreCase(SOAP11) ||   
                 protocol.equalsIgnoreCase(X_SOAP12));
     }
 
@@ -597,12 +621,18 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 // this should never happen
                 environment.error(getMessage("wsgen.class.not.found", endpoint));
             }
+//<<<<<<< CompileTool.java
+//            BindingID bindingID = getBindingID(protocol);
+//            if (bindingID == null) {
+//                BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
+//                if (bindingType != null &&
+//                    bindingType.value().length()>0)
+//                    bindingID = BindingID.parse(bindingType.value());
+//=======
             BindingID bindingID = getBindingID(protocol);
-            if (bindingID == null) {
-                BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
-                if (bindingType != null &&
-                    bindingType.value().length()>0)
-                    bindingID = BindingID.parse(bindingType.value());
+            if (!protocolSet) {
+                bindingID = BindingID.parse(endpointClass);
+//>>>>>>> 1.35
             }
             RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, serviceName, bindingID);
             rtModeler.setClassLoader(classLoader);
@@ -922,6 +952,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     protected Set<String> bindingFiles = new HashSet<String>();
     protected boolean genWsdl = false;
     protected String protocol = SOAP11;
+    protected boolean protocolSet = false;
     protected String transport = HTTP;
     protected static final String SOAP11 = "soap1.1";
     protected static final String X_SOAP12 = "Xsoap1.2";
