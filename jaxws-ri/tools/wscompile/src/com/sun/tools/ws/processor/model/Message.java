@@ -174,7 +174,7 @@ public abstract class Message extends ModelObject {
         if (_parametersByName.size() != _parameters.size()) {
             initializeParametersByName();
         }
-        return (Parameter) _parametersByName.get(name);
+        return _parametersByName.get(name);
     }
 
     public Iterator<Parameter> getParameters() {

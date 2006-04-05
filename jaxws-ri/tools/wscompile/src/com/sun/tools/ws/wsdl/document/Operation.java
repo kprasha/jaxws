@@ -20,22 +20,20 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Collections;
-import java.util.HashMap;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
+import com.sun.codemodel.JClass;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.api.wsdl.TWSDLOperation;
-import com.sun.codemodel.JClass;
+import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.tools.ws.wsdl.framework.EntityAction;
+import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Entity corresponding to the "operation" child element of a "portType" WSDL element.
@@ -45,7 +43,7 @@ import com.sun.codemodel.JClass;
 public class Operation extends Entity implements TWSDLOperation {
 
     public Operation() {
-        _faults = new ArrayList();
+        _faults = new ArrayList<Fault>();
         _helper = new ExtensibilityHelper();
     }
 
@@ -117,8 +115,8 @@ public class Operation extends Entity implements TWSDLOperation {
         _faults.add(f);
     }
 
-    public Iterator faults() {
-        return _faults.iterator();
+    public Iterable<Fault> faults() {
+        return _faults;
     }
 
     public String getParameterOrder() {
@@ -150,8 +148,8 @@ public class Operation extends Entity implements TWSDLOperation {
         if (_output != null) {
             action.perform(_output);
         }
-        for (Iterator iter = _faults.iterator(); iter.hasNext();) {
-            action.perform((Entity) iter.next());
+        for (Fault _fault : _faults) {
+            action.perform(_fault);
         }
         _helper.withAllSubEntitiesDo(action);
     }
@@ -164,8 +162,8 @@ public class Operation extends Entity implements TWSDLOperation {
         if (_output != null) {
             _output.accept(visitor);
         }
-        for (Iterator iter = _faults.iterator(); iter.hasNext();) {
-            ((Fault) iter.next()).accept(visitor);
+        for (Fault _fault : _faults) {
+            _fault.accept(visitor);
         }
         visitor.postVisit(this);
     }
@@ -247,7 +245,7 @@ public class Operation extends Entity implements TWSDLOperation {
     private String _name;
     private Input _input;
     private Output _output;
-    private List _faults;
+    private List<Fault> _faults;
     private OperationStyle _style;
     private String _parameterOrder;
     private String _uniqueKey;

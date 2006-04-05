@@ -1196,12 +1196,9 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     protected void handleLiteralSOAPFault(Response response, Set duplicateNames){
-        for (Iterator iter = info.bindingOperation.faults(); iter.hasNext();){
-            BindingFault bindingFault = (BindingFault)iter.next();
+        for( BindingFault bindingFault : info.bindingOperation.faults() ) {
             com.sun.tools.ws.wsdl.document.Fault portTypeFault = null;
-            for(Iterator iter2 = info.portTypeOperation.faults(); iter2.hasNext();){
-                com.sun.tools.ws.wsdl.document.Fault aFault =
-                    (com.sun.tools.ws.wsdl.document.Fault)iter2.next();
+            for( com.sun.tools.ws.wsdl.document.Fault aFault : info.portTypeOperation.faults() ) { 
                 if(aFault.getName().equals(bindingFault.getName())){
                     if(portTypeFault != null){
                         // the WSDL document is invalid, a wsld:fault in a wsdl:operation of a portType can be bound only once
@@ -1405,8 +1402,7 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     private boolean boundToFault(String partName){
-        for (Iterator iter = info.bindingOperation.faults(); iter.hasNext();){
-            BindingFault bindingFault = (BindingFault)iter.next();
+        for( BindingFault bindingFault : info.bindingOperation.faults() ) {
             if(partName.equals(bindingFault.getName()))
                 return true;
         }

@@ -20,17 +20,15 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entity corresponding to the "operation" child element of a WSDL "binding" element.
@@ -40,7 +38,7 @@ import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 public class BindingOperation extends Entity implements TWSDLExtensible {
 
     public BindingOperation() {
-        _faults = new ArrayList();
+        _faults = new ArrayList<BindingFault>();
         _helper = new ExtensibilityHelper();
     }
 
@@ -112,8 +110,8 @@ public class BindingOperation extends Entity implements TWSDLExtensible {
         _faults.add(f);
     }
 
-    public Iterator faults() {
-        return _faults.iterator();
+    public Iterable<BindingFault> faults() {
+        return _faults;
     }
 
     public QName getElementName() {
@@ -159,8 +157,8 @@ public class BindingOperation extends Entity implements TWSDLExtensible {
         if (_output != null) {
             action.perform(_output);
         }
-        for (Iterator iter = _faults.iterator(); iter.hasNext();) {
-            action.perform((Entity) iter.next());
+        for (BindingFault _fault : _faults) {
+            action.perform(_fault);
         }
         _helper.withAllSubEntitiesDo(action);
     }
@@ -175,8 +173,8 @@ public class BindingOperation extends Entity implements TWSDLExtensible {
         if (_output != null) {
             _output.accept(visitor);
         }
-        for (Iterator iter = _faults.iterator(); iter.hasNext();) {
-            ((BindingFault) iter.next()).accept(visitor);
+        for (BindingFault _fault : _faults) {
+            _fault.accept(visitor);
         }
         visitor.postVisit(this);
     }
@@ -208,7 +206,7 @@ public class BindingOperation extends Entity implements TWSDLExtensible {
     private String _name;
     private BindingInput _input;
     private BindingOutput _output;
-    private List _faults;
+    private List<BindingFault> _faults;
     private OperationStyle _style;
     private String _uniqueKey;
 

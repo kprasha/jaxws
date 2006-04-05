@@ -69,7 +69,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -309,16 +308,14 @@ public abstract class WSDLModelerBase implements Modeler {
                 partsList.add(mPart);
             }
         } else {
-            for(Iterator iter = message.parts();iter.hasNext();) {
-                MessagePart mPart = (MessagePart)iter.next();
-                if(!mimeParts.contains(mPart))
+            for (MessagePart mPart : message.getParts()) {
+                if (!mimeParts.contains(mPart))
                     mPart.setBindingExtensibilityElementKind(MessagePart.SOAP_BODY_BINDING);
                 partsList.add(mPart);
             }
         }
 
-        for(Iterator iter = message.parts();iter.hasNext();) {
-            MessagePart mPart = (MessagePart)iter.next();
+        for (MessagePart mPart : message.getParts()) {
             if(mimeParts.contains(mPart)) {
                 mPart.setBindingExtensibilityElementKind(MessagePart.WSDL_MIME_BINDING);
                 parts.add(mPart);
@@ -366,7 +363,7 @@ public abstract class WSDLModelerBase implements Modeler {
                     mimeContents.add((MIMEContent) obj);
                 }
             }
-            if(!validateMimeContentPartNames(mimeContents.iterator()))
+            if(!validateMimeContentPartNames(mimeContents))
                 return false;
             if(mPart.getName() != null) {
                 //bug fix: 5024018
@@ -406,19 +403,19 @@ public abstract class WSDLModelerBase implements Modeler {
         return mimeTypes;
     }
 
-    private boolean validateMimeContentPartNames(Iterator mimeContents) {
+    private boolean validateMimeContentPartNames(List<MIMEContent> mimeContents) {
         //validate mime:content(s) in the mime:part as per R2909
-        while(mimeContents.hasNext()){
+        for (MIMEContent mimeContent : mimeContents) {
             String mimeContnetPart = null;
             if(mimeContnetPart == null) {
-                mimeContnetPart = getMimeContentPartName((MIMEContent)mimeContents.next());
+                mimeContnetPart = getMimeContentPartName(mimeContent);
                 if(mimeContnetPart == null) {
                     warn("mimemodeler.invalidMimeContent.missingPartAttribute",
                             new Object[] {info.operation.getName().getLocalPart()});
                     return false;
                 }
             }else {
-                String newMimeContnetPart = getMimeContentPartName((MIMEContent)mimeContents.next());
+                String newMimeContnetPart = getMimeContentPartName(mimeContent);
                 if(newMimeContnetPart == null) {
                     warn("mimemodeler.invalidMimeContent.missingPartAttribute",
                             new Object[] {info.operation.getName().getLocalPart()});
@@ -577,15 +574,9 @@ public abstract class WSDLModelerBase implements Modeler {
         // look for fault messages with the same soap:fault name
         Set<QName> faultNames = new HashSet<QName>();
         Set<QName> duplicateNames = new HashSet<QName>();
-        for (Iterator iter = info.bindingOperation.faults(); iter.hasNext();) {
-            BindingFault bindingFault = (BindingFault)iter.next();
+        for( BindingFault bindingFault : info.bindingOperation.faults() ) {
             com.sun.tools.ws.wsdl.document.Fault portTypeFault = null;
-            for (Iterator iter2 = info.portTypeOperation.faults();
-                 iter2.hasNext();
-                ) {
-                com.sun.tools.ws.wsdl.document.Fault aFault =
-                    (com.sun.tools.ws.wsdl.document.Fault)iter2.next();
-
+            for (com.sun.tools.ws.wsdl.document.Fault aFault : info.portTypeOperation.faults()) {
                 if (aFault.getName().equals(bindingFault.getName())) {
                     if (portTypeFault != null) {
                         // the WSDL document is invalid
@@ -618,8 +609,7 @@ public abstract class WSDLModelerBase implements Modeler {
 
             com.sun.tools.ws.wsdl.document.Message faultMessage =
                 portTypeFault.resolveMessage(info.document);
-            Iterator iter2 = faultMessage.parts();
-            if (!iter2.hasNext()) {
+            if(faultMessage.getParts().isEmpty()) {
                 // the WSDL document is invalid
                 throw new ModelerException(
                     "wsdlmodeler.invalid.bindingFault.emptyMessage",
@@ -802,16 +792,10 @@ public abstract class WSDLModelerBase implements Modeler {
         Operation operation,
         String baseName) {
         Set<String> names = new HashSet<String>();
-        for (Iterator iter = operation.getRequest().getParameters();
-             iter.hasNext();
-            ) {
-            Parameter p = (Parameter)iter.next();
+        for( Parameter p : operation.getRequest().getParametersList() ) {
             names.add(p.getName());
         }
-        for (Iterator iter = operation.getResponse().getParameters();
-             iter.hasNext();
-            ) {
-            Parameter p = (Parameter)iter.next();
+        for( Parameter p : operation.getResponse().getParametersList() ) {
             names.add(p.getName());
         }
         String candidateName = baseName;
