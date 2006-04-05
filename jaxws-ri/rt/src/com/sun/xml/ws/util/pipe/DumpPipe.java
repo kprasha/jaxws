@@ -9,6 +9,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 
 /**
  * {@link Pipe} that dumps messages that pass through.
@@ -60,12 +61,35 @@ public class DumpPipe extends AbstractFilterPipeImpl {
                         // noop
                     }
                 });
+                writer = createIndenter(writer);
                 packet.getMessage().copy().writeTo(writer);
                 writer.close();
             } catch (XMLStreamException e) {
                 e.printStackTrace(out);
             }
         out.println("============");
+    }
+
+    /**
+     * Wraps {@link XMLStreamWriter} by an indentation engine if possible.
+     *
+     * <p>
+     * We can do this only when we have <tt>stax-utils.jar</tt> in the classpath.
+     */
+    private XMLStreamWriter createIndenter(XMLStreamWriter writer) {
+        try {
+            Class clazz = getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
+            Constructor c = clazz.getConstructor(XMLStreamWriter.class);
+            writer = (XMLStreamWriter)c.newInstance(writer);
+        } catch (Exception e) {
+            // if stax-utils.jar is not in the classpath, this will fail
+            // so, we'll just have to do without indentation
+            if(!warnStaxUtils) {
+                warnStaxUtils = true;
+                out.println("WARNING: put stax-utils.jar to the classpath to indent the dump output");
+            }
+        }
+        return writer;
     }
 
 
@@ -76,4 +100,6 @@ public class DumpPipe extends AbstractFilterPipeImpl {
     public void preDestroy() {
         // noop
     }
+
+    private static boolean warnStaxUtils;
 }
