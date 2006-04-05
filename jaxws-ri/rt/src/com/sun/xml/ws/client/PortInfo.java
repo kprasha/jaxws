@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
 
@@ -43,11 +44,20 @@ class PortInfo {
     public final @NotNull EndpointAddress targetEndpoint;
     public final @NotNull BindingID bindingId;
 
-    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId) {
+    /**
+     * If a port is known statically to a WSDL, {@link PortInfo} may
+     * have the corresponding WSDL model. This would occur when the
+     * service was created with the WSDL location and the port is defined
+     * in the WSDL.
+     */
+    public final WSDLPort portModel;
+
+    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, WSDLPort port) {
         this.owner = owner;
         this.targetEndpoint = targetEndpoint;
         this.portName = name;
         this.bindingId = bindingId;
+        this.portModel = port;
     }
 
     public BindingImpl createBinding() {
@@ -65,6 +75,6 @@ class PortInfo {
      *      can be null.
      */
     public @Nullable WSDLPort getWSDLModel() {
-        return null;
+        return portModel;
     }
 }

@@ -185,7 +185,7 @@ public class WSServiceDelegate extends WSService {
         // fill in statically known ports
         for (WSDLPortImpl port : wsdlContext.getPorts(serviceName) ) {
             ports.put(port.getName(),
-                new PortInfo(this, port.getAddress(), port.getName(), port.getBinding().getBindingId()));
+                new PortInfo(this, port.getAddress(), port.getName(), port.getBinding().getBindingId(), port));
         }
     }
 
@@ -227,7 +227,7 @@ public class WSServiceDelegate extends WSService {
         if (!ports.containsKey(portName)) {
             ports.put(portName,
                 new PortInfo(this, EndpointAddress.create(endpointAddress), portName,
-                    BindingID.parse(bindingId)));
+                    BindingID.parse(bindingId), null));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }

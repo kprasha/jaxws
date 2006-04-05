@@ -46,18 +46,13 @@ final class SEIPortInfo extends PortInfo {
      * As a port known statically to WSDL, {@link SEIPortInfo} always
      * has the corresponding WSDL model.
      */
-    public final WSDLPort portModel;
+    //public final WSDLPort portModel;
 
     public SEIPortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, Class sei, SOAPSEIModel model, WSDLPort portModel) {
-        super(owner, targetEndpoint, name, bindingId);
+        super(owner, targetEndpoint, name, bindingId, portModel);
         this.sei = sei;
         this.model = model;
-        this.portModel = portModel;
         assert sei!=null && model!=null && portModel!=null;
     }
 
-    @Override
-    public WSDLPort getWSDLModel() {
-        return portModel;
-    }
 }
