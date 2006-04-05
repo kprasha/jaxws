@@ -372,16 +372,6 @@ public final class Packet extends PropertySet {
      */
     @Deprecated
     public Boolean isOneWay;
-
-    /**
-     * The value of {@link ContentNegotiation#PROPERTY} 
-     * property.
-     * <p>
-     * This property is only used for outbound messages.
-     */
-    @Property(ContentNegotiation.PROPERTY)
-    public ContentNegotiation contentNegotiation = ContentNegotiation.none;
-    
     
     /**
      * Bag to capture "other" properties that do not have

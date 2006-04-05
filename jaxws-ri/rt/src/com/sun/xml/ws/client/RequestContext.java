@@ -94,6 +94,16 @@ import java.util.Map.Entry;
 @SuppressWarnings({"SuspiciousMethodCalls"})
 public final class RequestContext extends PropertySet {
     /**
+     * The default value to be use for {@link #contentNegotiation} obtained
+     * from a system property.
+     * <p>
+     * This enables content negotiation to be easily switched on by setting
+     * a system property on the command line for testing purposes tests.
+     */
+    private static ContentNegotiation defaultContentNegotiation =
+            ContentNegotiation.obtainFromSystemProperty();
+    
+    /**
      * Stores properties that don't fit the strongly-typed fields.
      */
     private final Map<String,Object> others;
@@ -132,7 +142,7 @@ public final class RequestContext extends PropertySet {
      * The value of {@link ContentNegotiation#PROPERTY} 
      * property.
      */
-    public ContentNegotiation contentNegotiation = ContentNegotiation.none;
+    public ContentNegotiation contentNegotiation = defaultContentNegotiation;
     
     @Property(ContentNegotiation.PROPERTY)
     public String getContentNegotiationString() {
@@ -143,8 +153,12 @@ public final class RequestContext extends PropertySet {
         if(s==null)
             contentNegotiation = ContentNegotiation.none;
         else {
-            // TODO should IllegalArgumentException be caught here?
-            contentNegotiation = ContentNegotiation.valueOf(s);
+            try {
+                contentNegotiation = ContentNegotiation.valueOf(s);
+            } catch (IllegalArgumentException e) {
+                // If the value is not recognized default to none
+                contentNegotiation = ContentNegotiation.none;
+            }
         }
     }
     

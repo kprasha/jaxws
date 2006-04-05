@@ -45,23 +45,27 @@ public enum ContentNegotiation {
     optimistic;
   
     /**
-     * Property name for content negotiation on a {@link RequestContext} and 
-     * a {@link Packet}.
+     * Property name for content negotiation on {@link RequestContext}.
      */
     public static final String PROPERTY = "com.sun.xml.ws.client.ContentNegotiation";
     
     /**
-     * Obtain the content negiation value from a system property.
+     * Obtain the content negotiation value from a system property.
+     * <p>
+     * This method will never throw a runtime exception.
+     *
      * @return the content negotiation value.
      */
     public static ContentNegotiation obtainFromSystemProperty() {
-        String value = System.getProperty(PROPERTY);
         try {
+            String value = System.getProperty(PROPERTY);
+            
             if (value == null) return none;
             
             return valueOf(value);
-        } catch (IllegalArgumentException e) {
-            // Default to none for any unrecognized value
+        } catch (Exception e) {
+            // Default to none for any unrecognized value or any other
+            // runtime exception thrown
             return none;
         }
     }
