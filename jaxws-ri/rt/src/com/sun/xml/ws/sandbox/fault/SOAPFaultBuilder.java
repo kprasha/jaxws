@@ -229,9 +229,8 @@ public abstract class SOAPFaultBuilder {
         return "get" + StringUtils.capitalize(f.getName());
     }
 
-    private static Message createSOAP11Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultcode) {
+    private static Message createSOAP11Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
         SOAPFaultException soapFaultException = null;
-        QName faultCode = null;
         String faultString = null;
         String faultActor = null;
         Throwable cause = e.getCause();
@@ -243,7 +242,7 @@ public abstract class SOAPFaultBuilder {
         if (soapFaultException != null) {
             QName soapFaultCode = soapFaultException.getFault().getFaultCodeAsQName();
             if(soapFaultCode != null)
-                faultcode = soapFaultCode;
+                faultCode = soapFaultCode;
 
             faultString = soapFaultException.getFault().getFaultString();
             faultActor = soapFaultException.getFault().getFaultActor();
@@ -276,10 +275,9 @@ public abstract class SOAPFaultBuilder {
         return new JAXBMessage(JAXB_MARSHALLER, new SOAP11Fault(faultCode, faultString, null, detailNode), soapVersion);
     }
 
-    private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultcode) {
+    private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
         SOAPFaultException soapFaultException = null;
         CodeType code = null;
-        QName faultCode = null;
         String faultString = null;
         String faultActor = null;
         Throwable cause = e.getCause();
@@ -293,7 +291,7 @@ public abstract class SOAPFaultBuilder {
             QName soapFaultCode = fault.getFaultCodeAsQName();
             if(soapFaultCode != null){
                 if(soapFaultCode != null)
-                    faultcode = soapFaultCode;
+                    faultCode = soapFaultCode;
                 code = new CodeType(faultCode);
                 Iterator iter = fault.getFaultSubcodes();
                 boolean first = true;
