@@ -26,7 +26,7 @@ package com.sun.xml.ws.pept.ept;
 import com.sun.xml.ws.pept.encoding.Decoder;
 import com.sun.xml.ws.pept.encoding.Encoder;
 import com.sun.xml.ws.pept.presentation.MessageStruct;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 /**
  * <p>
@@ -74,7 +74,7 @@ public interface MessageInfo extends MessageStruct {
  * @return a Connection with ...
  * </p>
  */
-    public WSConnection getConnection();
+    public WSHTTPConnection getConnection();
 /**
  * <p>
  * Does ...
@@ -118,7 +118,7 @@ public interface MessageInfo extends MessageStruct {
  * @param connection ...
  * </p>
  */
-    public void setConnection(WSConnection connection);
+    public void setConnection(WSHTTPConnection connection);
 
 } // end MessageInfo
 

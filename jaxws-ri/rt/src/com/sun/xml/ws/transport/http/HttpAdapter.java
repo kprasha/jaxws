@@ -11,7 +11,7 @@ import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.istack.NotNull;
@@ -103,10 +103,10 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
 
     final class HttpToolkit extends Adapter.Toolkit implements TransportBackChannel {
-        private WSConnection con;
+        private WSHTTPConnection con;
         private boolean closed;
 
-        public void handle(WSConnection con) throws IOException {
+        public void handle(WSHTTPConnection con) throws IOException {
             this.con = con;
             this.closed = false;
             String ct = con.getRequestHeader("Content-Type");
@@ -137,7 +137,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             } else {
                 Message responseMessage = packet.getMessage();
                 if (responseMessage==null) {
-                    con.setStatus(WSConnection.ONEWAY);
+                    con.setStatus(WSHTTPConnection.ONEWAY);
                     con.getOutput();        // Sets Status Code on the connection
                 } else {
                     // TODO add HTTP_RESPONSE_CODE as a property on Packet ??
@@ -165,7 +165,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         public void close() {
             closed = true;
             // close the response channel now
-            con.setStatus(WSConnection.ONEWAY);
+            con.setStatus(WSHTTPConnection.ONEWAY);
             con.getOutput();        // Sets Status Code on the connection
             con.closeOutput();
         }
@@ -189,7 +189,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * To populate a request {@link Packet} with more info,
      * use {@link WSConnection#wrapUpRequestPacket(Packet)}.
      */
-    public void handle(@NotNull WSConnection connection) throws IOException {
+    public void handle(@NotNull WSHTTPConnection connection) throws IOException {
         HttpToolkit tk = pool.take();
         try {
             tk.handle(connection);
@@ -224,7 +224,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      *      The query string given by the client (which indicates
      *      what document to serve.) Can be null (but it causes an 404 not found.)
      */
-    public void publishWSDL(WSConnection con, final String baseAddress, String queryString) throws IOException {
+    public void publishWSDL(WSHTTPConnection con, final String baseAddress, String queryString) throws IOException {
 
         SDDocument doc = wsdls.get(queryString);
         if (doc == null) {
@@ -250,7 +250,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         doc.writeTo(portAddressResolver, resolver, os);
     }
 
-    private void writeNotFoundErrorPage(WSConnection con, String message) throws IOException {
+    private void writeNotFoundErrorPage(WSHTTPConnection con, String message) throws IOException {
         con.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
         setContentType(con, "text/html; charset=UTF-8");
 
@@ -265,7 +265,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         out.println("</html>");
     }
 
-    private void writeInternalServerError(WSConnection con) {
+    private void writeInternalServerError(WSHTTPConnection con) {
         con.setStatus(HttpURLConnection.HTTP_INTERNAL_ERROR);
         con.getOutput();        // Sets the status code
     }
@@ -273,7 +273,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     /**
      * Sets the Content-Type as the only header.
      */
-    private void setContentType(WSConnection con, String contentType) {
+    private void setContentType(WSHTTPConnection con, String contentType) {
         con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
     }
 

@@ -17,8 +17,9 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.api.server;
+package com.sun.xml.ws.transport.http;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet.Property;
 
@@ -36,7 +37,7 @@ import java.util.Map;
  * Different HTTP server layer uses different implementations of this class
  * so that JAX-WS can be shielded from individuality of such layers.
  */
-public interface WSConnection {
+public interface WSHTTPConnection {
     
     public static final int OK=200;
     public static final int ONEWAY=202;

@@ -21,7 +21,7 @@
 package com.sun.xml.ws.transport;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.client.ClientTransportException;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ import java.util.Map;
  *
  * @author WS Development Team
  */
-public abstract class WSConnectionImpl implements WSConnection {
+public abstract class WSConnectionImpl implements WSHTTPConnection {
     private Map<String, List<String>> reqHeaders = null;
     private Map<String, List<String>> rspHeaders = null;
     public OutputStream outputStream = null;

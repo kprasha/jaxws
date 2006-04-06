@@ -26,7 +26,7 @@ import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 
@@ -106,7 +106,7 @@ final class LocalTransportPipe implements Pipe {
 
             String ct = getContentType(con);
 
-            if (con.getStatus() == WSConnection.ONEWAY) {
+            if (con.getStatus() == WSHTTPConnection.ONEWAY) {
                 return request.createResponse(null);    // one way. no response given.
             }
 

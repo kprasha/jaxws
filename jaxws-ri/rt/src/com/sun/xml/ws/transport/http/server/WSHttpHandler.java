@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
 import com.sun.xml.ws.resources.HttpserverMessages;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import java.io.IOException;
@@ -77,7 +77,7 @@ final class WSHttpHandler implements HttpHandler {
     }
 
     public void handleExchange(HttpExchange msg) {
-        WSConnection con = new ServerConnectionImpl(msg);
+        WSHTTPConnection con = new ServerConnectionImpl(msg);
         try {
             logger.fine("Received HTTP request:"+msg.getRequestURI());
             String method = msg.getRequestMethod();

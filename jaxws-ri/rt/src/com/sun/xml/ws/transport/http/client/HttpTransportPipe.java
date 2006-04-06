@@ -26,7 +26,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -104,7 +104,7 @@ public class HttpTransportPipe implements Pipe {
 
             Map<String, List<String>> respHeaders = con.getHeaders();
 
-            if (con.statusCode== WSConnection.ONEWAY) {
+            if (con.statusCode== WSHTTPConnection.ONEWAY) {
                 return request.createResponse(null);    // one way. no response given.
             }
             String contentType = getContentType(respHeaders);

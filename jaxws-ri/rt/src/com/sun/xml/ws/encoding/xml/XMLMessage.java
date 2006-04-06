@@ -29,7 +29,7 @@ import com.sun.xml.messaging.saaj.util.ByteInputStream;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
 import com.sun.xml.ws.protocol.xml.XMLMessageException;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.FastInfosetReflection;
@@ -324,7 +324,7 @@ public final class XMLMessage {
         abstract Source getSource();
         abstract DataSource getDataSource();
         int getStatus() {
-            return WSConnection.OK;
+            return WSHTTPConnection.OK;
         }
     }
     
@@ -859,7 +859,7 @@ public final class XMLMessage {
             if (err instanceof HTTPException) {
                 return ((HTTPException)err).getStatusCode();
             }
-            return WSConnection.INTERNAL_ERR;
+            return WSHTTPConnection.INTERNAL_ERR;
         }
     }
 }

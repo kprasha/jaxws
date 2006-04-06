@@ -1,7 +1,7 @@
 package com.sun.xml.ws.transport.http.servlet;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.WSConnection;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.HttpAdapterList;
@@ -71,7 +71,7 @@ public final class ServletAdapter extends HttpAdapter {
      * that takes convenient parameters for servlet.
      */
     public void handle(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        WSConnection connection = new ServletConnectionImpl(context,request,response);
+        WSHTTPConnection connection = new ServletConnectionImpl(context,request,response);
         super.handle(connection);
     }
 
@@ -80,7 +80,7 @@ public final class ServletAdapter extends HttpAdapter {
      * that takes convenient parameters for servlet.
      */
     public void publishWSDL(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        WSConnection con = new ServletConnectionImpl(context,request,response);
+        WSHTTPConnection con = new ServletConnectionImpl(context,request,response);
         super.publishWSDL(con,getBaseAddress(request),request.getQueryString());
     }
 
