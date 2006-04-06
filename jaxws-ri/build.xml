@@ -414,6 +414,9 @@ major-version=${release.impl.version}
     <zip file="${build.home}/jaxws-tools.src.zip">
       <fileset dir="${basedir}/tools/wscompile/src" />
     </zip>
+    <zip file="${build.home}/jaxws-libs.src.zip">
+      <fileset dir="${basedir}/lib" includes="*src.zip" />
+    </zip>
   </target>
 
     <target name="integrate-jaxb-hudson" depends="prepare"
