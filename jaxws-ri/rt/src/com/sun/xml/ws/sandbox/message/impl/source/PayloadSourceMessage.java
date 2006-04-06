@@ -1,89 +1,38 @@
 package com.sun.xml.ws.sandbox.message.impl.source;
 
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.bind.marshaller.SAX2DOMEx;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
-import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.stream.StreamMessage;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import com.sun.xml.ws.util.ASCIIUtility;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.LocatorImpl;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.WebServiceException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 /**
- * Payloadsource message that can be constructed for the StreamSource, SAXSource and DOMSource.
+ * {@link Message} backed by {@link Source}
  *
  * @author Vivek Pandey
- *
  */
 public class PayloadSourceMessage extends AbstractMessageImpl {
-    private Source src;
-    private String localName;
-    private String namespaceUri;
-    private HeaderList headers;
-    private SourceUtils sourceUtils;
+    private final StreamMessage message;
+    private final Source payload;
 
-    private Message streamMessage;
-    private byte[] payloadbytes;
-
-    /**
-     * Gets the {@link Message} based on {@link Source} representing payload.
-     *
-     * @param headers may be null
-     * @param src must be non-null
-     * @param soapVersion  must be non-null, posible values are {@link SOAPVersion#SOAP_11} or {@link SOAPVersion#SOAP_12}
-     */
-    public PayloadSourceMessage(HeaderList headers, Source src, SOAPVersion soapVersion) {
+    public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
-        this.headers = headers;
-        this.src = src;
-        sourceUtils = new SourceUtils(src);
-        if(src instanceof StreamSource){
-            StreamSource streamSource = (StreamSource)src;
-            try {
-                payloadbytes = ASCIIUtility.getBytes(streamSource.getInputStream());
-            } catch (IOException e) {
-                throw new WebServiceException(e);
-            }
-            streamSource.setInputStream(new ByteArrayInputStream(payloadbytes));
-            XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
-            //move the cursor to the payload element
-            XMLStreamReaderUtil.next(reader);
-            streamMessage = new StreamMessage(headers, reader, soapVersion);
-        }
+        this.payload = payload;
+        XMLStreamReader reader = SourceReaderFactory.createSourceReader(payload, true);
+        XMLStreamReaderUtil.next(reader);
+        message = new StreamMessage(headers, reader, soapVersion);
     }
 
     public PayloadSourceMessage(Source s, SOAPVersion soapVer) {
@@ -91,175 +40,46 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     }
 
     public boolean hasHeaders() {
-        if(headers == null)
-            return false;
-        return headers.size() > 0;
+        return message.hasHeaders();
     }
 
     public HeaderList getHeaders() {
-        if(headers == null)
-            headers = new HeaderList();
-        return headers;
+        return message.getHeaders();
     }
 
     public String getPayloadLocalPart() {
-        if(localName != null)
-            return localName;
-
-        if(sourceUtils.isStreamSource()){
-            localName = streamMessage.getPayloadLocalPart();
-        }else{
-            QName name = sourceUtils.sniff(src);
-            localName = name.getLocalPart();
-            namespaceUri = name.getNamespaceURI();
-        }
-        return localName;
+        return message.getPayloadLocalPart();
     }
 
     public String getPayloadNamespaceURI() {
-        if(namespaceUri != null)
-            return namespaceUri;
-
-        if(sourceUtils.isStreamSource()){
-            namespaceUri = streamMessage.getPayloadNamespaceURI();
-        }else{
-            QName name = sourceUtils.sniff(src);
-            localName = name.getLocalPart();
-            namespaceUri = name.getNamespaceURI();
-        }
-        return namespaceUri;
+        return message.getPayloadNamespaceURI();
     }
 
     public boolean hasPayload() {
         return true;
     }
 
-
     public Source readPayloadAsSource() {
-        if(sourceUtils.isStreamSource()){
-            ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
-            StreamSource newSource = new StreamSource(bis, src.getSystemId());
-            return newSource;
-        }
-        return src;
-    }
-
-    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException{
-        SAXResult sr = new SAXResult(contentHandler);
-        try {
-            Transformer transformer = XmlUtil.newTransformer();
-            transformer.transform(src, sr);
-        } catch (TransformerConfigurationException e) {
-            errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
-        } catch (TransformerException e) {
-            errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
-        }
-    }
-
-    public Object readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
-        if(sourceUtils.isStreamSource())
-            return streamMessage.readPayloadAsJAXB(unmarshaller);
-        return unmarshaller.unmarshal(src);
-    }
-
-    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        if(sourceUtils.isStreamSource())
-            return streamMessage.readPayloadAsJAXB(bridge,context);
-        return bridge.unmarshal(context,src);
+        return payload;
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {
-        if(sourceUtils.isStreamSource()){
-            return streamMessage.readPayload();
-        }
-        XMLStreamReader reader =  SourceReaderFactory.createSourceReader(src, true);
-        //position the reader at start tag then return
-        XMLStreamReaderUtil.next(reader);
-        return reader;
+        return message.readPayload();
     }
 
-    public void writePayloadTo(XMLStreamWriter w) throws XMLStreamException {
-        if(sourceUtils.isStreamSource()){
-            streamMessage.writePayloadTo(w);
-            return;
-        }
-        SourceUtils.serializeSource(src, w);
+    public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
+        message.writePayloadTo(sw);
     }
 
-    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        if(sourceUtils.isStreamSource()){
-            streamMessage.writeTo(w);
-            w.flush();
-            w.close();
-            return;
-        }
-        String soapNsUri = soapVersion.nsUri;
-        w.writeStartDocument();
-       // w.writeNamespace("S",soapNsUri);
-        w.writeStartElement("S","Envelope",soapNsUri);
-        w.writeNamespace("S",soapNsUri);
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        message.writeTo(contentHandler, errorHandler);
+    }
 
-        //write soapenv:Header
-        w.writeStartElement("S","Header",soapNsUri);
-        if(hasHeaders()) {
-            int len = headers.size();
-            for( int i=0; i<len; i++ ) {
-                headers.get(i).writeTo(w);
-            }
-        }
-        w.writeEndElement();
-
-        // write the body
-        w.writeStartElement("S","Body",soapNsUri);
-        SourceUtils.serializeSource(src, w);
-        w.writeEndElement();
-
-        w.writeEndElement();
-        w.writeEndDocument();
-        w.flush();
+    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        message.writePayloadTo(contentHandler, errorHandler);
     }
 
     public Message copy() {
-        Message msg = null;
-        if(sourceUtils.isStreamSource()){
-            StreamSource ss = (StreamSource)src;
-            ByteArrayInputStream bis = new ByteArrayInputStream(payloadbytes);
-            StreamSource newSource = new StreamSource(bis, src.getSystemId());
-            newSource.setReader(ss.getReader());
-            return new PayloadSourceMessage(HeaderList.copy(headers), newSource, soapVersion);
-        }else if(sourceUtils.isSaxSource()){
-            SAXSource saxSrc = (SAXSource)src;
-            try {
-                MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-                XMLReader reader = saxSrc.getXMLReader();
-                if(reader == null)
-                    reader = new SAXBufferProcessor();
-                saxSrc.setXMLReader(reader);
-                reader.setContentHandler(new SAXBufferCreator(xsb));
-                reader.parse(saxSrc.getInputSource());
-                src = new XMLStreamBufferSource(xsb);
-                return new PayloadSourceMessage(HeaderList.copy(headers),
-                        new XMLStreamBufferSource(xsb), soapVersion);
-            } catch (IOException e) {
-                throw new WebServiceException(e);
-            } catch (SAXException e) {
-                throw new WebServiceException(e);
-            }
-        }else if(sourceUtils.isDOMSource()){
-            DOMSource ds = (DOMSource)src;
-            try {
-                SAX2DOMEx s2d = new SAX2DOMEx();
-                writePayloadTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
-                Source newDomSrc = new DOMSource(s2d.getDOM(), ds.getSystemId());
-                msg = new PayloadSourceMessage(HeaderList.copy(headers), newDomSrc, soapVersion);
-            } catch (ParserConfigurationException e) {
-                throw new WebServiceException(e);
-            } catch (SAXException e) {
-                throw new WebServiceException(e);
-            }
-        }
-        return msg;
+        return message.copy();
     }
-
-    private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }
