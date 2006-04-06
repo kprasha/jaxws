@@ -19,13 +19,10 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.SOAPSEIModel;
-
-import javax.xml.namespace.QName;
+import com.sun.istack.NotNull;
 
 
 /**
@@ -42,17 +39,12 @@ final class SEIPortInfo extends PortInfo {
      * Model of {@link #sei}.
      */
     public final SOAPSEIModel model;
-    /**
-     * As a port known statically to WSDL, {@link SEIPortInfo} always
-     * has the corresponding WSDL model.
-     */
-    //public final WSDLPort portModel;
 
-    public SEIPortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, Class sei, SOAPSEIModel model, WSDLPort portModel) {
-        super(owner, targetEndpoint, name, bindingId, portModel);
+    public SEIPortInfo(WSServiceDelegate owner, Class sei, SOAPSEIModel model, @NotNull WSDLPort portModel) {
+        super(owner,portModel);
         this.sei = sei;
         this.model = model;
-        assert sei!=null && model!=null && portModel!=null;
+        assert sei!=null && model!=null;
     }
 
 }

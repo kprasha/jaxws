@@ -24,6 +24,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
@@ -49,32 +50,28 @@ class PortInfo {
      * have the corresponding WSDL model. This would occur when the
      * service was created with the WSDL location and the port is defined
      * in the WSDL.
+     *
+     * If this is a {@link SEIPortInfo}, then this is always non-null.
      */
-    public final WSDLPort portModel;
+    public final @Nullable WSDLPort portModel;
 
-    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, WSDLPort port) {
+    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId) {
         this.owner = owner;
         this.targetEndpoint = targetEndpoint;
         this.portName = name;
         this.bindingId = bindingId;
+        this.portModel = null;
+    }
+
+    public PortInfo(@NotNull WSServiceDelegate owner, @NotNull WSDLPort port) {
+        this.owner = owner;
+        this.targetEndpoint = port.getAddress();
+        this.portName = port.getName();
+        this.bindingId = port.getBinding().getBindingId();
         this.portModel = port;
     }
 
     public BindingImpl createBinding() {
         return owner.createBinding(portName,bindingId);
-    }
-
-    /**
-     * Gets the {@link WSDLPort} model for this port, if any
-     *
-     * <p>
-     * A port may be dynamically added by an user without having the corresponding WSDL
-     * definition, in which case this method returns null.
-     *
-     * @return
-     *      can be null.
-     */
-    public @Nullable WSDLPort getWSDLModel() {
-        return portModel;
     }
 }

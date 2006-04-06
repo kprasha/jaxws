@@ -4,6 +4,7 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.Closeable;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
@@ -24,6 +25,7 @@ import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.WSDLContext;
+import com.sun.istack.NotNull;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
@@ -184,8 +186,7 @@ public class WSServiceDelegate extends WSService {
 
         // fill in statically known ports
         for (WSDLPortImpl port : wsdlContext.getPorts(serviceName) ) {
-            ports.put(port.getName(),
-                new PortInfo(this, port.getAddress(), port.getName(), port.getBinding().getBindingId(), port));
+            ports.put(port.getName(), new PortInfo(this,port));
         }
     }
 
@@ -226,17 +227,32 @@ public class WSServiceDelegate extends WSService {
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
             ports.put(portName,
-                new PortInfo(this, EndpointAddress.create(endpointAddress), portName,
-                    BindingID.parse(bindingId), null));
+                new PortInfo(this, EndpointAddress.create(endpointAddress), portName, BindingID.parse(bindingId)));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
 
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
-        PortInfo port = ports.get(portName);
+        PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding();
         return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port,binding));
+    }
+
+    /**
+     * Obtains {@link PortInfo} for the given name, with error check.
+     */
+    private @NotNull PortInfo safeGetPort(QName portName) {
+        PortInfo port = ports.get(portName);
+        if(port==null) {
+            StringBuilder sb = new StringBuilder();
+            for (QName qn : ports.keySet()) {
+                if(sb.length()>0)   sb.append(',');
+                sb.append(qn);
+            }
+            throw new WebServiceException(ClientMessages.INVALID_PORT_NAME(portName,sb));
+        }
+        return port;
     }
 
     /**
@@ -251,7 +267,7 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
         return assembler.createClient(
             portInfo.targetEndpoint,
-            portInfo.getWSDLModel(),
+            portInfo.portModel,
             this,binding);
     }
 
@@ -261,7 +277,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        PortInfo port = ports.get(portName);
+        PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding();
         return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,
             createPipeline(port,binding));
@@ -379,8 +395,7 @@ public class WSServiceDelegate extends WSService {
         modeler.setPortName(portName);
         AbstractSEIModelImpl model = modeler.buildRuntimeModel();
 
-        spi = new SEIPortInfo(this,wsdlPort.getAddress(),portName,
-            wsdlPort.getBinding().getBindingId(),portInterface, (SOAPSEIModel)model,wsdlPort);
+        spi = new SEIPortInfo(this,portInterface,(SOAPSEIModel)model,wsdlPort);
         seiContext.put(spi.sei,spi);
         ports.put(spi.portName,spi);
 
