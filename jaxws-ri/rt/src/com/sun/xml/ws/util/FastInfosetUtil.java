@@ -29,7 +29,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
 
-import com.sun.xml.ws.pept.ept.MessageInfo;
 import com.sun.xml.messaging.saaj.soap.MessageImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 
@@ -81,15 +80,6 @@ public class FastInfosetUtil {
         }
         catch (Exception e) {
             // Ignore
-        }
-    }
-    
-    public static void ensureCorrectEncoding(MessageInfo messageInfo, 
-        SOAPMessage message) 
-    {
-        String conneg = (String) messageInfo.getMetaData(CONTENT_NEGOTIATION_PROPERTY);
-        if (conneg == "optimistic") {
-            ((MessageImpl) message).setIsFastInfoset(true);
         }
     }
 
