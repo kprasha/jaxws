@@ -19,6 +19,8 @@
  */
 package com.sun.xml.ws.api.message;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -26,24 +28,21 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.namespace.QName;
-
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 
 
 /**
  * A SOAP header.
  *
  * <p>
- * A header is read-only, but unlike body it can be read
- * multiple times (TODO: is this really necessary?)
+ * A header is immutable, but unlike body it can be read
+ * multiple times.
  * The {@link Header} abstraction hides how the header
  * data is represented in memory; instead, it commits to
  * the ability to write itself to XML infoset.
@@ -74,6 +73,10 @@ public interface Header {
 
     /**
      * True if this header must be understood.
+     *
+     * <p>
+     * Namely, this method returns true if this header has
+     * <tt>mustUnderstand="true"</tt>.
      */
     public boolean isMustUnderstood();
 
