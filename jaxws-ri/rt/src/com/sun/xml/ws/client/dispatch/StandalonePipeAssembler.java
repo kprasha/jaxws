@@ -66,7 +66,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
                 !binding.getHandlerChain().isEmpty()) {
             boolean isClient = false;
             HandlerPipe logicalHandlerPipe = null;
-            if(binding.getSOAPVersion() != null) {
+            if (binding instanceof SOAPBinding) {
                 if(!((SOAPBindingImpl)binding).getLogicalHandlerChain().isEmpty()) {
                     logicalHandlerPipe = new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
                     terminal = logicalHandlerPipe;
