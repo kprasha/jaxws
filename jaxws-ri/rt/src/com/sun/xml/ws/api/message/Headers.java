@@ -47,7 +47,7 @@ public abstract class Headers {
      * Creates a {@link Header} backed a by a JAXB bean.
      */
     public static Header create(SOAPVersion soapVersion, Marshaller m, Object o) {
-        return new JAXBHeader(soapVersion,m,o);
+        return new JAXBHeader(m,o);
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class Headers {
      * Creates a {@link Header} backed a by a JAXB bean.
      */
     public static Header create(SOAPVersion soapVersion, Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
-        return new JAXBHeader(soapVersion, bridge, bridgeInfo, jaxbObject);
+        return new JAXBHeader(bridge, bridgeInfo, jaxbObject);
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class Headers {
      * Creates a new {@link Header} backed by an {@link Element}.
      */
     public static Header create( SOAPVersion soapVersion, Element node ) {
-        return new DOMHeader<Element>(soapVersion,node);
+        return new DOMHeader<Element>(node);
     }
 
     /**

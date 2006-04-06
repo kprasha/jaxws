@@ -22,6 +22,7 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
 
 import javax.xml.bind.JAXBContext;
@@ -91,9 +92,11 @@ public class SOAPMessageContextImpl extends MessageUpdatableContext implements S
     }
 
     public Object[] getHeaders(QName header, JAXBContext jaxbContext, boolean allRoles) {
+        SOAPVersion soapVersion = binding.getSOAPVersion();
+
         List<Object> beanList = new ArrayList<Object>();
         try {
-            Iterator<Header> itr = packet.getMessage().getHeaders().getHeaders(header.getNamespaceURI(),header.getLocalPart());
+            Iterator<Header> itr = packet.getMessage().getHeaders().getHeaders(header,false);
             if(allRoles) {
                 while(itr.hasNext()) {
                     beanList.add(itr.next().readAsJAXB(jaxbContext.createUnmarshaller()));
@@ -102,8 +105,8 @@ public class SOAPMessageContextImpl extends MessageUpdatableContext implements S
                 while(itr.hasNext()) {
                     Header soapHeader = itr.next();
                     //Check if the role is one of the roles on this Binding
-                    // Also Add if there is no role or actor
-                    if((soapHeader.getRole()== null) || getRoles().contains(soapHeader.getRole())) {
+                    String role = soapHeader.getRole(soapVersion);
+                    if(getRoles().contains(role)) {
                         beanList.add(soapHeader.readAsJAXB(jaxbContext.createUnmarshaller()));
                     }
                 }

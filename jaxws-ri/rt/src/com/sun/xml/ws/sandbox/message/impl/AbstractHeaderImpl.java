@@ -1,10 +1,11 @@
 package com.sun.xml.ws.sandbox.message.impl;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 
-import javax.xml.soap.SOAPConstants;
 import javax.xml.namespace.QName;
+import java.util.Set;
 
 /**
  * Partial default implementation of {@link Header}.
@@ -17,41 +18,27 @@ import javax.xml.namespace.QName;
  */
 public abstract class AbstractHeaderImpl implements Header {
 
-    protected final SOAPVersion soapVersion;
-
-    protected AbstractHeaderImpl(SOAPVersion soapVersion) {
-        this.soapVersion = soapVersion;
+    protected AbstractHeaderImpl() {
     }
 
-    public boolean isMustUnderstood() {
+    public boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles) {
+        // check mustUnderstand
         String v = getAttribute(soapVersion.nsUri, "mustUnderstand");
-        if(v==null) return false;
-        return parseBool(v);
+        if(v==null || !parseBool(v)) return true;
+
+        // now role
+        return !roles.contains(getRole(soapVersion));
     }
 
-    public String getRole() {
-        String v;
-
-        switch(soapVersion) {
-        case SOAP_11:
-            v = getAttribute(soapVersion.nsUri,"actor");
-            if(v==null)
-                return SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER;
-            if(v.equals(SOAPConstants.URI_SOAP_ACTOR_NEXT))
-                return SOAPConstants.URI_SOAP_1_2_ROLE_NEXT;
-            return v;
-        case SOAP_12:
-            v = getAttribute(soapVersion.nsUri,"role");
-            if(v==null)
-                return SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER;
-            return v;
-        default:
-            throw new AssertionError();
-        }
+    public @NotNull String getRole(@NotNull SOAPVersion soapVersion) {
+        String v = getAttribute(soapVersion.nsUri, soapVersion.roleAttributeName);
+        if(v==null)
+            v = soapVersion.implicitRole;
+        return v;
     }
 
     public boolean isRelay() {
-        String v = getAttribute(soapVersion.nsUri,"relay");
+        String v = getAttribute(SOAPVersion.SOAP_12.nsUri,"relay");
         if(v==null) return false;   // on SOAP 1.1 message there shouldn't be such an attribute, so this works fine
         return parseBool(v);
     }

@@ -23,7 +23,6 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.sandbox.message.impl.AbstractHeaderImpl;
 import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
@@ -34,8 +33,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import java.io.OutputStream;
-import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -47,6 +44,8 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * {@link Header} whose physical data representation is a JAXB bean.
@@ -74,8 +73,7 @@ public final class JAXBHeader extends AbstractHeaderImpl {
      */
     private XMLStreamBuffer infoset;
 
-    public JAXBHeader(SOAPVersion soapVersion, Marshaller marshaller, Object jaxbObject) {
-        super(soapVersion);
+    public JAXBHeader(Marshaller marshaller, Object jaxbObject) {
         this.jaxbObject = jaxbObject;
         this.bridge = MarshallerBridgeContext.MARSHALLER_BRIDGE;
         this.context = new MarshallerBridgeContext(marshaller);
@@ -87,8 +85,7 @@ public final class JAXBHeader extends AbstractHeaderImpl {
         }
     }
 
-    public JAXBHeader(SOAPVersion soapVersion, Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
-        super(soapVersion);
+    public JAXBHeader(Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
         this.jaxbObject = jaxbObject;
         this.bridge = bridge;
         this.context = bridgeInfo;

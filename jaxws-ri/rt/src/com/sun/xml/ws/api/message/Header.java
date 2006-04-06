@@ -19,8 +19,11 @@
  */
 package com.sun.xml.ws.api.message;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.ws.api.SOAPVersion;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -29,12 +32,12 @@ import org.xml.sax.SAXParseException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import java.util.Set;
 
 
 /**
@@ -72,37 +75,63 @@ public interface Header {
     // as one method, instead of exposing two properties.
 
     /**
-     * True if this header must be understood.
+     * Checks if this header is ignorable for us (IOW, make sure
+     * that this header has a problematic "mustUnderstand" header value
+     * that we have to reject.)
      *
      * <p>
-     * Namely, this method returns true if this header has
-     * <tt>mustUnderstand="true"</tt>.
+     * This method is used as a part of the
+     * <a href="HeaderList.html#MU">mustUnderstanx processing</a>.
+     * At the end of the processing, the JAX-WS identifies a list of {@link Header}s
+     * that were not understood. This method is invoked on those {@link Header}s,
+     * to verify that we don't need to report an error for it.
+     *
+     * <p>
+     * specifically, this method has to perform the following tasks:
+     *
+     * <ul>
+     *  <li>If this header does not have <tt>mustUnderstand</tt> as "1" nor "true",
+     *      then this method must return true.
+     *  <li>Otherwise, check the role attribute (for SOAP 1.2) or the actor attribute (for SOAP 1.1).
+     *      When those attributes are absent, the default values have to be assumed.
+     *      See {@link #getRole(SOAPVersion)} for how the values are defaulted.
+     *      Now, see if the {@code roles} set contains the value.
+     *      If so, this method must return false (indicating that an error is in order.)
+     *  <li>Otherwise return true (since we don't play the role this header is intended for.)
+     * </ul>
+     *
+     * @param soapVersion
+     *      The caller specifies the SOAP version that the pipeline is working against.
+     *      Often each {@link Header} implementation already knows the SOAP version
+     *      anyway, but this allows some {@link Header}s to avoid keeping it.
+     *      That's why this redundant parameter is passed in.
+     * @param roles
+     *      The set of role values that the current JAX-WS pipeline is assuming.
+     *      Note that SOAP 1.1 and SOAP 1.2 use different strings for the same role,
+     *      and the caller is responsible for supplying a proper value depending on the
+     *      active SOAP version in use.
+     *
+     * @return
+     *      true if no error needs to be reported. False if an error needs to be raised.
+     *      See the method javadoc for more discussion.
      */
-    public boolean isMustUnderstood();
+    public boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles);
 
     /**
      * Gets the value of the soap:role attribute (or soap:actor for SOAP 1.1).
      *
      * <p>
-     * SOAP 1.1 values are normalized into SOAP 1.2 values.
+     * If the attribute is omitted, the value defaults to {@link SOAPVersion#implicitRole}.
      *
-     * An omitted SOAP 1.1 actor attribute value will become:
-     * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver"
-     * An SOAP 1.1 actor attribute value of:
-     * "http://schemas.xmlsoap.org/soap/actor/next"
-     * will become:
-     * "http://www.w3.org/2003/05/soap-envelope/role/next"
-     *
-     * <p>
-     * If the soap:role attribute is absent, this method returns
-     * "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver".
-     *
+     * @param soapVersion
+     *      The caller specifies the SOAP version that the pipeline is working against.
+     *      Often each {@link Header} implementation already knows the SOAP version
+     *      anyway, but this allows some {@link Header}s to avoid keeping it.
+     *      That's why this redundant parameter is passed in.
      * @return
      *      never null. This string need not be interned.
-     *
-     * @see SOAPConstants
      */
-    public String getRole();
+    public @NotNull String getRole(@NotNull SOAPVersion soapVersion);
 
     /**
      * True if this header is to be relayed if not processed.
@@ -127,27 +156,25 @@ public interface Header {
      * Gets the namespace URI of this header element.
      *
      * @return
-     *      never null.
      *      this string must be interned.
      */
-    public String getNamespaceURI();
+    public @NotNull String getNamespaceURI();
 
     /**
      * Gets the local name of this header element.
      *
      * @return
-     *      never null.
      *      this string must be interned.
      */
-    public String getLocalPart();
+    public @NotNull String getLocalPart();
 
     /**
      * Gets the attribute value on the header element.
      *
      * @param nsUri
-     *      The namespace URI of the attribute. Can be empty but never null.
+     *      The namespace URI of the attribute. Can be empty.
      * @param localName
-     *      The local name of the attribute. Must not be null.
+     *      The local name of the attribute.
      *
      * @return
      *      if the attribute is found, return the whitespace normalized value.
@@ -156,7 +183,7 @@ public interface Header {
      *      whitespace-normalizing attributes, so {@link Header} implementation
      *      doesn't have to do anything.
      */
-    String getAttribute(String nsUri, String localName);
+    @Nullable String getAttribute(@NotNull String nsUri, @NotNull String localName);
 
     /**
      * Gets the attribute value on the header element.
@@ -169,7 +196,7 @@ public interface Header {
      *
      * @see #getAttribute(String, String)
      */
-    String getAttribute(QName name);
+    @Nullable String getAttribute(@NotNull QName name);
 
     /**
      * Reads the header as a {@link XMLStreamReader}.

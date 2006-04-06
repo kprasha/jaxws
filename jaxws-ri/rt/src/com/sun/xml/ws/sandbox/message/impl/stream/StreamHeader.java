@@ -19,12 +19,14 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
+import com.sun.istack.FinalArrayList;
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.istack.FinalArrayList;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Node;
@@ -35,7 +37,6 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
@@ -46,6 +47,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link Header} whose physical data representation is an XMLStreamBuffer.
@@ -66,7 +68,8 @@ public abstract class StreamHeader implements Header {
 
     protected boolean _isMustUnderstand;
 
-    protected String _role = SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER;
+    // never null. role or actor value
+    protected String _role;
 
     protected boolean _isRelay;
 
@@ -137,11 +140,16 @@ public abstract class StreamHeader implements Header {
         _mark = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
     }
 
-    public boolean isMustUnderstood() {
-        return _isMustUnderstand;
+    public final boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles) {
+        // check mustUnderstand
+        if(!_isMustUnderstand) return true;
+
+        // now role
+        return !roles.contains(_role);
     }
 
-    public String getRole() {
+    public @NotNull String getRole(@NotNull SOAPVersion soapVersion) {
+        assert _role!=null;
         return _role;
     }
 

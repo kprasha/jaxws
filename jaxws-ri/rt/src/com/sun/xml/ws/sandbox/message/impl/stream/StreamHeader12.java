@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamException;
  *
  * @author Paul.Sandoz@Sun.Com
  */
+@SuppressWarnings({"StringEquality"})
 public class StreamHeader12 extends StreamHeader {
 
     public StreamHeader12(XMLStreamReader reader, XMLStreamBuffer mark) {
@@ -45,6 +46,8 @@ public class StreamHeader12 extends StreamHeader {
 
     protected final FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader) {
         FinalArrayList<Attribute> atts = null;
+
+        _role = SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER;
 
         for (int i = 0; i < reader.getAttributeCount(); i++) {
             final String localName = reader.getAttributeLocalName(i);

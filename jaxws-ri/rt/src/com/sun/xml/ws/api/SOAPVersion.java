@@ -23,6 +23,7 @@ package com.sun.xml.ws.api;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 
 import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPBinding;
@@ -59,10 +60,12 @@ import javax.xml.ws.soap.SOAPBinding;
 public enum SOAPVersion {
     SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
             com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE,
+            SOAPConstants.URI_SOAP_ACTOR_NEXT, "actor",
             javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL),
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
+            SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER, "role",
             javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL);
 
     /**
@@ -89,9 +92,21 @@ public enum SOAPVersion {
      */
     public final SOAPFactory saajSoapFactory;
 
-    private SOAPVersion(String httpBindingId, String nsUri, String saajFactoryString) {
+    /**
+     * If the actor/role attribute is absent, this SOAP version assumes this value.
+     */
+    public final String implicitRole;
+
+    /**
+     * "role" (SOAP 1.2) or "actor" (SOAP 1.1)
+     */
+    public final String roleAttributeName;
+
+    private SOAPVersion(String httpBindingId, String nsUri, String implicitRole, String roleAttributeName, String saajFactoryString) {
         this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
+        this.implicitRole = implicitRole;
+        this.roleAttributeName = roleAttributeName;
         try {
             saajMessageFactory = MessageFactory.newInstance(saajFactoryString);
             saajSoapFactory = SOAPFactory.newInstance(saajFactoryString);

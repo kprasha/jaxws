@@ -19,31 +19,12 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.saaj;
 
-import com.sun.xml.bind.unmarshaller.DOMScanner;
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.streaming.SourceReaderFactory;
-import com.sun.xml.ws.streaming.DOMStreamReader;
-import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.sandbox.message.impl.DOMHeader;
-import org.w3c.dom.Node;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
+import com.sun.istack.NotNull;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.ws.WebServiceException;
 
 /**
  * {@link Header} for {@link SOAPHeaderElement}.
@@ -65,7 +46,7 @@ public final class SAAJHeader extends DOMHeader<SOAPHeaderElement> {
     public SAAJHeader(SOAPHeaderElement header) {
         // we won't rely on any of the super class method that uses SOAPVersion,
         // so we can just pass in a dummy version
-        super(SOAPVersion.SOAP_11,header);
+        super(header);
     }
 
     /**
@@ -101,7 +82,8 @@ public final class SAAJHeader extends DOMHeader<SOAPHeaderElement> {
      *
      * @return never null. This string need not be interned.
      */
-    public String getRole() {
+    @Override
+    public @NotNull String getRole(SOAPVersion soapVersion) {
         if(isSet(FLAG_ACTOR))
             return role;
 

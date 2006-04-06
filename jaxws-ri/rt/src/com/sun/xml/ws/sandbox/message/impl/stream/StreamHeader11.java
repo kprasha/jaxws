@@ -19,22 +19,21 @@
  */
 package com.sun.xml.ws.sandbox.message.impl.stream;
 
+import com.sun.istack.FinalArrayList;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.sandbox.message.impl.Util;
-import com.sun.istack.FinalArrayList;
 
 import javax.xml.soap.SOAPConstants;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
-import java.util.List;
-import java.util.ArrayList;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * {@link StreamHeader} for SOAP 1.1.
  *
  * @author Paul.Sandoz@Sun.Com
  */
+@SuppressWarnings({"StringEquality"})
 public class StreamHeader11 extends StreamHeader {
 
     public StreamHeader11(XMLStreamReader reader, XMLStreamBuffer mark) {
@@ -48,6 +47,8 @@ public class StreamHeader11 extends StreamHeader {
     protected final FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader) {
         FinalArrayList<Attribute> atts = null;
 
+        _role = SOAPConstants.URI_SOAP_ACTOR_NEXT;
+
         for (int i = 0; i < reader.getAttributeCount(); i++) {
             final String localName = reader.getAttributeLocalName(i);
             final String namespaceURI = reader.getAttributeNamespace(i);
@@ -58,12 +59,7 @@ public class StreamHeader11 extends StreamHeader {
                     _isMustUnderstand = Util.parseBool(value);
                 } else if (localName == SOAP_1_1_ROLE) {
                     if (value != null && value.length() > 0) {
-                        if (!_role.equals(SOAPConstants.URI_SOAP_ACTOR_NEXT)) {
-                            _role = value;
-                        } else {
-                            // Normalize to SOAP 1.2 role next value
-                            _role = SOAPConstants.URI_SOAP_1_2_ROLE_NEXT;
-                        }
+                        _role = value;
                     }
                 }
             }

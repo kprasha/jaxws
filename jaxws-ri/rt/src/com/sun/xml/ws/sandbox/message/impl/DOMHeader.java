@@ -4,7 +4,6 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.messaging.saaj.packaging.mime.Header;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Element;
@@ -33,8 +32,7 @@ public class DOMHeader<N extends Element> extends AbstractHeaderImpl {
     private final String nsUri;
     private final String localName;
 
-    public DOMHeader(SOAPVersion soapVersion, N node) {
-        super(soapVersion);
+    public DOMHeader(N node) {
         assert node!=null;
         this.node = node;
 

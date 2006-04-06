@@ -153,11 +153,11 @@ public class WSServiceDelegate extends WSService {
                 parseWSDL(wsdlDocumentLocation);
 
             //if @HandlerChain present, set HandlerResolver on service context
-            HandlerChain handlerChain = (HandlerChain)
-            AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-                return serviceClass.getAnnotation(HandlerChain.class);
-            }
+            HandlerChain handlerChain =
+            AccessController.doPrivileged(new PrivilegedAction<HandlerChain>() {
+                public HandlerChain run() {
+                    return serviceClass.getAnnotation(HandlerChain.class);
+                }
             });
             if(handlerChain != null) {
                 HandlerResolverImpl hresolver = new HandlerResolverImpl(this);

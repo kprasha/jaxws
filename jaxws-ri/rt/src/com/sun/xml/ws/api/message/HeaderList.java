@@ -312,6 +312,13 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
+     * @see #getHeaders(String, String, boolean)
+     */
+    public @NotNull Iterator<Header> getHeaders(@NotNull QName headerName, final boolean markAsUnderstood) {
+        return getHeaders(headerName.getNamespaceURI(),headerName.getLocalPart(),markAsUnderstood);
+    }
+
+    /**
      * @deprecated
      *      use {@link #getHeaders(String, boolean)}.
      */
