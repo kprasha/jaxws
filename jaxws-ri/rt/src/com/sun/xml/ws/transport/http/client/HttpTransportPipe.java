@@ -155,6 +155,7 @@ public class HttpTransportPipe implements Pipe {
     private void dump(ByteArrayBuffer buf, String caption) throws IOException {
         System.out.println("---["+caption +"]---");
         buf.writeTo(System.out);
+        System.out.println("--------------------");
     }
 
     /**
