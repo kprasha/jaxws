@@ -53,12 +53,12 @@ import java.util.Set;
  * @author Vivek Pandey
  */
 public class Internalizer {
-    private Map<String, Document> wsdlDocuments;
+    private Map<String, Element> wsdlDocuments;
     private static final XPathFactory xpf = XPathFactory.newInstance();
     private final XPath xpath = xpf.newXPath();
     private ProcessorEnvironment env;
 
-    public  void transform(Set<Element> JAXWSBindings, Map<String, Document> wsdlDocuments, ProcessorEnvironment env) {
+    public  void transform(Set<Element> JAXWSBindings, Map<String, Element> wsdlDocuments, ProcessorEnvironment env) {
         if(JAXWSBindings == null)
             return;
         this.env = env;
@@ -101,7 +101,7 @@ public class Internalizer {
      * or null if none is found.
      */
     public Document get( String systemId ) {
-        Document doc = wsdlDocuments.get(systemId);
+        Element doc = wsdlDocuments.get(systemId);
 
         if( doc==null && systemId.startsWith("file:/") && !systemId.startsWith("file://") ) {
             // As of JDK1.4, java.net.URL.toExternal method returns URLs like
@@ -113,7 +113,7 @@ public class Internalizer {
             doc = wsdlDocuments.get( "file://"+systemId.substring(5) );
         }
 
-        return doc;
+        return doc.getOwnerDocument();
     }
 
     /**
