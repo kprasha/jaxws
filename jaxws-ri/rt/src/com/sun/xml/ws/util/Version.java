@@ -46,4 +46,8 @@ public final class Version {
         if(v==null) return "unknown";
         return v;
     }
+
+    public String toString() {
+        return BUILD_VERSION;
+    }
 }
