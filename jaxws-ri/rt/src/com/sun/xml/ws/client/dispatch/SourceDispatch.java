@@ -6,7 +6,10 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
@@ -41,12 +44,11 @@ public class SourceDispatch extends DispatchImpl<Source> {
 
     Source toReturnValue(Packet response) {
         Message msg = response.getMessage();
+
         switch (mode){
             case PAYLOAD:
                 return msg.readPayloadAsSource();
             case MESSAGE:
-                //todo: uncomment when Pa
-                //return
                 return msg.readEnvelopeAsSource();
             default:
                 throw new WebServiceException("Unrecognized dispatch mode");
@@ -54,23 +56,32 @@ public class SourceDispatch extends DispatchImpl<Source> {
     }
 
     Packet createPacket(Source msg) {
-        Message message;
+
+        final Message message;
+
         switch (mode) {
             case PAYLOAD:
-                message = new PayloadSourceMessage(msg, soapVersion);
+                          //check on this for different binding
+                message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
+                //message = new PayloadSourceMessage(msg, soapVersion);
                 break;
             case MESSAGE:
-                //Todo: temporary until ProtocolSourceMessage is done
-                SOAPMessage soapmsg;
-                try {
-                    //todo:
-                    soapmsg = binding.getSOAPVersion().saajMessageFactory.createMessage();
-                    soapmsg.getSOAPPart().setContent(msg);
-                    soapmsg.saveChanges();
-                } catch (SOAPException e) {
-                    throw new WebServiceException(e);
+                //check on this for message mode
+                if (isXMLHttp())
+                    message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
+                else {
+                    //Todo: temporary until ProtocolSourceMessage is done
+                    SOAPMessage soapmsg;
+                    try {
+                        //todo:
+                        soapmsg = binding.getSOAPVersion().saajMessageFactory.createMessage();
+                        soapmsg.getSOAPPart().setContent(msg);
+                        soapmsg.saveChanges();
+                    } catch (SOAPException e) {
+                        throw new WebServiceException(e);
+                    }
+                    message = new SAAJMessage(soapmsg);
                 }
-                message = new SAAJMessage(soapmsg);
                 //todo:temp until ProtocolSourceMessage implemented
                 //message = new ProtocolSourceMessage(msg);
                 //todo: uncomment above when ProtocolSourceMessage is done
@@ -79,22 +90,7 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 throw new WebServiceException("Unrecognized message mode");
         }
 
-        // KK - stubs can't assume what form messages are serialized.
-        // don't assume that it's even going to be formated as text/xml.
-
-        //Map<String, List<String>> ch = new HashMap<String, List<String>>();
-        //
-        //List<String> ct = new ArrayList<String>();
-        //ct.add("text/xml");
-        //ch.put("Content-Type", ct);
-        //
-        //List<String> cte = new ArrayList<String>();
-        //cte.add("binary");
-        //ch.put("Content-Transfer-Encoding", cte);
-        //
-        //Packet p = new Packet(message);
-        //p.httpRequestHeaders = ch;
-
         return new Packet(message);
     }
+   
 }

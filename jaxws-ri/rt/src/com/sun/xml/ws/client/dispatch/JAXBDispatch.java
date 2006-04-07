@@ -6,6 +6,7 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
@@ -45,18 +46,9 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
 
     private final JAXBContext jaxbcontext;
 
-    private final Pool.Marshaller marshallers;
-    private final Pool.Unmarshaller unmarshallers;
-
-
     public JAXBDispatch(QName port, JAXBContext jc, Service.Mode mode, WSServiceDelegate service, Pipe pipe, BindingImpl binding) {
         super(port, mode, service, pipe, binding);
         this.jaxbcontext = jc;
-        //temp temp temp - todo:check with KK on how to use pool
-        //perhaps pool should be in DispatchImpl?
-        //??to pool JAXB objects??
-        marshallers = new Pool.Marshaller(jaxbcontext);
-        unmarshallers = new Pool.Unmarshaller(jaxbcontext);
     }
 
 
@@ -78,37 +70,18 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
         }
     }
 
-    private void setHttpRequestHeaders(Packet props) {
-        Map<String, List<String>> ch = new HashMap<String, List<String>>();
-
-        List<String> ct = new ArrayList<String>();
-        ct.add("text/xml");
-        ch.put("Content-Type", ct);
-
-        List<String> cte = new ArrayList<String>();
-        cte.add("binary");
-        ch.put("Content-Transfer-Encoding", cte);
-
-        props.httpRequestHeaders = ch;
-    }
 
     Packet createPacket(Object msg) {
         assert jaxbcontext != null;
-        //todo: use Pool - temp to get going
+
         try {
             Marshaller marshaller = jaxbcontext.createMarshaller();
             marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
-            return new Packet(new JAXBMessage(marshaller, msg, soapVersion));
+            //todo: msg == null needs http Get for xmlHTTP- Payload mode for SOAP
+            Message message = (msg == null) ? Messages.createEmpty(soapVersion): Messages.create(marshaller, msg, soapVersion);
+            return new Packet(message);
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
-    }
-
-    @Override
-    void setProperties(Packet packet, boolean expectReply) {
-        super.setProperties(packet,expectReply);
-
-        setHttpRequestHeaders(packet);
-        packet.otherProperties.put(JAXB_CONTEXT_PROPERTY, jaxbcontext); // KK - do we really need this?
     }
 }

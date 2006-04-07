@@ -5,6 +5,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -174,11 +175,10 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
     void setProperties(Packet packet, boolean expectReply) {
         packet.expectReply = expectReply;
+    }
 
-        //not needed but leave for now --maybe mode is needed
-        packet.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_MODE, mode);
-        if (clazz != null)
-            packet.otherProperties.put(DispatchContext.DISPATCH_MESSAGE_CLASS, clazz);
+     boolean isXMLHttp() {
+        return  (binding.getBindingId().equals(BindingID.XML_HTTP)) ? true : false;
     }
 
     /**
