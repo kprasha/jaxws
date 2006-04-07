@@ -19,7 +19,7 @@ public abstract class ServiceDescriptor {
 
     /**
      * Gives list of schemas
-     * @return List of Schema documents as {@link Source}
+     * @return List of XML schema documents as {@link Source}
      */
     public abstract @NotNull List<? extends Source> getSchemas();
 }
