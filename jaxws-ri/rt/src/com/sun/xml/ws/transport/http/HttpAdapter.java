@@ -1,6 +1,7 @@
 package com.sun.xml.ws.transport.http;
 
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
@@ -11,10 +12,8 @@ import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.Headers;
-import com.sun.istack.NotNull;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
@@ -179,7 +178,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * Receives the incoming HTTP connection and dispatches
      * it to JAX-WS. This method returns when JAX-WS completes
      * processing the request and the whole reply is written
-     * to {@link WSConnection}.
+     * to {@link WSHTTPConnection}.
      *
      * <p>
      * This method is invoked by the lower-level HTTP stack,
@@ -187,7 +186,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      *
      * <p>
      * To populate a request {@link Packet} with more info,
-     * use {@link WSConnection#wrapUpRequestPacket(Packet)}.
+     * use {@link WSHTTPConnection#wrapUpRequestPacket(Packet)}.
      */
     public void handle(@NotNull WSHTTPConnection connection) throws IOException {
         HttpToolkit tk = pool.take();

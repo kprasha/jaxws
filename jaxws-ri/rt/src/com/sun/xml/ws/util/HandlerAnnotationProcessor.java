@@ -23,6 +23,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.handler.HandlerChainsModel;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.server.EndpointFactory;
 
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
@@ -64,8 +65,7 @@ public class HandlerAnnotationProcessor {
 
     /**
      * <p>This method is called by
-     * {@link com.sun.xml.ws.client.WSServiceDelegate} and
-     * {@link com.sun.xml.ws.server.Root} when
+     * {@link EndpointFactory} when
      * they have an annotated class.
      *
      * <p>If there is no handler chain annotation on the class,
@@ -104,12 +104,12 @@ public class HandlerAnnotationProcessor {
             serviceName, portName, binding);
     }
 
-    public static HandlerChainsModel buildHandlerChainsModel(final Class clazz) {
+    public static HandlerChainsModel buildHandlerChainsModel(final Class<?> clazz) {
         if(clazz == null) {
             return null;
         }
         HandlerChain handlerChain =
-            (HandlerChain) clazz.getAnnotation(HandlerChain.class);
+            clazz.getAnnotation(HandlerChain.class);
         if(handlerChain == null)
             return null;
         InputStream iStream = getFileAsStream(clazz, handlerChain);
@@ -129,7 +129,7 @@ public class HandlerAnnotationProcessor {
         }
     }
 
-    static Class getSEI(Class clazz) {
+    static Class getSEI(Class<?> clazz) {
         if (Provider.class.isAssignableFrom(clazz)) {
             //No SEI for Provider Implementation
             return null;
@@ -143,8 +143,7 @@ public class HandlerAnnotationProcessor {
                 clazz.getCanonicalName());
         }
 
-        WebService webService =
-            (WebService) clazz.getAnnotation(WebService.class);
+        WebService webService = clazz.getAnnotation(WebService.class);
 
         String ei = webService.endpointInterface();
         if (ei.length() > 0) {

@@ -19,7 +19,6 @@
  */
 package com.sun.xml.ws.transport.http;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet.Property;
 
@@ -46,7 +45,7 @@ public interface WSHTTPConnection {
     public static final int INTERNAL_ERR=500;
 
     /**
-     * This is an opportunity for {@link WSConnection} to fill in a {@link Packet}
+     * This is an opportunity for {@link WSHTTPConnection} to fill in a {@link Packet}
      * additional transport-specific properties.
      */
     void wrapUpRequestPacket(Packet p);
