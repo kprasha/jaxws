@@ -25,11 +25,9 @@ import javax.xml.transform.Source;
  */
 public class PayloadSourceMessage extends AbstractMessageImpl {
     private final StreamMessage message;
-    private final Source payload;
 
     public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
-        this.payload = payload;
         XMLStreamReader reader = SourceReaderFactory.createSourceReader(payload, true);
         XMLStreamReaderUtil.next(reader);
         message = new StreamMessage(headers, reader, soapVersion);
@@ -60,7 +58,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     }
 
     public Source readPayloadAsSource() {
-        return payload;
+        return message.readPayloadAsSource();
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {
