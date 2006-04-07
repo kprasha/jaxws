@@ -7,6 +7,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
+import com.sun.xml.ws.util.RuntimeVersion;
 import com.sun.xml.ws.util.Pool.PipePool;
 
 import javax.xml.ws.BindingProvider;
@@ -139,5 +140,9 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     public void setResponseContext(ResponseContext rc) {
         this.responseContext = rc;
+    }
+
+    public String toString() {
+        return RuntimeVersion.VERSION+": Stub for "+getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
 }
