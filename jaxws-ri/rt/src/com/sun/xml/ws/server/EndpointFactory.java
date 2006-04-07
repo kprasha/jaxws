@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -33,6 +34,7 @@ import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.istack.Nullable;
+import javax.xml.ws.WebServiceException;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
@@ -54,15 +56,16 @@ import java.util.logging.Logger;
  * Entry point to the JAX-WS RI server-side runtime.
  *
  * @author Kohsuke Kawaguchi
+ * @author Jitendra Kotamraju
  */
 public class EndpointFactory {
-    /*
-      no need to take WebServiceContext implementation. That's hidden inside our system.
-      We shall only take delegate to getUserPrincipal and isUserInRole from adapter.
-    */
 
     /**
      * Implements {@link WSEndpoint#create}.
+     *
+     * No need to take WebServiceContext implementation. When InvokerPipe is
+     * instantiated, it calls InstanceResolver to set up a WebServiceContext.
+     * We shall only take delegate to getUserPrincipal and isUserInRole from adapter.
      *
      * <p>
      * Nobody else should be calling this method.
@@ -70,7 +73,8 @@ public class EndpointFactory {
     public static <T> WSEndpoint<T> createEndpoint(
         Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
         Container container, WSBinding binding,
-        SDDocumentSource primaryWsdl, @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
+        @Nullable SDDocumentSource primaryWsdl,
+        @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
 
         if(ir==null || implType ==null)
             throw new IllegalArgumentException();
@@ -87,17 +91,28 @@ public class EndpointFactory {
 
         if(serviceName==null)
             serviceName = getDefaultServiceName(implType);
-        // TODO: no error check is done about serviceName==null
 
         if(portName==null)
             portName = getDefaultPortName(serviceName,implType);
-        // TODO: no error check is done about portName==null
-
-        QName portTypeName = null; // TODO: the way this is used is very unclear to me - KK
 
         // setting a default binding
         if (binding == null)
             binding = BindingImpl.create(BindingID.parse(implType));
+        
+        if (primaryWsdl != null) {
+            verifyPrimaryWSDL(primaryWsdl, serviceName);
+        }
+        
+        QName portTypeName = null;
+        if (implType.getAnnotation(WebServiceProvider.class)==null) {
+            portTypeName = RuntimeModeler.getPortTypeName(implType);
+        }
+        
+        // Categorises the documents as WSDL, Schema etc
+        List<SDDocumentImpl> docList = categoriseMetadata(md, serviceName, portTypeName);
+        // Finds the primary WSDL and makes sure that metadata doesn't have
+        // two concrete or abstract WSDLs
+        SDDocumentImpl primaryDoc = findPrimary(docList);
 
         Pipe terminal;
         WSDLPort wsdlPort = null;
@@ -117,9 +132,7 @@ public class EndpointFactory {
                 }
             } else {
                 // Create runtime model for non Provider endpoints
-                seiModel = createSEIModel(primaryWsdl, md, implType, serviceName, portName, binding);
-                portTypeName = seiModel.getPortTypeName();
-
+                seiModel = createSEIModel(primaryDoc, md, implType, serviceName, portName, binding);
                 wsdlPort = seiModel.getPort();
 
                 //set mtom processing
@@ -132,56 +145,27 @@ public class EndpointFactory {
             //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
 
             if (binding.getHandlerChain() == null) {
-                    HandlerAnnotationInfo chainInfo =
-                        HandlerAnnotationProcessor.buildHandlerInfo(
-                        implType, serviceName, portName, binding);
-                    if (chainInfo != null) {
-                        binding.setHandlerChain(chainInfo.getHandlers());
-                        if (binding instanceof SOAPBinding) {
-                            ((SOAPBinding)binding).setRoles(chainInfo.getRoles());
-                        }
+                HandlerAnnotationInfo chainInfo =
+                    HandlerAnnotationProcessor.buildHandlerInfo(
+                    implType, serviceName, portName, binding);
+                if (chainInfo != null) {
+                    binding.setHandlerChain(chainInfo.getHandlers());
+                    if (binding instanceof SOAPBinding) {
+                        ((SOAPBinding)binding).setRoles(chainInfo.getRoles());
                     }
-                }
-        }
-
-
-        SDDocumentImpl primaryDoc = null;
-        boolean foundConcrete = false;
-        boolean foundAbstract = false;
-        List<SDDocumentImpl> docList = buildMetadata(md, serviceName, portTypeName);
-        for(SDDocumentImpl doc : docList) {
-            if (doc instanceof SDDocument.WSDL) {
-                SDDocument.WSDL wsdlDoc = (SDDocument.WSDL)doc;
-                if (wsdlDoc.hasService()) {
-                    primaryDoc = doc;
-                    if (foundConcrete) {
-                        // TODO test framework generates WSDL even for WSDL tests. Until that
-                        // is fixed, we comment this one
-                        //throw new ServerRtException("duplicate.primary.wsdl", doc.getSystemId() );
-                    }
-                    foundConcrete = true;
-                }
-                if (wsdlDoc.hasPortType()) {
-                    if (foundAbstract) {
-                        // TODO test framework generates WSDL even for WSDL tests. Until that
-                        // is fixed, we comment this one
-                        //throw new ServerRtException("duplicate.abstract.wsdl", doc.getSystemId());
-                    }
-                    foundAbstract = true;
                 }
             }
         }
-        
+
+        // Generate WSDL for SEI endpoints(not for Provider endpoints)
         if (primaryDoc == null) {
             if (implType.getAnnotation(WebServiceProvider.class)==null) {
-                // Generate WSDL for SEI endpoints(not for Provider endpoints)
                 primaryDoc = generateWSDL(binding, seiModel, docList);
             }
-
         }
         
+        // create WSDL model
         if (wsdlPort == null && primaryDoc != null) {
-            // create WSDL model
             wsdlPort = getWSDLPort(primaryDoc, docList, implType, serviceName, portName);
         }
 
@@ -325,16 +309,64 @@ public class EndpointFactory {
     /**
      * Builds {@link SDDocumentImpl} from {@link SDDocumentSource}.
      */
-    private static List<SDDocumentImpl> buildMetadata(
+    private static List<SDDocumentImpl> categoriseMetadata(
         List<SDDocumentSource> src, QName serviceName, QName portTypeName) {
 
         List<SDDocumentImpl> r = new ArrayList<SDDocumentImpl>(src.size());
-
         for (SDDocumentSource doc : src) {
             r.add(SDDocumentImpl.create(doc,serviceName,portTypeName));
         }
-
         return r;
+    }
+    
+    /**
+     * Verifies whether the given primaryWsdl contains the given serviceName.
+     * If the WSDL doesn't have the service, it throws an WebServiceException.
+     */
+    private static void verifyPrimaryWSDL(@NotNull SDDocumentSource primaryWsdl, @NotNull QName serviceName) {
+        SDDocumentImpl primaryDoc = SDDocumentImpl.create(primaryWsdl,serviceName,null);
+        if (!(primaryDoc instanceof SDDocument.WSDL)) {
+            throw new WebServiceException("Not a primary WSDL="+primaryWsdl.getSystemId());
+        }
+        SDDocument.WSDL wsdlDoc = (SDDocument.WSDL)primaryDoc;
+        if (!wsdlDoc.hasService()) {
+            throw new WebServiceException("Not a primary WSDL="+primaryWsdl.getSystemId()+
+                    " since it doesn't have Service "+serviceName);
+        }
+    }
+    
+    /**
+     * Finds the primary WSDL document from the list of metadata documents. If
+     * there are two metadata documents that qualify for primary, it throws an
+     * exception. If there are two metadata documents that qualify for porttype,
+     * it throws an exception.
+     *
+     * @return primay wsdl document, null if is not there in the docList
+     *
+     */
+    private static @Nullable SDDocumentImpl findPrimary(@NotNull List<SDDocumentImpl> docList) {
+        SDDocumentImpl primaryDoc = null;
+        boolean foundConcrete = false;
+        boolean foundAbstract = false;
+        for(SDDocumentImpl doc : docList) {
+            if (doc instanceof SDDocument.WSDL) {
+                SDDocument.WSDL wsdlDoc = (SDDocument.WSDL)doc;
+                if (wsdlDoc.hasService()) {
+                    primaryDoc = doc;
+                    if (foundConcrete) {
+                        throw new ServerRtException("duplicate.primary.wsdl", doc.getSystemId() );
+                    }
+                    foundConcrete = true;
+                }
+                if (wsdlDoc.hasPortType()) {
+                    if (foundAbstract) {
+                        throw new ServerRtException("duplicate.abstract.wsdl", doc.getSystemId());
+                    }
+                    foundAbstract = true;
+                }
+            }
+        }
+        return primaryDoc;
     }
     
     private static WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
