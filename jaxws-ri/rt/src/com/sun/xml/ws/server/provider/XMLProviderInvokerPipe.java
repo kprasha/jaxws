@@ -4,10 +4,12 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.encoding.xml.XMLMessage;
 import javax.activation.DataSource;
 import javax.xml.transform.Source;
 import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
+import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
 
 /**
  * This pipe is used to invoke XML/HTTP {@link Provider} endpoints.
@@ -38,28 +40,12 @@ public class XMLProviderInvokerPipe extends ProviderInvokerPipe {
             if (isSource) {
                 parameter = msg.readPayloadAsSource();
             } else {
-                // TODO : use Encoder to write attachments, and XML 
-                // This is also performance issue. The transport bytes are
-                // parsed and rewritten to make DataSource.
-                /*
-                parameter = new DataSource() {
-                    public InputStream getInputStream() {
-                        return is;
-                    }
-
-                    public OutputStream getOutputStream() {
-                        return null;
-                    }
-
-                    public String getContentType() {
-                        return contentType;
-                    }
-
-                    public String getName() {
-                        return "";
-                    }
-                };
-                 */
+                if (msg instanceof HasDataSource) {
+                    HasDataSource hasDS = (HasDataSource)msg;
+                    parameter = hasDS.getDataSource();
+                } else {
+                    parameter = XMLMessage.getDataSource(msg);
+                }
             }
         }
         return parameter;
@@ -87,9 +73,7 @@ public class XMLProviderInvokerPipe extends ProviderInvokerPipe {
                 responseMsg = Messages.createUsingPayload(source, SOAPVersion.SOAP_11);
             }  else {
                 DataSource ds = (DataSource)returnValue;
-                // TODO what message representation can we use here
-                // None of the current implementations fit here
-                responseMsg = null;
+                responseMsg = XMLMessage.create(ds);
             }
         }
         return responseMsg;

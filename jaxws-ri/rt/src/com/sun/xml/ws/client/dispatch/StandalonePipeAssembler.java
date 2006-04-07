@@ -80,7 +80,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and 
             //SOAPHandlerPipe here.
 
-            if(binding.getSOAPVersion() != null) {
+            if(binding instanceof SOAPBinding) {
                 if(!((SOAPBindingImpl)binding).getSOAPHandlerChain().isEmpty()) {
                     HandlerPipe soapHandlerPipe;
                     soapHandlerPipe= new SOAPHandlerPipe(binding,terminal, logicalHandlerPipe, isClient);
