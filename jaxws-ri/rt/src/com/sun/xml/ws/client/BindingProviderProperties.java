@@ -50,6 +50,8 @@ public interface BindingProviderProperties extends JAXWSProperties{
         "com.sun.xml.ws.request.timeout";
 
     //JAXWS 2.0
+    public static final String JAXWS_HANDLER_CONFIG =
+        "com.sun.xml.ws.handler.config";
     public static final String JAXWS_RUNTIME_CONTEXT =
         "com.sun.xml.ws.runtime.context";
     public static final String JAXWS_CONTEXT_PROPERTY =

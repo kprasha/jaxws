@@ -90,7 +90,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         {// fill in Packet
             packet.proxy = this;
             packet.endpointAddress = defaultEndPointAddress;
-
+            packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
         }
 

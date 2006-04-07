@@ -15,6 +15,8 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
+import com.sun.xml.ws.client.HandlerConfiguration;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -123,9 +125,10 @@ public class SOAPHandlerPipe extends HandlerPipe {
         // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
         soapHandlers = new ArrayList<SOAPHandler>();
-        soapHandlers.addAll(((BindingImpl)binding).getSOAPHandlerChain());
+        HandlerConfiguration handlerConfig = ((BindingImpl)binding).getHandlerConfig();
+        soapHandlers.addAll(handlerConfig.getSoapHandlers());
         roles = new HashSet<String>();
-        roles.addAll(((SOAPBindingImpl)binding).getRoles());
+        roles.addAll(handlerConfig.getRoles());
         processor = new SOAPHandlerProcessor(binding,soapHandlers, isClient);
     }
 

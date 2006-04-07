@@ -28,6 +28,7 @@ import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.client.ContentNegotiation;
+import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
@@ -192,6 +193,14 @@ public final class Packet extends PropertySet {
      */
     // TODO: expose this as a property
     public boolean wasTransportSecure;
+
+    /**
+     * This property holds the snapshot of HandlerConfiguration
+     * at the time of invocation.
+     * This property is used by MUPipe and HandlerPipe implementations.
+     */
+    @Property(BindingProviderProperties.JAXWS_HANDLER_CONFIG)
+    public HandlerConfiguration handlerConfig;
 
     /**
      * If a message originates from a proxy stub that implements

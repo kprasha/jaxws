@@ -25,6 +25,7 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -54,7 +55,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     protected Set<String> requiredRoles;
     protected Set<String> roles;
     protected boolean enableMtom;
-    private Set<QName> handlerUnderstoodHeaders;
     protected final SOAPVersion soapVersion;
 
 
@@ -91,48 +91,32 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     
     /**
      * This method separates the logical and protocol handlers. 
-     * Also parses Headers understood by SOAPHandlers.
+     * Also parses Headers understood by SOAPHandlers and
+     * sets the HandlerConfiguration.
      */
     protected void sortHandlers() {
-        handlerUnderstoodHeaders = new HashSet<QName>();
-        logicalHandlers =  new ArrayList<LogicalHandler>();
-        soapHandlers =  new ArrayList<SOAPHandler>();
+        List<LogicalHandler> logicalHandlers = new ArrayList<LogicalHandler>();
+        List<SOAPHandler> soapHandlers = new ArrayList<SOAPHandler>();
+        Set<QName> handlerUnderstoodHeaders = new HashSet<QName>();
+
         if(handlers == null)
             return;
         for (Handler handler : handlers) {
-            if (LogicalHandler.class.isAssignableFrom(handler.getClass())) {
+            if (handler instanceof LogicalHandler) {
                 logicalHandlers.add((LogicalHandler) handler);
-            } else if (SOAPHandler.class.isAssignableFrom(handler.getClass())) {
+            } else if (handler instanceof SOAPHandler) {
                 soapHandlers.add((SOAPHandler) handler);
                 Set<QName> headers = ((SOAPHandler<?>) handler).getHeaders();
                 if (headers != null) {
                     handlerUnderstoodHeaders.addAll(headers);
                 }
-            } else if (Handler.class.isAssignableFrom(handler.getClass())) {
-                throw new HandlerException(
-                    "cannot.extend.handler.directly",
-                    handler.getClass().toString());
             } else {
                 throw new HandlerException("handler.not.valid.type",
-                    handler.getClass().toString());
+                    handler.getClass());
             }
         }
-        //handlers.clear();
-        //handlers.addAll(logicalHandlers);
-        //handlers.addAll(soapHandlers);
-    }
-    
-    /**
-     * Returns the headers understood by the handlers. This set
-     * is created when the handler chain caller is instantiated and
-     * the handlers are sorted. The set is comprised of headers
-     * returned from SOAPHandler.getHeaders() method calls.
-     *
-     * @return The set of all headers that the handlers declare
-     * that they understand.
-     */
-    public Set<QName> getHandlerUnderstoodHeaders() {
-        return handlerUnderstoodHeaders;
+        //TODO compute portUnderstoodHeaders
+        handlerConfig = new HandlerConfiguration(roles, null,logicalHandlers,soapHandlers,handlerUnderstoodHeaders);
     }
 
     protected void addRequiredRoles() {
@@ -155,7 +139,8 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
             throw new WebServiceException(ClientMessages.INVALID_SOAP_ROLE_NONE());
         }
         this.roles = roles;
-        addRequiredRoles();        
+        addRequiredRoles();
+        sortHandlers();
     }
 
 

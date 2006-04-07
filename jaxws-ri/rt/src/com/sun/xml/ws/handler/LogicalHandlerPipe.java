@@ -127,7 +127,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
         // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
         logicalHandlers = new ArrayList<LogicalHandler>();
-        logicalHandlers.addAll(((BindingImpl)binding).getLogicalHandlerChain());
+        logicalHandlers.addAll(((BindingImpl)binding).getHandlerConfig().getLogicalHandlers());
         if(binding.getSOAPVersion() == null) {
             processor = new XMLHandlerProcessor(binding,
                     logicalHandlers,isClient);

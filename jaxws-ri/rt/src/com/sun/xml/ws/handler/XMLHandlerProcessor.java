@@ -27,7 +27,7 @@ public class XMLHandlerProcessor<C extends MessageUpdatableContext> extends Hand
     /**
      * Creates a new instance of LogicalHandlerProcessor
      */
-    public XMLHandlerProcessor(WSBinding binding, List<Handler> chain, boolean isClient) {
+    public XMLHandlerProcessor(WSBinding binding, List<? extends Handler> chain, boolean isClient) {
         super(binding,chain, isClient);
     }
     

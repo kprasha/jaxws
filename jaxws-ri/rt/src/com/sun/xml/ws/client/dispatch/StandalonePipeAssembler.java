@@ -62,30 +62,18 @@ public class StandalonePipeAssembler implements PipelineAssembler {
      */
     public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
         WSBinding binding = endpoint.getBinding();
-        if((binding.getHandlerChain() != null) &&
-                !binding.getHandlerChain().isEmpty()) {
+        if(!binding.getHandlerChain().isEmpty()) {
             boolean isClient = false;
-            HandlerPipe logicalHandlerPipe = null;
-            if (binding instanceof SOAPBinding) {
-                if(!((SOAPBindingImpl)binding).getLogicalHandlerChain().isEmpty()) {
-                    logicalHandlerPipe = new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
-                    terminal = logicalHandlerPipe;
-                }
-            } else {
-                //XML/HTTP Binding can have only LogicalHandlers
-                logicalHandlerPipe = new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
-                terminal = logicalHandlerPipe;
-            }
+            HandlerPipe logicalHandlerPipe =
+                    new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
 
             //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and 
             //SOAPHandlerPipe here.
 
             if(binding instanceof SOAPBinding) {
-                if(!((SOAPBindingImpl)binding).getSOAPHandlerChain().isEmpty()) {
                     HandlerPipe soapHandlerPipe;
                     soapHandlerPipe= new SOAPHandlerPipe(binding,terminal, logicalHandlerPipe, isClient);
                     terminal = soapHandlerPipe;
-                }
             }
         }
         return terminal;

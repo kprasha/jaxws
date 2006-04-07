@@ -26,13 +26,12 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.client.HandlerConfiguration;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.LogicalHandler;
-import javax.xml.ws.handler.soap.SOAPHandler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 /**
  * Instances are created by the service, which then
@@ -48,10 +47,9 @@ import java.util.List;
 public abstract class BindingImpl implements WSBinding {
 
     protected List<Handler> handlers; // may be logical/soap mixed
-    protected List<LogicalHandler> logicalHandlers;
-    protected List<SOAPHandler> soapHandlers;
-    
-    
+
+    protected HandlerConfiguration handlerConfig;
+
     private final BindingID bindingId;
 
     protected BindingImpl(List<Handler> handlerChain, BindingID bindingId) {
@@ -61,24 +59,20 @@ public abstract class BindingImpl implements WSBinding {
     }
 
 
-    /**
-     * Return a copy of the list. If there is a handler chain caller,
-     * this is the proper list. Otherwise, return a copy of 'handlers'.
-     *
-     * @return The list of handlers.
-     * The list may have a different order depending on
-     * whether or not the handlers have been called yet, since the
-     * logical and protocol handlers will be sorted before calling them.
-     */
-    public List<Handler> getHandlerChain() {
+    public @NotNull List<Handler> getHandlerChain() {
         if(handlers == null)
-            return null;
+            return Collections.emptyList();
         return new ArrayList<Handler>(handlers);
     }
 
     public boolean hasHandlers() {
         return !handlers.isEmpty();
     }
+
+    public HandlerConfiguration getHandlerConfig() {
+        return handlerConfig;
+    }
+
 
     /**
      * Sets the handlers on the binding and then
@@ -88,17 +82,15 @@ public abstract class BindingImpl implements WSBinding {
         handlers = chain;
         sortHandlers();
     }
-    
+
+    /**
+     * This is called when ever Binding.setHandlerChain() or SOAPBinding.setRoles()
+     * is called.
+     * This sorts out the Handlers into Logical and SOAP Handlers and
+     * sets the HandlerConfiguration.
+     */
     protected abstract void sortHandlers();
-    
-    public List<SOAPHandler> getSOAPHandlerChain(){
-        return soapHandlers;
-    }
-    
-    public List<LogicalHandler> getLogicalHandlerChain(){
-        return logicalHandlers;
-    }
-    
+
     public @NotNull BindingID getBindingId(){
         return bindingId;
     }

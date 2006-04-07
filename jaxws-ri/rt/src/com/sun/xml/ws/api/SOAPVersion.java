@@ -27,6 +27,7 @@ import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.namespace.QName;
 
 
 /**
@@ -61,12 +62,14 @@ public enum SOAPVersion {
     SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
             com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE,
             SOAPConstants.URI_SOAP_ACTOR_NEXT, "actor",
-            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL),
+            javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL,
+            new QName(com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE, "MustUnderstand")),
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
             SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER, "role",
-            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL);
+            javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL,
+            new QName(com.sun.xml.ws.encoding.soap.SOAP12Constants.URI_ENVELOPE, "MustUnderstand"));
 
     /**
      * Binding ID for SOAP/HTTP binding of this SOAP version.
@@ -81,6 +84,11 @@ public enum SOAPVersion {
      * SOAP envelope namespace URI.
      */
     public final String nsUri;
+
+    /**
+     * SOAP MustUnderstand FaultCode for this SOAP version
+     */
+    public final QName faultCodeMustUnderstand;
 
     /**
      * SAAJ {@link MessageFactory} for this SOAP version.
@@ -102,7 +110,8 @@ public enum SOAPVersion {
      */
     public final String roleAttributeName;
 
-    private SOAPVersion(String httpBindingId, String nsUri, String implicitRole, String roleAttributeName, String saajFactoryString) {
+    private SOAPVersion(String httpBindingId, String nsUri, String implicitRole, String roleAttributeName,
+                        String saajFactoryString, QName faultCodeMustUnderstand) {
         this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
         this.implicitRole = implicitRole;
@@ -113,6 +122,7 @@ public enum SOAPVersion {
         } catch (SOAPException e) {
             throw new Error(e);
         }
+        this.faultCodeMustUnderstand = faultCodeMustUnderstand;
     }
 
 

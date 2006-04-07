@@ -21,6 +21,7 @@ package com.sun.xml.ws.binding;
 
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
@@ -43,12 +44,13 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
     }
 
     /**
-     * This method separates the logical and protocol handlers.
+     * This method separates the logical and protocol handlers and
+     * sets the HandlerConfiguration.
      * Only logical handlers are allowed with HTTPBinding. 
      * Setting SOAPHandlers throws WebServiceException
      */
     protected void sortHandlers() {
-        logicalHandlers =  new ArrayList<LogicalHandler>();
+        List<LogicalHandler> logicalHandlers = new ArrayList<LogicalHandler>();
         if(handlers == null)
             return;
         for (Handler handler : handlers) {
@@ -57,6 +59,8 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
             } else {
                 logicalHandlers.add((LogicalHandler) handler);
             }            
-        }        
+        }
+        //TODO compute portUnderstoodHeaders
+        handlerConfig = new HandlerConfiguration(null, null,logicalHandlers,null,null);
     }
 }
