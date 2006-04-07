@@ -7,6 +7,8 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.Binding;
+import javax.xml.ws.handler.Handler;
+import java.util.List;
 
 /**
  * JAX-WS implementation of {@link Binding}.
@@ -67,4 +69,6 @@ public interface WSBinding extends Binding {
      *      Always non-null same value.
      */
     @NotNull BindingID getBindingId();
+
+    @NotNull List<Handler> getHandlerChain();
 }

@@ -135,22 +135,19 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
         masterPipeline.preDestroy();
 
-        List<Handler> handlerChain = binding.getHandlerChain();
-        if(handlerChain!=null) {
-            for (Handler handler : handlerChain) {
-                for (Method method : handler.getClass().getMethods()) {
-                    if (method.getAnnotation(PreDestroy.class) == null) {
-                        continue;
-                    }
-                    try {
-                        method.invoke(handler);
-                    } catch (Exception e) {
-                        logger.warning("exception ignored from handler " +
-                            "@PreDestroy method: " +
-                            e.getMessage());
-                    }
-                    break;
+        for (Handler handler : binding.getHandlerChain()) {
+            for (Method method : handler.getClass().getMethods()) {
+                if (method.getAnnotation(PreDestroy.class) == null) {
+                    continue;
                 }
+                try {
+                    method.invoke(handler);
+                } catch (Exception e) {
+                    logger.warning("exception ignored from handler " +
+                        "@PreDestroy method: " +
+                        e.getMessage());
+                }
+                break;
             }
         }
     }

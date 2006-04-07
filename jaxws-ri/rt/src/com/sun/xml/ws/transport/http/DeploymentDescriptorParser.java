@@ -221,8 +221,6 @@ public class DeploymentDescriptorParser<A> {
 
                 String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
-                setHandlersAndRoles(binding, reader, serviceName, portName);
-                ensureNoContent(reader);
 
                 // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
@@ -233,6 +231,9 @@ public class DeploymentDescriptorParser<A> {
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
                     );
+
+                setHandlersAndRoles(binding, reader, serviceName, portName);
+                ensureNoContent(reader);
 
                 adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
             } else {
