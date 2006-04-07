@@ -154,16 +154,16 @@ public class WSDLModeler extends WSDLModelerBase {
                 public void doneParsingEntity(QName element, Entity entity) {
                 }
             });
-            hSet = parser.getUse();
-
             extensions = Boolean.valueOf(_options.getProperty(ProcessorOptions.EXTENSION));
             
             useWSIBasicProfile = !extensions;
             if (_options.getProperty(ProcessorOptions.USE_WXF).equals("true")) {
                 parser.setUseWxf(true);
             }
-            document =
-                parser.parse();
+            document = parser.parse();
+            if(document == null)
+                return null;
+
             document.validateLocally();
 
             boolean validateWSDL =

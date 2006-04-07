@@ -41,8 +41,13 @@ import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 public class TWSDLParserContextImpl implements TWSDLParserContext {
 
     private final static String PREFIX_XMLNS = "xmlns";
+    private boolean _followImports;
+    private AbstractDocument _document;
+    private NamespaceSupport _nsSupport;
+    private ArrayList<ParserListener> _listeners;
+    private WSDLLocation _wsdlLocation;
 
-    public TWSDLParserContextImpl(AbstractDocument doc, ArrayList listeners) {
+    public TWSDLParserContextImpl(AbstractDocument doc, ArrayList<ParserListener> listeners) {
         _document = doc;
         _listeners = listeners;
         _nsSupport = new NamespaceSupport();
@@ -170,12 +175,4 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
     public String getWSDLLocation() {
         return _wsdlLocation.getLocation();
     }
-
-    private boolean _followImports;
-    private AbstractDocument _document;
-    private NamespaceSupport _nsSupport;
-    private ArrayList _listeners;
-    //bug fix:4856674
-    private WSDLLocation _wsdlLocation;
-
 }

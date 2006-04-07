@@ -71,9 +71,7 @@ public class Util {
     }
 
     public static void verifyTagNS(Element element, QName name) {
-        if (!element.getLocalName().equals(name.getLocalPart())
-            || (element.getNamespaceURI() != null
-                && !element.getNamespaceURI().equals(name.getNamespaceURI())))
+        if (!isTagName(element, name))
             fail(
                 "parsing.invalidTagNS",
                 new Object[] {
@@ -81,6 +79,13 @@ public class Util {
                     element.getNamespaceURI(),
                     name.getLocalPart(),
                     name.getNamespaceURI()});
+    }
+
+    public static boolean isTagName(Element element, QName name){
+        return (element.getLocalName().equals(name.getLocalPart())
+            && (element.getNamespaceURI() != null
+                && element.getNamespaceURI().equals(name.getNamespaceURI())));
+
     }
 
     public static void verifyTagNSRootElement(Element element, QName name) {

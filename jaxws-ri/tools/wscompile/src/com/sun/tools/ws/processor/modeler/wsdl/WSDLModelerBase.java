@@ -90,7 +90,6 @@ public abstract class WSDLModelerBase implements Modeler {
             new LocalizableMessageFactory("com.sun.tools.ws.resources.modeler");
         _conflictingClassNames = null;
         _env = modelInfo.getParent().getEnvironment();
-        hSet = null;
         reqResNames = new HashSet<String>();
     }
 
@@ -1018,5 +1017,4 @@ public abstract class WSDLModelerBase implements Modeler {
 
     protected WSDLParser parser;
     protected WSDLDocument document;
-    protected HashSet hSet;
 }

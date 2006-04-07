@@ -34,6 +34,10 @@ public class ParseException extends JAXWSExceptionBase {
         super(key, args);
     }
 
+    public ParseException(Localizable message){
+        super("localized.error", message);
+    }
+
     public ParseException(Throwable throwable) {
         super(throwable);
     }
