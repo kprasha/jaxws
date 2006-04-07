@@ -20,6 +20,8 @@
 
 package com.sun.xml.ws.streaming;
 
+import org.xml.sax.helpers.XMLReaderFactory;
+
 import java.util.Iterator;
 
 import javax.xml.namespace.QName;
