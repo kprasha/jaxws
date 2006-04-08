@@ -27,8 +27,10 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.http.HTTPBinding;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author WS Development Team
@@ -40,7 +42,8 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
      */
     HTTPBindingImpl(List<Handler> handlerChain) {
         // TODO: implement a real encoder/decoder for these
-        super(handlerChain, BindingID.XML_HTTP);
+        super(BindingID.XML_HTTP);
+        setHandlerConfig(createHandlerConfig(handlerChain,null,portKnownHeaders));
     }
 
     /**
@@ -49,18 +52,17 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
      * Only logical handlers are allowed with HTTPBinding. 
      * Setting SOAPHandlers throws WebServiceException
      */
-    protected void sortHandlers() {
+    protected HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
+                                                    Set<QName> portKnownHeaders) {
         List<LogicalHandler> logicalHandlers = new ArrayList<LogicalHandler>();
-        if(handlers == null)
-            return;
-        for (Handler handler : handlers) {
+        for (Handler handler : handlerChain) {
             if (!(handler instanceof LogicalHandler)) {
                 throw new WebServiceException(ClientMessages.NON_LOGICAL_HANDLER_SET(handler.getClass()));
             } else {
                 logicalHandlers.add((LogicalHandler) handler);
-            }            
+            }
         }
-        //TODO compute portUnderstoodHeaders
-        handlerConfig = new HandlerConfiguration(null, null,logicalHandlers,null,null);
+        //TODO compute portKnownHeaders
+        return new HandlerConfiguration(roles,portKnownHeaders,handlerChain,logicalHandlers,null,null);
     }
 }

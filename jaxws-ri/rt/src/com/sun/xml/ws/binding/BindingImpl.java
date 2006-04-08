@@ -28,10 +28,10 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
+import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
+import java.util.Set;
 
 /**
  * Instances are created by the service, which then
@@ -46,27 +46,17 @@ import java.util.Collections;
  */
 public abstract class BindingImpl implements WSBinding {
 
-    protected List<Handler> handlers; // may be logical/soap mixed
-
-    protected HandlerConfiguration handlerConfig;
-
+    private HandlerConfiguration handlerConfig;
+    protected Set<QName> portKnownHeaders;
     private final BindingID bindingId;
 
-    protected BindingImpl(List<Handler> handlerChain, BindingID bindingId) {
-        this.handlers = handlerChain;
-        sortHandlers();
+    protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
     }
 
 
     public @NotNull List<Handler> getHandlerChain() {
-        if(handlers == null)
-            return Collections.emptyList();
-        return new ArrayList<Handler>(handlers);
-    }
-
-    public boolean hasHandlers() {
-        return !handlers.isEmpty();
+        return handlerConfig.getHandlerChain();
     }
 
     public HandlerConfiguration getHandlerConfig() {
@@ -77,10 +67,10 @@ public abstract class BindingImpl implements WSBinding {
     /**
      * Sets the handlers on the binding and then
      * sorts the handlers in to logical and protocol handlers.
+     * Creates a new HandlerConfiguration object and sets it on the BindingImpl.
      */
     public void setHandlerChain(List<Handler> chain) {
-        handlers = chain;
-        sortHandlers();
+        setHandlerConfig(createHandlerConfig(chain,handlerConfig.getRoles(), portKnownHeaders));
     }
 
     /**
@@ -89,8 +79,12 @@ public abstract class BindingImpl implements WSBinding {
      * This sorts out the Handlers into Logical and SOAP Handlers and
      * sets the HandlerConfiguration.
      */
-    protected abstract void sortHandlers();
+    protected void setHandlerConfig(HandlerConfiguration handlerConfig) {
+        this.handlerConfig = handlerConfig;
+    }
 
+    protected abstract HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
+                                                             Set<QName> portKnownHeaders);
     public @NotNull BindingID getBindingId(){
         return bindingId;
     }

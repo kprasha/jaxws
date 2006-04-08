@@ -20,11 +20,10 @@
 package com.sun.xml.ws.client;
 
 import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.namespace.QName;
-import java.util.Set;
-import java.util.List;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * @author Rama Pulavarthi
@@ -42,31 +41,50 @@ import java.util.HashSet;
  */
 public class HandlerConfiguration {
     private final Set<String> roles;
+    /**
+     * This chain may contain both soap and logical handlers.
+     */
+    private final List<Handler> handlerChain;
     private final List<LogicalHandler> logicalHandlers;
     private final List<SOAPHandler> soapHandlers;
     private Set<QName> knownHeaders;
-
+    private Set<QName> handlerKnownHeaders;
     /**
      * @param roles                    This contains the roles assumed by the Binding implementation.
-     * @param portUnderstoodHeaders    This contains the headers that are bound to the current WSDL Port
+     * @param portKnownHeaders    This contains the headers that are bound to the current WSDL Port
+     * @param handlerChain             This contains the handler chain set on the Binding
      * @param logicalHandlers
      * @param soapHandlers
-     * @param handlerUnderstoodHeaders The set is comprised of headers returned from SOAPHandler.getHeaders()
+     * @param handlerKnownHeaders The set is comprised of headers returned from SOAPHandler.getHeaders()
      *                                 method calls.
      */
-    public HandlerConfiguration(Set<String> roles, Set<QName> portUnderstoodHeaders,
+    public HandlerConfiguration(Set<String> roles, Set<QName> portKnownHeaders,
+                                List<Handler> handlerChain,
                                 List<LogicalHandler> logicalHandlers, List<SOAPHandler> soapHandlers,
-                                Set<QName> handlerUnderstoodHeaders) {
+                                Set<QName> handlerKnownHeaders) {
         this.roles = roles;
+        this.handlerChain = handlerChain;
         this.logicalHandlers = logicalHandlers;
         this.soapHandlers = soapHandlers;
+        this.handlerKnownHeaders = handlerKnownHeaders;
         this.knownHeaders = new HashSet<QName>();
-        knownHeaders.addAll(portUnderstoodHeaders);
-        knownHeaders.addAll(handlerUnderstoodHeaders);
+        knownHeaders.addAll(portKnownHeaders);
+        knownHeaders.addAll(handlerKnownHeaders);
     }
 
     public Set<String> getRoles() {
         return roles;
+    }
+
+    /**
+     *
+     * @return return a copy of handler chain
+     */
+    public List<Handler> getHandlerChain() {
+        if(handlerChain == null)
+            return Collections.emptyList();
+        return new ArrayList<Handler>(handlerChain);
+
     }
 
     public List<LogicalHandler> getLogicalHandlers() {
@@ -79,6 +97,10 @@ public class HandlerConfiguration {
 
     public Set<QName> getKnownHeaders() {
         return knownHeaders;
+    }
+
+    public Set<QName> getHandlerKnownHeaders() {
+        return handlerKnownHeaders;
     }
 
 }

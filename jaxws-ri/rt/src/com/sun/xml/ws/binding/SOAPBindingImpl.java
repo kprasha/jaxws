@@ -64,9 +64,10 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     SOAPBindingImpl(
         BindingID bindingId, List<Handler> handlerChain, SOAPVersion soapVersion) {
 
-        super(handlerChain, bindingId);
+        super(bindingId);
         this.soapVersion = soapVersion;
         setup();
+        setHandlerConfig(createHandlerConfig(handlerChain, roles, portKnownHeaders));
         //Is this still required? comment out for now
         //setupSystemHandlerDelegate(serviceName);
 
@@ -94,29 +95,29 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      * Also parses Headers understood by SOAPHandlers and
      * sets the HandlerConfiguration.
      */
-    protected void sortHandlers() {
+    protected HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
+                                                             Set<QName> portKnownHeaders) {
         List<LogicalHandler> logicalHandlers = new ArrayList<LogicalHandler>();
         List<SOAPHandler> soapHandlers = new ArrayList<SOAPHandler>();
-        Set<QName> handlerUnderstoodHeaders = new HashSet<QName>();
+        Set<QName> handlerKnownHeaders = new HashSet<QName>();
 
-        if(handlers == null)
-            return;
-        for (Handler handler : handlers) {
+        for (Handler handler : handlerChain) {
             if (handler instanceof LogicalHandler) {
                 logicalHandlers.add((LogicalHandler) handler);
             } else if (handler instanceof SOAPHandler) {
                 soapHandlers.add((SOAPHandler) handler);
                 Set<QName> headers = ((SOAPHandler<?>) handler).getHeaders();
                 if (headers != null) {
-                    handlerUnderstoodHeaders.addAll(headers);
+                    handlerKnownHeaders.addAll(headers);
                 }
             } else {
                 throw new HandlerException("handler.not.valid.type",
                     handler.getClass());
             }
         }
-        //TODO compute portUnderstoodHeaders
-        handlerConfig = new HandlerConfiguration(roles, null,logicalHandlers,soapHandlers,handlerUnderstoodHeaders);
+        //TODO compute portKnownHeaders
+        return new HandlerConfiguration(roles,portKnownHeaders,handlerChain,
+                logicalHandlers,soapHandlers,handlerKnownHeaders);
     }
 
     protected void addRequiredRoles() {
@@ -127,9 +128,10 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         return roles;
     }
 
-    /*
+    /**
      * Adds the next and other roles in case this has
      * been called by a user without them.
+     * Creates a new HandlerConfiguration object and sets it on the BindingImpl.
      */
     public void setRoles(Set<String> roles) {
         if (roles == null) {
@@ -140,7 +142,10 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         }
         this.roles = roles;
         addRequiredRoles();
-        sortHandlers();
+        HandlerConfiguration oldConfig = getHandlerConfig();
+        setHandlerConfig(new HandlerConfiguration(roles, portKnownHeaders, oldConfig.getHandlerChain(),
+                oldConfig.getLogicalHandlers(),oldConfig.getSoapHandlers(),
+                oldConfig.getHandlerKnownHeaders()));
     }
 
 
