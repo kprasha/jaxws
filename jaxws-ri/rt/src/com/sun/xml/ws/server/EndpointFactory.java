@@ -71,7 +71,7 @@ public class EndpointFactory {
      * Nobody else should be calling this method.
      */
     public static <T> WSEndpoint<T> createEndpoint(
-        Class<T> implType, InstanceResolver<T> ir, QName serviceName, QName portName,
+        Class<T> implType, boolean processHandlerAnnotation, InstanceResolver<T> ir, QName serviceName, QName portName,
         Container container, WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
@@ -98,16 +98,16 @@ public class EndpointFactory {
         // setting a default binding
         if (binding == null)
             binding = BindingImpl.create(BindingID.parse(implType));
-        
+
         if (primaryWsdl != null) {
             verifyPrimaryWSDL(primaryWsdl, serviceName);
         }
-        
+
         QName portTypeName = null;
         if (implType.getAnnotation(WebServiceProvider.class)==null) {
             portTypeName = RuntimeModeler.getPortTypeName(implType);
         }
-        
+
         // Categorises the documents as WSDL, Schema etc
         List<SDDocumentImpl> docList = categoriseMetadata(md, serviceName, portTypeName);
         // Finds the primary WSDL and makes sure that metadata doesn't have
@@ -141,19 +141,9 @@ public class EndpointFactory {
                 }
                 terminal= new SEIInvokerPipe(seiModel,ir,binding);
             }
-
-            //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
-
-            if (binding.getHandlerChain() == null) {
-                HandlerAnnotationInfo chainInfo =
-                    HandlerAnnotationProcessor.buildHandlerInfo(
-                    implType, serviceName, portName, binding);
-                if (chainInfo != null) {
-                    binding.setHandlerChain(chainInfo.getHandlers());
-                    if (binding instanceof SOAPBinding) {
-                        ((SOAPBinding)binding).setRoles(chainInfo.getRoles());
-                    }
-                }
+            if (processHandlerAnnotation) {
+                //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
+                processHandlerAnnotation(binding, implType, serviceName, portName);
             }
         }
 
@@ -163,7 +153,7 @@ public class EndpointFactory {
                 primaryDoc = generateWSDL(binding, seiModel, docList);
             }
         }
-        
+
         // create WSDL model
         if (wsdlPort == null && primaryDoc != null) {
             wsdlPort = getWSDLPort(primaryDoc, docList, implType, serviceName, portName);
@@ -180,6 +170,20 @@ public class EndpointFactory {
         ServiceDefinitionImpl serviceDefiniton = (primaryDoc != null) ? new ServiceDefinitionImpl(docList, primaryDoc) : null;
 
         return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal);
+    }
+
+    private static <T> void processHandlerAnnotation(WSBinding binding, Class<T> implType, QName serviceName, QName portName) {
+        if (binding.getHandlerChain() == null) {
+            HandlerAnnotationInfo chainInfo =
+                    HandlerAnnotationProcessor.buildHandlerInfo(
+                            implType, serviceName, portName, binding);
+            if (chainInfo != null) {
+                binding.setHandlerChain(chainInfo.getHandlers());
+                if (binding instanceof SOAPBinding) {
+                    ((SOAPBinding) binding).setRoles(chainInfo.getRoles());
+                }
+            }
+        }
     }
 
 
@@ -318,7 +322,7 @@ public class EndpointFactory {
         }
         return r;
     }
-    
+
     /**
      * Verifies whether the given primaryWsdl contains the given serviceName.
      * If the WSDL doesn't have the service, it throws an WebServiceException.
@@ -334,7 +338,7 @@ public class EndpointFactory {
                     " since it doesn't have Service "+serviceName);
         }
     }
-    
+
     /**
      * Finds the primary WSDL document from the list of metadata documents. If
      * there are two metadata documents that qualify for primary, it throws an

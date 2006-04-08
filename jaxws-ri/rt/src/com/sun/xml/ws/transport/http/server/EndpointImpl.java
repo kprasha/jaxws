@@ -1,23 +1,22 @@
-
 /*
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the "License").  You may not use this file except
- * in compliance with the License.
- * 
- * You can obtain a copy of the license at
- * https://jwsdp.dev.java.net/CDDLv1.0.html
- * See the License for the specific language governing
- * permissions and limitations under the License.
- * 
- * When distributing Covered Code, include this CDDL
- * HEADER in each file and include the License file at
- * https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
- * add the following below this CDDL HEADER, with the
- * fields enclosed by brackets "[]" replaced with your
- * own identifying information: Portions Copyright [yyyy]
- * [name of copyright owner]
- */
+* The contents of this file are subject to the terms
+* of the Common Development and Distribution License
+* (the "License").  You may not use this file except
+* in compliance with the License.
+*
+* You can obtain a copy of the license at
+* https://jwsdp.dev.java.net/CDDLv1.0.html
+* See the License for the specific language governing
+* permissions and limitations under the License.
+*
+* When distributing Covered Code, include this CDDL
+* HEADER in each file and include the License file at
+* https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
+* add the following below this CDDL HEADER, with the
+* fields enclosed by brackets "[]" replaced with your
+* own identifying information: Portions Copyright [yyyy]
+* [name of copyright owner]
+*/
 
 package com.sun.xml.ws.transport.http.server;
 
@@ -31,6 +30,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.istack.NotNull;
+
 import java.net.MalformedURLException;
 
 import javax.xml.namespace.QName;
@@ -54,13 +54,13 @@ import org.xml.sax.EntityResolver;
 
 /**
  * Implements {@link Endpoint}.
- *
- * <p>
+ * <p/>
+ * <p/>
  * This class accumulates the information necessary to create
  * {@link WSEndpoint}, and then when {@link #publish} method
  * is called it will be created.
- *
- * <p>
+ * <p/>
+ * <p/>
  * This object also allows accumulated information to be retrieved.
  *
  * @author Jitendra Kotamraju
@@ -68,12 +68,12 @@ import org.xml.sax.EntityResolver;
 public class EndpointImpl extends Endpoint {
 
     private static final WebServicePermission ENDPOINT_PUBLISH_PERMISSION =
-        new WebServicePermission("publishEndpoint");
+            new WebServicePermission("publishEndpoint");
 
     /**
      * Once the service is published, this field will
      * be set to the {@link HttpEndpoint} instance.
-     *
+     * <p/>
      * But don't declare the type as {@link HttpEndpoint}
      * to avoid static type dependency that cause the class loading to
      * fail if the LW HTTP server doesn't exist.
@@ -85,9 +85,8 @@ public class EndpointImpl extends Endpoint {
     private final Object implementor;
     private List<Source> metadata;
     private Executor executor;
-    private Map<String,Object> properties = Collections.emptyMap(); // always non-null
+    private Map<String, Object> properties = Collections.emptyMap(); // always non-null
     private boolean stopped;
-
 
 
     public EndpointImpl(@NotNull BindingID bindingId, @NotNull Object impl) {
@@ -99,12 +98,11 @@ public class EndpointImpl extends Endpoint {
      * Wraps an already created {@link WSEndpoint} into an {@link EndpointImpl},
      * and immediately publishes it with the given context.
      *
-     * @deprecated
-     *      This is a backdoor method. Don't use it unless you know what you are doing.
+     * @deprecated This is a backdoor method. Don't use it unless you know what you are doing.
      */
     public EndpointImpl(WSEndpoint wse, Object serverContext) {
         actualEndpoint = new HttpEndpoint(wse, executor);
-        ((HttpEndpoint)actualEndpoint).publish(serverContext);
+        ((HttpEndpoint) actualEndpoint).publish(serverContext);
         binding = wse.getBinding();
         implementor = null; // this violates the semantics, but hey, this is a backdoor.
     }
@@ -123,38 +121,38 @@ public class EndpointImpl extends Endpoint {
         try {
             url = new URL(address);
         } catch (MalformedURLException ex) {
-            throw new IllegalArgumentException("Cannot create URL for this address "+address);
+            throw new IllegalArgumentException("Cannot create URL for this address " + address);
         }
         if (!url.getProtocol().equals("http")) {
-            throw new IllegalArgumentException(url.getProtocol()+" protocol based address is not supported");
+            throw new IllegalArgumentException(url.getProtocol() + " protocol based address is not supported");
         }
         if (!url.getPath().startsWith("/")) {
-            throw new IllegalArgumentException("Incorrect WebService address="+address+
+            throw new IllegalArgumentException("Incorrect WebService address=" + address +
                     ". The address's path should start with /");
         }
         createEndpoint();
-        ((HttpEndpoint)actualEndpoint).publish(address);
+        ((HttpEndpoint) actualEndpoint).publish(address);
     }
 
     public void publish(Object serverContext) {
         canPublish();
         if (!com.sun.net.httpserver.HttpContext.class.isAssignableFrom(serverContext.getClass())) {
-            throw new IllegalArgumentException(serverContext.getClass()+" is not a supported context.");
+            throw new IllegalArgumentException(serverContext.getClass() + " is not a supported context.");
         }
         createEndpoint();
-        ((HttpEndpoint)actualEndpoint).publish(serverContext);
+        ((HttpEndpoint) actualEndpoint).publish(serverContext);
     }
 
     public void stop() {
         if (isPublished()) {
-            ((HttpEndpoint)actualEndpoint).stop();
+            ((HttpEndpoint) actualEndpoint).stop();
             actualEndpoint = null;
             stopped = true;
         }
     }
 
     public boolean isPublished() {
-        return actualEndpoint!=null;
+        return actualEndpoint != null;
     }
 
     public List<Source> getMetadata() {
@@ -176,7 +174,7 @@ public class EndpointImpl extends Endpoint {
         this.executor = executor;
     }
 
-    public Map<String,Object> getProperties() {
+    public Map<String, Object> getProperties() {
         return new HashMap<String, Object>(properties);
     }
 
@@ -198,20 +196,20 @@ public class EndpointImpl extends Endpoint {
         // See if HttpServer implementation is available
         try {
             Class.forName("com.sun.net.httpserver.HttpServer");
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new UnsupportedOperationException("NOT SUPPORTED");
         }
 
         WSEndpoint wse = WSEndpoint.create(
-            (Class) implementor.getClass(),
-            InstanceResolver.createSingleton(implementor),
-            getProperty(QName.class, Endpoint.WSDL_SERVICE),
-            getProperty(QName.class, Endpoint.WSDL_PORT),
-            null /* no container */,
-            binding,
-            null, /* TODO: how do we find a primary WSDL? */
-            buildDocList(),
-            (EntityResolver)null
+                (Class) implementor.getClass(), true,
+                InstanceResolver.createSingleton(implementor),
+                getProperty(QName.class, Endpoint.WSDL_SERVICE),
+                getProperty(QName.class, Endpoint.WSDL_PORT),
+                null /* no container */,
+                binding,
+                null, /* TODO: how do we find a primary WSDL? */
+                buildDocList(),
+                (EntityResolver) null
         );
         // Don't load HttpEndpoint class before as it may load HttpServer classes
         actualEndpoint = new HttpEndpoint(wse, executor);
@@ -219,11 +217,11 @@ public class EndpointImpl extends Endpoint {
 
     private <T> T getProperty(Class<T> type, String key) {
         Object o = properties.get(key);
-        if(o==null)     return null;
-        if(type.isInstance(o))
+        if (o == null) return null;
+        if (type.isInstance(o))
             return type.cast(o);
         else
-            throw new IllegalArgumentException("Property "+key+" has to be of type "+type);   // i18n
+            throw new IllegalArgumentException("Property " + key + " has to be of type " + type);   // i18n
     }
 
     /**
@@ -235,17 +233,17 @@ public class EndpointImpl extends Endpoint {
 
         if (metadata != null) {
             Transformer transformer = XmlUtil.newTransformer();
-            for(Source source: metadata) {
+            for (Source source : metadata) {
                 try {
                     XMLStreamBufferResult xsbr = new XMLStreamBufferResult();
                     transformer.transform(source, xsbr);
                     String systemId = source.getSystemId();
 
-                    r.add(SDDocumentSource.create(new URL(systemId),xsbr.getXMLStreamBuffer()));
+                    r.add(SDDocumentSource.create(new URL(systemId), xsbr.getXMLStreamBuffer()));
                 } catch (TransformerException te) {
-                    throw new ServerRtException("server.rt.err",te);
+                    throw new ServerRtException("server.rt.err", te);
                 } catch (IOException te) {
-                    throw new ServerRtException("server.rt.err",te);
+                    throw new ServerRtException("server.rt.err", te);
                 }
             }
         }
@@ -256,11 +254,11 @@ public class EndpointImpl extends Endpoint {
     private void canPublish() {
         if (isPublished()) {
             throw new IllegalStateException(
-                "Cannot publish this endpoint. Endpoint has been already published.");
+                    "Cannot publish this endpoint. Endpoint has been already published.");
         }
         if (stopped) {
             throw new IllegalStateException(
-                "Cannot publish this endpoint. Endpoint has been already stopped.");
+                    "Cannot publish this endpoint. Endpoint has been already stopped.");
         }
     }
 

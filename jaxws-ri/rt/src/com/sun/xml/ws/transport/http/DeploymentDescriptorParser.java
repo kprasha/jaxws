@@ -224,17 +224,15 @@ public class DeploymentDescriptorParser<A> {
 
                 // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
-
+                boolean handlersSetInDD = setHandlersAndRoles(binding, reader, serviceName, portName);
+                
+                ensureNoContent(reader);
                 WSEndpoint<?> endpoint = WSEndpoint.create(
-                    implementorClass,
+                    implementorClass,!handlersSetInDD,
                     InstanceResolver.createSingleton(getImplementor(implementorClass)),
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
                     );
-
-                setHandlersAndRoles(binding, reader, serviceName, portName);
-                ensureNoContent(reader);
-
                 adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
             } else {
                 failWithLocalName("runtime.parser.invalidElement", reader);
@@ -409,15 +407,17 @@ public class DeploymentDescriptorParser<A> {
     /**
      * Parses the handler and role information and sets it
      * on the {@link WSBinding}.
+     * @return true if <handler-chains> element present in DD
+     *         false otherwise.
      */
-    protected void setHandlersAndRoles(WSBinding binding, XMLStreamReader reader, QName serviceName, QName portName) {
+    protected boolean setHandlersAndRoles(WSBinding binding, XMLStreamReader reader, QName serviceName, QName portName) {
 
         if (XMLStreamReaderUtil.nextElementContent(reader) ==
             XMLStreamConstants.END_ELEMENT ||
             !reader.getName().equals(
             HandlerChainsModel.QNAME_HANDLER_CHAINS)) {
 
-            return;
+            return false;
         }
 
         HandlerAnnotationInfo handlerInfo = HandlerChainsModel.parseHandlerFile(
@@ -430,6 +430,7 @@ public class DeploymentDescriptorParser<A> {
 
         // move past </handler-chains>
         XMLStreamReaderUtil.nextContent(reader);
+        return true;
     }
 
     protected static void ensureNoContent(XMLStreamReader reader) {

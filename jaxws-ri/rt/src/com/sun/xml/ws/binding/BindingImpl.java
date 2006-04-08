@@ -32,6 +32,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 
 /**
  * Instances are created by the service, which then
@@ -47,7 +48,7 @@ import java.util.Set;
 public abstract class BindingImpl implements WSBinding {
 
     private HandlerConfiguration handlerConfig;
-    protected Set<QName> portKnownHeaders;
+    protected final Set<QName> portKnownHeaders = Collections.<QName>emptySet();
     private final BindingID bindingId;
 
     protected BindingImpl(BindingID bindingId) {
@@ -84,7 +85,7 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     protected abstract HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
-                                                             Set<QName> portKnownHeaders);
+                                                                Set<QName> portKnownHeaders);
     public @NotNull BindingID getBindingId(){
         return bindingId;
     }
@@ -103,12 +104,12 @@ public abstract class BindingImpl implements WSBinding {
 
     public static BindingImpl create(@NotNull BindingID bindingId) {
         if(bindingId.equals(BindingID.XML_HTTP))
-            return new HTTPBindingImpl(null);
+            return new HTTPBindingImpl(Collections.<Handler>emptyList());
         else
-            return new SOAPBindingImpl(bindingId, null, bindingId.getSOAPVersion());
+            return new SOAPBindingImpl(bindingId, Collections.<Handler>emptyList(), bindingId.getSOAPVersion());
     }
 
     public static WSBinding getDefaultBinding() {
-        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, null, SOAPVersion.SOAP_11);
+        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, Collections.<Handler>emptyList(), SOAPVersion.SOAP_11);
     }
 }
