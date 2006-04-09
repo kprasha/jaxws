@@ -53,6 +53,7 @@ public class MimeMultipartRelatedDecoder implements Decoder {
     private byte[] prevBuffer;
 
     private Map<String, StreamAttachment> attachemnts;
+    private StreamAttachment root;
     private final Decoder mtomDecoder;
     private final Decoder soapDecoder;
 
@@ -68,6 +69,8 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         this.version = version;
         mtomDecoder = new MtomDecoder(this, version);
         soapDecoder = StreamSOAPDecoder.create(version);
+        
+        init();
     }
 
     private void init(){
@@ -151,6 +154,51 @@ public class MimeMultipartRelatedDecoder implements Decoder {
         // BUG: not allowed to leave a message without a packet - KK
         throw new UnsupportedOperationException();
     }
+    
+    public void decode(InputStream in, String contentType) throws IOException {
+        init();
+        try {
+            ct = new ContentType(contentType);
+            boundary = ct.getParameter("boundary");
+            if (boundary == null || boundary.equals(""))
+                throw new WebServiceException("MIME boundary parameter not found" + ct.toString());
+            String bnd = "--" + boundary;
+            boundaryBytes = ASCIIUtility.getBytes(bnd);
+            start = ct.getParameter("start");
+        } catch (ParseException e) {
+            throw new WebServiceException(e);
+        }
+
+        //InputStream MUST support mark()
+        if (!in.markSupported()) {
+            this.in = new BufferedInputStream(in);
+        } else {
+            this.in = in;
+        }
+    }
+    
+    public StreamAttachment getPrimaryPart() {
+        try {
+            if (start == null) {
+                getMIMEPart("XXXXXXX");
+                return root;
+            } else {
+                return getMIMEPart(start);
+            }
+        } catch(IOException ioe) {
+            throw new WebServiceException(ioe);
+        }
+            
+    }
+    
+    public Map<String, StreamAttachment> getOtherParts() {
+        try {
+            getMIMEPart("XXXX"); //TODO
+        return attachemnts;
+        } catch(IOException ioe) {
+            throw new WebServiceException(ioe);
+        }
+    }
 
     public void decode(ReadableByteChannel in, String contentType, Packet packet) {
         throw new UnsupportedOperationException();
@@ -223,6 +271,9 @@ public class MimeMultipartRelatedDecoder implements Decoder {
 
                 ByteOutputStream bos = getNextPart();
                 StreamAttachment as = new StreamAttachment(bos.getBytes(), 0, bos.getCount(), contentType, contentId);
+if (root == null) {
+    root = as;
+}                
                 attachemnts.put(contentId, as);
                 if (ids[0].equals(contentId))
                     return as;

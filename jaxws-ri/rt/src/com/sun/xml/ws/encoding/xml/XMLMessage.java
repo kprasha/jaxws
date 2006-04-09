@@ -20,56 +20,29 @@
 
 package com.sun.xml.ws.encoding.xml;
 
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.messaging.saaj.packaging.mime.MessagingException;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
-import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
-import com.sun.xml.messaging.saaj.packaging.mime.internet.MimeBodyPart;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.MimeMultipart;
-import com.sun.xml.messaging.saaj.util.ByteInputStream;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import com.sun.xml.ws.protocol.xml.XMLMessageException;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.sandbox.impl.XMLHTTPDecoder;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
-import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.util.FastInfosetReflection;
-import com.sun.xml.ws.util.FastInfosetUtil;
-import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import java.io.ByteArrayOutputStream;
-import java.lang.UnsupportedOperationException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import javax.activation.DataHandler;
 
 import javax.activation.DataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.http.HTTPException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,7 +75,7 @@ public final class XMLMessage {
      * received, there's two parts -- the transport headers and the
      * message content in a transport specific stream.
      */
-    private static Message create(final String ct, final InputStream in) {
+    public static Message create(final String ct, final InputStream in) {
         Message data;
         try {
             if (ct != null) {
@@ -151,31 +124,7 @@ public final class XMLMessage {
             return Messages.create(marshaller,  object, SOAPVersion.SOAP_11);
         }
     }
-    
 
-    public static Message create(Source source, Map<String, DataHandler> attachments) {
-        if (attachments == null) {
-            return create(source);
-        } else {
-            if (source == null) {
-                return new UnknownContent(attachments);
-            } else {
-                return new XMLMultiPart(source, attachments);
-            }
-        }
-    }
-    
-    public static Message create(Object object, JAXBContext context, Map<String, DataHandler> attachments) {
-        if (attachments == null) {
-            return (object == null) ? Messages.createEmpty(SOAPVersion.SOAP_11) : create(object, context);
-        } else {
-            if (object == null) {
-                return new UnknownContent(attachments);
-            } else {
-                return new XMLMultiPart(JAXBTypeSerializer.serialize(object, context), attachments);
-            }
-        }
-    }
 
     /**
      * Verify a contentType.
@@ -238,46 +187,12 @@ public final class XMLMessage {
      * This class parses {@link MimeMultipart} lazily.
      */
     private static final class XMLMultiPart extends AbstractMessageImpl implements HasDataSource {
-        private DataSource dataSource;
-        private MimeMultipart multipart;
-        private final MimeHeaders headers = new MimeHeaders();
+        private final DataSource dataSource;
+        private Message message = null;
 
         public XMLMultiPart(final String contentType, final InputStream is) {
             super(SOAPVersion.SOAP_11);
-            dataSource = new DataSource() {
-                public InputStream getInputStream() {
-                    return is;
-                }
-
-                public OutputStream getOutputStream() {
-                    return null;
-                }
-
-                public String getContentType() {
-                    return contentType;
-                }
-
-                public String getName() {
-                    return "";
-                }
-            };
-        }
-        
-        public XMLMultiPart(Source source, final Map<String, DataHandler> atts) {
-            super(SOAPVersion.SOAP_11);
-            multipart = new MimeMultipart("related");
-            multipart.getContentType().setParameter("type", "text/xml");
-
-            // Creates Primary part
-            MimeBodyPart rootPart = new MimeBodyPart();
-            rootPart.setContent(source, "text/xml");
-            multipart.addBodyPart(rootPart, 0);
-
-            for(Map.Entry<String, DataHandler> e : atts.entrySet()) {
-                MimeBodyPart part = new MimeBodyPart();
-                part.setDataHandler(e.getValue());
-                multipart.addBodyPart(part);
-            }
+            dataSource = createDataSource(contentType, is);
         }
 
         public XMLMultiPart(DataSource dataSource) {
@@ -286,101 +201,30 @@ public final class XMLMessage {
         }
 
         public DataSource getDataSource() {
-            if (dataSource != null) {
-                return dataSource;
-            } else if (multipart != null) {
-                return new DataSource() {
-                    public InputStream getInputStream() {
-                        try {
-                            ByteOutputStream bos = new ByteOutputStream();
-                            multipart.writeTo(bos);
-                            return bos.newInputStream();
-                        } catch(MessagingException me) {
-                            throw new XMLMessageException("xml.get.ds.err",me);
-                        } catch(IOException ioe) {
-                            throw new XMLMessageException("xml.get.ds.err",ioe);
-                        }
-                    }
-
-                    public OutputStream getOutputStream() {
-                        return null;
-                    }
-
-                    public String getContentType() {
-                        return multipart.getContentType().toString();
-                    }
-
-                    public String getName() {
-                        return "";
-                    }
-                };
-            }
-            return null;
-        }
-
-        private MimeBodyPart getRootPart() {
-            try {
-                convertToMultipart();
-                ContentType contentType = multipart.getContentType();
-                String startParam = contentType.getParameter("start");
-                MimeBodyPart sourcePart = (startParam == null)
-                    ? (MimeBodyPart)multipart.getBodyPart(0)
-                    : (MimeBodyPart)multipart.getBodyPart(startParam);
-                return sourcePart;
-            }
-            catch (MessagingException ex) {
-                throw new XMLMessageException("xml.get.source.err",ex);
-            }
-        }
-
-        private void convertToMultipart() {
-            if (dataSource != null) {
-                try {
-                    multipart = new MimeMultipart(dataSource,null);
-                    dataSource = null;
-                } catch (MessagingException ex) {
-                    throw new XMLMessageException("xml.get.source.err",ex);
-                }
-            }
-        }
-
-        public void writeTo(OutputStream out, boolean useFastInfoset) {
-            try {
-                // Try to use dataSource whenever possible
-                if (dataSource != null) {
-                    InputStream is = dataSource.getInputStream();
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = is.read(buf)) != -1) {
-                        out.write(buf, 0, len);
-                    }
-                    return;     // we're done
-                }     
-                multipart.writeTo(out);
-            }
-            catch(Exception e) {
-                throw new WebServiceException(e);
-            }
+            assert dataSource != null;
+            return dataSource;
         }
         
-        MimeHeaders getMimeHeaders() {
-            headers.removeHeader("Content-Type");
-            if (dataSource != null) {
-                headers.addHeader("Content-Type", dataSource.getContentType());
-            } else {
-                if (multipart != null ) {
-                    headers.addHeader("Content-Type", multipart.getContentType().toString());
+        private void convertDataSourceToMessage() {
+            if (message != null) {
+                try {
+                    message = XMLHTTPDecoder.INSTANCE.decodeXMLMultipart(dataSource.getInputStream(), dataSource.getContentType());
+                } catch(IOException ioe) {
+                    throw new WebServiceException(ioe);
                 }
             }
-            return headers;
         }
 
         protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
             throw new UnsupportedOperationException();
         }
+        
+        public boolean isFault() {
+            return false;
+        }
 
         public boolean hasHeaders() {
-            throw new UnsupportedOperationException();
+            return false;
         }
 
         public HeaderList getHeaders() {
@@ -400,27 +244,27 @@ public final class XMLMessage {
         }
 
         public Source readPayloadAsSource() {
-            // Otherwise, parse MIME package and find root part
-            convertToMultipart();
-            MimeBodyPart sourcePart = getRootPart();
-            try {
-                // Return a StreamSource or FastInfosetSource depending on type
-                return new StreamSource(sourcePart.getInputStream());
-            } catch (IOException ex) {
-                throw new WebServiceException(ex);
-            }
+            convertDataSourceToMessage();
+            return message.readPayloadAsSource();
         }
 
         public XMLStreamReader readPayload() throws XMLStreamException {
-            return SourceReaderFactory.createSourceReader(readPayloadAsSource(), true);
+            convertDataSourceToMessage();
+            return message.readPayload();
         }
 
         public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
-            new XMLStreamReaderToXMLStreamWriter().bridge(readPayload(), sw);
+            convertDataSourceToMessage();
+            message.writePayloadTo(sw);
         }
 
         public Message copy() {
-            throw new UnsupportedOperationException();
+            convertDataSourceToMessage();
+            return message.copy();
+        }
+
+        public boolean hasUnconsumedDataSource() {
+            return message == null;
         }
 
     }
@@ -433,64 +277,25 @@ public final class XMLMessage {
      * This could be used to represent image/jpeg etc
      */
     public static class UnknownContent extends AbstractMessageImpl implements HasDataSource {
-        private final String ct;
-        private final InputStream in;
-        private final MimeMultipart multipart;
-        private final MimeHeaders headers = new MimeHeaders();
+        private final DataSource ds;
         
-        public UnknownContent(String ct, InputStream in) {
+        public UnknownContent(final String ct, final InputStream in) {
             super(SOAPVersion.SOAP_11);
-            this.ct = ct;
-            this.in = in;
-            this.multipart = null;
+            ds = createDataSource(ct, in);
         }
         
-        public UnknownContent(Map<String, DataHandler> atts) {
+        public UnknownContent(DataSource ds) {
             super(SOAPVersion.SOAP_11);
-            this.in = null;
-            multipart = new MimeMultipart("mixed");
-            for(Map.Entry<String, DataHandler> e : atts.entrySet()) {
-                MimeBodyPart part = new MimeBodyPart();
-                part.setDataHandler(e.getValue());
-                multipart.addBodyPart(part);
-            }
-            this.ct = multipart.getContentType().toString();
+            this.ds = ds;
+        }
+        
+        public boolean hasUnconsumedDataSource() {
+            return true;
         }
 
         public DataSource getDataSource() {
-            return new DataSource() {
-                public InputStream getInputStream() {
-                    if (multipart != null) {
-                        try {
-                            ByteOutputStream bos = new ByteOutputStream();
-                            multipart.writeTo(bos);
-                            return bos.newInputStream();
-                        } catch(Exception ioe) {
-                            throw new WebServiceException(ioe);
-                        }
-                    }
-                    return in;
-                }
-
-                public OutputStream getOutputStream() {
-                    return null;
-                }
-
-                public String getContentType() {
-                    assert ct != null;
-                    return ct;
-                }
-
-                public String getName() {
-                    return "";
-                }
-            };
-        }
-
-        MimeHeaders getMimeHeaders() {
-            headers.removeHeader("Content-Type");
-            headers.addHeader("Content-Type", ct);
-            return headers;
+            assert ds != null;
+            return ds;
         }
 
         protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
@@ -498,6 +303,10 @@ public final class XMLMessage {
         }
 
         public boolean hasHeaders() {
+            return false;
+        }
+        
+        public boolean isFault() {
             return false;
         }
 
@@ -522,7 +331,7 @@ public final class XMLMessage {
         }
 
         public XMLStreamReader readPayload() throws XMLStreamException {
-            throw new WebServiceException("There is not XML payload. Shouldn't come here.");
+            throw new WebServiceException("There isn't XML payload. Shouldn't come here.");
         }
 
         public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
@@ -536,6 +345,7 @@ public final class XMLMessage {
     }
     
     public static interface HasDataSource {
+        boolean hasUnconsumedDataSource();
         DataSource getDataSource();
     }
     
@@ -570,6 +380,26 @@ public final class XMLMessage {
             };
         }
         
+    }
+    
+    public static DataSource createDataSource(final String contentType, final InputStream is) {
+        return new DataSource() {
+            public InputStream getInputStream() {
+                return is;
+            }
+
+            public OutputStream getOutputStream() {
+                return null;
+            }
+
+            public String getContentType() {
+                return contentType;
+            }
+
+            public String getName() {
+                return "";
+            }
+        };
     }
     
 }

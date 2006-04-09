@@ -4,10 +4,13 @@
 
 package com.sun.xml.ws.client.dispatch;
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.encoding.xml.XMLMessage;
+import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
 
 import javax.activation.DataSource;
 import javax.xml.namespace.QName;
@@ -44,7 +47,7 @@ public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
         return new Packet(message);
         */
-        throw new UnsupportedOperationException();
+        return new Packet(XMLMessage.create(arg));
     }
 
     DataSource toReturnValue(Packet response) {
@@ -61,6 +64,13 @@ public class DataSourceDispatch extends DispatchImpl<DataSource> {
                 throw new WebServiceException("Unrecognized dispatch mode");
         }
         */
+        Message message = response.getMessage();
+        if (message instanceof HasDataSource) {
+            HasDataSource hasDS = (HasDataSource)message;
+            // TODO Need to call hasUnconsumedDataSource()
+            return hasDS.getDataSource();
+        }
+        // TODO need to convert message to DataSource
         throw new UnsupportedOperationException();
     }
 }

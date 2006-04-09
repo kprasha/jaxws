@@ -22,6 +22,7 @@ package com.sun.xml.ws.binding;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import java.util.Collections;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
@@ -63,6 +64,6 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
             }
         }
         //TODO compute portKnownHeaders
-        return new HandlerConfiguration(roles,portKnownHeaders,handlerChain,logicalHandlers,null,null);
+        return new HandlerConfiguration(roles,portKnownHeaders,handlerChain,logicalHandlers,null,Collections.<QName>emptySet());
     }
 }
