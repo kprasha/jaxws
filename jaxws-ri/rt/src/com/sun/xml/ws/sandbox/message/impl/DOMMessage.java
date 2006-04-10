@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.istack.FragmentContentHandler;
 import org.w3c.dom.Element;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -103,7 +104,9 @@ public final class DOMMessage extends AbstractMessageImpl {
         }
     }
 
-    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
+        if(fragment)
+            contentHandler = new FragmentContentHandler(contentHandler);
         DOMScanner ds = new DOMScanner();
         ds.setContentHandler(contentHandler);
         ds.scan(payload);

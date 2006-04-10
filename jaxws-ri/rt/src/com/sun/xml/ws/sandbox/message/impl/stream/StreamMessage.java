@@ -21,7 +21,6 @@ package com.sun.xml.ws.sandbox.message.impl.stream;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -227,14 +226,14 @@ public final class StreamMessage extends AbstractMessageImpl {
         writer.writeEndElement();
     }
 
-    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
         assert unconsumed();
         try {
             if(payloadLocalName==null)
                 return; // no body
 
             XMLStreamReaderToContentHandler conv =
-                new XMLStreamReaderToContentHandler(reader,contentHandler,true,true);
+                new XMLStreamReaderToContentHandler(reader,contentHandler,true,fragment);
             conv.bridge();
             reader.close();
         } catch (XMLStreamException e) {
@@ -282,7 +281,7 @@ public final class StreamMessage extends AbstractMessageImpl {
         }
         headerTag.writeEnd(contentHandler);
         bodyTag.writeStart(contentHandler);
-        writePayloadTo(contentHandler,errorHandler);
+        writePayloadTo(contentHandler,errorHandler, true);
         bodyTag.writeEnd(contentHandler);
         envelopeTag.writeEnd(contentHandler);
 

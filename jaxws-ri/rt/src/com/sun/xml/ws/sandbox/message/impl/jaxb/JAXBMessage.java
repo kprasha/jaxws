@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.sandbox.message.impl.RootElementSniffer;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
+import com.sun.istack.FragmentContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -224,9 +225,10 @@ public final class JAXBMessage extends AbstractMessageImpl {
     /**
      * Writes the payload as SAX events.
      */
-    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
         try {
-            // TODO: wrap this into a fragment filter
+            if(fragment)
+                contentHandler = new FragmentContentHandler(contentHandler);
             bridge.marshal(context,jaxbObject,contentHandler);
         } catch (JAXBException e) {
             errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));

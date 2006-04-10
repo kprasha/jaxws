@@ -73,8 +73,8 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
         message.writeTo(contentHandler, errorHandler);
     }
 
-    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        message.writePayloadTo(contentHandler, errorHandler);
+    protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
+        message.writePayloadTo(contentHandler, errorHandler, fragment);
     }
 
     public Message copy() {

@@ -142,7 +142,7 @@ public abstract class AbstractMessageImpl extends Message {
         contentHandler.endElement(soapNsUri,"Header","S:Header");
         // write the body
         contentHandler.startElement(soapNsUri,"Body","S:Body",EMPTY_ATTS);
-        writePayloadTo(contentHandler,errorHandler);
+        writePayloadTo(contentHandler,errorHandler, true);
         contentHandler.endElement(soapNsUri,"Body","S:Body");
         contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
     }
@@ -150,9 +150,12 @@ public abstract class AbstractMessageImpl extends Message {
     /**
      * Writes the payload to SAX events.
      *
-     * This method shall always write a fragment without start/endDocument events.
+     * @param fragment
+     *      if true, this method will fire SAX events without start/endDocument events,
+     *      suitable for embedding this into a bigger SAX event sequence.
+     *      if false, this method generaets a completely SAX event sequence on its own.
      */
-    protected abstract void writePayloadTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException;
+    protected abstract void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException;
 
     /**
      * Default implementation that uses {@link #writeTo(ContentHandler, ErrorHandler)}

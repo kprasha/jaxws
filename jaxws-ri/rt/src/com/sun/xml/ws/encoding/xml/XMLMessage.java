@@ -27,7 +27,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.sandbox.impl.XMLHTTPDecoder;
 import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
@@ -215,7 +214,7 @@ public final class XMLMessage {
             }
         }
 
-        protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
             throw new UnsupportedOperationException();
         }
         
@@ -298,7 +297,7 @@ public final class XMLMessage {
             return ds;
         }
 
-        protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        protected void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
             throw new UnsupportedOperationException();
         }
 

@@ -78,7 +78,7 @@ public class ProtocolSourceMessage extends AbstractMessageImpl {
         throw new UnsupportedOperationException();
     }
 
-    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
         throw new UnsupportedOperationException();
     }
 
