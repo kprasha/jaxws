@@ -33,12 +33,6 @@ import javax.xml.transform.sax.SAXSource;
  */
 final class XMLReaderImpl extends XMLFilterImpl {
 
-    /**
-     * {@link ContentHandler} to fire events to.
-     * We use a dummy instance to make sure this will never be null.
-     */
-    private ContentHandler  contentHandler = DUMMY;
-
     private final Message msg;
 
     XMLReaderImpl(Message msg) {
@@ -63,14 +57,14 @@ final class XMLReaderImpl extends XMLFilterImpl {
 
     @Override
     public ContentHandler getContentHandler() {
-        if(contentHandler==DUMMY)   return null;
-        return contentHandler;
+        if(super.getContentHandler()==DUMMY)   return null;
+        return super.getContentHandler();
     }
 
     @Override
     public void setContentHandler(ContentHandler contentHandler) {
         if(contentHandler==null)    contentHandler = DUMMY;
-        this.contentHandler = contentHandler;
+        super.setContentHandler(contentHandler);
     }
 
     private static final ContentHandler DUMMY = new DefaultHandler();
