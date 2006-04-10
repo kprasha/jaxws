@@ -20,30 +20,21 @@
 
 package com.sun.xml.ws.handler;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.stream.buffer.sax.SAXBufferCreator;
-import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.encoding.soap.DeserializationException;
-import com.sun.xml.ws.encoding.soap.SerializationException;
-import com.sun.xml.ws.util.ASCIIUtility;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.WebServiceException;
-import com.sun.xml.ws.encoding.jaxb.JAXBTypeSerializer;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 /**
  * Implementation of {@link LogicalMessage}. This class implements the methods
@@ -124,21 +115,23 @@ public class LogicalMessageImpl implements LogicalMessage {
      */
     public Object getPayload(JAXBContext context) {
         try {
-            Source src = getPayload(); 
-            return JAXBTypeSerializer.deserialize(src, context);   
-        } catch (DeserializationException e){
-            // As per Spec, try to give the original JAXBException
-            throw new WebServiceException(e.getCause());
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+            return unmarshaller.unmarshal(getPayload());
+        } catch (JAXBException e){
+            throw new WebServiceException(e);
         }
     }
     
     public void setPayload(Object payload, JAXBContext context) {
         payloadModifed = true;
         try {
-            payloadSrc = JAXBTypeSerializer.serialize(payload, context);            
-        } catch(SerializationException e) {
-            // As per Spec, try to give the original JAXBException
-            throw new WebServiceException(e.getCause());
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty("jaxb.fragment", true);
+            DOMResult domResult = new DOMResult();
+            marshaller.marshal(payload, domResult);
+            payloadSrc = new DOMSource(domResult.getNode());
+        } catch(JAXBException e) {
+            throw new WebServiceException(e);
         }        
     }
     /*
