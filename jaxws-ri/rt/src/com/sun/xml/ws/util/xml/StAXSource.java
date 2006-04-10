@@ -189,7 +189,7 @@ public class StAXSource extends SAXSource {
             throw new IllegalStateException();
         }
 
-        this.reader = new XMLStreamReaderToContentHandler(reader,repeater,eagerQuit);
+        this.reader = new XMLStreamReaderToContentHandler(reader,repeater,eagerQuit,true);
 
         super.setXMLReader(pseudoParser);
         // pass a dummy InputSource. We don't care

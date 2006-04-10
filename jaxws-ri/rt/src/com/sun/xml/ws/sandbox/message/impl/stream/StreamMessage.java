@@ -234,7 +234,7 @@ public final class StreamMessage extends AbstractMessageImpl {
                 return; // no body
 
             XMLStreamReaderToContentHandler conv =
-                new XMLStreamReaderToContentHandler(reader,contentHandler,true);
+                new XMLStreamReaderToContentHandler(reader,contentHandler,true,true);
             conv.bridge();
             reader.close();
         } catch (XMLStreamException e) {

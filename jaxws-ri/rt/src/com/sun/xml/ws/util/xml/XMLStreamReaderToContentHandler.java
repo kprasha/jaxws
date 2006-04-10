@@ -34,6 +34,11 @@ public class XMLStreamReaderToContentHandler {
     private boolean eagerQuit;
 
     /**
+     * If true, not start/endDocument event.
+     */
+    private boolean fragment;
+
+    /**
      * Construct a new StAX to SAX adapter that will convert a StAX event
      * stream into a SAX event stream.
      *
@@ -42,10 +47,11 @@ public class XMLStreamReaderToContentHandler {
      * @param saxCore
      *                SAXevent sink
      */
-    public XMLStreamReaderToContentHandler(XMLStreamReader staxCore, ContentHandler saxCore, boolean eagerQuit) {
+    public XMLStreamReaderToContentHandler(XMLStreamReader staxCore, ContentHandler saxCore, boolean eagerQuit, boolean fragment) {
         this.staxStreamReader = staxCore;
         this.saxHandler = saxCore;
         this.eagerQuit = eagerQuit;
+        this.fragment = fragment;
     }
 
     /*
@@ -134,10 +140,16 @@ public class XMLStreamReaderToContentHandler {
     }
 
     private void handleEndDocument() throws SAXException {
+        if(fragment)
+            return;
+
         saxHandler.endDocument();
     }
 
     private void handleStartDocument() throws SAXException {
+        if(fragment)
+            return;
+
         saxHandler.setDocumentLocator(new Locator() {
             public int getColumnNumber() {
                 return staxStreamReader.getLocation().getColumnNumber();

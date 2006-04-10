@@ -149,6 +149,8 @@ public abstract class AbstractMessageImpl extends Message {
 
     /**
      * Writes the payload to SAX events.
+     *
+     * This method shall always write a fragment without start/endDocument events.
      */
     protected abstract void writePayloadTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException;
 
