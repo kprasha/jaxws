@@ -21,9 +21,6 @@ package com.sun.xml.ws.encoding.soap.internal;
 
 import javax.xml.transform.Source;
 
-import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
-import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
-
 /**
  * @author WS Development Team
  */
@@ -33,14 +30,6 @@ public class BodyBlock {
 
     public BodyBlock(Object value) {
         this.value = value;
-    }
-
-    public BodyBlock(JAXBBeanInfo beanInfo) {
-        this.value = beanInfo;
-    }
-
-    public BodyBlock(JAXBBridgeInfo bridgeInfo) {
-        this.value = bridgeInfo;
     }
 
     public BodyBlock(Source source) {
