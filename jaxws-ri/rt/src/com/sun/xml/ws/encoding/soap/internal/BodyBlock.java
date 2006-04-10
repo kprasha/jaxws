@@ -23,7 +23,6 @@ import javax.xml.transform.Source;
 
 import com.sun.xml.ws.encoding.jaxb.JAXBBeanInfo;
 import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
-import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 
 /**
  * @author WS Development Team
@@ -46,10 +45,6 @@ public class BodyBlock {
 
     public BodyBlock(Source source) {
         setSource(source);
-    }
-
-    public BodyBlock(RpcLitPayload rpcLoad) {
-        this.value = rpcLoad;
     }
 
     public void setSource(Source source) {

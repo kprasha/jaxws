@@ -28,9 +28,8 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.encoding.jaxb.JAXBBridgeInfo;
-import com.sun.xml.ws.encoding.jaxb.RpcLitPayload;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
@@ -145,15 +144,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         return b;
     }
 
-    /**
-     * @param name Qualified name of the message payload or header
-     * @param payload  One of {@link RpcLitPayload} or {@link JAXBBridgeInfo}
-     * @deprecated It will be no longer needed with the {@link com.sun.xml.ws.api.message.Message}
-     */
-    void addDecoderInfo(QName name, Object payload) {
-        payloadMap.put(name, payload);
-    }
-
     private JAXBRIContext createJAXBContext() {
         final List<TypeReference> types = getAllTypeReferences();
         final Class[] cls = new Class[types.size()];
@@ -165,12 +155,11 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         try {
             //jaxbContext = JAXBRIContext.newInstance(cls, types, targetNamespace, false);
             // Need to avoid doPriv block once JAXB is fixed. Afterwards, use the above
-            jaxbContext = (JAXBRIContext)
-                 AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                     public java.lang.Object run() throws Exception {
-                         return JAXBRIContext.newInstance(cls, types, ns, false);
-                     }
-                 });
+            jaxbContext = AccessController.doPrivileged(new PrivilegedExceptionAction<JAXBRIContext>() {
+                public JAXBRIContext run() throws Exception {
+                    return JAXBRIContext.newInstance(cls, types, ns, false);
+                }
+            });
             createBridgeMap(types);
         } catch (PrivilegedActionException e) {
             throw new WebServiceException(e.getMessage(), e.getException());
@@ -326,8 +315,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                 String partName = param.getPartName();
                 if(partName == null)
                     continue;
-                ParameterBinding paramBinding = wsdlBinding.getBinding(opName,
-                        partName, Mode.IN);
+                ParameterBinding paramBinding = wsdlBinding.getBinding(opName, partName, Mode.IN);
                 if(paramBinding != null)
                     param.setInBinding(paramBinding);
             }
@@ -379,7 +367,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      */
     private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, WSDLBoundPortTypeImpl boundPortType, Mode mode) {
         QName opName = new QName(boundPortType.getPortTypeName().getNamespaceURI(), method.getOperationName());
-        RpcLitPayload payload = new RpcLitPayload(wrapperParameter.getName());
         WSDLBoundOperationImpl bo = boundPortType.get(opName);
         Map<Integer, ParameterImpl> bodyParams = new HashMap<Integer, ParameterImpl>();
         List<ParameterImpl> unboundParams = new ArrayList<ParameterImpl>();
@@ -419,23 +406,12 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         for(int i = 0; i <  bodyParams.size();i++){
             ParameterImpl p = bodyParams.get(i);
             wrapperParameter.addWrapperChild(p);
-            if(((mode == Mode.IN) && p.getInBinding().isBody())||
-                    ((mode == Mode.OUT) && p.getOutBinding().isBody())){
-                JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(), null);
-                payload.addParameter(bi);
-            }
-        }
-
-        for(ParameterImpl p : attachParams){
-            JAXBBridgeInfo bi = new JAXBBridgeInfo(p.getBridge(), null);
-            payloadMap.put(p.getName(), bi);
         }
 
         //add unbounded parts
         for(ParameterImpl p:unboundParams){
             wrapperParameter.addWrapperChild(p);
         }
-        payloadMap.put(wrapperParameter.getName(), payload);
         return attachParams;
     }
 
@@ -517,6 +493,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      *
      * @param enableMtom
      * @deprecated
+     *      Whether MTOM is enabled or not should be remembered by {@link WSBinding},
+     *      not by {@link SEIModel}.
      */
     public void enableMtom(boolean enableMtom){
         this.enableMtom = enableMtom;
@@ -547,7 +525,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private Map<QName,JavaMethodImpl> nameToJM = new HashMap<QName, JavaMethodImpl>();
     private List<JavaMethodImpl> javaMethods = new ArrayList<JavaMethodImpl>();
     private final Map<TypeReference, Bridge> bridgeMap = new HashMap<TypeReference, Bridge>();
-    private final Map<QName, Object> payloadMap = new HashMap<QName, Object>();
     protected final QName emptyBodyName = new QName("");
     private String targetNamespace = "";
     private final Map<Integer, RawAccessor> rawAccessorMap = new HashMap<Integer, RawAccessor>();
