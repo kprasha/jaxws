@@ -28,11 +28,9 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.handler.Handler;
-import java.util.List;
-import java.util.Set;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Instances are created by the service, which then
@@ -48,13 +46,12 @@ import java.util.Collections;
 public abstract class BindingImpl implements WSBinding {
 
     private HandlerConfiguration handlerConfig;
-    protected final Set<QName> portKnownHeaders = Collections.<QName>emptySet();
     private final BindingID bindingId;
 
     protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
+        setHandlerConfig(createHandlerConfig(Collections.<Handler>emptyList()));
     }
-
 
     public @NotNull List<Handler> getHandlerChain() {
         return handlerConfig.getHandlerChain();
@@ -71,7 +68,7 @@ public abstract class BindingImpl implements WSBinding {
      * Creates a new HandlerConfiguration object and sets it on the BindingImpl.
      */
     public void setHandlerChain(List<Handler> chain) {
-        setHandlerConfig(createHandlerConfig(chain,handlerConfig.getRoles(), portKnownHeaders));
+        setHandlerConfig(createHandlerConfig(chain));
     }
 
     /**
@@ -84,8 +81,8 @@ public abstract class BindingImpl implements WSBinding {
         this.handlerConfig = handlerConfig;
     }
 
-    protected abstract HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
-                                                                Set<QName> portKnownHeaders);
+    protected abstract HandlerConfiguration createHandlerConfig(List<Handler> handlerChain);
+
     public @NotNull BindingID getBindingId(){
         return bindingId;
     }
@@ -104,12 +101,12 @@ public abstract class BindingImpl implements WSBinding {
 
     public static BindingImpl create(@NotNull BindingID bindingId) {
         if(bindingId.equals(BindingID.XML_HTTP))
-            return new HTTPBindingImpl(Collections.<Handler>emptyList());
+            return new HTTPBindingImpl();
         else
-            return new SOAPBindingImpl(bindingId, Collections.<Handler>emptyList(), bindingId.getSOAPVersion());
+            return new SOAPBindingImpl(bindingId, bindingId.getSOAPVersion());
     }
 
     public static WSBinding getDefaultBinding() {
-        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, Collections.<Handler>emptyList(), SOAPVersion.SOAP_11);
+        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, SOAPVersion.SOAP_11);
     }
 }

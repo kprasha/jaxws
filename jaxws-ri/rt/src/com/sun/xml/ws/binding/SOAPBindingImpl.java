@@ -26,6 +26,7 @@ import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -35,11 +36,7 @@ import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.soap.SOAPBinding;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import java.util.*;
 
 
 /**
@@ -50,28 +47,41 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     public static final String X_SOAP12HTTP_BINDING =
         "http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/";
 
-    protected static String ROLE_NONE;
+    private static final String ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
 
-    protected Set<String> requiredRoles;
-    protected Set<String> roles;
+    private Set<String> requiredRoles;
+    private Set<String> roles;
     protected boolean enableMtom;
     protected final SOAPVersion soapVersion;
 
+    private Set<QName> portKnownHeaders = Collections.emptySet();
 
     /**
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
-    SOAPBindingImpl(
-        BindingID bindingId, List<Handler> handlerChain, SOAPVersion soapVersion) {
+    SOAPBindingImpl(BindingID bindingId, SOAPVersion soapVersion) {
 
         super(bindingId);
         this.soapVersion = soapVersion;
+        //Sets up the required roles depending on SOAP binding.
         setup();
-        setHandlerConfig(createHandlerConfig(handlerChain, roles, portKnownHeaders));
         //Is this still required? comment out for now
         //setupSystemHandlerDelegate(serviceName);
 
         this.enableMtom = bindingId.isMTOMEnabled();
+    }
+
+    /**
+     *  This method should be called if the binding has SOAPSEIModel
+     *  The Headers understood by the Port are set, so that they can be used for MU
+     *  processing.
+     *
+     * @param headers
+     */
+    public void setPortKnownHeaders(@NotNull Set<QName> headers) {
+        this.portKnownHeaders = headers;
+        // apply this change to HandlerConfiguration
+        setHandlerConfig(createHandlerConfig(getHandlerChain()));
     }
 
     // if the binding id is unknown, no roles are added
@@ -85,18 +95,16 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
             requiredRoles.add(SOAP12NamespaceConstants.ROLE_NEXT);
             requiredRoles.add(SOAP12NamespaceConstants.ROLE_ULTIMATE_RECEIVER);
         }
-        ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
         roles = new HashSet<String>();
-        addRequiredRoles();        
+        addRequiredRoles();
     }
-    
+
     /**
      * This method separates the logical and protocol handlers. 
      * Also parses Headers understood by SOAPHandlers and
      * sets the HandlerConfiguration.
      */
-    protected HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
-                                                             Set<QName> portKnownHeaders) {
+    protected HandlerConfiguration createHandlerConfig(List<Handler> handlerChain) {
         List<LogicalHandler> logicalHandlers = new ArrayList<LogicalHandler>();
         List<SOAPHandler> soapHandlers = new ArrayList<SOAPHandler>();
         Set<QName> handlerKnownHeaders = new HashSet<QName>();
@@ -115,7 +123,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
                     handler.getClass());
             }
         }
-        //TODO compute portKnownHeaders
         return new HandlerConfiguration(roles,portKnownHeaders,handlerChain,
                 logicalHandlers,soapHandlers,handlerKnownHeaders);
     }
@@ -143,7 +150,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         this.roles = roles;
         addRequiredRoles();
         HandlerConfiguration oldConfig = getHandlerConfig();
-        setHandlerConfig(new HandlerConfiguration(roles, portKnownHeaders, oldConfig.getHandlerChain(),
+        setHandlerConfig(new HandlerConfiguration(this.roles, portKnownHeaders, oldConfig.getHandlerChain(),
                 oldConfig.getLogicalHandlers(),oldConfig.getSoapHandlers(),
                 oldConfig.getHandlerKnownHeaders()));
     }

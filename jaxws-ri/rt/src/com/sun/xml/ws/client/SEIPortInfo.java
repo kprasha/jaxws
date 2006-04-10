@@ -22,6 +22,8 @@ package com.sun.xml.ws.client;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.SOAPSEIModel;
+import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.istack.NotNull;
 
 
@@ -47,4 +49,17 @@ final class SEIPortInfo extends PortInfo {
         assert sei!=null && model!=null;
     }
 
+    /**
+     * This method inaddition to creating a BindingImpl object, sets the portKnownHeaders
+     *  that can be used for MU Header processing.
+     * @return BindingImpl
+     */
+    @Override
+    public BindingImpl createBinding() {
+        BindingImpl bindingImpl = super.createBinding();
+        if(bindingImpl instanceof SOAPBindingImpl) {
+            ((SOAPBindingImpl)bindingImpl).setPortKnownHeaders(model.getKnownHeaders());
+        }
+        return bindingImpl;
+    }
 }

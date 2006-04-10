@@ -20,18 +20,17 @@
 package com.sun.xml.ws.binding;
 
 import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.client.HandlerConfiguration;
-import java.util.Collections;
+import com.sun.xml.ws.resources.ClientMessages;
 
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.http.HTTPBinding;
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author WS Development Team
@@ -41,20 +40,18 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
     /**
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
-    HTTPBindingImpl(List<Handler> handlerChain) {
+    HTTPBindingImpl() {
         // TODO: implement a real encoder/decoder for these
         super(BindingID.XML_HTTP);
-        setHandlerConfig(createHandlerConfig(handlerChain,null,portKnownHeaders));
     }
 
     /**
      * This method separates the logical and protocol handlers and
      * sets the HandlerConfiguration.
-     * Only logical handlers are allowed with HTTPBinding. 
+     * Only logical handlers are allowed with HTTPBinding.
      * Setting SOAPHandlers throws WebServiceException
      */
-    protected HandlerConfiguration createHandlerConfig(List<Handler> handlerChain, Set<String> roles,
-                                                    Set<QName> portKnownHeaders) {
+    protected HandlerConfiguration createHandlerConfig(List<Handler> handlerChain) {
         List<LogicalHandler> logicalHandlers = new ArrayList<LogicalHandler>();
         for (Handler handler : handlerChain) {
             if (!(handler instanceof LogicalHandler)) {
@@ -63,7 +60,9 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
                 logicalHandlers.add((LogicalHandler) handler);
             }
         }
-        //TODO compute portKnownHeaders
-        return new HandlerConfiguration(roles,portKnownHeaders,handlerChain,logicalHandlers,null,Collections.<QName>emptySet());
+        return new HandlerConfiguration(
+                Collections.<String>emptySet(),
+                Collections.<QName>emptySet(),
+                handlerChain,logicalHandlers,null,null);
     }
 }

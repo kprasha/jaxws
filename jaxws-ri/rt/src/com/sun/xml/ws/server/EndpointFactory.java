@@ -17,6 +17,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.resources.ServerMessages;
@@ -135,9 +136,12 @@ public class EndpointFactory {
                 seiModel = createSEIModel(primaryDoc, md, implType, serviceName, portName, binding);
                 wsdlPort = seiModel.getPort();
 
-                //set mtom processing
                 if(binding instanceof SOAPBindingImpl){
+                    //set mtom processing
                     seiModel.enableMtom(((SOAPBinding)binding).isMTOMEnabled());
+                    //set portKnownHeaders on Binding, so that they can be used for MU processing
+                    ((SOAPBindingImpl)binding).setPortKnownHeaders(
+                            ((SOAPSEIModel)seiModel).getKnownHeaders());
                 }
                 terminal= new SEIInvokerPipe(seiModel,ir,binding);
             }
