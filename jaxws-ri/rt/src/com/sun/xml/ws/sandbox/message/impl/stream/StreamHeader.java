@@ -59,8 +59,8 @@ public abstract class StreamHeader implements Header {
     protected static final String SOAP_1_1_MUST_UNDERSTAND = "mustUnderstand";
     protected static final String SOAP_1_2_MUST_UNDERSTAND = SOAP_1_1_MUST_UNDERSTAND;
 
-    protected static final String SOAP_1_1_ROLE = "role";
-    protected static final String SOAP_1_2_ROLE = "actor";
+    protected static final String SOAP_1_1_ROLE = "actor";
+    protected static final String SOAP_1_2_ROLE = "role";
 
     protected static final String SOAP_1_2_RELAY = "relay";
 
