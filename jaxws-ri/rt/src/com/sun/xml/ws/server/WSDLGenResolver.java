@@ -20,8 +20,8 @@
 
 package com.sun.xml.ws.server;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
@@ -39,27 +39,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author WS Development Team
+ * WSDLGenerator uses WSDLResolver while creating WSDL artifacts. WSDLResolver
+ * is used to control the file names and which artifact to be generated or not.
+ *
+ * @author Jitendra Kotamraju
  */
 final class WSDLGenResolver implements WSDLResolver {
     
-    private List<SDDocumentImpl> docs;
+    private final List<SDDocumentImpl> docs;
     private final List<SDDocumentSource> newDocs = new ArrayList<SDDocumentSource>();
-    private SDDocumentSource abstractWsdlSource;
     private SDDocumentSource concreteWsdlSource;
     
     private SDDocumentImpl abstractWsdl;
     private SDDocumentImpl concreteWsdl;
 
     /**
-     * targetNS -> documents.
+     * targetNS -> schema documents.
      */
     private final Map<String, List<SDDocumentImpl>> nsMapping = new HashMap<String,List<SDDocumentImpl>>();
 
     private final QName serviceName;
     private final QName portTypeName;
 
-    public WSDLGenResolver(List<SDDocumentImpl> docs,QName serviceName,QName portTypeName) {
+    public WSDLGenResolver(@NotNull List<SDDocumentImpl> docs,QName serviceName,QName portTypeName) {
         this.docs = docs;
         this.serviceName = serviceName;
         this.portTypeName = portTypeName;
@@ -82,36 +84,27 @@ final class WSDLGenResolver implements WSDLResolver {
         }
     }
     
-    /*
-    public SDDocumentImpl getConcreteWSDL() {
-        return concreteWsdl;
-    }
-     */
-    
-    public List<SDDocumentSource> getGeneratedDocs() {
-        return newDocs;
-    }
-    
     /**
-     * return null if concrete WSDL need not be generated.
+     * Generates the concrete WSDL that contains service element.
      *
-     * TODO: but it's not returning null. What am I missing!? - KK
+     * @return Result the generated concrete WSDL
      */
     public Result getWSDL(String filename) {
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
         concreteWsdlSource = SDDocumentSource.create(createURL(filename),xsb);
         newDocs.add(concreteWsdlSource);
-
-        /*
-        concreteWsdl=SDDocumentImpl.create(sd,serviceName,portName);
-
-        docs.add(concreteWsdl);
-*/
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename);
         return r;
     }
 
+    /**
+     * At present, it returns file URL scheme eventhough there is no resource
+     * in the filesystem.
+     *
+     * @return URL of the generated document
+     *
+     */
     private URL createURL(String filename) {
         try {
             return new URL("file:///"+filename);
@@ -124,9 +117,11 @@ final class WSDLGenResolver implements WSDLResolver {
 
     /**
      * Updates filename if the suggested filename need to be changed in
-     * wsdl:import
+     * wsdl:import. If the metadata already contains abstract wsdl(i.e. a WSDL
+     * which has the porttype), then the abstract wsdl shouldn't be generated
      *
      * return null if abstract WSDL need not be generated
+     *        Result the abstract WSDL
      */
     public Result getAbstractWSDL(Holder<String> filename) {
         if (abstractWsdl != null) {
@@ -135,26 +130,21 @@ final class WSDLGenResolver implements WSDLResolver {
         }
 
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-        abstractWsdlSource = SDDocumentSource.create(createURL(filename.value),xsb);
+        SDDocumentSource abstractWsdlSource = SDDocumentSource.create(createURL(filename.value),xsb);
         newDocs.add(abstractWsdlSource);
-/*
-        abstractWsdl=SDDocumentImpl.create(sd,serviceName,portName);
-
-        docs.add(abstractWsdl);
- */
-
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename.value);
         return r;
     }
 
-    /*
+    /**
      * Updates filename if the suggested filename need to be changed in
-     * xsd:import
+     * xsd:import. If there is already a schema document for the namespace
+     * in the metadata, then it is not generated.
      *
      * return null if schema need not be generated
+     *        Result the generated schema document
      */
-    // TODO: shouldn't file name be an URL?
     public Result getSchemaOutput(String namespace, Holder<String> filename) {
         List<SDDocumentImpl> schemas = nsMapping.get(namespace);
         if (schemas != null) {
@@ -168,10 +158,6 @@ final class WSDLGenResolver implements WSDLResolver {
 
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
         SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
-        /*
-
-        docs.add(SDDocumentImpl.create(sd,serviceName,portName));
-         */
         newDocs.add(sd);
 
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
@@ -179,6 +165,14 @@ final class WSDLGenResolver implements WSDLResolver {
         return r;
     }
     
+    /**
+     * Converts SDDocumentSource to SDDocumentImpl and updates original docs. It
+     * categories the generated documents into WSDL, Schema types.
+     *
+     * @return the primary WSDL
+     *         null if it is not there in the generated documents
+     *
+     */
     public SDDocumentImpl updateDocs() {
         for (SDDocumentSource doc : newDocs) {
             SDDocumentImpl docImpl = SDDocumentImpl.create(doc,serviceName,portTypeName);
