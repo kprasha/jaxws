@@ -19,24 +19,23 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
 
 import javax.xml.ws.WebServiceException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-import java.io.InputStream;
-import java.io.IOException;
 
 /**
  * {@link Pipe} that sends a request to a remote HTTP server.
@@ -133,7 +132,7 @@ public class HttpTransportPipe implements Pipe {
      */
     private void writeSOAPAction(Map<String, List<String>> reqHeaders, String soapAction) {
         if(soapAction != null){
-            reqHeaders.put("SOAPAction", Arrays.asList(soapAction));
+            reqHeaders.put("SOAPAction", Collections.singletonList(soapAction));
         }
     }
 
