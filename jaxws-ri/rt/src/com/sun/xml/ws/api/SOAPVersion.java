@@ -31,6 +31,7 @@ import javax.xml.namespace.QName;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.Collections;
 
 
 /**
@@ -67,7 +68,7 @@ public enum SOAPVersion {
             SOAPConstants.URI_SOAP_ACTOR_NEXT, "actor",
             javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL,
             new QName(com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE, "MustUnderstand"),
-            new HashSet<String>(Arrays.asList(SOAPConstants.URI_SOAP_ACTOR_NEXT))),
+            Collections.singleton(SOAPConstants.URI_SOAP_ACTOR_NEXT)),
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
