@@ -59,10 +59,10 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     /**
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
-    SOAPBindingImpl(BindingID bindingId, SOAPVersion soapVersion) {
+    SOAPBindingImpl(BindingID bindingId) {
 
         super(bindingId);
-        this.soapVersion = soapVersion;
+        this.soapVersion = bindingId.getSOAPVersion();
         //Sets up the required roles depending on SOAP binding.
         setup();
         //Is this still required? comment out for now

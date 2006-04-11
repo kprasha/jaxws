@@ -103,10 +103,10 @@ public abstract class BindingImpl implements WSBinding {
         if(bindingId.equals(BindingID.XML_HTTP))
             return new HTTPBindingImpl();
         else
-            return new SOAPBindingImpl(bindingId, bindingId.getSOAPVersion());
+            return new SOAPBindingImpl(bindingId);
     }
 
     public static WSBinding getDefaultBinding() {
-        return new SOAPBindingImpl(BindingID.SOAP11_HTTP, SOAPVersion.SOAP_11);
+        return new SOAPBindingImpl(BindingID.SOAP11_HTTP);
     }
 }
