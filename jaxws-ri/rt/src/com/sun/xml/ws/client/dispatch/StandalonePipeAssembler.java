@@ -3,34 +3,33 @@
  */
 package com.sun.xml.ws.client.dispatch;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.TransportPipeFactory;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.handler.SOAPHandlerPipe;
-import com.sun.xml.ws.util.pipe.DumpPipe;
-import com.sun.xml.ws.protocol.soap.MUPipe;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
+import com.sun.xml.ws.util.pipe.DumpPipe;
+
 import javax.xml.ws.soap.SOAPBinding;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
     public Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
         Pipe head = createTransport(address,wsdlModel,service,binding);
-        
+
         if(dump)
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
-            head = new DumpPipe(System.out,head);
+            head = new DumpPipe("dump", System.out,head);
 
         // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
         head = new ClientMUPipe(binding,head);
@@ -42,13 +41,13 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             soapHandlerPipe = new SOAPHandlerPipe(binding, wsdlModel, head, isClient);
             head = soapHandlerPipe;
         }
-        
+
         //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and
         //SOAPHandlerPipe here.
-        
+
         HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, head, soapHandlerPipe, isClient);
         head = logicalHandlerPipe;
-        
+
         return head;
     }
 
@@ -63,7 +62,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
 
     /**
      * On Server-side, HandlerChains cannot be changed after it is deployed.
-     * During assembling the Pipelines, we can decide if we really need a 
+     * During assembling the Pipelines, we can decide if we really need a
      * SOAPHandlerPipe and LogicalHandlerPipe for a particular Endpoint.
      */
     public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
@@ -73,7 +72,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             HandlerPipe logicalHandlerPipe =
                     new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
 
-            //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and 
+            //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and
             //SOAPHandlerPipe here.
 
             if(binding instanceof SOAPBinding) {
