@@ -17,21 +17,44 @@ import java.lang.reflect.Constructor;
  * @author Kohsuke Kawaguchi
  */
 public class DumpPipe extends AbstractFilterPipeImpl {
+
+    private final String name;
+
     private final PrintStream out;
 
     private final XMLOutputFactory staxOut;
+
+    /**
+     * @param name
+     *      Specify the name that identifies this {@link DumpPipe}
+     *      instance. This string will be printed when this pipe
+     *      dumps messages, and allows people to distinguish which
+     *      pipe instance is dumping a message when multiple
+     *      {@link DumpPipe}s print messages out.
+     * @param out
+     *      The output to send dumps to.
+     * @param next
+     *      The next {@link Pipe} in the pipeline.
+     */
+    public DumpPipe(String name, PrintStream out, Pipe next) {
+        super(next);
+        this.name = name;
+        this.out = out;
+        this.staxOut = XMLOutputFactory.newInstance();
+        staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
+    }
 
     /**
      * @param out
      *      The output to send dumps to.
      * @param next
      *      The next {@link Pipe} in the pipeline.
+     *
+     * @deprecated
+     *      use {@link #DumpPipe(String, PrintStream, Pipe)}
      */
     public DumpPipe(PrintStream out, Pipe next) {
-        super(next);
-        this.out = out;
-        this.staxOut = XMLOutputFactory.newInstance();
-        staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
+        this("DumpPipe",out,next);
     }
 
     /**
@@ -39,6 +62,7 @@ public class DumpPipe extends AbstractFilterPipeImpl {
      */
     private DumpPipe(DumpPipe that, PipeCloner cloner) {
         super(that,cloner);
+        this.name = that.name;
         this.out = that.out;
         this.staxOut = that.staxOut;
     }
@@ -51,7 +75,7 @@ public class DumpPipe extends AbstractFilterPipeImpl {
     }
 
     private void dump(String header, Packet packet) {
-        out.println("====["+header+"]====");
+        out.println("====["+name+":"+header+"]====");
         if(packet.getMessage()==null)
             out.println("(none)");
         else
