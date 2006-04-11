@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * {@link Pipe} that sends a request to a remote HTTP server.
@@ -84,7 +85,7 @@ public class HttpTransportPipe implements Pipe {
                 reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
                 writeSOAPAction(reqHeaders, ct.getSOAPAction());
                 if(dump)
-                    dump(buf, "HTTP request");
+                    dump(buf, "HTTP request", reqHeaders);
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
@@ -93,7 +94,7 @@ public class HttpTransportPipe implements Pipe {
                 if(dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
                     encoder.encode(request, buf);
-                    dump(buf, "HTTP request");
+                    dump(buf, "HTTP request", reqHeaders);
                     buf.writeTo(con.getOutput());
                 } else {
                     encoder.encode(request, con.getOutput());
@@ -114,7 +115,7 @@ public class HttpTransportPipe implements Pipe {
             if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 buf.write(response);
-                dump(buf,"HTTP response "+con.statusCode);
+                dump(buf,"HTTP response "+con.statusCode, respHeaders);
                 response = buf.newInputStream();
             }
             decoder.decode(response, contentType, reply);
@@ -152,8 +153,20 @@ public class HttpTransportPipe implements Pipe {
         return new HttpTransportPipe(this,cloner);
     }
 
-    private void dump(ByteArrayBuffer buf, String caption) throws IOException {
+    private void dump(ByteArrayBuffer buf, String caption, Map<String, List<String>> headers) throws IOException {
         System.out.println("---["+caption +"]---");
+        for (Entry<String,List<String>> header : headers.entrySet()) {
+            if(header.getValue().isEmpty()) {
+                // I don't think this is legal, but let's just dump it,
+                // as the point of the dump is to uncover problems.
+                System.out.println(header.getValue());
+            } else {
+                for (String value : header.getValue()) {
+                    System.out.println(header.getValue()+": "+value);
+                }
+            }
+        }
+
         buf.writeTo(System.out);
         System.out.println("--------------------");
     }
