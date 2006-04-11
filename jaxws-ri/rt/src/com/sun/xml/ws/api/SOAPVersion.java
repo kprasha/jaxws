@@ -28,6 +28,9 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 
 
 /**
@@ -63,13 +66,15 @@ public enum SOAPVersion {
             com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE,
             SOAPConstants.URI_SOAP_ACTOR_NEXT, "actor",
             javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL,
-            new QName(com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE, "MustUnderstand")),
+            new QName(com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE, "MustUnderstand"),
+            new HashSet<String>(Arrays.asList(SOAPConstants.URI_SOAP_ACTOR_NEXT))),
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
             SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER, "role",
             javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL,
-            new QName(com.sun.xml.ws.encoding.soap.SOAP12Constants.URI_ENVELOPE, "MustUnderstand"));
+            new QName(com.sun.xml.ws.encoding.soap.SOAP12Constants.URI_ENVELOPE, "MustUnderstand"),
+            new HashSet<String>(Arrays.asList(SOAPConstants.URI_SOAP_1_2_ROLE_NEXT,SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER)));
 
     /**
      * Binding ID for SOAP/HTTP binding of this SOAP version.
@@ -106,12 +111,18 @@ public enum SOAPVersion {
     public final String implicitRole;
 
     /**
+     * This represents the roles required to be assumed by SOAP binding implementation.
+     *
+     */
+    public final Set<String> requiredRoles;
+
+    /**
      * "role" (SOAP 1.2) or "actor" (SOAP 1.1)
      */
     public final String roleAttributeName;
 
     private SOAPVersion(String httpBindingId, String nsUri, String implicitRole, String roleAttributeName,
-                        String saajFactoryString, QName faultCodeMustUnderstand) {
+                        String saajFactoryString, QName faultCodeMustUnderstand, Set<String> requiredRoles) {
         this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
         this.implicitRole = implicitRole;
@@ -123,6 +134,7 @@ public enum SOAPVersion {
             throw new Error(e);
         }
         this.faultCodeMustUnderstand = faultCodeMustUnderstand;
+        this.requiredRoles = requiredRoles;
     }
 
 

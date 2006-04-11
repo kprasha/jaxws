@@ -22,7 +22,6 @@ package com.sun.xml.ws.binding;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
-import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.client.HandlerConfiguration;
@@ -48,8 +47,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         "http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/";
 
     private static final String ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
-
-    private Set<String> requiredRoles;
     private Set<String> roles;
     protected boolean enableMtom;
     protected final SOAPVersion soapVersion;
@@ -63,8 +60,8 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
         super(bindingId);
         this.soapVersion = bindingId.getSOAPVersion();
-        //Sets up the required roles depending on SOAP binding.
-        setup();
+        roles = new HashSet<String>();
+        addRequiredRoles();
         //Is this still required? comment out for now
         //setupSystemHandlerDelegate(serviceName);
 
@@ -82,21 +79,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         this.portKnownHeaders = headers;
         // apply this change to HandlerConfiguration
         setHandlerConfig(createHandlerConfig(getHandlerChain()));
-    }
-
-    // if the binding id is unknown, no roles are added
-    private void setup() {
-        requiredRoles = new HashSet<String>();
-        switch(soapVersion) {
-        case SOAP_11:
-            requiredRoles.add(SOAPNamespaceConstants.ACTOR_NEXT);
-            break;
-        case SOAP_12:
-            requiredRoles.add(SOAP12NamespaceConstants.ROLE_NEXT);
-            requiredRoles.add(SOAP12NamespaceConstants.ROLE_ULTIMATE_RECEIVER);
-        }
-        roles = new HashSet<String>();
-        addRequiredRoles();
     }
 
     /**
@@ -128,7 +110,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     }
 
     protected void addRequiredRoles() {
-        roles.addAll(requiredRoles);
+        roles.addAll(soapVersion.requiredRoles);
     }
 
     public Set<String> getRoles() {
