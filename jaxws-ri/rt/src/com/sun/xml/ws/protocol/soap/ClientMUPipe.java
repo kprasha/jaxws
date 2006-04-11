@@ -55,7 +55,7 @@ public class ClientMUPipe extends MUPipe {
     public Packet process(Packet packet) {
         Packet reply = next.process(packet);
         //Oneway
-        if(packet.getMessage() == null) {
+        if(reply.getMessage() == null) {
             return reply;
         }
         HandlerConfiguration handlerConfig = packet.handlerConfig;
