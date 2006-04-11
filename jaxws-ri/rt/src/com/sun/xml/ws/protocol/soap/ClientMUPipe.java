@@ -27,7 +27,6 @@ import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPFaultException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -40,7 +39,7 @@ public class ClientMUPipe extends MUPipe {
         super(binding, next);
     }
 
-    protected ClientMUPipe(MUPipe that, PipeCloner cloner) {
+    protected ClientMUPipe(ClientMUPipe that, PipeCloner cloner) {
         super(that,cloner);
     }
 
@@ -55,10 +54,14 @@ public class ClientMUPipe extends MUPipe {
     @Override
     public Packet process(Packet packet) {
         Packet reply = next.process(packet);
+        //Oneway
+        if(packet.getMessage() == null) {
+            return reply;
+        }
         HandlerConfiguration handlerConfig = packet.handlerConfig;
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(reply.getMessage().getHeaders(),
                 handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
-        if(misUnderstoodHeaders.isEmpty()) {
+        if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
             return reply;
         }
         throw createMUSOAPFaultException(misUnderstoodHeaders);

@@ -16,6 +16,9 @@ import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.handler.SOAPHandlerPipe;
 import com.sun.xml.ws.util.pipe.DumpPipe;
+import com.sun.xml.ws.protocol.soap.MUPipe;
+import com.sun.xml.ws.protocol.soap.ClientMUPipe;
+import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import javax.xml.ws.soap.SOAPBinding;
@@ -28,7 +31,10 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
             head = new DumpPipe(System.out,head);
-        
+
+        // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
+        head = new ClientMUPipe(binding,head);
+
         boolean isClient = true;
         HandlerPipe soapHandlerPipe = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
@@ -76,6 +82,9 @@ public class StandalonePipeAssembler implements PipelineAssembler {
                     terminal = soapHandlerPipe;
             }
         }
+
+        // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
+        terminal = new ServerMUPipe(binding,terminal);
         return terminal;
     }
 
