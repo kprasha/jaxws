@@ -68,8 +68,10 @@ public class HandlerConfiguration {
         this.soapHandlers = soapHandlers;
         this.handlerKnownHeaders = handlerKnownHeaders;
         this.knownHeaders = new HashSet<QName>();
-        knownHeaders.addAll(portKnownHeaders);
-        knownHeaders.addAll(handlerKnownHeaders);
+        if(portKnownHeaders != null)
+            knownHeaders.addAll(portKnownHeaders);
+        if(portKnownHeaders != null)
+            knownHeaders.addAll(handlerKnownHeaders);
     }
 
     public Set<String> getRoles() {
