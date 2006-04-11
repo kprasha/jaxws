@@ -70,7 +70,7 @@ public class HandlerConfiguration {
         this.knownHeaders = new HashSet<QName>();
         if(portKnownHeaders != null)
             knownHeaders.addAll(portKnownHeaders);
-        if(portKnownHeaders != null)
+        if(handlerKnownHeaders != null)
             knownHeaders.addAll(handlerKnownHeaders);
     }
 
