@@ -34,6 +34,7 @@ import java.util.HashMap;
 import javax.xml.ws.WebServiceException;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -80,15 +81,15 @@ public class HttpTransportPipe implements Pipe {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 ct = encoder.encode(request, buf);
                 // data size is available, set it as Content-Length
-                reqHeaders.put("Content-Length", Arrays.asList(""+buf.size()));
-                reqHeaders.put("Content-Type", Arrays.asList(ct.getContentType()));
+                reqHeaders.put("Content-Length", Collections.singletonList(Integer.toString(buf.size())));
+                reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
                 writeSOAPAction(reqHeaders, ct.getSOAPAction());
                 if(dump)
                     dump(buf, "HTTP request");
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
-                reqHeaders.put("Content-Type", Arrays.asList(ct.getContentType()));
+                reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
                 writeSOAPAction(reqHeaders, ct.getSOAPAction());
                 if(dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
