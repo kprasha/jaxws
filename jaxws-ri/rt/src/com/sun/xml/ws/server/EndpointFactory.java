@@ -177,17 +177,16 @@ public class EndpointFactory {
     }
 
     private static <T> void processHandlerAnnotation(WSBinding binding, Class<T> implType, QName serviceName, QName portName) {
-        if (binding.getHandlerChain() == null) {
-            HandlerAnnotationInfo chainInfo =
-                    HandlerAnnotationProcessor.buildHandlerInfo(
-                            implType, serviceName, portName, binding);
-            if (chainInfo != null) {
-                binding.setHandlerChain(chainInfo.getHandlers());
-                if (binding instanceof SOAPBinding) {
-                    ((SOAPBinding) binding).setRoles(chainInfo.getRoles());
-                }
+        HandlerAnnotationInfo chainInfo =
+                HandlerAnnotationProcessor.buildHandlerInfo(
+                        implType, serviceName, portName, binding);
+        if (chainInfo != null) {
+            binding.setHandlerChain(chainInfo.getHandlers());
+            if (binding instanceof SOAPBinding) {
+                ((SOAPBinding) binding).setRoles(chainInfo.getRoles());
             }
         }
+
     }
 
 
