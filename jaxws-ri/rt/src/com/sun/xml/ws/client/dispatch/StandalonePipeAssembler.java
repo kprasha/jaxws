@@ -31,8 +31,10 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             // as it would be very handy for a trouble-shooting at the production site.
             head = new DumpPipe("dump", System.out,head);
 
-        // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
-        head = new ClientMUPipe(binding,head);
+        if(binding instanceof SOAPBinding) {
+            // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
+            head = new ClientMUPipe(binding,head);
+        }
 
         boolean isClient = true;
         HandlerPipe soapHandlerPipe = null;
@@ -82,8 +84,10 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             }
         }
 
-        // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
-        terminal = new ServerMUPipe(binding,terminal);
+        if (binding instanceof SOAPBinding) {
+            // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
+            terminal = new ServerMUPipe(binding,terminal);
+        }
         return terminal;
     }
 
