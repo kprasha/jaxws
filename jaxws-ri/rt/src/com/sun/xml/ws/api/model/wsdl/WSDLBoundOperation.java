@@ -25,6 +25,7 @@ package com.sun.xml.ws.api.model.wsdl;
 import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
+import java.util.List;
 
 /**
  * Abstracts wsdl:binding/wsdl:operation. It can be used to determine the parts and their binding.
