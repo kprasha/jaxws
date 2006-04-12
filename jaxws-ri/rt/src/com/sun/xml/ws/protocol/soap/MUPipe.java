@@ -49,7 +49,7 @@ import org.w3c.dom.Element;
  * @author Rama Pulavarthi
  */
 
-public abstract class MUPipe extends AbstractFilterPipeImpl {
+abstract class MUPipe extends AbstractFilterPipeImpl {
 
     private static final String MU_FAULT_DETAIL_LOCALPART = "NotUnderstood";
     private final static QName MU_HEADER_DETAIL = new QName(SOAPVersion.SOAP_12.nsUri, MU_FAULT_DETAIL_LOCALPART);
@@ -61,7 +61,7 @@ public abstract class MUPipe extends AbstractFilterPipeImpl {
 
     private final SOAPVersion soapVersion;
 
-    public MUPipe(WSBinding binding, Pipe next) {
+    protected MUPipe(WSBinding binding, Pipe next) {
         super(next);
         // MUPipe should n't be used for bindings other than SOAP.
         if (!(binding instanceof SOAPBinding)) {
