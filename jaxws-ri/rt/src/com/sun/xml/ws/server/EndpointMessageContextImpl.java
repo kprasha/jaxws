@@ -28,9 +28,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.WebServiceContext;
 
 /**
- * Implements WebServiceContext's {@link MessageContext} on top of {@link Packet}.
+ * Implements {@link WebServiceContext}'s {@link MessageContext} on top of {@link Packet}.
  *
  * <p>
  * This class creates a {@link Map} view for APPLICATION scoped properties that
@@ -46,15 +47,15 @@ import javax.xml.ws.handler.MessageContext;
  *
  * @author Jitendra Kotamraju
  */
-
+@SuppressWarnings({"SuspiciousMethodCalls"})
 public class EndpointMessageContextImpl extends AbstractMap<String,Object> implements MessageContext {
-    
+
     /**
      * Lazily computed.
      */
     private Set<Map.Entry<String,Object>> entrySet;
     private final Packet packet;
-    
+
     /**
      * @param packet
      *      The {@link Packet} to wrap.
@@ -62,7 +63,7 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> imple
     public EndpointMessageContextImpl(Packet packet) {
         this.packet = packet;
     }
-    
+
     @Override
     public Object get(Object key) {
         if (packet.supports(key)) {
@@ -80,7 +81,7 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> imple
 
         return packet.otherProperties.get(key);
     }
-    
+
     @Override
     public Object put(String key, Object value) {
         if (packet.supports(key)) {
@@ -109,7 +110,7 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> imple
         packet.getApplicationScopePropertyNames(false).add(key);
         return null;
     }
-    
+
     @Override
     public Object remove(Object key) {
          if (packet.supports(key)) {
@@ -152,9 +153,9 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> imple
     public MessageContext.Scope getScope(String name) {
         return null;
     }
-    
+
     private class EntrySet extends AbstractSet<Map.Entry<String, Object>> {
-        
+
         public Iterator<Map.Entry<String, Object>> iterator() {
             return null;
         }
@@ -164,7 +165,7 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> imple
         public boolean remove(Object o) {
             return EndpointMessageContextImpl.this.remove(o) != null;
         }
-        
+
         public int size() {
             return 0;
         }
@@ -172,5 +173,5 @@ public class EndpointMessageContextImpl extends AbstractMap<String,Object> imple
             EndpointMessageContextImpl.this.clear();
         }
     }
-    
+
 }
