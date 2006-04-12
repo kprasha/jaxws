@@ -24,7 +24,6 @@ package com.sun.xml.ws.api.model;
 
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.jws.WebParam.Mode;
 import java.lang.reflect.Method;

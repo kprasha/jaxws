@@ -28,10 +28,10 @@ import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;

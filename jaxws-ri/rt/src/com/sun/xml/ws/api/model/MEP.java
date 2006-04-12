@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.pept.presentation;
+package com.sun.xml.ws.api.model;
 
 /**
  * Constants that represents four message exchange patterns.

@@ -28,6 +28,7 @@ import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.WSBinding;
@@ -37,7 +38,6 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.pept.presentation.MEP;
 import com.sun.xml.ws.util.Pool;
 
 import javax.jws.WebParam.Mode;

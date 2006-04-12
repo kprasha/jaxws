@@ -25,6 +25,7 @@ package com.sun.xml.ws.client.sei;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
@@ -32,7 +33,6 @@ import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
-import com.sun.xml.ws.pept.presentation.MEP;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.spi.ServiceDelegate;
@@ -74,7 +74,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
                 methodHandlers.put(m,new CallbackMethodHandler(this,
                     syncs.get(jm.getOperation()), m.getParameterTypes().length-1));
             }
-            if(jm.getMEP()==MEP.ASYNC_POLL) {
+            if(jm.getMEP()== MEP.ASYNC_POLL) {
                 Method m = jm.getMethod();
                 methodHandlers.put(m,new PollingMethodHandler(this,syncs.get(jm.getOperation())));
             }
