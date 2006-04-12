@@ -115,7 +115,6 @@ public enum SOAPVersion {
 
     /**
      * This represents the roles required to be assumed by SOAP binding implementation.
-     *
      */
     public final Set<String> requiredRoles;
 
