@@ -33,8 +33,8 @@ import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
 
 import javax.xml.bind.JAXBException;

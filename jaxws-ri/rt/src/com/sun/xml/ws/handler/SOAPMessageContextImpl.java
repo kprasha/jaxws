@@ -25,7 +25,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.message.saaj.SAAJMessage;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;

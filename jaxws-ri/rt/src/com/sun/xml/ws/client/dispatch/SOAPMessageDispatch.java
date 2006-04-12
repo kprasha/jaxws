@@ -22,12 +22,11 @@
 
 package com.sun.xml.ws.client.dispatch;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJMessage;
+import com.sun.xml.ws.message.saaj.SAAJMessage;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MimeHeader;

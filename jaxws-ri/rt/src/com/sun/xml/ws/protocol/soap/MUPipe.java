@@ -32,7 +32,7 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
-import com.sun.xml.ws.sandbox.message.impl.DOMHeader;
+import com.sun.xml.ws.message.DOMHeader;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.*;

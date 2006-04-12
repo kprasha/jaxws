@@ -26,8 +26,8 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
-import com.sun.xml.ws.sandbox.message.impl.source.PayloadSourceMessage;
+import com.sun.xml.ws.message.EmptyMessageImpl;
+import com.sun.xml.ws.message.source.PayloadSourceMessage;
 import javax.xml.transform.Source;
 
 import javax.xml.ws.LogicalMessage;

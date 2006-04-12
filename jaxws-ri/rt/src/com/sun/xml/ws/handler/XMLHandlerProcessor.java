@@ -31,12 +31,9 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.sandbox.message.impl.EmptyMessageImpl;
 import java.util.List;
-import javax.xml.ws.LogicalMessage;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.http.HTTPException;
 

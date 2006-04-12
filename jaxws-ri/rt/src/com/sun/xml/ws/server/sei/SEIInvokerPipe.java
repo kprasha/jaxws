@@ -31,7 +31,7 @@ import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.server.InvokerPipe;
 import com.sun.xml.ws.util.QNameMap;
 

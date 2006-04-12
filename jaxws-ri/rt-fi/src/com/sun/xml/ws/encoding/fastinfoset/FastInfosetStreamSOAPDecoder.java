@@ -26,8 +26,9 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.sandbox.impl.StreamSOAPDecoder;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
+import com.sun.xml.ws.encoding.StreamSOAPDecoder;
+import com.sun.xml.ws.message.stream.StreamHeader;
+
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import javax.xml.stream.XMLStreamReader;

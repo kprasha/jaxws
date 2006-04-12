@@ -29,8 +29,8 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.sandbox.impl.XMLHTTPDecoder;
-import com.sun.xml.ws.sandbox.message.impl.AbstractMessageImpl;
+import com.sun.xml.ws.encoding.XMLHTTPDecoder;
+import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.activation.DataSource;

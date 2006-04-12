@@ -29,12 +29,10 @@ import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.sandbox.impl.DecoderFacade;
-import com.sun.xml.ws.sandbox.impl.EncoderFacade;
-import com.sun.xml.ws.sandbox.impl.TestDecoderImpl;
-import com.sun.xml.ws.sandbox.impl.TestEncoderImpl;
-import com.sun.xml.ws.sandbox.impl.XMLHTTPDecoder;
-import com.sun.xml.ws.sandbox.impl.XMLHTTPEncoder;
+import com.sun.xml.ws.encoding.DecoderFacade;
+import com.sun.xml.ws.encoding.EncoderFacade;
+import com.sun.xml.ws.encoding.XMLHTTPDecoder;
+import com.sun.xml.ws.encoding.XMLHTTPEncoder;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.BindingType;

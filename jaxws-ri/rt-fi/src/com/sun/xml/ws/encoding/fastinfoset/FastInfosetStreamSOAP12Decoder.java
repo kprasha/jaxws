@@ -24,8 +24,8 @@ package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader12;
+import com.sun.xml.ws.message.stream.StreamHeader;
+import com.sun.xml.ws.message.stream.StreamHeader12;
 
 import javax.xml.stream.XMLStreamReader;
 

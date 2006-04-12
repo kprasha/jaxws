@@ -27,10 +27,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
-import static com.sun.xml.ws.client.BindingProviderProperties.JAXB_CONTEXT_PROPERTY;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
-import com.sun.xml.ws.util.Pool;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -40,10 +37,6 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * TODO: Use sandbox classes, update javadoc

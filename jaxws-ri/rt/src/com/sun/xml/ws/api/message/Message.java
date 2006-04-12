@@ -29,7 +29,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;

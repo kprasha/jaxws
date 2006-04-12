@@ -31,7 +31,7 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBMessage;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;

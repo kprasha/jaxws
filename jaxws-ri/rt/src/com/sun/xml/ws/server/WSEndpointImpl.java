@@ -38,12 +38,11 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.handler.Handler;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**

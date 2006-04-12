@@ -22,7 +22,7 @@
 package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.sandbox.impl.ContentTypeImpl;
+import com.sun.xml.ws.encoding.ContentTypeImpl;
 
 /**
  * An encoder that encodes SOAP 1.1 messages infosets to fast infoset

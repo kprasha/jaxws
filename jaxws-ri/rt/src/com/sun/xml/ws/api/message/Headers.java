@@ -27,11 +27,11 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.sandbox.message.impl.DOMHeader;
-import com.sun.xml.ws.sandbox.message.impl.jaxb.JAXBHeader;
-import com.sun.xml.ws.sandbox.message.impl.saaj.SAAJHeader;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader11;
-import com.sun.xml.ws.sandbox.message.impl.stream.StreamHeader12;
+import com.sun.xml.ws.message.DOMHeader;
+import com.sun.xml.ws.message.jaxb.JAXBHeader;
+import com.sun.xml.ws.message.saaj.SAAJHeader;
+import com.sun.xml.ws.message.stream.StreamHeader11;
+import com.sun.xml.ws.message.stream.StreamHeader12;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBElement;

@@ -33,7 +33,7 @@ import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.sandbox.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 
 import javax.xml.namespace.QName;
