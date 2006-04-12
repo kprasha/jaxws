@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.protocol.soap;
@@ -87,10 +87,6 @@ public abstract class MUPipe extends AbstractFilterPipeImpl {
      *         by the binding.
      */
     protected final Set<QName> getMisUnderstoodHeaders(HeaderList headers, Set<String> roles, Set<QName> knownHeaders) {
-        //Add default roles assumed by SOAP Binding.
-        //DONE in SOAPBindingImpl
-        //roles.addAll(getRequiredRoles());
-
         Set<QName> notUnderstoodHeaders = null;
 
         for (int i = 0; i < headers.size(); i++) {
@@ -118,7 +114,7 @@ public abstract class MUPipe extends AbstractFilterPipeImpl {
     final SOAPFaultException createMUSOAPFaultException(Set<QName> notUnderstoodHeaders) {
         try {
             SOAPFault fault = createMUSOAPFault();
-            addDetail(fault, notUnderstoodHeaders);
+            setMUFaultString(fault, notUnderstoodHeaders);
             return new SOAPFaultException(fault);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
@@ -138,7 +134,7 @@ public abstract class MUPipe extends AbstractFilterPipeImpl {
         try {
             SOAPFault fault = createMUSOAPFault();
             if (soapVersion == SOAP_11) {
-                addDetail(fault, notUnderstoodHeaders);
+                setMUFaultString(fault, notUnderstoodHeaders);
             }
             Message muFaultMessage = Messages.create(fault);
             if (soapVersion == SOAP_12) {
@@ -150,16 +146,9 @@ public abstract class MUPipe extends AbstractFilterPipeImpl {
         }
     }
 
-    private static void addDetail(SOAPFault fault, Set<QName> notUnderstoodHeaders) throws SOAPException {
-        Detail detail = fault.addDetail();
-        for (QName qname : notUnderstoodHeaders) {
-            //TODO change namespace
-            Element e = fault.getOwnerDocument().createElementNS("http://TODO_RENAME", MU_FAULT_DETAIL_LOCALPART);
-            e.setAttribute("xmlns:abc", qname.getNamespaceURI());
-            e.setAttribute("qname", "abc:" + qname.getLocalPart());
-            detail.appendChild(e);
-        }
-
+    private void setMUFaultString(SOAPFault fault, Set<QName> notUnderstoodHeaders) throws SOAPException {
+        fault.setFaultString("MustUnderstand headers:" +
+                notUnderstoodHeaders + " are not understood");
     }
 
     private static void addHeader(Message m, Set<QName> notUnderstoodHeaders) throws SOAPException {
