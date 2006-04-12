@@ -582,7 +582,7 @@ public class WSDLModeler extends WSDLModelerBase {
             }
             fail("wsdlmodeler.invalid.operation.notSupportedStyle",
                     new Object[]{info.portTypeOperation.getName(),
-                    info.port.resolveBinding(document).resolvePortType(document)});
+                    info.port.resolveBinding(document).resolvePortType(document).getName()});
         }
 
         SOAPStyle soapStyle = info.soapBinding.getStyle();
