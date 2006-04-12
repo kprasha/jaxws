@@ -78,7 +78,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     
     public Packet process( Packet packet) {
         // This check is done to cover handler returning false in Oneway request
-        Boolean handleFalse = (Boolean) packet.otherProperties.get(HandlerProcessor.HANDLE_FALSE_PROPERTY);
+        Boolean handleFalse = (Boolean) packet.invocationProperties.get(HandlerProcessor.HANDLE_FALSE_PROPERTY);
         if(handleFalse != null && handleFalse){
             // Cousin HandlerPipe returned false during Oneway Request processing.
             // Dont call handlers and dispatch the message.
