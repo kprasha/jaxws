@@ -29,8 +29,7 @@ import java.net.URI;
 
 /**
  * Resolves metadata such as WSDL/schema. This serves as extensibile plugin point which a wsdl parser can use to
- * get the metadata from an endpoint. Implementor of this class must provide a zero argument constructor so that
- * it can be loaded during service lookup mechanism.
+ * get the metadata from an endpoint. 
  *
  * @author Vivek Pandey
  */

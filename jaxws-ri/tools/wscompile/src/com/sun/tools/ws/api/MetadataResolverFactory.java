@@ -29,7 +29,11 @@ import org.xml.sax.EntityResolver;
 /**
  * Extension point for resolving metadata using wsimport.
  * <p/>
- * wsimport would get a {@link MetaDataResolver} using this factory and from it will resolve all the wsdl/schema metadata.
+ * wsimport would get a {@link MetaDataResolver} using this factory and from it will resolve all the wsdl/schema
+ * metadata.
+ *
+ * Implementor of this class must provide a zero argument constructor so that
+ * it can be loaded during service lookup mechanism.
  *
  * @author Vivek Pandey
  * @see MetaDataResolver#resolve(java.net.URI)
