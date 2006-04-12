@@ -29,8 +29,8 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
@@ -408,13 +408,19 @@ public final class Packet extends PropertySet {
      *
      * <p>
      * See <a href="#properties">class javadoc</a> for more discussion.
+     *
+     * @see #getApplicationScopePropertyNames(boolean)
      */
     public final Map<String,Object> invocationProperties;
 
     /**
      * Gets a {@link Set} that stores application-scope properties.
      *
+     * <p>
      * These properties will be exposed to the response context.
+     * Consequently, if a {@link Pipe} wishes to expose a property
+     * to {@link ResponseContext}, it needs to add the property name
+     * to this set.
      *
      * @param readOnly
      *      Return true if the caller only intends to read the value of this set.
