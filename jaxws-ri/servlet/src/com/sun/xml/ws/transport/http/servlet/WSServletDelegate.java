@@ -118,7 +118,7 @@ final class WSServletDelegate {
                     return;
                 }
                 WSBinding binding = target.getEndpoint().getBinding();
-                if (binding.getBindingId().equals(HTTPBinding.HTTP_BINDING)) {
+                if (binding instanceof HTTPBinding) {
                     // The request is handled by endpoint or runtime
                     target.handle(context, request, response);
                 } else {
@@ -319,7 +319,8 @@ final class WSServletDelegate {
         ServletAdapter result = fixedUrlPatternEndpoints.get(path);
         if (result == null) {
             for (ServletAdapter candidate : pathUrlPatternEndpoints) {
-                if (path.startsWith(candidate.getValidPath())) {
+                String noSlashStar = candidate.getValidPath();
+                if (path.equals(noSlashStar) || path.startsWith(noSlashStar+"/") || path.startsWith(noSlashStar+"?")) {
                     result = candidate;
                     break;
                 }
