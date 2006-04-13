@@ -35,10 +35,8 @@ import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
-import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.PropertySet;
 
-import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -151,42 +149,37 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
             ContentType contentType = encoder.getStaticContentType(packet);
             ct = contentType.getContentType();
-            if (ct == null) {
+            if (ct == null)
                 throw new UnsupportedOperationException();
+
+            Message responseMessage = packet.getMessage();
+            if (responseMessage==null) {
+                close();
             } else {
-                Message responseMessage = packet.getMessage();
-                if (responseMessage==null) {
-                    con.setStatus(WSHTTPConnection.ONEWAY);
-                    con.getOutput();        // Sets Status Code on the connection
-                } else {
-                    // TODO add HTTP_RESPONSE_CODE as a property on Packet ??
-                    Integer statusObj = (Integer)packet.invocationProperties.get(MessageContext.HTTP_RESPONSE_CODE);
-                    int statusCode;
-                    if (statusObj != null) {
-                        statusCode = statusObj;
-                    } else {
-                        statusCode = responseMessage.isFault()
-                            ? HttpURLConnection.HTTP_INTERNAL_ERROR
-                            : HttpURLConnection.HTTP_OK;
-                    }
-                    con.setStatus(statusCode);
-                    Headers headers = new Headers();
-                    headers.put("Content-Type", Collections.singletonList(ct));
-                    // TODO headers from Packet's properties ?
-                    //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
-                    con.setResponseHeaders(headers);
-                    encoder.encode(packet, con.getOutput());
+                if(con.getStatus()==0) {
+                    // if the appliation didn't set the status code,
+                    // set the default one.
+                    con.setStatus( responseMessage.isFault()
+                        ? HttpURLConnection.HTTP_INTERNAL_ERROR
+                        : HttpURLConnection.HTTP_OK );
                 }
+
+                setContentType(con,ct);
+                // TODO headers from Packet's properties ?
+                //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
+                encoder.encode(packet, con.getOutput());
+                con.closeOutput();
             }
-            con.closeOutput();
         }
 
         public void close() {
-            closed = true;
-            // close the response channel now
-            con.setStatus(WSHTTPConnection.ONEWAY);
-            con.getOutput();        // Sets Status Code on the connection
-            con.closeOutput();
+            if(!closed) {
+                closed = true;
+                // close the response channel now
+                con.setStatus(WSHTTPConnection.ONEWAY);
+                con.getOutput();        // Sets Status Code on the connection
+                con.closeOutput();
+            }
         }
     }
 

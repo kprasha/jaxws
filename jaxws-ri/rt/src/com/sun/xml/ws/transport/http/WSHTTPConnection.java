@@ -20,9 +20,10 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.transport.http;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.util.PropertySet.Property;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.handler.MessageContext;
@@ -60,15 +61,34 @@ public abstract class WSHTTPConnection extends PropertySet {
     public abstract void setResponseHeaders(Map<String,List<String>> headers);
     
     /**
-     * sets the transport status code like <code>OK</code>
+     * Sets the HTTP response code like {@link #OK}.
+     *
+     * <p>
+     * While JAX-WS processes a {@link WSHTTPConnection}, it
+     * will at least call this method once to set a valid HTTP response code.
+     * Note that this method may be invoked multiple times (from user code),
+     * so do not consider the value to be final until {@link #getOutput()}
+     * is invoked.
      */
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public abstract void setStatus(int status);
 
     /**
-     * Transport's underlying input stream
+     * Gets the last value set by {@link #setStatus(int)}.
+     *
+     * @return
+     *      if {@link #setStatus(int)} has not been invoked yet,
+     *      return 0.
+     */
+    // I know this is ugly method!
+    public abstract int getStatus();
+
+    /**
+     * Transport's underlying input stream.
+     *
      * @return Transport's underlying input stream
      */
-    public abstract InputStream getInput();
+    public abstract @NotNull InputStream getInput();
     
     /**
      * Closes transport's input stream
@@ -94,13 +114,13 @@ public abstract class WSHTTPConnection extends PropertySet {
     /**
      * Returns the {@link WebServiceContextDelegate} for this connection.
      */
-    public abstract WebServiceContextDelegate getWebServiceContextDelegate();
+    public abstract @NotNull WebServiceContextDelegate getWebServiceContextDelegate();
 
     /**
      * HTTP request method, such as "GET" or "POST".
      */
     @Property(MessageContext.HTTP_REQUEST_METHOD)
-    public abstract String getRequestMethod();
+    public abstract @NotNull String getRequestMethod();
 
     /**
      * HTTP request headers.
@@ -108,13 +128,13 @@ public abstract class WSHTTPConnection extends PropertySet {
      * @deprecated
      *      This is a potentially expensive operation.
      *      Programs that want to access HTTP headers should consider using
-     *      other methods.
+     *      other methods such as {@link #getRequestHeader(String)}.
      *
      * @return
      *      can be empty but never null.
      */
     @Property(MessageContext.HTTP_REQUEST_HEADERS)
-    public abstract Map<String, List<String>> getRequestHeaders();
+    public abstract @NotNull Map<String,List<String>> getRequestHeaders();
 
     /**
      * Gets an HTTP request header.
@@ -126,13 +146,13 @@ public abstract class WSHTTPConnection extends PropertySet {
      * @return
      *      null if no header exists.
      */
-    public abstract String getRequestHeader(String headerName);
+    public abstract @Nullable String getRequestHeader(@NotNull String headerName);
 
     /**
      * HTTP Query string, such as "foo=bar", or null if none exists.
      */
     @Property(MessageContext.QUERY_STRING)
-    public abstract String getQueryString();
+    public abstract @Nullable String getQueryString();
 
     /**
      * Requested path. A string like "/foo/bar/baz".
@@ -140,5 +160,5 @@ public abstract class WSHTTPConnection extends PropertySet {
      * @see javax.servlet.http.HttpServletRequest#getPathInfo()
      */
     @Property(MessageContext.PATH_INFO)
-    public abstract String getPathInfo();
+    public abstract @NotNull String getPathInfo();
 }
