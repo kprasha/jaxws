@@ -39,6 +39,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBException;
 
 /**
  * {@link Message} backed by {@link Source}
@@ -89,6 +91,10 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
 
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         message.writePayloadTo(sw);
+    }
+
+    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        return (T) message.readPayloadAsJAXB(unmarshaller);
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
