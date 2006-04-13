@@ -113,16 +113,14 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             //RELOOK: For now create again
             context =  getContext(reply);
 
-            //TODO: Server-side oneway is not correct
-            //TODO: HandleFault incorrect
+            //TODO: HandleFault behavior is incorrect
+            //TODO: If user inserts fault message inbetween two handler pipes
 
             //If null, it is oneway
             if(reply.getMessage()!= null){
-                if(!isClient) {
-                    if(reply.getMessage().isFault()) {
+                if(reply.getMessage().isFault()) {
                         //handleFault() is called on handlers
                         processor.addHandleFaultProperty(context);
-                    }
                 }
             }
             if(reply.getMessage()!= null){
