@@ -1,13 +1,12 @@
 package com.sun.xml.ws.util;
 
+import com.sun.istack.FinalArrayList;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContext;
-import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.ws.WebServiceContext;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -51,12 +50,9 @@ public abstract class DistributedPropertySet extends PropertySet {
     /**
      * All {@link PropertySet}s that are bundled into this {@link PropertySet}.
      */
-    private List<PropertySet> satellites;
+    private final FinalArrayList<PropertySet> satellites = new FinalArrayList<PropertySet>();
 
     public void addSatellite(@NotNull PropertySet satellite) {
-        if(satellites==null) {
-            satellites = new ArrayList<PropertySet>();
-        }
         satellites.add(satellite);
     }
 
