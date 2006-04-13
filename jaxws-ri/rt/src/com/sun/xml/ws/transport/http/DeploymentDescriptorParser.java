@@ -192,6 +192,9 @@ public class DeploymentDescriptorParser<A> {
                 if(portName == null)
                     portName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
 
+                //get enable-mtom attribute value
+                String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
+
                 BindingID bindingId;
                 {//set Binding using DD, annotation, or default one(in that order)
                     String attr = getAttribute(attrs, ATTR_BINDING);
@@ -199,14 +202,19 @@ public class DeploymentDescriptorParser<A> {
                         // Convert short-form tokens to API's binding ids
                         attr = getBindingIdForToken(attr);
                         bindingId = BindingID.parse(attr);
-                    } else
+                        // enable-mtom attribute should override the default mtom setting. Which can happen if hte binding
+                        // ID in DD doesn't explicitly sets MTOM
+                        if(bindingId.getMtomSetting().isDefault()){
+                            bindingId.getMtomSetting().enable(Boolean.valueOf(mtom));
+                        }
+                    } else{
                         bindingId = BindingID.parse(implementorClass);
+                        //enable-mtom attribute should override mtom setting from annotation
+                        if(mtom != null){
+                            bindingId.getMtomSetting().enable(Boolean.valueOf(mtom));
+                        }
+                    }
                 }
-
-                WSBinding binding = BindingImpl.create(bindingId);
-
-                //get enable-mtom attribute value
-                String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
 
                 String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
                 if(mtomThreshold != null){
@@ -216,11 +224,8 @@ public class DeploymentDescriptorParser<A> {
                     // with the new code
                 }
 
-                if(binding instanceof SOAPBinding){
-                    SOAPBinding sb = (SOAPBinding)binding;
-                    sb.setMTOMEnabled((mtom != null)?Boolean.valueOf(mtom):false);
-                }
 
+                WSBinding binding = BindingImpl.create(bindingId);
                 String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
 
