@@ -143,7 +143,7 @@ public abstract class BindingID {
 
     /**
      * Returns true if this binding implies using MTOM. Its convience method and equivalent to calling
-     * {@link MtomSetting#isEnabled()}}}.
+     * {@link MtomSetting#isEnabled()}.
      *
      * <p>
      * Note that MTOM can be enabled/disabled at runtime through
@@ -160,7 +160,7 @@ public abstract class BindingID {
      * @return {@link MtomSetting}. Returns the default MTOM setting. It can be overriden by {@link BindingID} instances.
      * @see SOAPBindingImpl
      */
-    public MtomSettingImpl getMtomSetting(){
+    public MtomSetting getMtomSetting(){
         return new MtomSettingImpl(this);
     }
 
@@ -388,16 +388,19 @@ public abstract class BindingID {
         /*final*/ Map<String,String> parameters = new HashMap<String,String>();
 
         static final String MTOM_PARAM = "mtom";
+        final MtomSetting mtomSetting;
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL) {
             super(version, lexical, canGenerateWSDL);
+            mtomSetting = new MtomSettingImpl(this);
         }
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL, 
                            boolean mtomEnabled) {
-            super(version, lexical, canGenerateWSDL);
+            this(version, lexical, canGenerateWSDL);
             String mtomStr = mtomEnabled ? "true" : "false";
             parameters.put(MTOM_PARAM, mtomStr);
+            mtomSetting.enable(mtomEnabled);
         }
 
         public @NotNull Encoder createEncoder(WSBinding binding) {
@@ -408,25 +411,30 @@ public abstract class BindingID {
             return new DecoderFacade(version);
         }
 
-        public MtomSettingImpl getMtomSetting() {
-            return new MtomSettingImpl(this);
+        public MtomSetting getMtomSetting() {
+            return mtomSetting;
         }
 
         public String getParameter(String parameterName, String defaultValue) {
             if (parameters.get(parameterName) == null)
                 return super.getParameter(parameterName, defaultValue);
             return parameters.get(parameterName);
-        }        
+        }
     }
 
-    public final class MtomSettingImpl implements MtomSetting {
+    final class MtomSettingImpl implements MtomSetting {
         private boolean isDefault;
         private boolean enable;
 
-        public MtomSettingImpl(BindingID binding) {
-            String mtom = binding.getParameter("mtom", "false");
+        MtomSettingImpl(BindingID binding) {
+            String mtom = binding.getParameter(SOAPHTTPImpl.MTOM_PARAM, "false");
             this.isDefault = (mtom == null);
             this.enable = mtom != null && mtom.equals("true");
+        }
+
+        MtomSettingImpl(boolean enable){
+            this.isDefault = false;
+            this.enable = enable;
         }
 
         public boolean isEnabled() {
@@ -437,15 +445,9 @@ public abstract class BindingID {
             return isDefault;
         }
 
-        /**
-         * Can be called to explicitly set the mtom enable flag. Calling this method makes {@link com.sun.xml.ws.api.MtomSetting#isDefault()}
-         * to false;
-         *
-         * @param enable
-         */
-        public void enable(boolean enable){
-            this.enable = enable;
+        public void enable(boolean enable) {
             this.isDefault = false;
+            this.enable = enable;
         }
     }
 }

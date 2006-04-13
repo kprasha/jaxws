@@ -21,4 +21,12 @@ public interface MtomSetting {
      * @return true tells the mtom setting is explicitly set by DD/annotation and false means its default setting.
      */
     boolean isDefault();
+
+    /**
+     * Explicitly set the mtom enable flag.
+     * Calling this method makes {@link com.sun.xml.ws.api.MtomSetting#isDefault()} to false;
+     *
+     * @param enable
+     */
+    void enable(boolean enable);
 }
