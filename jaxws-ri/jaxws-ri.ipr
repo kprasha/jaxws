@@ -225,6 +225,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/javadoc/javadoc.iml" filepath="$PROJECT_DIR$/javadoc/javadoc.iml" />
       <module fileurl="file://$PROJECT_DIR$/jaxws-ri.iml" filepath="$PROJECT_DIR$/jaxws-ri.iml" />
       <module fileurl="file://$PROJECT_DIR$/transports/local/local.iml" filepath="$PROJECT_DIR$/transports/local/local.iml" group="transports" />
       <module fileurl="file://$PROJECT_DIR$/tools/resourcegen/resourcegen.iml" filepath="$PROJECT_DIR$/tools/resourcegen/resourcegen.iml" />

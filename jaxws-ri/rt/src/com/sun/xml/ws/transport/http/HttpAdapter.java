@@ -36,6 +36,7 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.Headers;
+import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
@@ -133,11 +134,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             String ct = con.getRequestHeader("Content-Type");
             InputStream in = con.getInput();
             Packet packet = new Packet();
+            packet.addSatellite(con);
             decoder.decode(in, ct, packet);
-            // TODO: deprecate wrapUpRequestPacket and instead have Packet
-            // go look for properties on WSConnection when asked by the user
-            con.wrapUpRequestPacket(packet);
-            packet.httpRequestHeaders = con.getRequestHeaders();
             try {
                 packet = head.process(packet,con.getWebServiceContextDelegate(),this);
             } catch(Exception e) {
@@ -208,7 +206,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      *
      * <p>
      * To populate a request {@link Packet} with more info,
-     * use {@link WSHTTPConnection#wrapUpRequestPacket(Packet)}.
+     * define {@link PropertySet.Property properties} on
+     * {@link WSHTTPConnection}.
      */
     public void handle(@NotNull WSHTTPConnection connection) throws IOException {
         HttpToolkit tk = pool.take();

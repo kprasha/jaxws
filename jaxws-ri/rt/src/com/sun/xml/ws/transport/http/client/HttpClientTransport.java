@@ -359,6 +359,10 @@ final class HttpClientTransport {
         }
     }
 
+    public HttpURLConnection getConnection() {
+        return httpConnection;
+    }
+
     // overide default SSL HttpClientVerifier to always return true
     // effectively overiding Hostname client verification when using SSL
     static class HttpClientVerifier implements HostnameVerifier {

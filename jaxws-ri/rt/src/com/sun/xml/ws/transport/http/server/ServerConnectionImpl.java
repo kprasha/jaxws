@@ -209,4 +209,14 @@ final class ServerConnectionImpl extends WSConnectionImpl implements WebServiceC
         }
         return null;
     }
+
+    protected PropertyMap getPropertyMap() {
+        return model;
+    }
+
+    private static final PropertyMap model;
+
+    static {
+        model = parse(ServerConnectionImpl.class);
+    }
 }

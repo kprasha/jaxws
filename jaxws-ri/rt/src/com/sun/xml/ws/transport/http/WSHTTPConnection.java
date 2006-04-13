@@ -23,6 +23,7 @@ package com.sun.xml.ws.transport.http;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.util.PropertySet.Property;
+import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.InputStream;
@@ -37,8 +38,15 @@ import java.util.Map;
  * <p>
  * Different HTTP server layer uses different implementations of this class
  * so that JAX-WS can be shielded from individuality of such layers.
+ * This is an interface implemented as an abstract class, so that
+ * future versions of the JAX-WS RI can add new methods.
+ *
+ * <p>
+ * This class extends {@link PropertySet} so that a transport can
+ * expose its properties to the appliation and pipes. (This object
+ * will be added to {@link Packet#addSatellite(PropertySet)}.)
  */
-public interface WSHTTPConnection {
+public abstract class WSHTTPConnection extends PropertySet {
     
     public static final int OK=200;
     public static final int ONEWAY=202;
@@ -47,58 +55,52 @@ public interface WSHTTPConnection {
     public static final int INTERNAL_ERR=500;
 
     /**
-     * This is an opportunity for {@link WSHTTPConnection} to fill in a {@link Packet}
-     * additional transport-specific properties.
-     */
-    void wrapUpRequestPacket(Packet p);
-
-    /**
      * sets transport headers
      */
-    void setResponseHeaders(Map<String,List<String>> headers);
+    public abstract void setResponseHeaders(Map<String,List<String>> headers);
     
     /**
      * sets the transport status code like <code>OK</code>
      */
-    void setStatus(int status);
+    public abstract void setStatus(int status);
 
     /**
      * Transport's underlying input stream
      * @return Transport's underlying input stream
      */
-    InputStream getInput();
+    public abstract InputStream getInput();
     
     /**
      * Closes transport's input stream
      */
-    void closeInput();
+    public abstract void closeInput();
     
     /**
      * Transport's underlying output stream
      * @return Transport's underlying output stream
      */
-    OutputStream getOutput();
+    public abstract OutputStream getOutput();
     
     /**
      * Closes transport's output stream
      */
-    void closeOutput();
+    public abstract void closeOutput();
 
     /**
      * Closes transport connection
      */
-    void close();
+    public abstract void close();
 
     /**
      * Returns the {@link WebServiceContextDelegate} for this connection.
      */
-    WebServiceContextDelegate getWebServiceContextDelegate();
+    public abstract WebServiceContextDelegate getWebServiceContextDelegate();
 
     /**
      * HTTP request method, such as "GET" or "POST".
      */
-    @Property(javax.xml.ws.handler.MessageContext.HTTP_REQUEST_METHOD)
-    String getRequestMethod();
+    @Property(MessageContext.HTTP_REQUEST_METHOD)
+    public abstract String getRequestMethod();
 
     /**
      * HTTP request headers.
@@ -112,7 +114,7 @@ public interface WSHTTPConnection {
      *      can be empty but never null.
      */
     @Property(MessageContext.HTTP_REQUEST_HEADERS)
-    Map<String, List<String>> getRequestHeaders();
+    public abstract Map<String, List<String>> getRequestHeaders();
 
     /**
      * Gets an HTTP request header.
@@ -124,13 +126,13 @@ public interface WSHTTPConnection {
      * @return
      *      null if no header exists.
      */
-    String getRequestHeader(String headerName);
+    public abstract String getRequestHeader(String headerName);
 
     /**
      * HTTP Query string, such as "foo=bar", or null if none exists.
      */
     @Property(MessageContext.QUERY_STRING)
-    String getQueryString();
+    public abstract String getQueryString();
 
     /**
      * Requested path. A string like "/foo/bar/baz".
@@ -138,5 +140,5 @@ public interface WSHTTPConnection {
      * @see javax.servlet.http.HttpServletRequest#getPathInfo()
      */
     @Property(MessageContext.PATH_INFO)
-    String getPathInfo();
+    public abstract String getPathInfo();
 }

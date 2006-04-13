@@ -29,6 +29,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,6 +70,7 @@ public abstract class PropertySet {
      * @see Packet
      * @author Kohsuke Kawaguchi
      */
+    @Inherited
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD,ElementType.METHOD})
     public @interface Property {
@@ -90,6 +92,20 @@ public abstract class PropertySet {
     /**
      * Map representing the Fields and Methods annotated with {@link Property}.
      * Model of {@link PropertySet} class.
+     *
+     * <p>
+     * At the end of the derivation chain this method just needs to be implemented
+     * as:
+     *
+     * <pre>
+     * private static final PropertyMap model;
+     * static {
+     *   model = parse(MyDerivedClass.class);
+     * }
+     * protected PropertyMap getPropertyMap() {
+     *   return model;
+     * }
+     * </pre>
      */
     protected abstract PropertyMap getPropertyMap();
 

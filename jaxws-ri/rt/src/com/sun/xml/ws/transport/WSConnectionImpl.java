@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author WS Development Team
  */
-public abstract class WSConnectionImpl implements WSHTTPConnection {
+public abstract class WSConnectionImpl extends WSHTTPConnection {
     private Map<String, List<String>> reqHeaders = null;
     private Map<String, List<String>> rspHeaders = null;
     public OutputStream outputStream = null;
@@ -48,7 +48,7 @@ public abstract class WSConnectionImpl implements WSHTTPConnection {
     protected int statusCode;
 
     /** Creates a new instance of WSConnectionImpl */
-    public WSConnectionImpl () {
+    protected WSConnectionImpl () {
     }
 
     public int getStatus () {
@@ -85,10 +85,6 @@ public abstract class WSConnectionImpl implements WSHTTPConnection {
      */
     public InputStream getInput() {
         return inputStream;
-    }
-
-    public void wrapUpRequestPacket(Packet p) {
-        // noop
     }
 
     public Map<String, List<String>> getRequestHeaders () {

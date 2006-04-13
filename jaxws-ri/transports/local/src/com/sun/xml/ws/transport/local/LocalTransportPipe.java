@@ -28,11 +28,12 @@ import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
-import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -95,8 +96,13 @@ final class LocalTransportPipe implements Pipe {
             LocalConnectionImpl con = new LocalConnectionImpl();
             // get transport headers from message
             reqHeaders.clear();
-            if (request.httpRequestHeaders != null)
-                reqHeaders.putAll(request.httpRequestHeaders);
+            Map<String, List<String>> rh = (Map<String, List<String>>) request.get(MessageContext.HTTP_REQUEST_HEADERS);
+            //assign empty map if its null
+            if(rh != null){
+                reqHeaders.putAll(rh);
+            }
+
+
             con.setResponseHeaders(reqHeaders);
 
             String contentType = encoder.encode(request, con.getOutput()).getContentType();

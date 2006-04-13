@@ -24,26 +24,24 @@ package com.sun.xml.ws.api.message;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.api.server.TransportBackChannel;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.client.ResponseContext;
-import com.sun.xml.ws.util.PropertySet;
 import com.sun.xml.ws.util.DistributedPropertySet;
 
 import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.Dispatch;
+import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -167,24 +165,6 @@ public final class Packet extends DistributedPropertySet {
     public void setMessage(Message message) {
         this.message = message;
     }
-
-    /**
-     * Value of {@link #HTTP_REQUEST_HEADERS} property.
-     *
-     * @deprecated
-     *      shouldn't be computed eagerly
-     */
-    @Property(MessageContext.HTTP_REQUEST_HEADERS)
-    public Map<String, List<String>> httpRequestHeaders;
-
-    /**
-     * Value of {@link #HTTP_RESPONSE_HEADERS} property.
-     *
-     * @deprecated
-     *      shouldn't be computed eagerly
-     */
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
-    public Map<String, List<String>> httpResponseHeaders;
 
     /**
      * True if this message came from a transport (IOW inbound),

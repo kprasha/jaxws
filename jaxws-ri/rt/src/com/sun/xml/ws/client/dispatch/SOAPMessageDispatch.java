@@ -35,6 +35,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.MessageContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,9 +75,9 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
             ch.put(mh.getName(), h);
         }
 
-        Packet msg = new Packet(new SAAJMessage(arg));
-        msg.httpRequestHeaders = ch;
-        return msg;
+        Packet packet = new Packet(new SAAJMessage(arg));
+        packet.otherProperties.put(MessageContext.HTTP_REQUEST_HEADERS,ch);
+        return packet;
     }
 
     SOAPMessage toReturnValue(Packet response) {

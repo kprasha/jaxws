@@ -78,5 +78,15 @@ final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceCo
     public String getPathInfo() {
         return null;   // not really supported
     }
+
+    protected PropertyMap getPropertyMap() {
+        return model;
+    }
+
+    private static final PropertyMap model;
+
+    static {
+        model = parse(LocalConnectionImpl.class);
+    }
 }
 

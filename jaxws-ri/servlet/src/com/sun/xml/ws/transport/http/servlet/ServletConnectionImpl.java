@@ -150,41 +150,47 @@ final class ServletConnectionImpl extends WSConnectionImpl implements WebService
     }
 
     @Override
-    public void wrapUpRequestPacket(Packet p) {
-        // TODO need to do this lazily
-        p.invocationProperties.put(MessageContext.SERVLET_CONTEXT, context);
-        p.getApplicationScopePropertyNames(false).add(MessageContext.SERVLET_CONTEXT);
-        p.invocationProperties.put(MessageContext.SERVLET_REQUEST, request);
-        p.getApplicationScopePropertyNames(false).add(MessageContext.SERVLET_REQUEST);
-        p.invocationProperties.put(MessageContext.SERVLET_RESPONSE, response);
-        p.getApplicationScopePropertyNames(false).add(MessageContext.SERVLET_RESPONSE);
-        p.invocationProperties.put(MessageContext.HTTP_REQUEST_METHOD, request.getMethod());
-        p.getApplicationScopePropertyNames(false).add(MessageContext.HTTP_REQUEST_METHOD);
-        p.invocationProperties.put(MessageContext.HTTP_REQUEST_HEADERS, getRequestHeaders());
-        p.getApplicationScopePropertyNames(false).add(MessageContext.HTTP_REQUEST_HEADERS);
-        if (request.getQueryString() != null) {
-            p.invocationProperties.put(MessageContext.QUERY_STRING, request.getQueryString());
-            p.getApplicationScopePropertyNames(false).add(MessageContext.QUERY_STRING);
-        }
-        if (request.getPathInfo() != null) {
-            p.invocationProperties.put(MessageContext.PATH_INFO, request.getPathInfo());
-            p.getApplicationScopePropertyNames(false).add(MessageContext.PATH_INFO);            
-        }
-    }
-
     public String getRequestMethod() {
         return request.getMethod();
     }
 
+    @Override
     public String getRequestHeader(String headerName) {
         return request.getHeader(headerName);
     }
 
+    @Override
     public String getQueryString() {
         return request.getQueryString();
     }
 
+    @Override
     public String getPathInfo() {
         return request.getPathInfo();
+    }
+
+    @Property(MessageContext.SERVLET_CONTEXT)
+    public ServletContext getContext() {
+        return context;
+    }
+
+    @Property(MessageContext.SERVLET_RESPONSE)
+    public HttpServletResponse getResponse() {
+        return response;
+    }
+
+    @Property(MessageContext.SERVLET_REQUEST)
+    public HttpServletRequest getRequest() {
+        return request;
+    }
+
+    protected PropertyMap getPropertyMap() {
+        return model;
+    }
+
+    private static final PropertyMap model;
+
+    static {
+        model = parse(ServletConnectionImpl.class);
     }
 }
