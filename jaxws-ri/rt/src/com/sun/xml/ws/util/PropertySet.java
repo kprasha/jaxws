@@ -34,10 +34,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * A set of "properties" that can be accessed via strongly-typed fields
@@ -92,6 +92,27 @@ public abstract class PropertySet {
      * Model of {@link PropertySet} class.
      */
     protected abstract PropertyMap getPropertyMap();
+
+    // maybe we can use this some time
+    ///**
+    // * If all the properties defined on this {@link PropertySet} has a certain prefix
+    // * (such as, say, "javax.xml.ws.http."), then return it.
+    // *
+    // * <p>
+    // * Returning a non-null value from this method allows methods like
+    // * {@link #get(Object)} and {@link #put(String, Object)} to work faster.
+    // * This is especially so with {@link DistributedPropertySet}, so implementations
+    // * are encouraged to set a common prefix, as much as possible.
+    // *
+    // * <p>
+    // * Currently, this is used only by {@link DistributedPropertySet}.
+    // *
+    // * @return
+    // *      Null if no such common prefix exists. Otherwise string like
+    // *      "javax.xml.ws.http." (the dot at the last is usually preferrable,
+    // *      so that properties like "javax.xml.ws.https.something" won't match.
+    // */
+    //protected abstract String getPropertyPrefix();
 
     /**
      * This method parses a class for fields and methods with {@link Property}.
@@ -238,10 +259,18 @@ public abstract class PropertySet {
     }
 
 
-    public boolean containsKey(Object key) {
+    public final boolean containsKey(Object key) {
         return get(key)!=null;
     }
 
+    /**
+     * Gets the value of the property.
+     *
+     * @param key
+     *      This field is typed as {@link Object} to follow the {@link Map#get(Object)}
+     *      convention, but if anything but {@link String} is passed, this method
+     *      just returns null.
+     */
     public Object get(Object key) {
         Accessor sp = getPropertyMap().get(key);
         if(sp!=null)
@@ -291,21 +320,39 @@ public abstract class PropertySet {
         }
     }
 
+
+    /**
+     * Lazily created view of {@link Property}s that
+     * forms the core of {@link #createMapView()}.
+     */
+    /*package*/ Set<Entry<String,Object>> mapViewCore;
+
     /**
      * Creates a {@link Map} view of this {@link PropertySet}.
      *
      * <p>
-     * This map is live, in the sense that values you set to it
-     * will be reflected to {@link PropertySet}, and changes made
-     * to {@link PropertySet} externally would still see through
-     * the map view.
+     * This map is partially live, in the sense that values you set to it
+     * will be reflected to {@link PropertySet}.
+     *
+     * <p>
+     * However, this map may not pick up changes made
+     * to {@link PropertySet} after the view is created.
      *
      * @return
      *      always non-null valid instance.
      */
-    public Map<String,Object> createMapView() {
-        final Set<Map.Entry<String,Object>> core = new HashSet<Entry<String, Object>>();
+    public final Map<String,Object> createMapView() {
+        final Set<Entry<String,Object>> core = new HashSet<Entry<String,Object>>();
+        createEntrySet(core);
 
+        return new AbstractMap<String, Object>() {
+            public Set<Entry<String,Object>> entrySet() {
+                return core;
+            }
+        };
+    }
+
+    /*package*/ void createEntrySet(Set<Entry<String,Object>> core) {
         for (final Entry<String, Accessor> e : getPropertyMap().entrySet()) {
             core.add(new Entry<String, Object>() {
                 public String getKey() {
@@ -324,11 +371,5 @@ public abstract class PropertySet {
                 }
             });
         }
-
-        return new AbstractMap<String, Object>() {
-            public Set<Entry<String,Object>> entrySet() {
-                return core;
-            }
-        };
     }
 }

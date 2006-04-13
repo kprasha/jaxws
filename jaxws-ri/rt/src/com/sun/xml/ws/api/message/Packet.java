@@ -32,6 +32,7 @@ import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.util.PropertySet;
+import com.sun.xml.ws.util.DistributedPropertySet;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
@@ -113,7 +114,7 @@ import java.util.Set;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class Packet extends PropertySet {
+public final class Packet extends DistributedPropertySet {
 
     /**
      * Creates a {@link Packet} that wraps a given {@link Message}.
