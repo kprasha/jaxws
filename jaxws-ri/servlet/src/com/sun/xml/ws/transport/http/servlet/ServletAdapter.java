@@ -89,7 +89,7 @@ public final class ServletAdapter extends HttpAdapter {
     }
 
     /**
-     * Version of {@link #handle(WSConnection)}
+     * Version of {@link #handle(WSHTTPConnection)}
      * that takes convenient parameters for servlet.
      */
     public void handle(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -98,7 +98,7 @@ public final class ServletAdapter extends HttpAdapter {
     }
 
     /**
-     * Version of {@link #publishWSDL(WSConnection, String, String)}
+     * Version of {@link #publishWSDL(WSHTTPConnection, String, String)}
      * that takes convenient parameters for servlet.
      */
     public void publishWSDL(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -121,7 +121,4 @@ public final class ServletAdapter extends HttpAdapter {
 
         return addrBuf.toString();
     }
-
-    ;
-
 }
