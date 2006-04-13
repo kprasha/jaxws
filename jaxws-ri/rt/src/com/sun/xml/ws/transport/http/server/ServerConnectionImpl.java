@@ -22,157 +22,96 @@
 
 package com.sun.xml.ws.transport.http.server;
 
+import com.sun.istack.NotNull;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.transport.WSConnectionImpl;
-import com.sun.xml.ws.util.NoCloseInputStream;
-import com.sun.xml.ws.util.NoCloseOutputStream;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 
 /**
- * <code>com.sun.xml.ws.api.server.WSConnection</code> used with Java SE endpoints
+ * {@link WSHTTPConnection} used with Java SE endpoints
  *
  * @author WS Development Team
  */
-final class ServerConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
+final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceContextDelegate {
 
     private HttpExchange httpExchange;
     private int status;
-    private Map<String,List<String>> requestHeaders;
-    private Map<String,List<String>> responseHeaders;
-    private NoCloseInputStream is;
-    private NoCloseOutputStream out;
-    private boolean closedInput;
-    private boolean closedOutput;
+    private int responseContentLength = 0;
+
+    private boolean outputWritten;
+
 
     public ServerConnectionImpl(HttpExchange httpTransaction) {
         this.httpExchange = httpTransaction;
     }
 
-    public Map<String,List<String>> getHeaders() {
+    @Override
+    public @NotNull Map<String,List<String>> getRequestHeaders() {
         return httpExchange.getRequestHeaders();
     }
 
-    /**
-     * sets response headers.
-     */
-    public void setResponseHeaders(Map<String,List<String>> headers) {
-        responseHeaders = headers;
+    @Override
+    public String getRequestHeader(String headerName) {
+        return httpExchange.getRequestHeaders().getFirst(headerName);
     }
 
+    @Override
+    public void setResponseHeaders(Map<String,List<String>> headers) {
+        Headers r = httpExchange.getResponseHeaders();
+        r.clear();
+        for(Map.Entry <String, List<String>> entry : headers.entrySet()) {
+            String name = entry.getKey();
+            List<String> values = entry.getValue();
+            if (name.equals("Content-Length")) {
+                // No need to add this header
+                responseContentLength = Integer.parseInt(values.get(0));
+            } else {
+                r.put(name,new ArrayList<String>(values));
+            }
+        }
+    }
+
+    @Override
+    public void setContentTypeResponseHeader(@NotNull String value) {
+        httpExchange.getResponseHeaders().set("Content-Type",value);
+    }
+
+    @Override
     public void setStatus(int status) {
         this.status = status;
     }
 
-    /**
-     * sets HTTP status code
-     */
+    @Override
     public int getStatus() {
-        if (status == 0) {
-            status = HttpURLConnection.HTTP_INTERNAL_ERROR;
-        }
         return status;
     }
 
-    public InputStream getInput() {
-        if (is == null) {
-            is = new NoCloseInputStream(httpExchange.getRequestBody());
-        }
-        return is;
+    public @NotNull InputStream getInput() {
+        return httpExchange.getRequestBody();
     }
 
-    public OutputStream getOutput() {
-        if (out == null) {
-            try {
-                closeInput();
-                int len = 0;
-                if (responseHeaders != null) {
-                    for(Map.Entry <String, List<String>> entry : responseHeaders.entrySet()) {
-                        String name = entry.getKey();
-                        List<String> values = entry.getValue();
-                        if (name.equals("Content-Length")) {
-                            // No need to add this header
-                            len = Integer.valueOf(values.get(0));
-                        } else {
-                            for(String value : values) {
-                                httpExchange.getResponseHeaders().add(name, value);
-                            }
-                        }
-                    }
-                }
+    public @NotNull OutputStream getOutput() throws IOException {
+        assert !outputWritten;
+        outputWritten = true;
 
-                // write HTTP status code, and headers
-                httpExchange.sendResponseHeaders(getStatus(), len);
-                out = new NoCloseOutputStream(httpExchange.getResponseBody());
-            } catch(IOException ioe) {
-                ioe.printStackTrace();
-            }
-        }
-        return out;
+        httpExchange.sendResponseHeaders(getStatus(), responseContentLength);
+
+        return httpExchange.getResponseBody();
     }
 
-    public void closeOutput() {
-        if (out != null) {
-            try {
-                out.doClose();
-                closedOutput = true;
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        out = null;
-    }
-
-    public void closeInput() {
-        if (is != null) {
-            try {
-                // Read everything from request and close it
-                byte[] buf = new byte[1024];
-                while (is.read(buf) != -1) {
-                }
-                is.doClose();
-                closedInput = true;
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        is = null;
-    }
-
-    public void close() {
-        try {
-            if (!closedInput) {
-                if (is == null) {
-                    getInput();
-                }
-                closeInput();
-            }
-            if (!closedOutput) {
-                if (out == null) {
-                    getOutput();
-                }
-                closeOutput();
-            }
-        } finally {
-            try {
-                httpExchange.close();
-            } catch(IOException ioe) {
-                ioe.printStackTrace();
-            }
-        }
-    }
-
-    public WebServiceContextDelegate getWebServiceContextDelegate() {
+    public @NotNull WebServiceContextDelegate getWebServiceContextDelegate() {
         return this;
     }
 
@@ -184,14 +123,12 @@ final class ServerConnectionImpl extends WSConnectionImpl implements WebServiceC
         return false;
     }
 
-    public String getRequestMethod() {
+    @Override
+    public @NotNull String getRequestMethod() {
         return httpExchange.getRequestMethod();
     }
 
-    public String getRequestHeader(String headerName) {
-        return httpExchange.getRequestHeaders().getFirst(headerName);
-    }
-
+    @Override
     public String getQueryString() {
         URI requestUri = httpExchange.getRequestURI();
         String query = requestUri.getQuery();
@@ -200,6 +137,7 @@ final class ServerConnectionImpl extends WSConnectionImpl implements WebServiceC
         return null;
     }
 
+    @Override
     public String getPathInfo() {
         URI requestUri = httpExchange.getRequestURI();
         String reqPath = requestUri.getPath();

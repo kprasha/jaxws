@@ -37,6 +37,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.PropertySet;
 
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -164,11 +165,10 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                         : HttpURLConnection.HTTP_OK );
                 }
 
-                setContentType(con,ct);
-                // TODO headers from Packet's properties ?
-                //headers = msg.getProperties().HTTP_RESPONSE_HEADERS;
-                encoder.encode(packet, con.getOutput());
-                con.closeOutput();
+                con.setContentTypeResponseHeader(ct);
+                OutputStream os = con.getOutput();
+                encoder.encode(packet, os);
+                os.close();
             }
         }
 
@@ -177,8 +177,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 closed = true;
                 // close the response channel now
                 con.setStatus(WSHTTPConnection.ONEWAY);
-                con.getOutput();        // Sets Status Code on the connection
-                con.closeOutput();
+                try {
+                    con.getOutput().close(); // no payload
+                } catch (IOException e) {
+                    throw new WebServiceException(e);
+                }
             }
         }
     }
@@ -246,7 +249,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
 
         con.setStatus(HttpURLConnection.HTTP_OK);
-        setContentType(con, "text/xml");
+        con.setContentTypeResponseHeader("text/xml");
 
         OutputStream os = con.getOutput();
         final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
@@ -261,11 +264,12 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         };
 
         doc.writeTo(portAddressResolver, resolver, os);
+        os.close();
     }
 
     private void writeNotFoundErrorPage(WSHTTPConnection con, String message) throws IOException {
         con.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
-        setContentType(con, "text/html; charset=UTF-8");
+        con.setContentTypeResponseHeader("text/html; charset=UTF-8");
 
         PrintWriter out = new PrintWriter(new OutputStreamWriter(con.getOutput(),"UTF-8"));
         out.println("<html>");
@@ -276,18 +280,12 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         out.println(WsservletMessages.SERVLET_HTML_NOT_FOUND(message));
         out.println("</body>");
         out.println("</html>");
+        out.close();
     }
 
-    private void writeInternalServerError(WSHTTPConnection con) {
+    private void writeInternalServerError(WSHTTPConnection con) throws IOException {
         con.setStatus(HttpURLConnection.HTTP_INTERNAL_ERROR);
-        con.getOutput();        // Sets the status code
-    }
-
-    /**
-     * Sets the Content-Type as the only header.
-     */
-    private void setContentType(WSHTTPConnection con, String contentType) {
-        con.setResponseHeaders(Collections.singletonMap("Content-Type",Collections.singletonList(contentType)));
+        con.getOutput().close();        // Sets the status code
     }
 
     private static final class DummyList extends HttpAdapterList<HttpAdapter> {

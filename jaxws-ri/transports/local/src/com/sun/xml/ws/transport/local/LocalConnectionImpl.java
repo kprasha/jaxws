@@ -21,32 +21,43 @@
  */
 
 package com.sun.xml.ws.transport.local;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.transport.WSConnectionImpl;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
- * Server-side Local transport implementation
+ * {@link WSHTTPConnection} implemented for the local transport.
  *
  * @author WS Development Team
  */
-final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
+final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceContextDelegate {
+
+    private final Map<String, List<String>> reqHeaders;
+    private Map<String, List<String>> rspHeaders = null;
+    protected int statusCode;
     private ByteArrayBuffer baos;
 
-    public LocalConnectionImpl() {
+    LocalConnectionImpl(@NotNull Map<String, List<String>> reqHeaders) {
+        this.reqHeaders = reqHeaders;
     }
 
-    public InputStream getInput () {
+    public @NotNull InputStream getInput() {
         return baos.newInputStream();
     }
 
-    public OutputStream getOutput () {
+    public @NotNull OutputStream getOutput() {
         baos = new ByteArrayBuffer();
         return baos;
     }
@@ -55,7 +66,7 @@ final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceCo
         return baos.toString();
     }
 
-    public WebServiceContextDelegate getWebServiceContextDelegate() {
+    public @NotNull WebServiceContextDelegate getWebServiceContextDelegate() {
         return this;
     }
 
@@ -67,7 +78,7 @@ final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceCo
         return false;   // not really supported
     }
 
-    public String getRequestMethod() {
+    public @NotNull String getRequestMethod() {
         return "POST";   // not really supported
     }
 
@@ -78,6 +89,43 @@ final class LocalConnectionImpl extends WSConnectionImpl implements WebServiceCo
     public String getPathInfo() {
         return null;   // not really supported
     }
+
+    public int getStatus () {
+        return statusCode;
+    }
+
+    public void setStatus (int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public @Nullable Map<String, List<String>> getResponseHeaders() {
+        return rspHeaders;
+    }
+
+    public @NotNull Map<String, List<String>> getRequestHeaders () {
+        return reqHeaders;
+    }
+
+    public String getRequestHeader(String headerName) {
+        List<String> values = getRequestHeaders().get(headerName);
+        if(values==null || values.isEmpty())
+            return null;
+        else
+            return values.get(0);
+    }
+
+    public void setResponseHeaders(Map<String,List<String>> headers) {
+        this.rspHeaders = headers; // we are lazy
+    }
+
+    public void setContentTypeResponseHeader(@NotNull String value) {
+        if(rspHeaders==null)
+            rspHeaders = new HashMap<String,List<String>>();
+
+        rspHeaders.put("Content-Type", Collections.singletonList(value));
+    }
+
+
 
     protected PropertyMap getPropertyMap() {
         return model;

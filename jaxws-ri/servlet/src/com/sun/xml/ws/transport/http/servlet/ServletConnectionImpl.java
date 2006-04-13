@@ -21,19 +21,20 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.Headers;
-import com.sun.xml.ws.transport.WSConnectionImpl;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -41,20 +42,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <code>com.sun.xml.ws.api.server.WSConnection</code> used by
- * WSServletDelegate, uses <code>javax.servlet.http.HttpServletRequest</code>
- * and <code>javax.servlet.http.HttpServletResponse</code>
+ *{@link WSHTTPConnection} implemented for {@link HttpServlet}.
  *
  * @author WS Development Team
  */
-final class ServletConnectionImpl extends WSConnectionImpl implements WebServiceContextDelegate {
+final class ServletConnectionImpl extends WSHTTPConnection implements WebServiceContextDelegate {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final ServletContext context;
     private int status;
-    private Map<String,List<String>> requestHeaders;
-    private Map<String,List<String>> responseHeaders;
+    private Headers requestHeaders;
 
     public ServletConnectionImpl(ServletContext context, HttpServletRequest request, HttpServletResponse response) {
         this.context = context;
@@ -63,7 +61,7 @@ final class ServletConnectionImpl extends WSConnectionImpl implements WebService
     }
 
     @Override
-    public Map<String,List<String>> getRequestHeaders() {
+    public @NotNull Map<String,List<String>> getRequestHeaders() {
         if (requestHeaders == null) {
             requestHeaders = new Headers();
             Enumeration enums = request.getHeaderNames();
@@ -81,63 +79,51 @@ final class ServletConnectionImpl extends WSConnectionImpl implements WebService
         return requestHeaders;
     }
 
+
+
     /**
      * sets response headers.
      */
     @Override
     public void setResponseHeaders(Map<String,List<String>> headers) {
-        responseHeaders = headers;
+        response.reset();   // clear all the headers
+        if(status!=0)
+            response.setStatus(status);
+        for(Map.Entry <String, List<String>> entry : headers.entrySet()) {
+            String name = entry.getKey();
+            for(String value : entry.getValue()) {
+                response.addHeader(name, value);
+            }
+        }
     }
 
     @Override
     public void setStatus(int status) {
         this.status = status;
+        response.setStatus(status);
     }
 
-    /**
-     * sets HTTP status code
-     */
     @Override
     public int getStatus() {
-        if (status == 0) {
-            status = HttpURLConnection.HTTP_OK;
-        }
         return status;
     }
 
     @Override
-    public InputStream getInput() {
-        try {
-            return request.getInputStream();
-        } catch(IOException ioe) {
-            ioe.printStackTrace();
-        }
-        return null;
+    public void setContentTypeResponseHeader(@NotNull String value) {
+        response.setContentType(value);
     }
 
     @Override
-    public OutputStream getOutput() {
-        // write HTTP status code, and headers
-        response.setStatus(getStatus());
-        if (responseHeaders != null) {
-            for(Map.Entry <String, List<String>> entry : responseHeaders.entrySet()) {
-                String name = entry.getKey();
-                List<String> values = entry.getValue();
-                for(String value : values) {
-                    response.setHeader(name, value);
-                }
-            }
-        }
-        try {
-            outputStream = response.getOutputStream();
-            return outputStream;
-        } catch(IOException ioe) {
-            ioe.printStackTrace();
-        }
-        return null;
+    public @NotNull InputStream getInput() throws IOException {
+        return request.getInputStream();
     }
 
-    public WebServiceContextDelegate getWebServiceContextDelegate() {
+    @Override
+    public @NotNull OutputStream getOutput() throws IOException {
+        return response.getOutputStream();
+    }
+
+    public @NotNull WebServiceContextDelegate getWebServiceContextDelegate() {
         return this;
     }
 
@@ -150,7 +136,7 @@ final class ServletConnectionImpl extends WSConnectionImpl implements WebService
     }
 
     @Override
-    public String getRequestMethod() {
+    public @NotNull String getRequestMethod() {
         return request.getMethod();
     }
 
@@ -165,7 +151,7 @@ final class ServletConnectionImpl extends WSConnectionImpl implements WebService
     }
 
     @Override
-    public String getPathInfo() {
+    public @NotNull String getPathInfo() {
         return request.getPathInfo();
     }
 

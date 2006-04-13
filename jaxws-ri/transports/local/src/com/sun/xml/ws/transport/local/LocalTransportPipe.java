@@ -35,10 +35,10 @@ import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Transport {@link Pipe} that routes a message to a service that runs within it.
@@ -93,7 +93,6 @@ final class LocalTransportPipe implements Pipe {
         try {
             // Set up WSConnection with tranport headers, request content
 
-            LocalConnectionImpl con = new LocalConnectionImpl();
             // get transport headers from message
             reqHeaders.clear();
             Map<String, List<String>> rh = (Map<String, List<String>>) request.get(MessageContext.HTTP_REQUEST_HEADERS);
@@ -103,16 +102,15 @@ final class LocalTransportPipe implements Pipe {
             }
 
 
-            con.setResponseHeaders(reqHeaders);
+            LocalConnectionImpl con = new LocalConnectionImpl(reqHeaders);
 
             String contentType = encoder.encode(request, con.getOutput()).getContentType();
 
-            reqHeaders.put("Content-Type", Arrays.asList(contentType));
-            con.setRequestHeaders(reqHeaders);
+            reqHeaders.put("Content-Type", Collections.singletonList(contentType));
 
             adapter.handle(con);
 
-            String ct = getContentType(con);
+            String ct = getResponseContentType(con);
 
             if (con.getStatus() == WSHTTPConnection.ONEWAY) {
                 return request.createResponse(null);    // one way. no response given.
@@ -128,7 +126,7 @@ final class LocalTransportPipe implements Pipe {
         }
     }
 
-    private String getContentType(LocalConnectionImpl con) {
+    private String getResponseContentType(LocalConnectionImpl con) {
         Map<String, List<String>> rsph = con.getResponseHeaders();
         if(rsph!=null) {
             List<String> c = rsph.get("Content-Type");

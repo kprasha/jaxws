@@ -29,8 +29,10 @@ import com.sun.xml.ws.util.PropertySet;
 import javax.xml.ws.handler.MessageContext;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.net.HttpURLConnection;
 
 
 /**
@@ -48,7 +50,7 @@ import java.util.Map;
  * will be added to {@link Packet#addSatellite(PropertySet)}.)
  */
 public abstract class WSHTTPConnection extends PropertySet {
-    
+
     public static final int OK=200;
     public static final int ONEWAY=202;
     public static final int UNSUPPORTED_MEDIA=415;
@@ -56,10 +58,47 @@ public abstract class WSHTTPConnection extends PropertySet {
     public static final int INTERNAL_ERR=500;
 
     /**
-     * sets transport headers
+     * Overwrites all the HTTP response headers written thus far.
+     *
+     * <p>
+     * The implementation should copy the contents of the {@link Map},
+     * rather than retaining a reference. The {@link Map} passed as a
+     * parameter may change after this method is invoked.
+     *
+     * <p>
+     * This method may be called repeatedly, although in normal use
+     * case that's rare (so the implementation is encourage to take
+     * advantage of this usage pattern to improve performance, if possible.)
+     *
+     * <p>
+     * Initially, no header is set.
+     *
+     * @param headers
+     *      See {@link HttpURLConnection#getHeaderFields()} for the format.
+     *      This parameter may not be null, but since the user application
+     *      code may invoke this method, a graceful error checking with
+     *      an helpful error message should be provided if it's actually null.
      */
-    public abstract void setResponseHeaders(Map<String,List<String>> headers);
-    
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    public abstract void setResponseHeaders(@NotNull Map<String,List<String>> headers);
+
+    /**
+     * Sets the <tt>"Content-Type"</tt> header.
+     *
+     * <p>
+     * If the Content-Type header has already been set, this method will overwrite
+     * the previously set value. If not, this method adds it.
+     *
+     * <p>
+     * Note that this method and {@link #setResponseHeaders(Map<String,List<String>>)}
+     * may be invoked in any arbitrary order.
+     *
+     * @param value
+     *      strings like <tt>"application/xml; charset=UTF-8"</tt> or
+     *      <tt>"image/jpeg"</tt>.
+     */
+    public abstract void setContentTypeResponseHeader(@NotNull String value);
+
     /**
      * Sets the HTTP response code like {@link #OK}.
      *
@@ -86,30 +125,32 @@ public abstract class WSHTTPConnection extends PropertySet {
     /**
      * Transport's underlying input stream.
      *
-     * @return Transport's underlying input stream
+     * <p>
+     * This method will be invoked at most once by the JAX-WS RI to
+     * read the request body. If there's no request body, this method
+     * should return an empty {@link InputStream}.
+     *
+     * @return
+     *      the stream from which the request body will be read.
      */
-    public abstract @NotNull InputStream getInput();
-    
-    /**
-     * Closes transport's input stream
-     */
-    public abstract void closeInput();
-    
-    /**
-     * Transport's underlying output stream
-     * @return Transport's underlying output stream
-     */
-    public abstract OutputStream getOutput();
-    
-    /**
-     * Closes transport's output stream
-     */
-    public abstract void closeOutput();
+    public abstract @NotNull InputStream getInput() throws IOException;
 
     /**
-     * Closes transport connection
+     * Transport's underlying output stream
+     *
+     * <p>
+     * This method will be invoked exactly once by the JAX-WS RI
+     * to start writing the response body (unless the processing aborts abnormally.)
+     * Even if there's no response body to write, this method will
+     * still be invoked only to be closed immediately.
+     *
+     * <p>
+     * Once this method is called, the status code and response
+     * headers will never change (IOW {@link #setStatus(int)},
+     * {@link #setResponseHeaders}, and {@link #setContentTypeResponseHeader(String)}
+     * will never be invoked.
      */
-    public abstract void close();
+    public abstract @NotNull OutputStream getOutput() throws IOException;
 
     /**
      * Returns the {@link WebServiceContextDelegate} for this connection.
@@ -160,5 +201,5 @@ public abstract class WSHTTPConnection extends PropertySet {
      * @see javax.servlet.http.HttpServletRequest#getPathInfo()
      */
     @Property(MessageContext.PATH_INFO)
-    public abstract @NotNull String getPathInfo();
+    public abstract @Nullable String getPathInfo();
 }

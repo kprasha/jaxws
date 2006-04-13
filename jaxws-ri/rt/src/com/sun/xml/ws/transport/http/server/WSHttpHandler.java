@@ -67,7 +67,7 @@ final class WSHttpHandler implements HttpHandler {
     /**
      * Called by HttpServer when there is a matching request for the context
      */
-    public void handle(HttpExchange msg) {
+    public void handle(HttpExchange msg) throws IOException {
         logger.fine("Received HTTP request:"+msg.getRequestURI());
         if (executor != null) {
             // Use application's Executor to handle request. Application may
@@ -78,7 +78,7 @@ final class WSHttpHandler implements HttpHandler {
         }
     }
 
-    public void handleExchange(HttpExchange msg) {
+    public void handleExchange(HttpExchange msg) throws IOException {
         WSHTTPConnection con = new ServerConnectionImpl(msg);
         try {
             logger.fine("Received HTTP request:"+msg.getRequestURI());
@@ -97,10 +97,13 @@ final class WSHttpHandler implements HttpHandler {
             } else {
                 logger.warning(HttpserverMessages.UNEXPECTED_HTTP_METHOD(method));
             }
+            msg.close();
         } catch(IOException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
-        } finally {
-            con.close();
+            throw e;
+        } catch(RuntimeException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -116,7 +119,11 @@ final class WSHttpHandler implements HttpHandler {
         }
 
         public void run() {
-            handleExchange(msg);
+            try {
+                handleExchange(msg);
+            } catch (IOException e) {
+                // this error is already reported, so just ignore.
+            }
         }
     }
 
