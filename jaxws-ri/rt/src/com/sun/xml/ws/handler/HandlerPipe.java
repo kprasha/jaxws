@@ -46,24 +46,26 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     protected final boolean isClient;
     protected HandlerProcessor processor;
     protected boolean remedyActionTaken = false;
-
     private final @Nullable WSDLPort port;
-    
-    
+
     public HandlerPipe(Pipe next, WSDLPort port, boolean isClient) {
         super(next);
         this.port = port;
         this.isClient = isClient;
+        exchange = new HandlerPipeExchange();
     }
     
     public HandlerPipe(Pipe next, HandlerPipe cousinPipe, boolean isClient) {
         super(next);
         this.cousinPipe = cousinPipe;
         this.isClient = isClient;
-        if(cousinPipe != null)
+        if(cousinPipe != null) {
             this.port = cousinPipe.port;
-        else
+            exchange = cousinPipe.exchange;
+        } else {
             this.port = null;
+            exchange = new HandlerPipeExchange();
+        }
     }
     
     /**
@@ -74,14 +76,14 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         this.cousinPipe = that.cousinPipe;
         this.isClient = that.isClient;
         this.port = that.port;
+        this.exchange = that.exchange;
     }
     
-    public Packet process( Packet packet) {
+    public final Packet process( Packet packet) {
         // This check is done to cover handler returning false in Oneway request
-        Boolean handleFalse = (Boolean) packet.invocationProperties.get(HandlerProcessor.HANDLE_FALSE_PROPERTY);
-        if(handleFalse != null && handleFalse){
+        if(isHandleFalse()){
             // Cousin HandlerPipe returned false during Oneway Request processing.
-            // Dont call handlers and dispatch the message.
+            // Don't call handlers and dispatch the message.
             remedyActionTaken = true;
             return next.process(packet);
         }
@@ -110,23 +112,15 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             // Call next Pipe.process() on msg
             reply = next.process(packet);
 
-            //RELOOK: For now create again
+            if (isHandleFalse() || reply.getMessage() == null) {
+                // Cousin HandlerPipe returned false during Response processing.
+                // or it is oneway request
+                // Don't call handlers.
+                return reply;
+            }
             context =  getContext(reply);
-
-            //TODO: HandleFault behavior is incorrect
-            //TODO: If user inserts fault message inbetween two handler pipes
-
-            //If null, it is oneway
-            if(reply.getMessage()!= null){
-                if(reply.getMessage().isFault()) {
-                        //handleFault() is called on handlers
-                        processor.addHandleFaultProperty(context);
-                }
-            }
-            if(reply.getMessage()!= null){
-                // Call handlers on Response
-                callHandlersOnResponse(context);
-            }
+            // Call handlers on Response
+            callHandlersOnResponse(context,isHandleFault(reply));
         } finally {
             close(context.getMessageContext());
         }
@@ -145,13 +139,13 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
               otherwise use this value as an approximation, since this carries
               the appliation's intention --- whether it was invokeOneway vs invoke,etc.
              */
-            return (packet.expectReply != null ? packet.expectReply : false);
+            return (packet.expectReply != null && packet.expectReply);
         }
     }
 
     private boolean callHandlersOnRequest(MessageUpdatableContext context, boolean isOneWay){
 
-        boolean handlerResult = false;
+        boolean handlerResult;
         try {
             if(isClient) {
                 //CLIENT-SIDE
@@ -178,14 +172,14 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         return handlerResult;
     }
 
-    private void callHandlersOnResponse(MessageUpdatableContext context){
+    private void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault){
         try {
             if(isClient) {
                 //CLIENT-SIDE
-                processor.callHandlersResponse(Direction.INBOUND,context);
+                processor.callHandlersResponse(Direction.INBOUND,context,handleFault);
             } else {
                 //SERVER-SIDE
-                processor.callHandlersResponse(Direction.OUTBOUND,context);
+                processor.callHandlersResponse(Direction.OUTBOUND,context,handleFault);
             }
         } catch(WebServiceException wse) {
             //no rewrapping
@@ -214,17 +208,52 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      * Close this Pipes's handlers.
      */
     public abstract void closeCall(MessageContext msgContext);
-    
-    
-    protected HandlerPipeExchange exchange;
+
+    final boolean isHandleFault(Packet packet) {
+        if (cousinPipe != null) {
+            return exchange.isHandleFault();
+        } else {
+            return packet.getMessage().isFault();
+        }
+    }
+
+    final void setHandleFault() {
+        exchange.setHandleFault(true);
+    }
+
+    public final boolean isHandleFalse() {
+        return exchange.isHandleFalse();
+    }
+
+    final void setHandleFalse() {
+        exchange.setHandleFalse(true);
+    }
+
+    private final HandlerPipeExchange exchange;
+
     /**
      * This class is used primarily to exchange information or status between
      * LogicalHandlerPipe and SOAPHandlerPipe
      */
-    
-    public class HandlerPipeExchange {
-        //TODO: get the requirements from different scenarios
-        String dummy;
+    class HandlerPipeExchange {
+        private boolean handleFalse;
+        private boolean handleFault;
+
+        boolean isHandleFault() {
+            return handleFault;
+        }
+
+        void setHandleFault(boolean handleFault) {
+            this.handleFault = handleFault;
+        }
+
+        public boolean isHandleFalse() {
+            return handleFalse;
+        }
+
+        void setHandleFalse(boolean handleFalse) {
+            this.handleFalse = handleFalse;
+        }
     }
     
 }

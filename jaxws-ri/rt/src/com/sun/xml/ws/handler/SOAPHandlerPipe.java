@@ -36,7 +36,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
 import java.util.ArrayList;
@@ -151,7 +150,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
         soapHandlers.addAll(handlerConfig.getSoapHandlers());
         roles = new HashSet<String>();
         roles.addAll(handlerConfig.getRoles());
-        processor = new SOAPHandlerProcessor(binding,soapHandlers, isClient);
+        processor = new SOAPHandlerProcessor(this,binding,soapHandlers, isClient);
     }
 
     MessageUpdatableContext getContext(Packet packet){

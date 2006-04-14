@@ -34,30 +34,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
  * @author WS Development Team
  */
 abstract class HandlerProcessor<C extends MessageUpdatableContext> {
-    
-    public static final String IGNORE_FAULT_PROPERTY =
-            "ignore fault in message";
-    public static final String HANDLE_FAULT_PROPERTY =
-            "handle fault on message";
-    public static final String HANDLE_FALSE_PROPERTY =
-            "handle false on message";
+
     protected boolean isClient;
     protected static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".handler");
-    
+
     // need request or response for Handle interface
-    public enum RequestOrResponse { REQUEST, RESPONSE }
-    public enum Direction { OUTBOUND, INBOUND }
-    private Set<QName> understoodHeaders;
+    public enum RequestOrResponse {
+        REQUEST, RESPONSE }
+
+    public enum Direction {
+        OUTBOUND, INBOUND }
+
     private List<? extends Handler> handlers; // may be logical/soap mixed
-    
+
     protected WSBinding binding;
     private int index = -1;
-    
+    private HandlerPipe owner;
+
     /**
      * The handlers that are passed in will be sorted into
      * logical and soap handlers. During this sorting, the
@@ -65,9 +62,10 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * handlers.
      *
      * @param chain A list of handler objects, which can
-     * be protocol or logical handlers.
+     *              be protocol or logical handlers.
      */
-    public HandlerProcessor(WSBinding binding, List<? extends Handler> chain, boolean isClient) {
+    protected HandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain, boolean isClient) {
+        this.owner = owner;
         if (chain == null) { // should only happen in testing
             chain = new ArrayList<Handler>();
         }
@@ -75,7 +73,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         this.binding = binding;
         this.isClient = isClient;
     }
-    
+
     /**
      * Gives index of the handler in the chain to know what handlers in the chain
      * are invoked
@@ -83,6 +81,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
     protected int getIndex() {
         return index;
     }
+
     /**
      * This is called when a handler returns false or throws a RuntimeException
      */
@@ -90,69 +89,56 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         //TODO: If its already set, don't modify it
         index = i;
     }
-    /**
-     * This list may be different than the chain that is passed
-     * in since the logical and protocol handlers must be separated.
-     *
-     * @return The list of handlers, sorted by logical and then protocol.
-     */
-    public List<? extends Handler> getHandlerChain() {
-        return handlers;
-    }
-    
-    public boolean hasHandlers() {
-        return (handlers.size() != 0);
-    }
-    
+
     /**
      * TODO: Just putting thoughts,
      * Current contract: This is Called during Request Processing.
      * return true, if all handlers in the chain return true
-     *            Current Pipe can call nextPipe.process();
+     * Current Pipe can call nextPipe.process();
      * return false, One of the handlers has returned false or thrown a
-     *            RuntimeException. Remedy Actions taken:
-     *         1) In this case, The processor will setIndex()to track what 
-     *            handlers are invoked until that point.
-     *         2) Previously invoked handlers are again invoked (handleMessage()
-     *            or handleFault()) to take remedy action. 
-     *            CurrentPipe should NOT call nextPipe.process()
-     *            While closing handlers, check getIndex() to get the invoked 
-     *            handlers.
+     * RuntimeException. Remedy Actions taken:
+     * 1) In this case, The processor will setIndex()to track what
+     * handlers are invoked until that point.
+     * 2) Previously invoked handlers are again invoked (handleMessage()
+     * or handleFault()) to take remedy action.
+     * CurrentPipe should NOT call nextPipe.process()
+     * While closing handlers, check getIndex() to get the invoked
+     * handlers.
      * TODO: Index may be reset during remedy action, needs fix
      * throw RuntimeException, this happens when a RuntimeException occurs during
-     *            handleMessage during Request processing or 
-     *            during remedy action 2)
-     *            CurrentPipe should NOT call nextPipe.process() and throw the 
-     *            exception to the previous Pipe
-     *            While closing handlers, check getIndex() to get the invoked 
-     *            handlers.
+     * handleMessage during Request processing or
+     * during remedy action 2)
+     * CurrentPipe should NOT call nextPipe.process() and throw the
+     * exception to the previous Pipe
+     * While closing handlers, check getIndex() to get the invoked
+     * handlers.
      */
     public boolean callHandlersRequest(Direction direction,
-            C context,
-            boolean responseExpected) {
-        setDirection(direction,context);
-        boolean result = true;
+                                       C context,
+                                       boolean responseExpected) {
+        setDirection(direction, context);
+        boolean result;
         // call handlers
         try {
             if (direction == Direction.OUTBOUND) {
-                result = callHandleMessage(context,0,handlers.size()-1);
+                result = callHandleMessage(context, 0, handlers.size() - 1);
             } else {
-                result = callHandleMessage(context,handlers.size()-1,0);
+                result = callHandleMessage(context, handlers.size() - 1, 0);
             }
         } catch (ProtocolException pe) {
             logger.log(Level.FINER, "exception in handler chain", pe);
             if (responseExpected) {
                 //insert fault message if its not a fault message
-                insertFaultMessage(context, (ProtocolException) pe);                
+                insertFaultMessage(context, pe);
                 // reverse direction
-                reverseDirection(direction,context);
-                //Put handleFault in MessageContext
-                addHandleFaultProperty(context);
+                reverseDirection(direction, context);
+                //Set handleFault so that cousinPipe is aware of fault
+                setHandleFaultProperty();
                 // call handle fault                
-                if(direction == Direction.OUTBOUND) {
-                    callHandleFault(context, getIndex()-1, 0);
+                if (direction == Direction.OUTBOUND) {
+                    callHandleFault(context, getIndex() - 1, 0);
                 } else {
-                    callHandleFault(context,getIndex()+1,handlers.size()-1);
+                    callHandleFault(context, getIndex() + 1, handlers.size() - 1);
                 }
             }
             return false;
@@ -160,138 +146,105 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
             logger.log(Level.FINER, "exception in handler chain", re);
             throw re;
         }
-        
-        if(!result) {
+
+        if (!result) {
             if (responseExpected) {
                 // reverse direction
-                reverseDirection(direction,context);
+                reverseDirection(direction, context);
                 // call handle message
-                if(direction == Direction.OUTBOUND) {
-                    callHandleMessageReverse(context, getIndex()-1, 0);
+                if (direction == Direction.OUTBOUND) {
+                    callHandleMessageReverse(context, getIndex() - 1, 0);
                 } else {
-                    callHandleMessageReverse(context,getIndex()+1,handlers.size()-1);
+                    callHandleMessageReverse(context, getIndex() + 1, handlers.size() - 1);
                 }
             } else {
+                // Set handleFalse so that cousinPipe is aware of false processing
                 // Oneway, dispatch the message
                 // cousinPipe should n't call handleMessage() anymore.
-                // Set a property for it.
-                addHandleFalseProperty(context);
+                setHandleFalseProperty();
             }
             return false;
         }
-        
+
         return result;
     }
-    
-    
+
+
     /**
      * TODO: Just putting thoughts,
      * Current contract: This is Called during Response Processing.
      * Runs all handlers until handle returns false or throws a RuntimeException
-     *            CurrentPipe should close all the handlers in the chain.  
+     * CurrentPipe should close all the handlers in the chain.
      * throw RuntimeException, this happens when a RuntimeException occurs during
-     *            normal Response processing or remedy action 2) taken
-     *            during callHandlersRequest().
-     *            CurrentPipe should close all the handlers in the chain.  
+     * normal Response processing or remedy action 2) taken
+     * during callHandlersRequest().
+     * CurrentPipe should close all the handlers in the chain.
      * TODO: there might be a problem with Index tracking in some cases.
      */
     public void callHandlersResponse(Direction direction,
-            C context) {
-        setDirection(direction,context);
-        boolean callHandleFalse = (context.get(HANDLE_FALSE_PROPERTY) == null)? 
-            false:(Boolean) context.get(HANDLE_FALSE_PROPERTY);
-        if(callHandleFalse){
-            // Cousin HandlerPipe returned false during Response processing.
-            // Don't call handlers.
-            return;
-        }
-        
-        boolean callHandleFault = (context.get(HANDLE_FAULT_PROPERTY) == null)? 
-            false:(Boolean) context.get(HANDLE_FAULT_PROPERTY);
-        
+                                     C context, boolean isFault) {
+        setDirection(direction, context);
         try {
-            if(callHandleFault) {
+            if (isFault) {
                 // call handleFault on handlers
-                if(direction == Direction.OUTBOUND) {
-                    callHandleFault(context,0,handlers.size()-1);
+                if (direction == Direction.OUTBOUND) {
+                    callHandleFault(context, 0, handlers.size() - 1);
                 } else {
-                    callHandleFault(context,handlers.size()-1,0);
+                    callHandleFault(context, handlers.size() - 1, 0);
                 }
             } else {
                 // call handleMessage on handlers                
                 if (direction == Direction.OUTBOUND) {
-                    callHandleMessageReverse(context,0,handlers.size()-1);
+                    callHandleMessageReverse(context, 0, handlers.size() - 1);
                 } else {
-                    callHandleMessageReverse(context,handlers.size()-1,0);
+                    callHandleMessageReverse(context, handlers.size() - 1, 0);
                 }
             }
         } catch (RuntimeException re) {
             logger.log(Level.FINER, "exception in handler chain", re);
             throw re;
-        }        
+        }
     }
-    
+
+
     /**
      * Reverses the Message Direction.
      * MessageContext.MESSAGE_OUTBOUND_PROPERTY is changed.
      */
-    public void reverseDirection(Direction origDirection, C context){
-        if(origDirection == Direction.OUTBOUND){
+    public void reverseDirection(Direction origDirection, C context) {
+        if (origDirection == Direction.OUTBOUND) {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         } else {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, true);
         }
     }
-    
+
     /**
      * Sets the Message Direction.
      * MessageContext.MESSAGE_OUTBOUND_PROPERTY is changed.
      */
-    public void setDirection(Direction direction, C context){
-        if(direction == Direction.OUTBOUND){
+    public void setDirection(Direction direction, C context) {
+        if (direction == Direction.OUTBOUND) {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, true);
         } else {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         }
     }
-    
+
     /**
-     * When this property is set HandlerPipes can call handleFault() on the 
+     * When this property is set HandlerPipes can call handleFault() on the
      * message
      */
-    public void addHandleFaultProperty(C context) {
-        context.put(HANDLE_FAULT_PROPERTY, Boolean.TRUE);
+    public void setHandleFaultProperty() {
+        owner.setHandleFault();
     }
-    
+
     /**
-     * When this property is set HandlerPipes will not call 
+     * When this property is set HandlerPipes will not call
      * handleMessage() during Response processing.
      */
-    public void addHandleFalseProperty(C context) {
-        context.put(HANDLE_FALSE_PROPERTY, Boolean.TRUE);
-    }
-    
-    public boolean checkHandlerFalseProperty(C context) {
-        Boolean handleFalse = (Boolean) context.get(HANDLE_FALSE_PROPERTY);
-        return (handleFalse == null)? false:handleFalse;        
-    }
-    
-    /**
-     * TODO: Do we need this? 
-     * <p>The expectation of the rest of the code is that,
-     * if a ProtocolException is thrown from the handler chain,
-     * the message contents reflect the protocol exception.
-     * However, if a new ProtocolException is thrown from
-     * the handleFault method, then the fault should be
-     * ignored and the new exception should be dispatched.
-     *
-     * <p>This method simply sets a property that is checked
-     * by the client and server code when a ProtocolException
-     * is caught. The property can be checked with
-     * {@link MessageContextUtil#ignoreFaultInMessage}
-     */
-    private void addIgnoreFaultProperty(C context) {
-        context.put(IGNORE_FAULT_PROPERTY, Boolean.TRUE);
+    public void setHandleFalseProperty() {
+        owner.setHandleFalse();
     }
 
     /**
@@ -300,13 +253,13 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * If its SOAP/HTTP Binding, put right SOAP Fault version
      */
     abstract void insertFaultMessage(C context,
-            ProtocolException exception);
-    
+                                     ProtocolException exception);
+
     /*
-     * Calls handleMessage on the handlers. Indices are
-     * inclusive. Exceptions get passed up the chain, and an
-     * exception or return of 'false' ends processing.
-     */
+    * Calls handleMessage on the handlers. Indices are
+    * inclusive. Exceptions get passed up the chain, and an
+    * exception or return of 'false' ends processing.
+    */
     private boolean callHandleMessage(C context, int start, int end) {
         /* Do we need this check?
         if (handlers.isEmpty() ||
@@ -318,87 +271,89 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         int i = start;
         try {
             if (start > end) {
-                while(i >= end) {
-                    if(handlers.get(i).handleMessage(context) == false) {
+                while (i >= end) {
+                    if (!handlers.get(i).handleMessage(context)) {
                         setIndex(i);
                         return false;
                     }
                     i--;
                 }
             } else {
-                while(i <= end) {
-                    if(handlers.get(i).handleMessage(context) == false) {
+                while (i <= end) {
+                    if (!handlers.get(i).handleMessage(context)) {
                         setIndex(i);
                         return false;
                     }
                     i++;
                 }
             }
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             setIndex(i);
             throw e;
         }
         return true;
     }
-    
+
     /*
-     * Calls handleMessage on the handlers. Indices are
-     * inclusive. Exceptions get passed up the chain, and an
-     * exception (or) 
-     * return of 'false' calls addHandleFalseProperty(context) and 
-     * ends processing.
-     * setIndex() is not called.
-     *
-     */
+    * Calls handleMessage on the handlers. Indices are
+    * inclusive. Exceptions get passed up the chain, and an
+    * exception (or)
+    * return of 'false' calls addHandleFalseProperty(context) and
+    * ends processing.
+    * setIndex() is not called.
+    *
+    */
     private boolean callHandleMessageReverse(C context, int start, int end) {
-        
+
         if (handlers.isEmpty() ||
                 start == -1 ||
                 start == handlers.size()) {
             return false;
         }
-        
+
         int i = start;
-        
+
         if (start > end) {
-            while(i >= end) {
-                if(handlers.get(i).handleMessage(context) == false) {
-                    addHandleFalseProperty(context);
+            while (i >= end) {
+                if (!handlers.get(i).handleMessage(context)) {
+                    // Set handleFalse so that cousinPipe is aware of false processing
+                    setHandleFalseProperty();
                     return false;
                 }
                 i--;
             }
         } else {
-            while(i <= end) {
-                if(handlers.get(i).handleMessage(context) == false) {
-                    addHandleFalseProperty(context);
+            while (i <= end) {
+                if (!handlers.get(i).handleMessage(context)) {
+                    // Set handleFalse so that cousinPipe is aware of false processing
+                    setHandleFalseProperty();
                     return false;
                 }
                 i++;
             }
-        }        
+        }
         return true;
     }
-    
+
     /*
-     * Calls handleFault on the handlers. Indices are
-     * inclusive. Exceptions get passed up the chain, and an
-     * exception or return of 'false' ends processing.
-     */
-    
+    * Calls handleFault on the handlers. Indices are
+    * inclusive. Exceptions get passed up the chain, and an
+    * exception or return of 'false' ends processing.
+    */
+
     private boolean callHandleFault(C context, int start, int end) {
-        
+
         if (handlers.isEmpty() ||
                 start == -1 ||
                 start == handlers.size()) {
             return false;
         }
-        
+
         int i = start;
         if (start > end) {
             try {
                 while (i >= end) {
-                    if (handlers.get(i).handleFault(context) == false) {
+                    if (!handlers.get(i).handleFault(context)) {
                         return false;
                     }
                     i--;
@@ -411,7 +366,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         } else {
             try {
                 while (i <= end) {
-                    if (handlers.get(i).handleFault(context) == false) {
+                    if (!handlers.get(i).handleFault(context)) {
                         return false;
                     }
                     i++;
@@ -424,19 +379,19 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         }
         return true;
     }
-    
+
     /**
      * Calls close on the handlers from the starting
      * index through the ending index (inclusive). Made indices
      * inclusive to allow both directions more easily.
      */
     protected void closeHandlers(MessageContext context, int start, int end) {
-        if (handlers.isEmpty() || 
+        if (handlers.isEmpty() ||
                 start == -1) {
             return;
         }
         if (start > end) {
-            for (int i=start; i>=end; i--) {
+            for (int i = start; i >= end; i--) {
                 try {
                     handlers.get(i).close(context);
                 } catch (RuntimeException re) {
@@ -445,7 +400,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
                 }
             }
         } else {
-            for (int i=start; i<=end; i++) {
+            for (int i = start; i <= end; i++) {
                 try {
                     handlers.get(i).close(context);
                 } catch (RuntimeException re) {
@@ -455,127 +410,4 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
             }
         }
     }
-    
-    
-    
-    /**
-     * Used to hold the context objects that are used to get
-     * and set the current message.
-     *
-     */
-    /*
-    static class ContextHolder {
-        
-        boolean logicalOnly;
-        WSBinding binding;
-        Packet packet;
-        MessageContext cxt;
-        // smc and lmc are mutually exclusive, one of them should be null anytime
-        SOAPMessageContextImpl smc;
-        LogicalMessageContextImpl lmc;
-        ContextHolder(WSBinding binding, Packet msg) {
-            logicalOnly = isLogicalOnly(binding);
-            this.binding = binding;
-            this.packet = msg;
-            this.cxt = new MessageContextImpl(msg);
-        }
-        
-        
-        // This method determines whether to process ProtocolHandlers or not
-         
-        public boolean isLogicalOnly(WSBinding binding) {
-            if(binding.getSOAPVersion()!=null) {
-                return false;
-            }
-            return true;
-        }
-        
-        LogicalMessageContext getLMC() {
-            if(lmc == null) {
-                if(smc != null) {
-                    smc.updatePacket();
-                    smc = null;
-                }
-                lmc = new LogicalMessageContextImpl(binding, packet, cxt);
-                
-            }
-            return lmc;
-        }
-        
-        SOAPMessageContext getSMC() {
-            if(smc == null) {
-                if(lmc != null) {
-                    lmc.updatePacket();
-                    lmc = null;
-                }
-                smc = (logicalOnly ? null : new SOAPMessageContextImpl(binding, packet, cxt));
-            }
-            return smc;
-        }
-        
-        MessageContext getMC() {
-            return cxt;
-        }
-        //TODO:
-        Packet getUpdatedPacket() {
-            //TODO: Need to build a Message and set properties from MessageContext
-            if(lmc != null) {
-                lmc.updatePacket();
-            } else if(smc != null) {
-                smc.updatePacket();
-            }
-            return packet;
-        }
-        
-        
-    }
-    */
-    /* TRI-STATE for handler result
-    public enum HandleResult { TRUE, FALSE, EXCEPTION };
-    
-    class HandlerResult {        
-        boolean result = true;
-        int index = 0;
-        RuntimeException ex;
-        HandleResult internalResult;
-        
-        public HandlerResult(boolean result){
-            this.result = result;
-            if(result)
-                internalResult = HandleResult.TRUE;
-            else
-                internalResult = HandleResult.FALSE;
-        }
-        public HandlerResult(boolean result, int index){
-            if(result) {
-                internalResult = HandleResult.TRUE;
-            } else {
-                internalResult = HandleResult.FALSE;
-            }
-            this.index = index;
-            this.result = result;
-        }
-        
-        public HandlerResult(RuntimeException ex) {
-            internalResult = HandleResult.EXCEPTION;
-            this.ex = ex;
-        }
-        
-        public HandleResult getHandlerResult() {
-            return internalResult;
-        }
-        
-        boolean getResult(){
-            return result;
-        }
-        
-        RuntimeException getException() {
-            return ex;
-        }
-        
-        int getIndex(){
-            return index;
-        }
-    }
-    */
 }

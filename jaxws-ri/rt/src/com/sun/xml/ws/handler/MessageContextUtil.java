@@ -25,8 +25,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.util.ByteArrayDataSource;
 
-import static com.sun.xml.ws.handler.HandlerProcessor.IGNORE_FAULT_PROPERTY;
-
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -119,18 +117,5 @@ public class MessageContextUtil {
         Map<String, DataHandler> attachMap = getMessageAttachments(ctxt);
         attachMap.put(cid, dh);
     }
-    
-    /*
-     * See HandlerChainCaller for full details. When a ProtocolException
-     * is caught from the handler chain, this method is used to tell
-     * the runtime whether to use the fault in the current message or
-     * use the exception and create a new message.
-     */
-    public static boolean ignoreFaultInMessage(MessageContext context) {
-        if (context.get(IGNORE_FAULT_PROPERTY) == null) {
-            return false;
-        }
-        return (Boolean) context.get(IGNORE_FAULT_PROPERTY);
-    }
-    
+
 }

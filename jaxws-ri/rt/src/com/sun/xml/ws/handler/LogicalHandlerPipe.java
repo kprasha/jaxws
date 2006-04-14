@@ -151,10 +151,10 @@ public class LogicalHandlerPipe extends HandlerPipe {
         logicalHandlers = new ArrayList<LogicalHandler>();
         logicalHandlers.addAll(((BindingImpl)binding).getHandlerConfig().getLogicalHandlers());
         if(binding.getSOAPVersion() == null) {
-            processor = new XMLHandlerProcessor(binding,
+            processor = new XMLHandlerProcessor(this, binding,
                     logicalHandlers,isClient);
         } else {
-            processor = new SOAPHandlerProcessor(binding,
+            processor = new SOAPHandlerProcessor(this, binding,
                     logicalHandlers,isClient);
         }            
     }
