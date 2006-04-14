@@ -104,7 +104,7 @@ public class RuntimeWSDLParser {
         // Check to see if the obtained WSDL was a WSDL document. If not then try running with MEX else append with "?wsdl" if it doesn't end with one
         if(errors.get(NOT_A_WSDL)){
             //TODO: try with MEX. Since mex is not here now so we try by appending ?wsdl to the URI to see if it works
-            if(wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() != null) && !wsdlLoc.getQuery().equals("wsdl")){
+            if(wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)){
                 String urlString = wsdlLoc.toExternalForm();
                 urlString += "?wsdl";
                 wsdlLoc = new URL(urlString);
