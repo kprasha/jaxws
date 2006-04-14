@@ -47,6 +47,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private final @NotNull WSDLModelImpl owner;
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
+    private boolean mtomEnabled;
 
     /**
      * Operations keyed by the payload tag name.
@@ -102,6 +103,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public BindingID getBindingId() {
+
         return bindingId;
     }
 
@@ -130,6 +132,14 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
 
+    /**
+     * Gets the {@link ParameterBinding} for a given operation, part name and the direction - IN/OUT
+     *
+     * @param operation wsdl:operation@name value. Must be non-null.
+     * @param part      wsdl:part@name such as value of soap:header@part. Must be non-null.
+     * @param mode      {@link Mode#IN} or {@link Mode@OUT}. Must be non-null.
+     * @return null if the binding could not be resolved for the part.
+     */
     public ParameterBinding getBinding(QName operation, String part, Mode mode) {
         WSDLBoundOperationImpl op = get(operation);
         if (op == null) {
@@ -142,6 +152,14 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
             return op.getOutputBinding(part);
     }
 
+    /**
+     * Gets mime:content@part value which is the MIME type for a given operation, part and {@link Mode}.
+     *
+     * @param operation wsdl:operation@name value. Must be non-null.
+     * @param part      wsdl:part@name such as value of soap:header@part. Must be non-null.
+     * @param mode      {@link Mode#IN} or {@link Mode@OUT}. Must be non-null.
+     * @return null if the binding could not be resolved for the part.
+     */
     public String getMimeType(QName operation, String part, Mode mode) {
         WSDLBoundOperationImpl op = get(operation);
         if (Mode.IN == mode)
@@ -165,6 +183,14 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
             return emptyPayloadOperation;
         else
             return payloadMap.get(namespaceUri,localName);
+    }
+
+    public void enableMTOM() {
+        mtomEnabled = true;
+    }
+
+    public boolean isMTOMEnabled() {
+        return mtomEnabled;
     }
 
     public SOAPVersion getSOAPVersion(){

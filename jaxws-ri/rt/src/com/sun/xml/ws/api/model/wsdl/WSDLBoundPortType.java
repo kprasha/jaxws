@@ -81,26 +81,6 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
     BindingID getBindingId();
 
     /**
-     * Gets the {@link ParameterBinding} for a given operation, part name and the direction - IN/OUT
-     *
-     * @param operation wsdl:operation@name value. Must be non-null.
-     * @param part      wsdl:part@name such as value of soap:header@part. Must be non-null.
-     * @param mode      {@link Mode#IN} or {@link Mode@OUT}. Must be non-null.
-     * @return null if the binding could not be resolved for the part.
-     */
-    ParameterBinding getBinding(QName operation, String part, Mode mode);
-
-    /**
-     * Gets mime:content@part value which is the MIME type for a given operation, part and {@link Mode}.
-     *
-     * @param operation wsdl:operation@name value. Must be non-null.
-     * @param part      wsdl:part@name such as value of soap:header@part. Must be non-null.
-     * @param mode      {@link Mode#IN} or {@link Mode@OUT}. Must be non-null.
-     * @return null if the binding could not be resolved for the part.
-     */
-    String getMimeType(QName operation, String part, Mode mode);
-
-    /**
      * Gets the bound operation in this port for a tag name. Here the operation would be the one whose
      * input part descriptor bound to soap:body is same as the tag name except for rpclit where the tag
      * name would be {@link WSDLBoundOperation#getName()}.
@@ -125,4 +105,16 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      *      null if no operation with the given tag name is found.
      */
     @Nullable WSDLBoundOperation getOperation(String namespaceUri, String localName);
+
+    /**
+     * Enables  Mtom as per mtom policy assertion. This method would be called during WSDL parsing to enable MTOM for a
+     * WSDL operation.
+     */
+    void enableMTOM();
+
+    /**
+     * Tells if MTOM is enabled for this WSDL operation.
+     * @return by default returns false unless enabled by {@link #enableMTOM()}
+     */
+    boolean isMTOMEnabled();
 }
