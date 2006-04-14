@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocument;
@@ -240,6 +241,10 @@ public class EndpointFactory {
                     wsdlPort = wsdlDoc.getService(serviceName).get(portName);
                     if(wsdlPort == null)
                         throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
+
+                    // set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
+                    // conflicts.
+                    applyEffectiveMtomSetting(wsdlPort.getBinding(), binding);
                 }else{
                     WSDLService service = wsdlDoc.getService(serviceName);
                     if(service == null)
@@ -256,13 +261,7 @@ public class EndpointFactory {
 
                             //set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
                             // conflicts.
-                            if(p.getBinding().isMTOMEnabled()){
-                                if(bindingId.isMTOMEnabled() == null){
-                                    binding.setMTOMEnabled(true);
-                                }else if (bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled() == Boolean.FALSE){
-                                    throw new ServerRtException("Deployment failed! Mtom policy assertion in WSDL is enabled whereas the deplyment descriptor setting wants to disable it!");
-                                }
-                            }
+                            applyEffectiveMtomSetting(p.getBinding(), binding);
                             hasPort = true;
                         }
                     }
@@ -284,6 +283,23 @@ public class EndpointFactory {
                 throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
             } catch (ServiceConfigurationError e) {
                 throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
+            }
+        }
+    }
+
+    /**
+     *Set the mtom enable setting from wsdl model (mtom policy assertion) on to @link WSBinding} if DD has
+     * not already set it on BindingID. Also check conflicts.
+     */
+
+    private static void applyEffectiveMtomSetting(WSDLBoundPortType wsdlBinding, WSBinding binding){
+        if(wsdlBinding.isMTOMEnabled()){
+            BindingID bindingId = binding.getBindingId();
+            if(bindingId.isMTOMEnabled() == null){
+                binding.setMTOMEnabled(true);
+            }else if (bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled() == Boolean.FALSE){
+                //TODO: i18N
+                throw new ServerRtException("Deployment failed! Mtom policy assertion in WSDL is enabled whereas the deplyment descriptor setting wants to disable it!");
             }
         }
     }
