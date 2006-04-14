@@ -179,11 +179,20 @@ public abstract class SOAPFaultBuilder {
     private static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode, Node detail) {
         switch (soapVersion) {
             case SOAP_11:
-                return new JAXBMessage(JAXB_MARSHALLER, new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
+                return new JAXBMessage(createMarshaller(), new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
             case SOAP_12:
-                return new JAXBMessage(JAXB_MARSHALLER, new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
+                return new JAXBMessage(createMarshaller(), new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
             default:
                 throw new AssertionError();
+        }
+    }
+
+    private static Marshaller createMarshaller() {
+        try {
+            return JAXB_CONTEXT.createMarshaller();
+        } catch (JAXBException e) {
+            // this is getting disgusting, but this can never happen
+            throw new AssertionError(e);
         }
     }
 
@@ -254,7 +263,6 @@ public abstract class SOAPFaultBuilder {
     private static Message createSOAP11Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
         SOAPFaultException soapFaultException = null;
         String faultString = null;
-        String faultActor = null;
         Throwable cause = e.getCause();
         if (e instanceof SOAPFaultException) {
             soapFaultException = (SOAPFaultException) e;
@@ -267,7 +275,6 @@ public abstract class SOAPFaultBuilder {
                 faultCode = soapFaultCode;
 
             faultString = soapFaultException.getFault().getFaultString();
-            faultActor = soapFaultException.getFault().getFaultActor();
         }
 
         if (faultCode == null) {
@@ -294,14 +301,13 @@ public abstract class SOAPFaultBuilder {
                 faultCode = getDefaultFaultCode(soapVersion);
             }
         }
-        return new JAXBMessage(JAXB_MARSHALLER, new SOAP11Fault(faultCode, faultString, null, detailNode), soapVersion);
+        return new JAXBMessage(createMarshaller(), new SOAP11Fault(faultCode, faultString, null, detailNode), soapVersion);
     }
 
     private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
         SOAPFaultException soapFaultException = null;
         CodeType code = null;
         String faultString = null;
-        String faultActor = null;
         Throwable cause = e.getCause();
         if (e instanceof SOAPFaultException) {
             soapFaultException = (SOAPFaultException) e;
@@ -312,8 +318,7 @@ public abstract class SOAPFaultBuilder {
             SOAPFault fault = soapFaultException.getFault();
             QName soapFaultCode = fault.getFaultCodeAsQName();
             if(soapFaultCode != null){
-                if(soapFaultCode != null)
-                    faultCode = soapFaultCode;
+                faultCode = soapFaultCode;
                 code = new CodeType(faultCode);
                 Iterator iter = fault.getFaultSubcodes();
                 boolean first = true;
@@ -331,7 +336,6 @@ public abstract class SOAPFaultBuilder {
                 }
             }
             faultString = soapFaultException.getFault().getFaultString();
-            faultActor = soapFaultException.getFault().getFaultActor();
         }
 
         if (faultCode == null && code == null) {
@@ -364,7 +368,7 @@ public abstract class SOAPFaultBuilder {
         DetailType detailType = null;
         if(detailNode != null)
             detailType = new DetailType(detailNode);
-        return new JAXBMessage(JAXB_MARSHALLER, new SOAP12Fault(code, reason, null, null, detailType), soapVersion);
+        return new JAXBMessage(createMarshaller(), new SOAP12Fault(code, reason, null, null, detailType), soapVersion);
     }
 
     private static SubcodeType fillSubcodes(SubcodeType parent, QName value){
@@ -398,13 +402,9 @@ public abstract class SOAPFaultBuilder {
      */
     private static final JAXBContext JAXB_CONTEXT;
 
-    private static final Marshaller JAXB_MARSHALLER;
-
     static {
         try {
             JAXB_CONTEXT = JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
-            JAXB_MARSHALLER = JAXB_CONTEXT.createMarshaller();
-            JAXB_MARSHALLER.setProperty(Marshaller.JAXB_FRAGMENT, true);
         } catch (JAXBException e) {
             throw new Error(e); // this must be a bug in our code
         }
