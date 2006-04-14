@@ -23,6 +23,8 @@
 package com.sun.xml.ws.util;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.handler.MessageContext;
 import java.lang.annotation.ElementType;
@@ -143,15 +145,17 @@ public abstract class PropertySet {
         for (Method m : clazz.getMethods()) {
             Property cp = m.getAnnotation(Property.class);
             if(cp!=null) {
+                String name = m.getName();
+                assert name.startsWith("get");
+
+                String setName = 's'+name.substring(1);   // getFoo -> setFoo
+                Method setter;
                 try {
-                    String name = m.getName();
-                    assert name.startsWith("get");  // must be on the getter
-                    name = 's'+name.substring(1);   // getFoo -> setFoo
-                    Method setter = clazz.getMethod(name,m.getReturnType());
-                    props.put(cp.value(), new MethodAccessor(m,setter,cp));
+                    setter = clazz.getMethod(setName,m.getReturnType());
                 } catch (NoSuchMethodException e) {
-                    throw new Error(e);     // that's a bug. define the setter please.
+                    setter = null; // no setter
                 }
+                props.put(cp.value(), new MethodAccessor(m,setter,cp));
             }
         }
 
@@ -213,11 +217,12 @@ public abstract class PropertySet {
         /**
          * Getter method.
          */
-        private final Method getter;
+        private final @NotNull Method getter;
         /**
          * Setter method.
+         * Some property is read-only.
          */
-        private final Method setter;
+        private final @Nullable Method setter;
 
         /**
          * {@link Property} annotation on {@link #getter}.
@@ -250,6 +255,8 @@ public abstract class PropertySet {
         }
 
         public void set(PropertySet props, Object value) {
+            if(setter==null)
+                throw new IllegalArgumentException(getName()+" is a read-only property.");
             try {
                 setter.invoke(props,value);
             } catch (IllegalAccessException e) {
