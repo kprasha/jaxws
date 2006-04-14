@@ -22,25 +22,24 @@
 
 package com.sun.xml.ws.message.jaxb;
 
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.TypeReference;
-
-import javax.xml.bind.ValidationEventHandler;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.attachment.AttachmentMarshaller;
-import javax.xml.bind.attachment.AttachmentUnmarshaller;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.transform.Source;
-import javax.xml.transform.Result;
-import java.io.OutputStream;
-import java.io.InputStream;
-
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.bind.attachment.AttachmentMarshaller;
+import javax.xml.bind.attachment.AttachmentUnmarshaller;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Used to adapt {@link Marshaller} into a {@link BridgeContext}.
@@ -85,24 +84,53 @@ final class MarshallerBridgeContext extends BridgeContext {
 
     static final Bridge MARSHALLER_BRIDGE = new Bridge() {
         public void marshal(BridgeContext context, Object object, XMLStreamWriter output) throws JAXBException {
-            ((MarshallerBridgeContext)context).m.marshal(object,output);
+            Marshaller m = ((MarshallerBridgeContext) context).m;
+            m.setProperty(Marshaller.JAXB_FRAGMENT,true);
+            try {
+                m.marshal(object,output);
+            } finally {
+                m.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
         }
 
         public void marshal(BridgeContext context, Object object, OutputStream output, NamespaceContext nsContext) throws JAXBException {
             // TODO: handle nsContext
-            ((MarshallerBridgeContext)context).m.marshal(object,output);
+            Marshaller m = ((MarshallerBridgeContext) context).m;
+            m.setProperty(Marshaller.JAXB_FRAGMENT,true);
+            try {
+                m.marshal(object,output);
+            } finally {
+                m.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
         }
 
         public void marshal(BridgeContext context, Object object, Node output) throws JAXBException {
-            ((MarshallerBridgeContext)context).m.marshal(object,output);
+            Marshaller m = ((MarshallerBridgeContext) context).m;
+            m.setProperty(Marshaller.JAXB_FRAGMENT,true);
+            try {
+                m.marshal(object,output);
+            } finally {
+                m.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
         }
 
         public void marshal(BridgeContext context, Object object, ContentHandler contentHandler) throws JAXBException {
-            ((MarshallerBridgeContext)context).m.marshal(object,contentHandler);
+            Marshaller m = ((MarshallerBridgeContext) context).m;
+            m.setProperty(Marshaller.JAXB_FRAGMENT,true);
+            try {
+                m.marshal(object,contentHandler);
+            } finally {
+                m.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
         }
 
         public void marshal(BridgeContext context, Object object, Result result) throws JAXBException {
-            ((MarshallerBridgeContext)context).m.marshal(object,result);
+            Marshaller m = ((MarshallerBridgeContext) context).m;
+            m.setProperty(Marshaller.JAXB_FRAGMENT,true);
+            try {
+            } finally {
+                m.setProperty(Marshaller.JAXB_FRAGMENT,false);
+            }
         }
 
         public Object unmarshal(BridgeContext context, XMLStreamReader in) {
