@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.HashSet;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * A set of "properties" that can be accessed via strongly-typed fields
@@ -48,6 +50,7 @@ import java.util.HashSet;
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings({"SuspiciousMethodCalls"})
 public abstract class PropertySet {
 
     /**
@@ -135,31 +138,37 @@ public abstract class PropertySet {
     /**
      * This method parses a class for fields and methods with {@link Property}.
      */
-    protected static PropertyMap parse(Class clazz) {
-        PropertyMap props = new PropertyMap();
-        for (Field f : clazz.getFields()) {
-            Property cp = f.getAnnotation(Property.class);
-            if(cp!=null)
-                props.put(cp.value(), new FieldAccessor(f, cp));
-        }
-        for (Method m : clazz.getMethods()) {
-            Property cp = m.getAnnotation(Property.class);
-            if(cp!=null) {
-                String name = m.getName();
-                assert name.startsWith("get");
-
-                String setName = 's'+name.substring(1);   // getFoo -> setFoo
-                Method setter;
-                try {
-                    setter = clazz.getMethod(setName,m.getReturnType());
-                } catch (NoSuchMethodException e) {
-                    setter = null; // no setter
+    protected static PropertyMap parse(final Class clazz) {
+        // make all relevant fields and methods accessible.
+        // this allows runtime to skip the security check, so they runs faster.
+        return AccessController.doPrivileged(new PrivilegedAction<PropertyMap>() {
+            public PropertyMap run() {
+                PropertyMap props = new PropertyMap();
+                for (Field f : clazz.getFields()) {
+                    Property cp = f.getAnnotation(Property.class);
+                    if(cp!=null)
+                        props.put(cp.value(), new FieldAccessor(f, cp));
                 }
-                props.put(cp.value(), new MethodAccessor(m,setter,cp));
-            }
-        }
+                for (Method m : clazz.getMethods()) {
+                    Property cp = m.getAnnotation(Property.class);
+                    if(cp!=null) {
+                        String name = m.getName();
+                        assert name.startsWith("get");
 
-        return props;
+                        String setName = 's'+name.substring(1);   // getFoo -> setFoo
+                        Method setter;
+                        try {
+                            setter = clazz.getMethod(setName,m.getReturnType());
+                        } catch (NoSuchMethodException e) {
+                            setter = null; // no setter
+                        }
+                        props.put(cp.value(), new MethodAccessor(m,setter,cp));
+                    }
+                }
+
+                return props;
+            }
+        });
     }
 
     /**
@@ -185,6 +194,7 @@ public abstract class PropertySet {
 
         protected FieldAccessor(Field f, Property annotation) {
             this.f = f;
+            f.setAccessible(true);
             this.annotation = annotation;
         }
 
@@ -233,6 +243,9 @@ public abstract class PropertySet {
             this.getter = getter;
             this.setter = setter;
             this.annotation = annotation;
+            getter.setAccessible(true);
+            if(setter!=null)
+                setter.setAccessible(true);
         }
 
         public String getName() {
