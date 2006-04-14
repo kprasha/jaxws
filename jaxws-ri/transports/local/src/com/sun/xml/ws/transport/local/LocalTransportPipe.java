@@ -95,7 +95,7 @@ final class LocalTransportPipe implements Pipe {
 
             // get transport headers from message
             reqHeaders.clear();
-            Map<String, List<String>> rh = (Map<String, List<String>>) request.get(MessageContext.HTTP_REQUEST_HEADERS);
+            Map<String, List<String>> rh = (Map<String, List<String>>) request.invocationProperties.get(MessageContext.HTTP_REQUEST_HEADERS);
             //assign empty map if its null
             if(rh != null){
                 reqHeaders.putAll(rh);

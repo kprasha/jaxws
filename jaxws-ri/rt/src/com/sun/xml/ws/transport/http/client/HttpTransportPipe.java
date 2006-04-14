@@ -30,21 +30,16 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.client.ClientTransportException;
-import static com.sun.xml.ws.client.BindingProviderProperties.HTTP_COOKIE_JAR;
 
 import javax.xml.ws.WebServiceException;
-import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.net.HttpURLConnection;
 
 /**
  * {@link Pipe} that sends a request to a remote HTTP server.
@@ -76,7 +71,7 @@ public class HttpTransportPipe implements Pipe {
     public Packet process(Packet request) {
         try {
             // get transport headers from message
-            Map<String, List<String>> reqHeaders = (Map<String, List<String>>) request.get(MessageContext.HTTP_REQUEST_HEADERS);
+            Map<String, List<String>> reqHeaders = (Map<String, List<String>>) request.invocationProperties.get(MessageContext.HTTP_REQUEST_HEADERS);
             //assign empty map if its null
             if(reqHeaders == null){
                 reqHeaders = new HashMap<String, List<String>>();
