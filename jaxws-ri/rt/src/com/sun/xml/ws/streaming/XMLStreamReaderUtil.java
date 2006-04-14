@@ -23,18 +23,9 @@
 package com.sun.xml.ws.streaming;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-
-import com.sun.xml.ws.util.xml.XmlUtil;
-
-import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
-
 import static javax.xml.stream.XMLStreamConstants.*;
-import java.util.Map;
-import java.util.HashMap;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * <p> XMLStreamReaderUtil provides some utility methods intended to be used
@@ -194,8 +185,7 @@ public class XMLStreamReaderUtil {
         if (state != expectedState) {
             throw new XMLStreamReaderException(
                 "xmlreader.unexpectedState",
-                new Object[] {
-                    getStateName(expectedState), getStateName(state) });
+                getStateName(expectedState), getStateName(state));
         }
     }
 
