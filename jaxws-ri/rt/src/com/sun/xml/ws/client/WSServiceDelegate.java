@@ -369,7 +369,7 @@ public class WSServiceDelegate extends WSService {
         // create binding
         BindingImpl bindingImpl = BindingImpl.create(bindingId);
         PortInfo portInfo  = ports.get(portName);
-        if(portInfo.portModel.getBinding().isMTOMEnabled()){
+        if(portInfo.portModel!=null && portInfo.portModel.getBinding().isMTOMEnabled()){
             bindingImpl.setMTOMEnabled(true);
         }
         if(bindingImpl instanceof SOAPBinding) {
