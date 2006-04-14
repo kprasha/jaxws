@@ -207,7 +207,14 @@ public final class JAXBMessage extends AbstractMessageImpl {
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
         JAXBResult out = new JAXBResult(unmarshaller);
-        bridge.marshal(context,jaxbObject,out);
+        // since the bridge only produces fragments, we need to fire start/end document.
+        try {
+            out.getHandler().startDocument();
+            bridge.marshal(context,jaxbObject,out);
+            out.getHandler().endDocument();
+        } catch (SAXException e) {
+            throw new JAXBException(e);
+        }
         return (T)out.getResult();
     }
 
