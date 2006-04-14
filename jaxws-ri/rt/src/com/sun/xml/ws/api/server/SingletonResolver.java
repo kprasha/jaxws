@@ -24,6 +24,7 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.server.ServerRtException;
+import com.sun.istack.NotNull;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,13 +44,13 @@ import java.security.PrivilegedActionException;
  * @author Kohsuke Kawaguchi
  */
 final class SingletonResolver<T> extends InstanceResolver<T> {
-    private final T singleton;
+    private final @NotNull T singleton;
 
-    public SingletonResolver(T singleton) {
+    public SingletonResolver(@NotNull T singleton) {
         this.singleton = singleton;
     }
 
-    public T resolve(Packet request) {
+    public @NotNull T resolve(Packet request) {
         return singleton;
     }
 
