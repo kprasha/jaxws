@@ -35,10 +35,11 @@ import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Map.Entry;
 
 /**
  * Transport {@link Pipe} that routes a message to a service that runs within it.
@@ -108,7 +109,13 @@ final class LocalTransportPipe implements Pipe {
 
             reqHeaders.put("Content-Type", Collections.singletonList(contentType));
 
+            if(dump)
+                dump(con,"request",reqHeaders);
+
             adapter.handle(con);
+
+            if(dump)
+                dump(con,"response",con.getResponseHeaders());
 
             String ct = getResponseContentType(con);
 
@@ -141,5 +148,41 @@ final class LocalTransportPipe implements Pipe {
 
     public Pipe copy(PipeCloner cloner) {
         return new LocalTransportPipe(this,cloner);
+    }
+
+
+
+    private void dump(LocalConnectionImpl con, String caption, Map<String,List<String>> headers) {
+        System.out.println("---["+caption +"]---");
+        if(headers!=null) {
+            for (Entry<String,List<String>> header : headers.entrySet()) {
+                if(header.getValue().isEmpty()) {
+                    // I don't think this is legal, but let's just dump it,
+                    // as the point of the dump is to uncover problems.
+                    System.out.println(header.getValue());
+                } else {
+                    for (String value : header.getValue()) {
+                        System.out.println(header.getValue()+": "+value);
+                    }
+                }
+            }
+        }
+        System.out.println(con.toString());
+        System.out.println("--------------------");
+    }
+
+    /**
+     * Dumps what goes across HTTP transport.
+     */
+    private static final boolean dump;
+
+    static {
+        boolean b;
+        try {
+            b = Boolean.getBoolean(LocalTransportPipe.class.getName()+".dump");
+        } catch( Throwable t ) {
+            b = false;
+        }
+        dump = b;
     }
 }
