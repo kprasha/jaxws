@@ -111,4 +111,12 @@ public abstract class BindingImpl implements WSBinding {
     public static WSBinding getDefaultBinding() {
         return new SOAPBindingImpl(BindingID.SOAP11_HTTP);
     }
+
+    public boolean isMTOMEnabled(){
+        return false;//default
+    }
+
+    public void setMTOMEnabled(boolean value){}
+
+
 }

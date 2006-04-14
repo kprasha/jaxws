@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
@@ -367,7 +368,10 @@ public class WSServiceDelegate extends WSService {
 
         // create binding
         BindingImpl bindingImpl = BindingImpl.create(bindingId);
-
+        PortInfo portInfo  = ports.get(portName);
+        if(portInfo.portModel.getBinding().isMTOMEnabled()){
+            bindingImpl.setMTOMEnabled(true);
+        }
         if(bindingImpl instanceof SOAPBinding) {
             Set<String> roles = rolesMap.get(portName);
             if (roles != null) {

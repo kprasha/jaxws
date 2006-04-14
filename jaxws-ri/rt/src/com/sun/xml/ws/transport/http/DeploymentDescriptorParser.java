@@ -167,83 +167,82 @@ public class DeploymentDescriptorParser<A> {
         }
 
         while (XMLStreamReaderUtil.nextElementContent(reader) !=
-            XMLStreamConstants.END_ELEMENT) {
-            if (reader.getName().equals(QNAME_ENDPOINT)) {
+            XMLStreamConstants.END_ELEMENT) if (reader.getName().equals(QNAME_ENDPOINT)) {
 
-                attrs = XMLStreamReaderUtil.getAttributes(reader);
-                String name = getMandatoryNonEmptyAttribute(reader, attrs, ATTR_NAME);
-                if (!names.add(name)) {
-                    logger.warning(
+            attrs = XMLStreamReaderUtil.getAttributes(reader);
+            String name = getMandatoryNonEmptyAttribute(reader, attrs, ATTR_NAME);
+            if (!names.add(name)) {
+                logger.warning(
                         WsservletMessages.SERVLET_WARNING_DUPLICATE_ENDPOINT_NAME(/*name*/));
-                }
+            }
 
-                String implementationName =
+            String implementationName =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_IMPLEMENTATION);
-                Class implementorClass = getImplementorClass(implementationName);
-                verifyImplementorClass(implementorClass);
+            Class implementorClass = getImplementorClass(implementationName);
+            verifyImplementorClass(implementorClass);
 
-                SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
+            SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
 
-                QName serviceName = getQNameAttribute(attrs, ATTR_SERVICE);
-                if(serviceName == null)
-                    serviceName = EndpointFactory.getDefaultServiceName(implementorClass);
+            QName serviceName = getQNameAttribute(attrs, ATTR_SERVICE);
+            if (serviceName == null)
+                serviceName = EndpointFactory.getDefaultServiceName(implementorClass);
 
-                QName portName = getQNameAttribute(attrs, ATTR_PORT);
-                if(portName == null)
-                    portName = EndpointFactory.getDefaultPortName(serviceName,implementorClass);
+            QName portName = getQNameAttribute(attrs, ATTR_PORT);
+            if (portName == null)
+                portName = EndpointFactory.getDefaultPortName(serviceName, implementorClass);
 
-                //get enable-mtom attribute value
-                String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
+            //get enable-mtom attribute value
+            String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
 
-                BindingID bindingId;
-                {//set Binding using DD, annotation, or default one(in that order)
-                    String attr = getAttribute(attrs, ATTR_BINDING);
-                    if(attr!=null) {
-                        // Convert short-form tokens to API's binding ids
-                        attr = getBindingIdForToken(attr);
-                        bindingId = BindingID.parse(attr);
-                        // enable-mtom attribute should override the default mtom setting. Which can happen if hte binding
-                        // ID in DD doesn't explicitly sets MTOM
-                        if(bindingId.getMtomSetting().isDefault()){
-                            bindingId.getMtomSetting().enable(Boolean.valueOf(mtom));
-                        }
-                    } else{
-                        bindingId = BindingID.parse(implementorClass);
-                        //enable-mtom attribute should override mtom setting from annotation
-                        if(mtom != null){
-                            bindingId.getMtomSetting().enable(Boolean.valueOf(mtom));
-                        }
-                    }
+            BindingID bindingId;
+            {//set Binding using DD, annotation, or default one(in that order)
+                String attr = getAttribute(attrs, ATTR_BINDING);
+                if (attr != null) {
+                    // Convert short-form tokens to API's binding ids
+                    attr = getBindingIdForToken(attr);
+                    bindingId = BindingID.parse(attr);
+                } else {
+                    bindingId = BindingID.parse(implementorClass);
                 }
+            }
 
-                String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
-                if(mtomThreshold != null){
-                    int mtomThresholdValue = Integer.valueOf(mtomThreshold);
-                    //rei.setMtomThreshold(mtomThresholdValue);
-                    // TODO: still haven't figured out how to do this correctly
-                    // with the new code
-                }
+            boolean effectiveMtomValue = false;
+            if (bindingId.isMTOMEnabled() == null) {
+                effectiveMtomValue = Boolean.valueOf(mtom);
+            } else if (Boolean.valueOf(mtom).compareTo(bindingId.isMTOMEnabled()) != 0) {
+                //TODO: throw error and fail
+            } else{
+                effectiveMtomValue = bindingId.isMTOMEnabled();
+            }
+
+            String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
+            if (mtomThreshold != null) {
+                int mtomThresholdValue = Integer.valueOf(mtomThreshold);
+                //rei.setMtomThreshold(mtomThresholdValue);
+                // TODO: still haven't figured out how to do this correctly
+                // with the new code
+            }
 
 
-                WSBinding binding = BindingImpl.create(bindingId);
-                String urlPattern =
+            WSBinding binding = BindingImpl.create(bindingId);
+            binding.setMTOMEnabled(effectiveMtomValue);
+            String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
 
-                // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
+            // TODO use 'docs' as the metadata. If wsdl is non-null it's the primary.
 
-                boolean handlersSetInDD = setHandlersAndRoles(binding, reader, serviceName, portName);
-                
-                ensureNoContent(reader);
-                WSEndpoint<?> endpoint = WSEndpoint.create(
-                    implementorClass,!handlersSetInDD,
+            boolean handlersSetInDD = setHandlersAndRoles(binding, reader, serviceName, portName);
+
+            ensureNoContent(reader);
+            WSEndpoint<?> endpoint = WSEndpoint.create(
+                    implementorClass, !handlersSetInDD,
                     InstanceResolver.createSingleton(getImplementor(implementorClass)),
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
-                    );
-                adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
-            } else {
-                failWithLocalName("runtime.parser.invalidElement", reader);
-            }
+            );
+            adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
+        } else {
+            failWithLocalName("runtime.parser.invalidElement", reader);
         }
 
         reader.close();

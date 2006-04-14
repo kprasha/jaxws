@@ -68,7 +68,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         //Is this still required? comment out for now
         //setupSystemHandlerDelegate(serviceName);
 
-        this.enableMtom = bindingId.isMTOMEnabled();
+        this.enableMtom = bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled();
     }
 
     /**

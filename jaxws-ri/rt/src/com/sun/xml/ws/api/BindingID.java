@@ -142,29 +142,21 @@ public abstract class BindingID {
     public abstract String toString();
 
     /**
-     * Returns true if this binding implies using MTOM. Its convience method and equivalent to calling
-     * {@link MtomSetting#isEnabled()}.
+     * Returns tri state.
+     *
+     * null - the mtom is not set explicitly using a deployment descriptor or annotations and this would mean the
+     * default value of mtom disabled or false.
+     *
+     * true | false - The value is set explicitly using deployment descriptor or annotation
      *
      * <p>
      * Note that MTOM can be enabled/disabled at runtime through
      * {@link WSBinding}, so this value merely controls how things
      * are configured by default.
      */
-    public boolean isMTOMEnabled() {
-        return getMtomSetting().isEnabled();
+    public Boolean isMTOMEnabled() {
+        return null;
     }
-
-    /**
-     * Gives the MTOM setting. This method can be used to see if the mtom setting is the default setting or enabled/disabled as per deployment
-     * descriptor/annotation.
-     * @return {@link MtomSetting}. Returns the default MTOM setting. It can be overriden by {@link BindingID} instances.
-     * @see SOAPBindingImpl
-     */
-    public MtomSetting getMtomSetting(){
-        return new MtomSettingImpl(this);
-    }
-
-
 
     /**
      * Returns true if this binding can generate WSDL.
@@ -388,11 +380,12 @@ public abstract class BindingID {
         /*final*/ Map<String,String> parameters = new HashMap<String,String>();
 
         static final String MTOM_PARAM = "mtom";
-        final MtomSetting mtomSetting;
+        Boolean mtomSetting = null;
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL) {
             super(version, lexical, canGenerateWSDL);
-            mtomSetting = new MtomSettingImpl(this);
+            String mtom = getParameter(SOAPHTTPImpl.MTOM_PARAM, "false");
+            mtomSetting = mtom != null?Boolean.valueOf(mtom):null;
         }
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL, 
@@ -400,7 +393,7 @@ public abstract class BindingID {
             this(version, lexical, canGenerateWSDL);
             String mtomStr = mtomEnabled ? "true" : "false";
             parameters.put(MTOM_PARAM, mtomStr);
-            mtomSetting.enable(mtomEnabled);
+            mtomSetting = mtomEnabled;
         }
 
         public @NotNull Encoder createEncoder(WSBinding binding) {
@@ -411,43 +404,10 @@ public abstract class BindingID {
             return new DecoderFacade(version);
         }
 
-        public MtomSetting getMtomSetting() {
-            return mtomSetting;
-        }
-
         public String getParameter(String parameterName, String defaultValue) {
             if (parameters.get(parameterName) == null)
                 return super.getParameter(parameterName, defaultValue);
             return parameters.get(parameterName);
-        }
-    }
-
-    final class MtomSettingImpl implements MtomSetting {
-        private boolean isDefault;
-        private boolean enable;
-
-        MtomSettingImpl(BindingID binding) {
-            String mtom = binding.getParameter(SOAPHTTPImpl.MTOM_PARAM, "false");
-            this.isDefault = (mtom == null);
-            this.enable = mtom != null && mtom.equals("true");
-        }
-
-        MtomSettingImpl(boolean enable){
-            this.isDefault = false;
-            this.enable = enable;
-        }
-
-        public boolean isEnabled() {
-            return enable;
-        }
-
-        public boolean isDefault() {
-            return isDefault;
-        }
-
-        public void enable(boolean enable) {
-            this.isDefault = false;
-            this.enable = enable;
         }
     }
 }

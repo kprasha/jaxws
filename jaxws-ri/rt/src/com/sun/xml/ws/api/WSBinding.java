@@ -93,4 +93,15 @@ public interface WSBinding extends Binding {
     @NotNull BindingID getBindingId();
 
     @NotNull List<Handler> getHandlerChain();
+
+    /**
+     * Tells whether mtom is enabled or disabled
+     */
+    boolean isMTOMEnabled();
+
+
+    /**
+     * Call it to enabled/disable mtom
+     */
+    void setMTOMEnabled(boolean value);
 }

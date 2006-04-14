@@ -253,6 +253,16 @@ public class EndpointFactory {
                         if(p.getBinding().getBindingId().equals(bindingId)) {
                             if(hasPort)
                                 throw new ServerRtException("runtime.parser.wsdl.multiplebinding", bindingId, serviceName, wsdlUrl);
+
+                            //set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
+                            // conflicts.
+                            if(p.getBinding().isMTOMEnabled()){
+                                if(bindingId.isMTOMEnabled() == null){
+                                    binding.setMTOMEnabled(true);
+                                }else if (bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled() == Boolean.FALSE){
+                                    throw new ServerRtException("Deployment failed! Mtom policy assertion in WSDL is enabled whereas the deplyment descriptor setting wants to disable it!");
+                                }
+                            }
                             hasPort = true;
                         }
                     }

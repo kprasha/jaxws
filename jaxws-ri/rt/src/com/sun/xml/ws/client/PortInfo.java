@@ -70,7 +70,7 @@ class PortInfo {
         this.targetEndpoint = port.getAddress();
         this.portName = port.getName();
         this.bindingId = port.getBinding().getBindingId();
-        this.portModel = port;
+        this.portModel = port;        
     }
 
     public BindingImpl createBinding() {
