@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
+import com.sun.istack.Nullable;
 
 import java.net.URI;
 import java.util.List;
@@ -42,22 +43,32 @@ import java.io.FileInputStream;
 /**
  * {@link TransportPipeFactory} for the local transport.
  *
+ * <p>
+ * The syntax of the endpoint address is:
+ * <pre><xmp>
+ * local:///path/to/exploded/war/image?portName
+ * </xmp></pre>
+ *
+ * <p>
+ * If the service only contains one port, the <tt>?portName</tt> portion
+ * can be omitted.
+ *
  * @author Kohsuke Kawaguchi
  */
 public final class LocalTransportFactory extends TransportPipeFactory {
-    public Pipe doCreate(EndpointAddress addresss, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+    public Pipe doCreate(EndpointAddress addresss, @Nullable WSDLPort wsdlModel, WSService service, WSBinding binding) {
         URI adrs = addresss.getURI();
         if(!adrs.getScheme().equals("local"))
             return null;
 
-        return new LocalTransportPipe(createServerService(wsdlModel),binding);
+        return new LocalTransportPipe(createServerService(adrs),binding);
     }
 
     /**
      * The local transport works by looking at the exploded war file image on
      * a file system.
      */
-    protected static WSEndpoint createServerService(WSDLPort wsdlModel) {
+    protected static WSEndpoint createServerService(URI adrs) {
         try {
             String outputDir = System.getProperty("tempdir");
             if (outputDir == null) {
@@ -68,7 +79,7 @@ public final class LocalTransportFactory extends TransportPipeFactory {
             WSEndpoint endpoint = endpoints.get(0);
             if (endpoints.size() > 1) {
                 for (WSEndpoint rei : endpoints) {
-                    if(rei.getPort().getName().equals(wsdlModel.getName())) {
+                    if(rei.getPort().getName().equals(adrs.getQuery())) {
                         endpoint = rei;
                         break;
                     }
