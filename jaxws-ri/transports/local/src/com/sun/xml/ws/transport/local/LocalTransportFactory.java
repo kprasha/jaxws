@@ -45,8 +45,8 @@ import java.io.FileInputStream;
  * @author Kohsuke Kawaguchi
  */
 public final class LocalTransportFactory extends TransportPipeFactory {
-    public Pipe doCreate(EndpointAddress addres, WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        URI adrs = addres.getURI();
+    public Pipe doCreate(EndpointAddress addresss, WSDLPort wsdlModel, WSService service, WSBinding binding) {
+        URI adrs = addresss.getURI();
         if(!adrs.getScheme().equals("local"))
             return null;
 
