@@ -54,7 +54,8 @@ public final class LocalTransportFactory extends TransportPipeFactory {
     }
 
     /**
-     * The local transport works by 'deploying' a service , we "deploy"
+     * The local transport works by looking at the exploded war file image on
+     * a file system.
      */
     protected static WSEndpoint createServerService(WSDLPort wsdlModel) {
         try {
