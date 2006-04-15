@@ -269,7 +269,7 @@ public abstract class PropertySet {
 
         public void set(PropertySet props, Object value) {
             if(setter==null)
-                throw new IllegalArgumentException(getName()+" is a read-only property.");
+                throw new ReadOnlyPropertyException(getName());
             try {
                 setter.invoke(props,value);
             } catch (IllegalAccessException e) {
@@ -321,7 +321,7 @@ public abstract class PropertySet {
      * This method is slow. Code inside JAX-WS should define strongly-typed
      * fields in this class and access them directly, instead of using this.
      *
-     * @throws IllegalArgumentException
+     * @throws ReadOnlyPropertyException
      *      if the given key is an alias of a strongly-typed field,
      *      and if the value object given is not assignable to the field.
      *
