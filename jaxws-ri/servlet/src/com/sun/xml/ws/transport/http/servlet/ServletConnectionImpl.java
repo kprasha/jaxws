@@ -61,6 +61,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
+    @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public @NotNull Map<String,List<String>> getRequestHeaders() {
         if (requestHeaders == null) {
             requestHeaders = new Headers();
@@ -85,6 +86,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
      * sets response headers.
      */
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public void setResponseHeaders(Map<String,List<String>> headers) {
         response.reset();   // clear all the headers
         if(status!=0)
@@ -98,12 +100,14 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public void setStatus(int status) {
         this.status = status;
         response.setStatus(status);
     }
 
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public int getStatus() {
         return status;
     }
@@ -136,6 +140,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
+    @Property(MessageContext.HTTP_REQUEST_METHOD)
     public @NotNull String getRequestMethod() {
         return request.getMethod();
     }
@@ -146,11 +151,13 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
+    @Property(MessageContext.QUERY_STRING)
     public String getQueryString() {
         return request.getQueryString();
     }
 
     @Override
+    @Property(MessageContext.PATH_INFO)
     public @NotNull String getPathInfo() {
         return request.getPathInfo();
     }
