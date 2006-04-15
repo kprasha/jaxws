@@ -23,6 +23,7 @@
 package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.util.ReadOnlyPropertyException;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
@@ -125,7 +126,11 @@ public class MessageContextImpl implements MessageContext {
         for (Entry<String,Object> entry : internalMap.entrySet()) {
                 String key = entry.getKey();
                 if(packet.supports(key)) {
+                    try {
                     packet.put(key,entry.getValue());
+                    } catch(ReadOnlyPropertyException e) {
+                        // Nothing to do
+                    }
                 } else if(packet.otherProperties.containsKey(key)) {
                     packet.otherProperties.put(key,entry.getValue());
                 } else {
