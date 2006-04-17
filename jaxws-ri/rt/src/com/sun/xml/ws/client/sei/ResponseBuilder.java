@@ -249,7 +249,10 @@ abstract class ResponseBuilder {
 
         private final Bridge wrapper;
 
+        private final QName wrapperName;
+
         public DocLit(WrapperParameter wp) {
+            wrapperName = wp.getName();
             wrapper = wp.getBridge();
             Class wrapperType = (Class) wrapper.getTypeReference().type;
 
@@ -285,6 +288,7 @@ abstract class ResponseBuilder {
 
             if(parts.length>0) {
                 XMLStreamReader reader = msg.readPayload();
+                XMLStreamReaderUtil.verifyTag(reader,wrapperName);
                 Object wrapperBean = wrapper.unmarshal(context, reader);
 
                 try {
