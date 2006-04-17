@@ -53,7 +53,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
 
     private WSBinding binding;
     private List<SOAPHandler> soapHandlers;
-    protected Set<String> roles;
+    private Set<String> roles;
 
     /** Creates a new instance of SOAPHandlerPipe */
     public SOAPHandlerPipe(WSBinding binding, WSDLPort port, Pipe next, boolean isClient) {

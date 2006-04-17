@@ -41,7 +41,7 @@ import javax.xml.ws.http.HTTPException;
  * This is used only for XML/HTTP binding
  * @author WS Development Team
  */
-public class XMLHandlerProcessor<C extends MessageUpdatableContext> extends HandlerProcessor<C> {
+final class XMLHandlerProcessor<C extends MessageUpdatableContext> extends HandlerProcessor<C> {
     
     /**
      * Creates a new instance of LogicalHandlerProcessor
@@ -54,7 +54,7 @@ public class XMLHandlerProcessor<C extends MessageUpdatableContext> extends Hand
      * TODO: This is valid only for XML/HTTP binding
      * Empty the XML message
      */
-    void insertFaultMessage(C context,
+    final void insertFaultMessage(C context,
             ProtocolException exception) {
         if(exception instanceof HTTPException) {
             context.put(MessageContext.HTTP_RESPONSE_CODE,((HTTPException)exception).getStatusCode());

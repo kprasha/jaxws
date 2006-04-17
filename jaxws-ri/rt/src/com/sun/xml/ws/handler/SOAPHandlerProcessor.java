@@ -46,7 +46,7 @@ import javax.xml.ws.handler.Handler;
  *
  * @author WS Development Team
  */
-public class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends HandlerProcessor<C> {
+final class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends HandlerProcessor<C> {
     
     /**
      * Creates a new instance of SOAPHandlerProcessor
@@ -69,7 +69,7 @@ public class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends Han
      * something else will need to be passed to the method
      * to determine whether the fault code is client or server.
      */
-    void insertFaultMessage(C context,
+    final void insertFaultMessage(C context,
         ProtocolException exception) {
         try {
             if(!context.getPacketMessage().isFault()) {

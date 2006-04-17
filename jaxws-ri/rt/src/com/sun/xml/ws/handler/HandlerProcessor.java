@@ -86,7 +86,6 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * This is called when a handler returns false or throws a RuntimeException
      */
     private void setIndex(int i) {
-        //TODO: If its already set, don't modify it
         index = i;
     }
 
@@ -104,8 +103,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * CurrentPipe should NOT call nextPipe.process()
      * While closing handlers, check getIndex() to get the invoked
      * handlers.
-     * TODO: Index may be reset during remedy action, needs fix
-     * throw RuntimeException, this happens when a RuntimeException occurs during
+     * @throws RuntimeException this happens when a RuntimeException occurs during
      * handleMessage during Request processing or
      * during remedy action 2)
      * CurrentPipe should NOT call nextPipe.process() and throw the
@@ -178,8 +176,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * throw RuntimeException, this happens when a RuntimeException occurs during
      * normal Response processing or remedy action 2) taken
      * during callHandlersRequest().
-     * CurrentPipe should close all the handlers in the chain.
-     * TODO: there might be a problem with Index tracking in some cases.
+     * CurrentPipe should close all the handlers in the chain.     * 
      */
     public void callHandlersResponse(Direction direction,
                                      C context, boolean isFault) {
@@ -211,7 +208,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * Reverses the Message Direction.
      * MessageContext.MESSAGE_OUTBOUND_PROPERTY is changed.
      */
-    public void reverseDirection(Direction origDirection, C context) {
+    private void reverseDirection(Direction origDirection, C context) {
         if (origDirection == Direction.OUTBOUND) {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, false);
         } else {
@@ -223,7 +220,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * Sets the Message Direction.
      * MessageContext.MESSAGE_OUTBOUND_PROPERTY is changed.
      */
-    public void setDirection(Direction direction, C context) {
+    private void setDirection(Direction direction, C context) {
         if (direction == Direction.OUTBOUND) {
             context.put(MessageContext.MESSAGE_OUTBOUND_PROPERTY, true);
         } else {
@@ -235,7 +232,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * When this property is set HandlerPipes can call handleFault() on the
      * message
      */
-    public void setHandleFaultProperty() {
+    private void setHandleFaultProperty() {
         owner.setHandleFault();
     }
 
@@ -243,7 +240,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * When this property is set HandlerPipes will not call
      * handleMessage() during Response processing.
      */
-    public void setHandleFalseProperty() {
+    private void setHandleFalseProperty() {
         owner.setHandleFalse();
     }
 

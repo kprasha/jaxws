@@ -42,10 +42,10 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     /**
      * handle hold reference to other Pipe for inter-pipe communication
      */
-    protected HandlerPipe cousinPipe;
-    protected final boolean isClient;
-    protected HandlerProcessor processor;
-    protected boolean remedyActionTaken = false;
+    HandlerPipe cousinPipe;
+    final boolean isClient;
+    HandlerProcessor processor;
+    boolean remedyActionTaken = false;
     private final @Nullable WSDLPort port;
 
     public HandlerPipe(Pipe next, WSDLPort port, boolean isClient) {
@@ -209,7 +209,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      */
     public abstract void closeCall(MessageContext msgContext);
 
-    final boolean isHandleFault(Packet packet) {
+    private boolean isHandleFault(Packet packet) {
         if (cousinPipe != null) {
             return exchange.isHandleFault();
         } else {
@@ -218,15 +218,15 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     }
 
     final void setHandleFault() {
-        exchange.setHandleFault(true);
+        exchange.setHandleFault();
     }
 
-    public final boolean isHandleFalse() {
+    private boolean isHandleFalse() {
         return exchange.isHandleFalse();
     }
 
     final void setHandleFalse() {
-        exchange.setHandleFalse(true);
+        exchange.setHandleFalse();
     }
 
     private final HandlerPipeExchange exchange;
@@ -235,7 +235,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      * This class is used primarily to exchange information or status between
      * LogicalHandlerPipe and SOAPHandlerPipe
      */
-    class HandlerPipeExchange {
+    static final class HandlerPipeExchange {
         private boolean handleFalse;
         private boolean handleFault;
 
@@ -243,16 +243,16 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             return handleFault;
         }
 
-        void setHandleFault(boolean handleFault) {
-            this.handleFault = handleFault;
+        void setHandleFault() {
+            this.handleFault = true;
         }
 
         public boolean isHandleFalse() {
             return handleFalse;
         }
 
-        void setHandleFalse(boolean handleFalse) {
-            this.handleFalse = handleFalse;
+        void setHandleFalse() {
+            this.handleFalse = true;
         }
     }
     
