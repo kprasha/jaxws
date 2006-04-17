@@ -358,11 +358,11 @@ public abstract class Message {
         // TODO: is SOAP version a property of a Message?
         // or is it defined by external factors?
         // how do I compare?
-        if(getPayloadLocalPart()!="Fault")
+        if(!getPayloadLocalPart().equals("Fault"))
             return false;
 
         String nsUri = getPayloadNamespaceURI();
-        return nsUri== SOAPVersion.SOAP_11.nsUri || nsUri==SOAPVersion.SOAP_12.nsUri;
+        return nsUri.equals(SOAPVersion.SOAP_11.nsUri) || nsUri.equals(SOAPVersion.SOAP_12.nsUri);
     }
 
     /**
