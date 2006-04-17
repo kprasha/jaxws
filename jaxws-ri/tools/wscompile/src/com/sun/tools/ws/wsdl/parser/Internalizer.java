@@ -114,8 +114,7 @@ public class Internalizer {
             // this extra check solves this problem.
             doc = wsdlDocuments.get( "file://"+systemId.substring(5) );
         }
-
-        return doc.getOwnerDocument();
+        return doc==null?null:doc.getOwnerDocument();
     }
 
     /**
