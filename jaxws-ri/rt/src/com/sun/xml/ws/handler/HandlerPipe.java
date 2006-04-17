@@ -213,12 +213,14 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         if (cousinPipe != null) {
             return exchange.isHandleFault();
         } else {
-            return packet.getMessage().isFault();
+            boolean isFault = packet.getMessage().isFault();
+            exchange.setHandleFault(isFault);
+            return isFault;
         }
     }
 
-    final void setHandleFault() {
-        exchange.setHandleFault();
+    final void setHandleFault(boolean isFault) {
+        exchange.setHandleFault(isFault);
     }
 
     private boolean isHandleFalse() {
@@ -243,8 +245,8 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             return handleFault;
         }
 
-        void setHandleFault() {
-            this.handleFault = true;
+        void setHandleFault(boolean isFault) {
+            this.handleFault = isFault;
         }
 
         public boolean isHandleFalse() {

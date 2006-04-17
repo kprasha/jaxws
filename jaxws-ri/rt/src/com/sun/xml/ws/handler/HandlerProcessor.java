@@ -233,7 +233,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * message
      */
     private void setHandleFaultProperty() {
-        owner.setHandleFault();
+        owner.setHandleFault(true);
     }
 
     /**
