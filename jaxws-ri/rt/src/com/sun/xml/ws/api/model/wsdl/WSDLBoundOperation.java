@@ -45,4 +45,9 @@ public interface WSDLBoundOperation extends WSDLObject, WSDLExtensible {
      * @return always same {@link WSDLOperation}
      */
     @NotNull WSDLOperation getOperation();
+
+    /**
+     * Gives the owner {@link WSDLBoundPortType} corresponding to wsd:binding that owns this wsd;:operation binding.
+     */
+    @NotNull WSDLBoundPortType getOwner();
 }

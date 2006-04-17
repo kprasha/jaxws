@@ -22,10 +22,7 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPart;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.*;
 import com.sun.istack.Nullable;
 
 import javax.jws.soap.SOAPBinding.Style;
@@ -57,6 +54,8 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private final Map<String, WSDLPartImpl> inParts;
     private final Map<String, WSDLPartImpl> outParts;
     private WSDLOperationImpl operation;
+
+    private WSDLBoundPortTypeImpl owner;
 
     /**
      *
@@ -245,11 +244,16 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return null;
     }
 
+    public WSDLBoundPortTypeImpl getOwner(){
+        return owner;
+    }
+
     private QName payloadName;
     private boolean emptyPayload;
     private Map<QName, WSDLMessageImpl> messages;
 
     void freeze(WSDLBoundPortTypeImpl parent) {
+        owner = parent;
         messages = parent.getOwner().getMessages();
         operation = parent.getPortType().get(name.getLocalPart());
     }
