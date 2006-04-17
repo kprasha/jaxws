@@ -23,6 +23,8 @@
 package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
 
@@ -36,12 +38,12 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
      * Gets the name of the wsdl:portType/wsdl:operation@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
      */
-    QName getName();
+    @NotNull QName getName();
 
     /**
      * Gets the wsdl:input of this operation
      */
-    WSDLInput getInput();
+    @NotNull WSDLInput getInput();
 
     /**
      * Gets the wsdl:output of this operation.
@@ -49,7 +51,7 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
      * @return
      *      null if this is an one-way operation.
      */
-    WSDLOutput getOutput();
+    @Nullable WSDLOutput getOutput();
 
 
 
@@ -101,5 +103,10 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
      * @param faultDetailName tag name of the element inside soaenv:Fault/detail/, must be non-null.
      * @return returns null if a wsdl fault corresponding to the detail entry name not found.
      */
-    WSDLFault getFault(QName faultDetailName);
+    @Nullable WSDLFault getFault(QName faultDetailName);
+
+    /**
+     * Gives the owner {@link WSDLPortType} corresponding to wsd:portType that owns this wsd;:operation.
+     */
+    @NotNull WSDLPortType getOwner();
 }

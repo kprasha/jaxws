@@ -21,11 +21,9 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.*;
 import com.sun.xml.ws.util.QNameMap;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -44,6 +42,7 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
     private final List<WSDLFaultImpl> faults;
     private final QNameMap<WSDLFaultImpl> faultMap;
     protected Iterable<WSDLMessageImpl> messages;
+    private WSDLPortType owner;
 
     public WSDLOperationImpl(QName name) {
         this.name = name;
@@ -103,11 +102,18 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         return null;
     }
 
+    @NotNull
+    public WSDLPortType getOwner() {
+        return owner;
+    }
+
     public void addFault(WSDLFaultImpl fault) {
         faults.add(fault);
     }
 
-    public void freez(WSDLModelImpl root) {
+    public void freez(WSDLPortTypeImpl owner) {
+        this.owner = owner;
+        WSDLModelImpl root = owner.getOwner();
         assert input != null;
         input.freeze(root);
         if(output != null)

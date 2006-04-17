@@ -36,6 +36,7 @@ import java.util.Hashtable;
 public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements WSDLPortType {
     private QName name;
     private final Map<String, WSDLOperationImpl> portTypeOperations;
+    private WSDLModelImpl owner;
 
     public WSDLPortTypeImpl(QName name) {
         super();
@@ -65,9 +66,14 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
         portTypeOperations.put(opName, ptOp);
     }
 
+    WSDLModelImpl getOwner(){
+        return owner;
+    }
+
     void freeze(WSDLModelImpl root) {
+        owner = root;
         for(WSDLOperationImpl op : portTypeOperations.values()){
-            op.freez(root);            
+            op.freez(this);            
         }
     }
 }
