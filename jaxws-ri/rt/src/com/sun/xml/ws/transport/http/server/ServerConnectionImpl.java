@@ -37,27 +37,30 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.xml.ws.handler.MessageContext;
 
 
 /**
- * {@link WSHTTPConnection} used with Java SE endpoints
+ * {@link WSHTTPConnection} used with Java SE endpoints. It provides connection
+ * implementation using {@link HttpExchange} object.
  *
- * @author WS Development Team
+ * @author Jitendra Kotamraju
  */
 final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceContextDelegate {
 
-    private HttpExchange httpExchange;
+    private final HttpExchange httpExchange;
     private int status;
     private int responseContentLength = 0;
 
     private boolean outputWritten;
 
 
-    public ServerConnectionImpl(HttpExchange httpTransaction) {
-        this.httpExchange = httpTransaction;
+    public ServerConnectionImpl(@NotNull HttpExchange httpExchange) {
+        this.httpExchange = httpExchange;
     }
 
     @Override
+    @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public @NotNull Map<String,List<String>> getRequestHeaders() {
         return httpExchange.getRequestHeaders();
     }
@@ -68,13 +71,14 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public void setResponseHeaders(Map<String,List<String>> headers) {
         Headers r = httpExchange.getResponseHeaders();
         r.clear();
         for(Map.Entry <String, List<String>> entry : headers.entrySet()) {
             String name = entry.getKey();
             List<String> values = entry.getValue();
-            if (name.equals("Content-Length")) {
+            if (name.equalsIgnoreCase("Content-Length")) {
                 // No need to add this header
                 responseContentLength = Integer.parseInt(values.get(0));
             } else {
@@ -89,11 +93,13 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public void setStatus(int status) {
         this.status = status;
     }
 
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public int getStatus() {
         return status;
     }
@@ -124,11 +130,13 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
+    @Property(MessageContext.HTTP_REQUEST_METHOD)
     public @NotNull String getRequestMethod() {
         return httpExchange.getRequestMethod();
     }
 
     @Override
+    @Property(MessageContext.QUERY_STRING)
     public String getQueryString() {
         URI requestUri = httpExchange.getRequestURI();
         String query = requestUri.getQuery();
@@ -138,6 +146,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
+    @Property(MessageContext.PATH_INFO)
     public String getPathInfo() {
         URI requestUri = httpExchange.getRequestURI();
         String reqPath = requestUri.getPath();
