@@ -54,7 +54,11 @@ public final class FileSystemResourceLoader implements ResourceLoader {
 
     public Set<String> getResourcePaths(String path) {
         Set<String> r = new HashSet<String>();
-        for( File f : new File(root+path).listFiles() ) {
+        File[] files = new File(root+path).listFiles();
+        if (files == null) {
+            return null;
+        }
+        for( File f : files) {
             if(f.isDirectory()) {
                 r.add(path+f.getName()+'/');
             } else {
