@@ -128,6 +128,7 @@ final class MarshallerBridgeContext extends BridgeContext {
             Marshaller m = ((MarshallerBridgeContext) context).m;
             m.setProperty(Marshaller.JAXB_FRAGMENT,true);
             try {
+                m.marshal(object,result);
             } finally {
                 m.setProperty(Marshaller.JAXB_FRAGMENT,false);
             }
