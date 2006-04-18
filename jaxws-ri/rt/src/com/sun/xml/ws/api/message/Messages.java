@@ -186,9 +186,8 @@ public abstract class Messages {
      *      never be touched directly.
      *
      */
-    public static Message create(Source envelope) {
-        // TODO: Doesn't the ProtocolSourceMessage require SOAPVersion
-        return new ProtocolSourceMessage(envelope);
+    public static Message create(Source envelope, SOAPVersion soapVersion) {
+        return new ProtocolSourceMessage(envelope, soapVersion);
     }
 
 

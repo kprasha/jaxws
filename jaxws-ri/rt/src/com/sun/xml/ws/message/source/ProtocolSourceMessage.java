@@ -22,13 +22,22 @@
 
 package com.sun.xml.ws.message.source;
 
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.encoding.StreamSOAPDecoder;
 import com.sun.xml.ws.message.AbstractMessageImpl;
+import com.sun.xml.ws.message.stream.StreamMessage;
+import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -40,71 +49,80 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 /**
- * Partial implementation of {@link Message} backed by {@link Source} where the Source represents the complete message
- * such as a SOAP envelope.
+ * Implementation of {@link Message} backed by {@link Source} where the Source
+ * represents the complete message such as a SOAP envelope. It uses
+ * {@link StreamSOAPDecoder} to create a {@link Message} and uses it as a
+ * delegate for all the methods.
  *
  * @author Vivek Pandey
+ * @author Jitendra Kotamraju
  */
-public class ProtocolSourceMessage extends AbstractMessageImpl {
-    private HeaderList headers;
-    private AttachmentSet attSet;
-    private Source src;
-    private Message sm;
+public class ProtocolSourceMessage extends Message {
+    private final Message sm;
 
-    public ProtocolSourceMessage(Source source) {
-        super((SOAPVersion)null);
-        this.src = source;
-        SourceUtils sourceUtils = new SourceUtils(src);
-        if (sourceUtils.isStreamSource()) {
-            StreamSource streamSource = (StreamSource) src;
-            XMLStreamReader reader = XMLStreamReaderFactory.createXMLStreamReader(streamSource.getInputStream(), true);
-            sm = Messages.create(reader);
-        }
+    public ProtocolSourceMessage(Source source, SOAPVersion soapVersion) {
+        XMLStreamReader reader = SourceReaderFactory.createSourceReader(source, true);
+        StreamSOAPDecoder decoder = StreamSOAPDecoder.create(soapVersion);
+        sm = decoder.decode(reader);
     }
 
     public boolean hasHeaders() {
-        return (headers != null) && headers.size() > 0;
+        return sm.hasHeaders();
     }
 
     public HeaderList getHeaders() {
-        if (headers == null)
-            headers = new HeaderList();
-        return headers;
+        return sm.getHeaders();
     }
 
     public String getPayloadLocalPart() {
-        throw new UnsupportedOperationException();
+        return sm.getPayloadLocalPart();
     }
 
     public String getPayloadNamespaceURI() {
-        throw new UnsupportedOperationException();
+        return sm.getPayloadNamespaceURI();
     }
 
     public boolean hasPayload() {
-        throw new UnsupportedOperationException();
+        return sm.hasPayload();
     }
 
     public Source readPayloadAsSource() {
-        throw new UnsupportedOperationException();
+        return sm.readPayloadAsSource();
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {
-        throw new UnsupportedOperationException();
+        return sm.readPayload();
     }
 
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
-        throw new UnsupportedOperationException();
+        sm.writePayloadTo(sw);
     }
 
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException {
-        throw new UnsupportedOperationException();
-    }
-
-    public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
-        throw new UnsupportedOperationException();
+        sm.writeTo(sw);
     }
 
     public Message copy() {
-        throw new UnsupportedOperationException();
+        return sm.copy();
+    }
+
+    public Source readEnvelopeAsSource() {
+        return sm.readEnvelopeAsSource();
+    }
+
+    public SOAPMessage readAsSOAPMessage() throws SOAPException {
+        return sm.readAsSOAPMessage();
+    }
+
+    public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        return (T)sm.readPayloadAsJAXB(unmarshaller);
+    }
+
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return sm.readPayloadAsJAXB(bridge, context);
+    }
+
+    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        sm.writeTo(contentHandler, errorHandler);
     }
 }

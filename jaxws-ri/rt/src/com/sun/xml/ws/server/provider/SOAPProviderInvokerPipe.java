@@ -95,7 +95,7 @@ public class SOAPProviderInvokerPipe extends ProviderInvokerPipe {
         } else {
             if (isSource) {
                 Source source = (Source)returnValue;
-                responseMsg = Messages.create(source);
+                responseMsg = Messages.create(source, soapVersion);
             } else {
                 SOAPMessage soapMsg = (SOAPMessage)returnValue;
                 responseMsg = Messages.create(soapMsg);
