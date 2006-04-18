@@ -48,7 +48,7 @@ import javax.xml.ws.WebServiceContext;
  * @author Jitendra Kotamraju
  */
 @SuppressWarnings({"SuspiciousMethodCalls"})
-public class EndpointMessageContextImpl extends AbstractMap<String,Object> implements MessageContext {
+final class EndpointMessageContextImpl extends AbstractMap<String,Object> implements MessageContext {
 
     /**
      * Lazily computed.
