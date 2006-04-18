@@ -321,7 +321,7 @@ public abstract class Message {
      * @return
      *      null if a {@link Message} doesn't have any payload.
      */
-    public abstract String getPayloadLocalPart();
+    public abstract @Nullable String getPayloadLocalPart();
 
     /**
      * Gets the namespace URI of the payload element.
@@ -330,6 +330,7 @@ public abstract class Message {
      *      null if a {@link Message} doesn't have any payload.
      */
     public abstract String getPayloadNamespaceURI();
+    // I'm not putting @Nullable on it because doing null check on getPayloadLocalPart() should be suffice
 
     /**
      * Returns true if a {@link Message} has a payload.
@@ -358,7 +359,8 @@ public abstract class Message {
         // TODO: is SOAP version a property of a Message?
         // or is it defined by external factors?
         // how do I compare?
-        if(!getPayloadLocalPart().equals("Fault"))
+        String localPart = getPayloadLocalPart();
+        if(localPart==null || !localPart.equals("Fault"))
             return false;
 
         String nsUri = getPayloadNamespaceURI();
