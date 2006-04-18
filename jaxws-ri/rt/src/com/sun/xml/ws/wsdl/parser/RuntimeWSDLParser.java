@@ -303,7 +303,7 @@ public class RuntimeWSDLParser {
         }
 
         QName opName = new QName(binding.getPortTypeName().getNamespaceURI(), bindingOpName);
-        WSDLBoundOperationImpl bindingOp = new WSDLBoundOperationImpl(opName);
+        WSDLBoundOperationImpl bindingOp = new WSDLBoundOperationImpl(binding, opName);
         binding.put(opName, bindingOp);
         extension.bindingOperationAttributes(bindingOp, reader);
 
@@ -473,7 +473,7 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        WSDLPortTypeImpl portType = new WSDLPortTypeImpl(new QName(targetNamespace, portTypeName));
+        WSDLPortTypeImpl portType = new WSDLPortTypeImpl(wsdlDoc, new QName(targetNamespace, portTypeName));
         extension.portTypeAttributes(portType, reader);
         wsdlDoc.addPortType(portType);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
@@ -497,7 +497,7 @@ public class RuntimeWSDLParser {
         }
 
         QName operationQName = new QName(portType.getName().getNamespaceURI(), operationName);
-        WSDLOperationImpl operation = new WSDLOperationImpl(operationQName);
+        WSDLOperationImpl operation = new WSDLOperationImpl(portType, operationQName);
         extension.portTypeOperationAttributes(operation, reader);
         String parameterOrder = ParserUtil.getAttribute(reader, "parameterOrder");
         operation.setParameterOrder(parameterOrder);

@@ -42,12 +42,13 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
     private final List<WSDLFaultImpl> faults;
     private final QNameMap<WSDLFaultImpl> faultMap;
     protected Iterable<WSDLMessageImpl> messages;
-    private WSDLPortType owner;
+    private final WSDLPortType owner;
 
-    public WSDLOperationImpl(QName name) {
+    public WSDLOperationImpl(WSDLPortTypeImpl owner, QName name) {
         this.name = name;
         this.faults = new ArrayList<WSDLFaultImpl>();
         this.faultMap = new QNameMap<WSDLFaultImpl>();
+        this.owner = owner;
     }
 
     public QName getName() {
@@ -102,18 +103,20 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         return null;
     }
 
-    @NotNull
-    public WSDLPortType getOwner() {
+    WSDLPortType getOwner() {
         return owner;
+    }
+
+    @NotNull
+    public QName getPortTypeName() {
+        return owner.getName();
     }
 
     public void addFault(WSDLFaultImpl fault) {
         faults.add(fault);
     }
 
-    public void freez(WSDLPortTypeImpl owner) {
-        this.owner = owner;
-        WSDLModelImpl root = owner.getOwner();
+    public void freez(WSDLModelImpl root) {
         assert input != null;
         input.freeze(root);
         if(output != null)

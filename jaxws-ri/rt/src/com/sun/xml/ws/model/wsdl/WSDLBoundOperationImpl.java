@@ -55,13 +55,13 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private final Map<String, WSDLPartImpl> outParts;
     private WSDLOperationImpl operation;
 
-    private WSDLBoundPortTypeImpl owner;
+    private final WSDLBoundPortTypeImpl owner;
 
     /**
      *
      * @param name wsdl:operation name qualified value
      */
-    public WSDLBoundOperationImpl(QName name) {
+    public WSDLBoundOperationImpl(WSDLBoundPortTypeImpl owner, QName name) {
         this.name = name;
         inputParts = new HashMap<String, ParameterBinding>();
         outputParts = new HashMap<String, ParameterBinding>();
@@ -69,6 +69,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         outputMimeTypes = new HashMap<String, String>();
         inParts = new HashMap<String, WSDLPartImpl>();
         outParts = new HashMap<String, WSDLPartImpl>();
+        this.owner = owner;
     }
 
     public QName getName(){
@@ -244,7 +245,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return null;
     }
 
-    public WSDLBoundPortTypeImpl getOwner(){
+    WSDLBoundPortTypeImpl getOwner(){
         return owner;
     }
 
@@ -252,9 +253,8 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private boolean emptyPayload;
     private Map<QName, WSDLMessageImpl> messages;
 
-    void freeze(WSDLBoundPortTypeImpl parent) {
-        owner = parent;
-        messages = parent.getOwner().getMessages();
-        operation = parent.getPortType().get(name.getLocalPart());
+    void freeze(WSDLModelImpl parent) {
+        messages = parent.getMessages();
+        operation = owner.getPortType().get(name.getLocalPart());
     }
 }

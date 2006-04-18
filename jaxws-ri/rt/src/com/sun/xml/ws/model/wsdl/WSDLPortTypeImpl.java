@@ -38,9 +38,10 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
     private final Map<String, WSDLOperationImpl> portTypeOperations;
     private WSDLModelImpl owner;
 
-    public WSDLPortTypeImpl(QName name) {
+    public WSDLPortTypeImpl(WSDLModelImpl owner, QName name) {
         super();
         this.name = name;
+        this.owner = owner;
         portTypeOperations = new Hashtable<String, WSDLOperationImpl>();
     }
 
@@ -70,10 +71,9 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
         return owner;
     }
 
-    void freeze(WSDLModelImpl root) {
-        owner = root;
+    void freeze() {
         for(WSDLOperationImpl op : portTypeOperations.values()){
-            op.freez(this);            
+            op.freez(owner);
         }
     }
 }

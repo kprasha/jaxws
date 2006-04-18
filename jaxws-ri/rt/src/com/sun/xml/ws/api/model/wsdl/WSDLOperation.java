@@ -106,7 +106,7 @@ public interface WSDLOperation extends WSDLObject, WSDLExtensible {
     @Nullable WSDLFault getFault(QName faultDetailName);
 
     /**
-     * Gives the owner {@link WSDLPortType} corresponding to wsd:portType that owns this wsd;:operation.
+     * Gives the enclosing wsdl:portType@name attribute value.
      */
-    @NotNull WSDLPortType getOwner();
+    @NotNull QName getPortTypeName();
 }
