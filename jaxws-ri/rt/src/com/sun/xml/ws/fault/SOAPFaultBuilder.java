@@ -263,6 +263,7 @@ public abstract class SOAPFaultBuilder {
     private static Message createSOAP11Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
         SOAPFaultException soapFaultException = null;
         String faultString = null;
+        String faultActor = null;
         Throwable cause = e.getCause();
         if (e instanceof SOAPFaultException) {
             soapFaultException = (SOAPFaultException) e;
@@ -275,6 +276,7 @@ public abstract class SOAPFaultBuilder {
                 faultCode = soapFaultCode;
 
             faultString = soapFaultException.getFault().getFaultString();
+            faultActor = soapFaultException.getFault().getFaultActor();
         }
 
         if (faultCode == null) {
@@ -301,13 +303,14 @@ public abstract class SOAPFaultBuilder {
                 faultCode = getDefaultFaultCode(soapVersion);
             }
         }
-        return new JAXBMessage(createMarshaller(), new SOAP11Fault(faultCode, faultString, null, detailNode), soapVersion);
+        return new JAXBMessage(createMarshaller(), new SOAP11Fault(faultCode, faultString, faultActor, detailNode), soapVersion);
     }
 
     private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
         SOAPFaultException soapFaultException = null;
         CodeType code = null;
         String faultString = null;
+        String faultRole = null;
         Throwable cause = e.getCause();
         if (e instanceof SOAPFaultException) {
             soapFaultException = (SOAPFaultException) e;
@@ -336,6 +339,7 @@ public abstract class SOAPFaultBuilder {
                 }
             }
             faultString = soapFaultException.getFault().getFaultString();
+            faultRole = soapFaultException.getFault().getFaultActor();
         }
 
         if (faultCode == null && code == null) {
@@ -368,7 +372,7 @@ public abstract class SOAPFaultBuilder {
         DetailType detailType = null;
         if(detailNode != null)
             detailType = new DetailType(detailNode);
-        return new JAXBMessage(createMarshaller(), new SOAP12Fault(code, reason, null, null, detailType), soapVersion);
+        return new JAXBMessage(createMarshaller(), new SOAP12Fault(code, reason, null, faultRole, detailType), soapVersion);
     }
 
     private static SubcodeType fillSubcodes(SubcodeType parent, QName value){
