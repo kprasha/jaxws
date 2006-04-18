@@ -35,7 +35,7 @@ import javax.xml.ws.handler.MessageContext;
  * @author WS Development Team
  */
 public abstract class MessageUpdatableContext implements MessageContext {
-    protected Packet packet;
+    final Packet packet;
     private MessageContextImpl ctxt;
     /** Creates a new instance of MessageUpdatableContext */
     public MessageUpdatableContext(Packet packet) {
@@ -46,7 +46,7 @@ public abstract class MessageUpdatableContext implements MessageContext {
     /**
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
-    public void fill(Packet packet) {
+    private void fill(Packet packet) {
         ctxt.fill(packet);
     }
     /**
@@ -73,12 +73,12 @@ public abstract class MessageUpdatableContext implements MessageContext {
      * Updates the complete packet with user modfications to the message and 
      * properties cahnges in MessageContext
      */
-    void updatePacket() {
+    final void updatePacket() {
         updateMessage();
         fill(packet);
     }
     
-    protected MessageContextImpl getMessageContext() {
+    MessageContextImpl getMessageContext() {
         return ctxt;
     }
     

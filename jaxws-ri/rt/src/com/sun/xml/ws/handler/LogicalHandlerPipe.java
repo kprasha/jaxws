@@ -77,7 +77,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
     
-    protected LogicalHandlerPipe(LogicalHandlerPipe that, PipeCloner cloner) {
+    private LogicalHandlerPipe(LogicalHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
         this.binding = that.binding;
     }

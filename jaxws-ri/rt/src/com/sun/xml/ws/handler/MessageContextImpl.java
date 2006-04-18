@@ -41,10 +41,10 @@ import javax.xml.ws.handler.MessageContext;
  * @author WS Development Team
  */
 
-public class MessageContextImpl implements MessageContext {
+class MessageContextImpl implements MessageContext {
     
-    Map<String,Object> internalMap = new HashMap<String,Object>();
-    Set<String> appScopeProps;
+    private Map<String,Object> internalMap = new HashMap<String,Object>();
+    private Set<String> appScopeProps;
     /** Creates a new instance of MessageContextImpl */
     public MessageContextImpl(Packet packet) {
         
@@ -122,7 +122,7 @@ public class MessageContextImpl implements MessageContext {
     /**
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
-    protected void fill(Packet packet) {
+    void fill(Packet packet) {
         for (Entry<String,Object> entry : internalMap.entrySet()) {
                 String key = entry.getKey();
                 if(packet.supports(key)) {

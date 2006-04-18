@@ -55,7 +55,7 @@ import javax.xml.ws.WebServiceException;
 * TODO: Take care of variations in behavior wrt to vaious sources.
 * DOMSource : changes made should be reflected, StreamSource or SAXSource, Give copy
 */
-public class LogicalMessageImpl implements LogicalMessage {
+class LogicalMessageImpl implements LogicalMessage {
     private Packet packet;
     // This holds the (modified)payload set by User
     private Source payloadSrc = null;
@@ -68,10 +68,10 @@ public class LogicalMessageImpl implements LogicalMessage {
         this.packet = packet;
     }
     
-    protected boolean isPayloadModifed(){
+    boolean isPayloadModifed(){
         return payloadModifed;
     }
-    protected Source getModifiedPayload(){
+    Source getModifiedPayload(){
         if(!payloadModifed)
             throw new RuntimeException("Payload not modified.");
         return payloadSrc;

@@ -38,8 +38,8 @@ import java.util.logging.Logger;
  */
 abstract class HandlerProcessor<C extends MessageUpdatableContext> {
 
-    protected boolean isClient;
-    protected static final Logger logger = Logger.getLogger(
+    boolean isClient;
+    static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".handler");
 
     // need request or response for Handle interface
@@ -51,7 +51,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
 
     private List<? extends Handler> handlers; // may be logical/soap mixed
 
-    protected WSBinding binding;
+    WSBinding binding;
     private int index = -1;
     private HandlerPipe owner;
 
@@ -78,7 +78,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * Gives index of the handler in the chain to know what handlers in the chain
      * are invoked
      */
-    protected int getIndex() {
+    int getIndex() {
         return index;
     }
 
@@ -233,7 +233,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * message
      */
     private void setHandleFaultProperty() {
-        owner.setHandleFault(true);
+        owner.setHandleFault();
     }
 
     /**
@@ -382,7 +382,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * index through the ending index (inclusive). Made indices
      * inclusive to allow both directions more easily.
      */
-    protected void closeHandlers(MessageContext context, int start, int end) {
+    void closeHandlers(MessageContext context, int start, int end) {
         if (handlers.isEmpty() ||
                 start == -1) {
             return;

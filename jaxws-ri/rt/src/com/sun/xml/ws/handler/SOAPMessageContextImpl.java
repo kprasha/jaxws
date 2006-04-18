@@ -47,10 +47,10 @@ import java.util.Set;
  *
  * @author WS Development Team
  */
-public class SOAPMessageContextImpl extends MessageUpdatableContext implements SOAPMessageContext {
+class SOAPMessageContextImpl extends MessageUpdatableContext implements SOAPMessageContext {
 
     private Set<String> roles;
-    protected SOAPMessage soapMsg = null;
+    private SOAPMessage soapMsg = null;
     private WSBinding binding;
 
     public SOAPMessageContextImpl(WSBinding binding, Packet packet) {

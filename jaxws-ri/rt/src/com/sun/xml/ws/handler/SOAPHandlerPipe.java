@@ -80,7 +80,7 @@ public class SOAPHandlerPipe extends HandlerPipe {
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
-    protected SOAPHandlerPipe(SOAPHandlerPipe that, PipeCloner cloner) {
+    private SOAPHandlerPipe(SOAPHandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
         this.binding = that.binding;
     }

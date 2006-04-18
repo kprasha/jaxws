@@ -201,7 +201,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      * Close SOAPHandlers first and then LogicalHandlers on Client
      * Close LogicalHandlers first and then SOAPHandlers on Server
      */
-    public abstract void close(MessageContext msgContext);
+    protected abstract void close(MessageContext msgContext);
     
     /**
      * This is called from cousinPipe.
@@ -219,8 +219,8 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         }
     }
 
-    final void setHandleFault(boolean isFault) {
-        exchange.setHandleFault(isFault);
+    final void setHandleFault() {
+        exchange.setHandleFault(true);
     }
 
     private boolean isHandleFalse() {

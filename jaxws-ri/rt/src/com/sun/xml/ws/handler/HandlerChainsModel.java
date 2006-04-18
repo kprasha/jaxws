@@ -47,15 +47,15 @@ public class HandlerChainsModel {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".util");
     
-    protected Class annotatedClass;
-    protected List<HandlerChainType> handlerChains;
-    protected String id;
+    private Class annotatedClass;
+    private List<HandlerChainType> handlerChains;
+    private String id;
     /** Creates a new instance of HandlerChains */
-    public HandlerChainsModel(Class annotatedClass) {
+    private HandlerChainsModel(Class annotatedClass) {
         this.annotatedClass = annotatedClass;
     }
     
-    public List<HandlerChainType> getHandlerChain() {
+    private List<HandlerChainType> getHandlerChain() {
         if (handlerChains == null) {
             handlerChains = new ArrayList<HandlerChainType>();
         }
@@ -344,7 +344,7 @@ public class HandlerChainsModel {
 
     }
 
-    static Class loadClass(ClassLoader loader, String name) {
+    private static Class loadClass(ClassLoader loader, String name) {
         try {
             return Class.forName(name, true, loader);
         } catch (ClassNotFoundException e) {
@@ -354,7 +354,7 @@ public class HandlerChainsModel {
         }
     }
 
-    static void callHandlerPostConstruct(Object handlerClass) {
+    private static void callHandlerPostConstruct(Object handlerClass) {
         // call @PostConstruct method on handler if present
         for (Method method : handlerClass.getClass().getMethods()) {
             if (method.getAnnotation(PostConstruct.class) == null) {
@@ -369,20 +369,20 @@ public class HandlerChainsModel {
         }
     }
 
-    static void skipChain(XMLStreamReader reader) {
+    private static void skipChain(XMLStreamReader reader) {
         while (XMLStreamReaderUtil.nextContent(reader) !=
                 XMLStreamConstants.END_ELEMENT ||
                 !reader.getName().equals(QNAME_HANDLER_CHAIN)) {}
         XMLStreamReaderUtil.nextElementContent(reader);
     }
 
-    static void skipTextElement(XMLStreamReader reader) {
+    private static void skipTextElement(XMLStreamReader reader) {
         XMLStreamReaderUtil.nextContent(reader);
         XMLStreamReaderUtil.nextElementContent(reader);
         XMLStreamReaderUtil.nextElementContent(reader);
     }
 
-    static void skipInitParamElement(XMLStreamReader reader) {
+    private static void skipInitParamElement(XMLStreamReader reader) {
         int state;
         do {
             state = XMLStreamReaderUtil.nextContent(reader);
@@ -391,7 +391,7 @@ public class HandlerChainsModel {
         XMLStreamReaderUtil.nextElementContent(reader);
     }
 
-    static void ensureProperName(XMLStreamReader reader,
+    private static void ensureProperName(XMLStreamReader reader,
             QName expectedName) {
 
         if (!reader.getName().equals(expectedName)) {
@@ -407,7 +407,7 @@ public class HandlerChainsModel {
         }
     }
 
-    static void failWithLocalName(String key,
+    private static void failWithLocalName(String key,
             XMLStreamReader reader, String arg) {
         throw new UtilException(key,
             Integer.toString(reader.getLocation().getLineNumber()),
@@ -450,15 +450,15 @@ public class HandlerChainsModel {
 
     static class HandlerChainType {
         //constraints
-        protected QName serviceNamePattern;
-        protected QName portNamePattern;
-        protected List<String> protocolBindings;
+        QName serviceNamePattern;
+        QName portNamePattern;
+        List<String> protocolBindings;
 
         // This flag is set if one of the above constraint is set on handler chain
-        protected boolean constraintSet = false;
+        boolean constraintSet = false;
 
-        protected List<HandlerType> handlers;
-        protected String id;
+        List<HandlerType> handlers;
+        String id;
 
 
         /** Creates a new instance of HandlerChain */
@@ -519,11 +519,11 @@ public class HandlerChainsModel {
     }
 
     static class HandlerType {
-        protected String handlerName;
-        protected String handlerClass;
-        protected List<String> soapRoles;
+        String handlerName;
+        String handlerClass;
+        List<String> soapRoles;
 
-        protected java.lang.String id;
+        java.lang.String id;
 
         /** Creates a new instance of HandlerComponent */
         public HandlerType() {

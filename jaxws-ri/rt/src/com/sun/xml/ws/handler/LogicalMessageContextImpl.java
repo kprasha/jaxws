@@ -43,7 +43,7 @@ import javax.xml.ws.handler.LogicalMessageContext;
  *
  * @author WS Development Team
  */
-public class LogicalMessageContextImpl extends MessageUpdatableContext implements LogicalMessageContext {
+class LogicalMessageContextImpl extends MessageUpdatableContext implements LogicalMessageContext {
     private LogicalMessageImpl lm;
     private WSBinding binding;
 
