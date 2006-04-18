@@ -237,13 +237,15 @@ public abstract class Messages {
     }
 
     /**
-     * Creates a {@link Message} that represents an exception as a fault.
+     * Creates a {@link Message} that represents an exception as a fault. The
+     * created message reflects if t or t.getCause() is SOAPFaultException.
      *
-     * <p>
-     * TODO: I'm not too sure if JAX-WS can represent any exception
-     * as a fault --- it probably can't. So the exact signature needs to be
-     * worked out. This method is here just to show the concept of
-     * {@link Messages}.
+     * creates a fault message with default faultCode env:Server if t or t.getCause()
+     * is not SOAPFaultException. Otherwise, it use SOAPFaultException's faultCode
+     *
+     * @return
+     *      Always non-null. A message that wraps this {@link Throwable}.
+     *
      */
     public static Message create(Throwable t, SOAPVersion soapVersion) {
         return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, t);
