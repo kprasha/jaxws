@@ -69,15 +69,6 @@ public class XMLStreamWriterFactory {
     static {
         // Use StAX pluggability layer to get factory instance
         xmlOutputFactory = XMLOutputFactory.newInstance();
-        // TODO: Zephyr has an issue in writing an XML like
-        // <foo xmlns="bar" /> by using
-        // writeStartElement("bar","foo");
-        // writeNamespace("bar"...);
-        // and this blocks JAX-WSA RI.
-        // so while this bug is getting fixed in Zephyr,
-        // we'll repair the namespace.
-        // this is reported as bug 6395980
-        xmlOutputFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
 
         // Use reflection to avoid static dependency with FI jar
         try {
