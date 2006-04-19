@@ -81,26 +81,34 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
 
-
+    private Map<String,List<String>> responseHeaders;
     /**
      * sets response headers.
      */
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public void setResponseHeaders(Map<String,List<String>> headers) {
-        response.reset();   // clear all the headers
-        if(status!=0)
+        this.responseHeaders = headers;
+        if (headers == null)
+            return;
+        if (status != 0)
             response.setStatus(status);
-        for(Map.Entry <String, List<String>> entry : headers.entrySet()) {
+        response.reset();   // clear all the headers
+
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             String name = entry.getKey();
-            for(String value : entry.getValue()) {
+            for (String value : entry.getValue()) {
                 response.addHeader(name, value);
             }
         }
+
+    }
+
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    public Map<String,List<String>> getResponseHeaders() {
+        return responseHeaders;
     }
 
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public void setStatus(int status) {
         this.status = status;
         response.setStatus(status);

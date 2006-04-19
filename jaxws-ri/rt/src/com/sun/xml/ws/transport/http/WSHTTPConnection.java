@@ -79,7 +79,7 @@ public abstract class WSHTTPConnection extends PropertySet {
      *      code may invoke this method, a graceful error checking with
      *      an helpful error message should be provided if it's actually null.
      */
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+
     public abstract void setResponseHeaders(@NotNull Map<String,List<String>> headers);
 
     /**
@@ -109,7 +109,7 @@ public abstract class WSHTTPConnection extends PropertySet {
      * so do not consider the value to be final until {@link #getOutput()}
      * is invoked.
      */
-    @Property(MessageContext.HTTP_RESPONSE_CODE)
+    
     public abstract void setStatus(int status);
 
     /**
