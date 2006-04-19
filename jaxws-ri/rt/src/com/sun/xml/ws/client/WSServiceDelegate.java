@@ -69,6 +69,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -201,7 +202,11 @@ public class WSServiceDelegate extends WSService {
      */
     private void parseWSDL(URL wsdlDocumentLocation) {
         wsdlContext = new WSDLContext(wsdlDocumentLocation, XmlUtil.createDefaultCatalogResolver());
-        wsdlService = wsdlContext.getWSDLModel().getService(this.serviceName);
+        wsdlService = wsdlContext.getWSDLModel().getService(serviceName);
+        if(wsdlService==null)
+            throw new WebServiceException(
+                ClientMessages.INVALID_SERVICE_NAME(serviceName,
+                    buildNameList(wsdlContext.getWSDLModel().getServices().keySet())));
 
         // fill in statically known ports
         for (WSDLPortImpl port : wsdlContext.getPorts(serviceName) ) {
@@ -264,14 +269,18 @@ public class WSServiceDelegate extends WSService {
     private @NotNull PortInfo safeGetPort(QName portName) {
         PortInfo port = ports.get(portName);
         if(port==null) {
-            StringBuilder sb = new StringBuilder();
-            for (QName qn : ports.keySet()) {
-                if(sb.length()>0)   sb.append(',');
-                sb.append(qn);
-            }
-            throw new WebServiceException(ClientMessages.INVALID_PORT_NAME(portName,sb));
+            throw new WebServiceException(ClientMessages.INVALID_PORT_NAME(portName,buildNameList(ports.keySet())));
         }
         return port;
+    }
+
+    private StringBuilder buildNameList(Collection<QName> names) {
+        StringBuilder sb = new StringBuilder();
+        for (QName qn : names) {
+            if(sb.length()>0)   sb.append(',');
+            sb.append(qn);
+        }
+        return sb;
     }
 
     /**
