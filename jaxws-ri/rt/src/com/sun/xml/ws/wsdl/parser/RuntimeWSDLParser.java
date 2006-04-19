@@ -313,6 +313,8 @@ public class RuntimeWSDLParser {
                 parseInputBinding(reader, bindingOp);
             }else if(WSDLConstants.QNAME_OUTPUT.equals(name)){
                 parseOutputBinding(reader, bindingOp);
+            }else if(WSDLConstants.QNAME_FAULT.equals(name)){
+                parseFaultBinding(reader, bindingOp);
             }else if(SOAPConstants.QNAME_OPERATION.equals(name) ||
                     SOAPConstants.QNAME_SOAP12OPERATION.equals(name)){
                 String style = reader.getAttributeValue(null, "style");
@@ -369,6 +371,25 @@ public class RuntimeWSDLParser {
                 parseMimeMultipartBinding(reader, bindingOp.getOutputParts(), bindingOp.getOutputMimeTypes());
             }else{
                 extension.bindingOperationOutputElements(bindingOp,reader);
+            }
+        }
+    }
+
+    private void parseFaultBinding(XMLStreamReader reader, WSDLBoundOperationImpl bindingOp) {
+        boolean bodyFound = false;
+        extension.bindingOperationFaultAttributes(bindingOp,reader);
+        while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
+            QName name = reader.getName();
+            if((SOAPConstants.QNAME_BODY.equals(name) || SOAPConstants.QNAME_SOAP12BODY.equals(name)) && !bodyFound){
+                bodyFound = true;
+                bindingOp.setFaultExplicitBodyParts(parseSOAPBodyBinding(reader, bindingOp.getFaultParts()));
+                goToEnd(reader);
+            }else if((SOAPConstants.QNAME_HEADER.equals(name) || SOAPConstants.QNAME_SOAP12HEADER.equals(name))){
+                parseSOAPHeaderBinding(reader, bindingOp.getFaultParts());
+            }else if(MIMEConstants.QNAME_MULTIPART_RELATED.equals(name)){
+                parseMimeMultipartBinding(reader, bindingOp.getFaultParts(), bindingOp.getFaultMimeTypes());
+            }else{
+                extension.bindingOperationFaultElements(bindingOp,reader);
             }
         }
     }

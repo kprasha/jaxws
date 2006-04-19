@@ -42,17 +42,22 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     // map of wsdl:part to the binding
     private final Map<String, ParameterBinding> inputParts;
     private final Map<String, ParameterBinding> outputParts;
+    private final Map<String, ParameterBinding> faultParts;
     private final Map<String, String> inputMimeTypes;
     private final Map<String, String> outputMimeTypes;
+    private final Map<String, String> faultMimeTypes;
 
     private boolean explicitInputSOAPBodyParts = false;
     private boolean explicitOutputSOAPBodyParts = false;
+    private boolean explicitFaultSOAPBodyParts = false;
 
     private Boolean emptyInputBody;
     private Boolean emptyOutputBody;
+    private Boolean emptyFaultBody;
 
     private final Map<String, WSDLPartImpl> inParts;
     private final Map<String, WSDLPartImpl> outParts;
+    private final Map<String, WSDLPartImpl> fltParts;
     private WSDLOperationImpl operation;
 
     private final WSDLBoundPortTypeImpl owner;
@@ -65,10 +70,13 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         this.name = name;
         inputParts = new HashMap<String, ParameterBinding>();
         outputParts = new HashMap<String, ParameterBinding>();
+        faultParts = new HashMap<String, ParameterBinding>();
         inputMimeTypes = new HashMap<String, String>();
         outputMimeTypes = new HashMap<String, String>();
+        faultMimeTypes = new HashMap<String, String>();
         inParts = new HashMap<String, WSDLPartImpl>();
         outParts = new HashMap<String, WSDLPartImpl>();
+        fltParts = new HashMap<String, WSDLPartImpl>();
         this.owner = owner;
     }
 
@@ -118,6 +126,15 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     }
 
     /**
+     * Map of wsdl:fault part name and the binding as {@link ParameterBinding}
+     *
+     * @return empty Map if there is no parts
+     */
+    public Map<String, ParameterBinding> getFaultParts() {
+        return faultParts;
+    }
+
+    /**
      * Map of mime:content@part and the mime type from mime:content@type for wsdl:output
      *
      * @return empty Map if there is no parts
@@ -133,6 +150,15 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
      */
     public Map<String, String> getOutputMimeTypes() {
         return outputMimeTypes;
+    }
+
+    /**
+     * Map of mime:content@part and the mime type from mime:content@type for wsdl:fault
+     *
+     * @return empty Map if there is no parts
+     */
+    public Map<String, String> getFaultMimeTypes() {
+        return faultMimeTypes;
     }
 
     /**
@@ -182,6 +208,29 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     }
 
     /**
+     * Gets {@link ParameterBinding} for a given wsdl part in wsdl:fault
+     *
+     * @param part Name of wsdl:part, must be non-null
+     * @return null if the part is not found.
+     */
+    public ParameterBinding getFaultBinding(String part){
+        if(emptyFaultBody == null){
+            if(faultParts.get(" ") != null)
+                emptyFaultBody = true;
+            else
+                emptyFaultBody = false;
+        }
+        ParameterBinding block = faultParts.get(part);
+        if(block == null){
+            if(explicitFaultSOAPBodyParts || emptyFaultBody)
+                return ParameterBinding.UNBOUND;
+            return ParameterBinding.BODY;
+        }
+
+        return block;
+    }
+
+    /**
      * Gets the MIME type for a given wsdl part in wsdl:input
      *
      * @param part Name of wsdl:part, must be non-null
@@ -201,6 +250,16 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return outputMimeTypes.get(part);
     }
 
+    /**
+     * Gets the MIME type for a given wsdl part in wsdl:fault
+     *
+     * @param part Name of wsdl:part, must be non-null
+     * @return null if the part is not found.
+     */
+    public String getMimeTypeForFaultPart(String part){
+        return faultMimeTypes.get(part);
+    }
+
     public WSDLOperation getOperation() {
         return operation;
     }
@@ -211,6 +270,10 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
 
     public void setOutputExplicitBodyParts(boolean b) {
         explicitOutputSOAPBodyParts = b;
+    }
+
+    public void setFaultExplicitBodyParts(boolean b) {
+        explicitFaultSOAPBodyParts = b;
     }
 
     private Style style = Style.DOCUMENT;
