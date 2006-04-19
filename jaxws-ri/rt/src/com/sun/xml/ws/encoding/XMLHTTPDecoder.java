@@ -72,7 +72,7 @@ public final class XMLHTTPDecoder implements Decoder {
         }
         
         public Message decode(InputStream in, String contentType) throws IOException {
-            decoder.decode(in, contentType);
+            //decoder.decode(in, contentType);
             // TODO need to create a Message around MimeMultipartRelatedDecoder
             return null;
             //return XMLMessage.create(decoder);
