@@ -41,8 +41,7 @@ public class XMLStreamReaderUtil {
     public static void close(XMLStreamReader reader) {
         try {
             reader.close();
-        }
-        catch (XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw wrapException(e);
         }
     }
@@ -190,7 +189,7 @@ public class XMLStreamReaderUtil {
     }
 
     public static void verifyTag(XMLStreamReader reader, String namespaceURI, String localName) {
-        if (localName != reader.getLocalName() || namespaceURI != reader.getNamespaceURI()) {
+        if (!localName.equals(reader.getLocalName()) || !namespaceURI.equals(reader.getNamespaceURI())) {
             throw new XMLStreamReaderException(
                 "xmlreader.unexpectedState.tag",
                     "{" + namespaceURI + "}" + localName,
@@ -315,12 +314,11 @@ public class XMLStreamReaderUtil {
 
                 // this is the normal case
                 int index = 0;
-                String namespacePrefix = null;
                 int namespaceCount = reader.getNamespaceCount();
                 int attributeCount = reader.getAttributeCount();
                 atInfos = new AttributeInfo[namespaceCount + attributeCount];
                 for (int i=0; i<namespaceCount; i++) {
-                    namespacePrefix = reader.getNamespacePrefix(i);
+                    String namespacePrefix = reader.getNamespacePrefix(i);
 
                     // will be null if default prefix. QName can't take null
                     if (namespacePrefix == null) {
