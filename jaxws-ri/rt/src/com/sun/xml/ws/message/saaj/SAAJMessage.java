@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.message.saaj;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
@@ -463,13 +464,15 @@ public class SAAJMessage extends Message {
 
     }
 
-    private void writeAttributes(NamedNodeMap attrs , XMLStreamWriter writer)throws XMLStreamException{
-        for(int i=0;i< attrs.getLength();i++){
-            Attr attr = (Attr)attrs.item(i);
-            if(attr.getNamespaceURI().equals("http://www.w3.org/2000/xmlns/")){
-                writer.writeNamespace(attr.getLocalName(),attr.getValue());
-            } else{
-                writer.writeAttribute(attr.getPrefix(),attr.getNamespaceURI(),attr.getLocalName(),attr.getValue());
+    private void writeAttributes(@Nullable NamedNodeMap attrs , XMLStreamWriter writer)throws XMLStreamException{
+        if (attrs != null) {
+            for(int i=0;i< attrs.getLength();i++){
+                Attr attr = (Attr)attrs.item(i);
+                if(attr.getNamespaceURI().equals("http://www.w3.org/2000/xmlns/")){
+                    writer.writeNamespace(attr.getLocalName(),attr.getValue());
+                } else{
+                    writer.writeAttribute(attr.getPrefix(),attr.getNamespaceURI(),attr.getLocalName(),attr.getValue());
+                }
             }
         }
     }
