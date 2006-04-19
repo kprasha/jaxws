@@ -67,6 +67,8 @@ public final class LocalTransportFactory extends TransportPipeFactory {
     /**
      * The local transport works by looking at the exploded war file image on
      * a file system.
+     * TODO: Currently it expects the PortName to be appended to the endpoint address
+     *       This needs to be expanded to take Service and Port QName as well.
      */
     protected static WSEndpoint createServerService(URI adrs) {
         try {
@@ -79,7 +81,8 @@ public final class LocalTransportFactory extends TransportPipeFactory {
             WSEndpoint endpoint = endpoints.get(0);
             if (endpoints.size() > 1) {
                 for (WSEndpoint rei : endpoints) {
-                    if(rei.getPort().getName().equals(adrs.getQuery())) {
+                    //TODO: for now just compare local part
+                    if(rei.getPort().getName().getLocalPart().equals(adrs.getQuery())) {
                         endpoint = rei;
                         break;
                     }
