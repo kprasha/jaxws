@@ -58,7 +58,7 @@ public class JAXWSBindingInfoParser {
         this.env = env;
     }
 
-    public Element parse(InputSource source) {
+    public Document parse(InputSource source) {
         try {
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             builderFactory.setNamespaceAware(true);
@@ -67,9 +67,7 @@ public class JAXWSBindingInfoParser {
             builder.setErrorHandler(XmlUtil.DRACONIAN_ERROR_HANDLER);
 
             builder.setEntityResolver(new NullEntityResolver());
-            Document dom = builder.parse(source);
-            Element root = dom.getDocumentElement();
-            return root;
+            return builder.parse(source);
         } catch (ParserConfigurationException e) {
             throw new ParseException("parsing.parserConfigException",e);
         } catch (FactoryConfigurationError e) {
