@@ -107,8 +107,8 @@ public abstract class StreamSOAPDecoder implements Decoder {
         HeaderList headers = null;
         TagInfoset headerTag = null;
 
-        if (reader.getLocalName() == SOAP_HEADER
-                && reader.getNamespaceURI() == SOAP_NAMESPACE_URI) {
+        if (reader.getLocalName().equals(SOAP_HEADER)
+                && reader.getNamespaceURI().equals(SOAP_NAMESPACE_URI)) {
             headerTag = new TagInfoset(reader);
 
             // Collect namespaces on soap:Header
