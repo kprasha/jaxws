@@ -85,21 +85,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
                 if (isXMLHttp())
                     message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
                 else {
-                    //Todo: temporary until ProtocolSourceMessage is done
-                    SOAPMessage soapmsg;
-                    try {
-                        //todo:
-                        soapmsg = binding.getSOAPVersion().saajMessageFactory.createMessage();
-                        soapmsg.getSOAPPart().setContent(msg);
-                        soapmsg.saveChanges();
-                    } catch (SOAPException e) {
-                        throw new WebServiceException(e);
-                    }
-                    message = new SAAJMessage(soapmsg);
+                    message = Messages.create(msg, soapVersion);
                 }
-                //todo:temp until ProtocolSourceMessage implemented
-                //message = new ProtocolSourceMessage(msg);
-                //todo: uncomment above when ProtocolSourceMessage is done
                 break;
             default:
                 throw new WebServiceException("Unrecognized message mode");
