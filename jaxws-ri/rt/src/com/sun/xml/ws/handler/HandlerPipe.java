@@ -52,22 +52,19 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         super(next);
         this.port = port;
         this.isClient = isClient;
-        exchange = new HandlerPipeExchange();
     }
-    
+
     public HandlerPipe(Pipe next, HandlerPipe cousinPipe, boolean isClient) {
         super(next);
         this.cousinPipe = cousinPipe;
         this.isClient = isClient;
         if(cousinPipe != null) {
             this.port = cousinPipe.port;
-            exchange = cousinPipe.exchange;
         } else {
             this.port = null;
-            exchange = new HandlerPipeExchange();
         }
     }
-    
+
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
@@ -76,10 +73,10 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         this.cousinPipe = that.cousinPipe;
         this.isClient = that.isClient;
         this.port = that.port;
-        this.exchange = that.exchange;
     }
-    
+
     public final Packet process( Packet packet) {
+        setupExchange();
         // This check is done to cover handler returning false in Oneway request
         if(isHandleFalse()){
             // Cousin HandlerPipe returned false during Oneway Request processing.
@@ -210,28 +207,43 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     public abstract void closeCall(MessageContext msgContext);
 
     private boolean isHandleFault(Packet packet) {
-        if (cousinPipe != null) {
-            return exchange.isHandleFault();
+        if (exchange != null) {
+            if (cousinPipe != null) {
+                return exchange.isHandleFault();
+            } else {
+                boolean isFault = packet.getMessage().isFault();
+                exchange.setHandleFault(isFault);
+                return isFault;
+            }
         } else {
-            boolean isFault = packet.getMessage().isFault();
-            exchange.setHandleFault(isFault);
-            return isFault;
+            return false;
         }
     }
 
     final void setHandleFault() {
-        exchange.setHandleFault(true);
+        if(exchange != null)
+            exchange.setHandleFault(true);
     }
 
     private boolean isHandleFalse() {
-        return exchange.isHandleFalse();
+        if(exchange != null)
+            return exchange.isHandleFalse();
+        else
+            return false;
     }
 
     final void setHandleFalse() {
-        exchange.setHandleFalse();
+        if(exchange != null)
+            exchange.setHandleFalse();
     }
 
-    private final HandlerPipeExchange exchange;
+    private void setupExchange() {
+        if(cousinPipe != null) {
+            exchange = new HandlerPipeExchange();
+            cousinPipe.exchange = exchange;
+        }
+    }
+    private HandlerPipeExchange exchange;
 
     /**
      * This class is used primarily to exchange information or status between
