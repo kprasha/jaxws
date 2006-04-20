@@ -142,14 +142,10 @@ public abstract class StreamSOAPDecoder implements Decoder {
         TagInfoset bodyTag = new TagInfoset(reader);
 
         XMLStreamReaderUtil.nextElementContent(reader);
-        if (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
-            // Payload is present
-            // XMLStreamReader is positioned at the first child
-            return new StreamMessage(envelopeTag,headerTag,headers,bodyTag,reader,soapVersion);
-        } else {
-            // Empty payload <soap:Body/>
-            return new EmptyMessageImpl(headers, SOAPVersion.fromNsUri(SOAP_NAMESPACE_URI));
-        }
+        return new StreamMessage(envelopeTag,headerTag,headers,bodyTag,reader,soapVersion);
+        // when there's no payload,
+        // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
+        // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.
     }
 
     public void decode(ReadableByteChannel in, String contentType, Packet packet ) {

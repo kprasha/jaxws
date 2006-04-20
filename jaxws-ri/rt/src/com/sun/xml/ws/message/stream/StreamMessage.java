@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.message.stream;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
@@ -31,13 +33,10 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
-import com.sun.xml.ws.message.EmptyMessageImpl;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -249,18 +248,21 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     public Message copy() {
-        // if the reader is on END element means its empty body or no payload, so lets
-        // return the same message
-        if(!hasPayload())
-            return new EmptyMessageImpl(HeaderList.copy(headers), soapVersion);
-
         assert unconsumed();
         try {
             // copy the payload
-            XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
-            reader = xsb.readAsXMLStreamReader();
+            XMLStreamReader clone;
+            if(hasPayload()) {
+                XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
+                reader = xsb.readAsXMLStreamReader();
+                clone = xsb.readAsXMLStreamReader();
+            } else {
+                // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
+                // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.
+                clone = reader;
+            }
 
-            return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, xsb.readAsXMLStreamReader(), soapVersion);
+            return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, clone, soapVersion);
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message",e);
         } catch (XMLStreamBufferException e) {
@@ -290,9 +292,13 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     /**
-     * Used for an assertion. Returns true when the message is unconsumed.
+     * Used for an assertion. Returns true when the message is unconsumed,
+     * or otherwise throw an exception.
      */
     private boolean unconsumed() {
+        if(payloadLocalName==null)
+            return true;    // no payload. can be consumed multiple times.
+
         if(reader.getEventType()!=XMLStreamReader.START_ELEMENT) {
             AssertionError error = new AssertionError("StreamMessage has been already consumed. See the nested exception for where it's consumed");
             error.initCause(consumedAt);
