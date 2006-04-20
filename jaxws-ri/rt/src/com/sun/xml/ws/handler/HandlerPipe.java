@@ -121,6 +121,8 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             // Call handlers on Response
             callHandlersOnResponse(context,isHandleFault(reply));
         } finally {
+            // Clean up the exchange for next invocation.
+            exchange = null;
             close(context.getMessageContext());
         }
         //Update Packet with user modifications
@@ -209,41 +211,34 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     public abstract void closeCall(MessageContext msgContext);
 
     private boolean isHandleFault(Packet packet) {
-        if (exchange != null) {
-            if (cousinPipe != null) {
-                return exchange.isHandleFault();
-            } else {
-                boolean isFault = packet.getMessage().isFault();
-                exchange.setHandleFault(isFault);
-                return isFault;
-            }
+        if (cousinPipe != null) {
+            return exchange.isHandleFault();
         } else {
-            return false;
+            boolean isFault = packet.getMessage().isFault();
+            exchange.setHandleFault(isFault);
+            return isFault;
         }
     }
 
     final void setHandleFault() {
-        if(exchange != null)
-            exchange.setHandleFault(true);
+        exchange.setHandleFault(true);
     }
 
     private boolean isHandleFalse() {
-        if(exchange != null)
-            return exchange.isHandleFalse();
-        else
-            return false;
+        return exchange.isHandleFalse();
     }
 
     final void setHandleFalse() {
-        if(exchange != null)
-            exchange.setHandleFalse();
+        exchange.setHandleFalse();
     }
 
     private void setupExchange() {
-        if(cousinPipe != null) {
+        if(exchange == null) {
             exchange = new HandlerPipeExchange();
-            cousinPipe.exchange = exchange;
-        }
+            if(cousinPipe != null) {
+                cousinPipe.exchange = exchange;
+            }
+        }        
     }
     private HandlerPipeExchange exchange;
 
