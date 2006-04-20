@@ -39,9 +39,7 @@ import javax.xml.transform.Source;
 
 /**
  * {@link Message} that has no body.
- *
- * TODO: this is a work in progress.
- *
+ * 
  * @author Kohsuke Kawaguchi
  */
 public class EmptyMessageImpl extends AbstractMessageImpl {
@@ -63,7 +61,6 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
             headers = new HeaderList();
         this.headers = headers;
     }
-
 
     /**
      * Copy constructor.
