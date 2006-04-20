@@ -70,7 +70,9 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      */
     protected HandlerPipe(HandlerPipe that, PipeCloner cloner) {
         super(that,cloner);
-        this.cousinPipe = that.cousinPipe;
+        if(that.cousinPipe != null) {
+            this.cousinPipe = cloner.copy(that.cousinPipe);
+        }
         this.isClient = that.isClient;
         this.port = that.port;
     }
