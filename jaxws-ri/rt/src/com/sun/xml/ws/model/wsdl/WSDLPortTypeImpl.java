@@ -53,7 +53,7 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
         return portTypeOperations.get(operationName);
     }
 
-    Iterable<WSDLOperationImpl> getOperations() {
+    public Iterable<WSDLOperationImpl> getOperations() {
         return portTypeOperations.values();
     }
 

@@ -46,4 +46,10 @@ public interface WSDLPortType extends WSDLObject, WSDLExtensible {
      * @return null if a {@link WSDLOperation} is not found
      */
     public WSDLOperation get(String operationName);
+
+
+    /**
+     * Gets {@link Iterable}<{$link WSDLOperation}>
+     */
+    public Iterable<? extends WSDLOperation> getOperations();
 }
