@@ -128,6 +128,7 @@ public class MtomEncoder implements Encoder {
         mtomAttachmentStream.clear();
         ContentType contentType = getContentType(packet);
         this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
+
         if(packet.getMessage() != null){
             try {
                 //OutputUtil.writeln("Content-Type: "+messageContentType, out);
@@ -187,8 +188,8 @@ public class MtomEncoder implements Encoder {
             try {
                 String xopPrefix = writer.getPrefix(XOP_NAMESPACEURI);
                 if(xopPrefix == null){
-                    writer.setPrefix("xop", XOP_NAMESPACEURI);
-                    writer.writeStartElement("xop", XOP_LOCALNAME, XOP_NAMESPACEURI);
+                    writer.writeStartElement(XOP_LOCALNAME);
+                    writer.writeDefaultNamespace(XOP_NAMESPACEURI);
                 }else{
                     writer.writeStartElement(xopPrefix, XOP_LOCALNAME, XOP_NAMESPACEURI);
                 }
