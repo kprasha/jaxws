@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.encoding.ContentTypeImpl;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
+import com.sun.xml.stream.writers.UTF8OutputStreamWriter;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLStreamException;
@@ -42,10 +43,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayOutputStream;
 import java.nio.channels.WritableByteChannel;
-import java.util.UUID;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
@@ -128,7 +126,12 @@ public class MtomEncoder implements Encoder {
         mtomAttachmentStream.clear();
         ContentType contentType = getContentType(packet);
         this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
-
+        if (writer instanceof Map) {
+            OutputStream os = (OutputStream) ((Map) writer).get("sjsxp-outputstream");
+            if (os != null) {
+                osWriter = new UTF8OutputStreamWriter(os);
+            }
+        }
         if(packet.getMessage() != null){
             try {
                 //OutputUtil.writeln("Content-Type: "+messageContentType, out);
@@ -173,6 +176,10 @@ public class MtomEncoder implements Encoder {
     private static final String XOP_LOCALNAME = "Include";
     private static final String XOP_NAMESPACEURI = "http://www.w3.org/2004/08/xop/include";
 
+    private UTF8OutputStreamWriter osWriter;
+    private static final String xopPref="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
+    private static final String xopSuff="\"/>";
+
     private void writeMtomBinary(byte[] data, int start, int len, String contentType){
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -185,20 +192,27 @@ public class MtomEncoder implements Encoder {
             mtomAttachmentStream.add(bos);
 
             //write out the xop reference
-            try {
-                String xopPrefix = writer.getPrefix(XOP_NAMESPACEURI);
-                if(xopPrefix == null){
-                    writer.writeStartElement(XOP_LOCALNAME);
-                    writer.writeDefaultNamespace(XOP_NAMESPACEURI);
-                }else{
-                    writer.writeStartElement(xopPrefix, XOP_LOCALNAME, XOP_NAMESPACEURI);
+            if(osWriter != null){
+                writer.writeCharacters("");
+                osWriter.write(xopPref+contentId+xopSuff);
+            }else{
+                try {
+                    String xopPrefix = writer.getPrefix(XOP_NAMESPACEURI);
+                    if(xopPrefix == null){
+                        writer.writeStartElement(XOP_LOCALNAME);
+                        writer.writeDefaultNamespace(XOP_NAMESPACEURI);
+                    }else{
+                        writer.writeStartElement(xopPrefix, XOP_LOCALNAME, XOP_NAMESPACEURI);
+                    }
+                    writer.writeAttribute("href", "cid:"+contentId);
+                    writer.writeEndElement();
+                } catch (XMLStreamException e) {
+                    throw new WebServiceException(e);
                 }
-                writer.writeAttribute("href", "cid:"+contentId);
-                writer.writeEndElement();
-            } catch (XMLStreamException e) {
-                throw new WebServiceException(e);
             }
         } catch (IOException e) {
+            throw new WebServiceException(e);
+        } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
     }
