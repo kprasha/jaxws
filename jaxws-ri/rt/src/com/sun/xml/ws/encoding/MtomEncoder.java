@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.encoding.ContentTypeImpl;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.stream.writers.UTF8OutputStreamWriter;
 
@@ -68,9 +67,13 @@ public class MtomEncoder implements Encoder {
     private final String soapContentType;
     private XMLStreamWriter writer;
     private final SOAPVersion version;
+    private UTF8OutputStreamWriter osWriter;
+    private static final String xopPref="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
+    private static final String xopSuff="\"/>";
+
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
-    private final List<ByteArrayOutputStream> mtomAttachmentStream = new ArrayList<ByteArrayOutputStream>();
+    private final List<ByteArrayBuffer> mtomAttachmentStream = new ArrayList<ByteArrayBuffer>();
 
     MtomEncoder(SOAPVersion version){
         this.version = version;
@@ -125,17 +128,10 @@ public class MtomEncoder implements Encoder {
         //get the current boundary thaat will be reaturned from this method
         mtomAttachmentStream.clear();
         ContentType contentType = getContentType(packet);
-        this.writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
-        if (writer instanceof Map) {
-            OutputStream os = (OutputStream) ((Map) writer).get("sjsxp-outputstream");
-            if (os != null) {
-                osWriter = new UTF8OutputStreamWriter(os);
-            }
-        }
+        writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
+        osWriter = new UTF8OutputStreamWriter(out);
         if(packet.getMessage() != null){
             try {
-                //OutputUtil.writeln("Content-Type: "+messageContentType, out);
-                //OutputUtil.writeln(out);                    // write \r\n
                 OutputUtil.writeln("--"+boundary, out);
                 OutputUtil.writeln("Content-Type: "+ soapXopContentType,  out);
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
@@ -149,17 +145,17 @@ public class MtomEncoder implements Encoder {
                 //if there no other mime parts to be written, write the end boundary
                 if(!mimeAttSet.hasNext() && mtomAttachmentStream.size() == 0){
                     OutputUtil.writeAsAscii("--"+boundary, out);
-                        OutputUtil.writeAsAscii("--", out);
+                    OutputUtil.writeAsAscii("--", out);
                 }
 
-                for(ByteArrayOutputStream bos : mtomAttachmentStream){
-                    out.write(bos.toByteArray());
-                    OutputUtil.writeln(out);
+                for(ByteArrayBuffer bos : mtomAttachmentStream){
+                    bos.write(out);
+
+                    //once last attachment is written, end with boundary
                     if(++numOfAttachments == mtomAttachmentStream.size()){
                         OutputUtil.writeAsAscii("--"+boundary, out);
                         OutputUtil.writeAsAscii("--", out);
                     }
-                    bos.reset();
                 }
 
                 //now write out the attachments in the message
@@ -173,43 +169,38 @@ public class MtomEncoder implements Encoder {
         return contentType;
     }
 
-    private static final String XOP_LOCALNAME = "Include";
-    private static final String XOP_NAMESPACEURI = "http://www.w3.org/2004/08/xop/include";
+    private class ByteArrayBuffer{
+        private  byte[] buff;
+        private  int off;
+        private  int len;
+        private  String contentType;
+        String contentId;
 
-    private UTF8OutputStreamWriter osWriter;
-    private static final String xopPref="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
-    private static final String xopSuff="\"/>";
+        ByteArrayBuffer(byte[] buff, int off, int len, String contentType) {
+            this.buff = buff;
+            this.off = off;
+            this.len = len;
+            this.contentType = contentType;
+            this.contentId = encodeCid(null);
+        }
+
+        void write(OutputStream os) throws IOException {
+            //build attachment frame
+            OutputUtil.writeln("--"+boundary, os);
+            writeMimeHeaders(contentType, contentId, os);
+            os.write(buff, off, len);
+            OutputUtil.writeln(os);
+        }
+    }
 
     private void writeMtomBinary(byte[] data, int start, int len, String contentType){
         try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            String contentId = encodeCid(null);
-
-            //build attachment frame
-            OutputUtil.writeln("--"+boundary, bos);
-            writeMimeHeaders(contentType, contentId, bos);
-            bos.write(data, start, len);
+            ByteArrayBuffer bos = new ByteArrayBuffer(data, start, len, contentType);
             mtomAttachmentStream.add(bos);
 
             //write out the xop reference
-            if(osWriter != null){
-                writer.writeCharacters("");
-                osWriter.write(xopPref+contentId+xopSuff);
-            }else{
-                try {
-                    String xopPrefix = writer.getPrefix(XOP_NAMESPACEURI);
-                    if(xopPrefix == null){
-                        writer.writeStartElement(XOP_LOCALNAME);
-                        writer.writeDefaultNamespace(XOP_NAMESPACEURI);
-                    }else{
-                        writer.writeStartElement(xopPrefix, XOP_LOCALNAME, XOP_NAMESPACEURI);
-                    }
-                    writer.writeAttribute("href", "cid:"+contentId);
-                    writer.writeEndElement();
-                } catch (XMLStreamException e) {
-                    throw new WebServiceException(e);
-                }
-            }
+            writer.writeCharacters("");
+            osWriter.write(xopPref+bos.contentId+xopSuff);
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
@@ -242,7 +233,7 @@ public class MtomEncoder implements Encoder {
     }
 
     public Encoder copy() {
-        throw new UnsupportedOperationException();
+        return new MtomEncoder(version);
     }
 
     public XMLStreamWriterEx getXmlStreamWriterEx() {
