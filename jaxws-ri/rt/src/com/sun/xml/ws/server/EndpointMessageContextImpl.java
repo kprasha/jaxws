@@ -70,7 +70,7 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
             return packet.get(key);    // strongly typed
         }
 
-        if (!packet.getApplicationScopePropertyNames(true).contains(key)) {
+        if (packet.getHandlerScopePropertyNames(true).contains(key)) {
             return null;            // no such application-scope property
         }
 
@@ -89,7 +89,7 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         }
         Object old = packet.invocationProperties.get(key);
         if (old != null) {
-            if (!packet.getApplicationScopePropertyNames(true).contains(key)) {
+            if (packet.getHandlerScopePropertyNames(true).contains(key)) {
                 throw new IllegalArgumentException("Cannot overwrite property in HANDLER scope");
             }
             // Overwrite existing APPLICATION scoped property
@@ -98,7 +98,7 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         }
         old = packet.otherProperties.get(key);
         if (old != null) {
-            if (!packet.getApplicationScopePropertyNames(true).contains(key)) {
+            if (packet.getHandlerScopePropertyNames(true).contains(key)) {
                 throw new IllegalArgumentException("Cannot overwrite property in HANDLER scope");
             }
             // Overwrite existing APPLICATION scoped property
@@ -107,7 +107,6 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         }
         // No existing property. So Add a new property
         packet.invocationProperties.put(key, value);
-        packet.getApplicationScopePropertyNames(false).add(key);
         return null;
     }
 
@@ -118,22 +117,20 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         }
         Object old = packet.invocationProperties.get(key);
         if (old != null) {
-            if (!packet.getApplicationScopePropertyNames(true).contains(key)) {
+            if (packet.getHandlerScopePropertyNames(true).contains(key)) {
                 throw new IllegalArgumentException("Cannot remove property in HANDLER scope");
             }
             // Remove existing APPLICATION scoped property
             packet.invocationProperties.remove(key);
-            packet.getApplicationScopePropertyNames(false).remove(key);
             return old;
         }
         old = packet.otherProperties.get(key);
         if (old != null) {
-            if (!packet.getApplicationScopePropertyNames(true).contains(key)) {
+            if (packet.getHandlerScopePropertyNames(true).contains(key)) {
                 throw new IllegalArgumentException("Cannot remove property in HANDLER scope");
             }
             // Remove existing APPLICATION scoped property
             packet.otherProperties.remove(key);
-            packet.getApplicationScopePropertyNames(false).remove(key);
             return old;
         }
         // No existing property.

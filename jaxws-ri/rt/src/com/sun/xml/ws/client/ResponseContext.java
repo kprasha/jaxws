@@ -80,7 +80,8 @@ public class ResponseContext extends AbstractMap<String,Object> {
             return packet.containsKey(key);    // strongly typed
 
         if(packet.invocationProperties.containsKey(key) || packet.otherProperties.containsKey(key))
-            return packet.getApplicationScopePropertyNames(true).contains(key);
+            // if handler-scope, hide it
+            return !packet.getHandlerScopePropertyNames(true).contains(key);
 
         return false;
     }
@@ -89,7 +90,7 @@ public class ResponseContext extends AbstractMap<String,Object> {
         if(packet.supports(key))
             return packet.get(key);    // strongly typed
 
-        if(!packet.getApplicationScopePropertyNames(true).contains(key))
+        if(!packet.getHandlerScopePropertyNames(true).contains(key))
             return null;            // no such application-scope property
 
         Object v = packet.invocationProperties.get(key);
@@ -127,10 +128,11 @@ public class ResponseContext extends AbstractMap<String,Object> {
             Map<String,Object> r = new HashMap<String,Object>();
 
             // export application-scope properties
-            for (String key : packet.getApplicationScopePropertyNames(true)) {
-                if(containsKey(key))
-                    r.put(key,get(key));
-            }
+            r.putAll(packet.invocationProperties);
+            r.putAll(packet.otherProperties);
+
+            // hide handler-scope properties
+            r.keySet().removeAll(packet.getHandlerScopePropertyNames(true));
 
             // and all strongly typed ones
             r.putAll(packet.createMapView());

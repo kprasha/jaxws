@@ -141,6 +141,7 @@ public final class Packet extends DistributedPropertySet {
      */
     private Packet(Packet that) {
         this.invocationProperties = that.invocationProperties;
+        this.handlerScopePropertyNames = that.handlerScopePropertyNames;
         // copy other properties that need to be copied. is there any?
     }
 
@@ -376,8 +377,22 @@ public final class Packet extends DistributedPropertySet {
      * See <a href="#properties">class javadoc</a> for more discussion.
      *
      * TODO: allocate this instance lazily.
+     *
+     * @deprecated
+     *      It seems like nobody needs this, so we're considering to remove it.
      */
     public final Map<String,Object> otherProperties = new HashMap<String,Object>();
+
+    /**
+     * Lazily created set of handler-scope property names.
+     *
+     * <p>
+     * We expect that this is only used when handlers are present
+     * and they explicitly set some handler-scope values.
+     *
+     * @see #getHandlerScopePropertyNames(boolean)
+     */
+    private Set<String> handlerScopePropertyNames;
 
     /**
      * Bag to capture properties that are available for the whole
@@ -390,16 +405,16 @@ public final class Packet extends DistributedPropertySet {
      * <p>
      * See <a href="#properties">class javadoc</a> for more discussion.
      *
-     * @see #getApplicationScopePropertyNames(boolean)
+     * @see #getHandlerScopePropertyNames(boolean)
      */
     public final Map<String,Object> invocationProperties;
 
     /**
-     * Gets a {@link Set} that stores application-scope properties.
+     * Gets a {@link Set} that stores handler-scope properties.
      *
      * <p>
-     * These properties will be exposed to the response context.
-     * Consequently, if a {@link Pipe} wishes to expose a property
+     * These properties will not be exposed to the response context.
+     * Consequently, if a {@link Pipe} wishes to hide a property
      * to {@link ResponseContext}, it needs to add the property name
      * to this set.
      *
@@ -411,18 +426,28 @@ public final class Packet extends DistributedPropertySet {
      * @return
      *      always non-null, possibly empty set that stores property names.
      */
-    public final Set<String> getApplicationScopePropertyNames( boolean readOnly ) {
-        Set<String> o = (Set<String>) invocationProperties.get(SCOPE_PROPERTY);
+    public final Set<String> getHandlerScopePropertyNames( boolean readOnly ) {
+        Set<String> o = this.handlerScopePropertyNames;
         if(o==null) {
             if(readOnly)
                 return Collections.emptySet();
             o = new HashSet<String>();
-            invocationProperties.put(SCOPE_PROPERTY,o);
+            this.handlerScopePropertyNames = o;
         }
         return o;
     }
 
-    private static final String SCOPE_PROPERTY = "com.sun.xml.ws.HandlerScope";
+    /**
+     * This method no longer works.
+     *
+     * @deprecated
+     *      Use {@link #getHandlerScopePropertyNames(boolean)}.
+     *      To be removed once Tango components are updated.
+     */
+    public final Set<String> getApplicationScopePropertyNames( boolean readOnly ) {
+        assert false;
+        return new HashSet<String>();
+    }
 
     /**
      * Creates a response {@link Packet} from a request packet ({@code this}).

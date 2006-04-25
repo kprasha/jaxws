@@ -24,16 +24,10 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.ReadOnlyPropertyException;
-import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collection;
-import javax.activation.DataHandler;
-import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.MessageContext;
 
 /**
@@ -44,15 +38,13 @@ import javax.xml.ws.handler.MessageContext;
 class MessageContextImpl implements MessageContext {
     
     private Map<String,Object> internalMap = new HashMap<String,Object>();
-    private Set<String> appScopeProps;
+    private Set<String> handlerScopeProps;
     /** Creates a new instance of MessageContextImpl */
     public MessageContextImpl(Packet packet) {
-        
+        handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
         internalMap.putAll(packet.createMapView());
         internalMap.putAll(packet.invocationProperties);
         internalMap.putAll(packet.otherProperties);
-        appScopeProps =  packet.getApplicationScopePropertyNames(false);
-        
     }
     
     protected void updatePacket() {
@@ -60,19 +52,19 @@ class MessageContextImpl implements MessageContext {
     }
     public void setScope(String name, Scope scope) {
         //TODO: check in intrenalMap
-        if(scope == MessageContext.Scope.APPLICATION) {
-            appScopeProps.add(name);
+        if(scope == Scope.APPLICATION) {
+            handlerScopeProps.remove(name);
         } else {
-            appScopeProps.remove(name);
+            handlerScopeProps.add(name);
             
         }
     }
     
     public Scope getScope(String name) {
-        if(appScopeProps.contains(name)) {
-            return MessageContext.Scope.APPLICATION;
+        if(handlerScopeProps.contains(name)) {
+            return Scope.HANDLER;
         } else {
-            return MessageContext.Scope.HANDLER;
+            return Scope.APPLICATION;
         }
     }
     
@@ -124,25 +116,25 @@ class MessageContextImpl implements MessageContext {
      */
     void fill(Packet packet) {
         for (Entry<String,Object> entry : internalMap.entrySet()) {
-                String key = entry.getKey();
-                if(packet.supports(key)) {
-                    try {
+            String key = entry.getKey();
+            if(packet.supports(key)) {
+                try {
                     packet.put(key,entry.getValue());
-                    } catch(ReadOnlyPropertyException e) {
-                        // Nothing to do
-                    }
-                } else if(packet.otherProperties.containsKey(key)) {
-                    packet.otherProperties.put(key,entry.getValue());
-                } else {
-                    packet.invocationProperties.put(key,entry.getValue());
+                } catch(ReadOnlyPropertyException e) {
+                    // Nothing to do
                 }
+            } else if(packet.otherProperties.containsKey(key)) {
+                packet.otherProperties.put(key,entry.getValue());
+            } else {
+                packet.invocationProperties.put(key,entry.getValue());
+            }
         }
         
         //Remove properties which are removed by user.
         packet.createMapView().keySet().retainAll(internalMap.keySet());
         packet.otherProperties.keySet().retainAll(internalMap.keySet());
         packet.invocationProperties.keySet().retainAll(internalMap.keySet());
-        packet.getApplicationScopePropertyNames(false).retainAll(internalMap.keySet());
+        packet.getHandlerScopePropertyNames(false).retainAll(internalMap.keySet());
     }
     
 }
