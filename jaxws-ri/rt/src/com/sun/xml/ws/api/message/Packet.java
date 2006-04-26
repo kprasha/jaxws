@@ -140,6 +140,7 @@ public final class Packet extends DistributedPropertySet {
      * Used by {@link #createResponse(Message)}.
      */
     private Packet(Packet that) {
+        that.copySatelliteInto(this);
         this.invocationProperties = that.invocationProperties;
         this.handlerScopePropertyNames = that.handlerScopePropertyNames;
         // copy other properties that need to be copied. is there any?
