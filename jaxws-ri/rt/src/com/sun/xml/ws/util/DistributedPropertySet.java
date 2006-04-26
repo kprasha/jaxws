@@ -60,6 +60,10 @@ public abstract class DistributedPropertySet extends PropertySet {
         satellites.remove(satellite);
     }
 
+    public void copySatelliteInto(@NotNull DistributedPropertySet r) {
+        r.satellites.addAll(this.satellites);
+    }
+
     @Override
     public Object get(Object key) {
         // check satellites
