@@ -405,15 +405,23 @@ public abstract class Message {
     public abstract <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
 
     /**
-     * Reads the payload as a JAXB object according to the given {@link Bridge},
-     * by using the specified {@link BridgeContext}.
+     * Reads the payload as a JAXB object according to the given {@link Bridge}.
      *
      * This consumes the message.
      *
      * @throws JAXBException
      *      If JAXB reports an error during the processing.
      */
-    public abstract <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException;
+    public abstract <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException;
+
+    /**
+     * @deprecated
+     *      Use {@link #readPayloadAsJAXB(Bridge)}.
+     */
+    public final <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return readPayloadAsJAXB(bridge);
+    }
+
 
     /**
      * Reads the payload as a {@link XMLStreamReader}

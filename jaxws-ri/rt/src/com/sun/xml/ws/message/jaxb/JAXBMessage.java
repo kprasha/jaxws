@@ -21,8 +21,9 @@
  */
 package com.sun.xml.ws.message.jaxb;
 
+import com.sun.istack.FragmentContentHandler;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -31,17 +32,13 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
-import com.sun.istack.FragmentContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import java.io.OutputStream;
-import java.util.Map;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.util.JAXBResult;
@@ -50,6 +47,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * {@link Message} backed by a JAXB bean.
@@ -65,7 +64,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
     private final Object jaxbObject;
 
     private final Bridge bridge;
-    private final BridgeContext context;
 
     /**
      * Lazily sniffed payload element name
@@ -80,8 +78,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
     /**
      * Creates a {@link Message} backed by a JAXB bean.
      *
-     * @param marshaller
-     *      The marshaller to be used to produce infoset from the object. Must not be null.
+     * @param context
+     *      The JAXBContext to be used for marshalling.
      * @param jaxbObject
      *      The JAXB object that represents the payload. must not be null. This object
      *      must be bound to an element (which means it either is a {@link JAXBElement} or
@@ -89,35 +87,10 @@ public final class JAXBMessage extends AbstractMessageImpl {
      * @param soapVer
      *      The SOAP version of the message. Must not be null.
      */
-    public JAXBMessage( Marshaller marshaller, Object jaxbObject, SOAPVersion soapVer ) {
+    public JAXBMessage( JAXBRIContext context, Object jaxbObject, SOAPVersion soapVer ) {
         super(soapVer);
-        this.bridge = MarshallerBridgeContext.MARSHALLER_BRIDGE;
-        this.context = new MarshallerBridgeContext(marshaller);
+        this.bridge = new MarshallerBridge(context);
         this.jaxbObject = jaxbObject;
-    }
-
-    /**
-     * Creates a {@link Message} backed by a JAXB bean.
-     *
-     * @param marshaller
-     *      The marshaller to be used to produce infoset from the object. Must not be null.
-     * @param tagName
-     *      The tag name of the payload element. Must not be null.
-     * @param declaredType
-     *      The expected type (IOW the declared defined in the schema) of the instance.
-     *      If this is different from <tt>jaxbTypeObject</tt>, @xsi:type will be produced.
-     * @param jaxbTypeObject
-     *      The JAXB object that represents the payload. must not be null. This object
-     *      may be a type that binds to an XML type, not an element, such as {@link String}
-     *      or {@link Integer} that doesn't necessarily have an element name.
-     * @param soapVer
-     *      The SOAP version of the message. Must not be null.
-     */
-    public <T> JAXBMessage( Marshaller marshaller, QName tagName, Class<T> declaredType, T jaxbTypeObject, SOAPVersion soapVer ) {
-        this(marshaller,new JAXBElement<T>(tagName,declaredType,jaxbTypeObject),soapVer);
-        // fill in those known values eagerly
-        this.nsUri = tagName.getNamespaceURI();
-        this.localName = tagName.getLocalPart();
     }
 
     /**
@@ -126,16 +99,12 @@ public final class JAXBMessage extends AbstractMessageImpl {
      * @param bridge
      *      Specify the payload tag name and how <tt>jaxbObject</tt> is bound.
      * @param jaxbObject
-     *      The object to be bound.
-     * @param context
-     *      The {@link BridgeContext} used for marshalling.
      */
-    public JAXBMessage( Bridge bridge, Object jaxbObject, BridgeContext context, SOAPVersion soapVer ) {
+    public JAXBMessage(Bridge bridge, Object jaxbObject, SOAPVersion soapVer) {
         super(soapVer);
         // TODO: think about a better way to handle BridgeContext
         this.bridge = bridge;
         this.jaxbObject = jaxbObject;
-        this.context = context;
         QName tagName = bridge.getTypeReference().tagName;
         this.nsUri = tagName.getNamespaceURI();
         this.localName = tagName.getLocalPart();
@@ -152,8 +121,6 @@ public final class JAXBMessage extends AbstractMessageImpl {
 
         this.jaxbObject = that.jaxbObject;
         this.bridge = that.bridge;
-        // TODO: we need a different context
-        this.context = that.context;
     }
 
     public boolean hasHeaders() {
@@ -188,7 +155,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
     private void sniff() {
         RootElementSniffer sniffer = new RootElementSniffer(false);
         try {
-            bridge.marshal(context,jaxbObject,sniffer);
+            bridge.marshal(jaxbObject,sniffer);
         } catch (JAXBException e) {
             // if it's due to us aborting the processing after the first element,
             // we can safely ignore this exception.
@@ -202,7 +169,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
     }
 
     public Source readPayloadAsSource() {
-        return new JAXBBridgeSource(bridge,context,jaxbObject);
+        return new JAXBBridgeSource(bridge,jaxbObject);
     }
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
@@ -210,7 +177,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
         // since the bridge only produces fragments, we need to fire start/end document.
         try {
             out.getHandler().startDocument();
-            bridge.marshal(context,jaxbObject,out);
+            bridge.marshal(jaxbObject,out);
             out.getHandler().endDocument();
         } catch (SAXException e) {
             throw new JAXBException(e);
@@ -222,7 +189,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
         try {
             if(infoset==null) {
                 XMLStreamBufferResult sbr = new XMLStreamBufferResult();
-                bridge.marshal(context,jaxbObject,sbr);
+                bridge.marshal(jaxbObject,sbr);
                 infoset = sbr.getXMLStreamBuffer();
             }
             return infoset.readAsXMLStreamReader();
@@ -238,7 +205,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
         try {
             if(fragment)
                 contentHandler = new FragmentContentHandler(contentHandler);
-            bridge.marshal(context,jaxbObject,contentHandler);
+            bridge.marshal(jaxbObject,contentHandler);
         } catch (JAXBException e) {
             errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
         }
@@ -247,19 +214,19 @@ public final class JAXBMessage extends AbstractMessageImpl {
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
             // TODO: XOP handling
-            
+
             // If writing to Zephyr, get output stream and use JAXB UTF-8 writer
             if (sw instanceof Map) {
                 OutputStream os = (OutputStream) ((Map) sw).get("sjsxp-outputstream");
                 if (os != null) {
                     sw.writeCharacters("");        // Force completion of open elems
-                    bridge.marshal(context, jaxbObject, os, sw.getNamespaceContext());
+                    bridge.marshal(jaxbObject, os, sw.getNamespaceContext());
                     return;
                 }
             }
-            
-            bridge.marshal(context,jaxbObject,sw);                
-        } 
+
+            bridge.marshal(jaxbObject,sw);
+        }
         catch (JAXBException e) {
             throw new XMLStreamException2(e);
         }

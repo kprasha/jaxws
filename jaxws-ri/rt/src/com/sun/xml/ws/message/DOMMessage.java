@@ -105,8 +105,8 @@ public final class DOMMessage extends AbstractMessageImpl {
         return (T)unmarshaller.unmarshal(payload);
     }
 
-    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return bridge.unmarshal(context,payload);
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
+        return bridge.unmarshal(payload);
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {

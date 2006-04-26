@@ -23,7 +23,6 @@ package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.message.Message;
@@ -32,6 +31,7 @@ import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
+import javax.jws.WebParam.Mode;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -44,7 +44,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.jws.WebParam.Mode;
 
 /**
  * Reads a request {@link Message}, disassembles it, and moves obtained Java values
@@ -62,20 +61,18 @@ abstract class EndpointArgumentsBuilder {
      * @param args
      *      The Java arguments given to the SEI method invocation.
      *      Some parts of the reply message may be set to {@link Holder}s in the arguments.
-     * @param context
-     *      This object is used to unmarshal the reply message to Java objects.
      * @throws JAXBException
      *      if there's an error during unmarshalling the request message.
      * @throws XMLStreamException
      *      if there's an error during unmarshalling the request message.
      */
-    abstract void readRequest( Message request, Object[] args, BridgeContext context )
+    abstract void readRequest(Message request, Object[] args)
         throws JAXBException, XMLStreamException;
 
     static final class None extends EndpointArgumentsBuilder {
         private None(){
         }
-        public void readRequest(Message msg, Object[] args, BridgeContext context) {
+        public void readRequest(Message msg, Object[] args) {
         }
     }
 
@@ -122,7 +119,7 @@ abstract class EndpointArgumentsBuilder {
             this.nullValue = nullValue;
             this.setter = setter;
         }
-        public void readRequest(Message msg, Object[] args, BridgeContext context) {
+        public void readRequest(Message msg, Object[] args) {
             setter.put(nullValue, args);
         }
     }
@@ -153,10 +150,9 @@ abstract class EndpointArgumentsBuilder {
             this(builders.toArray(new EndpointArgumentsBuilder[builders.size()]));
         }
 
-        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
-            Object retVal = null;
+        public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
             for (EndpointArgumentsBuilder builder : builders) {
-                builder.readRequest(msg,args,context);
+                builder.readRequest(msg,args);
             }
         }
     }
@@ -193,12 +189,12 @@ abstract class EndpointArgumentsBuilder {
             assert param.getOutBinding()== ParameterBinding.HEADER;
         }
 
-        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException {
+        public void readRequest(Message msg, Object[] args) throws JAXBException {
             com.sun.xml.ws.api.message.Header header =
-                msg.getHeaders().get(headerName);
+                msg.getHeaders().get(headerName,true);
 
             if(header!=null) {
-                setter.put( header.readAsJAXB(bridge,context), args );
+                setter.put( header.readAsJAXB(bridge), args );
             } else {
                 // header not found.
             }
@@ -223,8 +219,8 @@ abstract class EndpointArgumentsBuilder {
             this.setter = setter;
         }
 
-        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException {
-            setter.put( msg.readPayloadAsJAXB(bridge,context), args );
+        public void readRequest(Message msg, Object[] args) throws JAXBException {
+            setter.put( msg.readPayloadAsJAXB(bridge), args );
         }
     }
 
@@ -276,11 +272,11 @@ abstract class EndpointArgumentsBuilder {
             this.parts = parts.toArray(new PartBuilder[parts.size()]);
         }
 
-        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
             Object retVal = null;
 
             XMLStreamReader reader = msg.readPayload();
-            Object wrapperBean = wrapper.unmarshal(context, reader);
+            Object wrapperBean = wrapper.unmarshal(reader);
 
             try {
                 for (PartBuilder part : parts) {
@@ -358,7 +354,7 @@ abstract class EndpointArgumentsBuilder {
             }
         }
 
-        public void readRequest(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
             XMLStreamReader reader = msg.readPayload();
             if (!reader.getName().equals(wrapperName))
                 throw new WebServiceException( // TODO: i18n
@@ -373,7 +369,7 @@ abstract class EndpointArgumentsBuilder {
                     XMLStreamReaderUtil.skipElement(reader);
                     reader.nextTag();
                 } else {
-                    part.readRequest(args,reader,context);
+                    part.readRequest(args,reader);
                 }
             }
 
@@ -400,8 +396,8 @@ abstract class EndpointArgumentsBuilder {
                 this.setter = setter;
             }
 
-            final void readRequest( Object[] args, XMLStreamReader r, BridgeContext context ) throws JAXBException {
-                Object obj = bridge.unmarshal(context,r);
+            final void readRequest( Object[] args, XMLStreamReader r ) throws JAXBException {
+                Object obj = bridge.unmarshal(r);
                 setter.put(obj,args);
             }
         }

@@ -81,8 +81,8 @@ public class DOMHeader<N extends Element> extends AbstractHeaderImpl {
         return (T) unmarshaller.unmarshal(node);
     }
 
-    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return bridge.unmarshal(context,node);
+    public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException {
+        return bridge.unmarshal(node);
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {

@@ -38,6 +38,8 @@ import com.sun.xml.ws.message.source.ProtocolSourceMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderException;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -80,8 +82,8 @@ public abstract class Messages {
     /**
      * Creates a {@link Message} backed by a JAXB bean.
      *
-     * @param marshaller
-     *      The marshaller to be used to produce infoset from the object. Must not be null.
+     * @param context
+     *      The context to be used to produce infoset from the object. Must not be null.
      * @param jaxbObject
      *      The JAXB object that represents the payload. must not be null. This object
      *      must be bound to an element (which means it either is a {@link JAXBElement} or
@@ -89,8 +91,16 @@ public abstract class Messages {
      * @param soapVersion
      *      The SOAP version of the message. Must not be null.
      */
+    public static Message create(JAXBRIContext context, Object jaxbObject, SOAPVersion soapVersion) {
+        return new JAXBMessage(context,jaxbObject,soapVersion);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #create(JAXBRIContext, Object, SOAPVersion)}
+     */
     public static Message create(Marshaller marshaller, Object jaxbObject, SOAPVersion soapVersion) {
-        return new JAXBMessage(marshaller,jaxbObject,soapVersion);
+        return new JAXBMessage(((MarshallerImpl)marshaller).getContext(),jaxbObject,soapVersion);
     }
 
     /**

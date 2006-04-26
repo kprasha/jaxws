@@ -24,7 +24,6 @@ package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.message.Message;
@@ -62,8 +61,6 @@ abstract class ResponseBuilder {
      * @param args
      *      The Java arguments given to the SEI method invocation.
      *      Some parts of the reply message may be set to {@link Holder}s in the arguments.
-     * @param context
-     *      This object is used to unmarshal the reply message to Java objects.
      * @return
      *      If a part of the reply message is returned as a return value from
      *      the SEI method, this method returns that value. Otherwise null.
@@ -72,12 +69,12 @@ abstract class ResponseBuilder {
      * @throws XMLStreamException
      *      if there's an error during unmarshalling the reply message.
      */
-    abstract Object readResponse( Message reply, Object[] args, BridgeContext context ) throws JAXBException, XMLStreamException;
+    abstract Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException;
 
     static final class None extends ResponseBuilder {
         private None(){
         }
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) {
+        public Object readResponse(Message msg, Object[] args) {
             return null;
         }
     }
@@ -125,7 +122,7 @@ abstract class ResponseBuilder {
             this.nullValue = nullValue;
             this.setter = setter;
         }
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) {
+        public Object readResponse(Message msg, Object[] args) {
             return setter.put(nullValue, args);
         }
     }
@@ -156,10 +153,10 @@ abstract class ResponseBuilder {
             this(builders.toArray(new ResponseBuilder[builders.size()]));
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public Object readResponse(Message msg, Object[] args) throws JAXBException, XMLStreamException {
             Object retVal = null;
             for (ResponseBuilder builder : builders) {
-                Object r = builder.readResponse(msg,args,context);
+                Object r = builder.readResponse(msg,args);
                 // there's only at most one ResponseBuilder that returns a value.
                 if(r!=null) {
                     assert retVal==null;
@@ -202,12 +199,12 @@ abstract class ResponseBuilder {
             assert param.getOutBinding()== ParameterBinding.HEADER;
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
+        public Object readResponse(Message msg, Object[] args) throws JAXBException {
             com.sun.xml.ws.api.message.Header header =
-                msg.getHeaders().get(headerName.getNamespaceURI(), headerName.getLocalPart());
+                msg.getHeaders().get(headerName.getNamespaceURI(), headerName.getLocalPart(),true);
 
             if(header!=null)
-                return setter.put( header.readAsJAXB(bridge,context), args );
+                return setter.put( header.readAsJAXB(bridge), args );
             else
                 // header not found.
                 return null;
@@ -232,8 +229,8 @@ abstract class ResponseBuilder {
             this.setter = setter;
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException {
-            return setter.put( msg.readPayloadAsJAXB(bridge,context), args );
+        public Object readResponse(Message msg, Object[] args) throws JAXBException {
+            return setter.put( msg.readPayloadAsJAXB(bridge), args );
         }
     }
 
@@ -283,13 +280,13 @@ abstract class ResponseBuilder {
             this.parts = parts.toArray(new PartBuilder[parts.size()]);
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public Object readResponse(Message msg, Object[] args) throws JAXBException, XMLStreamException {
             Object retVal = null;
 
             if(parts.length>0) {
                 XMLStreamReader reader = msg.readPayload();
                 XMLStreamReaderUtil.verifyTag(reader,wrapperName);
-                Object wrapperBean = wrapper.unmarshal(context, reader);
+                Object wrapperBean = wrapper.unmarshal(reader);
 
                 try {
                     for (PartBuilder part : parts) {
@@ -369,7 +366,7 @@ abstract class ResponseBuilder {
             }
         }
 
-        public Object readResponse(Message msg, Object[] args, BridgeContext context) throws JAXBException, XMLStreamException {
+        public Object readResponse(Message msg, Object[] args) throws JAXBException, XMLStreamException {
             Object retVal = null;
 
             XMLStreamReader reader = msg.readPayload();
@@ -386,7 +383,7 @@ abstract class ResponseBuilder {
                     XMLStreamReaderUtil.skipElement(reader);
                     reader.nextTag();
                 } else {
-                    Object o = part.readResponse(args,reader,context);
+                    Object o = part.readResponse(args,reader);
                     // there's only at most one ResponseBuilder that returns a value.
                     if(o!=null) {
                         assert retVal==null;
@@ -420,8 +417,8 @@ abstract class ResponseBuilder {
                 this.setter = setter;
             }
 
-            final Object readResponse( Object[] args, XMLStreamReader r, BridgeContext context ) throws JAXBException {
-                Object obj = bridge.unmarshal(context,r);
+            final Object readResponse(Object[] args, XMLStreamReader r) throws JAXBException {
+                Object obj = bridge.unmarshal(r);
                 return setter.put(obj,args);
             }
 

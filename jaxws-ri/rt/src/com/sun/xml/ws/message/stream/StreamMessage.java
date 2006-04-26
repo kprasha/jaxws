@@ -179,11 +179,11 @@ public final class StreamMessage extends AbstractMessageImpl {
         return unmarshaller.unmarshal(reader);
     }
 
-    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
         if(!hasPayload())
             return null;
         assert unconsumed();
-        return bridge.unmarshal(context,reader);
+        return bridge.unmarshal(reader);
     }
 
     public XMLStreamReader readPayload() {

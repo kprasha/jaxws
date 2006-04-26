@@ -87,7 +87,7 @@ abstract class BodyBuilder {
         final Message createMessage(Object[] methodArgs) {
             return new JAXBMessage(
                 bridge, build(methodArgs),
-                seiModel.getBridgeContext(), soapVersion );
+                soapVersion );
         }
 
         /**

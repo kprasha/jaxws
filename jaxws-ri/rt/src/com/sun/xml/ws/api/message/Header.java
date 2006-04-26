@@ -236,9 +236,15 @@ public interface Header {
     public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException;
 
     /**
-     * Reads the header as a JAXB object by using the given unmarshaller.
+     * @deprecated
+     *      Use {@link #readAsJAXB(Bridge)}. To be removed after JavaOne.
      */
     public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException;
+
+    /**
+     * Reads the header as a JAXB object by using the given unmarshaller.
+     */
+    public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException;
 
     /**
      * Writes out the header.

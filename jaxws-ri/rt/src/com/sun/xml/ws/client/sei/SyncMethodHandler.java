@@ -244,7 +244,7 @@ final class SyncMethodHandler extends MethodHandler {
                     throw faultBuilder.createException(checkedExceptions, msg);
                 } else {
                     BridgeContext context = seiModel.getBridgeContext();
-                    return responseBuilder.readResponse(msg,args,context);
+                    return responseBuilder.readResponse(msg,args);
                 }
             } catch (JAXBException e) {
                 throw new DeserializationException("failed.to.read.response",e);

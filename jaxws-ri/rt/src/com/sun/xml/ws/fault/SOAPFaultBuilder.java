@@ -22,7 +22,10 @@
 
 package com.sun.xml.ws.fault;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.CheckedException;
@@ -30,22 +33,19 @@ import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.SerializationException;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.StringUtils;
-import com.sun.istack.Nullable;
-import com.sun.istack.NotNull;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
 import javax.xml.transform.dom.DOMResult;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.ProtocolException;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -179,20 +179,11 @@ public abstract class SOAPFaultBuilder {
     private static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode, Node detail) {
         switch (soapVersion) {
             case SOAP_11:
-                return new JAXBMessage(createMarshaller(), new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
+                return new JAXBMessage(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
             case SOAP_12:
-                return new JAXBMessage(createMarshaller(), new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
+                return new JAXBMessage(JAXB_CONTEXT, new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
             default:
                 throw new AssertionError();
-        }
-    }
-
-    private static Marshaller createMarshaller() {
-        try {
-            return JAXB_CONTEXT.createMarshaller();
-        } catch (JAXBException e) {
-            // this is getting disgusting, but this can never happen
-            throw new AssertionError(e);
         }
     }
 
@@ -303,7 +294,7 @@ public abstract class SOAPFaultBuilder {
                 faultCode = getDefaultFaultCode(soapVersion);
             }
         }
-        return new JAXBMessage(createMarshaller(), new SOAP11Fault(faultCode, faultString, faultActor, detailNode), soapVersion);
+        return new JAXBMessage(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, faultActor, detailNode), soapVersion);
     }
 
     private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
@@ -372,7 +363,7 @@ public abstract class SOAPFaultBuilder {
         DetailType detailType = null;
         if(detailNode != null)
             detailType = new DetailType(detailNode);
-        return new JAXBMessage(createMarshaller(), new SOAP12Fault(code, reason, null, faultRole, detailType), soapVersion);
+        return new JAXBMessage(JAXB_CONTEXT, new SOAP12Fault(code, reason, null, faultRole, detailType), soapVersion);
     }
 
     private static SubcodeType fillSubcodes(SubcodeType parent, QName value){
@@ -404,11 +395,11 @@ public abstract class SOAPFaultBuilder {
     /**
      * This {@link JAXBContext} can handle SOAP 1.1/1.2 faults.
      */
-    private static final JAXBContext JAXB_CONTEXT;
+    private static final JAXBRIContext JAXB_CONTEXT;
 
     static {
         try {
-            JAXB_CONTEXT = JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
+            JAXB_CONTEXT = (JAXBRIContext)JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
         } catch (JAXBException e) {
             throw new Error(e); // this must be a bug in our code
         }

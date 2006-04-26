@@ -118,8 +118,8 @@ public class ProtocolSourceMessage extends Message {
         return (T)sm.readPayloadAsJAXB(unmarshaller);
     }
 
-    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return sm.readPayloadAsJAXB(bridge, context);
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
+        return sm.readPayloadAsJAXB(bridge);
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {

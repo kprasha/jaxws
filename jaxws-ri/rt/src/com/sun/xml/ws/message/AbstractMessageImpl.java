@@ -89,8 +89,8 @@ public abstract class AbstractMessageImpl extends Message {
         return (T)unmarshaller.unmarshal(readPayloadAsSource());
     }
 
-    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return bridge.unmarshal(context,readPayloadAsSource());
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
+        return bridge.unmarshal(readPayloadAsSource());
     }
 
     /**

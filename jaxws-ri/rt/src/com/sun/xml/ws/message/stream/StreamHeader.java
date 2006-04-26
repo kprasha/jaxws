@@ -200,9 +200,14 @@ public abstract class StreamHeader implements Header {
         }
     }
 
+    @Deprecated
     public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return readAsJAXB(bridge);
+    }
+
+    public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException {
         try {
-            return bridge.unmarshal(context,_mark.readAsXMLStreamReader());
+            return bridge.unmarshal(_mark.readAsXMLStreamReader());
         } catch (XMLStreamException e) {
             throw new JAXBException(e);
         }

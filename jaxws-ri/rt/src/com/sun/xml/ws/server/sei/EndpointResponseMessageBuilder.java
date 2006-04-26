@@ -86,7 +86,7 @@ abstract class EndpointResponseMessageBuilder {
         final Message createMessage(Object[] methodArgs, Object returnValue) {
             return new JAXBMessage(
                 bridge, build(methodArgs, returnValue),
-                seiModel.getBridgeContext(), soapVersion );
+                soapVersion );
         }
 
         /**

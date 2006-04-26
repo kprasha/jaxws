@@ -23,7 +23,6 @@
 package com.sun.xml.ws.message.jaxb;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
@@ -43,9 +42,8 @@ import java.io.IOException;
  */
 final class JAXBBridgeSource extends SAXSource {
 
-    public JAXBBridgeSource( Bridge bridge, BridgeContext context, Object contentObject ) {
+    public JAXBBridgeSource( Bridge bridge, Object contentObject ) {
         this.bridge = bridge;
-        this.context = context;
         this.contentObject = contentObject;
 
         super.setXMLReader(pseudoParser);
@@ -54,7 +52,6 @@ final class JAXBBridgeSource extends SAXSource {
     }
 
     private final Bridge bridge;
-    private final BridgeContext context;
     private final Object contentObject;
 
     // this object will pretend as an XMLReader.
@@ -94,11 +91,11 @@ final class JAXBBridgeSource extends SAXSource {
 
         private LexicalHandler lexicalHandler;
 
-        public void parse(InputSource input) throws IOException, SAXException {
+        public void parse(InputSource input) throws SAXException {
             parse();
         }
 
-        public void parse(String systemId) throws IOException, SAXException {
+        public void parse(String systemId) throws  SAXException {
             parse();
         }
 
@@ -107,7 +104,7 @@ final class JAXBBridgeSource extends SAXSource {
             // SAX events will be sent to the repeater, and the repeater
             // will further forward it to an appropriate component.
             try {
-                bridge.marshal( context, contentObject, this );
+                bridge.marshal( contentObject, this );
             } catch( JAXBException e ) {
                 // wrap it to a SAXException
                 SAXParseException se =

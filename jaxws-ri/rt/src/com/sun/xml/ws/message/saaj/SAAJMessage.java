@@ -214,11 +214,11 @@ public class SAAJMessage extends Message {
         }
     }
 
-    public <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+    public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
             if (pn != null)
-                return bridge.unmarshal(context,pn);
+                return bridge.unmarshal(pn);
             return null;
         } catch (SOAPException e) {
             throw new WebServiceException(e);

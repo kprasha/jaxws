@@ -24,6 +24,8 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -66,10 +68,18 @@ public abstract class Headers {
     private Headers() {}
 
     /**
-     * Creates a {@link Header} backed a by a JAXB bean.
+     * @deprecated
+     *      Use {@link #create(JAXBRIContext, Object)} instead.
      */
     public static Header create(SOAPVersion soapVersion, Marshaller m, Object o) {
-        return new JAXBHeader(m,o);
+        return new JAXBHeader(((MarshallerImpl)m).getContext(),o);
+    }
+
+    /**
+     * Creates a {@link Header} backed a by a JAXB bean.
+     */
+    public static Header create(JAXBRIContext context, Object o) {
+        return new JAXBHeader(context,o);
     }
 
     /**
@@ -90,8 +100,16 @@ public abstract class Headers {
     /**
      * Creates a {@link Header} backed a by a JAXB bean.
      */
+    public static Header create(Bridge bridge, Object jaxbObject) {
+        return new JAXBHeader(bridge, jaxbObject);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #create(Bridge, Object)} instead. To be removed after JavaOne.
+     */
     public static Header create(SOAPVersion soapVersion, Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
-        return new JAXBHeader(bridge, bridgeInfo, jaxbObject);
+        return new JAXBHeader(bridge, jaxbObject);
     }
 
     /**
@@ -104,8 +122,16 @@ public abstract class Headers {
     /**
      * Creates a new {@link Header} backed by an {@link Element}.
      */
-    public static Header create( SOAPVersion soapVersion, Element node ) {
+    public static Header create( Element node ) {
         return new DOMHeader<Element>(node);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #create(Element)}
+     */
+    public static Header create( SOAPVersion soapVersion, Element node ) {
+        return create(node);
     }
 
     /**

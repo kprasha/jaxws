@@ -239,7 +239,7 @@ final class EndpointMethodHandler {
             Object[] args = new Object[noOfArgs];
             BridgeContext context = seiModel.getBridgeContext();
             try {
-                argumentsBuilder.readRequest(reqMsg,args,context);
+                argumentsBuilder.readRequest(reqMsg,args);
             } catch (JAXBException e) {
                 throw new DeserializationException("failed.to.read.response",e);
             } catch (XMLStreamException e) {

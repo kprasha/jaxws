@@ -23,9 +23,12 @@
 package com.sun.xml.ws.message;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.bind.api.Bridge;
+import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import java.util.Set;
 
@@ -42,6 +45,14 @@ public abstract class AbstractHeaderImpl implements Header {
 
     protected AbstractHeaderImpl() {
     }
+
+    /**
+     * @deprecated 
+     */
+    public final <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
+        return readAsJAXB(bridge);
+    }
+
 
     public boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles) {
         // check mustUnderstand
