@@ -55,14 +55,11 @@ public abstract class WSDLGeneratorExtension {
      *      This is the root element of the generated WSDL.
      * @param model
      *      WSDL is being generated from this {@link SEIModel}.
-     * @param bindingID
-     *      The binding ID for which we generate WSDL.
-     *      WSDL is generated at very early point of the runtime, before the user
-     *      gets any chance of modifying the endpoint setting, so we take {@link BindingID}
-     *      rather than {@link WSBinding} (which is really just the instanciated mutable
-     *      version of {@link BindingID}.)
+     * @param binding
+     *      The binding for which we generate WSDL. the binding {@link WSBinding} represents a particular
+     *      configuration of JAXWS. This can be typically be overriden by
      */
-    public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull BindingID bindingID) {
+    public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding) {
     }
 
     /**
