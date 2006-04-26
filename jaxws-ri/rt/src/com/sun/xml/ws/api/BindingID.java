@@ -400,6 +400,10 @@ public abstract class BindingID {
             return new EncoderFacade(binding);
         }
 
+        public Boolean isMTOMEnabled() {
+            return mtomSetting;
+        }
+
         public @NotNull Decoder createDecoder(WSBinding binding) {
             return new DecoderFacade(version);
         }

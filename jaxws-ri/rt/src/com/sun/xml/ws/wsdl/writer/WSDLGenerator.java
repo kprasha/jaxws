@@ -30,6 +30,7 @@ import com.sun.xml.txw2.output.ResultFactory;
 import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -180,7 +181,7 @@ public class WSDLGenerator {
      */
     private static final String REPLACE_WITH_ACTUAL_URL = "REPLACE_WITH_ACTUAL_URL";
     private Set<QName> processedExceptions = new HashSet<QName>();
-    private BindingID bindingId;
+    private WSBinding binding;
     private String wsdlLocation;
     private String portWSDLID;
     private String schemaPrefix;
@@ -192,16 +193,16 @@ public class WSDLGenerator {
      * Creates the WSDLGenerator
      * @param model The {@link AbstractSEIModelImpl} used to generate the WSDL
      * @param wsdlResolver The {@link WSDLResolver} to use resovle names while generating the WSDL
-     * @param bindingId specifies which {@link javax.xml.ws.BindingType} to generate
+     * @param binding specifies which {@link javax.xml.ws.BindingType} to generate
      * @param extensions an array {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
      */    
-    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, BindingID bindingId,
+    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, WSBinding binding,
             WSDLGeneratorExtension... extensions) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
         this.wsdlResolver = wsdlResolver;
-        this.bindingId = bindingId;
+        this.binding = binding;
         this.extension = new WSDLGeneratorExtensionFacade(extensions);
     }
 
@@ -261,12 +262,12 @@ public class WSDLGenerator {
         serviceDefinitions._namespace(XSD_NAMESPACE, XSD_PREFIX);
         serviceDefinitions.targetNamespace(model.getServiceQName().getNamespaceURI());
         serviceDefinitions._namespace(model.getServiceQName().getNamespaceURI(), TNS_PREFIX);
-        if(bindingId.getSOAPVersion()== SOAPVersion.SOAP_12)
+        if(binding.getSOAPVersion()== SOAPVersion.SOAP_12)
             serviceDefinitions._namespace(SOAP12_NAMESPACE, SOAP12_PREFIX);
         else
             serviceDefinitions._namespace(SOAP11_NAMESPACE, SOAP_PREFIX);
         serviceDefinitions.name(model.getServiceQName().getLocalPart());
-        extension.start(serviceDefinitions, model, bindingId);
+        extension.start(serviceDefinitions, model, binding);
         if (serviceStream != portStream && portStream != null) {
             // generate an abstract and concrete wsdl
             portDefinitions = TXW.create(Definitions.class, portStream);
@@ -650,7 +651,7 @@ public class WSDLGenerator {
                 }
                 first = false;
             }
-            if(bindingId.getSOAPVersion()==SOAPVersion.SOAP_12)
+            if(this.binding.getBindingId().getSOAPVersion()==SOAPVersion.SOAP_12)
                 generateSOAP12BindingOperation(method, binding);
             else
                 generateBindingOperation(method, binding);
@@ -923,7 +924,7 @@ public class WSDLGenerator {
         if (model.getJavaMethods().size() == 0)
             return;
 
-        if(bindingId.getSOAPVersion()== SOAPVersion.SOAP_12){
+        if(this.binding.getBindingId().getSOAPVersion()== SOAPVersion.SOAP_12){
             com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress address = port._element(com.sun.xml.ws.wsdl.writer.document.soap12.SOAPAddress.class);
             address.location(endpointAddress);
         }else{

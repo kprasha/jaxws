@@ -356,7 +356,7 @@ public class EndpointFactory {
 
         // Generate WSDL and schema documents using runtime model
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortTypeName());
-        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, bindingId, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
         wsdlGen.doGeneration();
         return wsdlResolver.updateDocs();
     }
