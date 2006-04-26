@@ -401,7 +401,8 @@ public abstract class BindingID {
         }
 
         public Boolean isMTOMEnabled() {
-            return mtomSetting;
+            String mtom = parameters.get(MTOM_PARAM);
+            return mtom==null?null:Boolean.valueOf(mtom);
         }
 
         public @NotNull Decoder createDecoder(WSBinding binding) {
@@ -409,8 +410,6 @@ public abstract class BindingID {
         }
 
         public String getParameter(String parameterName, String defaultValue) {
-            if (parameters.get(parameterName) == null)
-                return super.getParameter(parameterName, defaultValue);
             return parameters.get(parameterName);
         }
     }
