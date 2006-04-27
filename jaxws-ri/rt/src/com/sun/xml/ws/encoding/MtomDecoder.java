@@ -161,6 +161,13 @@ public class MtomDecoder implements Decoder{
             return reader.getTextStart();
         }
 
+        private class Base64DataEx extends Base64Data{
+            private final InputStream is;
+            public Base64DataEx(InputStream is) {
+                super();
+                this.is = is;
+            }
+        }
         public int next() throws XMLStreamException {
             int event = reader.next();
             if ((event == XMLStreamConstants.START_ELEMENT) && reader.getLocalName().equals(XOP_LOCALNAME) && reader.getNamespaceURI().equals(XOP_NAMESPACEURI))
@@ -170,8 +177,7 @@ public class MtomDecoder implements Decoder{
                 href = decodeCid(href);
                 try {
                     StreamAttachment att = mimeMultipartDecoder.getMIMEPart(href);
-                    base64AttData = new Base64Data();
-                    base64AttData.set(att.asByteArray(), att.asByteArray().length, att.getContentType());
+                    base64AttData = att.asBase64Data();                    
                     textLength = base64AttData.getDataLen();
                     textStart = 0;
                     xopReferencePresent = true;

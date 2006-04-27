@@ -9,6 +9,7 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.InternetHeaders;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.util.ASCIIUtility;
+import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.encoding.ByteOutputStream;
 
 import javax.xml.ws.WebServiceException;
@@ -70,12 +71,12 @@ public class MimeMultipartParser {
             this.in = in;
         }
     }
-    
+
     /**
      * Parses the stream and returns the root part. If start parameter is
      * present in Content-Type, it is used to determine the root part, otherwise
      * root part is the first part.
-     * 
+     *
      * @return StreamAttachment for root part
      *         null if root part cannot be found
      *
@@ -89,7 +90,7 @@ public class MimeMultipartParser {
         }
         return root;
     }
-    
+
     /**
      * Parses the entire stream and returns all MIME parts except root MIME part.
      *
@@ -138,7 +139,7 @@ public class MimeMultipartParser {
      */
     private StreamAttachment getNextPart() {
         assert !lastBodyPartFound();
-        
+
         try {
             if (firstPart) {
                 compile(boundaryBytes);
@@ -152,9 +153,9 @@ public class MimeMultipartParser {
             String contentType = (contentTypes != null) ? contentTypes[0] : "application/octet-stream";
             String [] contentIds = ih.getHeader("content-id");
             String contentId = (contentIds != null) ? contentIds[0] : null;
-            ByteOutputStream bos = new ByteOutputStream();
+            ByteArrayBuffer bos = new ByteArrayBuffer();
             b = readBody(in, boundaryBytes, bos);
-            StreamAttachment as = new StreamAttachment(bos.getBytes(), 0, bos.getCount(), contentType, contentId);
+            StreamAttachment as = new StreamAttachment(bos, contentId, contentType);
             if (start == null && firstPart) {
                 root = as;      // Taking first part as root part
             } else if (contentId != null && start != null && start.equals(contentId)) {
@@ -171,7 +172,7 @@ public class MimeMultipartParser {
         }
     }
 
-    private int readBody(InputStream is, byte[] pattern, ByteOutputStream baos) throws IOException {
+    private int readBody(InputStream is, byte[] pattern, ByteArrayBuffer baos) throws IOException {
         if (!find(is, pattern, baos)) {
             //TODO: i18n
             throw new WebServiceException("Missing boundary delimitier ");
@@ -179,7 +180,7 @@ public class MimeMultipartParser {
         return b;
     }
 
-    private boolean find(InputStream is, byte[] pattern, ByteOutputStream out) throws IOException {
+    private boolean find(InputStream is, byte[] pattern, ByteArrayBuffer out) throws IOException {
         int i;
         int l = pattern.length;
         int lx = l - 1;

@@ -24,6 +24,7 @@ package com.sun.xml.ws.message.stream;
 
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.util.ByteArrayDataSource;
+import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.activation.DataHandler;
 import javax.xml.transform.Source;
@@ -36,6 +37,8 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
 
+import org.jvnet.staxex.Base64Data;
+
 /**
  * Attachment created from raw bytes.
  *
@@ -43,17 +46,17 @@ import java.io.ByteArrayInputStream;
  */
 public class StreamAttachment implements Attachment {
     private final String contentId;
-    private byte[] data;
     private final String contentType;
-    private int start;
+    private final ByteArrayBuffer byteArrayBuffer;
+    private final byte[] data;
     private final int len;
 
-    public StreamAttachment(byte[] data, int offset, int length, String contentType, String contentId) {
+    public StreamAttachment(ByteArrayBuffer buffer, String contentId, String contentType) {
         this.contentId = contentId;
-        this.data = data;
         this.contentType = contentType;
-        this.start = offset;
-        this.len = length;
+        this.byteArrayBuffer = buffer;
+        this.data = byteArrayBuffer.getRawData();
+        this.len = byteArrayBuffer.size();
     }
 
     public String getContentId() {
@@ -64,36 +67,37 @@ public class StreamAttachment implements Attachment {
         return contentType;
     }
 
+
     public byte[] asByteArray() {
-        if(start !=0 || len!=data.length) {
-            // if our buffer isn't exact, switch to the exact one
-            byte[] exact = new byte[len];
-            System.arraycopy(data,start,exact,0,len);
-            start = 0;
-            data = exact;
-        }
-        return data;
+        //we got to reallocate and give the exact byte[]
+        return byteArrayBuffer.toByteArray();
     }
 
     public DataHandler asDataHandler() {
-        return new DataHandler(new ByteArrayDataSource(data,start,len,getContentType()));
+        return new DataHandler(new ByteArrayDataSource(data,0,data.length,getContentType()));
     }
 
     public Source asSource() {
-        return new StreamSource(new ByteArrayInputStream(data,start,len));
+        return new StreamSource(new ByteArrayInputStream(data,0,data.length));
     }
 
     public InputStream asInputStream() {
-        return new ByteArrayInputStream(data,start,len);
+        return byteArrayBuffer.newInputStream();
+    }
+
+    public Base64Data asBase64Data(){
+        Base64Data base64Data = new Base64Data();
+        base64Data.set(data, data.length, contentType);
+        return base64Data;
     }
 
     public void writeTo(OutputStream os) throws IOException {
-        os.write(data,start,len);
+        byteArrayBuffer.writeTo(os);
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         AttachmentPart part = saaj.createAttachmentPart();
-        part.setRawContentBytes(data,start,len,getContentType());
+        part.setRawContentBytes(data,0,data.length,getContentType());
         part.setContentId(contentId);
         saaj.addAttachmentPart(part);
     }

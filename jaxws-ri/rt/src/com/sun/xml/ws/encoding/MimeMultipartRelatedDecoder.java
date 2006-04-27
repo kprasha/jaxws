@@ -38,6 +38,7 @@ import javax.xml.ws.WebServiceException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -73,6 +74,10 @@ public class MimeMultipartRelatedDecoder implements Decoder {
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         try {
+//            byte[] bytes = ASCIIUtility.getBytes(in);
+//            System.out.println("Received: "+new String(bytes));
+//            in = new ByteArrayInputStream(bytes);
+
             /**
              * A xop packaged Content-Type header would tell whether its MTOM message or not, it also tells the root
              * parts 'type' paramenter. Lets not check for it now as the root part will give all this information thru
@@ -104,6 +109,7 @@ public class MimeMultipartRelatedDecoder implements Decoder {
                     throw new WebServiceException("Incorrect Content-Type, expecting: " + version.toString()+", got: "+parsedVersion);
                 }
                 InputStream bodyStream = root.asInputStream();
+                                
                 if (mtomEncoded) {
                     mtomDecoder.decode(bodyStream, ctype, packet);
                     return;
