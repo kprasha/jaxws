@@ -207,9 +207,8 @@ public class DeploymentDescriptorParser<A> {
             }
 
             boolean effectiveMtomValue = false;
-            if (bindingId.isMTOMEnabled() == null) {
+            if (bindingId.isMTOMEnabled() == null){
                 effectiveMtomValue = Boolean.valueOf(mtom);
-                bindingId = BindingID.parse(bindingId.toString()+"?mtom="+String.valueOf(effectiveMtomValue));
             } else if (Boolean.valueOf(mtom).compareTo(bindingId.isMTOMEnabled()) != 0) {
                 //TODO: throw error and fail
             } else{
