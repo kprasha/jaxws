@@ -384,7 +384,7 @@ public abstract class BindingID {
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL) {
             super(version, lexical, canGenerateWSDL);
-            String mtom = getParameter(SOAPHTTPImpl.MTOM_PARAM, "false");
+            String mtom = getParameter(SOAPHTTPImpl.MTOM_PARAM, null);
             mtomSetting = mtom != null?Boolean.valueOf(mtom):null;
         }
 
@@ -410,6 +410,8 @@ public abstract class BindingID {
         }
 
         public String getParameter(String parameterName, String defaultValue) {
+            if (parameters.get(parameterName) == null)
+                return super.getParameter(parameterName, defaultValue);
             return parameters.get(parameterName);
         }
     }
