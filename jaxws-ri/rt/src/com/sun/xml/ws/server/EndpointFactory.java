@@ -160,8 +160,6 @@ public class EndpointFactory {
                 wsdlPort = seiModel.getPort();
 
                 if(binding instanceof SOAPBindingImpl){
-                    //set mtom processing
-                    seiModel.enableMtom(((SOAPBinding)binding).isMTOMEnabled());
                     //set portKnownHeaders on Binding, so that they can be used for MU processing
                     ((SOAPBindingImpl)binding).setPortKnownHeaders(
                             ((SOAPSEIModel)seiModel).getKnownHeaders());

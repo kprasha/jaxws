@@ -486,22 +486,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * Mtom processing is disabled by default. To enable it the RuntimeModel creator must call it to enable it.
-     * Its used by {@link com.sun.xml.ws.server.RuntimeEndpointInfo#init()} after the runtime model is built. This method should not be exposed to outside.
-     *
-     * This needs to be changed - since this information is available to {@link com.sun.xml.ws.server.RuntimeEndpointInfo}
-     * before building the model it should be passed on to {@link com.sun.xml.ws.model.RuntimeModeler#buildRuntimeModel()}.
-     *
-     * @param enableMtom
-     * @deprecated
-     *      Whether MTOM is enabled or not should be remembered by {@link WSBinding},
-     *      not by {@link SEIModel}.
-     */
-    public void enableMtom(boolean enableMtom){
-        this.enableMtom = enableMtom;
-    }
-
-    /**
      * This will no longer be needed with the new architecture
      * @return
      * @deprecated
@@ -531,5 +515,4 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private final Map<Integer, RawAccessor> rawAccessorMap = new HashMap<Integer, RawAccessor>();
     private List<String> knownNamespaceURIs = null;
     private WSDLPortImpl port;
-    private boolean enableMtom;
 }
