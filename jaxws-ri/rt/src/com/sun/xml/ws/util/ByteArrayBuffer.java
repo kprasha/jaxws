@@ -142,7 +142,7 @@ public class ByteArrayBuffer extends OutputStream {
      *      this method causes a buffer reallocation. Use it only when
      *      you have to.
      */
-    public final byte toByteArray()[] {
+    public final byte[] toByteArray() {
         byte newbuf[] = new byte[count];
         System.arraycopy(buf, 0, newbuf, 0, count);
         return newbuf;
@@ -150,6 +150,16 @@ public class ByteArrayBuffer extends OutputStream {
 
     public final int size() {
         return count;
+    }
+
+    /**
+     * Gets the underlying buffer that this {@link ByteArrayBuffer} uses.
+     * It's never small than its {@link #size()}.
+     *
+     * Use with caution.
+     */
+    public final byte[] getRawData() {
+        return buf;
     }
 
     public void close() throws IOException {
