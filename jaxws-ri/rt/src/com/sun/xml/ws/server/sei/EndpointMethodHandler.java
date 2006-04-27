@@ -22,18 +22,17 @@
 
 package com.sun.xml.ws.server.sei;
 
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.util.Pool;
 
 import javax.jws.WebParam.Mode;
@@ -196,8 +195,7 @@ final class EndpointMethodHandler {
                 }
                 break;
             case HEADER:
-                fillers.add(new MessageFiller.Header(seiModel, param.getIndex(), soapVersion, param.getBridge(),
-                        getter ));
+                fillers.add(new MessageFiller.Header(param.getIndex(), param.getBridge(), getter ));
                 break;
             case ATTACHMENT:
                 // TODO: implement this later
@@ -237,7 +235,6 @@ final class EndpointMethodHandler {
 
         try {
             Object[] args = new Object[noOfArgs];
-            BridgeContext context = seiModel.getBridgeContext();
             try {
                 argumentsBuilder.readRequest(reqMsg,args);
             } catch (JAXBException e) {

@@ -23,10 +23,8 @@
 package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.model.SEIModel;
 
 /**
  * Puts a non-payload message parameter to {@link Message}.
@@ -57,23 +55,18 @@ abstract class MessageFiller {
      * Adds a parameter as an header.
      */
     static final class Header extends MessageFiller {
-        private final SOAPVersion ver;
         private final Bridge bridge;
-        private final SEIModel model;
         private final ValueGetter getter;
 
-        protected Header(SEIModel model, int methodPos, SOAPVersion ver, Bridge bridge, ValueGetter getter) {
+        protected Header(int methodPos, Bridge bridge, ValueGetter getter) {
             super(methodPos);
-            this.model = model;
-            this.ver = ver;
             this.bridge = bridge;
             this.getter = getter;
         }
 
         void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
             Object value = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
-            msg.getHeaders().add(Headers.create(ver,
-                bridge, model.getBridgeContext(), value));
+            msg.getHeaders().add(Headers.create(bridge,value));
         }
     }
 }

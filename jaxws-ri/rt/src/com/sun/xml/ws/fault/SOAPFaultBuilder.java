@@ -191,7 +191,7 @@ public abstract class SOAPFaultBuilder {
 
     private Object getJAXBObject(Node jaxbBean, CheckedException ce) throws JAXBException {
         Bridge bridge = ce.getBridge();
-        return bridge.unmarshal(ce.getOwner().getBridgeContext(), jaxbBean);
+        return bridge.unmarshal(jaxbBean);
     }
 
     private Exception createUserDefinedException(CheckedExceptionImpl ce) {
@@ -286,7 +286,7 @@ public abstract class SOAPFaultBuilder {
         } else if(detail != null){
             try {
                 DOMResult dr = new DOMResult();
-                ce.getBridge().marshal(ce.getOwner().getBridgeContext(), detail, dr);
+                ce.getBridge().marshal(detail,dr);
                 detailNode = dr.getNode().getFirstChild();
             } catch (JAXBException e1) {
                 //Should we throw Internal Server Error???
@@ -352,7 +352,7 @@ public abstract class SOAPFaultBuilder {
         } else if(detail != null){
             try {
                 DOMResult dr = new DOMResult();
-                ce.getBridge().marshal(ce.getOwner().getBridgeContext(), detail, dr);
+                ce.getBridge().marshal(detail, dr);
                 detailNode = dr.getNode().getFirstChild();
             } catch (JAXBException e1) {
                 //Should we throw Internal Server Error???

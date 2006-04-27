@@ -26,12 +26,12 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
@@ -149,7 +149,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private JAXBRIContext createJAXBContext() {
         final List<TypeReference> types = getAllTypeReferences();
         final Class[] cls = new Class[types.size()];
-        final String ns = targetNamespace;
         int i = 0;
         for (TypeReference type : types) {
             cls[i++] = (Class) type.type;
@@ -159,7 +158,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             // Need to avoid doPriv block once JAXB is fixed. Afterwards, use the above
             jaxbContext = AccessController.doPrivileged(new PrivilegedExceptionAction<JAXBRIContext>() {
                 public JAXBRIContext run() throws Exception {
-                    return JAXBRIContext.newInstance(cls, types, ns, false);
+                    return JAXBRIContext.newInstance(cls, types, targetNamespace, false);
                 }
             });
             createBridgeMap(types);
