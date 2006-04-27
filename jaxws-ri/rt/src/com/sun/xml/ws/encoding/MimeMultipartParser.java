@@ -10,7 +10,6 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.util.ASCIIUtility;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.encoding.ByteOutputStream;
 
 import javax.xml.ws.WebServiceException;
 import java.io.BufferedInputStream;
@@ -142,7 +141,7 @@ public class MimeMultipartParser {
 
         try {
             if (firstPart) {
-                compile(boundaryBytes);
+                compileBoundaryPattern();
                 // skip the first boundary of the MIME package
                 if (!skipPreamble(in, boundaryBytes)) {
                     throw new WebServiceException("Missing Start Boundary, or boundary does not start on a new line");
@@ -172,17 +171,17 @@ public class MimeMultipartParser {
         }
     }
 
-    private int readBody(InputStream is, byte[] pattern, ByteArrayBuffer baos) throws IOException {
-        if (!find(is, pattern, baos)) {
+    private int readBody(InputStream in, byte[] pattern, ByteArrayBuffer baos) throws IOException {
+        if (!findMimeBody(baos)) {
             //TODO: i18n
             throw new WebServiceException("Missing boundary delimitier ");
         }
         return b;
     }
 
-    private boolean find(InputStream is, byte[] pattern, ByteArrayBuffer out) throws IOException {
+    private boolean findMimeBody(ByteArrayBuffer out) throws IOException {
         int i;
-        int l = pattern.length;
+        int l = boundaryBytes.length;
         int lx = l - 1;
         int bufferLength = 0;
         int s = 0;
@@ -193,13 +192,13 @@ public class MimeMultipartParser {
         BitSet eof = new BitSet(1);
 
         while (true) {
-            is.mark(l);
+            in.mark(l);
             if (!first) {
                 tmp = prevBuffer;
                 prevBuffer = buffer;
                 buffer = tmp;
             }
-            bufferLength = readNext(is, buffer, l, eof);
+            bufferLength = readNext(in, buffer, l, eof);
 
             if (bufferLength == -1) {
                 b = -1;
@@ -216,7 +215,7 @@ public class MimeMultipartParser {
             }
 
             for (i = lx; i >= 0; i--) {
-                if (buffer[i] != pattern[i]) {
+                if (buffer[i] != boundaryBytes[i]) {
                     break;
                 }
             }
@@ -245,7 +244,7 @@ public class MimeMultipartParser {
                     }
                 }
                 // found the boundary, skip *LWSP-char and CRLF
-                if (!skipLWSPAndCRLF(is)) {
+                if (!skipLWSPAndCRLF(in)) {
                     //throw new Exception(
                     //   "Boundary does not terminate with CRLF");
                 }
@@ -258,12 +257,12 @@ public class MimeMultipartParser {
                     if (buffer[0] == (byte) 10) {
                         int j = lx - 1;
                         for (j = lx - 1; j > 0; j--) {
-                            if (buffer[j + 1] != pattern[j]) {
+                            if (buffer[j + 1] != boundaryBytes[j]) {
                                 break;
                             }
                         }
                         if (j == 0) {
-                            // matched the pattern excluding the last char of the pattern
+                            // matched the boundaryBytes excluding the last char of the boundaryBytes
                             // so dont write the CR into stream
                             out.write(prevBuffer, 0, s - 1);
                         } else {
@@ -278,8 +277,8 @@ public class MimeMultipartParser {
             }
 
             s = Math.max(i + 1 - bcs[buffer[i] & 0x7f], gss[i]);
-            is.reset();
-            is.skip(s);
+            in.reset();
+            in.skip(s);
             if (first) {
                 first = false;
             }
@@ -291,8 +290,8 @@ public class MimeMultipartParser {
         return lastPartFound.get(0);
     }
 
-    private void compile(byte[] pattern) {
-        int l = pattern.length;
+    private void compileBoundaryPattern() {
+        int l = boundaryBytes.length;
 
         int i;
         int j;
@@ -302,7 +301,7 @@ public class MimeMultipartParser {
 
         // Initialise Bad Character Shift table
         for (i = 0; i < l; i++) {
-            bcs[pattern[i]] = i + 1;
+            bcs[boundaryBytes[i]] = i + 1;
         }
 
         // Initialise Good Suffix Shift table
@@ -313,8 +312,8 @@ public class MimeMultipartParser {
             // j is the beginning index of suffix being considered
             for (j = l - 1; j >= i; j--) {
                 // Testing for good suffix
-                if (pattern[j] == pattern[j - i]) {
-                    // pattern[j..len] is a good suffix
+                if (boundaryBytes[j] == boundaryBytes[j - i]) {
+                    // boundaryBytes[j..len] is a good suffix
                     gss[j - 1] = i;
                 } else {
                     // No match. The array has already been
@@ -330,7 +329,7 @@ public class MimeMultipartParser {
     }
 
     private boolean skipPreamble(InputStream is, byte[] pattern) throws IOException {
-        if (!find(is, pattern)) {
+        if (!findBoundary()) {
             return false;
         }
         if (lastPartFound.get(0)) {
@@ -339,39 +338,39 @@ public class MimeMultipartParser {
         return true;
     }
 
-    private boolean find(InputStream is, byte[] pattern) throws IOException {
+    private boolean findBoundary() throws IOException {
         int i;
-        int l = pattern.length;
+        int l = boundaryBytes.length;
         int lx = l - 1;
         int bufferLength = 0;
         BitSet eof = new BitSet(1);
         long[] posVector = new long[1];
 
         while (true) {
-            is.mark(l);
-            bufferLength = readNext(is, buffer, l, eof);
+            in.mark(l);
+            bufferLength = readNext(in, buffer, l, eof);
             if (eof.get(0)) {
                 // End of stream
                 return false;
             }
 
             for (i = lx; i >= 0; i--) {
-                if (buffer[i] != pattern[i]) {
+                if (buffer[i] != boundaryBytes[i]) {
                     break;
                 }
             }
 
             if (i < 0) {
                 // found the boundary, skip *LWSP-char and CRLF
-                if (!skipLWSPAndCRLF(is)) {
+                if (!skipLWSPAndCRLF(in)) {
                     throw new WebServiceException("Boundary does not terminate with CRLF");
                 }
                 return true;
             }
 
             int s = Math.max(i + 1 - bcs[buffer[i] & 0x7f], gss[i]);
-            is.reset();
-            is.skip(s);
+            in.reset();
+            in.skip(s);
         }
     }
 
