@@ -26,7 +26,6 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -483,15 +482,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      */
     public String getTargetNamespace() {
         return targetNamespace;
-    }
-
-    /**
-     * This will no longer be needed with the new architecture
-     * @return
-     * @deprecated
-     */
-    public Map<Integer, RawAccessor> getRawAccessorMap() {
-        return rawAccessorMap;
     }
 
     private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {
