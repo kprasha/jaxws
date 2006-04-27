@@ -50,7 +50,7 @@ public class ByteArrayBuffer extends OutputStream {
     /**
      * The buffer where data is stored.
      */
-    protected byte buf[];
+    protected byte[] buf;
 
     /**
      * The number of valid bytes in the buffer.
