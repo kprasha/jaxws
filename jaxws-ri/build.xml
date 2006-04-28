@@ -58,7 +58,6 @@
   <property name="build.version" value="${Name} ${release.impl.version}-${build.id}-${release.impl.version.suffix}" />
   <echo message="The build id is: ${build.version}" />
 
-
   <path id="runtime.compile.classpath">
     <fileset dir="${lib.home}">
       <include name="**/*.jar"/>
@@ -70,6 +69,8 @@
     <pathelement location="${build.home}/lib/jaxws-rt.jar"/>
     <pathelement location="${java.home}/../lib/tools.jar"/>
   </path>
+  
+  <import file="build-taskdefs.xml" />
   
   <target name="init">
     <echo message="-------- ${Name} ${release.impl.version} --------"/>
@@ -322,7 +323,7 @@ major-version=${release.impl.version}
     </copy>
   </target>
 
-  <target name="main" depends="image"/>
+  <target name="main" depends="image" description="build everything into the build directory"/>
   
   
   <target name="docs" depends="prepare" >
@@ -421,6 +422,37 @@ major-version=${release.impl.version}
     </zip>
   </target>
 
+
+  <target name="push-to-maven" depends="main"
+    description="publish artifacts into the maven repository">
+    <taskdef resource="maven-repository-importer.properties">
+      <classpath>
+        <pathelement path="tools/lib/maven-repository-importer.jar" />
+      </classpath>
+    </taskdef>
+    <delete dir="build/maven-repo" /><!-- clean it -->
+    <!-- ${suffix} can be overridden to "" for posting releases -->
+    <property name="suffix" value="-SNAPSHOT" />
+    <maven-repository-importer
+        destdir="build/maven-repo" version="${release.impl.version}${suffix}">
+      <artifact
+        jar="${build.home}/lib/jaxws-api.jar"
+        pom="etc/poms/jaxws-api.pom" />
+      <artifact
+        jar="${build.home}/lib/jaxws-rt.jar"
+        pom="etc/poms/jaxws-rt.pom" />
+      <artifact
+        jar="${build.home}/lib/jaxws-tools.jar"
+        pom="etc/poms/jaxws-tools.pom" />
+      <filterset>
+        <filter token="API_VERSION" value="${release.spec.version}"/>
+      </filterset>
+    </maven-repository-importer>
+
+    <echo>importing to CVS...</echo>
+    <!--cvs-import src="build/maven-repo" dest="jax-ws-sources/repo" cvsroot="-d:pserver:${user.name}@java-net-cvs:/cvs" /-->
+  </target>
+
     <target name="integrate-jaxb-hudson" depends="prepare"
             description="integrate the last successful JAXB Hudson build">
       <get src="http://kohsuke.sfbay.sun.com/hudson/job/jaxb-ri/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/jaxb-ri.zip"
@@ -433,6 +465,11 @@ major-version=${release.impl.version}
       </copy>
   <!--<delete dir="${build.home}/jaxb" /> -->
     </target>
+
+  <target name="integrate-maven-repository-importer">
+    <get src="http://kohsuke.sfbay/hudson/job/maven-repository-importer/lastSuccessfulBuild/artifact/build/maven-repository-importer.jar"
+         dest="tools/lib/maven-repository-importer.jar" />
+  </target>
 
   <target name="integrate-saaj-hudson" depends="prepare"
           description="integrate the last successful SAAJ RI Hudson build">
