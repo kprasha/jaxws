@@ -450,7 +450,7 @@ major-version=${release.impl.version}
     </maven-repository-importer>
 
     <echo>importing to CVS...</echo>
-    <!--cvs-import src="build/maven-repo" dest="jax-ws-sources/repo" cvsroot="-d:pserver:${user.name}@java-net-cvs:/cvs" /-->
+    <cvs-import src="build/maven-repo" dest="jax-ws-sources/repo" cvsroot=":pserver:${user.name}@java-net-cvs:/cvs" />
   </target>
 
     <target name="integrate-jaxb-hudson" depends="prepare"
