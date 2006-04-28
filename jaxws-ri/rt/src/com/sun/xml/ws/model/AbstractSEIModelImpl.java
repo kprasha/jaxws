@@ -483,6 +483,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         return targetNamespace;
     }
 
+    
     private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {
         protected BridgeContext initialValue() {
             return jaxbContext.createBridgeContext();
