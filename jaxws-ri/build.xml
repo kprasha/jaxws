@@ -423,8 +423,8 @@ major-version=${release.impl.version}
   </target>
 
 
-  <target name="push-to-maven" depends="main"
-    description="publish artifacts into the maven repository">
+  <target name="push-to-maven-prepare" depends="main"
+    description="prepare a repository iamge for the push-to-maven target">
     <taskdef resource="maven-repository-importer.properties">
       <classpath>
         <pathelement path="tools/lib/maven-repository-importer.jar" />
@@ -448,7 +448,10 @@ major-version=${release.impl.version}
         <filter token="API_VERSION" value="${release.spec.version}"/>
       </filterset>
     </maven-repository-importer>
+  </target>
 
+  <target name="push-to-maven" depends="push-to-maven-prepare"
+    description="publish artifacts into the maven repository">
     <echo>importing to CVS...</echo>
     <cvs-import src="build/maven-repo" dest="jax-ws-sources/repo" cvsroot=":pserver:${user.name}@java-net-cvs:/cvs" />
   </target>
