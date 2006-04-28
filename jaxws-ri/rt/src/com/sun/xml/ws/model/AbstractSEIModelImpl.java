@@ -502,7 +502,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     private final Map<TypeReference, Bridge> bridgeMap = new HashMap<TypeReference, Bridge>();
     protected final QName emptyBodyName = new QName("");
     private String targetNamespace = "";
-    private final Map<Integer, RawAccessor> rawAccessorMap = new HashMap<Integer, RawAccessor>();
     private List<String> knownNamespaceURIs = null;
     private WSDLPortImpl port;
 }
