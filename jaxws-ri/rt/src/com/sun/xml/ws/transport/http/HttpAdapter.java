@@ -241,6 +241,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      *      what document to serve.) Can be null (but it causes an 404 not found.)
      */
     public void publishWSDL(WSHTTPConnection con, final String baseAddress, String queryString) throws IOException {
+        // Workaround for a bug in http server. Read and close InputStream
+        // TODO remove once the bug is fixed in http server
+        InputStream in = con.getInput();
+        while(in.read() != -1);
+        in.close();
 
         SDDocument doc = wsdls.get(queryString);
         if (doc == null) {

@@ -68,13 +68,18 @@ final class WSHttpHandler implements HttpHandler {
      * Called by HttpServer when there is a matching request for the context
      */
     public void handle(HttpExchange msg) throws IOException {
-        logger.fine("Received HTTP request:"+msg.getRequestURI());
-        if (executor != null) {
-            // Use application's Executor to handle request. Application may
-            // have set an executor using Endpoint.setExecutor().
-            executor.execute(new HttpHandlerRunnable(msg));
-        } else {
-            handleExchange(msg);
+        try {
+            logger.fine("Received HTTP request:"+msg.getRequestURI());
+            if (executor != null) {
+                // Use application's Executor to handle request. Application may
+                // have set an executor using Endpoint.setExecutor().
+                executor.execute(new HttpHandlerRunnable(msg));
+            } else {
+                handleExchange(msg);
+            }
+        } catch(Throwable e) {
+            // Dont't propagate the exception otherwise it kills the httpserver
+            e.printStackTrace();
         }
     }
 
@@ -97,13 +102,8 @@ final class WSHttpHandler implements HttpHandler {
             } else {
                 logger.warning(HttpserverMessages.UNEXPECTED_HTTP_METHOD(method));
             }
+        } finally {
             msg.close();
-        } catch(IOException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            throw e;
-        } catch(RuntimeException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            throw e;
         }
     }
 
@@ -121,8 +121,9 @@ final class WSHttpHandler implements HttpHandler {
         public void run() {
             try {
                 handleExchange(msg);
-            } catch (IOException e) {
-                // this error is already reported, so just ignore.
+            } catch (Throwable e) {
+                // Does application's executor handle this exception ?
+                e.printStackTrace();
             }
         }
     }

@@ -71,7 +71,6 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public void setResponseHeaders(Map<String,List<String>> headers) {
         Headers r = httpExchange.getResponseHeaders();
         r.clear();
@@ -86,6 +85,11 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
             }
         }
     }
+    
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    public Map<String,List<String>> getResponseHeaders() {
+        return httpExchange.getResponseHeaders();
+    }
 
     @Override
     public void setContentTypeResponseHeader(@NotNull String value) {
@@ -93,7 +97,6 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public void setStatus(int status) {
         this.status = status;
     }
@@ -122,7 +125,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     public Principal getUserPrincipal(Packet request) {
-        return null;
+        return httpExchange.getPrincipal();
     }
 
     public boolean isUserInRole(Packet request, String role) {
