@@ -56,18 +56,6 @@ import java.util.Collection;
  * @author Vivek Pandey
  */
 public interface SEIModel {
-    /**
-     * {@link BridgeContext} is not thread safe, the {@link SEIModel} returns a thread
-     * local {@link BridgeContext}.
-     *
-     * @return the <code>{@link BridgeContext}</code>.
-     *
-     * TODO: this is broken, as one thread may legally use two bridges concurrently,
-     * such as marshalling object to unmarshal it into another form.
-     * We shall move this to JAXB and let it deal with pooling.
-     */
-    BridgeContext getBridgeContext();
-
     Pool.Marshaller getMarshallerPool();
 
     /**

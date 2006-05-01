@@ -108,14 +108,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         }
     }
 
-    /**
-     * @return the <code>BridgeContext</code> for this <code>RuntimeModel</code>
-     */
-    public BridgeContext getBridgeContext() {
-        assert jaxbContext!=null;
-        return bridgeContext.get();
-    }
-
     public Pool.Marshaller getMarshallerPool() {
         return marshallers;
     }
