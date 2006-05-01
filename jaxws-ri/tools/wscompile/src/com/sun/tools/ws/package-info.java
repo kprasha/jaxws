@@ -50,9 +50,8 @@
        "WsImport ANT Task" -> wsimport -> CompileTool;
        
        CompileTool -> APT -> WSAP -> WebServiceAP;
-       CompileTool -> Processor;
-       CompileTool -> Modeler;
-       CompileTool -> ProcessorActions;
+       CompileTool -> Processor -> Modeler;
+       Processor -> ProcessorActions;
        CompileTool -> WebServiceAP;
  
        Modeler -> WSDLModeler;
@@ -125,7 +124,7 @@
  *    javax.xml.ws.* annotations. This class is used either by the WsGen (CompileTool) tool or 
  *    idirectly via the {@link com.sun.istack.ws.WSAP WSAP} when invoked by APT.
  *
- *    <dt>{@link com.sun.istack.ws.WSAP WSAP}
+ *    <dt>{@link com.sun.istack.ws.AnnotationProcessorFactoryImpl WSAP}
  *    <dd>This is the entry point for the WebServiceAP when APT is invoked on a SEI
  *    annotated with the javax.jws.WebService annotation.
  *   </d1>
