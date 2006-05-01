@@ -74,10 +74,6 @@ public class MimeMultipartRelatedDecoder implements Decoder {
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         try {
-//            byte[] bytes = ASCIIUtility.getBytes(in);
-//            System.out.println("Received: "+new String(bytes));
-//            in = new ByteArrayInputStream(bytes);
-
             /**
              * A xop packaged Content-Type header would tell whether its MTOM message or not, it also tells the root
              * parts 'type' paramenter. Lets not check for it now as the root part will give all this information thru
@@ -141,7 +137,7 @@ public class MimeMultipartRelatedDecoder implements Decoder {
      * See {@link com.sun.xml.ws.api.pipe.Encoder#copy()} for the detailed contract.
      */
     public Decoder copy() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new MimeMultipartRelatedDecoder(version);
     }
 
     private SOAPVersion parseContentType(String contentType) throws ParseException {
