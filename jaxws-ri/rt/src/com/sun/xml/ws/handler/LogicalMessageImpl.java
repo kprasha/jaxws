@@ -82,6 +82,8 @@ class LogicalMessageImpl implements LogicalMessage {
             payloadSrc = packet.getMessage().readPayloadAsSource();
             payloadModifed = true;
         }
+        if (payloadSrc == null)
+            return null;
         if(payloadSrc instanceof DOMSource){
             return payloadSrc;
         } else {
