@@ -35,6 +35,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.TransportPipeFactory;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.handler.SOAPHandlerPipe;
@@ -106,6 +107,10 @@ public class StandalonePipeAssembler implements PipelineAssembler {
                     terminal = soapHandlerPipe;
             }
         }
+
+        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
+        if(hook!=null)
+            terminal = hook.createMonitoringPipe(wsdlModel,endpoint,terminal);
 
         if (binding instanceof SOAPBinding) {
             // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
