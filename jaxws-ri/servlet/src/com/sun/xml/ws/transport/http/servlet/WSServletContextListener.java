@@ -21,6 +21,7 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.HttpAdapter;
@@ -80,10 +81,11 @@ public final class WSServletContextListener
         if (classLoader == null) {
             classLoader = getClass().getClassLoader();
         }
+        ServletContainer container = new ServletContainer(context);
         try {
             // Parse the descriptor file and build endpoint infos
             DeploymentDescriptorParser<ServletAdapter> parser = new DeploymentDescriptorParser<ServletAdapter>(
-                classLoader,new ServletResourceLoader(context),null, new ServletAdapterList());
+                classLoader,new ServletResourceLoader(context), container, new ServletAdapterList());
             InputStream is = context.getResourceAsStream(JAXWS_RI_RUNTIME);
             List<ServletAdapter> adapters = parser.parse(is);
 
@@ -96,6 +98,25 @@ public final class WSServletContextListener
                 WsservletMessages.LISTENER_PARSING_FAILED(e),e);
             context.removeAttribute(WSServlet.JAXWS_RI_RUNTIME_INFO);
             throw new WSServletException("listener.parsingFailed", e);
+        }
+    }
+    
+    /**
+     * Provides access to {@link ServletContext} via {@link Container}. Pipes
+     * can get ServletContext from Container and use it to load some resources. 
+     */
+    private static class ServletContainer extends Container {
+        private final ServletContext servletContext;
+        
+        ServletContainer(ServletContext servletContext) {
+            this.servletContext = servletContext;
+        }
+        
+        public <T> T getSPI(Class<T> spiType) {
+            if (spiType == ServletContext.class) {
+                return (T)servletContext;
+            }
+            return null;
         }
     }
     
