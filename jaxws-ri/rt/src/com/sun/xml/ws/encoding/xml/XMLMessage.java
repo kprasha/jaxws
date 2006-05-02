@@ -279,6 +279,7 @@ public final class XMLMessage {
      */
     public static class UnknownContent extends AbstractMessageImpl implements HasDataSource {
         private final DataSource ds;
+        private final HeaderList headerList = new HeaderList();
         
         public UnknownContent(final String ct, final InputStream in) {
             super(SOAPVersion.SOAP_11);
@@ -312,7 +313,7 @@ public final class XMLMessage {
         }
 
         public HeaderList getHeaders() {
-            throw new UnsupportedOperationException();
+            return headerList;
         }
 
         public String getPayloadLocalPart() {
