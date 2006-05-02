@@ -246,12 +246,12 @@ final class HttpClientTransport {
 
     protected CookieJar sendCookieAsNeeded() {
         Boolean shouldMaintainSessionProperty =
-            (Boolean) context.otherProperties.get(SESSION_MAINTAIN_PROPERTY);
+            (Boolean) context.invocationProperties.get(SESSION_MAINTAIN_PROPERTY);
         if (shouldMaintainSessionProperty == null) {
             return null;
         }
         if (shouldMaintainSessionProperty) {
-            CookieJar cookieJar = (CookieJar) context.otherProperties.get(HTTP_COOKIE_JAR);
+            CookieJar cookieJar = (CookieJar) context.invocationProperties.get(HTTP_COOKIE_JAR);
             if (cookieJar == null) {
                 cookieJar = new CookieJar();
 
