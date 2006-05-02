@@ -260,7 +260,7 @@ final class EndpointMethodHandler {
                 e.printStackTrace();
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
-            return new Packet(responseMessage);
+            return req.createResponse(responseMessage);
         } finally {
             pool.recycle(m);
         }

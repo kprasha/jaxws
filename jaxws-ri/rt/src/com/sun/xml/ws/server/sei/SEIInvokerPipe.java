@@ -91,12 +91,10 @@ public class SEIInvokerPipe extends InvokerPipe {
                 : SOAP12Constants.FAULT_CODE_CLIENT;
             Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
                     soapVersion, faultString, faultCode);
-            res = new Packet(faultMsg);
+            res = req.createResponse(faultMsg);
         } else {
             res = handler.invoke(req);
         }
-        res.invocationProperties.putAll(req.invocationProperties);
-
         return res;
     }
 }
