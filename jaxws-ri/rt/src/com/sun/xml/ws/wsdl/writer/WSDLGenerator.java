@@ -29,13 +29,13 @@ import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.txw2.output.ResultFactory;
 import com.sun.xml.txw2.output.XmlSerializer;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
@@ -188,6 +188,7 @@ public class WSDLGenerator {
     private WSDLGeneratorExtension extension;
 
     private String endpointAddress = REPLACE_WITH_ACTUAL_URL;
+    private Container container;
 
     /**
      * Creates the WSDLGenerator
@@ -196,13 +197,14 @@ public class WSDLGenerator {
      * @param binding specifies which {@link javax.xml.ws.BindingType} to generate
      * @param extensions an array {@link WSDLGeneratorExtension} that will 
      * be invoked to generate WSDL extensions
-     */    
-    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, WSBinding binding,
-            WSDLGeneratorExtension... extensions) {
+     */
+    public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, WSBinding binding, Container container,
+                         WSDLGeneratorExtension... extensions) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
         this.wsdlResolver = wsdlResolver;
         this.binding = binding;
+        this.container = container;
         this.extension = new WSDLGeneratorExtensionFacade(extensions);
     }
 
@@ -222,8 +224,6 @@ public class WSDLGenerator {
         XmlSerializer portWriter = null;
         String fileName = JAXBRIContext.mangleNameToClassName(model.getServiceQName().getLocalPart());
         Result result = wsdlResolver.getWSDL(fileName+DOT_WSDL);
-        if (result == null)
-            return;
         wsdlLocation = result.getSystemId();
         serviceWriter = ResultFactory.createSerializer(result);
         if (model.getServiceQName().getNamespaceURI().equals(model.getTargetNamespace())) { 
@@ -267,7 +267,7 @@ public class WSDLGenerator {
         else
             serviceDefinitions._namespace(SOAP11_NAMESPACE, SOAP_PREFIX);
         serviceDefinitions.name(model.getServiceQName().getLocalPart());
-        extension.start(serviceDefinitions, model, binding);
+        extension.start(serviceDefinitions, model, binding, container);
         if (serviceStream != portStream && portStream != null) {
             // generate an abstract and concrete wsdl
             portDefinitions = TXW.create(Definitions.class, portStream);
@@ -442,7 +442,6 @@ public class WSDLGenerator {
             }
             // faults
             for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
-                QName tagName = exception.getDetailType().tagName;
                 QName messageName = new QName(model.getTargetNamespace(), exception.getMessageName());
                 FaultType paramType = operation.fault().name(exception.getMessageName()).message(messageName);
                 extension.addOperationFaultExtension(paramType, method.getMethod(), exception);        

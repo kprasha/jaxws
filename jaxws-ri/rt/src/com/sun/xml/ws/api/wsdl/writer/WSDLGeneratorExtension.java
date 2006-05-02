@@ -27,7 +27,10 @@ import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import java.lang.reflect.Method;
 
@@ -58,7 +61,23 @@ public abstract class WSDLGeneratorExtension {
      * @param binding
      *      The binding for which we generate WSDL. the binding {@link WSBinding} represents a particular
      *      configuration of JAXWS. This can be typically be overriden by
+     * @param container
+     *      The entry point to the external environment.
+     *      If this extension is used at the runtime to generate WSDL, you get a {@link Container}
+     *      that was given to {@link WSEndpoint#create}.
+     *      TODO: think about tool side
      */
+    public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
+        // for backward compatibility
+        start(root,model,binding);
+    }
+
+    /**
+     * Use {@link #start(TypedXmlWriter, SEIModel, WSBinding, Container)}.
+     *
+     * To be removed after JavaOne.
+     */
+    @Deprecated
     public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding) {
     }
 
