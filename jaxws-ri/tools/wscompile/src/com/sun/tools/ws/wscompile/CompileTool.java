@@ -56,16 +56,13 @@ import com.sun.xml.ws.util.VersionUtil;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import com.sun.xml.ws.wsdl.writer.WSDLResolver;
 import org.xml.sax.EntityResolver;
-import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
-import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -642,7 +639,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 rtModeler.setPortName(portName);
             AbstractSEIModelImpl rtModel = rtModeler.buildRuntimeModel();
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
-                    new com.sun.xml.ws.wsdl.writer.WSDLResolver() {
+                    new WSDLResolver() {
                         public Result getWSDL(String suggestedFilename) {
                             File wsdlFile =
                                 new File(nonclassDestDir, suggestedFilename);
