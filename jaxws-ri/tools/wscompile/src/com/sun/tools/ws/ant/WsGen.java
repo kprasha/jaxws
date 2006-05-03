@@ -21,9 +21,7 @@
  */
 package com.sun.tools.ws.ant;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
@@ -115,6 +113,19 @@ public class WsGen extends MatchingTask {
     /** Sets the base directory to output generated class. **/
     public void setDestdir(File base) {
         this.destDir = base;
+    }
+
+    /********************* failonerror option  ***********************/
+    /**
+     * False to continue the build even if the compilation fails.
+     */
+    private boolean failonerror = true;
+
+    /**
+     * Mostly for our SQE teams and not to be advertized.
+     */
+    public void setFailonerror(boolean value) {
+        failonerror = value;
     }
 
     /**
@@ -468,11 +479,18 @@ public class WsGen extends MatchingTask {
                 throw new BuildException("wsgen failed", location);
             }
         } catch (Exception ex) {
-            if (ex instanceof BuildException) {
-                throw (BuildException)ex;
+            if (failonerror) {
+                if (ex instanceof BuildException) {
+                    throw (BuildException) ex;
+                } else {
+                    throw new BuildException("Error starting wsgen: ", ex,
+                            getLocation());
+                }
             } else {
-                throw new BuildException("Error starting wsgen: ", ex,
-                getLocation());
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+                getProject().log(sw.toString(), Project.MSG_WARN);
+                // continue
             }
         } finally {
             try {

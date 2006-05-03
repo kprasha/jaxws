@@ -36,9 +36,7 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.XMLCatalog;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -102,6 +100,19 @@ public class WsImport extends MatchingTask {
      */
     public Commandline.Argument createJvmarg() {
         return cmd.createVmArgument();
+    }
+
+    /********************* failonerror option  ***********************/
+    /**
+     * False to continue the build even if the compilation fails.
+     */
+    private boolean failonerror = true;
+
+    /**
+     * Mostly for our SQE teams and not to be advertized.
+     */
+    public void setFailonerror(boolean value) {
+        failonerror = value;
     }
 
     /********************  -extensions option **********************/
@@ -538,12 +549,20 @@ public class WsImport extends MatchingTask {
                 throw new BuildException("wsimport failed", location);
             }
         } catch (Exception ex) {
-            if (ex instanceof BuildException) {
-                throw (BuildException)ex;
+            if (failonerror) {
+                if (ex instanceof BuildException) {
+                    throw (BuildException) ex;
+                } else {
+                    throw new BuildException("Error starting wsimport: ", ex,
+                            getLocation());
+                }
             } else {
-                throw new BuildException("Error starting wsimport: ", ex,
-                getLocation());
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+                getProject().log(sw.toString(), Project.MSG_WARN);
+                // continue
             }
+
         } finally {
             try {
                 if (logstr != null) {
