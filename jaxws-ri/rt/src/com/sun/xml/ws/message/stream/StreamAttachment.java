@@ -87,7 +87,7 @@ public class StreamAttachment implements Attachment {
 
     public Base64Data asBase64Data(){
         Base64Data base64Data = new Base64Data();
-        base64Data.set(data, data.length, contentType);
+        base64Data.set(data, len, contentType);
         return base64Data;
     }
 
@@ -97,7 +97,7 @@ public class StreamAttachment implements Attachment {
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         AttachmentPart part = saaj.createAttachmentPart();
-        part.setRawContentBytes(data,0,data.length,getContentType());
+        part.setRawContentBytes(data,0,len,getContentType());
         part.setContentId(contentId);
         saaj.addAttachmentPart(part);
     }
