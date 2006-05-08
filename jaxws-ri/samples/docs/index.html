@@ -2,31 +2,54 @@
 <html>
 <head>
   <meta http-equiv="CONTENT-TYPE"
- content="text/html; charset=iso-8859-1">
-  <title>JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ -- Samples Documentation</title>
-  <link rel="stylesheet" type="text/css" href="style/default.css"/>
-  <meta name="GENERATOR" content="StarOffice 7  (Solaris Sparc)">
+ content="text/html; charset=windows-1252">
+  <title>JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ -- Samples
+Documentation</title>
+  <meta name="GENERATOR" content="StarSuite 8  (Win32)">
   <meta name="CREATED" content="20051130;11594900">
-  <meta name="CHANGED" content="20051130;12365600">
+  <meta name="CHANGEDBY" content="Rama Pulavarthi">
+  <meta name="CHANGED" content="20060426;14003290">
   <meta http-equiv="Content-Language" content="en-us">
+  <style>
+	<!--
+		H1 { color: #000099; font-family: sans-serif; text-align: center }
+		H2 { color: #000099; font-family: sans-serif; text-align: center }
+		CODE { font-family: "Courier", monospace }
+	-->
+	</style>
 </head>
-<body dir="ltr" lang="en-US">
-  <center>
-  <h1>  Java<sup><font size="-2">TM</font></sup> API for XML Web Services<br />
-      Samples Documentation
-  </h1>
-  <b>Specification Version:</b> @@SPEC_VERSION@@<br />
-  <b>Reference Implementation (RI) Version:</b> @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@<br />
-  </center>
+<body lang="en-US" bgcolor="#ffffff" dir="ltr">
+<h1 align="center"><font color="#280099">Java<font size="1"><sup>TM</sup></font>
+API for XML Web Services<br>
+Samples Documentation</font> </h1>
+<p align="center"><b>Specification Version:</b>
+@@SPEC_VERSION@@<br>
+<b>Reference Implementation (RI) Version:</b>
+@@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@</p>
 <p>Java APIs for XML Web Services 2.0 is developed as <a
  href="http://jcp.org/en/jsr/detail?id=224">JSR
 224</a> under the <a href="http://jcp.org/">Java Community Process</a>
 (JCP). This document explains the samples that are bundled along with
 the Early Access Standards Implementation of JAX-WS 2.0.</p>
-<h2>1.0 Directory Structure</h2>
+
+The samples included with JAX-WS that is distributed on Java.net or
+as part of JWSDP, documents how to use JAX-WS in a non-Java EE 5 servlet container using a 
+proprietary deployment descriptor <code>sun-jaxws.xml</code> and servlet
+<code>com.sun.xml.ws.transport.http.servlet.WSServlet</code>.
+This means that you can these JAX-WS RI applications in any servlet container that has been
+enabled with the JAX-WS RI.  Applications that use the proprietary DD and servlet 
+will run in a JAX-WS RI enabled Java EE 5 servlet container, but 
+they will be non-portable. If you
+wish to use these JAX-WS samples in a Java EE container in a Java EE portable manner you need to 
+modify them to use the
+standard Java EE 5 deployment descriptor; please refer to the 
+<a href="http://java.sun.com/javaee/index.jsp">Java EE 5</a> or <a href="https://glassfish.dev.java.net/">Glassfish</a> 
+documentation/samples.  
+
+<h2><a name="1.0"></a><font color="#280099">1.0 Directory Structure</font></h2>
 <p>This section explains the directory structure of the <code>samples</code>
 directory in the bundle:</p>
-<table border="0" cellpadding="2" cellspacing="0" width="100%">
+<table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tbody>
     <tr valign="top">
       <td width="15%">
@@ -169,8 +192,7 @@ binding. </p>
       <td>
       <p>Same as <b>fromjava</b> sample but using JavaBeans as
 parameter and return types.<br>
-Also the service can be built and deployed using Endpoint API.<br>
-      </p>
+Also the service can be built and deployed using Endpoint API.</p>
       </td>
     </tr>
     <tr>
@@ -217,7 +239,7 @@ properties PATH_INFO and QUERY_STRING. </p>
     </tr>
   </tbody>
 </table>
-<h2>2.0 Prerequisites</h2>
+<h2><a name="2.0"></a><font color="#280099">2.0 Prerequisites</font></h2>
 <p>Here is the list of prerequisites that needs to be met before any
 of the samples can be invoked:</p>
 <ol>
@@ -238,7 +260,11 @@ sure that you download SJSAS PE 8.1 separate bundle only and use J2SE
 5.0 as the J2SE platform for it's installation. Although the download
 page requires J2SE 1.4.2 SDK for SJSAS PE 8.1, J2SE 5.0 is required for
 JAX-WS 2.0 binaries and must be used as the J2SE platform for SJSAS PE
-8.1 for the samples to work. </p>
+8.1 for the samples to work. The samples also work with Sun Java System
+Application Server PE 8.2. </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Make sure that the Application Server is configured for port 8080 as samples hardcoded with this port info. Otherwise, you need to change samples to use the correct port. </p>
   </li>
   <li>
     <p style="margin-bottom: 0in;">If you have installed JAX-WS as part
@@ -255,12 +281,16 @@ JAX-WS bundle, </p>
 point to the Application Server installation directory. </p>
       </li>
       <li>
+        <p style="margin-bottom: 0in;">Set <code>JAXWS_HOME</code>
+to the JAX-WS installation directory.</p>
+      </li>
+      <li>
         <p style="margin-bottom: 0in;">Make sure that the Application
 Server is not running. </p>
       </li>
       <li>
         <p style="margin-bottom: 0in;">Invoke <code>ANT_HOME/bin/ant
-install</code> from the root directory of the JAX-WS 2.0 EA2 bundle.
+install</code> from the root directory of the JAX-WS 2.0 FCS bundle.
 This will install JAX-WS 2.0 bundle on the Application Server referred
 by <code>AS_HOME</code> environment variable.</p>
       </li>
@@ -275,12 +305,12 @@ baked into this version of ant script.&nbsp; </p>
     </ol>
   </li>
 </ol>
-<h2>3.0 Invoking the sample</h2>
+<h2><a name="3.0"></a><font color="#280099">3.0 Invoking the sample</font></h2>
 <p>Each sample can be built, deployed and invoked using the
 <code>ANT_HOME/bin/ant</code> and <code>build.xml</code> ant script
 in the root directory of the sample. Each ant script supports the
 following set of targets:</p>
-<table border="0" cellpadding="2" cellspacing="0" width="100%">
+<table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
       <td width="15%">
@@ -308,19 +338,26 @@ following set of targets:</p>
     </tr>
   </tbody>
 </table>
-<br>
-Some samples can be built, deployed using javax.xml.ws.Endpoint API.
-These sample support an extra target:<br>
-<br>
-<table border="0" cellpadding="2" cellspacing="0" width="100%">
+<p><br>
+Some samples(e.g. fromjava, supplychain) can be built, deployed using
+javax.xml.ws.Endpoint API. These samples support extra targets:</p>
+<table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
       <td width="15%">
       <p>server-j2se</p>
       </td>
       <td width="85%">
-      <p>Builds and deploys the Endpoint API based service endpoint<br>
+      <p>Builds and deploys the Endpoint API based service
+endpoint(doesn't terminate until server-j2se-stop is called)<br>
       </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">server-j2se-stop<br>
+      </td>
+      <td style="vertical-align: top;">Stops the Endpoint API based
+service endpoint(need to run from a different window)<br>
       </td>
     </tr>
   </tbody>
@@ -334,7 +371,45 @@ is either running before the <code>server</code> target is invoked or
 run it after the <code>server</code> target is invoked. You will have
 to wait a few minutes for the Application Server to deploy the
 service endpoint correctly before building the client. </p>
-<p>&nbsp;</p>
+<p><font color="#280099"><b>Running Samples with Tomcat:</b></font></p>
+<ol>
+  <li>
+    <p style="margin-bottom: 0in;"><font color="#000000">Set
+CATALINA_HOME to your Tomcat installation.</font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Make sure that tomcat is configured for port 8080 as samples hardcoded with this port info. Otherwise, you need to change samples to use the correct port. </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><font color="#000000">If you have
+installed a standalone JAX-WS bundle, Copy the JAX-WS RI jars and its
+dependency jars to ${CATALINA_HOME}/shared/lib.</font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><font color="#000000">Set JAXWS_HOME
+to the JAX-WS installation directory.</font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><font color="#000000">Make sure the
+Tomcat container is up and running before running sample.</font></p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;"><font color="#000000">While running
+the ant targets in samples, specify “-Dtomcat=true”. For example: </font>
+    </p>
+  </li>
+</ol>
+<p style="margin-left: 0.79in; margin-bottom: 0in;">
+<font color="#000000">ant clean server -Dtomcat=true, this will build
+the service and deploy the war to ${CATALINA_HOME}/webapps.</font></p>
+<p style="margin-left: 0.79in; margin-bottom: 0in;">
+<font color="#000000">ant clean client -Dtomcat=true, this would
+create client-side artifacts and compiles the files.</font></p>
+<p style="margin-left: 0.79in; margin-bottom: 0in;">
+<font color="#000000">ant run -Dtomcat=true</font></p>
+<p style="margin-left: 0.79in; margin-bottom: 0in;">
+<br>
+</p>
 <p>We appreciate your feedback, please send it to
 <a href="mailto:users@jax-ws.dev.java.net">users@jax-ws.dev.java.net</a>.</p>
 <p>&nbsp;</p>
