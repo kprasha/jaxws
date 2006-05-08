@@ -1,5 +1,5 @@
 /**
- * $Id: MimeApp.java,v 1.4.2.1 2006-04-12 00:08:38 ofung Exp $
+ * $Id: MimeApp.java,v 1.4.2.2 2006-05-08 22:04:04 kohlert Exp $
  */
 
 /*
@@ -50,7 +50,7 @@ public class MimeApp {
             //test wsdl mime without enableMIMEContent(default)
             testEchoData ((Hello)port);
 
-            //test wsdl mime without enableMIMEContent
+            //test wsdl mime with enableMIMEContent
             testEchoDataWithEnableMIMEContent((Hello)port);
 
             testDetail((Hello)port);
@@ -58,7 +58,7 @@ public class MimeApp {
             //test swaref
             testSwaref ((Hello)port);
         } catch (Exception ex) {
-            System.out.println ("SOAP 1.1 MtomApp FAILED!");
+            System.out.println ("MimeApp FAILED!");
             ex.printStackTrace ();
         }
     }

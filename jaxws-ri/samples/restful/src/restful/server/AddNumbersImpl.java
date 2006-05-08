@@ -36,7 +36,6 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.http.HTTPException;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.BindingType;
-import javax.servlet.ServletRequest;
 
 @WebServiceProvider
 @BindingType(value=HTTPBinding.HTTP_BINDING)
@@ -50,9 +49,16 @@ public class AddNumbersImpl implements Provider<Source> {
             MessageContext mc = wsContext.getMessageContext();
             // check for a PATH_INFO request
             String path = (String)mc.get(MessageContext.PATH_INFO);
-            if (path != null && path.contains("/num1") &&
+            System.out.println("Query String = "+query);
+            System.out.println("PathInfo = "+path);
+            if (query != null && query.contains("num1=") &&
+                query.contains("num2=")) {
+                return createSource(query);
+            } else if (path != null && path.contains("/num1") &&
                        path.contains("/num2")) {
-                return createResultSource(path);
+                return createSource(path);
+            } else {
+                throw new HTTPException(404);
             }
             String query = (String)mc.get(MessageContext.QUERY_STRING);
             System.out.println("Query String = "+query);
@@ -68,7 +74,7 @@ public class AddNumbersImpl implements Provider<Source> {
         }
     }
     
-    private Source createResultSource(String str) {
+    private Source createSource(String str) {
         StringTokenizer st = new StringTokenizer(str, "=&/");
         String token = st.nextToken();
         int number1 = Integer.parseInt(st.nextToken());

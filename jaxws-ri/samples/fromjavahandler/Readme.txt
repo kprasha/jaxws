@@ -6,7 +6,6 @@ the Java->WSDL programming model.
 * etc - configuration files
     * custom-client.xml client customization file
     * custom-schema.xml client customization file for schema objects
-    * custom-server.xml server customization file
     * build.properties, deploy-targets.xml ant script to deploy the endpoint
       war file
     * sun-jaxws.xml deployment descriptor for web container
@@ -31,6 +30,7 @@ the Java->WSDL programming model.
   for both handler chain files (on the server) and customization files.
 
 * To run
+    * set JAXWS_HOME to the JAX-WS installation directory
     * ant clean server - runs apt to generate server side artifacts and
       does the deployment
     * ant clean client run - runs wsimport on the published wsdl by the deplyed

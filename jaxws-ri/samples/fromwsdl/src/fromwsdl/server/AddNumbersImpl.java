@@ -28,7 +28,7 @@ package fromwsdl.server;
  * implementation class.
  */
 @javax.jws.WebService (endpointInterface="fromwsdl.server.AddNumbersPortType")
-public class AddNumbersImpl{
+public class AddNumbersImpl {
     
     /**
      * @param number1

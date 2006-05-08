@@ -53,7 +53,6 @@
   <property file="build.properties"/>                <!-- Component local   -->
   <property file="../build.properties"/>             <!-- Commons local     -->  
   <property file="project.properties"/>
-
   <property name="build.id" value="${now}(${user.name})" />
   <property name="build.version" value="${Name} ${release.impl.version}-${build.id}-${release.impl.version.suffix}" />
   <echo message="The build id is: ${build.version}" />
@@ -319,7 +318,7 @@ major-version=${release.impl.version}
     <!-- should I copy local transport jar to the build.home?  -->
 
     <copy todir="${build.home}">
-        <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt" />
+        <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
     </copy>
   </target>
 
@@ -333,8 +332,10 @@ major-version=${release.impl.version}
         <include name="**/*.txt" />
         <include name="**/*.jpg" />
         <include name="**/*.css"/>
+        <include name="**/*.xsd"/>
         <exclude name="**/internal/**" />
       </fileset>
+      <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
       <filterset begintoken="@@" endtoken="@@">
         <filter token="SPEC_VERSION" 
                 value="${release.spec.version}" />
@@ -375,29 +376,38 @@ major-version=${release.impl.version}
       <fileset dir="${build.home}/docs"/>
     </copy>
 
-    <copy todir="${dist20.home}/samples">
-      <fileset dir="samples" includes="**" excludes="**/common_resources/**,**/CVS/**" />
-      <filterset begintoken="@@" endtoken="@@">
-        <filter token="SPEC_VERSION" 
-                value="${release.spec.version}" />
-        <filter token="IMPL_VERSION"
-                value="${release.impl.version}"/>
-        <filter token="IMPL_VERSION_SUFFIX"
-                value="${release.impl.version.suffix}"/>
-        <!--filter token="@@JWSDP_VERSION@@"
-                value="${jwsdp.impl.version}"/>
-        <filter token="@@JWSDP_ROOTDIR@@" 
-                value="${jwsdp.root.directory}"/-->
-    </filterset>
+    <copy    todir="${dist20.home}/samples">
+      <fileset dir="samples" includes="**/common_resources/**"/>
     </copy>
-  	
-    <copy todir="${dist20.home}">
+  	<copy todir="${dist20.home}/samples">
+        <fileset dir="samples" includes="**" excludes="**/common_resources/**,**/CVS/**" />
+        <filterset begintoken="@@" endtoken="@@">
+          <filter token="SPEC_VERSION" 
+                  value="${release.spec.version}" />
+          <filter token="IMPL_VERSION"
+                  value="${release.impl.version}"/>
+          <filter token="IMPL_VERSION_SUFFIX"
+                  value="${release.impl.version.suffix}"/>
+          <!--filter token="@@JWSDP_VERSION@@"
+                  value="${jwsdp.impl.version}"/>
+          <filter token="@@JWSDP_ROOTDIR@@" 
+                  value="${jwsdp.root.directory}"/-->
+        </filterset>
+	</copy>
+
+    <copy todir="${dist20.home}/samples/restful/etc">
+        <fileset dir="lib" includes="servlet.jar"/>
+    </copy>
+
+     <copy todir="${dist20.home}">
   	<fileset dir="${build.home}" includes="*.txt"/>
     </copy>
 
     <!-- add a copy of the license and README files to the top level -->
-    <copy todir="${dist20.home}"
-          file="license.txt" />
+    <copy todir="${dist20.home}">
+        <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
+    </copy>
+
     <copy todir="${dist20.home}"
           file="README" />
   </target>
@@ -456,13 +466,15 @@ major-version=${release.impl.version}
     <cvs-import src="build/maven-repo" dest="jax-ws-sources/repo" cvsroot=":pserver:${user.name}@java-net-cvs:/cvs" />
   </target>
 
+
+  
     <target name="integrate-jaxb-hudson" depends="prepare"
             description="integrate the last successful JAXB Hudson build">
       <get src="http://kohsuke.sfbay.sun.com/hudson/job/jaxb-ri/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/jaxb-ri.zip"
            dest="${build.home}/jaxb-ri.zip" />
       <mkdir dir="${build.home}/jaxb" />
       <unzip src="${build.home}/jaxb-ri.zip" dest="${build.home}/jaxb"/>
-      <copy todir="lib">
+      <copy todir="lib" overwrite="true">
         <fileset dir="${build.home}/jaxb/jaxb-ri/lib" includes="*.zip,*.jar"
                  excludes="activation.jar, jsr173_1.0_api.jar, jaxb1-impl.jar" />
       </copy>
@@ -502,11 +514,12 @@ major-version=${release.impl.version}
          dest="lib/stax-ex-src.zip" />
   </target>
 
+
   <target name="integrate-sjsxp-hudson" depends="prepare"
           description="integrate the last successful sjsxp Hudson build">
-    <get src="http://kohsuke.sfbay/hudson/job/zephyr/lastSuccessfulBuild/artifact/dist/sjsxp-1_0/sjsxp.jar"
+    <get src="http://kohsuke.sfbay/hudson/job/zephyr/lastSuccessfulBuild/artifact/zephyr/dist/sjsxp-1_0/sjsxp.jar"
          dest="lib/sjsxp.jar" />
-    <get src="http://kohsuke.sfbay/hudson/job/zephyr/lastSuccessfulBuild/artifact/dist/sjsxp-src-1_0.zip"
+    <get src="http://kohsuke.sfbay/hudson/job/zephyr/lastSuccessfulBuild/artifact/zephyr/dist/sjsxp-src-1_0.zip"
          dest="lib/sjsxp-src.zip" />
   </target>
 
@@ -516,23 +529,44 @@ major-version=${release.impl.version}
         <fileset dir="${basedir}/tools/lib" includes="installer-builder.jar, sfx4j-1.0.jar"/>
       </classpath>
     </taskdef>
-    
-    <target name="generate-weekly-binary"
+
+    <target name="re-build"
+        description="RE build target">
+      <antcall target="generate-binary">
+        <param name="compile.debug" value="true"/>
+      </antcall>
+      <antcall target="generate-weekly-source">
+        <param name="compile.debug" value="true"/>
+      </antcall>
+      <move tofile="${build.home}/jaxws${release.jar.version}.jar"
+         file="${build.home}/JAXWS2.0_${DSTAMP}.jar"/>
+      <move tofile="${build.home}/jaxws${release.jar.version}-src.jar"
+         file="${build.home}/JAXWS2.0_source_${DSTAMP}.jar"/>
+    </target>
+
+    <target name="generate-binary"
         description="generate java.net binary distribution">
       <antcall target="dist.zip">
         <param name="compile.debug" value="true"/>
       </antcall>
       <tstamp/>
       <!-- generate the class -->
-      <installerBuilder classFile="${build.home}/JAXWS_SI_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS2.0_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${build.home}/jaxws-ri.zip" />
+    </target>
+    
+    <target name="generate-weekly-binary"
+        description="generate java.net binary distribution">
+      <antcall target="generate-binary">
+        <param name="compile.debug" value="true"/>
+      </antcall>
       <delete file="${build.home}/jaxws-ri.zip" />
     </target>
         
     <target name="generate-weekly-source"
         depends="prepare"
-        description="generate java.net binary distribution">
+        description="generate sources for java.net binary distribution">
       <tstamp/>
             
       <!-- create the zip file contents -->
@@ -547,8 +581,11 @@ major-version=${release.impl.version}
           <exclude name="junit.jar"/>
         </fileset>
       </copy>
-      <copy file="${basedir}/license.txt"
-          todir="${source.drop.dir}/jaxws-si"/>
+      <copy todir="${source.drop.dir}/jaxws-si">
+        <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
+      </copy>
+<!--      <copy file="${basedir}/license.txt"
+          todir="${source.drop.dir}/jaxws-si"/> -->
       <copy file="${basedir}/etc/src-bundle.xml"
           tofile="${source.drop.dir}/jaxws-si/build.xml"/>
       <mkdir dir="${source.drop.dir}/jaxws-si/bin"/>
@@ -577,7 +614,7 @@ major-version=${release.impl.version}
       </zip>
           
       <!-- generate the installer -->
-      <installerBuilder classFile="${build.home}/JAXWS_SI_source_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS2.0_source_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${source.drop.dir}/jaxws-src-installer.zip"/>
       <delete dir="${source.drop.dir}"/>
@@ -606,6 +643,14 @@ major-version=${release.impl.version}
   <!-- assumes the dist target has been called -->
   <target name="create.zip" description="Create JAX-WS ZIP">
     <ant antfile="build-pkg.xml" target="create.zip" inheritrefs="true"/>
+  </target>
+
+  <!-- =======================
+       HPUX DISTRIBUTION 
+       ======================= -->
+  <!-- assumes the dist target has been called -->
+  <target name="create.hpux" description="Create HPUX pkg for JAX-WS">
+    <ant antfile="build-pkg.xml" target="create.hpux" inheritrefs="true"/>
   </target>
 
 </project>
