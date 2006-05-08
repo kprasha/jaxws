@@ -90,7 +90,7 @@ public class ResponseContext extends AbstractMap<String,Object> {
         if(packet.supports(key))
             return packet.get(key);    // strongly typed
 
-        if(!packet.getHandlerScopePropertyNames(true).contains(key))
+        if(packet.getHandlerScopePropertyNames(true).contains(key))
             return null;            // no such application-scope property
 
         Object v = packet.invocationProperties.get(key);
