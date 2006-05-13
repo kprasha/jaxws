@@ -48,8 +48,16 @@ public class ConsoleErrorReporter implements ErrorListener{
         return hasError;
     }
 
+    // will be null unless set in #error or #fatalError
+    //TODO: remove it after error handling is straightened
+    private Exception e;
+    Exception getException(){
+        return e;
+    }
+
     public void error(SAXParseException e) {
         hasError = true;
+        this.e = e;
         if(printStackTrace)
             e.printStackTrace();
         env.error(messageFactory.getMessage("model.saxparser.exception",
@@ -58,6 +66,7 @@ public class ConsoleErrorReporter implements ErrorListener{
 
     public void fatalError(SAXParseException e) {
         hasError = true;
+        this.e = e;
         if(printStackTrace)
             e.printStackTrace();
 

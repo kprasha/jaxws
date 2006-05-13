@@ -66,7 +66,7 @@ public class JAXBModelBuilder {
         _classNameAllocator = new ClassNameAllocatorImpl(classNameCollector);
 
         printstacktrace = Boolean.valueOf(options.getProperty(ProcessorOptions.PRINT_STACK_TRACE_PROPERTY));
-        consoleErrorReporter = new ConsoleErrorReporter(_env, printstacktrace);
+        consoleErrorReporter = new ConsoleErrorReporter(_env, false);
         internalBuildJAXBModel(elements);
     }
 
@@ -125,7 +125,7 @@ public class JAXBModelBuilder {
     protected void bind(){
         com.sun.tools.xjc.api.JAXBModel rawJaxbModel = schemaCompiler.bind();
         if(consoleErrorReporter.hasError()){
-            System.exit(-1);
+            throw new ModelException(consoleErrorReporter.getException());
         }
         jaxbModel = new JAXBModel(rawJaxbModel);
         jaxbModel.setGeneratedClassNames(_classNameAllocator.getJaxbGeneratedClasses());
