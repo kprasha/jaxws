@@ -106,7 +106,7 @@ public class LogicalHandlerPipe extends HandlerPipe {
                 if(processor != null)
                     closeLogicalHandlers(msgContext);
             }
-        }        
+        }
     }
     /**
      * This is called from cousinPipe.
@@ -129,6 +129,8 @@ public class LogicalHandlerPipe extends HandlerPipe {
                 //SERVER-SIDE
                 processor.closeHandlers(msgContext,processor.getIndex(),logicalHandlers.size()-1);
             }
+            //reset remedyActionTaken
+            remedyActionTaken = false;
         } else {
             //Close all handlers in the chain
             if(isClient){

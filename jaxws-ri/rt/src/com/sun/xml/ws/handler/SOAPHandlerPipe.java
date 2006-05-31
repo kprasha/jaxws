@@ -126,6 +126,8 @@ public class SOAPHandlerPipe extends HandlerPipe {
                 //SERVER-SIDE
                 processor.closeHandlers(msgContext,processor.getIndex(),soapHandlers.size()-1);
             }
+            //reset remedyActionTaken
+            remedyActionTaken = false;
         } else {
             //Close all handlers in the chain
             if(isClient){
