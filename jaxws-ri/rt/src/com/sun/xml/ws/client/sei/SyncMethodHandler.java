@@ -97,7 +97,7 @@ final class SyncMethodHandler extends MethodHandler {
             checkedExceptions.put(ce.getBridge().getTypeReference().tagName, ce);
         }
 
-        this.soapAction = '"'+method.getBinding().getSOAPAction()+'"';
+        this.soapAction = method.getBinding().getSOAPAction();
         this.seiModel = owner.seiModel;
 
         {// prepare objects for creating messages
