@@ -801,73 +801,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             return true;
         return !builder.isRemote(((DeclaredType)type).getDeclaration());
     }
-    
-    public void addSchemaElements(MethodDeclaration method, boolean isDocLitWrapped) {
-        addReturnSchemaElement(method, isDocLitWrapped);
-        boolean hasInParam = false;
-        for (ParameterDeclaration param : method.getParameters()) {
-            hasInParam |= addParamSchemaElement(param, method, isDocLitWrapped);
-        }
-        if (!hasInParam && soapStyle.equals(SOAPStyle.DOCUMENT) && !isDocLitWrapped) {
-            QName paramQName = new QName(wsdlNamespace, method.getSimpleName());
-            seiContext.addSchemaElement(paramQName, null);
-        }
-    }
-    
-    public void addReturnSchemaElement(MethodDeclaration method, boolean isDocLitWrapped) {
-        TypeMirror returnType = method.getReturnType();
-        WebResult webResult = method.getAnnotation(WebResult.class);
-        String responseName = builder.getResponseName(method.getSimpleName());
-        String responseNamespace = wsdlNamespace;
-        boolean isResultHeader = false;
-        if (webResult != null) {
-            responseName = webResult.name().length() > 0 ? webResult.name() : responseName;
-            responseNamespace = webResult.targetNamespace().length() > 0 ? webResult.targetNamespace() : responseNamespace;
-            isResultHeader = webResult.header();
-        }
-        QName typeName = new QName(responseNamespace, responseName);
-        if (!(returnType instanceof VoidType) &&
-                (!isDocLitWrapped || isResultHeader)) {
-            Reference ref = seiContext.addReference(method);
-            if (!soapStyle.equals(SOAPStyle.RPC))
-                seiContext.addSchemaElement(typeName, ref);
-        }
-    }
-    
-    public boolean addParamSchemaElement(ParameterDeclaration param, MethodDeclaration method, boolean isDocLitWrappped) {
-        boolean isInParam = false;
-        WebParam webParam = param.getAnnotation(WebParam.class);
-        String paramName = param.getSimpleName();
-        String paramNamespace = wsdlNamespace;
-        TypeMirror paramType = param.getType();
-        TypeMirror holderType = builder.getHolderValueType(paramType);
-        boolean isHeader = false;
-        if (soapStyle.equals(SOAPStyle.DOCUMENT) && !wrapped) {
-            paramName = method.getSimpleName();
-        }
-        if (webParam != null) {
-            paramName = webParam.name() != null && webParam.name().length() > 0 ? webParam.name() : paramName;
-            isHeader = webParam.header();
-            paramNamespace = webParam.targetNamespace().length() > 0 ? webParam.targetNamespace() : paramNamespace;
-        }
-        if (holderType != null) {
-            paramType = holderType;
-        }
-        if (isHeader || soapStyle.equals(SOAPStyle.DOCUMENT)) {
-            if (isHeader || !isDocLitWrappped) {
-                QName paramQName = new QName(paramNamespace, paramName);
-                Reference ref = seiContext.addReference(paramType, param);
-                seiContext.addSchemaElement(paramQName, ref);
-            }
-        } else
-            seiContext.addReference(paramType, param);
-        if (!isHeader && (holderType == null ||
-                (webParam == null || !webParam.mode().equals(WebParam.Mode.OUT)))) {
-            isInParam = true;
-        }
-        return isInParam;
-    }
-    
+
     protected ParameterDeclaration getOutParameter(MethodDeclaration method) {
         WebParam webParam;
         for (ParameterDeclaration param : method.getParameters()) {

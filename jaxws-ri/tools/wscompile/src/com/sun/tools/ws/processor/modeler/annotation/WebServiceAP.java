@@ -231,28 +231,6 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
         if (context.getRound() == 1) {
             buildModel();
         }
-        if (!wrapperGenerated  || // the wrappers already exist
-            context.getRound() == 2 ||
-            context.allEncoded()) {
-            if ((context.getRound() == 2 || !wrapperGenerated) && !context.isModelCompleted()) {
-                completeModel();
-                context.setModelCompleted(true);
-            }
-            try {
-                for (SEIContext seiContext : context.getSEIContexts()) {
-                    if (!seiContext.getModelCompiled()) {
-                        runProcessorActions(seiContext.getModel());
-                        seiContext.setModelCompiled(true);
-                    }
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (messager != null && output != null && output.size() > 0) {
-                    messager.printNotice(output.toString());
-                }
-            }
-        }
         context.incrementRound();
     }
 
@@ -280,23 +258,6 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
     protected String getResourceBundleName() {
         return "com.sun.tools.ws.resources.webserviceap";
-    }
-
-    public void createModel(TypeDeclaration d, QName modelName, String targetNamespace,
-        String modelerClassName){
-
-        SEIContext seiContext = context.getSEIContext(d);
-        if (seiContext.getModel() != null) {
-            onError("webserviceap.model.already.exists");
-            return;
-        }
-        log("creating model: " + modelName);
-        model = new Model(modelName);
-        model.setTargetNamespaceURI(targetNamespace);
-        model.setProperty(
-            ModelProperties.PROPERTY_MODELER_NAME,
-            modelerClassName);
-        seiContext.setModel(model);
     }
 
     public void setService(Service service) {
@@ -359,47 +320,10 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
         return new WebServiceWrapperGenerator(this, context);
     }
 
-    protected WebServiceVisitor createReferenceCollector() {
-        return new WebServiceReferenceCollector(this, context);
-    }
-
     protected boolean shouldProcessWebService(WebService webService) {
         return webService != null;
     }
 
-
-    private void completeModel() {
-        clearProcessed();
-        JavaCompiler javaC = XJC.createJavaCompiler();
-        JAXBModel jaxBModel;
-        WebServiceVisitor referenceCollector = createReferenceCollector();
-        for (SEIContext seiContext : context.getSEIContexts()) {
-            log("completing model for endpoint: "+seiContext.getSEIImplName());
-            TypeDeclaration decl = apEnv.getTypeDeclaration(seiContext.getSEIImplName());
-            if (decl == null)
-                onError("webserviceap.could.not.find.typedecl",
-                         new Object[] {seiContext.getSEIImplName(), context.getRound()});
-            decl.accept(referenceCollector);
-        }
-        clearProcessed();
-        for (SEIContext seiContext : context.getSEIContexts()) {
-            TypeDeclaration decl = apEnv.getTypeDeclaration(seiContext.getSEIName());
-            Collection<Reference> schemaMirrors = seiContext.getSchemaReferences(this);
-
-//            System.out.println("schemaMirrors count: " + schemaMirrors.size());
-//            for (Reference reference : schemaMirrors) {System.out.println("reference: "+reference.type);}
-//        System.out.println("schemaElementMap count: "+ seiContext.getSchemaElementMap(this).entrySet().size());
-//            for (Map.Entry<QName, ? extends Reference> entry : seiContext.getSchemaElementMap(this).entrySet()) {
-//               System.out.println("name: " + entry.getKey()+" value: "+entry.getValue().type);
-//            }
-
-//            System.out.println("setting default namespaceURI: "+seiContext.getNamespaceURI());
-            jaxBModel = new JAXBModel(javaC.bind(schemaMirrors, seiContext.getSchemaElementMap(this),
-                seiContext.getNamespaceURI(), apEnv));
-//            for (JAXBMapping map : jaxBModel.getMappings()) {System.out.println("map.getClazz: "+map.getClazz());}
-            seiContext.setJAXBModel(jaxBModel);
-        }
-    }
 
     public boolean isException(TypeDeclaration typeDecl) {
         return isSubtype(typeDecl, exceptionDecl);

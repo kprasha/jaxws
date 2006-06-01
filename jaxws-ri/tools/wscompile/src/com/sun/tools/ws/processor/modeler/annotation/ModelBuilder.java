@@ -46,7 +46,6 @@ import com.sun.tools.ws.processor.modeler.annotation.*;
  */
 public interface ModelBuilder {
     public AnnotationProcessorEnvironment getAPEnv();
-    public void createModel(TypeDeclaration d, QName modelName, String targetNamespace, String modelerClassName);
     public void setService(Service service);
     public void setPort(Port port);
     public String getOperationName(String methodName);

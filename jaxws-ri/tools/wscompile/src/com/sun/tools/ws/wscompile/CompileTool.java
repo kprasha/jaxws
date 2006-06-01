@@ -677,23 +677,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         return null;
     }
 
-    public void runProcessorActions() {
-        if (!(configuration.getModelInfo() instanceof ClassModelInfo)) {
-            onError(getMessage("wscompile.classmodelinfo.expected", new Object[] { configuration
-                    .getModelInfo() }));
-            return;
-        }
-        Model model = context.getSEIContext(
-                ((ClassModelInfo) configuration.getModelInfo()).getClassName()).getModel();
-        processor = new Processor(configuration, properties, model);
-        withModelHook();
-        registerProcessorActions(processor);
-        processor.runActions();
-       // TODO throw an error
-//        if (environment.getErrorCount() != 0) {
-//        }
-
-    }
     /**
      * @return the SourceVersion string
      */
