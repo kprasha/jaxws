@@ -58,6 +58,7 @@ import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.istack.Nullable;
+import javax.jws.WebService;
 import javax.xml.ws.WebServiceException;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
@@ -335,6 +336,29 @@ public class EndpointFactory {
             portName = RuntimeModeler.getPortName(implType, serviceName.getNamespaceURI());
         }
         return portName;
+    }
+    
+    /**
+     * Returns the wsdl from @WebService, or @WebServiceProvider annotation using
+     * wsdlLocation element.
+     *
+     * @param implType endpoint implementation class
+     * @return wsdl if there is wsdlLocation, else null
+     */
+    public static @Nullable String getWsdlLocation(Class<?> implType) {
+        String wsdl;
+        WebService ws = implType.getAnnotation(WebService.class);
+        if (ws != null) {
+            wsdl = ws.wsdlLocation();
+        } else {
+            WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
+            assert wsProvider != null;
+            wsdl = wsProvider.wsdlLocation();
+        }
+        if (wsdl.length() < 1) {
+            wsdl = null;
+        }
+        return wsdl;
     }
 
     /**

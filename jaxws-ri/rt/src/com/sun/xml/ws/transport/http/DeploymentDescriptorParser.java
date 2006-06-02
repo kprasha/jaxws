@@ -316,10 +316,7 @@ public class DeploymentDescriptorParser<A> {
         {
             String wsdlFile = getAttribute(attrs, ATTR_WSDL);
             if (wsdlFile == null) {
-                WebServiceProvider wsProvider = implementorClass.getAnnotation(WebServiceProvider.class);
-                if (wsProvider != null && !wsProvider.wsdlLocation().equals("")) {
-                    wsdlFile = wsProvider.wsdlLocation();
-                }
+                wsdlFile = EndpointFactory.getWsdlLocation(implementorClass);
             }
 
             if(wsdlFile!=null) {

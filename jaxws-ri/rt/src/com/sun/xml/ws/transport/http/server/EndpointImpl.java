@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.transport.http.server;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.BindingID;
@@ -29,6 +30,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.istack.NotNull;
@@ -209,7 +211,7 @@ public class EndpointImpl extends Endpoint {
                 getProperty(QName.class, Endpoint.WSDL_PORT),
                 null /* no container */,
                 binding,
-                null, /* TODO: how do we find a primary WSDL? */
+                getPrimaryWsdl(),
                 buildDocList(),
                 (EntityResolver) null
         );
@@ -251,6 +253,24 @@ public class EndpointImpl extends Endpoint {
         }
 
         return r;
+    }
+    
+    /**
+     * Gets wsdl from @WebService or @WebServiceProvider
+     */
+    private @Nullable SDDocumentSource getPrimaryWsdl() {
+        Class implType = implementor.getClass();
+        // Takes care of @WebService, @WebServiceProvider's wsdlLocation
+        String wsdlLocation = EndpointFactory.getWsdlLocation(implType);
+        if (wsdlLocation != null) {
+            ClassLoader cl = implType.getClassLoader();
+            URL url = cl.getResource(wsdlLocation);
+            if (url != null) {
+                return SDDocumentSource.create(url);
+            }
+            throw new ServerRtException("cannot.load.wsdl", wsdlLocation);
+        }
+        return null;
     }
 
     private void canPublish() {
