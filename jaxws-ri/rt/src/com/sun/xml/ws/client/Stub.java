@@ -58,12 +58,6 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     protected final BindingImpl binding;
 
-    /**
-     * The address to which the message is sent to,
-     * (unless it's overriden in {@link RequestContext}.
-     */
-    private final EndpointAddress defaultEndPointAddress;
-
     public final RequestContext requestContext = new RequestContext();
 
     /**
@@ -84,7 +78,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
     protected Stub(Pipe master, BindingImpl binding, EndpointAddress defaultEndPointAddress) {
         this.pipes = new PipePool(master);
         this.binding = binding;
-        this.defaultEndPointAddress = defaultEndPointAddress;
+        this.requestContext.setEndpointAddress(defaultEndPointAddress);
     }
 
     /**
@@ -111,7 +105,6 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
     protected final Packet process(Packet packet, RequestContext requestContext, ResponseContextReceiver receiver) {
         {// fill in Packet
             packet.proxy = this;
-            packet.endpointAddress = defaultEndPointAddress;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
         }

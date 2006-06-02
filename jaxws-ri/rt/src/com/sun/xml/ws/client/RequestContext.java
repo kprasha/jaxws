@@ -21,16 +21,17 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.util.PropertySet;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Request context implementation.
@@ -116,7 +117,7 @@ public final class RequestContext extends PropertySet {
      * <p>
      * This is the actual data store for {@link BindingProvider#ENDPOINT_ADDRESS_PROPERTY}.
      */
-    private EndpointAddress endpointAddress;
+    private @NotNull EndpointAddress endpointAddress;
 
     /**
      * Creates {@link BindingProvider#ENDPOINT_ADDRESS_PROPERTY} view
@@ -127,17 +128,18 @@ public final class RequestContext extends PropertySet {
      */
     @Property(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
     public String getEndPointAddressString() {
-        if(endpointAddress==null)
-            return null;
-        else
-            return endpointAddress.toString();
+        return endpointAddress.toString();
     }
 
     public void setEndPointAddressString(String s) {
         if(s==null)
-            this.endpointAddress = null;
+            throw new IllegalArgumentException();
         else
             this.endpointAddress = EndpointAddress.create(s);
+    }
+
+    public void setEndpointAddress(@NotNull EndpointAddress epa) {
+        this.endpointAddress = epa;
     }
 
     /**
