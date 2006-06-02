@@ -84,7 +84,14 @@ public final class EndpointAddress {
     private URL url;
     private final URI uri;
     private final String stringForm;
-    private Proxy proxy; // null iff url is null
+    /**
+     * Pre-selected proxy.
+     *
+     * If {@link #url} is null, this field is null.
+     * Otherwise, this field could still be null if the proxy couldn't be chosen
+     * upfront.
+     */
+    private Proxy proxy;
 
     public EndpointAddress(URI uri) {
         this.uri = uri;
@@ -183,7 +190,10 @@ public final class EndpointAddress {
      */
     public URLConnection openConnection() throws IOException {
         assert url!=null : uri+" doesn't have the corresponding URL";
-        return url.openConnection(proxy);
+        if(proxy!=null)
+            return url.openConnection(proxy);
+        else
+            return url.openConnection();
     }
 
     public String toString() {
