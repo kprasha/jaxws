@@ -84,7 +84,7 @@ public final class EndpointAddress {
     private URL url;
     private final URI uri;
     private final String stringForm;
-    private Proxy proxy; // null if url is null
+    private Proxy proxy; // null iff url is null
 
     public EndpointAddress(URI uri) {
         this.uri = uri;
