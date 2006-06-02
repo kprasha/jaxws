@@ -23,7 +23,6 @@ package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsServer;
 import com.sun.xml.ws.server.ServerRtException;
 
 import java.net.InetSocketAddress;
@@ -35,9 +34,9 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
- * Manages all the WebService HTTP/HTTPS servers created by JAXWS runtime.
+ * Manages all the WebService HTTP servers created by JAXWS runtime.
  *
- * @author WS Development Team
+ * @author Jitendra Kotamraju
  */
 final class ServerMgr {
     
@@ -59,41 +58,35 @@ final class ServerMgr {
     /*
      * Creates a HttpContext at the given address. If there is already a server
      * it uses that server to create a context. Otherwise, it creates a new
-     * HTTP or HTTPS server. This sever is added to servers Map.
+     * HTTP server. This sever is added to servers Map.
      */
     public HttpContext createContext(String address) {
         try {
             HttpServer server;
             ServerState state;
             URL url = new URL(address);
+            int port = url.getPort();
+            if (port == -1) {
+                port = url.getDefaultPort();
+            }
             InetSocketAddress inetAddress = new InetSocketAddress(url.getHost(),
-                    url.getPort());
+                port);
             synchronized(servers) {
                 state = servers.get(inetAddress);
                 if (state == null) {
-                    if (url.getProtocol().equals("http")) {
-                        logger.fine("Creating new HTTP Server at "+inetAddress);
-                        server = HttpServer.create(inetAddress, 5);
-                    } else {
-                        throw new IllegalArgumentException("https URL is not supported");
-                    }
+                    logger.fine("Creating new HTTP Server at "+inetAddress);
+                    server = HttpServer.create(inetAddress, 5);
                     server.setExecutor(Executors.newFixedThreadPool(5));
                     logger.fine("Creating HTTP Context at = "+url.getPath());
                     HttpContext context = server.createContext(url.getPath());
                     server.start();
-                    logger.fine("HTTP(S) server started = "+inetAddress);
+                    logger.fine("HTTP server started = "+inetAddress);
                     state = new ServerState(server);
                     servers.put(inetAddress, state);
                     return context;
                 }
             }
             server = state.getServer();
-            if (url.getProtocol().equals("https") && !(server instanceof HttpsServer)) {
-                throw new ServerRtException("already.http.server",inetAddress);
-            }
-            if (url.getProtocol().equals("http") && server instanceof HttpsServer) {
-                throw new ServerRtException("already.https.server",inetAddress);
-            }
             logger.fine("Creating HTTP Context at = "+url.getPath());
             HttpContext context = server.createContext(url.getPath());
             state.oneMoreContext();
