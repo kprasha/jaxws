@@ -23,6 +23,8 @@
 package com.sun.xml.ws.api;
 
 
+import com.sun.istack.Nullable;
+
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -78,7 +80,8 @@ import java.util.Iterator;
  * @author Kohsuke Kawaguchi
  */
 public final class EndpointAddress {
-    private URL url;    // can be null
+    @Nullable
+    private URL url;
     private final URI uri;
     private final String stringForm;
     private Proxy proxy; // null if url is null
