@@ -202,7 +202,7 @@ public abstract class Message {
      * Gets the attachments of this message
      * (attachments live outside a message.)
      */
-    public AttachmentSet getAttachments() {
+    public @NotNull AttachmentSet getAttachments() {
         return AttachmentSet.EMPTY;
     }
 

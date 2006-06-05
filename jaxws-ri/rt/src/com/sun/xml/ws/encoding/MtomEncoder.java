@@ -109,12 +109,12 @@ public class MtomEncoder implements Encoder {
     private ContentType getContentType(Packet packet){
         switch(version){
             case SOAP_11:
-                return new ContentTypeImpl(messageContentType, (packet.soapAction == null)?"":packet.soapAction);
+                return new ContentTypeImpl(messageContentType, (packet.soapAction == null)?"":packet.soapAction, null);
             case SOAP_12:
                 if(packet.soapAction != null){
                     messageContentType += ";action=\""+packet.soapAction+"\"";
                 }
-                return new ContentTypeImpl(messageContentType, null);
+                return new ContentTypeImpl(messageContentType, null, null);
         }
         //never happens
         return null;

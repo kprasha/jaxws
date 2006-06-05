@@ -31,14 +31,16 @@ import com.sun.xml.ws.encoding.ContentTypeImpl;
  * @author Paul.Sandoz@Sun.Com
  */
 final class FastInfosetStreamSOAP11Encoder extends FastInfosetStreamSOAPEncoder {
-    public static final ContentTypeImpl defaultContentType = 
-            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, "");
+    public static final ContentTypeImpl defaultContentType =
+            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, "", null);
     
     protected ContentType getContentType(String soapAction) {
+        // TODO: set Accept header
+
         if (soapAction == null || soapAction.length() == 0) {
             return defaultContentType;
         } else {
-            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, soapAction);
+            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, soapAction, null);
         }
     }
     

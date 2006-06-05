@@ -156,7 +156,10 @@ public final class XMLHTTPEncoder implements Encoder {
         public String getContentType() {
             return contentType;
         }
-        public String getSOAPAction() {
+        public String getSOAPActionHeader() {
+            return null;
+        }
+        public String getAcceptHeader() {
             return null;
         }
     }

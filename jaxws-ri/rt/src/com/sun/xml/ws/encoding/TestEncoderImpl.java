@@ -94,9 +94,9 @@ public final class TestEncoderImpl implements Encoder {
 
     private ContentType getContentType(String soapAction){
         if((soapAction != null) && contentType.equals("application/soap+xml"))
-            return new ContentTypeImpl(contentType + ";action=\""+soapAction+"\"", null);
+            return new ContentTypeImpl(contentType + ";action=\""+soapAction+"\"", null, null);
 
         String action = (soapAction == null)?"":soapAction;
-        return new ContentTypeImpl(contentType, action);
+        return new ContentTypeImpl(contentType, action, null);
     }
 }

@@ -86,14 +86,14 @@ public class HttpTransportPipe implements Pipe {
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Collections.singletonList(Integer.toString(buf.size())));
                 reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
-                writeSOAPAction(reqHeaders, ct.getSOAPAction());
+                writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
                 if(dump)
                     dump(buf, "HTTP request", reqHeaders);
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
                 reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
-                writeSOAPAction(reqHeaders, ct.getSOAPAction());
+                writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
                 if(dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
                     encoder.encode(request, buf);

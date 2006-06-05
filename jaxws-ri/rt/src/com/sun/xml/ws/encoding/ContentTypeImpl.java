@@ -30,17 +30,23 @@ import com.sun.xml.ws.api.pipe.ContentType;
 public final class ContentTypeImpl implements ContentType {
     private final String contentType;
     private final String soapAction;
+    private final String accept;
 
-    public ContentTypeImpl(String contentType, String soapAction) {
+    public ContentTypeImpl(String contentType, String soapAction, String accept) {
         this.contentType = contentType;
         this.soapAction = soapAction;
+        this.accept = accept;
     }
 
     public String getContentType() {
         return contentType;
     }
 
-    public String getSOAPAction() {
+    public String getSOAPActionHeader() {
         return soapAction;
+    }
+
+    public String getAcceptHeader() {
+        return accept;
     }
 }

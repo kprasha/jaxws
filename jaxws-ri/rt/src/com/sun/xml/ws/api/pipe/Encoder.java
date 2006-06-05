@@ -73,10 +73,11 @@ public interface Encoder {
      * This method allows a transport to streamline the write operation.
      *
      * @return
-     *      null if the content-type may change from a {@link Message} to {@link Message}.
-     *      Otherwise return the static content type, like "application/xml".
+     *      null if the content-type can't be determined in short of
+     *      encodin the packet. Otherwise content type for this {@link Packet},
+     *      such as "application/xml".
      */
-    ContentType getStaticContentType(Packet packaet);
+    ContentType getStaticContentType(Packet packet);
 
     /**
      * Encodes an XML infoset portion of the {@link Message}

@@ -32,13 +32,14 @@ import com.sun.xml.ws.encoding.ContentTypeImpl;
  */
 final class FastInfosetStreamSOAP12Encoder extends FastInfosetStreamSOAPEncoder {
     public static final ContentTypeImpl defaultContentType = 
-            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12, null);
+            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12, null, null);
     
     protected ContentType getContentType(String soapAction) {
+        // TODO: set accept header
         if (soapAction == null) {
             return defaultContentType;
         } else {
-            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12 + ";action=\""+soapAction+"\"", null);
+            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12 + ";action=\""+soapAction+"\"", null, null);
         }
     }
     

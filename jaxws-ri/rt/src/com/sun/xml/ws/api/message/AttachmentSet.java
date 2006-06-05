@@ -21,10 +21,8 @@
  */
 package com.sun.xml.ws.api.message;
 
-import com.sun.xml.ws.api.message.Attachment;
-
-import java.util.Iterator;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * A set of {@link Attachment} on a {@link Message}.
@@ -43,6 +41,11 @@ public interface AttachmentSet extends Iterable<Attachment> {
      *      if no such attachment exist.
      */
     Attachment get(String contentId);
+
+    /**
+     * Returns true if there's no attachment.
+     */
+    boolean isEmpty();
 
     // adding attachment seems to be unnecessary --- true?
     // note that you can create a new AttachmentSet with existing
@@ -70,6 +73,10 @@ public interface AttachmentSet extends Iterable<Attachment> {
     public static final AttachmentSet EMPTY = new AttachmentSet() {
         public Attachment get(String contentId) {
             return null;
+        }
+
+        public boolean isEmpty() {
+            return true;
         }
 
         public Iterator<Attachment> iterator() {

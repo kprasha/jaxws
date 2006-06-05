@@ -23,7 +23,6 @@ package com.sun.xml.ws.message.saaj;
 
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
@@ -33,9 +32,9 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.Element;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -401,14 +400,20 @@ public class SAAJMessage extends Message {
          *         if no such attachment exist.
          */
         public Attachment get(String contentId) {
-            if (!attIter.hasNext())
-                return null;
-
             // if this is the first time then create the attachment Map
             if (attMap == null) {
+                if (!attIter.hasNext())
+                    return null;
                 attMap = createAttachmentMap();
             }
             return attMap.get(contentId);
+        }
+
+        public boolean isEmpty() {
+            if(attMap!=null)
+                return attMap.isEmpty();
+            else
+                return !attIter.hasNext();
         }
 
         /**

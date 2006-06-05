@@ -95,7 +95,7 @@ public class MimeEncoder implements Encoder {
         OutputUtil.writeAsAscii(startBoundary, out);    // write --boundary
         OutputUtil.writeAsAscii("--", out);
 
-        return new ContentTypeImpl("multipart/related", null);
+        return new ContentTypeImpl("multipart/related", null, null);
     }
 
     public ContentType encode(Packet packet, WritableByteChannel buffer) {
