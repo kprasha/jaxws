@@ -40,12 +40,13 @@ import java.nio.channels.WritableByteChannel;
  */
 public class EncoderFacade implements Encoder {
     private final Encoder mtomEncoder;
-    private final Encoder soapEncoder;
+    private final Encoder mimeEncoder;
     private final SOAPBindingImpl binding;
 
     public EncoderFacade(WSBinding binding) {
         mtomEncoder = MtomEncoder.get(binding.getSOAPVersion());
-        soapEncoder = TestEncoderImpl.get(binding.getSOAPVersion());
+        Encoder soapEncoder = TestEncoderImpl.get(binding.getSOAPVersion());
+        mimeEncoder = new MimeEncoder(soapEncoder);
         this.binding = (SOAPBindingImpl)binding;
     }
 
@@ -68,6 +69,6 @@ public class EncoderFacade implements Encoder {
     private Encoder getEncoder(){
         if(binding.isMTOMEnabled())
             return mtomEncoder;
-        return soapEncoder;
+        return mimeEncoder;
     }
 }

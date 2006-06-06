@@ -39,7 +39,7 @@ import java.nio.channels.WritableByteChannel;
  * Mock up {@link Encoder} that just writes the SOAP envelope as XML,
  * until we get a real {@link Encoder} implemented.
  *
- * @author Jitu
+ * @author Jitendra Kotamraju
  */
 public final class TestEncoderImpl implements Encoder {
 
