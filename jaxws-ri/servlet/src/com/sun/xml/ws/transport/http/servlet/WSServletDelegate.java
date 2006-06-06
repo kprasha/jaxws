@@ -21,7 +21,7 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
-import com.sun.xml.ws.api.WSBinding;
+
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MimeHeaders;
+import javax.xml.ws.Binding;
 import javax.xml.ws.http.HTTPBinding;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -117,7 +118,7 @@ final class WSServletDelegate {
                     target.publishWSDL(context, request, response);
                     return;
                 }
-                WSBinding binding = target.getEndpoint().getBinding();
+                Binding binding = target.getEndpoint().getBinding();
                 if (binding instanceof HTTPBinding) {
                     // The request is handled by endpoint or runtime
                     target.handle(context, request, response);
@@ -193,8 +194,8 @@ final class WSServletDelegate {
                 writeNotFoundErrorPage(localizer, response, "Invalid request");
                 return;
             }
-            WSBinding binding = target.getEndpoint().getBinding();
-            if (binding.getBindingId().equals(HTTPBinding.HTTP_BINDING)) {
+            Binding binding = target.getEndpoint().getBinding();
+            if (binding instanceof HTTPBinding) {
                 target.handle(context, request, response);
             } else {
                 response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
