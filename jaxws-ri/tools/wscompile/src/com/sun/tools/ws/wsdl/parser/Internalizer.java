@@ -356,7 +356,9 @@ public class Internalizer {
             //
             // the current workaround is still problematic in the sense that
             // it can't support user-defined extensions. This needs more careful thought.
-            if(!target.hasAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "extensionBindingPrefixes")){
+
+            //JAXB doesn't allow writing jaxb:extensionbindingPrefix anywhere other than root element so lets write only on <xs:schema>
+            if(target.getLocalName().equals("schema") && target.getNamespaceURI().equals(Constants.NS_XSD)&& !target.hasAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "extensionBindingPrefixes")){
                 target.setAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "jaxb:extensionBindingPrefixes", "xjc");
                 target.setAttributeNS(Constants.NS_XMLNS, "xmlns:xjc", JAXWSBindingsConstants.NS_XJC_BINDINGS);
             }
