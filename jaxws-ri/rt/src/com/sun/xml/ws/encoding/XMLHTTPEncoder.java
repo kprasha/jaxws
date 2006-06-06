@@ -114,7 +114,7 @@ public final class XMLHTTPEncoder implements Encoder {
             if (atts != null && atts != atts.EMPTY) {
                 final ByteOutputStream bos = new ByteOutputStream();
                 try {
-                    ContentType ct = new MimeEncoder().encode(new Packet(msg), bos);
+                    ContentType ct = new MimeEncoder(null).encode(new Packet(msg), bos);
                     return XMLMessage.createDataSource(ct.getContentType(), bos.newInputStream());
                 } catch(IOException ioe) {
                     throw new WebServiceException(ioe);
