@@ -432,7 +432,7 @@ public class SAAJMessage extends Message {
             HashMap<String, Attachment> map = new HashMap<String, Attachment>();
             while (attIter.hasNext()) {
                 AttachmentPart ap = (AttachmentPart) attIter.next();
-                attMap.put(ap.getContentId(), new SAAJAttachment(ap));
+                map.put(ap.getContentId(), new SAAJAttachment(ap));
             }
             return map;
         }
