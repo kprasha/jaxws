@@ -111,7 +111,9 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     @Override
     public void setStatus(int status) {
         this.status = status;
-        response.setStatus(status);
+        // Servlet containers don't seem to like setting of the value multiple times
+        // Moving the following to getOutput()
+        //response.setStatus(status);
     }
 
     @Override
@@ -132,6 +134,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
 
     @Override
     public @NotNull OutputStream getOutput() throws IOException {
+        response.setStatus(status);
         return response.getOutputStream();
     }
 
