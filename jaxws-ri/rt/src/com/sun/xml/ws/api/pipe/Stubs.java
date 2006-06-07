@@ -30,6 +30,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.JAXBDispatch;
+import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.model.SOAPSEIModel;
 
@@ -92,6 +93,7 @@ public abstract class Stubs {
      * </pre>
      */
     public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+        DispatchImpl.checkValidSOAPMessageDispatch(binding, mode);
         return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, SOAPMessage.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
@@ -104,6 +106,7 @@ public abstract class Stubs {
      * </pre>
      */
     public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+        DispatchImpl.checkValidDataSourceDispatch(binding, mode);
         return new DataSourceDispatch(portName, DataSource.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
@@ -139,11 +142,10 @@ public abstract class Stubs {
      *
      * TODO: are these parameters making sense?
      */
-    public static <T> Dispatch<T> createDispatch( QName portName,
-                                           WSService owner,
-                                           WSBinding binding,
-                                           Class<T> clazz, Service.Mode mode, Pipe next ) {
-
+    public static <T> Dispatch<T> createDispatch(QName portName,
+                                                 WSService owner,
+                                                 WSBinding binding,
+                                                 Class<T> clazz, Service.Mode mode, Pipe next) {
         if (clazz == SOAPMessage.class) {
             return (Dispatch<T>) createSAAJDispatch(portName, owner, binding, mode, next);
         } else if (clazz == Source.class) {
