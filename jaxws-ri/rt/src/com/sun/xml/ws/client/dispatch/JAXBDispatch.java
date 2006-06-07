@@ -88,7 +88,7 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
         try {
             Marshaller marshaller = jaxbcontext.createMarshaller();
             marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
-            //todo: msg == null needs http Get for xmlHTTP- Payload mode for SOAP
+
             Message message = (msg == null) ? Messages.createEmpty(soapVersion): Messages.create(marshaller, msg, soapVersion);
             return new Packet(message);
         } catch (JAXBException e) {

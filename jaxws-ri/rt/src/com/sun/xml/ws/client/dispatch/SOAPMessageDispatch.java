@@ -41,9 +41,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-/**
- * TODO: Use sandbox classes, update javadoc
- */
 
 /**
  * The <code>SOAPMessageDispatch</code> class provides support
@@ -61,6 +58,10 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
     }
 
     Packet createPacket(SOAPMessage arg) {
+
+        if (arg == null && !isXMLHttp(binding))
+           throw new WebServiceException("Can not invoke a SOAPMessage with a null invocation parameter");
+
         MimeHeaders mhs = arg.getMimeHeaders();
         mhs.addHeader("Content-Type", "text/xml");
         mhs.addHeader("Content-Transfer-Encoding", "binary");

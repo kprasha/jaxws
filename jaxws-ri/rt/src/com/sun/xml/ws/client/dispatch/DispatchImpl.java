@@ -24,6 +24,7 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -42,6 +43,7 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.bind.JAXBException;
 import java.util.concurrent.Callable;
@@ -154,6 +156,8 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     public final T doInvoke(T in, RequestContext rc, ResponseContextReceiver receiver){
         Packet response = null;
         try {
+            checkNullAllowed(in, rc, binding, mode);
+
             Packet message = createPacket(in);
             setProperties(message,true);
             response = process(message,rc,receiver);
@@ -186,6 +190,10 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     public final void invokeOneWay(T in) {
+        
+        checkNullAllowed(in, requestContext, binding, mode);
+
+
         Packet request = createPacket(in);
         setProperties(request,false);
         Packet response = process(request,requestContext,this);
@@ -195,8 +203,50 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         packet.expectReply = expectReply;
     }
 
-     boolean isXMLHttp() {
+    static boolean isXMLHttp(WSBinding binding) {
         return  (binding.getBindingId().equals(BindingID.XML_HTTP)) ? true : false;
+    }
+
+    static boolean isPAYLOADMode(Service.Mode mode) {
+           return  (mode == Service.Mode.PAYLOAD) ? true : false;
+    }
+
+    static void checkNullAllowed(Object in, RequestContext rc, WSBinding binding, Service.Mode mode) {
+
+        if (in != null)
+            return;
+
+        //With HTTP Binding a null invocation parameter can not be used
+        //with HTTP Request Method == POST
+        if (isXMLHttp(binding)){
+            if (methodNotOk(rc))
+                throw new WebServiceException("A XML/HTTP request using MessageContext.HTTP_REQUEST_METHOD equals \"POST\" with a Null invocation Argument is not allowed");
+        } else { //soapBinding
+              if (mode == Service.Mode.MESSAGE )
+                  throw new WebServiceException("SOAP/HTTP Binding in Service.Mode.message is not allowed with a null invocation argument");
+        }
+    }
+
+    static boolean methodNotOk(RequestContext rc) {
+        String requestMethod = (String)rc.get(MessageContext.HTTP_REQUEST_METHOD);
+        String request = (requestMethod == null)? "POST": requestMethod;
+
+        return  "POST".equalsIgnoreCase(request) ||
+             "PUT".equalsIgnoreCase(request)? true: false;
+    }
+
+    public static void checkValidSOAPMessageDispatch(WSBinding binding, Service.Mode mode) {
+        if (DispatchImpl.isXMLHttp(binding))
+            throw new WebServiceException("Can not create Dispatch<SOAPMessage> with XML/HTTP Binding, SOAPBinding only.");
+        if (DispatchImpl.isPAYLOADMode(mode))
+            throw new WebServiceException("Can not create Dispatch<SOAPMessage> of Service.Mode.PAYLOAD, Service.Mode.MESSAGE only");
+    }
+
+    public static void checkValidDataSourceDispatch(WSBinding binding, Service.Mode mode) {
+        if (!DispatchImpl.isXMLHttp(binding))
+            throw new WebServiceException("Can not create Dispatch<DataSource> with SOAP Binding Binding, XML/HTTP Binding only.");
+        if (DispatchImpl.isPAYLOADMode(mode))
+            throw new WebServiceException("Can not create Dispatch<DataSource> of Service.Mode.PAYLOAD, Service.Mode.MESSAGE only");
     }
 
     /**

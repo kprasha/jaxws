@@ -76,13 +76,10 @@ public class SourceDispatch extends DispatchImpl<Source> {
 
         switch (mode) {
             case PAYLOAD:
-                          //check on this for different binding
                 message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
-                //message = new PayloadSourceMessage(msg, soapVersion);
                 break;
-            case MESSAGE:
-                //check on this for message mode
-                if (isXMLHttp())
+            case MESSAGE:                
+                if (isXMLHttp(binding))
                     message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
                 else {
                     message = Messages.create(msg, soapVersion);
