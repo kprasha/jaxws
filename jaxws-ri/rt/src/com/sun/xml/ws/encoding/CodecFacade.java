@@ -97,8 +97,8 @@ public class CodecFacade extends MimeCodec {
             swaCodec.decode(mpp,packet);
     }
 
-    private boolean isMultipartRelated(String contentType){
-        return MULTIPART.equals(contentType.substring(0,MULTIPART.length()).toLowerCase());
+    private boolean isMultipartRelated(String contentType){ 
+        return contentType.length() >= MULTIPART.length() && MULTIPART.equalsIgnoreCase(contentType.substring(0,MULTIPART.length()));
     }
 
     public CodecFacade copy() {
