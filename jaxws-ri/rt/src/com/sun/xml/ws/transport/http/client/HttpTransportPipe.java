@@ -23,9 +23,8 @@ package com.sun.xml.ws.transport.http.client;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
@@ -48,23 +47,21 @@ import java.util.Map.Entry;
  */
 public class HttpTransportPipe implements Pipe {
 
-    private final Encoder encoder;
-    private final Decoder decoder;
+    private final Codec codec;
 
     public HttpTransportPipe(WSBinding binding) {
-        this(binding.createEncoder(),binding.createDecoder());
+        this(binding.createCodec());
     }
 
-    private HttpTransportPipe(Encoder encoder, Decoder decoder) {
-        this.encoder = encoder;
-        this.decoder = decoder;
+    private HttpTransportPipe(Codec codec) {
+        this.codec = codec;
     }
 
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
     private HttpTransportPipe(HttpTransportPipe that, PipeCloner cloner) {
-        this( that.encoder.copy(), that.decoder.copy() );
+        this( that.codec.copy() );
         cloner.add(that,this);
     }
 
@@ -79,10 +76,10 @@ public class HttpTransportPipe implements Pipe {
 
             HttpClientTransport con = new HttpClientTransport(request,reqHeaders);
 
-            ContentType ct = encoder.getStaticContentType(request);
+            ContentType ct = codec.getStaticContentType(request);
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
-                ct = encoder.encode(request, buf);
+                ct = codec.encode(request, buf);
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Collections.singletonList(Integer.toString(buf.size())));
                 reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
@@ -96,11 +93,11 @@ public class HttpTransportPipe implements Pipe {
                 writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
                 if(dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
-                    encoder.encode(request, buf);
+                    codec.encode(request, buf);
                     dump(buf, "HTTP request", reqHeaders);
                     buf.writeTo(con.getOutput());
                 } else {
-                    encoder.encode(request, con.getOutput());
+                    codec.encode(request, con.getOutput());
                 }
             }
 
@@ -121,7 +118,7 @@ public class HttpTransportPipe implements Pipe {
                 dump(buf,"HTTP response "+con.statusCode, respHeaders);
                 response = buf.newInputStream();
             }
-            decoder.decode(response, contentType, reply);
+            codec.decode(response, contentType, reply);
 
             return reply;
         } catch(WebServiceException wex) {

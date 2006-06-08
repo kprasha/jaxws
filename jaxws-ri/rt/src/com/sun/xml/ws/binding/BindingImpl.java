@@ -26,8 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.ws.handler.Handler;
@@ -93,12 +92,8 @@ public abstract class BindingImpl implements WSBinding {
         return bindingId.getSOAPVersion();
     }
 
-    public final @NotNull Encoder createEncoder() {
+    public final @NotNull Codec createCodec() {
         return bindingId.createEncoder(this);
-    }
-
-    public final @NotNull Decoder createDecoder() {
-        return bindingId.createDecoder(this);
     }
 
     public static BindingImpl create(@NotNull BindingID bindingId) {

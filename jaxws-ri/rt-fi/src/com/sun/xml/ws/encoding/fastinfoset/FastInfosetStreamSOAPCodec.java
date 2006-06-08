@@ -22,25 +22,48 @@
 package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.encoding.StreamSOAPCodec;
+import com.sun.xml.ws.message.stream.StreamHeader;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
+import java.nio.channels.ReadableByteChannel;
 
 /**
- * A stream SOAP encoder for encoding SOAP message infosets to fast
+ * A stream SOAP codec for handling SOAP message infosets to fast
  * infoset documents.
+ *
+ * <p>
+ * This implementation currently defers to {@link StreamSOAPCodec} for the decoding
+ * using {@link XMLStreamReader}.
  *
  * @author Paul Sandoz
  */
-public abstract class FastInfosetStreamSOAPEncoder implements Encoder {
-    
+public abstract class FastInfosetStreamSOAPCodec implements Codec {
+
+    private StreamSOAPCodec _soapCodec;
+
+    /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion) {
+        _soapCodec = StreamSOAPCodec.create(soapVersion);
+    }
+
+    /* package */ FastInfosetStreamSOAPCodec(FastInfosetStreamSOAPCodec that) {
+        this._soapCodec = that._soapCodec.copy();
+    }
+
+
     public ContentType getStaticContentType(Packet packet) {
         return getContentType(packet.soapAction);
     }
@@ -63,29 +86,43 @@ public abstract class FastInfosetStreamSOAPEncoder implements Encoder {
         throw new UnsupportedOperationException();
     }
 
-    public Encoder copy() {
-        // TODO: when you make Decoder stateful, implement the copy method.
-        // This also depends on the underlying SOAP decoder being stateless
-        return this;
-    }
-
     protected XMLStreamWriter createXMLStreamWriter(OutputStream out) {
         // TODO: we should definitely let Encode owns one XMLStreamWriter instance
         // instead of instantiating a new one
         return new StAXDocumentSerializer(out);
     }
-    
+
     protected abstract ContentType getContentType(String soapAction);
-    
-    public static FastInfosetStreamSOAPEncoder get(SOAPVersion version) {
+
+    public void decode(InputStream in, String contentType, Packet response) throws IOException {
+        XMLStreamReader reader = createXMLStreamReader(in);
+        response.setMessage(_soapCodec.decode(reader));
+    }
+
+    public void decode(ReadableByteChannel in, String contentType, Packet response) {
+        throw new UnsupportedOperationException();
+    }
+
+    protected XMLStreamReader createXMLStreamReader(InputStream in) {
+        // TODO: we should definitely let Decode owns one XMLStreamReader instance
+        // instead of instantiating a new parser
+        return new StAXDocumentParser(in);
+    }
+
+    protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark);
+
+    /**
+     * Creates a new {@link FastInfosetStreamSOAPCodec} instance.
+     */
+    public static FastInfosetStreamSOAPCodec get(SOAPVersion version) {
         if(version==null)
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();
         switch(version) {
         case SOAP_11:
-            return new FastInfosetStreamSOAP11Encoder();
+            return new FastInfosetStreamSOAP11Codec();
         case SOAP_12:
-            return new FastInfosetStreamSOAP12Encoder();
+            return new FastInfosetStreamSOAP12Codec();
         default:
             throw new AssertionError();
         }

@@ -28,7 +28,7 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.encoding.StreamSOAPDecoder;
+import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.message.DOMMessage;
 import com.sun.xml.ws.message.EmptyMessageImpl;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
@@ -223,7 +223,7 @@ public abstract class Messages {
 
         SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
 
-        return StreamSOAPDecoder.create(ver).decode(reader);
+        return StreamSOAPCodec.create(ver).decode(reader);
     }
 
     /**

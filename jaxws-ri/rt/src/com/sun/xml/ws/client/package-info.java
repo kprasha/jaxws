@@ -31,7 +31,7 @@
  *   object(A,"EndpointIFInvocationHandler");
  *   object(B,"DelegateBase");
  *   object(C,"MessageDispatcher");
- *   object(D,"Encoder/Decoder");
+ *   object(D,"Codec");
  *   object(F,"WSConnection");
  *   step();
  *
@@ -177,7 +177,7 @@
  * There will be two types of client-side SOAPXMLEncoder for JAX-WS 2.0 FCS, 
  * SOAPXMEncoder for SOAP 1.1 and {@link com.sun.xml.ws.encoding.soap.client.SOAP12XMLEncoder}
  * for SOAP 1.2. The MessageDispatcher invokes configured handlers and use the 
- * encoder to convert the InternalMessage to a {@link javax.xml.soap.SOAPMessage}.
+ * codec to convert the InternalMessage to a {@link javax.xml.soap.SOAPMessage}.
  * The metadata from the MessageInfo is classified into {@link javax.xml.soap.MimeHeaders} 
  * of this SOAPMessage and context information for {@link com.sun.xml.ws.api.server.WSConnection}.
  * The SOAPMessge is then written to the output stream of the WSConnection

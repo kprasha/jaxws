@@ -24,7 +24,7 @@ package com.sun.xml.ws.api;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.istack.NotNull;
 
@@ -40,7 +40,7 @@ import java.util.List;
  *
  * <p>
  * Binding conceptually includes the on-the-wire format of the message,
- * this this object owns {@link Encoder} and {@link Decoder}.
+ * this this object owns {@link Codec} and {@link Decoder}.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -64,20 +64,12 @@ public interface WSBinding extends Binding {
     SOAPVersion getSOAPVersion();
 
     /**
-     * Creates a new {@link Encoder} for this binding.
+     * Creates a new {@link Codec} for this binding.
      *
      * <p>
-     * This is just a short-cut for {@code getBindingID().createEncoder()}
+     * This is just a short-cut for {@code getBindingID().createCodec()}
      */
-    @NotNull Encoder createEncoder();
-
-    /**
-     * Creates a new {@link Decoder} for this binding.
-     *
-     * <p>
-     * This is just a short-cut for {@code getBindingID().createDecoder()}
-     */
-    @NotNull Decoder createDecoder();
+    @NotNull Codec createCodec();
 
     /**
      * Gets the binding ID, which uniquely identifies the binding.

@@ -43,7 +43,7 @@ public class HTTPBindingImpl extends BindingImpl implements HTTPBinding {
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
     HTTPBindingImpl() {
-        // TODO: implement a real encoder/decoder for these
+        // TODO: implement a real Codec for these
         super(BindingID.XML_HTTP);
     }
 

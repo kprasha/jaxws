@@ -27,7 +27,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
@@ -119,7 +119,7 @@ import java.lang.reflect.Proxy;
  *
  * <h2>Message and XOP</h2>
  * <p>
- * XOP is considered as an {@link Encoder}, and therefore when you are looking at
+ * XOP is considered as an {@link Codec}, and therefore when you are looking at
  * {@link Message}, you'll never see &lt;xop:Include> or any such elements
  * (instead you'll see the base64 data inlined.) If a consumer of infoset isn't
  * interested in handling XOP by himself, this allows him to work with XOP

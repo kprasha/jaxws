@@ -22,79 +22,96 @@
 
 package com.sun.xml.ws.encoding;
 
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.stream.writers.UTF8OutputStreamWriter;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.message.stream.StreamAttachment;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import org.jvnet.staxex.Base64Data;
+import org.jvnet.staxex.NamespaceContextEx;
+import org.jvnet.staxex.XMLStreamReaderEx;
+import org.jvnet.staxex.XMLStreamWriterEx;
 
 import javax.activation.DataHandler;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayOutputStream;
-import java.nio.channels.WritableByteChannel;
-import java.util.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
-
-import org.jvnet.staxex.XMLStreamWriterEx;
-import org.jvnet.staxex.NamespaceContextEx;
-import org.jvnet.staxex.Base64Data;
+import java.nio.channels.WritableByteChannel;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 /**
- * Mtom messge Encoder. It can be used even for non-soap message's mtom encoding.
+ * Mtom messge Codec. It can be used even for non-soap message's mtom encoding.
  *
  * @author Vivek Pandey
  */
-public class MtomEncoder implements Encoder {
+public class MtomCodec extends MimeCodec {
+    // encoding
     private String boundaryParameter;
     private String boundary;
-    private static final String xopContentType = "application/xop+xml";
     private final String soapXopContentType;
     private final XMLStreamWriterEx xmlStreamWriterEx = new MtomStreamWriter();
     private String messageContentType;
-    private final String soapContentType;
     private XMLStreamWriter writer;
-    private final SOAPVersion version;
     private UTF8OutputStreamWriter osWriter;
-    private static final String xopPref="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
-    private static final String xopSuff="\"/>";
+
+    // decoding
+    private final StreamSOAPCodec codec;
+    private MimeMultipartParser mimeMP;
+    private final MtomXMLStreamReaderEx xmlStreamReaderEx = new MtomXMLStreamReaderEx();
+    private XMLStreamReader reader;
+    private Base64Data base64AttData;
+    private boolean xopReferencePresent = false;
+
+    //values that will set to whether mtom or not as caller can call getPcData or getTextCharacters
+    private int textLength;
+    private int textStart;
+
+    //To be used with #getTextCharacters
+    private char[] base64EncodedText;
+
+    //public MtomDecoder(MimeMultipartRelatedDecoder mimeMultipartDecoder) {
+    //    this.mimeMultipartDecoder = mimeMultipartDecoder;
+    //}
+
 
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
     private final List<ByteArrayBuffer> mtomAttachmentStream = new ArrayList<ByteArrayBuffer>();
 
-    MtomEncoder(SOAPVersion version){
-        this.version = version;
-        switch(version){
-            case SOAP_11:
-                this.soapContentType = "text/xml";
-                break;
-            case SOAP_12:
-                this.soapContentType = "application/soap+xml";
-                break;
-            default:
-                throw new AssertionError();
-        }
+    MtomCodec(SOAPVersion version){
+        super(version);
+        this.codec = StreamSOAPCodec.create(version);
         createConteTypeHeader();
-        this.soapXopContentType = xopContentType+";charset=utf-8;type=\""+soapContentType+"\"";
+        this.soapXopContentType = XOP_CONTENT_TYPE +";charset=utf-8;type=\""+version.contentType+"\"";
     }
 
     private void createConteTypeHeader(){
         boundary = "uuid:" + UUID.randomUUID().toString();
         boundaryParameter = "boundary=\"" + boundary +"\"";
-        messageContentType =  "Multipart/Related;type=\""+xopContentType+"\";" + boundaryParameter + ";start-info=\"" + soapContentType+"\"";
+        messageContentType =  "Multipart/Related;type=\""+XOP_CONTENT_TYPE +"\";" + boundaryParameter + ";start-info=\"" + version.contentType+"\"";
     }
 
     /**
@@ -200,7 +217,7 @@ public class MtomEncoder implements Encoder {
 
             //write out the xop reference
             writer.writeCharacters("");
-            osWriter.write(xopPref+bos.contentId+xopSuff);
+            osWriter.write(XOP_PREF +bos.contentId+XOP_SUFF);
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
@@ -232,8 +249,8 @@ public class MtomEncoder implements Encoder {
         throw new UnsupportedOperationException();
     }
 
-    public Encoder copy() {
-        return new MtomEncoder(version);
+    public MtomCodec copy() {
+        return new MtomCodec(version);
     }
 
     public XMLStreamWriterEx getXmlStreamWriterEx() {
@@ -251,8 +268,7 @@ public class MtomEncoder implements Encoder {
         if(ns != null && (ns.length() > 0)){
             try {
                 URI uri = new URI(ns);
-                String host = uri.toURL().getHost();
-                cid = host;
+                cid = uri.toURL().getHost();
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 return null;
@@ -267,21 +283,18 @@ public class MtomEncoder implements Encoder {
         return name + cid;
     }
 
-    public static final Encoder SOAP11 = new MtomEncoder(SOAPVersion.SOAP_11);
-    public static final Encoder SOAP12 = new MtomEncoder(SOAPVersion.SOAP_12);
+    @Override
+    protected void decode(MimeMultipartParser mpp, Packet packet) throws IOException {
+        this.mimeMP = mpp;
+        reader = XMLStreamReaderFactory.createXMLStreamReader(mimeMP.getRootPart().asInputStream(), true);
+        packet.setMessage(codec.decode(xmlStreamReaderEx));
+    }
 
-    public static Encoder get(SOAPVersion version) {
-        if(version==null)
-            // this decoder is for SOAP, not for XML/HTTP
-            throw new IllegalArgumentException();
-        switch(version) {
-        case SOAP_11:
-            return SOAP11;
-        case SOAP_12:
-            return SOAP12;
-        default:
-            throw new AssertionError();
+    private CharSequence getMtomPCData() {
+        if(xopReferencePresent){
+            return base64AttData;
         }
+        return reader.getText();
     }
 
     private class MtomStreamWriter implements XMLStreamWriterEx {
@@ -304,7 +317,7 @@ public class MtomEncoder implements Encoder {
                 Base64Data binaryData = (Base64Data)data;
                 writeBinary(binaryData.getExact(), 0, binaryData.getDataLen(), binaryData.getMimeType());
                 return;
-            }            
+            }
             writeCharacters(data.toString());
         }
 
@@ -462,4 +475,327 @@ public class MtomEncoder implements Encoder {
             writer.writeAttribute(prefix, namespaceURI, localName, value);
         }
     }
+
+    private class MtomXMLStreamReaderEx implements XMLStreamReaderEx {
+        public CharSequence getPCDATA() throws XMLStreamException {
+            return getMtomPCData();
+        }
+
+        public NamespaceContextEx getNamespaceContext() {
+            NamespaceContext nsContext = reader.getNamespaceContext();
+            return new MtomNamespaceContextEx(nsContext);
+
+
+        }
+
+        public String getElementTextTrim() throws XMLStreamException {
+            throw new UnsupportedOperationException();
+        }
+
+        private class MtomNamespaceContextEx implements NamespaceContextEx {
+            private NamespaceContext nsContext;
+
+            public MtomNamespaceContextEx(NamespaceContext nsContext) {
+                this.nsContext = nsContext;
+            }
+
+            public Iterator<Binding> iterator() {
+                throw new UnsupportedOperationException();
+            }
+
+            public String getNamespaceURI(String prefix) {
+                return nsContext.getNamespaceURI(prefix);
+            }
+
+            public String getPrefix(String namespaceURI) {
+                return nsContext.getPrefix(namespaceURI);
+            }
+
+            public Iterator getPrefixes(String namespaceURI) {
+                return nsContext.getPrefixes(namespaceURI);
+            }
+
+        }
+
+        public int getAttributeCount() {
+            return reader.getAttributeCount();
+        }
+
+        public int getEventType() {
+            return reader.getEventType();
+        }
+
+        public int getNamespaceCount() {
+            return reader.getNamespaceCount();
+        }
+
+        public int getTextLength() {
+            if (xopReferencePresent)
+                return textLength;
+            return reader.getTextLength();
+        }
+
+        public int getTextStart() {
+            //TODO: check if this is correct
+            if (xopReferencePresent)
+                return 0;
+            return reader.getTextStart();
+        }
+
+        private class Base64DataEx extends Base64Data{
+            private final InputStream is;
+            public Base64DataEx(InputStream is) {
+                super();
+                this.is = is;
+            }
+        }
+        public int next() throws XMLStreamException {
+            int event = reader.next();
+            if ((event == XMLStreamConstants.START_ELEMENT) && reader.getLocalName().equals(XOP_LOCALNAME) && reader.getNamespaceURI().equals(XOP_NAMESPACEURI))
+            {
+                //its xop reference, take the URI reference
+                String href = reader.getAttributeValue(null, "href");
+                href = decodeCid(href);
+                try {
+                    StreamAttachment att = mimeMP.getAttachmentPart(href);
+                    base64AttData = att.asBase64Data();
+                    textLength = base64AttData.getDataLen();
+                    textStart = 0;
+                    xopReferencePresent = true;
+                } catch (IOException e) {
+                    throw new WebServiceException(e);
+                }
+                //move to the </xop:Include>
+                try {
+                    reader.next();
+                } catch (XMLStreamException e) {
+                    throw new WebServiceException(e);
+                }
+                return XMLStreamConstants.CHARACTERS;
+            }
+            if(xopReferencePresent){
+                xopReferencePresent = false;
+                textStart = 0;
+                textLength = 0;
+                base64EncodedText = null;
+            }
+            return event;
+        }
+
+        private String decodeCid(String cid) {
+            if (cid.startsWith("cid:"))
+                cid = cid.substring(4, cid.length());
+            try {
+                return "<" + URLDecoder.decode(cid, "UTF-8") + ">";
+            } catch (UnsupportedEncodingException e) {
+                throw new WebServiceException(e);
+            }
+        }
+
+        public int nextTag() throws XMLStreamException {
+            return reader.nextTag();
+        }
+
+        public void close() throws XMLStreamException {
+            reader.close();
+        }
+
+        public boolean hasName() {
+            return reader.hasName();
+        }
+
+        public boolean hasNext() throws XMLStreamException {
+            return reader.hasNext();
+        }
+
+        public boolean hasText() {
+            return reader.hasText();
+        }
+
+        public boolean isCharacters() {
+            return reader.isCharacters();
+        }
+
+        public boolean isEndElement() {
+            return reader.isEndElement();
+        }
+
+        public boolean isStandalone() {
+            return reader.isStandalone();
+        }
+
+        public boolean isStartElement() {
+            return reader.isStartElement();
+        }
+
+        public boolean isWhiteSpace() {
+            return reader.isWhiteSpace();
+        }
+
+        public boolean standaloneSet() {
+            return reader.standaloneSet();
+        }
+
+        public char[] getTextCharacters() {
+            if (xopReferencePresent) {
+                char[] chars = new char[base64AttData.length()];
+                base64AttData.writeTo(chars, 0);
+                textLength = chars.length;
+                return chars;
+            }
+            return reader.getTextCharacters();
+        }
+
+        public boolean isAttributeSpecified(int index) {
+            return reader.isAttributeSpecified(index);
+        }
+
+        public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
+            if(xopReferencePresent){
+                int event = reader.getEventType();
+                if(event != XMLStreamConstants.CHARACTERS){
+                    //its invalid state - delegate it to underlying reader to throw the corrrect exception so that user
+                    // always sees the uniform exception from the XMLStreamReader
+                    throw new XMLStreamException("Invalid state: Expected CHARACTERS found :");
+                }
+                if(target == null){
+                    throw new NullPointerException("target char array can't be null") ;
+                }
+
+                if(targetStart < 0 || length < 0 || sourceStart < 0 || targetStart >= target.length ||
+                        (targetStart + length ) > target.length) {
+                    throw new IndexOutOfBoundsException();
+                }
+
+                if(base64EncodedText != null){
+                    base64EncodedText = new char[base64AttData.length()];
+                    base64AttData.writeTo(base64EncodedText, 0);
+                    textLength = base64EncodedText.length;
+                    textStart = 0;
+                }
+
+                if((textStart + sourceStart) > textLength)
+                    throw new IndexOutOfBoundsException();
+
+                int available = textLength - sourceStart;
+                if(available < 0){
+                    throw new IndexOutOfBoundsException("sourceStart is greater than" +
+                            "number of characters associated with this event");
+                }
+
+                int copiedLength = Math.min(available,length);
+
+                System.arraycopy(base64EncodedText, getTextStart() + sourceStart , target, targetStart, copiedLength);
+                textStart = sourceStart;
+                return copiedLength;
+            }
+            return reader.getTextCharacters(sourceStart, target, targetStart, length);
+        }
+
+        public String getCharacterEncodingScheme() {
+            return reader.getCharacterEncodingScheme();
+        }
+
+        public String getElementText() throws XMLStreamException {
+            return reader.getElementText();
+        }
+
+        public String getEncoding() {
+            return reader.getEncoding();
+        }
+
+        public String getLocalName() {
+            return reader.getLocalName();
+        }
+
+        public String getNamespaceURI() {
+            return reader.getNamespaceURI();
+        }
+
+        public String getPIData() {
+            return reader.getPIData();
+        }
+
+        public String getPITarget() {
+            return reader.getPITarget();
+        }
+
+        public String getPrefix() {
+            return reader.getPrefix();
+        }
+
+        public String getText() {
+            if (xopReferencePresent) {
+                String text =  base64AttData.toString();
+                textLength = text.length();
+            }
+            return reader.getText();
+        }
+
+        public String getVersion() {
+            return reader.getVersion();
+        }
+
+        public String getAttributeLocalName(int index) {
+            return reader.getAttributeLocalName(index);
+        }
+
+        public String getAttributeNamespace(int index) {
+            return reader.getAttributeNamespace(index);
+        }
+
+        public String getAttributePrefix(int index) {
+            return reader.getAttributePrefix(index);
+        }
+
+        public String getAttributeType(int index) {
+            return reader.getAttributeType(index);
+        }
+
+        public String getAttributeValue(int index) {
+            return reader.getAttributeValue(index);
+        }
+
+        public String getNamespacePrefix(int index) {
+            return reader.getNamespacePrefix(index);
+        }
+
+        public String getNamespaceURI(int index) {
+            return reader.getNamespaceURI(index);
+        }
+
+        public QName getName() {
+            return reader.getName();
+        }
+
+        public QName getAttributeName(int index) {
+            return reader.getAttributeName(index);
+        }
+
+        public Location getLocation() {
+            return reader.getLocation();
+        }
+
+        public Object getProperty(String name) throws IllegalArgumentException {
+            return reader.getProperty(name);
+        }
+
+        public void require(int type, String namespaceURI, String localName) throws XMLStreamException {
+            reader.require(type, namespaceURI, localName);
+        }
+
+        public String getNamespaceURI(String prefix) {
+            return reader.getNamespaceURI(prefix);
+        }
+
+        public String getAttributeValue(String namespaceURI, String localName) {
+            return reader.getAttributeValue(namespaceURI, localName);
+        }
+    }
+
+    private static final String XOP_CONTENT_TYPE = "application/xop+xml";
+    private static final String XOP_PREF ="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
+    private static final String XOP_SUFF ="\"/>";
+    private static final String XOP_LOCALNAME = "Include";
+    private static final String XOP_NAMESPACEURI = "http://www.w3.org/2004/08/xop/include";
 }

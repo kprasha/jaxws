@@ -321,7 +321,7 @@ public interface Pipe {
      * <p>
      * Note that this method might be invoked by one thread while another
      * thread is executing the {@link #process(Packet)} method. See
-     * the {@link Encoder#copy()} for more discussion about this.
+     * the {@link Codec#copy()} for more discussion about this.
      *
      * @param cloner
      *      Use this object (in particular its {@link PipeCloner#copy(Pipe)} method

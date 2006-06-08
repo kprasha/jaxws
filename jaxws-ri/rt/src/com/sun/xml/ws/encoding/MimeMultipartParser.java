@@ -29,8 +29,7 @@ import java.util.Map;
  * @author Vivek Pandey
  * @author Jitendra Kotamraju
  */
-
-public class MimeMultipartParser {
+final class MimeMultipartParser {
 
     private final InputStream in;
     private final String start;

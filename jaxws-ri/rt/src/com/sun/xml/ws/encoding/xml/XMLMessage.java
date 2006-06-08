@@ -29,7 +29,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.encoding.XMLHTTPDecoder;
+import com.sun.xml.ws.encoding.XMLHTTPCodec;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
@@ -209,7 +209,7 @@ public final class XMLMessage {
         private void convertDataSourceToMessage() {
             if (message != null) {
                 try {
-                    message = XMLHTTPDecoder.INSTANCE.decodeXMLMultipart(dataSource.getInputStream(), dataSource.getContentType());
+                    message = XMLHTTPCodec.INSTANCE.decodeXMLMultipart(dataSource.getInputStream(), dataSource.getContentType());
                 } catch(IOException ioe) {
                     throw new WebServiceException(ioe);
                 }

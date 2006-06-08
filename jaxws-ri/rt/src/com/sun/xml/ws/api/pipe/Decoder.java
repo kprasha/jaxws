@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * The reverse operation of {@link Encoder}.
+ * The reverse operation of {@link Codec}.
  *
  * <p>
  * {@link Decoder} is a non-reentrant object, meaning no two threads
@@ -44,73 +44,10 @@ import java.nio.channels.ReadableByteChannel;
  *
  * TODO: do we need a look up table from content type to {@link Decoder}?
  *
- * TODO: do we need to be able to get a corresponding {@link Encoder} from {@link Decoder}
+ * TODO: do we need to be able to get a corresponding {@link Codec} from {@link Decoder}
  *       and vice versa?
  *
  * @author Kohsuke Kawaguchi
  */
 public interface Decoder {
-    /**
-     * Reads bytes from {@link InputStream} and constructs a {@link Message}.
-     *
-     * <p>
-     * The design encourages lazy decoding of a {@link Message}, where
-     * a {@link Message} is returned even before the whole message is parsed,
-     * and additional parsing is done as the {@link Message} body is read along.
-     * A {@link Decoder} is most likely have its own implementation of {@link Message}
-     * for this purpose.
-     *
-     * @param in
-     *      the data to be read into a {@link Message}. The transport would have
-     *      read any transport-specific header before it passes an {@link InputStream},
-     *      and {@link InputStream} is expected to be read until EOS. Never null.
-     *
-     *      <p>
-     *      Some transports, such as SMTP, may 'encode' data into another format
-     *      (such as uuencode, base64, etc.) It is the caller's responsibility to
-     *      'decode' these transport-level encoding before it passes data into
-     *      {@link Decoder}.
-     *
-     * @param contentType
-     *      The MIME content type (like "application/xml") of this byte stream.
-     *      Thie text includes all the sub-headers of the content-type header. Therefore,
-     *      in more complex case, this could be something like
-     *      <tt>multipart/related; boundary="--=_outer_boundary"; type="multipart/alternative"</tt>.
-     *      This parameter must not be null.
-     *
-     * @param response
-     *      The parsed {@link Message} will be set to this {@link Packet}.
-     *      {@link Decoder} may add additional properties to this {@link Packet}.
-     *      On a successful method completion, a {@link Packet} must contain a
-     *      {@link Message}.
-     *
-     * @throws IOException
-     *      if {@link InputStream} throws an exception.
-     */
-    void decode( InputStream in, String contentType, Packet response ) throws IOException;
-
-    /**
-     *
-     * @see #decode(InputStream, String, Packet)
-     */
-    void decode( ReadableByteChannel in, String contentType, Packet response );
-
-    /*
-     * The following methods need to be documented and implemented.
-     *
-     * Such methods will be used by a server side
-     * transport pipe that can support the invocation of methods on a
-     * ServerEdgePipe.
-     *
-    XMLStreamReaderMessage decode( InputStream in, String contentType ) throws IOException;
-    XMLStreamReaderMessage decode( ReadableByteChannel in, String contentType );
-    */
-    
-    /**
-     * Creates a copy of this {@link Decoder}.
-     *
-     * <p>
-     * See {@link Encoder#copy()} for the detailed contract.
-     */
-    Decoder copy();
 }

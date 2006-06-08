@@ -102,7 +102,7 @@ import java.util.TreeSet;
  *   sun.io.StandardCodec    # Standard codecs for the platform
  * </pre>
  * <p/>
- * To locate an encoder for a given encoding name, the internal I/O code would
+ * To locate an codec for a given encoding name, the internal I/O code would
  * do something like this:
  * <p/>
  * <pre>

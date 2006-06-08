@@ -24,7 +24,7 @@ package com.sun.xml.ws.transport.local;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
@@ -61,8 +61,7 @@ final class LocalTransportPipe implements Pipe {
      */
     private final HttpAdapter adapter;
 
-    private final Encoder encoder;
-    private final Decoder decoder;
+    private final Codec codec;
 
     // per-pipe reusable resources.
     // we don't really have to reuse anything since this isn't designed for performance,
@@ -70,22 +69,20 @@ final class LocalTransportPipe implements Pipe {
     private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
     public LocalTransportPipe(WSEndpoint endpoint, WSBinding binding) {
-        this(HttpAdapter.createAlone(endpoint),
-            binding.createEncoder(),binding.createDecoder());
+        this(HttpAdapter.createAlone(endpoint),binding.createCodec());
     }
 
-    private LocalTransportPipe(HttpAdapter adapter, Encoder encoder, Decoder decoder) {
+    private LocalTransportPipe(HttpAdapter adapter, Codec codec) {
         this.adapter = adapter;
-        this.encoder = encoder;
-        this.decoder = decoder;
-        assert encoder!=null && decoder!=null && adapter!=null;
+        this.codec = codec;
+        assert codec !=null && adapter!=null;
     }
 
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
     private LocalTransportPipe(LocalTransportPipe that, PipeCloner cloner) {
-        this(that.adapter, that.encoder.copy(), that.decoder.copy());
+        this(that.adapter, that.codec.copy());
         cloner.add(that,this);
     }
 
@@ -105,7 +102,7 @@ final class LocalTransportPipe implements Pipe {
 
             LocalConnectionImpl con = new LocalConnectionImpl(reqHeaders);
 
-            String contentType = encoder.encode(request, con.getOutput()).getContentType();
+            String contentType = codec.encode(request, con.getOutput()).getContentType();
 
             reqHeaders.put("Content-Type", Collections.singletonList(contentType));
 
@@ -124,7 +121,7 @@ final class LocalTransportPipe implements Pipe {
             }
 
             Packet reply = request.createResponse(null);
-            decoder.decode(con.getInput(), ct, reply);
+            codec.decode(con.getInput(), ct, reply);
             return reply;
         } catch (WebServiceException wex) {
             throw wex;

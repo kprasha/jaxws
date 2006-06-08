@@ -22,18 +22,41 @@
 package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.ContentTypeImpl;
+import com.sun.xml.ws.message.stream.StreamHeader;
+import com.sun.xml.ws.message.stream.StreamHeader12;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+
+import javax.xml.stream.XMLStreamReader;
 
 /**
- * An encoder that encodes SOAP 1.2 messages infosets to fast infoset
+ * A codec that converts SOAP 1.2 messages infosets to fast infoset
  * documents.
  *
  * @author Paul.Sandoz@Sun.Com
  */
-final class FastInfosetStreamSOAP12Encoder extends FastInfosetStreamSOAPEncoder {
-    public static final ContentTypeImpl defaultContentType = 
+final class FastInfosetStreamSOAP12Codec extends FastInfosetStreamSOAPCodec {
+    public static final ContentTypeImpl defaultContentType =
             new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12, null, null);
-    
+
+    /*package*/ FastInfosetStreamSOAP12Codec() {
+        super(SOAPVersion.SOAP_12);
+    }
+
+    private FastInfosetStreamSOAP12Codec(FastInfosetStreamSOAPCodec that) {
+        super(that);
+    }
+
+    public Codec copy() {
+        return new FastInfosetStreamSOAP12Codec(this);
+    }
+
+    protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
+        return new StreamHeader12(reader, mark);
+    }
+
     protected ContentType getContentType(String soapAction) {
         // TODO: set accept header
         if (soapAction == null) {
@@ -42,5 +65,5 @@ final class FastInfosetStreamSOAP12Encoder extends FastInfosetStreamSOAPEncoder 
             return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12 + ";action=\""+soapAction+"\"", null, null);
         }
     }
-    
+
 }

@@ -32,29 +32,34 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.message.EmptyMessageImpl;
+import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A stream SOAP decoder.
+ * A stream SOAP codec.
  *
  * @author Paul Sandoz
  */
 @SuppressWarnings({"StringEquality"})
-public abstract class StreamSOAPDecoder implements Decoder {
+public abstract class StreamSOAPCodec implements Codec {
 
     private static final String SOAP_ENVELOPE = "Envelope";
     private static final String SOAP_HEADER = "Header";
@@ -63,7 +68,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
     private final String SOAP_NAMESPACE_URI;
     private final SOAPVersion soapVersion;
 
-    /*package*/ StreamSOAPDecoder(SOAPVersion soapVersion) {
+    /*package*/ StreamSOAPCodec(SOAPVersion soapVersion) {
         SOAP_NAMESPACE_URI = soapVersion.nsUri;
         this.soapVersion = soapVersion;
     }
@@ -73,6 +78,30 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
     // consider caching
     // private final MutableXMLStreamBuffer buffer;
+
+    public ContentType getStaticContentType(Packet packet) {
+        return getContentType(packet.soapAction);
+    }
+
+    public ContentType encode(Packet packet, OutputStream out) {
+        if (packet.getMessage() != null) {
+            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
+            try {
+                packet.getMessage().writeTo(writer);
+                writer.flush();
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
+        }
+        return getContentType(packet.soapAction);
+    }
+
+    protected abstract ContentType getContentType(String soapAction);
+
+    public ContentType encode(Packet packet, WritableByteChannel buffer) {
+        //TODO: not yet implemented
+        throw new UnsupportedOperationException();
+    }
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
         XMLStreamReader reader = createXMLStreamReader(in);
@@ -152,8 +181,7 @@ public abstract class StreamSOAPDecoder implements Decoder {
         throw new UnsupportedOperationException();
     }
 
-    public final Decoder copy() {
-        // TODO: when you make Decoder stateful, implement the copy method.
+    public final StreamSOAPCodec copy() {
         return this;
     }
 
@@ -207,17 +235,17 @@ public abstract class StreamSOAPDecoder implements Decoder {
 
 
     /**
-     * Creates a new {@link StreamSOAPDecoder} instance.
+     * Creates a new {@link StreamSOAPCodec} instance.
      */
-    public static StreamSOAPDecoder create(SOAPVersion version) {
+    public static StreamSOAPCodec create(SOAPVersion version) {
         if(version==null)
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();
         switch(version) {
             case SOAP_11:
-                return new StreamSOAP11Decoder();
+                return new StreamSOAP11Codec();
             case SOAP_12:
-                return new StreamSOAP12Decoder();
+                return new StreamSOAP12Codec();
             default:
                 throw new AssertionError();
         }

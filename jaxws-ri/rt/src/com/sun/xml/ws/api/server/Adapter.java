@@ -23,12 +23,11 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.util.Pool;
-import java.util.Map;
 
 /**
  * Receives incoming messages from a transport (such as HTTP, JMS, etc)
@@ -49,7 +48,7 @@ import java.util.Map;
  *
  * <li>
  * To manage thread-unsafe resources, such as {@link WSEndpoint.PipeHead},
- * {@link Encoder}, and {@link Decoder}.
+ * {@link Codec}, and {@link Decoder}.
  * </ol>
  *
  * <p>
@@ -70,7 +69,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public abstract class Adapter<TK extends Adapter.Toolkit> {
-    
+
     protected final WSEndpoint<?> endpoint;
 
     /**
@@ -78,13 +77,9 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
      */
     public class Toolkit {
         /**
-         * For encoding infoset to the byte stream.
+         * For encoding/decoding infoset to/from the byte stream.
          */
-        public final Encoder encoder;
-        /**
-         * For decoding the byte stream to XML infoset.
-         */
-        public final Decoder decoder;
+        public final Codec codec;
         /**
          * This object from {@link WSEndpoint} serves the request.
          */
@@ -92,8 +87,7 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
 
         public Toolkit() {
             WSBinding binding = endpoint.getBinding();
-            this.encoder = binding.createEncoder();
-            this.decoder = binding.createDecoder();
+            this.codec = binding.createCodec();
             this.head = endpoint.createPipeHead();
         }
     }
@@ -106,7 +100,7 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
             return createToolkit();
         }
     };
-    
+
     /**
      * Creates an {@link Adapter} that delivers
      * messages to the given endpoint.

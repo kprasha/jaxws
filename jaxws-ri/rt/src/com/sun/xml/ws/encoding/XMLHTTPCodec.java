@@ -22,36 +22,36 @@
 
 package com.sun.xml.ws.encoding;
 
+import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.pipe.Encoder;
-import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.encoding.xml.XMLMessage;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.activation.DataSource;
 import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
-import com.sun.xml.ws.encoding.MimeEncoder;
-import com.sun.xml.messaging.saaj.util.ByteOutputStream;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
+import javax.activation.DataSource;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 /**
- * {@link Encoder} that just writes the XML in XML/HTTP binding
+ * {@link Codec} that just writes the XML in XML/HTTP binding
  *
  * @author Jitendra Kotamraju
  */
-public final class XMLHTTPEncoder implements Encoder {
+public final class XMLHTTPCodec implements Codec {
 
     private final ContentType contentType;
 
-    private XMLHTTPEncoder(String contentType) {
+    private XMLHTTPCodec(String contentType) {
         this.contentType = new ContentTypeImpl(contentType);
     }
 
@@ -105,7 +105,7 @@ public final class XMLHTTPEncoder implements Encoder {
             return contentType;
         }
     }
-    
+
     public static DataSource createDataSource(Message msg) {
         if (msg instanceof HasDataSource) {
             return ((HasDataSource)msg).getDataSource();
@@ -114,12 +114,12 @@ public final class XMLHTTPEncoder implements Encoder {
             if (atts != null && atts != atts.EMPTY) {
                 final ByteOutputStream bos = new ByteOutputStream();
                 try {
-                    ContentType ct = new MimeEncoder(null).encode(new Packet(msg), bos);
+                    ContentType ct = new SwACodec(null).encode(new Packet(msg), bos);
                     return XMLMessage.createDataSource(ct.getContentType(), bos.newInputStream());
                 } catch(IOException ioe) {
                     throw new WebServiceException(ioe);
                 }
-                
+
             } else {
                 final ByteOutputStream bos = new ByteOutputStream();
                 XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
@@ -133,7 +133,7 @@ public final class XMLHTTPEncoder implements Encoder {
             }
 
         }
-        
+
     }
 
     public ContentType encode(Packet packet, WritableByteChannel buffer) {
@@ -141,15 +141,40 @@ public final class XMLHTTPEncoder implements Encoder {
         throw new UnsupportedOperationException();
     }
 
-    public Encoder copy() {
+    public void decode(InputStream in, String contentType, Packet packet) throws IOException {
+        Message message = XMLMessage.create(contentType, in);
+        packet.setMessage(message);
+    }
+
+    public Message decodeXMLMultipart(InputStream in, String contentType) throws IOException {
+        XMLHTTPMultipartDecoder decoder = new XMLHTTPMultipartDecoder();
+        return decoder.decode(in, contentType);
+    }
+
+    public void decode(ReadableByteChannel in, String contentType, Packet packet) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public static class XMLHTTPMultipartDecoder {
+        public Message decode(InputStream in, String contentType) throws IOException {
+            //decoder.decode(in, contentType);
+            // TODO need to create a Message around MimeMultipartRelatedDecoder
+            return null;
+            //return XMLMessage.create(decoder);
+        }
+
+    }
+
+    public Codec copy() {
         return this;
     }
-    
-    public static final Encoder INSTANCE = new XMLHTTPEncoder("text/xml");
-    
+
+    public static final XMLHTTPCodec INSTANCE = new XMLHTTPCodec("text/xml");
+
     static class ContentTypeImpl implements ContentType {
         final String contentType;
-        
+
         ContentTypeImpl(String contentType) {
             this.contentType = contentType;
         }

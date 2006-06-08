@@ -23,17 +23,11 @@
 package com.sun.xml.ws.message.source;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.encoding.StreamSOAPDecoder;
-import com.sun.xml.ws.message.AbstractMessageImpl;
-import com.sun.xml.ws.message.stream.StreamMessage;
+import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
@@ -46,12 +40,11 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 
 /**
  * Implementation of {@link Message} backed by {@link Source} where the Source
  * represents the complete message such as a SOAP envelope. It uses
- * {@link StreamSOAPDecoder} to create a {@link Message} and uses it as a
+ * {@link StreamSOAPCodec} to create a {@link Message} and uses it as a
  * delegate for all the methods.
  *
  * @author Vivek Pandey
@@ -62,8 +55,8 @@ public class ProtocolSourceMessage extends Message {
 
     public ProtocolSourceMessage(Source source, SOAPVersion soapVersion) {
         XMLStreamReader reader = SourceReaderFactory.createSourceReader(source, true);
-        StreamSOAPDecoder decoder = StreamSOAPDecoder.create(soapVersion);
-        sm = decoder.decode(reader);
+        StreamSOAPCodec codec = StreamSOAPCodec.create(soapVersion);
+        sm = codec.decode(reader);
     }
 
     public boolean hasHeaders() {

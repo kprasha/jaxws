@@ -67,6 +67,7 @@ import java.util.Collections;
 public enum SOAPVersion {
     SOAP_11(SOAPBinding.SOAP11HTTP_BINDING,
             com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE,
+            "text/xml",
             SOAPConstants.URI_SOAP_ACTOR_NEXT, "actor",
             javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL,
             new QName(com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE, "MustUnderstand"),
@@ -74,6 +75,7 @@ public enum SOAPVersion {
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
+            "application/xml+soap",
             SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER, "role",
             javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL,
             new QName(com.sun.xml.ws.encoding.soap.SOAP12Constants.URI_ENVELOPE, "MustUnderstand"),
@@ -92,6 +94,11 @@ public enum SOAPVersion {
      * SOAP envelope namespace URI.
      */
     public final String nsUri;
+
+    /**
+     * Content-type. Either "text/xml" or "application/soap+xml".
+     */
+    public final String contentType;
 
     /**
      * SOAP MustUnderstand FaultCode for this SOAP version
@@ -123,10 +130,11 @@ public enum SOAPVersion {
      */
     public final String roleAttributeName;
 
-    private SOAPVersion(String httpBindingId, String nsUri, String implicitRole, String roleAttributeName,
+    private SOAPVersion(String httpBindingId, String nsUri, String contentType, String implicitRole, String roleAttributeName,
                         String saajFactoryString, QName faultCodeMustUnderstand, Set<String> requiredRoles) {
         this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
+        this.contentType = contentType;
         this.implicitRole = implicitRole;
         this.roleAttributeName = roleAttributeName;
         try {

@@ -31,7 +31,7 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
 import com.sun.xml.ws.message.stream.StreamMessage;
-import com.sun.xml.ws.encoding.StreamSOAPDecoder;
+import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
 
@@ -39,7 +39,7 @@ import com.sun.istack.NotNull;
  * Complete infoset about a start tag.
  *
  * <p>
- * This is used between {@link StreamMessage} and {@link StreamSOAPDecoder}
+ * This is used between {@link StreamMessage} and {@link StreamSOAPCodec}
  * to capture the infoset of the s:Envelope, s:Header, and s:Body elements.
  *
  *

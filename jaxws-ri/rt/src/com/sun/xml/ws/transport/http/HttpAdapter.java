@@ -134,7 +134,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             InputStream in = con.getInput();
             Packet packet = new Packet();
             packet.addSatellite(con);
-            decoder.decode(in, ct, packet);
+            codec.decode(in, ct, packet);
             try {
                 packet = head.process(packet,con.getWebServiceContextDelegate(),this);
             } catch(Exception e) {
@@ -148,7 +148,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 return;                 // Connection is already closed
             }
 
-            ContentType contentType = encoder.getStaticContentType(packet);
+            ContentType contentType = codec.getStaticContentType(packet);
             ct = contentType.getContentType();
             if (ct == null)
                 throw new UnsupportedOperationException();
@@ -167,7 +167,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
                 con.setContentTypeResponseHeader(ct);
                 OutputStream os = con.getOutput();
-                encoder.encode(packet, os);
+                codec.encode(packet, os);
                 os.close();
             }
         }

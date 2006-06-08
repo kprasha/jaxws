@@ -24,15 +24,12 @@ package com.sun.xml.ws.api;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Encoder;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.encoding.DecoderFacade;
-import com.sun.xml.ws.encoding.EncoderFacade;
-import com.sun.xml.ws.encoding.XMLHTTPDecoder;
-import com.sun.xml.ws.encoding.XMLHTTPEncoder;
+import com.sun.xml.ws.encoding.CodecFacade;
+import com.sun.xml.ws.encoding.XMLHTTPCodec;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.BindingType;
@@ -109,24 +106,14 @@ public abstract class BindingID {
     public abstract SOAPVersion getSOAPVersion();
 
     /**
-     * Creates a new {@link Encoder} for this binding.
+     * Creates a new {@link Codec} for this binding.
      *
      * @param binding
      *      Ocassionally some aspects of binding can be overridden by
-     *      {@link WSBinding} at runtime by users, so some {@link Encoder}s
+     *      {@link WSBinding} at runtime by users, so some {@link Codec}s
      *      need to have access to {@link WSBinding} that it's working for.
      */
-    public abstract @NotNull Encoder createEncoder(@NotNull WSBinding binding);
-
-    /**
-     * Creates a new {@link Decoder} for this binding.
-     *
-     * @param binding
-     *      Ocassionally some aspects of binding can be overridden by
-     *      {@link WSBinding} at runtime by users, so some {@link Decoder}s
-     *      need to have access to {@link WSBinding} that it's working for.
-     */
-    public abstract @NotNull Decoder createDecoder(@NotNull WSBinding binding);
+    public abstract @NotNull Codec createEncoder(@NotNull WSBinding binding);
 
     /**
      * Gets the binding ID, which uniquely identifies the binding.
@@ -340,11 +327,8 @@ public abstract class BindingID {
      * Constant that represents REST.
      */
     public static final BindingID XML_HTTP = new Impl(SOAPVersion.SOAP_11, HTTPBinding.HTTP_BINDING,false) {
-        public Encoder createEncoder(WSBinding binding) {
-            return XMLHTTPEncoder.INSTANCE;
-        }
-        public Decoder createDecoder(WSBinding binding) {
-            return XMLHTTPDecoder.INSTANCE;
+        public Codec createEncoder(WSBinding binding) {
+            return XMLHTTPCodec.INSTANCE;
         }
     };
 
@@ -396,17 +380,13 @@ public abstract class BindingID {
             mtomSetting = mtomEnabled;
         }
 
-        public @NotNull Encoder createEncoder(WSBinding binding) {
-            return new EncoderFacade(binding);
+        public @NotNull Codec createEncoder(WSBinding binding) {
+            return new CodecFacade(binding);
         }
 
         public Boolean isMTOMEnabled() {
             String mtom = parameters.get(MTOM_PARAM);
             return mtom==null?null:Boolean.valueOf(mtom);
-        }
-
-        public @NotNull Decoder createDecoder(WSBinding binding) {
-            return new DecoderFacade(version);
         }
 
         public String getParameter(String parameterName, String defaultValue) {

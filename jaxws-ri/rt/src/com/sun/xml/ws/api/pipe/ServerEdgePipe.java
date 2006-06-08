@@ -43,7 +43,7 @@ import java.io.InputStream;
  * 
  * <p>
  * The second {@link Pipe} can take on the role of an {@link Decoder} and/or 
- * {@link Encoder} and in doing so optimize the decoding of a stream-based 
+ * {@link Codec} and in doing so optimize the decoding of a stream-based
  * message, represented as an {@link XMLStreamReader}, to a {@link Message}
  * and the encoding of a {@link Message} to a  stream-based message, 
  * represented as an {@link java.io.InputStream}. Such optimizations would be dependent
