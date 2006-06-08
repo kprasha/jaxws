@@ -41,66 +41,67 @@ import javax.xml.ws.WebServiceException;
  */
 public class SOAPProviderInvokerPipe extends ProviderInvokerPipe {
     
-    private final boolean isSource;
-    private final Service.Mode mode;
     private final SOAPVersion soapVersion;
     
     public SOAPProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver, ProviderEndpointModel model, SOAPVersion soapVersion) {
         super(instanceResolver);
-        this.isSource = model.isSource();
-        this.mode = model.getServiceMode();
         this.soapVersion = soapVersion;
-    }
-         
-    /**
-     * {@link Message} is converted to correct parameter for invoke() method
-     */
-    @Override
-    public Object getParameter(Message msg) {
-        Object parameter = null;
-        if (mode == Service.Mode.PAYLOAD) {
-            if (isSource) {
-                parameter = msg.readPayloadAsSource();
-            }
-            // else doesn't happen because ProviderModel takes care of it
+
+        if (model.getServiceMode() == Service.Mode.PAYLOAD) {
+            parameter = new PayloadSourceParameter();
         } else {
-            if (isSource) {
-                // Get SOAPMessage's envelope as Source
-                parameter = msg.readEnvelopeAsSource();
-            } else {
-                try {
-                    parameter = msg.readAsSOAPMessage();
-                } catch(SOAPException se) {
-                    throw new WebServiceException(se);
-                }
+            parameter = model.isSource() ? new MessageSourceParameter() : new SOAPMessageParameter();
+        }
+        
+        if (model.getServiceMode() == Service.Mode.PAYLOAD) {
+            response = new PayloadSourceResponse();
+        } else {
+            response = model.isSource() ? new MessageSourceResponse() : new SOAPMessageResponse();
+        }
+    }
+    
+    private static final class PayloadSourceParameter implements Parameter<Source> {
+        public Source getParameter(Message msg) {
+            return msg.readPayloadAsSource();
+        }
+    }
+    
+    private static final class MessageSourceParameter implements Parameter<Source> {
+        public Source getParameter(Message msg) {
+            return msg.readEnvelopeAsSource();
+        }
+    }
+    
+    private static final class SOAPMessageParameter implements Parameter<SOAPMessage> {
+        public SOAPMessage getParameter(Message msg) {
+            try {
+                return msg.readAsSOAPMessage();
+            } catch(SOAPException se) {
+                throw new WebServiceException(se);
             }
         }
-        return parameter;
     }
     
     @Override
-    public Message getResponseMessage(Exception e) {
+    protected Message getResponseMessage(Exception e) {
         return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
     }
-
-    /**
-     * return value of invoke() is converted to {@link Message}
-     */
-    @Override
-    public Message getResponseMessage(Object returnValue) {
-        Message responseMsg;
-        if (mode == Service.Mode.PAYLOAD) {
-            Source source = (Source)returnValue;
-            responseMsg = Messages.createUsingPayload(source, soapVersion);
-        } else {
-            if (isSource) {
-                Source source = (Source)returnValue;
-                responseMsg = Messages.create(source, soapVersion);
-            } else {
-                SOAPMessage soapMsg = (SOAPMessage)returnValue;
-                responseMsg = Messages.create(soapMsg);
-            }
+    
+    private final class PayloadSourceResponse implements Response<Source> {
+        public Message getResponse(Source source) {
+            return Messages.createUsingPayload(source, soapVersion);
         }
-        return responseMsg;
+    }
+    
+    private final class MessageSourceResponse implements Response<Source> {
+        public Message getResponse(Source source) {
+            return Messages.create(source, soapVersion);
+        }
+    }
+    
+    private static final class SOAPMessageResponse implements Response<SOAPMessage> {
+        public Message getResponse(SOAPMessage soapMsg) {
+            return Messages.create(soapMsg);
+        }
     }
 }

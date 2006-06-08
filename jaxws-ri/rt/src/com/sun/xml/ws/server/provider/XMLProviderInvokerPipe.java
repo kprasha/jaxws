@@ -39,65 +39,51 @@ import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
  * @author Jitendra Kotamraju
  */
 public class XMLProviderInvokerPipe extends ProviderInvokerPipe {
-    private final boolean isSource;
-    private final Service.Mode mode;
      
     public XMLProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver, ProviderEndpointModel model) {
         super(instanceResolver);
-        this.isSource = model.isSource();
-        this.mode = model.getServiceMode();
-    }
-    /**
-     * {@link Message} is converted to correct parameter for Provider.invoke() method
-     */
-    @Override
-    public Object getParameter(Message msg) {
-        Object parameter = null;
-        if (mode == Service.Mode.PAYLOAD) {
-            if (isSource) {
-                parameter = msg.readPayloadAsSource();
-            }
-            // else doesn't happen because ProviderModel takes care of it
-        }  else {
-            if (isSource) {
-                parameter = msg.readPayloadAsSource();
-            } else {
-                if (msg instanceof HasDataSource) {
-                    HasDataSource hasDS = (HasDataSource)msg;
-                    parameter = hasDS.getDataSource();
-                } else {
-                    parameter = XMLMessage.getDataSource(msg);
-                }
-            }
+        
+        if (model.getServiceMode() == Service.Mode.PAYLOAD) {
+            parameter = new PayloadSourceParameter();
+        } else {
+            parameter = model.isSource() ? new PayloadSourceParameter() : new DataSourceParameter();
         }
-        return parameter;
+        
+        if (model.getServiceMode() == Service.Mode.PAYLOAD) {
+            response = new PayloadSourceResponse();
+        } else {
+            response = model.isSource() ? new PayloadSourceResponse() : new DataSourceResponse();
+        }
+    }
+    
+    private static final class PayloadSourceParameter implements Parameter<Source> {
+        public Source getParameter(Message msg) {
+            return msg.readPayloadAsSource();
+        }
+    }
+    
+    private static final class DataSourceParameter implements Parameter<DataSource> {
+        public DataSource getParameter(Message msg) {
+            return (msg instanceof HasDataSource)
+                ? ((HasDataSource)msg).getDataSource()
+                : XMLMessage.getDataSource(msg);
+        }
     }
     
     @Override
-    public Message getResponseMessage(Exception e) {
-        return null;
+    protected Message getResponseMessage(Exception e) {
+        return null;    // TODO create a fault message
     }
-
-    /**
-     * return value of Provider.invoke() is converted to {@link Message}
-     */
-    @Override
-    public Message getResponseMessage(Object returnValue) {
-        Message responseMsg;
-        if (mode == Service.Mode.PAYLOAD) {
-            Source source = (Source)returnValue;
-            // Current Message implementation think that it is a SOAP Message
-            responseMsg = Messages.createUsingPayload(source, SOAPVersion.SOAP_11);
-        }  else {
-            if (isSource) {
-                Source source = (Source)returnValue;
-                // Current Message implementation think that it is a SOAP Message
-                responseMsg = Messages.createUsingPayload(source, SOAPVersion.SOAP_11);
-            }  else {
-                DataSource ds = (DataSource)returnValue;
-                responseMsg = XMLMessage.create(ds);
-            }
+    
+    private static final class PayloadSourceResponse implements Response<Source> {
+        public Message getResponse(Source source) {
+            return Messages.createUsingPayload(source, SOAPVersion.SOAP_11);
         }
-        return responseMsg;
+    }
+    
+    private static final class DataSourceResponse implements Response<DataSource> {
+        public Message getResponse(DataSource ds) {
+            return XMLMessage.create(ds);
+        }
     }
 }

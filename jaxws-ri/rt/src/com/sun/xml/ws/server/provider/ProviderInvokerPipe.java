@@ -38,6 +38,9 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
+    
+    protected Parameter<T> parameter;
+    protected Response<T> response;
 
     public ProviderInvokerPipe(InstanceResolver<? extends Provider<T>> instanceResolver) {
         super(instanceResolver);
@@ -50,14 +53,14 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
      * through the Pipeline to transport.
      */
     public Packet process(Packet request) {
-        T parameter = getParameter(request.getMessage());
+        T param = parameter.getParameter(request.getMessage());
 
         Provider<T> servant = getServant(request);
         logger.fine("Invoking Provider Endpoint "+servant);
 
         T returnValue;
         try {
-            returnValue = servant.invoke(parameter);
+            returnValue = servant.invoke(param);
         } catch(RuntimeException e) {
             e.printStackTrace();
             Message responseMessage = getResponseMessage(e);
@@ -71,11 +74,26 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
             }
             return request.createResponse(null);
         } else {
-            return request.createResponse(getResponseMessage(returnValue));
+            return request.createResponse(response.getResponse(returnValue));
         }
     }
     
-    public abstract T getParameter(Message msg);
-    public abstract Message getResponseMessage(T returnValue);
-    public abstract Message getResponseMessage(Exception e);
+    /**
+     * Binds {@link Message} to method invocation parameter
+     */
+    static interface Parameter<T> {
+        T getParameter(Message msg);
+    }
+    
+    /**
+     * Creates {@link Message} from method invocation's return value
+     */
+    static interface Response<T> {
+        Message getResponse(T returnValue);
+    }
+     
+    /**
+     * Creates a fault {@link Message} from method invocation's exception
+     */
+    protected abstract Message getResponseMessage(Exception e);
 }
