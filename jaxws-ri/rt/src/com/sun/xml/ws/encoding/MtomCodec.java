@@ -28,7 +28,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
@@ -68,35 +67,15 @@ import java.util.UUID;
  * @author Vivek Pandey
  */
 public class MtomCodec extends MimeCodec {
-    // encoding
-    private String boundaryParameter;
+    private final StreamSOAPCodec codec;
+
+    // encoding related parameters
     private String boundary;
     private final String soapXopContentType;
     private final XMLStreamWriterEx xmlStreamWriterEx = new MtomStreamWriter();
     private String messageContentType;
     private XMLStreamWriter writer;
     private UTF8OutputStreamWriter osWriter;
-
-    // decoding
-    private final StreamSOAPCodec codec;
-    private MimeMultipartParser mimeMP;
-    private final MtomXMLStreamReaderEx xmlStreamReaderEx = new MtomXMLStreamReaderEx();
-    private XMLStreamReader reader;
-    private Base64Data base64AttData;
-    private boolean xopReferencePresent = false;
-
-    //values that will set to whether mtom or not as caller can call getPcData or getTextCharacters
-    private int textLength;
-    private int textStart;
-
-    //To be used with #getTextCharacters
-    private char[] base64EncodedText;
-
-    //public MtomDecoder(MimeMultipartRelatedDecoder mimeMultipartDecoder) {
-    //    this.mimeMultipartDecoder = mimeMultipartDecoder;
-    //}
-
-
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
     private final List<ByteArrayBuffer> mtomAttachmentStream = new ArrayList<ByteArrayBuffer>();
@@ -110,7 +89,7 @@ public class MtomCodec extends MimeCodec {
 
     private void createConteTypeHeader(){
         boundary = "uuid:" + UUID.randomUUID().toString();
-        boundaryParameter = "boundary=\"" + boundary +"\"";
+        String boundaryParameter = "boundary=\"" + boundary +"\"";
         messageContentType =  "Multipart/Related;type=\""+XOP_CONTENT_TYPE +"\";" + boundaryParameter + ";start-info=\"" + version.contentType+"\"";
     }
 
@@ -285,16 +264,12 @@ public class MtomCodec extends MimeCodec {
 
     @Override
     protected void decode(MimeMultipartParser mpp, Packet packet) throws IOException {
-        this.mimeMP = mpp;
-        reader = XMLStreamReaderFactory.createXMLStreamReader(mimeMP.getRootPart().asInputStream(), true);
-        packet.setMessage(codec.decode(xmlStreamReaderEx));
-    }
-
-    private CharSequence getMtomPCData() {
-        if(xopReferencePresent){
-            return base64AttData;
-        }
-        return reader.getText();
+        // we'd like to reuse those reader objects but unfortunately decoder may be reused
+        // before the decoded message is completely used.
+        // TODO: improve this situation
+        packet.setMessage(codec.decode(new MtomXMLStreamReaderEx( mpp,
+            XMLStreamReaderFactory.createXMLStreamReader(mpp.getRootPart().asInputStream(), true)
+        )));
     }
 
     private class MtomStreamWriter implements XMLStreamWriterEx {
@@ -476,9 +451,37 @@ public class MtomCodec extends MimeCodec {
         }
     }
 
-    private class MtomXMLStreamReaderEx implements XMLStreamReaderEx {
+    private static class MtomXMLStreamReaderEx implements XMLStreamReaderEx {
+        /**
+         * The underlying {@link XMLStreamReader} that does the parsing of the root part.
+         */
+        private final XMLStreamReader reader;
+
+        /**
+         * The parser for the outer MIME 'shell'.
+         */
+        private final MimeMultipartParser mimeMP;
+
+        private boolean xopReferencePresent = false;
+        private Base64Data base64AttData;
+
+        //values that will set to whether mtom or not as caller can call getPcData or getTextCharacters
+        private int textLength;
+        private int textStart;
+
+        //To be used with #getTextCharacters
+        private char[] base64EncodedText;
+
+        public MtomXMLStreamReaderEx(MimeMultipartParser mimeMP, XMLStreamReader reader) {
+            this.mimeMP = mimeMP;
+            this.reader = reader;
+        }
+
         public CharSequence getPCDATA() throws XMLStreamException {
-            return getMtomPCData();
+            if(xopReferencePresent){
+                return base64AttData;
+            }
+            return reader.getText();
         }
 
         public NamespaceContextEx getNamespaceContext() {
