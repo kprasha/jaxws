@@ -74,11 +74,11 @@ public class StreamAttachment implements Attachment {
     }
 
     public DataHandler asDataHandler() {
-        return new DataHandler(new ByteArrayDataSource(data,0,data.length,getContentType()));
+        return new DataHandler(new ByteArrayDataSource(data,0,len,getContentType()));
     }
 
     public Source asSource() {
-        return new StreamSource(new ByteArrayInputStream(data,0,data.length));
+        return new StreamSource(new ByteArrayInputStream(data,0,len));
     }
 
     public InputStream asInputStream() {
