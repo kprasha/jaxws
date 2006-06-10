@@ -270,7 +270,7 @@ public abstract class Message {
      *      value, so the behavior is undefined if multiple callers provide
      *      different {@link WSDLPort} objects, which is a bug of the caller.
      */
-    public final boolean isOneWay(@NotNull WSDLPort port) {
+    public boolean isOneWay(@NotNull WSDLPort port) {
         if(isOneWay==null) {
             // we don't know, so compute.
             WSDLBoundOperation op = getOperation(port);
