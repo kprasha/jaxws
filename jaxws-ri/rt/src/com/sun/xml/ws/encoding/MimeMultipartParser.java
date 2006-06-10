@@ -29,7 +29,7 @@ import java.util.Map;
  * @author Vivek Pandey
  * @author Jitendra Kotamraju
  */
-final class MimeMultipartParser {
+public final class MimeMultipartParser {
 
     private final InputStream in;
     private final String start;
@@ -47,6 +47,8 @@ final class MimeMultipartParser {
 
     private final Map<String, StreamAttachment> attachments = new HashMap<String, StreamAttachment>();;
     private StreamAttachment root;
+    
+    private int cidCounter = 0;
 
     public MimeMultipartParser(InputStream in, String contentType) {
         try {
@@ -160,6 +162,9 @@ final class MimeMultipartParser {
                 root = as;      // root part as identified by start parameter
             } else if (contentId != null) {
                 attachments.put(contentId, as);     // Attachment part
+            } else {
+                ++cidCounter;
+                attachments.put(""+cidCounter, as);
             }
             firstPart = false;
             return as;

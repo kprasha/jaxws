@@ -23,6 +23,7 @@
 package com.sun.xml.ws.encoding;
 
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -114,7 +115,9 @@ public final class XMLHTTPCodec implements Codec {
             if (atts != null && atts != atts.EMPTY) {
                 final ByteOutputStream bos = new ByteOutputStream();
                 try {
-                    ContentType ct = new SwACodec(null).encode(new Packet(msg), bos);
+                    Codec codec = new SwACodec(SOAPVersion.SOAP_11);
+                    ContentType ct = codec.getStaticContentType(new Packet(msg));
+                    codec.encode(new Packet(msg), bos);
                     return XMLMessage.createDataSource(ct.getContentType(), bos.newInputStream());
                 } catch(IOException ioe) {
                     throw new WebServiceException(ioe);
@@ -158,9 +161,11 @@ public final class XMLHTTPCodec implements Codec {
 
     public static class XMLHTTPMultipartDecoder {
         public Message decode(InputStream in, String contentType) throws IOException {
+            MimeMultipartParser parser = new MimeMultipartParser(in, contentType);
+           
             //decoder.decode(in, contentType);
             // TODO need to create a Message around MimeMultipartRelatedDecoder
-            return null;
+            return new XMLMessage.XMLMultiPartParsedMessage(contentType, parser);
             //return XMLMessage.create(decoder);
         }
 
