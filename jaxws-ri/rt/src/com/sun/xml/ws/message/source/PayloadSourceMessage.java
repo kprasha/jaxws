@@ -25,6 +25,7 @@ package com.sun.xml.ws.message.source;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.message.AbstractMessageImpl;
@@ -49,16 +50,18 @@ import javax.xml.bind.JAXBException;
  */
 public class PayloadSourceMessage extends AbstractMessageImpl {
     private final StreamMessage message;
+    private AttachmentSet attSet;
 
-    public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, @NotNull SOAPVersion soapVersion) {
+    public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, AttachmentSet attSet, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
         XMLStreamReader reader = SourceReaderFactory.createSourceReader(payload, true);
         XMLStreamReaderUtil.next(reader);
         message = new StreamMessage(headers, reader, soapVersion);
+        this.attSet = attSet;
     }
 
     public PayloadSourceMessage(Source s, SOAPVersion soapVer) {
-        this(null, s, soapVer);
+        this(null, s, null, soapVer);
     }
 
     public boolean hasHeaders() {
@@ -67,6 +70,10 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
 
     public HeaderList getHeaders() {
         return message.getHeaders();
+    }
+    
+    public AttachmentSet getAttachments() {
+        return attSet;
     }
 
     public String getPayloadLocalPart() {
