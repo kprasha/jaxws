@@ -22,7 +22,6 @@
 package com.sun.xml.ws.message;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
