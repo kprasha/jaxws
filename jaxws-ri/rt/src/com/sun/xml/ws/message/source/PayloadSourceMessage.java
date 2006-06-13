@@ -61,7 +61,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     }
 
     public PayloadSourceMessage(Source s, SOAPVersion soapVer) {
-        this(null, s, null, soapVer);
+        this(null, s, AttachmentSet.EMPTY, soapVer);
     }
 
     public boolean hasHeaders() {
