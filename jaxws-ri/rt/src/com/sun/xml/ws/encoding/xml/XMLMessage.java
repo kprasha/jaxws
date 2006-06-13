@@ -327,7 +327,7 @@ public final class XMLMessage {
         }
 
         public HeaderList getHeaders() {
-            throw new UnsupportedOperationException();
+            return new HeaderList();
         }
 
         public String getPayloadLocalPart() {

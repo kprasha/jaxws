@@ -1,12 +1,18 @@
 package com.sun.xml.ws.encoding;
 
+import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
+import java.util.UUID;
 
 /**
  * {@link Codec}s that uses the MIME multipart as the underlying format.
@@ -27,10 +33,61 @@ import java.nio.channels.ReadableByteChannel;
  */
 abstract class MimeCodec implements Codec {
 
+    private String boundary;
+    private boolean hasAttachments;
+    protected Codec rootCodec;
     protected final SOAPVersion version;
 
     protected MimeCodec(SOAPVersion version) {
         this.version = version;
+    }
+    
+    // TODO: preencode String literals to byte[] so that they don't have to
+    // go through char[]->byte[] conversion at runtime.
+    public ContentType encode(Packet packet, OutputStream out) throws IOException {
+        Message msg = packet.getMessage();
+        if (msg == null) {
+            return null;
+        }
+
+        if (hasAttachments) {
+            OutputUtil.writeln("--"+boundary, out);
+            OutputUtil.writeln("Content-Type: text/xml", out);
+            OutputUtil.writeln(out);
+        }
+        ContentType primaryCt = rootCodec.encode(packet, out);
+
+        if (hasAttachments) {
+            OutputUtil.writeln(out);
+            // Encode all the attchments
+            for (Attachment att : msg.getAttachments()) {
+                OutputUtil.writeln("--"+boundary, out);
+                OutputUtil.writeln("Content-Id: <" + att.getContentId()+">", out);
+                OutputUtil.writeln("Content-Type: " + att.getContentType(), out);
+                OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
+                OutputUtil.writeln(out);                    // write \r\n
+                att.writeTo(out);
+                OutputUtil.writeln(out);                    // write \r\n
+            }
+            OutputUtil.writeAsAscii("--"+boundary, out);
+            OutputUtil.writeAsAscii("--", out);
+        }
+        return hasAttachments ? new ContentTypeImpl("multipart/related", null, null) : primaryCt;
+    }
+    
+    public ContentType getStaticContentType(Packet packet) {
+        Message msg = packet.getMessage();
+        hasAttachments = !msg.getAttachments().isEmpty();
+
+        if (hasAttachments) {
+            boundary = "uuid:" + UUID.randomUUID().toString();
+            String boundaryParameter = "boundary=\"" + boundary +"\"";
+            // TODO use primaryEncoder to get type
+            String messageContentType =  "Multipart/Related; type=\"text/xml\"; "+boundaryParameter;
+            return new ContentTypeImpl(messageContentType, packet.soapAction, null);
+        } else {
+            return rootCodec.getStaticContentType(packet);
+        }
     }
 
     /**
