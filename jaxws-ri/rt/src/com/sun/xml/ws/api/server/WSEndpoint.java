@@ -280,7 +280,7 @@ public abstract class WSEndpoint<T> {
     public static <T> WSEndpoint<T> create(
         @NotNull Class<T> implType,
         boolean processHandlerAnnotation,
-        @NotNull InstanceResolver<T> ir,
+        @NotNull Invoker invoker,
         @NotNull QName serviceName,
         @NotNull QName portName,
         @Nullable Container container,
@@ -289,12 +289,12 @@ public abstract class WSEndpoint<T> {
         @Nullable Collection<? extends SDDocumentSource> metadata,
         @Nullable EntityResolver resolver) {
         return EndpointFactory.createEndpoint(
-            implType,processHandlerAnnotation, ir,serviceName,portName,container,binding,primaryWsdl,metadata,resolver);
+            implType,processHandlerAnnotation, invoker,serviceName,portName,container,binding,primaryWsdl,metadata,resolver);
     }
 
     /**
      * The same as
-     * {@link #create(Class, boolean, InstanceResolver, QName, QName, Container, WSBinding, SDDocumentSource, Collection, EntityResolver)}
+     * {@link #create(Class, boolean, Invoker, QName, QName, Container, WSBinding, SDDocumentSource, Collection, EntityResolver)}
      * except that this version takes an url of the <tt>jax-ws-catalog.xml</tt>.
      *
      * @param catalogUrl
@@ -302,11 +302,18 @@ public abstract class WSEndpoint<T> {
      *      otherwise no resolution will be performed.
      */
     public static <T> WSEndpoint<T> create(
-        Class<T> implType,boolean processHandlerAnnotation, InstanceResolver<T> ir, QName serviceName, QName portName,
-        Container container, WSBinding binding,
-        SDDocumentSource primaryWsdl, Collection<? extends SDDocumentSource> metadata, @Nullable URL catalogUrl) {
+        Class<T> implType,
+        boolean processHandlerAnnotation,
+        Invoker invoker,
+        QName serviceName,
+        QName portName,
+        Container container,
+        WSBinding binding,
+        SDDocumentSource primaryWsdl,
+        Collection<? extends SDDocumentSource> metadata,
+        @Nullable URL catalogUrl) {
         return create(
-            implType,processHandlerAnnotation,ir,serviceName,portName,container,binding,primaryWsdl,metadata,
+            implType,processHandlerAnnotation,invoker,serviceName,portName,container,binding,primaryWsdl,metadata,
             XmlUtil.createEntityResolver(catalogUrl));
     }
 }

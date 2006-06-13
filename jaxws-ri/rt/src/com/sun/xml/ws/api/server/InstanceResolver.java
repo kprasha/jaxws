@@ -27,6 +27,8 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceContext;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Determines the instance that serves
@@ -102,5 +104,28 @@ public abstract class InstanceResolver<T> {
     public static <T> InstanceResolver<T> createSingleton(T singleton) {
         assert singleton!=null;
         return new SingletonResolver<T>(singleton);
+    }
+
+    /**
+     * Wraps this {@link InstanceResolver} into an {@link Invoker}.
+     */
+    public @NotNull Invoker createInvoker() {
+        return new Invoker() {
+            public void start(@NotNull WebServiceContext wsc) {
+                InstanceResolver.this.start(wsc);
+            }
+
+            public void dispose() {
+                InstanceResolver.this.dispose();
+            }
+
+            public Object invoke(Packet p, Method m, Object... args) throws InvocationTargetException, IllegalAccessException {
+                return m.invoke( resolve(p), args );
+            }
+
+            public String toString() {
+                return "Default Invoker over "+InstanceResolver.this.toString();
+            }
+        };
     }
 }

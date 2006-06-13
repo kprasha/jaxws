@@ -49,6 +49,7 @@ import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.ServiceConfigurationError;
@@ -96,12 +97,12 @@ public class EndpointFactory {
      * Nobody else should be calling this method.
      */
     public static <T> WSEndpoint<T> createEndpoint(
-        Class<T> implType, boolean processHandlerAnnotation, InstanceResolver<T> ir, QName serviceName, QName portName,
+        Class<T> implType, boolean processHandlerAnnotation, Invoker invoker, QName serviceName, QName portName,
         Container container, WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
 
-        if(ir==null || implType ==null)
+        if(invoker ==null || implType ==null)
             throw new IllegalArgumentException();
 
         List<SDDocumentSource> md = new ArrayList<SDDocumentSource>();
@@ -151,9 +152,9 @@ public class EndpointFactory {
                 ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
                 if (binding instanceof SOAPBinding) {
                     SOAPVersion soapVersion = binding.getSOAPVersion();
-                    terminal =  new SOAPProviderInvokerPipe((InstanceResolver)ir, model, soapVersion);
+                    terminal =  new SOAPProviderInvokerPipe((InstanceResolver)invoker, model, soapVersion);
                 } else {
-                    terminal =  new XMLProviderInvokerPipe((InstanceResolver)ir, model);
+                    terminal =  new XMLProviderInvokerPipe((InstanceResolver)invoker, model);
                 }
             } else {
                 // Create runtime model for non Provider endpoints
@@ -165,7 +166,7 @@ public class EndpointFactory {
                     ((SOAPBindingImpl)binding).setPortKnownHeaders(
                             ((SOAPSEIModel)seiModel).getKnownHeaders());
                 }
-                terminal= new SEIInvokerPipe(seiModel,ir,binding);
+                terminal= new SEIInvokerPipe(seiModel,invoker,binding);
             }
             if (processHandlerAnnotation) {
                 //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor

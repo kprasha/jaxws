@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
@@ -46,10 +47,10 @@ import java.security.Principal;
  */
 public abstract class InvokerPipe<T> extends AbstractPipeImpl {
 
-    private final InstanceResolver<? extends T> instanceResolver;
+    private final Invoker invoker;
 
-    protected InvokerPipe(InstanceResolver<? extends T> instanceResolver) {
-        this.instanceResolver = instanceResolver;
+    protected InvokerPipe(Invoker instanceResolver) {
+        this.invoker = instanceResolver;
         instanceResolver.start(webServiceContext);
     }
 
@@ -59,7 +60,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
     public final @NotNull T getServant(Packet request) {
         // this allows WebServiceContext to find this packet
         packets.set(request);
-        return instanceResolver.resolve(request);
+        return invoker.resolve(request);
     }
 
     /**
@@ -72,7 +73,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
 
     public void preDestroy() {
         super.preDestroy();
-        instanceResolver.dispose();
+        invoker.dispose();
     }
 
     /**
