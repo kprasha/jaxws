@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.Provider;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
@@ -42,4 +43,22 @@ public abstract class Invoker {
      *
      */
     public abstract Object invoke( @NotNull Packet p, @NotNull Method m, @NotNull Object... args ) throws InvocationTargetException, IllegalAccessException;
+
+    /**
+     * Invokes {@link Provider#invoke(Object)}
+     */
+    public <T> T invokeProvider( @NotNull Packet p, T arg ) throws IllegalAccessException, InvocationTargetException {
+        // default slow implementation that delegates to the other invoke method.
+        return (T)invoke(p,invokeMethod,arg);
+    }
+
+    private static final Method invokeMethod;
+
+    static {
+        try {
+            invokeMethod = Provider.class.getMethod("invoke",Object.class);
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
+    }
 }

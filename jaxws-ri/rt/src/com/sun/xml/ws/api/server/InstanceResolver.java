@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.Provider;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
@@ -111,16 +112,24 @@ public abstract class InstanceResolver<T> {
      */
     public @NotNull Invoker createInvoker() {
         return new Invoker() {
+            @Override
             public void start(@NotNull WebServiceContext wsc) {
                 InstanceResolver.this.start(wsc);
             }
 
+            @Override
             public void dispose() {
                 InstanceResolver.this.dispose();
             }
 
+            @Override
             public Object invoke(Packet p, Method m, Object... args) throws InvocationTargetException, IllegalAccessException {
                 return m.invoke( resolve(p), args );
+            }
+
+            @Override
+            public <T> T invokeProvider(@NotNull Packet p, T arg) {
+                return ((Provider<T>)resolve(p)).invoke(arg);
             }
 
             public String toString() {
