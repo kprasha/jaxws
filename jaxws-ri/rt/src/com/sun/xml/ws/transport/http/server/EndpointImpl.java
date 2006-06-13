@@ -206,7 +206,7 @@ public class EndpointImpl extends Endpoint {
 
         WSEndpoint wse = WSEndpoint.create(
                 (Class) implementor.getClass(), true,
-                InstanceResolver.createSingleton(implementor),
+                InstanceResolver.createSingleton(implementor).createInvoker(),
                 getProperty(QName.class, Endpoint.WSDL_SERVICE),
                 getProperty(QName.class, Endpoint.WSDL_PORT),
                 null /* no container */,

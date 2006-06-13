@@ -244,7 +244,7 @@ final class EndpointMethodHandler {
             }
             Message responseMessage;
             try {
-                Object ret = method.invoke(owner.getServant(req), args);
+                Object ret = owner.getInvoker(req).invoke(req, method, args);
                 responseMessage = isOneWay ? null : createResponseMessage(args, ret);
             } catch (InvocationTargetException e) {
                 e.printStackTrace();

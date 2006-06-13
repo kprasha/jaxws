@@ -56,11 +56,21 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
 
     /**
      * Returns the application object that serves the request.
-     */
+     *
     public final @NotNull T getServant(Packet request) {
         // this allows WebServiceContext to find this packet
         packets.set(request);
         return invoker.resolve(request);
+    }
+     */
+    
+    /**
+     * Returns the {@link Invoker} object that serves the request.
+     */
+    public final @NotNull Invoker getInvoker(Packet request) {
+        // this allows WebServiceContext to find this packet
+        packets.set(request);
+        return invoker;
     }
 
     /**

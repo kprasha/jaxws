@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.encoding.xml.XMLMessage;
 import javax.activation.DataSource;
 import javax.xml.transform.Source;
@@ -40,8 +41,8 @@ import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
  */
 public class XMLProviderInvokerPipe extends ProviderInvokerPipe {
      
-    public XMLProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver, ProviderEndpointModel model) {
-        super(instanceResolver);
+    public XMLProviderInvokerPipe(Invoker invoker, ProviderEndpointModel model) {
+        super(invoker);
         
         if (model.getServiceMode() == Service.Mode.PAYLOAD) {
             parameter = new PayloadSourceParameter();

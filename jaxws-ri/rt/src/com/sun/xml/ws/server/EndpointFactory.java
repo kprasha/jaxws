@@ -152,9 +152,9 @@ public class EndpointFactory {
                 ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
                 if (binding instanceof SOAPBinding) {
                     SOAPVersion soapVersion = binding.getSOAPVersion();
-                    terminal =  new SOAPProviderInvokerPipe((InstanceResolver)invoker, model, soapVersion);
+                    terminal =  new SOAPProviderInvokerPipe(invoker, model, soapVersion);
                 } else {
-                    terminal =  new XMLProviderInvokerPipe((InstanceResolver)invoker, model);
+                    terminal =  new XMLProviderInvokerPipe(invoker, model);
                 }
             } else {
                 // Create runtime model for non Provider endpoints

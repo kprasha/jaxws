@@ -236,7 +236,7 @@ public class DeploymentDescriptorParser<A> {
             ensureNoContent(reader);
             WSEndpoint<?> endpoint = WSEndpoint.create(
                     implementorClass, !handlersSetInDD,
-                    InstanceResolver.createSingleton(getImplementor(implementorClass)),
+                    InstanceResolver.createSingleton(getImplementor(implementorClass)).createInvoker(),
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
             );

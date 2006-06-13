@@ -24,6 +24,7 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.server.InvokerPipe;
 
 import javax.xml.ws.Provider;
@@ -42,8 +43,8 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
     protected Parameter<T> parameter;
     protected Response<T> response;
 
-    public ProviderInvokerPipe(InstanceResolver<? extends Provider<T>> instanceResolver) {
-        super(instanceResolver);
+    public ProviderInvokerPipe(Invoker invoker) {
+        super(invoker);
     }
 
     /*
@@ -55,13 +56,12 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
     public Packet process(Packet request) {
         T param = parameter.getParameter(request.getMessage());
 
-        Provider<T> servant = getServant(request);
-        logger.fine("Invoking Provider Endpoint "+servant);
+        logger.fine("Invoking Provider Endpoint");
 
         T returnValue;
         try {
-            returnValue = servant.invoke(param);
-        } catch(RuntimeException e) {
+            returnValue = getInvoker(request).invokeProvider(request, param);
+        } catch(Exception e) {
             e.printStackTrace();
             Message responseMessage = getResponseMessage(e);
             return request.createResponse(responseMessage);

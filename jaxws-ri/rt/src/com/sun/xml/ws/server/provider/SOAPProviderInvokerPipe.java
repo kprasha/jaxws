@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -43,8 +44,8 @@ public class SOAPProviderInvokerPipe extends ProviderInvokerPipe {
     
     private final SOAPVersion soapVersion;
     
-    public SOAPProviderInvokerPipe(InstanceResolver<? extends Provider> instanceResolver, ProviderEndpointModel model, SOAPVersion soapVersion) {
-        super(instanceResolver);
+    public SOAPProviderInvokerPipe(Invoker invoker, ProviderEndpointModel model, SOAPVersion soapVersion) {
+        super(invoker);
         this.soapVersion = soapVersion;
 
         if (model.getServiceMode() == Service.Mode.PAYLOAD) {

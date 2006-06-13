@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
@@ -53,8 +54,8 @@ public class SEIInvokerPipe extends InvokerPipe {
     private static final String EMPTY_PAYLOAD_NSURI = "";
     private final SOAPVersion soapVersion;
 
-    public SEIInvokerPipe(AbstractSEIModelImpl model,InstanceResolver instanceResolver, WSBinding binding) {
-        super(instanceResolver);
+    public SEIInvokerPipe(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
+        super(invoker);
         this.soapVersion = binding.getSOAPVersion();
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         // fill in methodHandlers.
