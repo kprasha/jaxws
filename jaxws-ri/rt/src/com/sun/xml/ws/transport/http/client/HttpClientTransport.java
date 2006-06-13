@@ -328,7 +328,7 @@ final class HttpClientTransport {
          */
         httpConnection.setRequestMethod(method);
         
-        Integer reqTimeout = (Integer)context.get(BindingProviderProperties.REQUEST_TIMEOUT);
+        Integer reqTimeout = (Integer)context.invocationProperties.get(BindingProviderProperties.REQUEST_TIMEOUT);
         if (reqTimeout != null) {
             httpConnection.setReadTimeout(reqTimeout);
         }
