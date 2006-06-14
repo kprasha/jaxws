@@ -49,9 +49,9 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
 
     private final Invoker invoker;
 
-    protected InvokerPipe(Invoker instanceResolver) {
-        this.invoker = instanceResolver;
-        instanceResolver.start(webServiceContext);
+    protected InvokerPipe(Invoker invoker) {
+        this.invoker = invoker;
+        invoker.start(webServiceContext);
     }
 
     /**
