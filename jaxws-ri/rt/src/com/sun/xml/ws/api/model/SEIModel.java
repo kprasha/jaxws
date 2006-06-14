@@ -112,7 +112,7 @@ public interface SEIModel {
      * @return the <code>JavaMethod</code> associated with the
      *         operation named name
      */
-    JavaMethod getJavaMethod(QName name);
+    public JavaMethod getJavaMethod(QName name);
 
     /**
      * Gives all the {@link JavaMethod} for a wsdl:port for which this {@link SEIModel} is

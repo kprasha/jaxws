@@ -24,6 +24,8 @@ package com.sun.xml.ws.api.message;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.model.JavaMethod;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -33,6 +35,8 @@ import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+import java.lang.reflect.Method;
+import javax.xml.namespace.QName;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.xml.sax.ContentHandler;
@@ -243,6 +247,47 @@ public abstract class Message {
      */
     public final @Nullable WSDLBoundOperation getOperation(@NotNull WSDLPort port) {
         return getOperation(port.getBinding());
+    }
+    
+    /**
+     * Returns the java Method of which this message is an instance of.
+     *
+     *
+     * <p>
+     * This method works only for a request. A pipe can determine a {@link Method}
+     * for a request, and then keep it in a local variable to use it with a response,
+     * so there should be no need to find out operation from a response (besides,
+     * there might not be any response!).  
+     *
+     * @param seiModel
+     *      This represents the java model for the endpoint
+     *      Some server {@link Pipe}s would get this information when they are created.
+     *
+     * @return
+     *      Null if there is no corresponding Method for this message. This is
+     *      possible, for example when a protocol message is sent through a
+     *      pipeline, or when we receive an invalid request on the server,
+     *      or when we are on the client and the user appliation sends a random
+     *      DOM through {@link Dispatch}, so this error needs to be handled
+     *      gracefully.
+     */
+    public final @Nullable Method getMethod(@Nullable SEIModel seiModel) {
+        if (seiModel != null) {
+            String localPart = getPayloadLocalPart();
+            String nsUri;
+            if (localPart == null) {
+                localPart = "";
+                nsUri = "";
+            } else {
+                nsUri = getPayloadNamespaceURI();
+            }
+            QName name = new QName(nsUri, localPart);
+            JavaMethod javaMethod = seiModel.getJavaMethod(name);
+            if (javaMethod != null) {
+                return javaMethod.getMethod();
+            }
+        }
+        return null;
     }
 
     private Boolean isOneWay;

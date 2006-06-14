@@ -111,6 +111,13 @@ public interface PipelineAssembler {
      * 'master pipeline', and it gets {@link Pipe#copy(PipeCloner) copied}
      * from it.
      *
+     * @param seiModel
+     *      The created pipeline will use seiModel to get java concepts for
+     *      the endpoint
+     *      Null if the service doesn't have SEI model e.g. Provider endpoints,
+     *      and otherwise non-null.
+     *
+     *
      * @param wsdlModel
      *      The created pipeline will be used to serve this port.
      *      Null if the service isn't associated with any port,
@@ -133,5 +140,5 @@ public interface PipelineAssembler {
      *      the terminal pipe is the one that invokes the user application
      *      or {@link Provider}.)
      */
-    Pipe createServer(WSDLPort wsdlModel, WSEndpoint owner, Pipe terminal);
+    Pipe createServer(@Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe terminal);
 }

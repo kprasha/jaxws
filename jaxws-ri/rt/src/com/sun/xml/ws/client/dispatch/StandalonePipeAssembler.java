@@ -30,6 +30,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
@@ -90,7 +91,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
      * During assembling the Pipelines, we can decide if we really need a
      * SOAPHandlerPipe and LogicalHandlerPipe for a particular Endpoint.
      */
-    public Pipe createServer(WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
+    public Pipe createServer(SEIModel seiModel, WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
         WSBinding binding = endpoint.getBinding();
         if(!binding.getHandlerChain().isEmpty()) {
             boolean isClient = false;
@@ -110,7 +111,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
 
         ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
         if(hook!=null)
-            terminal = hook.createMonitoringPipe(wsdlModel,endpoint,terminal);
+            terminal = hook.createMonitoringPipe(seiModel,wsdlModel,endpoint,terminal);
 
         if (binding instanceof SOAPBinding) {
             // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes

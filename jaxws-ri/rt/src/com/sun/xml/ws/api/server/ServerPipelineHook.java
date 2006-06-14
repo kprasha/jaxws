@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
@@ -47,7 +48,7 @@ public abstract class ServerPipelineHook {
      *      no additional pipe is inserted. If the implementation adds
      *      new pipes, return the new head pipe.
      */
-    public @NotNull Pipe createMonitoringPipe(@Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
+    public @NotNull Pipe createMonitoringPipe(@Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
         return tail;
     }
 }
