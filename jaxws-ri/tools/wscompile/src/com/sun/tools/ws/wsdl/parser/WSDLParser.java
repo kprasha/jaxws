@@ -257,6 +257,7 @@ public class WSDLParser {
             // tried mex already if resolver != null
             String getSysId = systemId + "?wsdl";
             try {
+                source = new InputSource(getSysId);
                 return buildDocumentFromWSDL(getSysId, source,
                     expectedTargetNamespaceURI);
             } catch (IOException e) {
