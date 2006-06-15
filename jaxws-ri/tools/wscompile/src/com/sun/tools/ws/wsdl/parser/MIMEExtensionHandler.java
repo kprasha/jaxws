@@ -53,6 +53,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
         return Constants.NS_WSDL_MIME;
     }
 
+    @Override
     public boolean doHandleExtension(
         TWSDLParserContext context,
         TWSDLExtensible parent,
@@ -169,8 +170,9 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
         }
     }
 
+    @Override
     protected boolean handleMIMEPartExtension(
-        TWSDLParserContextImpl context,
+        TWSDLParserContext context,
         TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, MIMEConstants.QNAME_CONTENT)) {

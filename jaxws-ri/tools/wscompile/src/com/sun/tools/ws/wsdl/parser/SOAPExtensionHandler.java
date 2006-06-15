@@ -184,8 +184,9 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
         return handleInputOutputExtension(context, parent, e);
     }
 
+    @Override
     protected boolean handleMIMEPartExtension(
-        TWSDLParserContextImpl context,
+        TWSDLParserContext context,
         TWSDLExtensible parent,
         Element e) {
         return handleInputOutputExtension(context, parent, e);
