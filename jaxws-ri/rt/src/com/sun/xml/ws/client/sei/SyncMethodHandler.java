@@ -128,8 +128,9 @@ final class SyncMethodHandler extends MethodHandler {
                         getter ));
                     break;
                 case ATTACHMENT:
-                    // TODO: implement this later
-                    throw new UnsupportedOperationException();
+                    fillers.add(new MessageFiller.Attachment(
+                            param.getIndex(), param.getBridge(), getter));
+                    break;
                 case UNBOUND:
                     break;
                 default:
@@ -176,8 +177,8 @@ final class SyncMethodHandler extends MethodHandler {
                     builders.add(new ResponseBuilder.Header(param, setter));
                     break;
                 case ATTACHMENT:
-                    // TODO: implement this later
-                    throw new UnsupportedOperationException();
+                    builders.add(new ResponseBuilder.Attachment(param, setter));
+                    break;
                 case UNBOUND:
                     builders.add(new ResponseBuilder.NullSetter(setter,
                         ResponseBuilder.getVMUninitializedValue(param.getTypeReference().type)));

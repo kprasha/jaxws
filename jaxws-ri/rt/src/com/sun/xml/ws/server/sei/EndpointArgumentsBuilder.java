@@ -157,7 +157,15 @@ abstract class EndpointArgumentsBuilder {
         }
     }
 
-    // TODO: attachment
+
+    /**
+     * Handles Attachment binding to java parameter
+     */
+    static final class Attachment extends EndpointArgumentsBuilder {
+        void readRequest(Message request, Object[] args) throws JAXBException, XMLStreamException {
+            throw new UnsupportedOperationException("Attachment is not handled");
+        }
+    }
 
     /**
      * Reads a header into a JAXB object.

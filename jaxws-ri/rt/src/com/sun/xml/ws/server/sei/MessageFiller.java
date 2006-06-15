@@ -50,6 +50,18 @@ abstract class MessageFiller {
      * Moves an argument of a method invocation into a {@link Message}.
      */
     abstract void fillIn(Object[] methodArgs, Object returnValue, Message msg);
+    
+    /**
+     * Adds a parameter as an MIME attachment.
+     */
+    static final class Attachment extends MessageFiller {
+        protected Attachment(int methodPos) {
+            super(methodPos);
+        }
+        
+        void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
+        }
+    }
 
     /**
      * Adds a parameter as an header.

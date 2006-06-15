@@ -166,8 +166,41 @@ abstract class ResponseBuilder {
             return retVal;
         }
     }
+    
+    /**
+     * Reads an Attachment into a Java parameter.
+     */
+    static final class Attachment extends ResponseBuilder {
+        private final Bridge<?> bridge;
+        private final ValueSetter setter;
+        private final QName headerName;
 
-    // TODO: attachment
+        /**
+         * @param name
+         *      The name of the header element.
+         * @param bridge
+         *      specifies how to unmarshal a header into a JAXB object.
+         * @param setter
+         *      specifies how the obtained value is returned to the client.
+         */
+        public Attachment(QName name, Bridge<?> bridge, ValueSetter setter) {
+            this.headerName = name;
+            this.bridge = bridge;
+            this.setter = setter;
+        }
+
+        public Attachment(ParameterImpl param, ValueSetter setter) {
+            this(
+                param.getTypeReference().tagName,
+                param.getBridge(),
+                setter);
+            
+        }
+
+        public Object readResponse(Message msg, Object[] args) throws JAXBException {
+            throw new UnsupportedOperationException("Attachment is not mapped");
+        }
+    }
 
     /**
      * Reads a header into a JAXB object.

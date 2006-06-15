@@ -51,6 +51,26 @@ abstract class MessageFiller {
      * Moves an argument of a method invocation into a {@link Message}.
      */
     abstract void fillIn(Object[] methodArgs, Message msg);
+    
+    /**
+     * Adds a parameter as an attachment.
+     */
+    static final class Attachment extends MessageFiller {
+        private final Bridge bridge;
+        private final ValueGetter getter;
+
+        protected Attachment(int methodPos, Bridge bridge, ValueGetter getter) {
+            super(methodPos);
+            this.bridge = bridge;
+            this.getter = getter;
+        }
+
+        void fillIn(Object[] methodArgs, Message msg) {
+            Object value = getter.get(methodArgs[methodPos]);
+            throw new UnsupportedOperationException("Not handling attachment parameter "+value);
+            //msg.getAttachments().add(value);
+        }
+    }
 
     /**
      * Adds a parameter as an header.

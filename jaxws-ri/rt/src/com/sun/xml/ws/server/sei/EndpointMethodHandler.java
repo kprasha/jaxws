@@ -127,8 +127,8 @@ final class EndpointMethodHandler {
                 builders.add(new EndpointArgumentsBuilder.Header(param, setter));
                 break;
             case ATTACHMENT:
-                // TODO: implement this later
-                throw new UnsupportedOperationException();
+                builders.add(new EndpointArgumentsBuilder.Attachment());
+                break;
             case UNBOUND:
                 builders.add(new EndpointArgumentsBuilder.NullSetter(setter,
                     EndpointArgumentsBuilder.getVMUninitializedValue(param.getTypeReference().type)));
@@ -198,8 +198,8 @@ final class EndpointMethodHandler {
                 fillers.add(new MessageFiller.Header(param.getIndex(), param.getBridge(), getter ));
                 break;
             case ATTACHMENT:
-                // TODO: implement this later
-                throw new UnsupportedOperationException();
+                fillers.add(new MessageFiller.Attachment(param.getIndex()));
+                break;
             case UNBOUND:
                 break;
             default:
