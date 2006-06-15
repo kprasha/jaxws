@@ -163,9 +163,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             } else if (args[i].equals("-keep")) {
                 keepGenerated = true;
                 args[i] = null;
-            } else if (args[i].equals("-wxf")) {
-                useWxf = true;
-                args[i] = null;
             } else if(args[i].equals("-wsdllocation")){
                 if(program.equals(WSGEN)) {
                     onError(getMessage("wscompile.invalidOption", args[i]));
@@ -813,8 +810,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         if(defaultPackage != null)
             properties.setProperty(ProcessorOptions.DEFAULT_PACKAGE, defaultPackage);
         properties.setProperty(ProcessorOptions.DONOT_OVERWRITE_CLASSES, (doNotOverWrite ? TRUE : FALSE));
-        properties.setProperty(ProcessorOptions.USE_WXF,
-            (useWxf ? TRUE : FALSE));
     }
 
     protected String getGenericErrorMessage() {
@@ -928,7 +923,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     protected boolean verbose = false;
     protected boolean keepGenerated = false;
     protected boolean doNotOverWrite = false;
-    protected boolean useWxf = false;
     protected boolean extensions = false;
     protected String userClasspath = null;
     protected Set<String> bindingFiles = new HashSet<String>();

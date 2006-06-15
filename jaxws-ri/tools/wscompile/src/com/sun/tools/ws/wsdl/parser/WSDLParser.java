@@ -38,7 +38,6 @@ import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.ParseException;
 import com.sun.tools.ws.wsdl.framework.ParserListener;
 import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
-import com.sun.tools.ws.wsdl.wxf.HTTPWxfClient;
 import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.JAXWSUtils;
@@ -93,9 +92,6 @@ public class WSDLParser {
 
     private ArrayList<ParserListener> listeners;
 
-    private boolean useWxf = false;
-    private HTTPWxfClient wxfClient;
-
     public WSDLParser(WSDLModelInfo modelInfo) {
         assert(modelInfo != null);
         this.extensionHandlers = new HashMap();
@@ -133,14 +129,6 @@ public class WSDLParser {
             return;
         }
         listeners.remove(l);
-    }
-
-    public boolean getUseWxf() {
-        return useWxf;
-    }
-
-    public void setUseWxf(boolean b) {
-        useWxf = b;
     }
 
     public WSDLDocument parse(){
@@ -195,7 +183,7 @@ public class WSDLParser {
                 root = buildDocumentFromWSDL(sysId, source, expectedTargetNamespaceURI);
             } catch (IOException e) {
                 //lets try with MetadataResolverFactory
-                root = getFromMetadataResolver(sysId);
+                root = getFromMetadataResolver(sysId, null, null);
                 if(root == null){
                     env.error(WsdlMessages.localizablePARSING_UNABLE_TO_GET_METADATA(sysId));
                     return null;
@@ -203,7 +191,8 @@ public class WSDLParser {
             }
 
         }else{
-            root = getFromMetadataResolver(sysId);
+            root = getFromMetadataResolver(
+                sysId, source, expectedTargetNamespaceURI);
 
             //if the metadata could not be resolved, try to the location and try to get the
             //metadata, it might be a wsdl on the filesystem
@@ -236,7 +225,17 @@ public class WSDLParser {
         return definitions;
     }
 
-    private Element getFromMetadataResolver(String systemId){
+    /*
+     * If source and target namespace are also passed in,
+     * then if the mex resolver is found and it cannot get
+     * the data, wsimport attempts to add ?wsdl to the
+     * address and retrieve the data with a normal http get.
+     * This behavior should only happen when trying a
+     * mex request first.
+     */
+    private Element getFromMetadataResolver(String systemId,
+        InputSource source, String expectedTargetNamespaceURI){
+        
         //try MEX
         MetaDataResolver resolver = null;
         ServiceDescriptor serviceDescriptor = null;
@@ -254,6 +253,17 @@ public class WSDLParser {
 
         if(serviceDescriptor != null){
             return parseMetadata(serviceDescriptor);
+        } else if (resolver != null && source != null){
+            // tried mex already if resolver != null
+            String getSysId = systemId + "?wsdl";
+            try {
+                return buildDocumentFromWSDL(getSysId, source,
+                    expectedTargetNamespaceURI);
+            } catch (IOException e) {
+                env.error(
+                    WsdlMessages.localizablePARSING_UNABLE_TO_GET_METADATA(
+                    getSysId));
+            }
         }
         return null;
     }

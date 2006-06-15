@@ -159,9 +159,6 @@ public class WSDLModeler extends WSDLModelerBase {
             extensions = Boolean.valueOf(_options.getProperty(ProcessorOptions.EXTENSION));
             
             useWSIBasicProfile = !extensions;
-            if (_options.getProperty(ProcessorOptions.USE_WXF).equals("true")) {
-                parser.setUseWxf(true);
-            }
             document = parser.parse();
             if(document == null)
                 return null;
