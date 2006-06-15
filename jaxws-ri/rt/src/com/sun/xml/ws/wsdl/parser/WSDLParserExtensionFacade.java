@@ -294,10 +294,16 @@ final class WSDLParserExtensionFacade extends WSDLParserExtension {
             e.bindingOperationFaultAttributes(operation, reader);
         }
     }
-    
+
     public void finished(WSDLModel model) {
         for (WSDLParserExtension e : extensions) {
             e.finished(model);
+        }
+    }
+
+    public void postFinished(WSDLModel model) {
+        for (WSDLParserExtension e : extensions) {
+            e.postFinished(model);
         }
     }
 }

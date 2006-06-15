@@ -133,6 +133,7 @@ public class RuntimeWSDLParser {
         parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
         parser.extension.finished(parser.wsdlDoc);
+        parser.extension.postFinished(parser.wsdlDoc);
         return parser.wsdlDoc;
     }
 

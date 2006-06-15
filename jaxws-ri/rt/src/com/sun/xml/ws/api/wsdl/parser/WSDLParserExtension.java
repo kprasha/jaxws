@@ -259,4 +259,8 @@ public abstract class WSDLParserExtension {
     public void finished(WSDLModel model) {
         // noop
     }
+
+    public void postFinished(WSDLModel model) {
+        // noop
+    }
 }
