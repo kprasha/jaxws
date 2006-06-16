@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.api.message;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -29,16 +31,10 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.JavaMethod;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
-import com.sun.istack.Nullable;
-import com.sun.istack.NotNull;
-import java.lang.reflect.Method;
-import javax.xml.namespace.QName;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.xml.sax.ContentHandler;
@@ -48,6 +44,7 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
@@ -56,6 +53,7 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.Dispatch;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
@@ -273,23 +271,17 @@ public abstract class Message {
      *      DOM through {@link Dispatch}, so this error needs to be handled
      *      gracefully.
      */
-    public final @Nullable Method getMethod(@Nullable SEIModel seiModel) {
-        if (seiModel != null) {
-            String localPart = getPayloadLocalPart();
-            String nsUri;
-            if (localPart == null) {
-                localPart = "";
-                nsUri = "";
-            } else {
-                nsUri = getPayloadNamespaceURI();
-            }
-            QName name = new QName(nsUri, localPart);
-            JavaMethod javaMethod = seiModel.getJavaMethod(name);
-            if (javaMethod != null) {
-                return javaMethod.getMethod();
-            }
+    public final @Nullable JavaMethod getMethod(@NotNull SEIModel seiModel) {
+        String localPart = getPayloadLocalPart();
+        String nsUri;
+        if (localPart == null) {
+            localPart = "";
+            nsUri = "";
+        } else {
+            nsUri = getPayloadNamespaceURI();
         }
-        return null;
+        QName name = new QName(nsUri, localPart);
+        return seiModel.getJavaMethod(name);
     }
 
     private Boolean isOneWay;
