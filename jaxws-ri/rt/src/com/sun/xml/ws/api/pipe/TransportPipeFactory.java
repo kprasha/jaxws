@@ -22,15 +22,12 @@
 
 package com.sun.xml.ws.api.pipe;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.client.dispatch.StandalonePipeAssembler;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.util.ServiceFinder;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import javax.xml.ws.WebServiceException;
 import java.util.logging.Logger;
@@ -83,22 +80,9 @@ public abstract class TransportPipeFactory {
      * Creates a transport {@link Pipe} for the given port, if this factory can do so,
      * or return null.
      *
-     * @param address
-     *      The endpoint address. Always non-null. This parameter is taken separately
-     *      from {@link WSDLPort} (even though there's {@link WSDLPort#getAddress()})
-     *      because sometimes WSDL is not available.
-     *
-     * @param wsdlModel
-     *      The created transport pipe will be used to serve this port.
-     *      Null if the service isn't associated with any port definition in WSDL,
-     *      and otherwise non-null.
-     *
-     * @param service
-     *      The transport pipe is created for this {@link WSService}.
-     *      Always non-null.
-     *
-     * @param binding
-     *      The binding of the new transport pipe to be created.
+     * @param context
+     *      Object that captures various contextual information
+     *      that can be used to determine the pipeline to be assembled.
      *
      * @return
      *      null to indicate that this factory isn't capable of creating a transport
@@ -111,7 +95,7 @@ public abstract class TransportPipeFactory {
      *      back to the user application, and no further {@link TransportPipeFactory}s
      *      are consulted.
      */
-    public abstract Pipe doCreate(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService service, @NotNull WSBinding binding);
+    public abstract Pipe doCreate(@NotNull ClientPipeAssemblerContext context);
 
     /**
      * Locates {@link PipelineAssemblerFactory}s and create
@@ -122,9 +106,9 @@ public abstract class TransportPipeFactory {
      * @return
      *      Always non-null, since we fall back to our default {@link PipelineAssembler}.
      */
-    public static Pipe create(@Nullable ClassLoader classLoader, @NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService service, @NotNull WSBinding binding) {
+    public static Pipe create(@Nullable ClassLoader classLoader, @NotNull ClientPipeAssemblerContext context) {
         for (TransportPipeFactory factory : ServiceFinder.find(TransportPipeFactory.class,classLoader)) {
-            Pipe pipe = factory.doCreate(address,wsdlModel,service,binding);
+            Pipe pipe = factory.doCreate(context);
             if(pipe!=null) {
                 logger.fine(factory.getClass()+" successfully created "+pipe);
                 return pipe;
@@ -132,13 +116,13 @@ public abstract class TransportPipeFactory {
         }
 
         // default built-in trasnports
-        String scheme = address.getURI().getScheme();
+        String scheme = context.getAddress().getURI().getScheme();
         if (scheme != null) {
             if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
-                return new HttpTransportPipe(binding);
+                return new HttpTransportPipe(context.getBinding());
         }
 
-        throw new WebServiceException("Unsupported endpoint address: "+address);    // TODO: i18n
+        throw new WebServiceException("Unsupported endpoint address: "+context.getAddress());    // TODO: i18n
     }
 
     private static final Logger logger = Logger.getLogger(TransportPipeFactory.class.getName());

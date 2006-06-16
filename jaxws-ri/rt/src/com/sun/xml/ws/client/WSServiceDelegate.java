@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
@@ -64,12 +65,12 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -294,9 +295,10 @@ public class WSServiceDelegate extends WSService {
         if(assembler==null)
             throw new WebServiceException("Unable to process bindingID="+bindingId);    // TODO: i18n
         return assembler.createClient(
-            portInfo.targetEndpoint,
-            portInfo.portModel,
-            this,binding);
+            new ClientPipeAssemblerContext(
+                portInfo.targetEndpoint,
+                portInfo.portModel,
+                this,binding));
     }
 
     public EndpointAddress getEndpointAddress(QName qName) {

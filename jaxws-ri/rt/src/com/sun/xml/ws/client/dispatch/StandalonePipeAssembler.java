@@ -25,18 +25,15 @@
  */
 package com.sun.xml.ws.client.dispatch;
 
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.TransportPipeFactory;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.ServerPipelineHook;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.LogicalHandlerPipe;
 import com.sun.xml.ws.handler.SOAPHandlerPipe;
@@ -47,24 +44,23 @@ import com.sun.xml.ws.util.pipe.DumpPipe;
 import javax.xml.ws.soap.SOAPBinding;
 
 public class StandalonePipeAssembler implements PipelineAssembler {
-    public Pipe createClient(EndpointAddress address, WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        Pipe head = createTransport(address,wsdlModel,service,binding);
+    public Pipe createClient(ClientPipeAssemblerContext context) {
+        Pipe head = createTransport(context);
 
         if(dump)
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
             head = new DumpPipe("dump", System.out,head);
 
-        if(binding instanceof SOAPBinding) {
-            // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
-            head = new ClientMUPipe(binding,head);
-        }
+        head = context.createClientMUPipe(head);
+
+        WSBinding binding = context.getBinding();
 
         boolean isClient = true;
         HandlerPipe soapHandlerPipe = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
         if(binding instanceof SOAPBinding) {
-            soapHandlerPipe = new SOAPHandlerPipe(binding, wsdlModel, head, isClient);
+            soapHandlerPipe = new SOAPHandlerPipe(binding, context.getWsdlModel(), head, isClient);
             head = soapHandlerPipe;
         }
 
@@ -80,10 +76,9 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     /**
      * Creates a transport pipe (for client), which becomes the terminal pipe.
      */
-    protected Pipe createTransport(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService service, @NotNull WSBinding binding) {
+    protected Pipe createTransport(ClientPipeAssemblerContext context) {
         return TransportPipeFactory.create(
-            Thread.currentThread().getContextClassLoader(),
-            address, wsdlModel, service, binding);
+            Thread.currentThread().getContextClassLoader(), context );
     }
 
     /**

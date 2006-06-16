@@ -22,23 +22,20 @@
 
 package com.sun.xml.ws.transport.local;
 
-import com.sun.xml.ws.api.pipe.TransportPipeFactory;
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.pipe.TransportPipeFactory;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
-import com.sun.istack.Nullable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
-import java.io.IOException;
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
 
 /**
  * {@link TransportPipeFactory} for the local transport.
@@ -56,12 +53,12 @@ import java.io.FileInputStream;
  * @author Kohsuke Kawaguchi
  */
 public final class LocalTransportFactory extends TransportPipeFactory {
-    public Pipe doCreate(EndpointAddress addresss, @Nullable WSDLPort wsdlModel, WSService service, WSBinding binding) {
-        URI adrs = addresss.getURI();
+    public Pipe doCreate(@NotNull ClientPipeAssemblerContext context) {
+        URI adrs = context.getAddress().getURI();
         if(!adrs.getScheme().equals("local"))
             return null;
 
-        return new LocalTransportPipe(createServerService(adrs),binding);
+        return new LocalTransportPipe(createServerService(adrs),context.getBinding());
     }
 
     /**

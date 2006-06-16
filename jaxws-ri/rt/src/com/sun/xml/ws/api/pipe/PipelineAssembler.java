@@ -57,6 +57,7 @@ import javax.xml.ws.WebServiceException;
  * on the {@link SEIModel}, so it is no longer given to the assembler.
  * Talk to us if you need it.
  *
+ * @see ClientPipeAssemblerContext
  *
  * @author Kohsuke Kawaguchi
  */
@@ -69,23 +70,9 @@ public interface PipelineAssembler {
      * a {@link Service}, JAX-WS runtime internally uses this method
      * to create a new pipeline as a part of the initilization.
      *
-     * @param address
-     *      The endpoint address. Always non-null. This parameter is taken separately
-     *      from {@link WSDLPort} (even though there's {@link WSDLPort#getAddress()})
-     *      because sometimes WSDL is not available.
-     *
-     * @param wsdlModel
-     *      The created pipeline will be used to serve this port.
-     *      Null if the service isn't associated with any port definition in WSDL,
-     *      and otherwise non-null.
-     *
-     * @param rootOwner
-     *      The pipeline is created for this {@link WSService}.
-     *      Always non-null. (To be precise, the newly created pipeline
-     *      is owned by a proxy or a dispatch created from thsi {@link WSService}.)
-     *
-     * @param binding
-     *      The binding of the new pipeline to be created.
+     * @param context
+     *      Object that captures various contextual information
+     *      that can be used to determine the pipeline to be assembled.
      *
      * @return
      *      non-null freshly created pipeline.
@@ -96,7 +83,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel, @NotNull WSService rootOwner, @NotNull WSBinding binding);
+    Pipe createClient(@NotNull ClientPipeAssemblerContext context);
 
     /**
      * Creates a new pipeline for servers.
