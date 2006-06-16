@@ -183,6 +183,7 @@ public final class RequestContext extends PropertySet {
      */
     private RequestContext(RequestContext that) {
         others = new HashMap<String,Object>(that.others);
+        endpointAddress = that.endpointAddress;
         // this is fragile, but it works faster
     }
 
