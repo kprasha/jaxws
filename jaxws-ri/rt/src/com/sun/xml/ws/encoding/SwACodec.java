@@ -34,6 +34,7 @@ import com.sun.xml.ws.message.stream.StreamAttachment;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -58,6 +59,10 @@ public final class SwACodec extends MimeCodec {
         // TODO: handle attachments correctly
         StreamAttachment root = mpp.getRootPart();
         rootCodec.decode(root.asInputStream(),root.getContentType(),packet);
+        Map<String, StreamAttachment> atts = mpp.getAttachmentParts();
+        for(Map.Entry<String, StreamAttachment> att : atts.entrySet()) {
+            packet.getMessage().getAttachments().add(att.getValue());
+        }
     }
 
     public ContentType encode(Packet packet, WritableByteChannel buffer) {

@@ -81,7 +81,6 @@ abstract class MessageFiller {
             String contentId;
             try {
                 contentId = URLEncoder.encode(param.getPartName(), "UTF-8")+ '=' +UUID.randomUUID()+"@jaxws.sun.com";
-                contentId="<"+contentId+">";
             } catch (UnsupportedEncodingException e) {
                 throw new WebServiceException(e);
             }

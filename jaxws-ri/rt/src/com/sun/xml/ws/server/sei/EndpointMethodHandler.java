@@ -127,7 +127,7 @@ final class EndpointMethodHandler {
                 builders.add(new EndpointArgumentsBuilder.Header(param, setter));
                 break;
             case ATTACHMENT:
-                builders.add(new EndpointArgumentsBuilder.Attachment());
+                builders.add(EndpointArgumentsBuilder.Attachment.createAttachment(param, setter));
                 break;
             case UNBOUND:
                 builders.add(new EndpointArgumentsBuilder.NullSetter(setter,
