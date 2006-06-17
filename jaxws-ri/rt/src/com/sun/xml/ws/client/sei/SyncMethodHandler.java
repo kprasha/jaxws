@@ -128,8 +128,7 @@ final class SyncMethodHandler extends MethodHandler {
                         getter ));
                     break;
                 case ATTACHMENT:
-                    fillers.add(new MessageFiller.Attachment(
-                            param.getIndex(), param.getBridge(), getter));
+                    fillers.add(new MessageFiller.Attachment(param, getter));
                     break;
                 case UNBOUND:
                     break;
@@ -177,7 +176,7 @@ final class SyncMethodHandler extends MethodHandler {
                     builders.add(new ResponseBuilder.Header(param, setter));
                     break;
                 case ATTACHMENT:
-                    builders.add(new ResponseBuilder.Attachment(param, setter));
+                    builders.add(ResponseBuilder.Attachment.createAttachment(param, setter));
                     break;
                 case UNBOUND:
                     builders.add(new ResponseBuilder.NullSetter(setter,

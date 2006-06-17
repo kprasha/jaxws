@@ -97,7 +97,7 @@ public final class XMLHTTPCodec extends MimeCodec {
             return ((HasDataSource)msg).getDataSource();
         } else {
             AttachmentSet atts = msg.getAttachments();
-            if (atts != null && atts != atts.EMPTY) {
+            if (atts != null && !atts.isEmpty()) {
                 final ByteOutputStream bos = new ByteOutputStream();
                 try {
                     Codec codec = new XMLHTTPCodec();

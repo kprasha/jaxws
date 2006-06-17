@@ -436,6 +436,10 @@ public class SAAJMessage extends Message {
             }
             return map;
         }
+
+        public void add(Attachment att) {
+            attMap.put(att.getContentId(), att);
+        }
     }
 
 

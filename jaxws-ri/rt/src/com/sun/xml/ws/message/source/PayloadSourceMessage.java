@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.message.AbstractMessageImpl;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -61,7 +62,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     }
 
     public PayloadSourceMessage(Source s, SOAPVersion soapVer) {
-        this(null, s, AttachmentSet.EMPTY, soapVer);
+        this(null, s, new AttachmentSetImpl(), soapVer);
     }
 
     public boolean hasHeaders() {

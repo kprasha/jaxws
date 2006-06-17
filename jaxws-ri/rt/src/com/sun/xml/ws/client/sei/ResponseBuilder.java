@@ -31,11 +31,18 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import java.awt.Image;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import javax.activation.DataHandler;
+import javax.imageio.ImageIO;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Type;
@@ -170,37 +177,148 @@ abstract class ResponseBuilder {
     /**
      * Reads an Attachment into a Java parameter.
      */
-    static final class Attachment extends ResponseBuilder {
-        private final Bridge<?> bridge;
-        private final ValueSetter setter;
-        private final QName headerName;
+    static final class Attachment {
 
         /**
-         * @param name
-         *      The name of the header element.
-         * @param bridge
-         *      specifies how to unmarshal a header into a JAXB object.
          * @param setter
          *      specifies how the obtained value is returned to the client.
          */
-        public Attachment(QName name, Bridge<?> bridge, ValueSetter setter) {
-            this.headerName = name;
-            this.bridge = bridge;
-            this.setter = setter;
-        }
-
-        public Attachment(ParameterImpl param, ValueSetter setter) {
-            this(
-                param.getTypeReference().tagName,
-                param.getBridge(),
-                setter);
+        public static ResponseBuilder createAttachment(ParameterImpl param, ValueSetter setter) {
+            Class type = (Class)param.getTypeReference().type;
+            param.getPartName();
+            if (DataHandler.class.isAssignableFrom(type)) {
+                return new DataHandlerAttachment();
+            } else if (byte[].class==type) {
+                return new ByteArrayAttachment();
+            } else if(Source.class.isAssignableFrom(type)) {
+                return new SourceAttachment();
+            } else if(Image.class.isAssignableFrom(type)) {
+                return new ImageAttachment(param, setter);
+            } else if(InputStream.class==type) {
+                return new InputStreamAttachment();
+                /*
+            } else if(isXMLMimeType(paramBinding.getMimeType())) {
+                return new XMLAttachment();
+                 */
+            } else {
+                //throw new UnsupportedOperationException("Attachment is not mapped");
+            }
+            return null;
             
         }
+        
+        static final class DataHandlerAttachment extends ResponseBuilder {
+            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
+                throw new UnsupportedOperationException("Attachment is not mapped");
+            }
+        }
+        
+        static final class ByteArrayAttachment extends ResponseBuilder {
+            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
+                throw new UnsupportedOperationException("Attachment is not mapped");
+            }
+        }
+        
+        static final class SourceAttachment extends ResponseBuilder {
+            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
+                throw new UnsupportedOperationException("Attachment is not mapped");
+            }
+        }
+        
+        static final class ImageAttachment extends ResponseBuilder {
+            private final ValueSetter setter;
+            private final ParameterImpl param;
+            private final String pname;
+            private final String pname1;
+            
+            ImageAttachment(ParameterImpl param, ValueSetter setter) {
+                this.setter = setter;
+                this.param = param;
+                this.pname = param.getPartName();
+                this.pname1 = "<"+pname;
+            }
+            
+            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
+                // TODO not to loop
+                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
+                    String part = getWSDLPartName(att);
+                    if (part == null) {
+                        continue;
+                    }
+                    if(part.equals(pname) || part.equals(pname1)){
+                        Image image;
+                        try {
+                            image = image = ImageIO.read(att.asInputStream());
+                        } catch(IOException ioe) {
+                            throw new WebServiceException(ioe);
+                        }
+                        if (image != null) {
+                            return setter.put(image, args);
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+        
+        static final class InputStreamAttachment extends ResponseBuilder {
+            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
+                throw new UnsupportedOperationException("Attachment is not mapped");
+            }
+        }
+        
+        static final class XMLAttachment extends ResponseBuilder {
+            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
+                throw new UnsupportedOperationException("Attachment is not mapped");
+            }
+        }
 
-        public Object readResponse(Message msg, Object[] args) throws JAXBException {
-            throw new UnsupportedOperationException("Attachment is not mapped");
+    }
+    
+    /**
+     * Gets the WSDL part name of this attachment.
+     *
+     * <p>
+     * According to WSI AP 1.0
+     * <PRE>
+     * 3.8 Value-space of Content-Id Header
+     *   Definition: content-id part encoding
+     *   The "content-id part encoding" consists of the concatenation of:
+     * The value of the name attribute of the wsdl:part element referenced by the mime:content, in which characters disallowed in content-id headers (non-ASCII characters as represented by code points above 0x7F) are escaped as follows:
+     *     o Each disallowed character is converted to UTF-8 as one or more bytes.
+     *     o Any bytes corresponding to a disallowed character are escaped with the URI escaping mechanism (that is, converted to %HH, where HH is the hexadecimal notation of the byte value).
+     *     o The original character is replaced by the resulting character sequence.
+     * The character '=' (0x3D).
+     * A globally unique value such as a UUID.
+     * The character '@' (0x40).
+     * A valid domain name under the authority of the entity constructing the message.
+     * </PRE>
+     *
+     * So a wsdl:part fooPart will be encoded as:
+     *      <fooPart=somereallybignumberlikeauuid@example.com>
+     *
+     * @return null
+     *      if the parsing fails.
+     */
+    public static final String getWSDLPartName(com.sun.xml.ws.api.message.Attachment att){
+        String cId = att.getContentId();
+
+        int index = cId.lastIndexOf('@', cId.length());
+        if(index == -1){
+            return null;
+        }
+        String localPart = cId.substring(0, index);
+        index = localPart.lastIndexOf('=', localPart.length());
+        if(index == -1){
+            return null;
+        }
+        try {
+            return java.net.URLDecoder.decode(localPart.substring(0, index), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new WebServiceException(e);
         }
     }
+
 
     /**
      * Reads a header into a JAXB object.

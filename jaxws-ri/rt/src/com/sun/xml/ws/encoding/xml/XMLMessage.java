@@ -401,6 +401,10 @@ public final class XMLMessage {
             return attMap.values().iterator();
         }
 
+        public void add(Attachment att) {
+            attMap.put(att.getContentId(), att);
+        }
+
     }
     
     /**

@@ -47,40 +47,17 @@ public interface AttachmentSet extends Iterable<Attachment> {
      */
     boolean isEmpty();
 
-    // adding attachment seems to be unnecessary --- true?
-    // note that you can create a new AttachmentSet with existing
-    // Attachments just fine. I'm talking about adding an Attachment
-    // from a pipe or some such.
-
-    ///**
-    // * Adds an attachment to this set.
-    // *
-    // * <p>
-    // * Note that it's OK for an {@link Attachment} to belong to
-    // * more than one {@link AttachmentSet} (which is in fact
-    // * necessary when you wrap a {@link Message} into another.
-    // *
-    // * @param att
-    // *      must not be null.
-    // */
-    //void add(Attachment att);
-
-
     /**
-     * Immutable {@link AttachmentSet} that has no {@link Attachment}.
+     * Adds an attachment to this set.
+     *
+     * <p>
+     * Note that it's OK for an {@link Attachment} to belong to
+     * more than one {@link AttachmentSet} (which is in fact
+     * necessary when you wrap a {@link Message} into another.
+     *
+     * @param att
+     *      must not be null.
      */
-    // if we need mutation method on AttachmentSet, such singleton won't be possible.
-    public static final AttachmentSet EMPTY = new AttachmentSet() {
-        public Attachment get(String contentId) {
-            return null;
-        }
+    public void add(Attachment att);
 
-        public boolean isEmpty() {
-            return true;
-        }
-
-        public Iterator<Attachment> iterator() {
-            return Collections.<Attachment>emptyList().iterator();
-        }
-    };
 }

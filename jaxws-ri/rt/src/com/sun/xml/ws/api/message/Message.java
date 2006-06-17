@@ -34,6 +34,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
@@ -207,8 +208,13 @@ public abstract class Message {
      * (attachments live outside a message.)
      */
     public @NotNull AttachmentSet getAttachments() {
-        return AttachmentSet.EMPTY;
+        if (attachmentSet == null) {
+            attachmentSet = new AttachmentSetImpl();
+        }
+        return attachmentSet;
     }
+    
+    private AttachmentSet attachmentSet;
 
     private WSDLBoundOperation operation = null;
 

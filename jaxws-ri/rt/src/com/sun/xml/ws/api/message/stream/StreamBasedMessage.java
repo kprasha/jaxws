@@ -23,6 +23,7 @@ package com.sun.xml.ws.api.message.stream;
 
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 
 /**
  * Base representation an XML or SOAP message as stream.
@@ -49,7 +50,7 @@ abstract class StreamBasedMessage {
      */
     protected StreamBasedMessage(Packet properties) {
         this.properties = properties;
-        this.attachments = AttachmentSet.EMPTY;        
+        this.attachments = new AttachmentSetImpl();        
     }
     
     /**
