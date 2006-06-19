@@ -25,6 +25,8 @@ package com.sun.xml.ws.server.sei;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.message.DataHandlerAttachment;
+import com.sun.xml.ws.message.JAXBAttachment;
 import com.sun.xml.ws.model.ParameterImpl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -64,16 +66,16 @@ abstract class MessageFiller {
     static final class Attachment extends MessageFiller {
         private final ParameterImpl param;
         private final ValueGetter getter;
+        private final String mimeType;
         
         protected Attachment(ParameterImpl param, ValueGetter getter) {
             super(param.getIndex());
             this.param = param;
             this.getter = getter;
-            param.getBinding().getMimeType();
+            mimeType = param.getBinding().getMimeType();
         }
         
         void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
-            String mimeType = param.getBinding().getMimeType();
             String contentId;
             try {
                 contentId = URLEncoder.encode(param.getPartName(), "UTF-8")+ '=' +UUID.randomUUID()+"@jaxws.sun.com";
@@ -85,21 +87,19 @@ abstract class MessageFiller {
             Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
             com.sun.xml.ws.api.message.Attachment att = null;
             if (obj instanceof DataHandler) {
-                //att = new DataHandlerAttachment(contentId,(DataHandler)obj);
+                att = new DataHandlerAttachment(contentId,(DataHandler)obj);
             } else if(obj instanceof Source) {
                 // this is potentially broken, as there's no guarantee this will work.
                 // we should have our own AttachmentBlock implementation for this.
-                //att = new DataHandlerAttachment(contentId, new DataHandler(obj,mimeType));
+                att = new DataHandlerAttachment(contentId, new DataHandler(obj,mimeType));
             } else if (obj instanceof byte[]) {
-                //att = new ByteArrayAttachment(contentId,(byte[])obj,mimeType);
-            //} else if (isXMLMimeType(mimeType)) {
-                //att = new JAXBAttachment(contentId,
-                //    new JAXBBridgeInfo(model.getBridge(mimeParam.getTypeReference()), obj),
-                //    rtContext, mimeType );
+                att = new com.sun.xml.ws.message.ByteArrayAttachment(contentId,(byte[])obj,mimeType);
+            } else if (isXMLMimeType(mimeType)) {
+                att = new JAXBAttachment(contentId, obj, param.getBridge(), mimeType);
             } else {
-            // this is also broken, as there's no guarantee that the object type and the MIME type
-            // matches. But most of the time it matches, so it mostly works.
-                att = new com.sun.xml.ws.message.DataHandlerAttachment(contentId,new DataHandler(obj,mimeType));
+                // this is also broken, as there's no guarantee that the object type and the MIME type
+                // matches. But most of the time it matches, so it mostly works.
+                att = new DataHandlerAttachment(contentId,new DataHandler(obj,mimeType));
             }
             msg.getAttachments().add(att);
         }
@@ -122,5 +122,9 @@ abstract class MessageFiller {
             Object value = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
             msg.getHeaders().add(Headers.create(bridge,value));
         }
+    }
+    
+    private static boolean isXMLMimeType(String mimeType){
+        return (mimeType.equals("text/xml") || mimeType.equals("application/xml")) ? true : false;
     }
 }

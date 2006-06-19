@@ -178,41 +178,102 @@ abstract class EndpointArgumentsBuilder {
             Class type = (Class)param.getTypeReference().type;
             param.getPartName();
             if (DataHandler.class.isAssignableFrom(type)) {
-                return new DataHandlerAttachment();
+                return new DataHandlerAttachment(param, setter);
             } else if (byte[].class==type) {
-                return new ByteArrayAttachment();
+                return new ByteArrayAttachment(param, setter);
             } else if(Source.class.isAssignableFrom(type)) {
-                return new SourceAttachment();
+                return new SourceAttachment(param, setter);
             } else if(Image.class.isAssignableFrom(type)) {
                 return new ImageAttachment(param, setter);
             } else if(InputStream.class==type) {
-                return new InputStreamAttachment();
-                /*
-            } else if(isXMLMimeType(paramBinding.getMimeType())) {
-                return new XMLAttachment();
-                 */
+                return new InputStreamAttachment(param, setter);
+            } else if(isXMLMimeType(param.getBinding().getMimeType())) {
+                return new XMLAttachment(param, setter);
             } else {
-                //throw new UnsupportedOperationException("Attachment is not mapped");
+                throw new UnsupportedOperationException("Attachment is not mapped");
             }
-            return null;
-            
         }
         
         static final class DataHandlerAttachment extends EndpointArgumentsBuilder {
+            private final EndpointValueSetter setter;
+            private final ParameterImpl param;
+            private final String pname;
+            private final String pname1;
+            
+            DataHandlerAttachment(ParameterImpl param, EndpointValueSetter setter) {
+                this.setter = setter;
+                this.param = param;
+                this.pname = param.getPartName();
+                this.pname1 = "<"+pname;
+            }
+            
             public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
-                throw new UnsupportedOperationException("Attachment is not mapped");
+                // TODO not to loop
+                for (com.sun.xml.ws.api.message.Attachment att : msg.getAttachments()) {
+                    String part = getWSDLPartName(att);
+                    if (part == null) {
+                        continue;
+                    }
+                    if(part.equals(pname) || part.equals(pname1)){
+                        setter.put(att.asDataHandler(), args);
+                        break;
+                    }
+                }
             }
         }
         
         static final class ByteArrayAttachment extends EndpointArgumentsBuilder {
+            private final EndpointValueSetter setter;
+            private final ParameterImpl param;
+            private final String pname;
+            private final String pname1;
+            
+            ByteArrayAttachment(ParameterImpl param, EndpointValueSetter setter) {
+                this.setter = setter;
+                this.param = param;
+                this.pname = param.getPartName();
+                this.pname1 = "<"+pname;
+            }
+            
             public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
-                throw new UnsupportedOperationException("Attachment is not mapped");
+                // TODO not to loop
+                for (com.sun.xml.ws.api.message.Attachment att : msg.getAttachments()) {
+                    String part = getWSDLPartName(att);
+                    if (part == null) {
+                        continue;
+                    }
+                    if(part.equals(pname) || part.equals(pname1)){
+                        setter.put(att.asByteArray(), args);
+                        break;
+                    }
+                }
             }
         }
         
         static final class SourceAttachment extends EndpointArgumentsBuilder {
+            private final EndpointValueSetter setter;
+            private final ParameterImpl param;
+            private final String pname;
+            private final String pname1;
+            
+            SourceAttachment(ParameterImpl param, EndpointValueSetter setter) {
+                this.setter = setter;
+                this.param = param;
+                this.pname = param.getPartName();
+                this.pname1 = "<"+pname;
+            }
+            
             public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
-                throw new UnsupportedOperationException("Attachment is not mapped");
+                for (com.sun.xml.ws.api.message.Attachment att : msg.getAttachments()) {
+                    String part = getWSDLPartName(att);
+                    if (part == null) {
+                        continue;
+                    }
+                    if(part.equals(pname) || part.equals(pname1)){
+                        setter.put(att.asSource(), args);
+                        break;
+                    }
+                }
             }
         }
         
@@ -239,12 +300,13 @@ abstract class EndpointArgumentsBuilder {
                     if(part.equals(pname) || part.equals(pname1)){
                         Image image;
                         try {
-                            image = image = ImageIO.read(att.asInputStream());
+                            image = ImageIO.read(att.asInputStream());
                         } catch(IOException ioe) {
                             throw new WebServiceException(ioe);
                         }
                         if (image != null) {
                             setter.put(image, args);
+                            break;
                         }
                     }
                 }
@@ -252,14 +314,58 @@ abstract class EndpointArgumentsBuilder {
         }
         
         static final class InputStreamAttachment extends EndpointArgumentsBuilder {
-            public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
-                throw new UnsupportedOperationException("Attachment is not mapped");
+            private final EndpointValueSetter setter;
+            private final ParameterImpl param;
+            private final String pname;
+            private final String pname1;
+            
+            InputStreamAttachment(ParameterImpl param, EndpointValueSetter setter) {
+                this.setter = setter;
+                this.param = param;
+                this.pname = param.getPartName();
+                this.pname1 = "<"+pname;
             }
+            
+            public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
+                for (com.sun.xml.ws.api.message.Attachment att : msg.getAttachments()) {
+                    String part = getWSDLPartName(att);
+                    if (part == null) {
+                        continue;
+                    }
+                    if(part.equals(pname) || part.equals(pname1)){
+                        setter.put(att.asInputStream(), args);
+                        break;
+                    }
+                }
+            }
+            
         }
         
         static final class XMLAttachment extends EndpointArgumentsBuilder {
+            private final EndpointValueSetter setter;
+            private final ParameterImpl param;
+            private final String pname;
+            private final String pname1;
+            
+            XMLAttachment(ParameterImpl param, EndpointValueSetter setter) {
+                this.setter = setter;
+                this.param = param;
+                this.pname = param.getPartName();
+                this.pname1 = "<"+pname;
+            }
+            
             public void readRequest(Message msg, Object[] args) throws JAXBException, XMLStreamException {
-                throw new UnsupportedOperationException("Attachment is not mapped");
+                for (com.sun.xml.ws.api.message.Attachment att : msg.getAttachments()) {
+                    String part = getWSDLPartName(att);
+                    if (part == null) {
+                        continue;
+                    }
+                    if(part.equals(pname) || part.equals(pname1)){
+                        Object obj = param.getBridge().unmarshal(att.asInputStream());
+                        setter.put(obj, args);
+                        break;
+                    }
+                }
             }
         }
 
@@ -554,5 +660,9 @@ abstract class EndpointArgumentsBuilder {
                 setter.put(obj,args);
             }
         }
+    }
+    
+    private static boolean isXMLMimeType(String mimeType){
+        return (mimeType.equals("text/xml") || mimeType.equals("application/xml")) ? true : false;
     }
 }
