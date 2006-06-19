@@ -198,7 +198,7 @@ final class EndpointMethodHandler {
                 fillers.add(new MessageFiller.Header(param.getIndex(), param.getBridge(), getter ));
                 break;
             case ATTACHMENT:
-                fillers.add(new MessageFiller.Attachment(param.getIndex()));
+                fillers.add(new MessageFiller.Attachment(param, getter));
                 break;
             case UNBOUND:
                 break;
