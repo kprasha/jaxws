@@ -25,15 +25,19 @@ package com.sun.xml.ws.server.sei;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.message.ByteArrayAttachment;
 import com.sun.xml.ws.message.DataHandlerAttachment;
 import com.sun.xml.ws.message.JAXBAttachment;
 import com.sun.xml.ws.model.ParameterImpl;
+import java.awt.Image;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.UUID;
 import javax.activation.DataHandler;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.api.message.Attachment;
 
 /**
  * Puts a non-payload message parameter to {@link Message}.
@@ -43,6 +47,7 @@ import javax.xml.ws.WebServiceException;
  * They add things to {@link Message}.
  *
  * @author Kohsuke Kawaguchi
+ * @author Jitendra Kotamraju
  */
 abstract class MessageFiller {
 
@@ -61,46 +66,86 @@ abstract class MessageFiller {
     abstract void fillIn(Object[] methodArgs, Object returnValue, Message msg);
     
     /**
-     * Adds a parameter as an MIME attachment.
+     * Adds a parameter as an MIME attachment to {@link Message}.
      */
-    static final class Attachment extends MessageFiller {
-        private final ParameterImpl param;
-        private final ValueGetter getter;
-        private final String mimeType;
+    static abstract class AttachmentFiller extends MessageFiller {
+        protected final ParameterImpl param;
+        protected final ValueGetter getter;
+        protected final String mimeType;
+        private final String contentIdPart;
         
-        protected Attachment(ParameterImpl param, ValueGetter getter) {
+        protected AttachmentFiller(ParameterImpl param, ValueGetter getter) {
             super(param.getIndex());
             this.param = param;
             this.getter = getter;
             mimeType = param.getBinding().getMimeType();
-        }
-        
-        void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
-            String contentId;
             try {
-                contentId = URLEncoder.encode(param.getPartName(), "UTF-8")+ '=' +UUID.randomUUID()+"@jaxws.sun.com";
+                contentIdPart = URLEncoder.encode(param.getPartName(), "UTF-8")+'=';
             } catch (UnsupportedEncodingException e) {
                 throw new WebServiceException(e);
             }
-
-            
-            Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
-            com.sun.xml.ws.api.message.Attachment att = null;
-            if (obj instanceof DataHandler) {
-                att = new DataHandlerAttachment(contentId,(DataHandler)obj);
-            } else if(obj instanceof Source) {
-                // this is potentially broken, as there's no guarantee this will work.
-                // we should have our own AttachmentBlock implementation for this.
-                att = new DataHandlerAttachment(contentId, new DataHandler(obj,mimeType));
-            } else if (obj instanceof byte[]) {
-                att = new com.sun.xml.ws.message.ByteArrayAttachment(contentId,(byte[])obj,mimeType);
-            } else if (isXMLMimeType(mimeType)) {
-                att = new JAXBAttachment(contentId, obj, param.getBridge(), mimeType);
+        }
+        
+        /**
+         * Creates an MessageFiller based on the parameter type
+         *
+         * @param param
+         *      runtime Parameter that abstracts the annotated java parameter
+         * @param getter
+         *      Gets a value from an object that represents a parameter passed
+         *      as a method argument.
+         */
+        public static MessageFiller createAttachmentFiller(ParameterImpl param, ValueGetter getter) {
+            Class type = (Class)param.getTypeReference().type;
+            if (DataHandler.class.isAssignableFrom(type) || Source.class.isAssignableFrom(type)) {
+                return new DataHandlerFiller(param, getter);
+            } else if (byte[].class==type) {
+                return new ByteArrayFiller(param, getter);
+            } else if(isXMLMimeType(param.getBinding().getMimeType())) {
+                return new JAXBFiller(param, getter);
             } else {
-                // this is also broken, as there's no guarantee that the object type and the MIME type
-                // matches. But most of the time it matches, so it mostly works.
-                att = new DataHandlerAttachment(contentId,new DataHandler(obj,mimeType));
+                return new DataHandlerFiller(param, getter);
             }
+        }
+        
+        String getContentId() {
+            return contentIdPart+UUID.randomUUID()+"@jaxws.sun.com";
+        }
+    }
+    
+    private static class ByteArrayFiller extends AttachmentFiller {
+        protected ByteArrayFiller(ParameterImpl param, ValueGetter getter) {
+            super(param, getter);
+        }
+        void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
+            String contentId = getContentId();
+            Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
+            Attachment att = new ByteArrayAttachment(contentId,(byte[])obj,mimeType);
+            msg.getAttachments().add(att);
+        }
+    }
+    
+    private static class DataHandlerFiller extends AttachmentFiller {
+        protected DataHandlerFiller(ParameterImpl param, ValueGetter getter) {
+            super(param, getter);
+        }
+        void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
+            String contentId = getContentId();
+            Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
+            DataHandler dh = (obj instanceof DataHandler) ? (DataHandler)obj : new DataHandler(obj,mimeType);
+            Attachment att = new DataHandlerAttachment(contentId, dh);
+            msg.getAttachments().add(att);
+        }
+    }
+    
+    private static class JAXBFiller extends AttachmentFiller {
+        protected JAXBFiller(ParameterImpl param, ValueGetter getter) {
+            super(param, getter);
+        }
+        void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
+            String contentId = getContentId();
+            Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
+            Attachment att = new JAXBAttachment(contentId, obj, param.getBridge(), mimeType);
             msg.getAttachments().add(att);
         }
     }
