@@ -26,6 +26,7 @@ import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.RawAccessor;
+import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.ParameterImpl;
@@ -177,210 +178,129 @@ abstract class ResponseBuilder {
     /**
      * Reads an Attachment into a Java parameter.
      */
-    static final class Attachment {
+    static abstract class AttachmentBuilder extends ResponseBuilder {
+        protected final ValueSetter setter;
+        protected final ParameterImpl param;
+        private final String pname;
+        private final String pname1;
+            
+        AttachmentBuilder(ParameterImpl param, ValueSetter setter) {
+            this.setter = setter;
+            this.param = param;
+            this.pname = param.getPartName();
+            this.pname1 = "<"+pname;
+        }
 
         /**
+         * Creates an AttachmentBuilder based on the parameter type
+         *
+         * @param param
+         *      runtime Parameter that abstracts the annotated java parameter
          * @param setter
-         *      specifies how the obtained value is returned to the client.
+         *      specifies how the obtained value is set into the argument. Takes
+         *      care of Holder arguments.
          */
-        public static ResponseBuilder createAttachment(ParameterImpl param, ValueSetter setter) {
+        public static ResponseBuilder createAttachmentBuilder(ParameterImpl param, ValueSetter setter) {
             Class type = (Class)param.getTypeReference().type;
-            param.getPartName();
             if (DataHandler.class.isAssignableFrom(type)) {
-                return new DataHandlerAttachment(param, setter);
+                return new DataHandlerBuilder(param, setter);
             } else if (byte[].class==type) {
-                return new ByteArrayAttachment(param, setter);
+                return new ByteArrayBuilder(param, setter);
             } else if(Source.class.isAssignableFrom(type)) {
-                return new SourceAttachment(param, setter);
+                return new SourceBuilder(param, setter);
             } else if(Image.class.isAssignableFrom(type)) {
-                return new ImageAttachment(param, setter);
+                return new ImageBuilder(param, setter);
             } else if(InputStream.class==type) {
-                return new InputStreamAttachment(param, setter);
+                return new InputStreamBuilder(param, setter);
             } else if(isXMLMimeType(param.getBinding().getMimeType())) {
-                return new XMLAttachment(param, setter);
+                return new JAXBBuilder(param, setter);
             } else {
                 throw new UnsupportedOperationException("Attachment is not mapped");
             }
         }
         
-        static final class DataHandlerAttachment extends ResponseBuilder {
-            private final ValueSetter setter;
-            private final ParameterImpl param;
-            private final String pname;
-            private final String pname1;
-            
-            DataHandlerAttachment(ParameterImpl param, ValueSetter setter) {
-                this.setter = setter;
-                this.param = param;
-                this.pname = param.getPartName();
-                this.pname1 = "<"+pname;
-            }
-            
-            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
-                // TODO not to loop
-                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
-                    String part = getWSDLPartName(att);
-                    if (part == null) {
-                        continue;
-                    }
-                    if(part.equals(pname) || part.equals(pname1)){
-                        return setter.put(att.asDataHandler(), args);
-                    }
+        public Object readResponse(Message msg, Object[] args) throws JAXBException, XMLStreamException {
+            // TODO not to loop
+            for (Attachment att : msg.getAttachments()) {
+                String part = getWSDLPartName(att);
+                if (part == null) {
+                    continue;
                 }
-                return null;
+                if(part.equals(pname) || part.equals(pname1)){
+                    return mapAttachment(att, args);
+                }
             }
+            return null;
         }
         
-        static final class ByteArrayAttachment extends ResponseBuilder {
-            private final ValueSetter setter;
-            private final ParameterImpl param;
-            private final String pname;
-            private final String pname1;
-            
-            ByteArrayAttachment(ParameterImpl param, ValueSetter setter) {
-                this.setter = setter;
-                this.param = param;
-                this.pname = param.getPartName();
-                this.pname1 = "<"+pname;
-            }
-            
-            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
-                // TODO not to loop
-                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
-                    String part = getWSDLPartName(att);
-                    if (part == null) {
-                        continue;
-                    }
-                    if(part.equals(pname) || part.equals(pname1)){
-                        return setter.put(att.asByteArray(), args);
-                    }
-                }
-                return null;
-            }
- 
+        abstract Object mapAttachment(Attachment att, Object[] args) throws JAXBException;
+    }
+        
+    private static final class DataHandlerBuilder extends AttachmentBuilder {
+        DataHandlerBuilder(ParameterImpl param, ValueSetter setter) {
+            super(param, setter);
         }
         
-        static final class SourceAttachment extends ResponseBuilder {
-            private final ValueSetter setter;
-            private final ParameterImpl param;
-            private final String pname;
-            private final String pname1;
-            
-            SourceAttachment(ParameterImpl param, ValueSetter setter) {
-                this.setter = setter;
-                this.param = param;
-                this.pname = param.getPartName();
-                this.pname1 = "<"+pname;
-            }
-            
-            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
-                // TODO not to loop
-                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
-                    String part = getWSDLPartName(att);
-                    if (part == null) {
-                        continue;
-                    }
-                    if(part.equals(pname) || part.equals(pname1)){
-                        return setter.put(att.asSource(), args);
-                    }
-                }
-                return null;
-            }
-
+        Object mapAttachment(Attachment att, Object[] args) {
+            return setter.put(att.asDataHandler(), args);
+        }
+    }
+        
+    private static final class ByteArrayBuilder extends AttachmentBuilder {
+        ByteArrayBuilder(ParameterImpl param, ValueSetter setter) {
+            super(param, setter);
         }
         
-        static final class ImageAttachment extends ResponseBuilder {
-            private final ValueSetter setter;
-            private final ParameterImpl param;
-            private final String pname;
-            private final String pname1;
-            
-            ImageAttachment(ParameterImpl param, ValueSetter setter) {
-                this.setter = setter;
-                this.param = param;
-                this.pname = param.getPartName();
-                this.pname1 = "<"+pname;
-            }
-            
-            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
-                // TODO not to loop
-                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
-                    String part = getWSDLPartName(att);
-                    if (part == null) {
-                        continue;
-                    }
-                    if(part.equals(pname) || part.equals(pname1)){
-                        Image image;
-                        try {
-                            image = image = ImageIO.read(att.asInputStream());
-                        } catch(IOException ioe) {
-                            throw new WebServiceException(ioe);
-                        }
-                        if (image != null) {
-                            return setter.put(image, args);
-                        }
-                    }
-                }
-                return null;
-            }
+        Object mapAttachment(Attachment att, Object[] args) {
+            return setter.put(att.asByteArray(), args);
+        }
+    }
+        
+    private static final class SourceBuilder extends AttachmentBuilder {
+        SourceBuilder(ParameterImpl param, ValueSetter setter) {
+            super(param, setter);
         }
         
-        static final class InputStreamAttachment extends ResponseBuilder {
-            private final ValueSetter setter;
-            private final ParameterImpl param;
-            private final String pname;
-            private final String pname1;
-            
-            InputStreamAttachment(ParameterImpl param, ValueSetter setter) {
-                this.setter = setter;
-                this.param = param;
-                this.pname = param.getPartName();
-                this.pname1 = "<"+pname;
-            }
-            
-            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
-                // TODO not to loop
-                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
-                    String part = getWSDLPartName(att);
-                    if (part == null) {
-                        continue;
-                    }
-                    if(part.equals(pname) || part.equals(pname1)){
-                        return setter.put(att.asInputStream(), args);
-                    }
-                }
-                return null;
-            }
+        Object mapAttachment(Attachment att, Object[] args) {
+            return setter.put(att.asSource(), args);
+        }
+    }
+        
+    private static final class ImageBuilder extends AttachmentBuilder {
+        ImageBuilder(ParameterImpl param, ValueSetter setter) {
+            super(param, setter);
         }
         
-        static final class XMLAttachment extends ResponseBuilder {
-            private final ValueSetter setter;
-            private final ParameterImpl param;
-            private final String pname;
-            private final String pname1;
-            
-            XMLAttachment(ParameterImpl param, ValueSetter setter) {
-                this.setter = setter;
-                this.param = param;
-                this.pname = param.getPartName();
-                this.pname1 = "<"+pname;
+        Object mapAttachment(Attachment att, Object[] args) {
+            Image image;
+            try {
+                image = ImageIO.read(att.asInputStream());
+            } catch(IOException ioe) {
+                throw new WebServiceException(ioe);
             }
-            
-            Object readResponse(Message reply, Object[] args) throws JAXBException, XMLStreamException {
-                // TODO not to loop
-                for (com.sun.xml.ws.api.message.Attachment att : reply.getAttachments()) {
-                    String part = getWSDLPartName(att);
-                    if (part == null) {
-                        continue;
-                    }
-                    if(part.equals(pname) || part.equals(pname1)){
-                        return setter.put(param.getBridge().unmarshal(att.asInputStream()), args);
-                    }
-                }
-                return null;
-            }
+            return setter.put(image, args);
         }
-
+    }
+        
+    private static final class InputStreamBuilder extends AttachmentBuilder {
+        InputStreamBuilder(ParameterImpl param, ValueSetter setter) {
+            super(param, setter);
+        }
+        
+        Object mapAttachment(Attachment att, Object[] args) {
+            return setter.put(att.asInputStream(), args);
+        }
+    }
+        
+    private static final class JAXBBuilder extends AttachmentBuilder {
+        JAXBBuilder(ParameterImpl param, ValueSetter setter) {
+            super(param, setter);
+        }
+        
+        Object mapAttachment(Attachment att, Object[] args) throws JAXBException {
+            Object obj = param.getBridge().unmarshal(att.asInputStream());
+            return setter.put(obj, args);
+        }
     }
     
     /**
