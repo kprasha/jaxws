@@ -27,6 +27,10 @@ package com.sun.tools.ws;
 
 public class WsImport {
     public static void main(String[] args) throws Throwable {
-        Invoker.main("wsimport",args);
+        System.exit(doMain(args));
+    }
+
+    public static int doMain(String[] args) throws Throwable {
+        return Invoker.main("wsimport",args);
     }
 }

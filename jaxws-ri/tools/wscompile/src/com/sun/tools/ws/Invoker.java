@@ -51,7 +51,12 @@ final class Invoker {
         "com.sun.mirror."
     };
 
-    static void main(String toolName, String[] args) throws Throwable {
+    /**
+     *
+     * @return
+     *      exit code
+     */
+    static int main(String toolName, String[] args) throws Throwable {
         ClassLoader oldcc = Thread.currentThread().getContextClassLoader();
         try {
             APTClassLoader cl = new APTClassLoader(Invoker.class.getClassLoader(),prefixes);
@@ -62,7 +67,7 @@ final class Invoker {
             Object tool = ctor.newInstance(System.out,toolName);
             Method runMethod = compileTool.getMethod("run",String[].class);
             boolean r = (Boolean)runMethod.invoke(tool,new Object[]{args});
-            System.exit(r ? 0 : 1);
+            return r ? 0 : 1;
         } catch (ToolsJarNotFoundException e) {
             System.err.println(e.getMessage());
         } catch (InvocationTargetException e) {
@@ -71,6 +76,6 @@ final class Invoker {
             Thread.currentThread().setContextClassLoader(oldcc);
         }
 
-        System.exit(1);
+        return -1;
     }
 }

@@ -27,6 +27,10 @@ package com.sun.tools.ws;
 
 public class WsGen {
     public static void main(String[] args) throws Throwable {
-        Invoker.main("wsgen",args);
+        System.exit(doMain(args));
+    }
+
+    public static int doMain(String[] args) throws Throwable {
+        return Invoker.main("wsgen",args);
     }
 }
