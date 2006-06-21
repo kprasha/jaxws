@@ -36,7 +36,6 @@ import com.sun.tools.ws.processor.config.WSDLModelInfo;
 import com.sun.tools.ws.processor.config.parser.Reader;
 import com.sun.tools.ws.processor.generator.CustomExceptionGenerator;
 import com.sun.tools.ws.processor.generator.SeiGenerator;
-import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext;
 import com.sun.tools.ws.processor.modeler.annotation.WebServiceAP;
 import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
@@ -402,6 +401,11 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             } else if (args[i].startsWith("-help")) {
                 help();
                 return false;
+            } else if (args[i].startsWith("-Xnocompile")) {
+                // -nocompile implies -keep
+                nocompile = true;
+                keepGenerated = true;
+                args[i] = null;
             } else if (args[i].equals("-Xdonotoverwrite")) {
                 if(program.equals(WSIMPORT)) {
                     onError(getMessage("wscompile.invalidOption", args[i]));
@@ -542,7 +546,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 withModelHook();
                 registerProcessorActions(processor);
                 processor.runActions();
-                if (environment.getErrorCount() == 0) {
+                if (environment.getErrorCount() == 0 && !nocompile) {
                     compileGeneratedClasses();
                 }
             }
@@ -924,6 +928,10 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     protected boolean keepGenerated = false;
     protected boolean doNotOverWrite = false;
     protected boolean extensions = false;
+    /**
+     * Do not generate class files --- just source files.
+     */
+    private boolean nocompile = false;
     protected String userClasspath = null;
     protected Set<String> bindingFiles = new HashSet<String>();
     protected boolean genWsdl = false;
