@@ -4,9 +4,13 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.handler.LogicalHandlerPipe;
+import com.sun.xml.ws.handler.SOAPHandlerPipe;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.util.pipe.DumpPipe;
 
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -53,7 +57,7 @@ public final class ClientPipeAssemblerContext {
      * Always non-null. (To be precise, the newly created pipeline
      * is owned by a proxy or a dispatch created from thsi {@link WSService}.)
      */
-    public @NotNull WSService getRootOwner() {
+    public @NotNull WSService getService() {
         return rootOwner;
     }
 
@@ -65,6 +69,13 @@ public final class ClientPipeAssemblerContext {
     }
 
     /**
+     * creates a {@link Pipe} that dumps messages that pass through.
+     */
+    public Pipe createDumpPipe(Pipe next) {
+        return new DumpPipe("dump", System.out, next);
+    }
+    
+    /**
      * Creates a {@link Pipe} that performs SOAP mustUnderstand processing.
      * This pipe should be before HandlerPipes.
      */
@@ -74,15 +85,27 @@ public final class ClientPipeAssemblerContext {
         else
             return next;
     }
+    
+    /**
+     * Creates a {@link Pipe} that invokes protocol and logical handlers.
+     */
+    public Pipe createHandlerPipe(Pipe next) {
+        boolean isClient = true;
+        HandlerPipe soapHandlerPipe = null;
+        //XML/HTTP Binding can have only LogicalHandlerPipe
+        if (binding instanceof SOAPBinding) {
+            soapHandlerPipe = new SOAPHandlerPipe(binding, wsdlModel, next, isClient);
+            next = soapHandlerPipe;
+        }
+        return new LogicalHandlerPipe(binding, next, soapHandlerPipe, isClient);
+    }
+    
+    /**
+     * Creates a transport pipe (for client), which becomes the terminal pipe.
+     */
+    public Pipe createTransportPipe() {
+        return TransportPipeFactory.create(
+            Thread.currentThread().getContextClassLoader(), this);
+    }
 
-    ///**
-    // * Creates a {@link Pipe} that performs SOAP mustUnderstand processing.
-    // *
-    // * This pipe has to be placed before handler pipes,
-    // * and by the time this pipe sees a {@link Message},
-    // * headers need to be marked as "understood".
-    // */
-    //public static Pipe createServerMUPipe(@Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe next) {
-    //    return new ServerMUPipe(owner.getBinding(),next);
-    //}
 }

@@ -83,7 +83,7 @@ public interface PipelineAssembler {
      *      propagated into the application, so it must have
      *      a descriptive error.
      */
-    Pipe createClient(@NotNull ClientPipeAssemblerContext context);
+    @NotNull Pipe createClient(@NotNull ClientPipeAssemblerContext context);
 
     /**
      * Creates a new pipeline for servers.
@@ -98,34 +98,19 @@ public interface PipelineAssembler {
      * 'master pipeline', and it gets {@link Pipe#copy(PipeCloner) copied}
      * from it.
      *
-     * @param seiModel
-     *      The created pipeline will use seiModel to get java concepts for
-     *      the endpoint
-     *      Null if the service doesn't have SEI model e.g. Provider endpoints,
-     *      and otherwise non-null.
+     * @param context
+     *      Object that captures various contextual information
+     *      that can be used to determine the pipeline to be assembled.
      *
+     * @return
+     *      non-null freshly created pipeline.
      *
-     * @param wsdlModel
-     *      The created pipeline will be used to serve this port.
-     *      Null if the service isn't associated with any port,
-     *      and otherwise non-null.
+     * @throws WebServiceException
+     *      if there's any configuration error that prevents the
+     *      pipeline from being constructed. This exception will be
+     *      propagated into the container, so it must have
+     *      a descriptive error.
      *
-     * @param owner
-     *      The created pipeline is used to serve this {@link WSEndpoint}.
-     *      Specifically, its {@link WSBinding} should be of interest to
-     *      many {@link Pipe}s. Always non-null.
-     *
-     * @param terminal
-     *      The last {@link Pipe} in the pipeline.
-     *      Always non-null.
-     *      The assembler
-     *      is expected to put additional {@link Pipe}s in front
-     *      of it.
-     *
-     *      <p>
-     *      (Just to give you the idea how this is used, normally
-     *      the terminal pipe is the one that invokes the user application
-     *      or {@link Provider}.)
      */
-    Pipe createServer(@Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe terminal);
+    @NotNull Pipe createServer(@NotNull ServerPipeAssemblerContext context);
 }

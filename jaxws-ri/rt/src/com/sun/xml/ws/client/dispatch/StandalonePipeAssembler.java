@@ -25,60 +25,32 @@
  */
 package com.sun.xml.ws.client.dispatch;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
-import com.sun.xml.ws.api.pipe.TransportPipeFactory;
-import com.sun.xml.ws.api.server.ServerPipelineHook;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.handler.HandlerPipe;
-import com.sun.xml.ws.handler.LogicalHandlerPipe;
-import com.sun.xml.ws.handler.SOAPHandlerPipe;
-import com.sun.xml.ws.protocol.soap.ClientMUPipe;
-import com.sun.xml.ws.protocol.soap.ServerMUPipe;
-import com.sun.xml.ws.util.pipe.DumpPipe;
+import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 
-import javax.xml.ws.soap.SOAPBinding;
-
+/**
+ * Default Pipeline assembler for JAX-WS client and server side runtimes. It
+ * assembles various pipes into a pipeline that a message needs to be passed
+ * through.
+ *
+ * @author Kohsuke Kawaguchi
+ * @author Jitendra Kotamraju
+ */
 public class StandalonePipeAssembler implements PipelineAssembler {
+    
     public Pipe createClient(ClientPipeAssemblerContext context) {
-        Pipe head = createTransport(context);
+        Pipe head = context.createTransportPipe();
 
-        if(dump)
+        if (dump) {
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
-            head = new DumpPipe("dump", System.out,head);
-
-        head = context.createClientMUPipe(head);
-
-        WSBinding binding = context.getBinding();
-
-        boolean isClient = true;
-        HandlerPipe soapHandlerPipe = null;
-        //XML/HTTP Binding can have only LogicalHandlerPipe
-        if(binding instanceof SOAPBinding) {
-            soapHandlerPipe = new SOAPHandlerPipe(binding, context.getWsdlModel(), head, isClient);
-            head = soapHandlerPipe;
+            head = context.createDumpPipe(head);
         }
 
-        //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and
-        //SOAPHandlerPipe here.
-
-        HandlerPipe logicalHandlerPipe = new LogicalHandlerPipe(binding, head, soapHandlerPipe, isClient);
-        head = logicalHandlerPipe;
-
-        return head;
-    }
-
-    /**
-     * Creates a transport pipe (for client), which becomes the terminal pipe.
-     */
-    protected Pipe createTransport(ClientPipeAssemblerContext context) {
-        return TransportPipeFactory.create(
-            Thread.currentThread().getContextClassLoader(), context );
+        head = context.createClientMUPipe(head);
+        return context.createHandlerPipe(head);
     }
 
     /**
@@ -86,33 +58,12 @@ public class StandalonePipeAssembler implements PipelineAssembler {
      * During assembling the Pipelines, we can decide if we really need a
      * SOAPHandlerPipe and LogicalHandlerPipe for a particular Endpoint.
      */
-    public Pipe createServer(SEIModel seiModel, WSDLPort wsdlModel, WSEndpoint endpoint, Pipe terminal) {
-        WSBinding binding = endpoint.getBinding();
-        if(!binding.getHandlerChain().isEmpty()) {
-            boolean isClient = false;
-            HandlerPipe logicalHandlerPipe =
-                    new LogicalHandlerPipe(binding, wsdlModel, terminal, isClient);
-            terminal = logicalHandlerPipe;
-            
-            //Someother pipes like JAX-WSA Pipe can come in between LogicalHandlerPipe and
-            //SOAPHandlerPipe here.
-
-            if(binding instanceof SOAPBinding) {
-                    HandlerPipe soapHandlerPipe;
-                    soapHandlerPipe= new SOAPHandlerPipe(binding,terminal, logicalHandlerPipe, isClient);
-                    terminal = soapHandlerPipe;
-            }
-        }
-
-        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
-        if(hook!=null)
-            terminal = hook.createMonitoringPipe(seiModel,wsdlModel,endpoint,terminal);
-
-        if (binding instanceof SOAPBinding) {
-            // MUPipe( which does MUUnderstand HeaderProcessing) should be before HandlerPipes
-            terminal = new ServerMUPipe(binding,terminal);
-        }
-        return terminal;
+    public Pipe createServer(ServerPipeAssemblerContext context) {
+        Pipe head = context.getTerminalPipe();
+        head = context.createHandlerPipe(head);
+        head = context.createMonitoringPipe(head);
+        head = context.createServerMUPipe(head);
+        return head;
     }
 
     /**

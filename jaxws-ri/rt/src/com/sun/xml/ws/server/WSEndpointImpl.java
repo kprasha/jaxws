@@ -34,6 +34,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
+import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -88,7 +89,8 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 Thread.currentThread().getContextClassLoader(), binding.getBindingId());
         assert assembler!=null;
 
-        this.masterPipeline = assembler.createServer(seiModel, port, this, terminalPipe);
+        ServerPipeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe);
+        this.masterPipeline = assembler.createServer(context);
     }
 
     public @NotNull Class<T> getImplementationClass() {
