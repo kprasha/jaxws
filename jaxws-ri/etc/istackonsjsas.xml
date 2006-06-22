@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 
-<project name="JAX-WS 2.0 FCS On Sun Java System App Server 8.1/8.2" default="help" basedir=".">
+<project name="JAX-WS 2.0.1 FCS On Sun Java System App Server 8.1/8.2" default="help" basedir=".">
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
@@ -35,7 +35,7 @@
 
     <condition property="notInstalled">
         <not>
-            <available file="${as.home}/.jaxws20fcs"/>
+            <available file="${as.home}/.jaxws201"/>
         </not>
     </condition>
 
@@ -44,7 +44,7 @@
     </target>
 
     <target name="install">
-        <echo message="Installing JAX-WS 2.0 on ${as.home} ..." />
+        <echo message="Installing JAX-WS 2.0.1 on ${as.home} ..." />
         <copy toDir="${backup.dir}">
             <fileset dir="${as.lib.home}">
                 <include name="saaj-*.jar"/>
@@ -84,7 +84,7 @@
     <target name="update-classpath" if="notInstalled">
          <!-- Add classpath-prefix, if not exists -->
         <antcall target="create.classpath.prefix" />
-        <!-- Add the JAX-WS 2.0 and JAXB 2.0 jars to classpath-prefix -->
+        <!-- Add the JAX-WS 2.0.1 and JAXB 2.0.1 jars to classpath-prefix -->
         <copy file="${as.home}/domains/${domain}/config/domain.xml" tofile="${backup.dir}/${domain}-domain.xml"/>
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
@@ -113,7 +113,7 @@
     </target>
 
     <target name="help">
-        <echo message="install:    Installs JAX-WS 2.0 FCS on the Application Server"/>
+        <echo message="install:    Installs JAX-WS 2.0.1 on the Application Server"/>
         <echo message="            Usage: ANT_HOME/bin/ant install"/>
     </target>
 </project>
