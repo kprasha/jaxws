@@ -103,10 +103,10 @@ public final class ServerPipeAssemblerContext {
         if (!binding.getHandlerChain().isEmpty()) {
             boolean isClient = false;
             HandlerPipe cousin = new LogicalHandlerPipe(binding, wsdlModel, next, isClient);
+            next = cousin;
             if (binding instanceof SOAPBinding) {
                 return new SOAPHandlerPipe(binding, next, cousin, isClient);
             }
-            return cousin;
         }
         return next;
     }
