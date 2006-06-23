@@ -78,7 +78,7 @@ public class RuntimeModeler {
     private boolean isWrapped = true;
     private boolean usesWebMethod = false;
     private ClassLoader classLoader = null;
-    private Object implementor;
+    //private Object implementor;
     private final WSDLPortImpl binding;
     private QName serviceName;
     private QName portName;
@@ -136,11 +136,12 @@ public class RuntimeModeler {
      * @param implementor The object on which service methods are invoked
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
      * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
-     */
+     *
     public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BindingID bindingId) {
         this(portClass, serviceName, bindingId);
         this.implementor = implementor;
     }
+     */
 
     /**
      * creates an instance of RunTimeModeler given a <code>sei</code> class and <code>binding</code>
@@ -150,11 +151,12 @@ public class RuntimeModeler {
      * @param portClass The SEI class to be modeled.
      * @param implementor The object on which service methods are invoked
      * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
-     */
+     *
     public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLPortImpl binding) {
         this(portClass, serviceName, binding);
         this.implementor = implementor;
     }
+     */
 
 
     /**
@@ -438,23 +440,21 @@ public class RuntimeModeler {
             return;
         }
 
-        // Use implementor to find the exact invocation method as implementor
-        // could be a proxy to portClass object
         JavaMethodImpl javaMethod;
-        Class implementorClass = (implementor != null)
-            ? implementor.getClass() : portClass;
-        if (method.getDeclaringClass()==implementorClass) {
-            javaMethod = new JavaMethodImpl(model,method);
+        //Class implementorClass = portClass;
+        if (method.getDeclaringClass()==portClass) {
+            javaMethod = new JavaMethodImpl(model,method,method);
         } else {
             try {
-                Method tmpMethod = implementorClass.getMethod(method.getName(),
+                Method tmpMethod = portClass.getMethod(method.getName(),
                     method.getParameterTypes());
-                javaMethod = new JavaMethodImpl(model,tmpMethod);
+                javaMethod = new JavaMethodImpl(model,tmpMethod,method);
             } catch (NoSuchMethodException e) {
                 throw new RuntimeModelerException("runtime.modeler.method.not.found",
                     method.getName(), portClass.getName());
             }
         }
+
         String methodName = method.getName();
 
         //set MEP -oneway, async, req/resp

@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.api.model;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 
@@ -41,9 +42,48 @@ public interface JavaMethod {
     SEIModel getOwner();
 
     /**
+     * On the server side, it uses this for invocation of the web service
+     *
+     * <p>
+     * @WebService(endpointInterface="I")
+     * class A { }
+     * In this case, it retuns A's method 
+     *
+     * <p>
+     * @WebService(endpointInterface="I")
+     * class A implements I { }
+     * In this case, it returns I's method
+     *
+     * <p>
+     * @WebService
+     * class A { }
+     * In this case, it returns A's method
+     *  
      * @return Returns the java {@link Method}
      */
-    Method getMethod();
+    @NotNull Method getMethod();
+    
+    /**
+     * Returns the SEI method if there is one.
+     *
+     * <p>
+     * @WebService(endpointInterface="I")
+     * class A { }
+     * In this case, it retuns I's method 
+     *
+     * <p>
+     * @WebService(endpointInterface="I")
+     * class A implements I { }
+     * In this case, it returns I's method
+     *
+     * <p>
+     * @WebService
+     * class A { }
+     * In this case, it returns A's method
+     *  
+     * @return Returns the java {@link Method}
+     */
+    @NotNull Method getSEIMethod();
 
     /**
      * @return Returns the {@link MEP}.
@@ -57,59 +97,4 @@ public interface JavaMethod {
      */
     SOAPBinding getBinding();
 
-    /**
-     * The {@link WSDLBoundOperation} that this method represents.
-     *
-     * @return
-     *      always non-null.
-     */
-//    WSDLBoundOperation getOperation();
-
-    /**
-     * Request parameters can be {@link Mode#IN} or
-     * {@link Mode#INOUT} and these parameters go in a request message on-the-wire.
-     * Further a Parameter can be instance of {@link com.sun.xml.ws.model.WrapperParameter} when
-     * the operation is wrapper style.
-     *
-     * @return returns unmodifiable list of request parameters
-     */
-//    List<? extends Parameter> getRequestParameters();
-
-    /**
-     * Response parameters go in the response message on-the-wire and can be of
-     * {@link Mode#OUT} or {@link Mode#INOUT}
-     * @return returns unmodifiable list of response parameters
-     */
-//    List<? extends Parameter> getResponseParameters();
-
-    /**
-     * @return Returns number of java method parameters - that will be all the
-     *         IN, INOUT and OUT holders
-     */
-//    int getInputParametersCount();
-
-   /**
-     * @param exceptionClass
-     * @return CheckedException corresponding to the exceptionClass. Returns
-     *         null if not found.
-     */
-//    CheckedException getCheckedException(Class exceptionClass);
-
-    /**
-     * @return a list of checked Exceptions thrown by this method
-     */
-//    List<? extends CheckedException> getCheckedExceptions();
-
-    /**
-     * @param detailType
-     * @return Gets the CheckedException corresponding to detailType. Returns
-     *         null if no CheckedExcpetion with the detailType found.
-     */
-//    CheckedException getCheckedException(TypeReference detailType);
-
-    /**
-     * Returns if the java method MEP is async
-     * @return if this is an Asynch MEP
-     */
-//    boolean isAsync();
 }

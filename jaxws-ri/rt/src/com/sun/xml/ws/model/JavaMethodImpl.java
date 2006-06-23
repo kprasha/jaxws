@@ -55,10 +55,12 @@ public final class JavaMethodImpl implements JavaMethod {
     private String operationName;
     private WSDLBoundOperationImpl wsdlOperation;
     /*package*/ final AbstractSEIModelImpl owner;
+    private final Method seiMethod;
 
-    public JavaMethodImpl(AbstractSEIModelImpl owner, Method method) {
+    public JavaMethodImpl(AbstractSEIModelImpl owner, Method method, Method seiMethod) {
         this.owner = owner;
         this.method = method;
+        this.seiMethod = seiMethod;
     }
 
     public SEIModel getOwner() {
@@ -66,10 +68,21 @@ public final class JavaMethodImpl implements JavaMethod {
     }
 
     /**
-     * @return Returns the method.
+     * @see {@link JavaMethod}
+     *
+     * @return Returns the method. 
      */
     public Method getMethod() {
         return method;
+    }
+    
+    /**
+     * @see {@link JavaMethod}
+     *
+     * @return Returns the SEI method where annotations are present
+     */
+    public Method getSEIMethod() {
+        return seiMethod;
     }
 
     /**
