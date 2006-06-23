@@ -539,9 +539,9 @@ major-version=${release.impl.version}
         <param name="compile.debug" value="true"/>
       </antcall>
       <move tofile="${build.home}/jaxws${release.jar.version}.jar"
-         file="${build.home}/JAXWS2.0_${DSTAMP}.jar"/>
+         file="${build.home}/JAXWS2.0.1ea_${DSTAMP}.jar"/>
       <move tofile="${build.home}/jaxws${release.jar.version}-src.jar"
-         file="${build.home}/JAXWS2.0_source_${DSTAMP}.jar"/>
+         file="${build.home}/JAXWS2.0.1ea_source_${DSTAMP}.jar"/>
     </target>
 
     <target name="generate-binary"
@@ -551,7 +551,7 @@ major-version=${release.impl.version}
       </antcall>
       <tstamp/>
       <!-- generate the class -->
-      <installerBuilder classFile="${build.home}/JAXWS2.0_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS2.0.1ea_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${build.home}/jaxws-ri.zip" />
     </target>
@@ -614,7 +614,7 @@ major-version=${release.impl.version}
       </zip>
           
       <!-- generate the installer -->
-      <installerBuilder classFile="${build.home}/JAXWS2.0_source_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS2.0.1ea_source_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${source.drop.dir}/jaxws-src-installer.zip"/>
       <delete dir="${source.drop.dir}"/>

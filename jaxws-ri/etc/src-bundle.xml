@@ -28,7 +28,7 @@
 <project name="jax-ws" default="build">
 
   <property name="Name" value="JAX-WS RI"/>
-  <property name="version" value="2.0"/>
+  <property name="version" value="2.0.1ea"/>
   
   <tstamp>
       <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
