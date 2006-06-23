@@ -51,8 +51,12 @@ import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.VoidType;
 
 import com.sun.tools.ws.processor.generator.GeneratorBase;
+import com.sun.tools.ws.processor.generator.GeneratorConstants;
+import com.sun.tools.ws.processor.generator.Names;
 import com.sun.tools.ws.processor.modeler.ModelerException;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.processor.util.GeneratedFileInfo;
+import com.sun.tools.ws.processor.util.DirectoryUtil;
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wscompile.FilerCodeWriter;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
@@ -125,7 +129,6 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             ProcessorEnvironment env = builder.getProcessorEnvironment();
             try {
                 CodeWriter cw = new FilerCodeWriter(sourceDir, env);
-
                 if(env.verbose())
                     cw = new ProgressCodeWriter(cw, System.out);
                 cm.build(cw);
@@ -203,6 +206,12 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 reqNamespace = reqWrapper.targetNamespace();
         }
         builder.log("requestWrapper: "+requestClassName);
+///// fix for wsgen CR 6442344
+        GeneratedFileInfo gfi=new GeneratedFileInfo();
+        gfi.setFile(new File(DirectoryUtil.getOutputDirectoryFor(requestClassName, builder.getSourceDir(), builder.getProcessorEnvironment()),
+                             Names.stripQualifier(requestClassName) + GeneratorConstants.JAVA_SRC_SUFFIX));
+        builder.getProcessorEnvironment().addGeneratedFile(gfi);
+//////////
         boolean canOverwriteRequest = builder.canOverWriteClass(requestClassName);
         if (!canOverwriteRequest) {
             builder.log("Class " + requestClassName + " exists. Not overwriting.");
@@ -233,6 +242,13 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 builder.onError("webserviceap.method.response.wrapper.bean.name.not.unique",
                                  new Object[] {typeDecl.getQualifiedName(), method.toString()});
             }
+  ///// fix for wsgen CR 6442344
+            gfi=new GeneratedFileInfo();
+            gfi=new GeneratedFileInfo();
+            gfi.setFile(new File(DirectoryUtil.getOutputDirectoryFor(responseClassName, builder.getSourceDir(), builder.getProcessorEnvironment()),
+                                 Names.stripQualifier(responseClassName) + GeneratorConstants.JAVA_SRC_SUFFIX));
+            builder.getProcessorEnvironment().addGeneratedFile(gfi);
+////////////
         }
         ArrayList<MemberInfo> reqMembers = new ArrayList<MemberInfo>();
         ArrayList<MemberInfo> resMembers = new ArrayList<MemberInfo>();
@@ -274,6 +290,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             // class members
             writeMembers(reqCls, reqMembers);
             writeMembers(resCls, resMembers);
+
         } catch (Exception e) {
             throw new ModelerException("modeler.nestedGeneratorError",e);
         }
