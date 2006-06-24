@@ -247,8 +247,12 @@ final class EndpointMethodHandler {
                 Object ret = owner.getInvoker(req).invoke(req, method, args);
                 responseMessage = isOneWay ? null : createResponseMessage(args, ret);
             } catch (InvocationTargetException e) {
-                e.printStackTrace();
                 Throwable cause = e.getCause();
+                if (cause != null) {
+                    cause.printStackTrace();
+                } else {
+                    e.printStackTrace();
+                }
                 if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
                     // Service specific exception
                     responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion,
