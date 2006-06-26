@@ -225,7 +225,7 @@ public abstract class BindingID {
             return customize(lexical,SOAP11_HTTP);
         if(belongsTo(lexical,SOAP12_HTTP.toString()))
             return customize(lexical,SOAP12_HTTP);
-        if(lexical.equals(SOAPBindingImpl.X_SOAP12HTTP_BINDING))
+        if(belongsTo(lexical,SOAPBindingImpl.X_SOAP12HTTP_BINDING))
             return customize(lexical,X_SOAP12_HTTP);
 
         // OK, it's none of the values JAX-WS understands.
