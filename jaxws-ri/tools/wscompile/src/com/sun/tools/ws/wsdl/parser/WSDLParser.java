@@ -253,14 +253,17 @@ public class WSDLParser {
 
         if(serviceDescriptor != null){
             return parseMetadata(serviceDescriptor);
-        } else if (resolver != null && source != null){
+        } else if (resolver != null &&
+            source != null &&
+            systemId.startsWith("http")){
+            
             // tried mex already if resolver != null
             String getSysId = systemId + "?wsdl";
             try {
                 source = new InputSource(getSysId);
                 return buildDocumentFromWSDL(getSysId, source,
                     expectedTargetNamespaceURI);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 env.error(
                     WsdlMessages.localizablePARSING_UNABLE_TO_GET_METADATA(
                     getSysId));
