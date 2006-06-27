@@ -120,8 +120,10 @@ abstract class MessageFiller {
         void fillIn(Object[] methodArgs, Object returnValue, Message msg) {
             String contentId = getContentId();
             Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
-            Attachment att = new ByteArrayAttachment(contentId,(byte[])obj,mimeType);
-            msg.getAttachments().add(att);
+            if (obj != null) {
+                Attachment att = new ByteArrayAttachment(contentId,(byte[])obj,mimeType);
+                msg.getAttachments().add(att);
+            }
         }
     }
     
