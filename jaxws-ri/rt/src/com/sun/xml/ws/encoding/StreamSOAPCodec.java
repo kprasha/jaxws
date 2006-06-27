@@ -34,6 +34,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
@@ -171,7 +172,7 @@ public abstract class StreamSOAPCodec implements Codec {
         TagInfoset bodyTag = new TagInfoset(reader);
 
         XMLStreamReaderUtil.nextElementContent(reader);
-        return new StreamMessage(envelopeTag,headerTag,headers,bodyTag,reader,soapVersion);
+        return new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag,reader,soapVersion);
         // when there's no payload,
         // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
         // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.

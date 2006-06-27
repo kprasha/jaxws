@@ -51,14 +51,12 @@ import javax.xml.bind.JAXBException;
  */
 public class PayloadSourceMessage extends AbstractMessageImpl {
     private final StreamMessage message;
-    private AttachmentSet attSet;
 
     public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, AttachmentSet attSet, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
         XMLStreamReader reader = SourceReaderFactory.createSourceReader(payload, true);
         XMLStreamReaderUtil.next(reader);
-        message = new StreamMessage(headers, reader, soapVersion);
-        this.attSet = attSet;
+        message = new StreamMessage(headers, attSet, reader, soapVersion);
     }
 
     public PayloadSourceMessage(Source s, SOAPVersion soapVer) {
@@ -74,7 +72,7 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     }
     
     public AttachmentSet getAttachments() {
-        return attSet;
+        return message.getAttachments();
     }
 
     public String getPayloadLocalPart() {

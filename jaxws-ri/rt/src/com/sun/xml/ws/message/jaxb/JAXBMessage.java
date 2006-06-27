@@ -22,14 +22,17 @@
 package com.sun.xml.ws.message.jaxb;
 
 import com.sun.istack.FragmentContentHandler;
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.message.AbstractMessageImpl;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.xml.sax.ContentHandler;
@@ -62,6 +65,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
      * The JAXB object that represents the header.
      */
     private final Object jaxbObject;
+    
+    private final AttachmentSet attachmentSet;
 
     private final Bridge bridge;
 
@@ -91,6 +96,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
         super(soapVer);
         this.bridge = new MarshallerBridge(context);
         this.jaxbObject = jaxbObject;
+        this.attachmentSet = new AttachmentSetImpl();
     }
 
     /**
@@ -108,6 +114,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
         QName tagName = bridge.getTypeReference().tagName;
         this.nsUri = tagName.getNamespaceURI();
         this.localName = tagName.getLocalPart();
+        this.attachmentSet = new AttachmentSetImpl();
     }
 
     /**
@@ -118,9 +125,15 @@ public final class JAXBMessage extends AbstractMessageImpl {
         this.headers = that.headers;
         if(this.headers!=null)
             this.headers = new HeaderList(this.headers);
+        this.attachmentSet = that.attachmentSet;
 
         this.jaxbObject = that.jaxbObject;
         this.bridge = that.bridge;
+    }
+    
+    @Override
+    public @NotNull AttachmentSet getAttachments() {
+        return attachmentSet;
     }
 
     public boolean hasHeaders() {

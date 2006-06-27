@@ -28,11 +28,13 @@ import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
@@ -66,6 +68,8 @@ public final class StreamMessage extends AbstractMessageImpl {
 
     // lazily created
     private @Nullable HeaderList headers;
+    
+    private final @NotNull AttachmentSet attachmentSet;
 
     private final String payloadLocalName;
 
@@ -94,10 +98,12 @@ public final class StreamMessage extends AbstractMessageImpl {
      *      points at the start element of the payload (or the end element of the &lt;s:Body>
      *      if there's no payload)
      */
-    public StreamMessage(@Nullable HeaderList headers, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
+    public StreamMessage(@Nullable HeaderList headers, @NotNull AttachmentSet attachmentSet, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
         this.headers = headers;
+        this.attachmentSet = attachmentSet;
         this.reader = reader;
+        
         //if the reader is pointing to the end element </soapenv:Body> then its empty message
         // or no payload
         if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
@@ -136,8 +142,8 @@ public final class StreamMessage extends AbstractMessageImpl {
      *      Null if the message didn't have a header tag.
      *
      */
-    public StreamMessage(@NotNull TagInfoset envelopeTag, @Nullable TagInfoset headerTag, @Nullable HeaderList headers, @NotNull TagInfoset bodyTag, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
-        this(headers,reader,soapVersion);
+    public StreamMessage(@NotNull TagInfoset envelopeTag, @Nullable TagInfoset headerTag, @NotNull AttachmentSet attachmentSet, @Nullable HeaderList headers, @NotNull TagInfoset bodyTag, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
+        this(headers,attachmentSet,reader,soapVersion);
         assert envelopeTag!=null && bodyTag!=null;
         this.envelopeTag = envelopeTag;
         this.headerTag = headerTag!=null ? headerTag : DEFAULT_TAGS[soapVersion.ordinal()*3+1];
@@ -153,6 +159,11 @@ public final class StreamMessage extends AbstractMessageImpl {
             headers = new HeaderList();
         }
         return headers;
+    }
+    
+    @Override
+    public @NotNull AttachmentSet getAttachments() {
+        return attachmentSet;
     }
 
     public String getPayloadLocalPart() {
@@ -262,7 +273,7 @@ public final class StreamMessage extends AbstractMessageImpl {
                 clone = reader;
             }
 
-            return new StreamMessage(envelopeTag, headerTag, HeaderList.copy(headers), bodyTag, clone, soapVersion);
+            return new StreamMessage(envelopeTag, headerTag, attachmentSet, HeaderList.copy(headers), bodyTag, clone, soapVersion);
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message",e);
         } catch (XMLStreamBufferException e) {
