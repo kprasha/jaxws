@@ -24,9 +24,11 @@ package com.sun.xml.ws.message;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import javax.xml.soap.AttachmentPart;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -169,10 +171,12 @@ public abstract class AbstractMessageImpl extends Message {
         } catch (SAXException e) {
             throw new SOAPException(e);
         }
-
-        // TODO: add attachments and so on.
-        // we can use helper classes, I think.
-
+        for(Attachment att : getAttachments()) {
+            AttachmentPart part = msg.createAttachmentPart();
+            part.setDataHandler(att.asDataHandler());
+            part.setContentId(att.getContentId());
+            msg.addAttachmentPart(part);
+        }
         return msg;
     }
 
