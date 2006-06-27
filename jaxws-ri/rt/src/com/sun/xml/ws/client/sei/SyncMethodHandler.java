@@ -77,6 +77,8 @@ final class SyncMethodHandler extends MethodHandler {
     private final boolean isOneWay;
 
     private final SEIModel seiModel;
+    
+    private final JavaMethodImpl javaMethod;
 
     /**
      * Used to get a value from method invocation parameter.
@@ -90,7 +92,7 @@ final class SyncMethodHandler extends MethodHandler {
 
     public SyncMethodHandler(SEIStub owner, JavaMethodImpl method) {
         super(owner);
-
+        
         //keep all the CheckedException model for the detail qname
         this.checkedExceptions = new HashMap<QName, CheckedExceptionImpl>();
         for(CheckedExceptionImpl ce : method.getCheckedExceptions()){
@@ -99,6 +101,7 @@ final class SyncMethodHandler extends MethodHandler {
 
         this.soapAction = method.getBinding().getSOAPAction();
         this.seiModel = owner.seiModel;
+        this.javaMethod = method;
 
         {// prepare objects for creating messages
             List<ParameterImpl> rp = method.getRequestParameters();
@@ -199,6 +202,10 @@ final class SyncMethodHandler extends MethodHandler {
             }
         }
         this.isOneWay = method.getMEP().isOneWay();
+    }
+    
+    public JavaMethodImpl getJavaMethod() {
+        return javaMethod;
     }
 
     public Object invoke(Object proxy, Object[] args) throws Throwable {

@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.client.sei;
 
+import com.sun.xml.ws.model.JavaMethodImpl;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Future;
@@ -38,8 +39,8 @@ final class CallbackMethodHandler extends AsyncMethodHandler {
      */
     private final int handlerPos;
 
-    public CallbackMethodHandler(SEIStub owner, SyncMethodHandler core, int handlerPos) {
-        super(owner,core);
+    public CallbackMethodHandler(SEIStub owner, JavaMethodImpl jm, SyncMethodHandler core, int handlerPos) {
+        super(owner,jm,core);
         this.handlerPos = handlerPos;
     }
 

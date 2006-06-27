@@ -69,14 +69,17 @@ public final class SEIStub extends Stub implements InvocationHandler {
         }
 
         for( JavaMethodImpl jm : seiModel.getJavaMethods() ) {
+            SyncMethodHandler sync = syncs.get(jm.getOperation());
             if(jm.getMEP()== MEP.ASYNC_CALLBACK) {
                 Method m = jm.getMethod();
-                methodHandlers.put(m,new CallbackMethodHandler(this,
-                    syncs.get(jm.getOperation()), m.getParameterTypes().length-1));
+                CallbackMethodHandler handler = new CallbackMethodHandler(
+                        this, jm, sync, m.getParameterTypes().length-1);
+                methodHandlers.put(m, handler);
             }
             if(jm.getMEP()== MEP.ASYNC_POLL) {
                 Method m = jm.getMethod();
-                methodHandlers.put(m,new PollingMethodHandler(this,syncs.get(jm.getOperation())));
+                PollingMethodHandler handler = new PollingMethodHandler(this, jm, sync);
+                methodHandlers.put(m, handler);
             }
         }
     }

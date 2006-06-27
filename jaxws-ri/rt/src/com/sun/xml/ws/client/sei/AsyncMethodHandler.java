@@ -25,30 +25,116 @@ package com.sun.xml.ws.client.sei;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.ResponseContextReceiver;
+import com.sun.xml.ws.model.ParameterImpl;
+import com.sun.xml.ws.model.WrapperParameter;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Holder;
 import javax.xml.ws.Response;
 import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Callable;
+import com.sun.xml.ws.model.JavaMethodImpl;
 
 /**
  * Common part between {@link CallbackMethodHandler} and {@link PollingMethodHandler}.
  *
  * @author Kohsuke Kawaguchi
+ * @author Jitendra Kotamraju
  */
 abstract class AsyncMethodHandler extends MethodHandler {
 
-    /**
-     * The synchronous version of the method.
-     */
+    private final JavaMethodImpl jm;
+    private final AsyncBuilder asyncBuilder;
     private final SyncMethodHandler core;
+    /**
+     * Async Wrapper bean.
+     */
+    private final Class wrapper;
 
-    protected AsyncMethodHandler(SEIStub owner, SyncMethodHandler core) {
+    protected AsyncMethodHandler(SEIStub owner, JavaMethodImpl jm, SyncMethodHandler core) {
         super(owner);
+        this.jm = jm;
         this.core = core;
+        
+        List<ParameterImpl> rp = jm.getResponseParameters();
+        List<AsyncBuilder> builders = new ArrayList<AsyncBuilder>();
+        
+        
+        Class tempWrap = null;
+        for(ParameterImpl param : rp) {
+            if (param.isWrapperStyle()) {
+                WrapperParameter wrapParam = (WrapperParameter)param;
+                for(ParameterImpl p : wrapParam.getWrapperChildren()) {
+                    if (p.getIndex() == -1) {
+                        tempWrap = (Class)param.getTypeReference().type;
+                        break;
+                    }
+                }
+                if (tempWrap != null) {
+                    break;
+                }
+            } else {
+                if (param.getIndex() == -1) {
+                    tempWrap = (Class)param.getTypeReference().type;
+                    break;
+                }
+            }
+        }
+        wrapper = tempWrap;
+        
+        rp = core.getJavaMethod().getResponseParameters();
+        
+        for( ParameterImpl param : rp ) {
+            if (rp.size() == 1) {
+                break;
+            }
+            ValueGetter setter = ValueGetter.get(param);
+            switch(param.getOutBinding().kind) {
+            case BODY:
+                if(param.isWrapperStyle()) {
+                    if(param.getParent().getBinding().isRpcLit())
+                        builders.add(new AsyncBuilder.DocLit(wrapper, (WrapperParameter)param));
+                    else
+                        builders.add(new AsyncBuilder.DocLit(wrapper, (WrapperParameter)param));
+                } else {
+                    builders.add(new AsyncBuilder.Bare(wrapper, param));
+                }
+                break;
+            case HEADER:
+                builders.add(new AsyncBuilder.Bare(wrapper, param));
+                break;
+            case ATTACHMENT:
+                builders.add(new AsyncBuilder.Bare(wrapper, param));
+                break;
+            case UNBOUND:
+                /*
+                builders.add(new AsyncBuilder.NullSetter(setter,
+                    ResponseBuilder.getVMUninitializedValue(param.getTypeReference().type)));
+                 */
+                break;
+            default:
+                throw new AssertionError();
+            }
+        }
+
+        switch(builders.size()) {
+        case 0:
+            asyncBuilder = AsyncBuilder.NONE;
+            break;
+        case 1:
+            asyncBuilder = builders.get(0);
+            break;
+        default:
+            asyncBuilder = new AsyncBuilder.Composite(builders);
+        }
+       
     }
 
     protected final Response<Object> doInvoke(Object proxy, Object[] args, AsyncHandler handler) {
+        
         AsyncMethodHandler.Invoker invoker = new Invoker(proxy, args);
         ResponseImpl<Object> ft = new ResponseImpl<Object>(invoker,handler);
         invoker.setReceiver(ft);
@@ -76,7 +162,29 @@ abstract class AsyncMethodHandler extends MethodHandler {
         public Object call() throws Exception {
             assert receiver!=null;
             try {
-                return core.invoke(proxy,args,snapshot,receiver);
+                // TODO: Calling the sync method has this overhead
+                Object[] newArgs;
+                Method method = core.getJavaMethod().getMethod();
+                int noOfArgs = method.getParameterTypes().length;
+                newArgs = new Object[noOfArgs];
+                for(int i=0; i < noOfArgs; i++) {
+                    if (method.getParameterTypes()[i].isAssignableFrom(Holder.class)) {
+                        Holder holder = new Holder();
+                        if (i < args.length) {
+                            holder.value = args[i];
+                        }
+                        newArgs[i] = holder;
+                    } else {
+                        newArgs[i] = args[i];
+                    }
+                }
+                Object returnValue = core.invoke(proxy,newArgs,snapshot,receiver);
+                if (asyncBuilder == AsyncBuilder.NONE) {
+                    return returnValue;
+                }
+                Object bean = wrapper.newInstance();
+                asyncBuilder.fillAsyncBean(newArgs, returnValue, bean);
+                return bean;
             } catch (Throwable t) {
                 throw new WebServiceException(t);
             }
