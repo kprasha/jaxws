@@ -43,21 +43,18 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      * handle hold reference to other Pipe for inter-pipe communication
      */
     HandlerPipe cousinPipe;
-    final boolean isClient;
     HandlerProcessor processor;
     boolean remedyActionTaken = false;
     private final @Nullable WSDLPort port;
 
-    public HandlerPipe(Pipe next, WSDLPort port, boolean isClient) {
+    public HandlerPipe(Pipe next, WSDLPort port) {
         super(next);
         this.port = port;
-        this.isClient = isClient;
     }
 
-    public HandlerPipe(Pipe next, HandlerPipe cousinPipe, boolean isClient) {
+    public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
         super(next);
         this.cousinPipe = cousinPipe;
-        this.isClient = isClient;
         if(cousinPipe != null) {
             this.port = cousinPipe.port;
         } else {
@@ -73,8 +70,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         if(that.cousinPipe != null) {
             this.cousinPipe = cloner.copy(that.cousinPipe);
         }
-        this.isClient = that.isClient;
-        this.port = that.port;
+        this.port = that.port;        
     }
 
     public final Packet process( Packet packet) {
@@ -131,6 +127,10 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         return reply;
     }
 
+    abstract void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault);
+
+    abstract boolean callHandlersOnRequest(MessageUpdatableContext context, boolean oneWay);
+
     private boolean checkOneWay(Packet packet) {
         if (port != null) {
             /* we can determine this value from WSDL */
@@ -141,56 +141,6 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
               the appliation's intention --- whether it was invokeOneway vs invoke,etc.
              */
             return (packet.expectReply != null && packet.expectReply);
-        }
-    }
-
-    private boolean callHandlersOnRequest(MessageUpdatableContext context, boolean isOneWay){
-
-        boolean handlerResult;
-        try {
-            if(isClient) {
-                //CLIENT-SIDE
-                handlerResult = processor.callHandlersRequest(Direction.OUTBOUND,context,!isOneWay);
-            } else {
-                //SERVER-SIDE
-                handlerResult = processor.callHandlersRequest(Direction.INBOUND,context,!isOneWay);
-            }
-        } catch(WebServiceException wse) {
-            remedyActionTaken = true;
-            //no rewrapping
-            throw wse;
-        } catch(RuntimeException re){
-            remedyActionTaken = true;
-            if(isClient){
-                throw new WebServiceException(re);
-            } else {
-                throw re;
-            }
-        }
-        if(!handlerResult) {
-                remedyActionTaken = true;
-        }
-        return handlerResult;
-    }
-
-    private void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault){
-        try {
-            if(isClient) {
-                //CLIENT-SIDE
-                processor.callHandlersResponse(Direction.INBOUND,context,handleFault);
-            } else {
-                //SERVER-SIDE
-                processor.callHandlersResponse(Direction.OUTBOUND,context,handleFault);
-            }
-        } catch(WebServiceException wse) {
-            //no rewrapping
-            throw wse;
-        } catch(RuntimeException re){
-            if(isClient){
-                throw new WebServiceException(re);
-            } else {
-                throw re;
-            }
         }
     }
 
@@ -208,7 +158,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
      * This is called from cousinPipe.
      * Close this Pipes's handlers.
      */
-    public abstract void closeCall(MessageContext msgContext);
+    protected abstract void closeCall(MessageContext msgContext);
 
     private boolean isHandleFault(Packet packet) {
         if (cousinPipe != null) {

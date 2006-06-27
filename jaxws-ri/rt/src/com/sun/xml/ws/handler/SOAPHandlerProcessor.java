@@ -51,8 +51,8 @@ final class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends Hand
     /**
      * Creates a new instance of SOAPHandlerProcessor
      */
-    public SOAPHandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain, boolean isClient) {
-        super(owner, binding, chain,isClient);
+    public SOAPHandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain) {
+        super(owner, binding, chain);
     }
     
     /**

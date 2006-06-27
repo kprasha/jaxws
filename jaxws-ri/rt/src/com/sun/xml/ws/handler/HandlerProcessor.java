@@ -64,14 +64,13 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * @param chain A list of handler objects, which can
      *              be protocol or logical handlers.
      */
-    protected HandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain, boolean isClient) {
+    protected HandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain) {
         this.owner = owner;
         if (chain == null) { // should only happen in testing
             chain = new ArrayList<Handler>();
         }
         handlers = chain;
         this.binding = binding;
-        this.isClient = isClient;
     }
 
     /**

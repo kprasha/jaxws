@@ -4,9 +4,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.handler.HandlerPipe;
-import com.sun.xml.ws.handler.LogicalHandlerPipe;
-import com.sun.xml.ws.handler.SOAPHandlerPipe;
+import com.sun.xml.ws.handler.*;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -94,10 +92,10 @@ public final class ClientPipeAssemblerContext {
         HandlerPipe soapHandlerPipe = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
         if (binding instanceof SOAPBinding) {
-            soapHandlerPipe = new SOAPHandlerPipe(binding, wsdlModel, next, isClient);
+            soapHandlerPipe = new ClientSOAPHandlerPipe(binding, wsdlModel, next);
             next = soapHandlerPipe;
         }
-        return new LogicalHandlerPipe(binding, next, soapHandlerPipe, isClient);
+        return new ClientLogicalHandlerPipe(binding, next, soapHandlerPipe);
     }
     
     /**

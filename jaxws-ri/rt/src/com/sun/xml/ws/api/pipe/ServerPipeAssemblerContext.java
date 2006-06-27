@@ -7,9 +7,7 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.handler.HandlerPipe;
-import com.sun.xml.ws.handler.LogicalHandlerPipe;
-import com.sun.xml.ws.handler.SOAPHandlerPipe;
+import com.sun.xml.ws.handler.*;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -102,10 +100,10 @@ public final class ServerPipeAssemblerContext {
     public @NotNull Pipe createHandlerPipe(@NotNull Pipe next) {
         if (!binding.getHandlerChain().isEmpty()) {
             boolean isClient = false;
-            HandlerPipe cousin = new LogicalHandlerPipe(binding, wsdlModel, next, isClient);
+            HandlerPipe cousin = new ServerLogicalHandlerPipe(binding, wsdlModel, next);
             next = cousin;
             if (binding instanceof SOAPBinding) {
-                return new SOAPHandlerPipe(binding, next, cousin, isClient);
+                return new ServerSOAPHandlerPipe(binding, next, cousin);
             }
         }
         return next;
