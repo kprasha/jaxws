@@ -3,4 +3,4 @@
 
 cd jax-ws-sources/jaxws-ri
 
-ant -Dbuild.id=jaxws-rearch-2005-nightly_$BUILD_ID -DDSTAMP=$BUILD_ID clean generate-weekly-binary generate-weekly-source
+ant -Dbuild.id=jaxws-rearch-2005-nightly_$BUILD_ID -DDSTAMP= clean generate-weekly-binary generate-weekly-source
