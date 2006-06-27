@@ -62,6 +62,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
         Pipe head = context.getTerminalPipe();
         head = context.createHandlerPipe(head);
         head = context.createMonitoringPipe(head);
+        head = context.createSecurityPipe(head);
         head = context.createServerMUPipe(head);
         return head;
     }

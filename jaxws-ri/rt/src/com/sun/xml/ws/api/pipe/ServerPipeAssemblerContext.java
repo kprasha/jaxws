@@ -95,6 +95,16 @@ public final class ServerPipeAssemblerContext {
     }
     
     /**
+     * Creates a {@link Pipe} that adds container specific security
+     */
+    public @NotNull Pipe createSecurityPipe(@NotNull Pipe next) {
+        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
+        if (hook != null)
+            return hook.createSecurityPipe(seiModel,wsdlModel,endpoint,next);
+        return next;
+    }
+    
+    /**
      * Creates a {@link Pipe} that invokes protocol and logical handlers.
      */
     public @NotNull Pipe createHandlerPipe(@NotNull Pipe next) {
