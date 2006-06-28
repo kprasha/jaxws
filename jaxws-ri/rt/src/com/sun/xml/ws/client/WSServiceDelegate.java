@@ -251,8 +251,9 @@ public class WSServiceDelegate extends WSService {
 
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
+            BindingID bid = (bindingId == null) ? BindingID.SOAP11_HTTP : BindingID.parse(bindingId);
             ports.put(portName,
-                new PortInfo(this, EndpointAddress.create(endpointAddress), portName, BindingID.parse(bindingId)));
+                new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bid));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
