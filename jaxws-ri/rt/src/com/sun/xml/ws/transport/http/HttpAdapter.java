@@ -36,6 +36,9 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.PropertySet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -98,24 +101,32 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             wsdls = Collections.emptyMap();
             revWsdls = Collections.emptyMap();
         } else {
-            wsdls = new HashMap<String, SDDocument>();
-            int wsdlnum = 1;
-            int xsdnum = 1;
+            wsdls = new HashMap<String, SDDocument>();  // wsdl=1 --> Doc
+            // Sort WSDL, Schema documents based on SystemId so that the same
+            // document gets wsdl=x mapping
+            Map<String, SDDocument> systemIds = new TreeMap<String, SDDocument>();
             for (SDDocument sdd : sdef) {
-                if (sdd == sdef.getPrimary()) {
-                    wsdls.put("wsdl", sdd);
+                if (sdd == sdef.getPrimary()) { // No sorting for Primary WSDL
+                    wsdls.put("wsdl", sdd);     
                     wsdls.put("WSDL", sdd);
                 } else {
-                    if(sdd.isWSDL()) {
-                        wsdls.put("wsdl="+(wsdlnum++),sdd);
-                    }
-                    if(sdd.isSchema()) {
-                        wsdls.put("xsd="+(xsdnum++),sdd);
-                    }
+                    systemIds.put(sdd.getURL().toString(), sdd);
+                }
+            }
+            
+            int wsdlnum = 1;
+            int xsdnum = 1;
+            for (Map.Entry<String, SDDocument> e : systemIds.entrySet()) {
+                SDDocument sdd = e.getValue();
+                if (sdd.isWSDL()) {
+                    wsdls.put("wsdl="+(wsdlnum++),sdd);
+                }
+                if (sdd.isSchema()) {
+                    wsdls.put("xsd="+(xsdnum++),sdd);
                 }
             }
 
-            revWsdls = new HashMap<SDDocument,String>();
+            revWsdls = new HashMap<SDDocument,String>();    // Doc --> wsdl=1
             for (Entry<String,SDDocument> e : wsdls.entrySet()) {
                 revWsdls.put(e.getValue(),e.getKey());
             }
