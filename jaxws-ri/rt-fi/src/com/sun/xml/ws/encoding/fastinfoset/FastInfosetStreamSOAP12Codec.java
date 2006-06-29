@@ -39,7 +39,7 @@ import javax.xml.stream.XMLStreamReader;
  */
 final class FastInfosetStreamSOAP12Codec extends FastInfosetStreamSOAPCodec {
     public static final ContentTypeImpl defaultContentType =
-            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12, null, null);
+            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12);
 
     /*package*/ FastInfosetStreamSOAP12Codec() {
         super(SOAPVersion.SOAP_12);
@@ -62,7 +62,7 @@ final class FastInfosetStreamSOAP12Codec extends FastInfosetStreamSOAPCodec {
         if (soapAction == null) {
             return defaultContentType;
         } else {
-            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12 + ";action=\""+soapAction+"\"", null, null);
+            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12 + ";action=\""+soapAction+"\"");
         }
     }
 

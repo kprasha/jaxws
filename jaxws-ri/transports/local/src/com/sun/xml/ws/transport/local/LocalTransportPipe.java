@@ -23,8 +23,8 @@ package com.sun.xml.ws.transport.local;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
@@ -102,10 +102,14 @@ final class LocalTransportPipe implements Pipe {
 
             LocalConnectionImpl con = new LocalConnectionImpl(reqHeaders);
 
-            String contentType = codec.encode(request, con.getOutput()).getContentType();
+            ContentType contentType = codec.encode(request, con.getOutput());
+            // String contentType = codec.encode(request, con.getOutput()).getContentType();
 
-            reqHeaders.put("Content-Type", Collections.singletonList(contentType));
-
+            reqHeaders.put("Content-Type", Collections.singletonList(contentType.getContentType()));
+            if (contentType.getAcceptHeader() != null) {
+                reqHeaders.put("Accept", Collections.singletonList(contentType.getAcceptHeader()));
+            }
+            
             if(dump)
                 dump(con,"request",reqHeaders);
 
@@ -116,6 +120,10 @@ final class LocalTransportPipe implements Pipe {
 
             String ct = getResponseContentType(con);
 
+            // TODO: check if returned MIME type is the same as that which was sent
+            // or is acceptable if an Accept header was used
+            // TODO: Check content negotiation logic
+            
             if (con.getStatus() == WSHTTPConnection.ONEWAY) {
                 return request.createResponse(null);    // one way. no response given.
             }

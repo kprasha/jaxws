@@ -32,6 +32,18 @@ public final class ContentTypeImpl implements ContentType {
     private final String soapAction;
     private final String accept;
 
+    public ContentTypeImpl(String contentType) {
+        this.contentType = contentType;
+        this.soapAction = null;
+        this.accept = null;
+    }
+    
+    public ContentTypeImpl(String contentType, String soapAction) {
+        this.contentType = contentType;
+        this.soapAction = soapAction;
+        this.accept = null;
+    }
+    
     public ContentTypeImpl(String contentType, String soapAction, String accept) {
         this.contentType = contentType;
         this.soapAction = soapAction;

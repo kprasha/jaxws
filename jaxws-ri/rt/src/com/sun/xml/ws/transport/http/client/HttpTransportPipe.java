@@ -79,18 +79,28 @@ public class HttpTransportPipe implements Pipe {
             ContentType ct = codec.getStaticContentType(request);
             if (ct == null) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
+                
                 ct = codec.encode(request, buf);
                 // data size is available, set it as Content-Length
                 reqHeaders.put("Content-Length", Collections.singletonList(Integer.toString(buf.size())));
                 reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
+                if (ct.getAcceptHeader() != null) {
+                    reqHeaders.put("Accept", Collections.singletonList(ct.getAcceptHeader()));
+                }
                 writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
+                
                 if(dump)
                     dump(buf, "HTTP request", reqHeaders);
+                
                 buf.writeTo(con.getOutput());
             } else {
                 // Set static Content-Type
                 reqHeaders.put("Content-Type", Collections.singletonList(ct.getContentType()));
+                if (ct.getAcceptHeader() != null) {
+                    reqHeaders.put("Accept", Collections.singletonList(ct.getAcceptHeader()));
+                }
                 writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
+                
                 if(dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
                     codec.encode(request, buf);
@@ -109,6 +119,8 @@ public class HttpTransportPipe implements Pipe {
                 return request.createResponse(null);    // one way. no response given.
             }
             String contentType = getContentType(respHeaders);
+            // TODO check if returned MIME type is the same as that which was sent
+            // or is acceptable if an Accept header was used
             Packet reply = request.createResponse(null);
             reply.addSatellite(new HttpResponseProperties(con.getConnection()));
             InputStream response = con.getInput();

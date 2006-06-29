@@ -184,6 +184,7 @@ public final class RequestContext extends PropertySet {
     private RequestContext(RequestContext that) {
         others = new HashMap<String,Object>(that.others);
         endpointAddress = that.endpointAddress;
+        contentNegotiation = that.contentNegotiation;
         // this is fragile, but it works faster
     }
 
@@ -224,6 +225,7 @@ public final class RequestContext extends PropertySet {
         if(mapView.fallbackMap==null) {
             if(endpointAddress!=null)
                 packet.endpointAddress = endpointAddress;
+            packet.contentNegotiation = contentNegotiation;
             packet.invocationProperties.putAll(others);
         } else {
             // fallback mode, simply copy map in a slow way

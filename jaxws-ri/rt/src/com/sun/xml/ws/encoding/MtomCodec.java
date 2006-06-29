@@ -78,9 +78,9 @@ public class MtomCodec extends MimeCodec {
     //This is the mtom attachment stream, we should write it just after the root part for decoder
     private final List<ByteArrayBuffer> mtomAttachmentStream = new ArrayList<ByteArrayBuffer>();
 
-    MtomCodec(SOAPVersion version){
+    MtomCodec(SOAPVersion version, StreamSOAPCodec codec){
         super(version);
-        this.codec = StreamSOAPCodec.create(version);
+        this.codec = codec;
         createConteTypeHeader();
         this.soapXopContentType = XOP_CONTENT_TYPE +";charset=utf-8;type=\""+version.contentType+"\"";
     }
@@ -205,7 +205,7 @@ public class MtomCodec extends MimeCodec {
     }
 
     public MtomCodec copy() {
-        return new MtomCodec(version);
+        return new MtomCodec(version, codec.copy());
     }
 
     private String encodeCid(String ns){

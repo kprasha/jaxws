@@ -144,6 +144,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             String ct = con.getRequestHeader("Content-Type");
             InputStream in = con.getInput();
             Packet packet = new Packet();
+            packet.acceptableMimeTypes = con.getRequestHeader("Accept");
             packet.addSatellite(con);
             codec.decode(in, ct, packet);
             try {

@@ -46,9 +46,17 @@ final class StreamSOAP11Codec extends StreamSOAPCodec {
         return new StreamHeader11(reader, mark);
     }
 
+    public static final ContentTypeImpl defaultContentType =
+            new ContentTypeImpl("text/xml", "");
+
     @Override
-    protected ContentType getContentType(String soapAction){
-        String action = (soapAction == null)?"":soapAction;
-        return new ContentTypeImpl("text/xml", action, null);
+    protected ContentType getContentType(String soapAction) {
+        // TODO: set Accept header
+
+        if (soapAction == null || soapAction.length() == 0) {
+            return defaultContentType;
+        } else {
+            return new ContentTypeImpl("text/xml", soapAction);
+        }
     }
 }

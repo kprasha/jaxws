@@ -53,6 +53,10 @@ import java.nio.channels.ReadableByteChannel;
  */
 public abstract class FastInfosetStreamSOAPCodec implements Codec {
 
+    private StAXDocumentParser _parser;
+    
+    private StAXDocumentSerializer _serializer;
+    
     private StreamSOAPCodec _soapCodec;
 
     /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion) {
@@ -70,7 +74,7 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
 
     public ContentType encode(Packet packet, OutputStream out) {
         if (packet.getMessage() != null) {
-            XMLStreamWriter writer = createXMLStreamWriter(out);
+            final XMLStreamWriter writer = getXMLStreamWriter(out);
             try {
                 packet.getMessage().writeTo(writer);
                 writer.flush();
@@ -86,35 +90,43 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
         throw new UnsupportedOperationException();
     }
 
-    protected XMLStreamWriter createXMLStreamWriter(OutputStream out) {
-        // TODO: we should definitely let Encode owns one XMLStreamWriter instance
-        // instead of instantiating a new one
-        return new StAXDocumentSerializer(out);
-    }
-
-    protected abstract ContentType getContentType(String soapAction);
-
     public void decode(InputStream in, String contentType, Packet response) throws IOException {
-        XMLStreamReader reader = createXMLStreamReader(in);
-        response.setMessage(_soapCodec.decode(reader));
+        response.setMessage(
+                _soapCodec.decode(getXMLStreamReader(in)));
     }
 
     public void decode(ReadableByteChannel in, String contentType, Packet response) {
         throw new UnsupportedOperationException();
     }
 
-    protected XMLStreamReader createXMLStreamReader(InputStream in) {
-        // TODO: we should definitely let Decode owns one XMLStreamReader instance
-        // instead of instantiating a new parser
-        return new StAXDocumentParser(in);
-    }
+    
+    protected abstract ContentType getContentType(String soapAction);
 
     protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark);
+    
+    
+    private XMLStreamWriter getXMLStreamWriter(OutputStream out) {
+        if (_serializer != null) {
+            _serializer.setOutputStream(out);
+            return _serializer;
+        } else {
+            return _serializer = new StAXDocumentSerializer(out);
+        }
+    }
+
+    private XMLStreamReader getXMLStreamReader(InputStream in) {
+        if (_parser != null) {
+            _parser.setInputStream(in);
+            return _parser;
+        } else {
+            return _parser = new StAXDocumentParser(in);
+        }
+    }
 
     /**
      * Creates a new {@link FastInfosetStreamSOAPCodec} instance.
      */
-    public static FastInfosetStreamSOAPCodec get(SOAPVersion version) {
+    public static FastInfosetStreamSOAPCodec create(SOAPVersion version) {
         if(version==null)
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();

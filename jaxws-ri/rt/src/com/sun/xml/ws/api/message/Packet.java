@@ -23,12 +23,12 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.util.DistributedPropertySet;
@@ -230,6 +230,48 @@ public final class Packet extends DistributedPropertySet {
             this.endpointAddress = EndpointAddress.create(s);
     }
 
+    /**
+     * The value of {@link ContentNegotiation#PROPERTY} 
+     * property.
+     * 
+     * This property is used only on the client side.
+     */
+    public ContentNegotiation contentNegotiation;
+    
+    @Property(ContentNegotiation.PROPERTY)
+    public String getContentNegotiationString() {
+        return (contentNegotiation != null) ? contentNegotiation.toString() : null;
+    }
+
+    public void setContentNegotiationString(String s) {
+        if(s==null)
+            contentNegotiation = null;
+        else {
+            try {
+                contentNegotiation = ContentNegotiation.valueOf(s);
+            } catch (IllegalArgumentException e) {
+                // If the value is not recognized default to none
+                contentNegotiation = ContentNegotiation.none;
+            }
+        }
+    }
+    
+    /**
+     * The list of MIME types that are acceptable to a receiver
+     * of an outbound message.
+     * 
+     * This property is used only on the server side.
+     * 
+     * <p>The representation shall be that specified by the HTTP Accept 
+     * request-header field.
+     *
+     * <p>The list of content types will be obtained from the transport
+     * meta-data of a inbound message in a request/response message exchange. 
+     * Hence this property will be set by the service-side transport pipe.
+     *
+     */
+    public String acceptableMimeTypes;
+    
     /**
      * When non-null, this object is consulted to
      * implement {@link WebServiceContext} methods
