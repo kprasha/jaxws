@@ -44,9 +44,9 @@ import java.util.UUID;
  */
 public final class SwACodec extends MimeCodec {
 
-    public SwACodec(SOAPVersion version) {
+    public SwACodec(SOAPVersion version, Codec rootCodec) {
         super(version);
-        this.rootCodec = StreamSOAPCodec.create(version);
+        this.rootCodec = rootCodec;
     }
 
     private SwACodec(SwACodec that) {
