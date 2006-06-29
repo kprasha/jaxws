@@ -22,7 +22,9 @@
 
 package com.sun.xml.ws.message;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -49,16 +51,19 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
      * some header, so we create it eagerly here.
      */
     private final HeaderList headers;
+    private final AttachmentSet attachmentSet;
 
     public EmptyMessageImpl(SOAPVersion version) {
         super(version);
         this.headers = new HeaderList();
+        this.attachmentSet = new AttachmentSetImpl();
     }
 
-    public EmptyMessageImpl(HeaderList headers, SOAPVersion version){
+    public EmptyMessageImpl(HeaderList headers, @NotNull AttachmentSet attachmentSet, SOAPVersion version){
         super(version);
         if(headers==null)
             headers = new HeaderList();
+        this.attachmentSet = attachmentSet;
         this.headers = headers;
     }
 
@@ -68,10 +73,16 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
     private EmptyMessageImpl(EmptyMessageImpl that) {
         super(that);
         this.headers = new HeaderList(that.headers);
+        this.attachmentSet = that.attachmentSet;
     }
 
     public boolean hasHeaders() {
         return !headers.isEmpty();
+    }
+    
+    @Override
+    public @NotNull AttachmentSet getAttachments() {
+        return attachmentSet;
     }
 
     public HeaderList getHeaders() {
@@ -92,14 +103,6 @@ public class EmptyMessageImpl extends AbstractMessageImpl {
 
     public Source readPayloadAsSource() {
         return null;
-    }
-
-    public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
-        for (Header header : headers) {
-            header.writeTo(msg);
-        }
-        return msg;
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {

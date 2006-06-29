@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.encoding.StreamSOAPCodec;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.DOMMessage;
 import com.sun.xml.ws.message.EmptyMessageImpl;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
@@ -180,7 +181,7 @@ public abstract class Messages {
         Element payload = DOMUtil.getFirstChild(soapEnvelope, ver.nsUri, "Body");
 
         if(payload==null) {
-            return new EmptyMessageImpl(headers,ver);
+            return new EmptyMessageImpl(headers, new AttachmentSetImpl(), ver);
         } else {
             return new DOMMessage(ver,headers,payload);
         }

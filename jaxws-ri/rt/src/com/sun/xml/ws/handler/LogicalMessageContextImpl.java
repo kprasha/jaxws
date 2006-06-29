@@ -78,7 +78,7 @@ class LogicalMessageContextImpl extends MessageUpdatableContext implements Logic
                 AttachmentSet attachments = msg.getAttachments();
                 Source modifiedPayload = lm.getModifiedPayload();
                 if(modifiedPayload == null){
-                    packet.setMessage(new EmptyMessageImpl(headers,binding.getSOAPVersion()));
+                    packet.setMessage(new EmptyMessageImpl(headers,attachments,binding.getSOAPVersion()));
                 } else {
                     packet.setMessage(new PayloadSourceMessage(headers,modifiedPayload, attachments, binding.getSOAPVersion()));
                 }
