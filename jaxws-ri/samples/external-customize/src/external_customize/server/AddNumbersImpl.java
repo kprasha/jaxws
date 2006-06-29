@@ -23,7 +23,7 @@ package external_customize.server;
 
 import javax.jws.WebService;
 
-@WebService (serviceName = "AddNumbersService", targetNamespace = "http://duke.example")
+@WebService (serviceName = "AddNumbersService", targetNamespace = "http://duke.example.org")
 public class AddNumbersImpl {
     
     /**

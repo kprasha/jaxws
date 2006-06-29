@@ -86,7 +86,7 @@ public class AddNumbersImpl implements Provider<Source> {
     
     private Source createResultSource(int sum) {
         String body =
-            "<ns:addNumbersResponse xmlns:ns=\"http://duke.example\"><ns:return>"
+            "<ns:addNumbersResponse xmlns:ns=\"http://duke.example.org\"><ns:return>"
             +sum
             +"</ns:return></ns:addNumbersResponse>";
         Source source = new StreamSource(
