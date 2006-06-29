@@ -29,7 +29,7 @@
     <bindings node="wsdl:definitions">
         <package name="fromwsdlhandler.server"/>
     </bindings>
-    <bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://duke.org']">
+    <bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://duke.example']">
         <jaxb:schemaBindings>
             <jaxb:package name="fromwsdlhandler.server"/>
         </jaxb:schemaBindings>

@@ -31,8 +31,8 @@
         interface="fromwsdl_soap12.server.AddNumbersPortType"
         implementation="fromwsdl_soap12.server.AddNumbersImpl"
         wsdl="WEB-INF/wsdl/AddNumbers.wsdl"
-        service="{http://duke.org}AddNumbersService"
-        port="{http://duke.org}AddNumbersPort"
+        service="{http://duke.example}AddNumbersService"
+        port="{http://duke.example}AddNumbersPort"
         binding="http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/"
         url-pattern="/addnumbers" />
 

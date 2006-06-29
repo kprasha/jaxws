@@ -29,8 +29,8 @@
         name="provider"
         implementation="provider.server.AddNumbersImpl"
         wsdl="WEB-INF/wsdl/AddNumbers.wsdl"
-        service="{http://duke.org}AddNumbersService"
-        port="{http://duke.org}AddNumbersPort"
+        service="{http://duke.example}AddNumbersService"
+        port="{http://duke.example}AddNumbersPort"
         url-pattern="/addnumbers" />
 
 </endpoints>
