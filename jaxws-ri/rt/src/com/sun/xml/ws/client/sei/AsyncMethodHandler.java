@@ -52,7 +52,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
     /**
      * Async Wrapper bean.
      */
-    private final Class wrapper;
+    //private final Class wrapper;
 
     protected AsyncMethodHandler(SEIStub owner, JavaMethodImpl jm, SyncMethodHandler core) {
         super(owner);
@@ -60,7 +60,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
         this.core = core;
         
         List<ParameterImpl> rp = jm.getResponseParameters();
-        List<AsyncBuilder> builders = new ArrayList<AsyncBuilder>();
+        
         
         
         Class tempWrap = null;
@@ -69,7 +69,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
                 WrapperParameter wrapParam = (WrapperParameter)param;
                 for(ParameterImpl p : wrapParam.getWrapperChildren()) {
                     if (p.getIndex() == -1) {
-                        tempWrap = (Class)param.getTypeReference().type;
+                        tempWrap = (Class)p.getTypeReference().type;
                         break;
                     }
                 }
@@ -83,44 +83,73 @@ abstract class AsyncMethodHandler extends MethodHandler {
                 }
             }
         }
-        wrapper = tempWrap;
+        Class wrapper = tempWrap;      
         
         rp = core.getJavaMethod().getResponseParameters();
-        
+        int size = 0;
         for( ParameterImpl param : rp ) {
-            if (rp.size() == 1) {
-                break;
-            }
-            ValueGetter setter = ValueGetter.get(param);
-            switch(param.getOutBinding().kind) {
-            case BODY:
-                if(param.isWrapperStyle()) {
-                    if(param.getParent().getBinding().isRpcLit())
-                        builders.add(new AsyncBuilder.DocLit(wrapper, (WrapperParameter)param));
-                    else
-                        builders.add(new AsyncBuilder.DocLit(wrapper, (WrapperParameter)param));
-                } else {
-                    builders.add(new AsyncBuilder.Bare(wrapper, param));
-                }
-                break;
-            case HEADER:
-                builders.add(new AsyncBuilder.Bare(wrapper, param));
-                break;
-            case ATTACHMENT:
-                builders.add(new AsyncBuilder.Bare(wrapper, param));
-                break;
-            case UNBOUND:
-                /*
-                builders.add(new AsyncBuilder.NullSetter(setter,
-                    ResponseBuilder.getVMUninitializedValue(param.getTypeReference().type)));
-                 */
-                break;
-            default:
-                throw new AssertionError();
+            if (param.isWrapperStyle()) {
+                WrapperParameter wrapParam = (WrapperParameter)param;
+                size += wrapParam.getWrapperChildren().size();
+            } else {
+                ++size;
             }
         }
+        
+        List<AsyncBuilder> builders = new ArrayList<AsyncBuilder>();
+        if (size == 0) {
+            // no mapping
+        } else if (size == 1) {
+            ParameterImpl single = null;
+            for( ParameterImpl param : rp ) {
+                if (param.isWrapperStyle()) {
+                    WrapperParameter wrapParam = (WrapperParameter)param;
+                    for(ParameterImpl p : wrapParam.getWrapperChildren()) {
+                        single = p;
+                        break;
+                    }
+                    if (single != null)
+                        break;
+                } else {
+                    single = param;
+                    break;
+                }
+            }
+            assert single != null;
+            builders.add(new AsyncBuilder.Filler(single));
+        } else {
+            for( ParameterImpl param : rp ) {
+                ValueGetter setter = ValueGetter.get(param);
+                switch(param.getOutBinding().kind) {
+                case BODY:
+                    if(param.isWrapperStyle()) {
+                        if(param.getParent().getBinding().isRpcLit())
+                            builders.add(new AsyncBuilder.DocLit(wrapper, (WrapperParameter)param));
+                        else
+                            builders.add(new AsyncBuilder.DocLit(wrapper, (WrapperParameter)param));
+                    } else {
+                        builders.add(new AsyncBuilder.Bare(wrapper, param));
+                    }
+                    break;
+                case HEADER:
+                    builders.add(new AsyncBuilder.Bare(wrapper, param));
+                    break;
+                case ATTACHMENT:
+                    builders.add(new AsyncBuilder.Bare(wrapper, param));
+                    break;
+                case UNBOUND:
+                    /*
+                    builders.add(new AsyncBuilder.NullSetter(setter,
+                        ResponseBuilder.getVMUninitializedValue(param.getTypeReference().type)));
+                     */
+                    break;
+                default:
+                    throw new AssertionError();
+                }
+            }
 
-        switch(builders.size()) {
+        }
+        switch(size) {      // Use size, since Composite is creating async bean
         case 0:
             asyncBuilder = AsyncBuilder.NONE;
             break;
@@ -128,7 +157,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
             asyncBuilder = builders.get(0);
             break;
         default:
-            asyncBuilder = new AsyncBuilder.Composite(builders);
+            asyncBuilder = new AsyncBuilder.Composite(builders, wrapper);
         }
        
     }
@@ -179,12 +208,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
                     }
                 }
                 Object returnValue = core.invoke(proxy,newArgs,snapshot,receiver);
-                if (asyncBuilder == AsyncBuilder.NONE) {
-                    return returnValue;
-                }
-                Object bean = wrapper.newInstance();
-                asyncBuilder.fillAsyncBean(newArgs, returnValue, bean);
-                return bean;
+                return asyncBuilder.fillAsyncBean(newArgs, returnValue, null);
             } catch (Throwable t) {
                 throw new WebServiceException(t);
             }

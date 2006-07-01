@@ -49,7 +49,7 @@ import java.util.List;
  */
 abstract class AsyncBuilder {
     
-    abstract void fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean);
+    abstract Object fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean);
 
     /**
      * Used to create a payload JAXB object just by taking
@@ -82,40 +82,72 @@ abstract class AsyncBuilder {
         /**
          * Picks up an object from the method arguments and uses it.
          */
-        void fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
+        Object fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
             Object obj = (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
             try {
                 accessor.set(bean, obj);
             } catch (Exception e) {
                 throw new WebServiceException(e);    // TODO:i18n
             }
+            return bean;
+        }
+    }
+    
+    final static class Filler extends AsyncBuilder {
+        /**
+         * The index of the method invocation parameters that goes into the payload.
+         */
+        private final int methodPos;
+        private final ValueGetter getter;
+
+        /**
+         * Creates a {@link BodyBuilder} from a bare parameter.
+         */
+        Filler(ParameterImpl p) {
+            this.methodPos = p.getIndex();
+            this.getter = ValueGetter.get(p);
+        }
+
+        /**
+         * Picks up an object from the method arguments and uses it.
+         */
+        Object fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
+            return (methodPos == -1) ? returnValue : getter.get(methodArgs[methodPos]);
         }
     }
     
     public static AsyncBuilder NONE = new None();
     
     static final class None extends AsyncBuilder {
-        void fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
-            // Nothing to do
+        Object fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
+            return bean;
         }
     }
     
     static final class Composite extends AsyncBuilder {
         private final AsyncBuilder[] builders;
+        private final Class beanClass;
 
-        public Composite(AsyncBuilder... builders) {
+        public Composite(AsyncBuilder[] builders, Class beanClass) {
             this.builders = builders;
+            this.beanClass = beanClass;
         }
 
-        public Composite(Collection<? extends AsyncBuilder> builders) {
-            this(builders.toArray(new AsyncBuilder[builders.size()]));
+
+        public Composite(Collection<? extends AsyncBuilder> builders, Class beanClass) {
+            this(builders.toArray(new AsyncBuilder[builders.size()]), beanClass);
         }
 
-        void fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
-            Object retVal = null;
+        Object fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
+            try {
+                bean = beanClass.newInstance();
+            } catch (Exception ex) {
+                throw new WebServiceException(ex);
+            }
             for (AsyncBuilder builder : builders) {
                 builder.fillAsyncBean(methodArgs, returnValue, bean);
             }
+            return bean;
         }
     }
 
@@ -192,15 +224,17 @@ abstract class AsyncBuilder {
         /**
          * Packs a bunch of arguments into a {@link CompositeStructure}.
          */
-        void fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
+        Object fillAsyncBean(Object[] methodArgs, Object returnValue, Object bean) {
             try {
                 // fill in wrapped parameters from methodArgs
                 for( int i=indices.length-1; i>=0; i-- ) {
-                    accessors[i].set(bean,getters[i].get(methodArgs[indices[i]]));
+                    Object obj = (indices[i] == -1) ? returnValue : methodArgs[indices[i]];                    
+                    accessors[i].set(bean,getters[i].get(obj));
                 }
             } catch (Exception e) {
                 throw new WebServiceException(e);    // TODO:i18n
             }
+            return bean;
         }
     }
 

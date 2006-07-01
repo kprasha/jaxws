@@ -78,7 +78,8 @@ enum ValueGetter {
      * Returns a {@link ValueGetter} suitable for the given {@link Parameter}.
      */
     static ValueGetter get(ParameterImpl p) {
-        if(p.getMode()== Mode.IN)
+        // return value is always PLAIN
+        if(p.getMode()== Mode.IN || p.getIndex() == -1)
             return PLAIN;
         else
             return HOLDER;
