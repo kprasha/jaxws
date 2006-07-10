@@ -51,6 +51,9 @@ class MessageContextImpl implements MessageContext {
         throw new UnsupportedOperationException("wrong call");
     }
     public void setScope(String name, Scope scope) {
+
+        if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
+        
         //TODO: check in intrenalMap
         if(scope == Scope.APPLICATION) {
             handlerScopeProps.remove(name);
@@ -61,6 +64,9 @@ class MessageContextImpl implements MessageContext {
     }
     
     public Scope getScope(String name) {
+
+        if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
+
         if(handlerScopeProps.contains(name)) {
             return Scope.HANDLER;
         } else {
@@ -109,6 +115,10 @@ class MessageContextImpl implements MessageContext {
     }
     public Collection<Object> values() {
         return internalMap.values();
+    }
+
+    private boolean keyExists(String name){
+        return keySet().contains(name);
     }
     
     /**
