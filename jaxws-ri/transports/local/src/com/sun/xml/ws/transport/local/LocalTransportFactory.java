@@ -69,10 +69,7 @@ public final class LocalTransportFactory extends TransportPipeFactory {
      */
     protected static WSEndpoint createServerService(URI adrs) {
         try {
-            String outputDir = System.getProperty("tempdir");
-            if (outputDir == null) {
-                throw new Error("Set tempdir system property");
-            }
+            String outputDir = adrs.getPath();
             List<WSEndpoint> endpoints = parseEndpoints(outputDir);
 
             WSEndpoint endpoint = endpoints.get(0);
