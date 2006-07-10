@@ -23,11 +23,13 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -70,7 +72,9 @@ public abstract class SDDocumentSource {
             private final URL systemId = url;
 
             public XMLStreamReader read(XMLInputFactory xif) throws IOException, XMLStreamException {
-                return xif.createXMLStreamReader(systemId.toExternalForm(),url.openStream());
+                InputStream is = url.openStream();
+                return new TidyXMLStreamReader(
+                    xif.createXMLStreamReader(systemId.toExternalForm(),is), is);
             }
 
             public URL getSystemId() {
