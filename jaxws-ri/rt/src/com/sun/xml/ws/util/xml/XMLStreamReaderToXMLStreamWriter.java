@@ -164,14 +164,15 @@ public class XMLStreamReaderToXMLStreamWriter {
      */
     protected void handleAttribute(int i) throws XMLStreamException {
         String nsUri = in.getAttributeNamespace(i);
-        if(nsUri==null) {
+        String prefix = in.getAttributePrefix(i);
+        if(nsUri==null || prefix == null || prefix.equals("")) {
             out.writeAttribute(
                 in.getAttributeLocalName(i),
                 in.getAttributeValue(i)
             );
         } else {
             out.writeAttribute(
-                in.getAttributePrefix(i),
+                prefix,
                 nsUri,
                 in.getAttributeLocalName(i),
                 in.getAttributeValue(i)
