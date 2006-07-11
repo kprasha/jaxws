@@ -64,13 +64,7 @@ import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -161,36 +155,44 @@ public class WSServiceDelegate extends WSService {
 
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, final Class<? extends Service> serviceClass) {
+        //we cant create a Service without serviceName
+        if (serviceName == null)
+            throw new WebServiceException(ClientMessages.INVALID_SERVICE_NAME_NULL(serviceName));
         this.serviceName = serviceName;
         this.serviceClass = serviceClass;
 
+        if(wsdlDocumentLocation!=null) {
+            parseWSDL(wsdlDocumentLocation);
+            populatePorts();
+        }
+
+        if (serviceClass != Service.class) {
+            /*
         if (serviceClass != Service.class) {
             SCAnnotations serviceCAnnotations = new SCAnnotations(serviceClass);
 
             if(wsdlDocumentLocation==null)
                 wsdlDocumentLocation = serviceCAnnotations.wsdlLocation;
-
-            if(wsdlDocumentLocation!=null)
-                parseWSDL(wsdlDocumentLocation);
-
-            //if @HandlerChain present, set HandlerResolver on service context
-            HandlerChain handlerChain =
-            AccessController.doPrivileged(new PrivilegedAction<HandlerChain>() {
-                public HandlerChain run() {
-                    return serviceClass.getAnnotation(HandlerChain.class);
-                }
-            });
-            if(handlerChain != null) {
-                HandlerResolverImpl hresolver = new HandlerResolverImpl(this);
-                setHandlerResolver(hresolver);
-            }
-
             for (Class clazz : serviceCAnnotations.classes)
                 addSEI(clazz);
         } else {
             if(wsdlDocumentLocation!=null)
                 parseWSDL(wsdlDocumentLocation);
         }
+        */
+            //if @HandlerChain present, set HandlerResolver on service context
+            HandlerChain handlerChain =
+                    AccessController.doPrivileged(new PrivilegedAction<HandlerChain>() {
+                        public HandlerChain run() {
+                            return serviceClass.getAnnotation(HandlerChain.class);
+                        }
+                    });
+            if (handlerChain != null) {
+                HandlerResolverImpl hresolver = new HandlerResolverImpl(this);
+                setHandlerResolver(hresolver);
+            }
+        }
+
     }
 
     /**
@@ -208,10 +210,22 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException(
                 ClientMessages.INVALID_SERVICE_NAME(serviceName,
                     buildNameList(wsdlContext.getWSDLModel().getServices().keySet())));
+    }
 
-        // fill in statically known ports
-        for (WSDLPortImpl port : wsdlContext.getPorts(serviceName) ) {
-            ports.put(port.getName(), new PortInfo(this,port));
+    private void populatePorts() {
+        if(wsdlContext != null) {
+
+        /*
+        //is this case needed as serviceName should not be null
+
+        if (serviceName == null) {
+            serviceName = wsdlContext.getFirstServiceName();
+        }
+        */
+         // fill in statically known ports
+            for (WSDLPortImpl port : wsdlContext.getPorts(serviceName)) {
+                ports.put(port.getName(), new PortInfo(this, port));
+            }
         }
     }
 
@@ -238,13 +252,14 @@ public class WSServiceDelegate extends WSService {
     public <T> T getPort(QName portName, Class<T> portInterface) throws WebServiceException {
         if(portName==null || portInterface==null)
             throw new IllegalArgumentException();
-
+        addSEI(portName, portInterface);
         return createEndpointIFBaseProxy(portName, portInterface);
     }
 
     public <T> T getPort(Class<T> portInterface) throws WebServiceException {
-        // pick the port name
-        QName portName = seiContext.get(portInterface).portName;
+        //get the first port corresponding to the SEI
+        QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
+        QName portName = wsdlContext.getWSDLModel().getPortName(serviceName, portTypeName);
         return getPort(portName, portInterface);
     }
 
@@ -343,6 +358,10 @@ public class WSServiceDelegate extends WSService {
     }
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {
+        //fail if service doesnt have WSDL
+        if (wsdlContext == null)
+            throw new WebServiceException(ClientMessages.INVALID_SERVICE_NO_WSDL(serviceName));
+
         if (!wsdlContext.contains(serviceName, portName)) {
             throw new WebServiceException("WSDLPort " + portName + "is not found in service " + serviceName);
         }
@@ -412,17 +431,9 @@ public class WSServiceDelegate extends WSService {
      * {@link SEIPortInfo} about a given SEI (linked from the {@link Service}-derived class.)
      */
     //todo: valid port in wsdl
-    private void addSEI(Class portInterface) throws WebServiceException {
+    private void addSEI(QName portName, Class portInterface) throws WebServiceException {
         SEIPortInfo spi = seiContext.get(portInterface);
         if (spi != null)    return;
-
-
-        QName portName = guessPortName(portInterface);
-        if (portName == null) {
-            portName = wsdlContext.getPortName();
-        }
-
-        //todo:use SCAnnotations and put in map
         WSDLPortImpl wsdlPort = getPortModel(portName);
         // TODO: error check against wsdlPort==null
         RuntimeModeler modeler = new RuntimeModeler(portInterface,serviceName,wsdlPort);

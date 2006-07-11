@@ -131,6 +131,20 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
         WSDLPort port = iter.hasNext()?iter.next():null;
         return port;
     }
+    
+    /**
+    * gets the first port in the wsdl which matches the serviceName and portType
+    */
+    public QName getPortName(QName serviceName, QName portType){
+        WSDLServiceImpl service = getService(serviceName);
+        for(WSDLPortImpl port:service.getPorts()){
+            QName ptName = port.getBinding().getPortTypeName();
+            assert (ptName != null);
+            if(ptName.equals(portType))
+                return port.getName();
+        }
+        return null;
+    }
 
     /**
      *
