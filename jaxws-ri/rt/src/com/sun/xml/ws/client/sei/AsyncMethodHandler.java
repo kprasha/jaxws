@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.client.sei;
 
+//import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.ResponseContextReceiver;
@@ -37,6 +38,8 @@ import javax.xml.ws.Response;
 import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Callable;
 import com.sun.xml.ws.model.JavaMethodImpl;
+import javax.jws.soap.SOAPBinding.Style;
+import javax.jws.soap.SOAPBinding.Use;
 
 /**
  * Common part between {@link CallbackMethodHandler} and {@link PollingMethodHandler}.
@@ -67,6 +70,11 @@ abstract class AsyncMethodHandler extends MethodHandler {
         for(ParameterImpl param : rp) {
             if (param.isWrapperStyle()) {
                 WrapperParameter wrapParam = (WrapperParameter)param;
+                if (core.getJavaMethod().getBinding().getStyle() == Style.DOCUMENT) {
+                    // doc/wrapper style
+                    tempWrap = (Class)wrapParam.getTypeReference().type;
+                    break;
+                }
                 for(ParameterImpl p : wrapParam.getWrapperChildren()) {
                     if (p.getIndex() == -1) {
                         tempWrap = (Class)p.getTypeReference().type;
@@ -91,6 +99,11 @@ abstract class AsyncMethodHandler extends MethodHandler {
             if (param.isWrapperStyle()) {
                 WrapperParameter wrapParam = (WrapperParameter)param;
                 size += wrapParam.getWrapperChildren().size();
+                if (core.getJavaMethod().getBinding().getStyle() == Style.DOCUMENT) {
+                    // doc/wrapper - wrapper bean is in async signature
+                    // Add 2 so that it is considered as async bean case
+                    size += 2;
+                }
             } else {
                 ++size;
             }
