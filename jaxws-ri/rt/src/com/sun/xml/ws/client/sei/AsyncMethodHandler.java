@@ -223,6 +223,13 @@ abstract class AsyncMethodHandler extends MethodHandler {
                 Object returnValue = core.invoke(proxy,newArgs,snapshot,receiver);
                 return asyncBuilder.fillAsyncBean(newArgs, returnValue, null);
             } catch (Throwable t) {
+                if (t instanceof RuntimeException) {
+                    if (t instanceof WebServiceException) {
+                        throw (WebServiceException)t;
+                    }
+                }  else if (t instanceof Exception) {
+                    throw (Exception)t;
+                }
                 throw new WebServiceException(t);
             }
         }
