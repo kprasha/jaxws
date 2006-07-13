@@ -36,8 +36,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -91,53 +93,76 @@ public class DOMUtil {
 
     /**
      * Traverses a DOM node and writes out on a streaming writer.
+     *
      * @param node
      * @param writer
      */
     public static void serializeNode(Element node, XMLStreamWriter writer) throws XMLStreamException {
-        writer.writeStartElement(
-            fixNull(node.getPrefix()),
-            node.getLocalName(),
-            fixNull(node.getNamespaceURI()));
+        String nodePrefix = fixNull(node.getPrefix());
+        String nodeNS = fixNull(node.getNamespaceURI());
 
-        if (node.hasAttributes()){
+        // See if nodePrefix:nodeNS is declared in writer's NamespaceContext before writing start element
+        // Writing start element puts nodeNS in NamespaceContext even though namespace declaration not written
+        boolean prefixDecl = isPrefixDeclared(writer, nodeNS, nodePrefix);
+
+        writer.writeStartElement(nodePrefix, node.getLocalName(), nodeNS);
+
+        if (node.hasAttributes()) {
             NamedNodeMap attrs = node.getAttributes();
             int numOfAttributes = attrs.getLength();
             // write namespace declarations first.
             // if we interleave this with attribue writing,
             // Zephyr will try to fix it and we end up getting inconsistent namespace bindings.
-            for(int i = 0; i < numOfAttributes; i++){
+            for (int i = 0; i < numOfAttributes; i++) {
                 Node attr = attrs.item(i);
                 String nsUri = fixNull(attr.getNamespaceURI());
-                if(nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+                if (nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+                    // handle default ns declarations
+                    String local = attr.getLocalName().equals(XMLConstants.XMLNS_ATTRIBUTE) ? "" : attr.getLocalName();
+                    if (local.equals(nodePrefix) && attr.getNodeValue().equals(nodeNS)) {
+                        prefixDecl = true;
+                    }
                     // this is a namespace declaration, not an attribute
-                    writer.writeNamespace(attr.getLocalName(),attr.getNodeValue());
+                    writer.writeNamespace(attr.getLocalName(), attr.getNodeValue());
                 }
             }
-            for(int i = 0; i < numOfAttributes; i++){
+        }
+        // node's namespace is not declared as attribute, but declared on ancestor
+        if (!prefixDecl) {
+            writer.writeNamespace(nodePrefix, nodeNS);
+        }
+
+        // Write all other attributes which are not namespace decl.
+        if (node.hasAttributes()) {
+            NamedNodeMap attrs = node.getAttributes();
+            int numOfAttributes = attrs.getLength();
+
+            for (int i = 0; i < numOfAttributes; i++) {
                 Node attr = attrs.item(i);
-                String nsUri = fixNull(attr.getNamespaceURI());
-                if(!nsUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+                String attrPrefix = fixNull(attr.getPrefix());
+                String attrNS = fixNull(attr.getNamespaceURI());
+                if (!attrNS.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
                     String localName = attr.getLocalName();
-                    if(localName==null) {
+                    if (localName == null) {
                         // TODO: this is really a bug in the caller for not creating proper DOM tree.
                         // will remove this workaround after plugfest
-                        localName=attr.getNodeName();
+                        localName = attr.getNodeName();
                     }
-                    writer.writeAttribute(
-                        fixNull(attr.getPrefix()),
-                        nsUri,
-                        localName,
-                        attr.getNodeValue());
+                    boolean attrPrefixDecl = isPrefixDeclared(writer, attrNS, attrPrefix);
+                    if (!attrPrefixDecl) {
+                        // attr namesapce is declared on the curretn node but
+                        writer.writeNamespace(attrPrefix, attrNS);
+                    }
+                    writer.writeAttribute(attrPrefix, attrNS, localName, attr.getNodeValue());
                 }
             }
         }
 
-        if(node.hasChildNodes()){
+        if (node.hasChildNodes()) {
             NodeList children = node.getChildNodes();
-            for(int i = 0; i< children.getLength(); i++){
+            for (int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
-                switch(child.getNodeType()){
+                switch (child.getNodeType()) {
                     case Node.PROCESSING_INSTRUCTION_NODE:
                         writer.writeProcessingInstruction(child.getNodeValue());
                     case Node.DOCUMENT_TYPE_NODE:
@@ -152,7 +177,7 @@ public class DOMUtil {
                         writer.writeCharacters(child.getNodeValue());
                         break;
                     case Node.ELEMENT_NODE:
-                        serializeNode((Element)child,writer);
+                        serializeNode((Element) child, writer);
                         break;
                 }
             }
@@ -160,32 +185,49 @@ public class DOMUtil {
         writer.writeEndElement();
     }
 
+    private static boolean isPrefixDeclared(XMLStreamWriter writer, String nsUri, String prefix) {
+        boolean prefixDecl = false;
+        NamespaceContext nscontext = writer.getNamespaceContext();
+        Iterator prefixItr = nscontext.getPrefixes(nsUri);
+        while (prefixItr.hasNext()) {
+            if (prefix.equals(prefixItr.next())) {
+                prefixDecl = true;
+                break;
+            }
+        }
+        return prefixDecl;
+    }
+
     /**
      * Gets the first child of the given name, or null.
      */
     public static Element getFirstChild(Element e, String nsUri, String local) {
-        for( Node n=e.getFirstChild(); n!=null; n=n.getNextSibling() ) {
-            if(n.getNodeType()==Node.ELEMENT_NODE) {
-                Element c = (Element)n;
-                if(c.getLocalName().equals(local) && c.getNamespaceURI().equals(nsUri))
+        for (Node n = e.getFirstChild(); n != null; n = n.getNextSibling()) {
+            if (n.getNodeType() == Node.ELEMENT_NODE) {
+                Element c = (Element) n;
+                if (c.getLocalName().equals(local) && c.getNamespaceURI().equals(nsUri))
                     return c;
             }
         }
         return null;
     }
 
-    private static @NotNull String fixNull(@Nullable String s) {
-        if(s==null)     return "";
-        else            return s;
+    private static
+    @NotNull
+    String fixNull(@Nullable String s) {
+        if (s == null) return "";
+        else return s;
     }
 
     /**
      * Gets the first element child.
      */
-    public static @Nullable Element getFirstElementChild(Node parent) {
-        for( Node n=parent.getFirstChild(); n!=null; n=n.getNextSibling() ) {
-            if(n.getNodeType()==Node.ELEMENT_NODE) {
-                return (Element)n;
+    public static
+    @Nullable
+    Element getFirstElementChild(Node parent) {
+        for (Node n = parent.getFirstChild(); n != null; n = n.getNextSibling()) {
+            if (n.getNodeType() == Node.ELEMENT_NODE) {
+                return (Element) n;
             }
         }
         return null;
