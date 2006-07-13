@@ -47,12 +47,13 @@ import javax.xml.ws.handler.Handler;
  * @author WS Development Team
  */
 final class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends HandlerProcessor<C> {
-    
+
     /**
      * Creates a new instance of SOAPHandlerProcessor
      */
-    public SOAPHandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain) {
+    public SOAPHandlerProcessor(boolean isClient, HandlerPipe owner, WSBinding binding, List<? extends Handler> chain) {
         super(owner, binding, chain);
+        this.isClient = isClient;
     }
     
     /**

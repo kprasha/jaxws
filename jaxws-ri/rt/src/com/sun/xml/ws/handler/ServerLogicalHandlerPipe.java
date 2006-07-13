@@ -131,7 +131,7 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
             processor = new XMLHandlerProcessor(this, binding,
                     logicalHandlers);
         } else {
-            processor = new SOAPHandlerProcessor(this, binding,
+            processor = new SOAPHandlerProcessor(false, this, binding,
                     logicalHandlers);
         }
     }

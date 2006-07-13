@@ -46,7 +46,8 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     HandlerProcessor processor;
     boolean remedyActionTaken = false;
     private final @Nullable WSDLPort port;
-
+    // flag used to decide whether to call close on cousinPipe
+    boolean requestProcessingSucessful = false;
     public HandlerPipe(Pipe next, WSDLPort port) {
         super(next);
         this.port = port;
@@ -104,6 +105,8 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             if (!isOneWay && !handlerResult) {
                 return packet;
             }
+
+            requestProcessingSucessful = true;
             // Call next Pipe.process() on msg
             reply = next.process(packet);
 
@@ -120,6 +123,7 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
             // Clean up the exchange for next invocation.
             exchange = null;
             close(context.getMessageContext());
+            requestProcessingSucessful = false;
         }
         //Update Packet with user modifications
         context.updatePacket();

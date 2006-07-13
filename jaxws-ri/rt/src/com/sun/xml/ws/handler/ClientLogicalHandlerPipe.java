@@ -80,11 +80,13 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
      * Close LogicalHandlers first and then SOAPHandlers on Server
      */
     public void close(MessageContext msgContext) {
-
-        //cousinPipe is null in XML/HTTP Binding
-        if (cousinPipe != null) {
-            // Close SOAPHandlerPipe
-            cousinPipe.closeCall(msgContext);
+        //assuming cousinPipe is called if requestProcessingSucessful is true
+        if (requestProcessingSucessful) {
+            //cousinPipe is null in XML/HTTP Binding
+            if (cousinPipe != null) {
+                // Close SOAPHandlerPipe
+                cousinPipe.closeCall(msgContext);
+            }
         }
         if (processor != null)
             closeLogicalHandlers(msgContext);
@@ -132,7 +134,7 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
             processor = new XMLHandlerProcessor(this, binding,
                     logicalHandlers);
         } else {
-            processor = new SOAPHandlerProcessor(this, binding,
+            processor = new SOAPHandlerProcessor(true, this, binding,
                     logicalHandlers);
         }
     }

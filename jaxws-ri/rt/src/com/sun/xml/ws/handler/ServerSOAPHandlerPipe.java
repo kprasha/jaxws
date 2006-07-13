@@ -90,10 +90,12 @@ public class ServerSOAPHandlerPipe extends HandlerPipe {
      * Close LogicalHandlers first and then SOAPHandlers on Server
      */
     public void close(MessageContext msgContext) {
-
-        if (cousinPipe != null) {
-            // Close LogicalHandlerPipe
-            cousinPipe.closeCall(msgContext);
+        //assuming cousinPipe is called if requestProcessingSucessful is true
+        if (requestProcessingSucessful) {
+            if (cousinPipe != null) {
+                // Close LogicalHandlerPipe
+                cousinPipe.closeCall(msgContext);
+            }
         }
         if (processor != null)
             closeSOAPHandlers(msgContext);
@@ -137,7 +139,7 @@ public class ServerSOAPHandlerPipe extends HandlerPipe {
         soapHandlers.addAll(handlerConfig.getSoapHandlers());
         roles = new HashSet<String>();
         roles.addAll(handlerConfig.getRoles());
-        processor = new SOAPHandlerProcessor(this, binding, soapHandlers);
+        processor = new SOAPHandlerProcessor(false, this, binding, soapHandlers);
     }
 
     void setUpProcessor() {

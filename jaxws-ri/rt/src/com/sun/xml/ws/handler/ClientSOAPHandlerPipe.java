@@ -129,7 +129,7 @@ public class ClientSOAPHandlerPipe extends HandlerPipe {
         soapHandlers.addAll(handlerConfig.getSoapHandlers());
         roles = new HashSet<String>();
         roles.addAll(handlerConfig.getRoles());
-        processor = new SOAPHandlerProcessor(this, binding, soapHandlers);
+        processor = new SOAPHandlerProcessor(true, this, binding, soapHandlers);
     }
 
     MessageUpdatableContext getContext(Packet packet) {
