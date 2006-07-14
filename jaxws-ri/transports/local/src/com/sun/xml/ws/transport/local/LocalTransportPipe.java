@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
@@ -103,11 +104,12 @@ final class LocalTransportPipe implements Pipe {
             LocalConnectionImpl con = new LocalConnectionImpl(reqHeaders);
 
             ContentType contentType = codec.encode(request, con.getOutput());
-            // String contentType = codec.encode(request, con.getOutput()).getContentType();
-
-            reqHeaders.put("Content-Type", Collections.singletonList(contentType.getContentType()));
+            String requestContentType = contentType.getContentType();
+            reqHeaders.put("Content-Type", Collections.singletonList(requestContentType));
+            
+            String requestAccept = contentType.getAcceptHeader();
             if (contentType.getAcceptHeader() != null) {
-                reqHeaders.put("Accept", Collections.singletonList(contentType.getAcceptHeader()));
+                reqHeaders.put("Accept", Collections.singletonList(requestAccept));
             }
             
             if(dump)
@@ -118,18 +120,19 @@ final class LocalTransportPipe implements Pipe {
             if(dump)
                 dump(con,"response",con.getResponseHeaders());
 
-            String ct = getResponseContentType(con);
+            String responseContentType = getResponseContentType(con);
 
-            // TODO: check if returned MIME type is the same as that which was sent
-            // or is acceptable if an Accept header was used
-            // TODO: Check content negotiation logic
-            
             if (con.getStatus() == WSHTTPConnection.ONEWAY) {
                 return request.createResponse(null);    // one way. no response given.
             }
 
+            // TODO: check if returned MIME type is the same as that which was sent
+            // or is acceptable if an Accept header was used
+            
+            checkFIConnegIntegrity(request.contentNegotiation, requestContentType, requestAccept, responseContentType);
+            
             Packet reply = request.createResponse(null);
-            codec.decode(con.getInput(), ct, reply);
+            codec.decode(con.getInput(), responseContentType, reply);
             return reply;
         } catch (WebServiceException wex) {
             throw wex;
@@ -138,6 +141,28 @@ final class LocalTransportPipe implements Pipe {
         }
     }
 
+    private void checkFIConnegIntegrity(ContentNegotiation conneg, 
+            String requestContentType, String requestAccept, String responseContentType) {
+        requestAccept = (requestAccept == null) ? "" : requestAccept;
+        if (requestContentType.contains("fastinfoset")) {
+            if (!responseContentType.contains("fastinfoset")) {
+                throw new RuntimeException(
+                        "Request is encoded using Fast Infoset but response is not not");
+            }
+        } else if (requestAccept.contains("fastinfoset")) {
+            if (!responseContentType.contains("fastinfoset")) {
+                throw new RuntimeException(
+                        "Fast Infoset is acceptable but response is not encoded in Fast Infoset");
+            }
+        } else if (conneg == ContentNegotiation.pessimistic) {
+            throw new RuntimeException(
+                    "Content negotitaion is set to pessimistic but Fast Infoset is not acceptable");
+        } else if (conneg == ContentNegotiation.optimistic) {
+            throw new RuntimeException(
+                    "Content negotitaion is set to optimistic but the request is not encoded using Fast Infoset");
+        }
+    }
+    
     private String getResponseContentType(LocalConnectionImpl con) {
         Map<String, List<String>> rsph = con.getResponseHeaders();
         if(rsph!=null) {

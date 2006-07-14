@@ -119,7 +119,9 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
             _parser.setInputStream(in);
             return _parser;
         } else {
-            return _parser = new StAXDocumentParser(in);
+            _parser = new StAXDocumentParser(in);
+            _parser.setStringInterning(true);
+            return _parser;
         }
     }
 
