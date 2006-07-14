@@ -40,7 +40,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.BindingProvider;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 /**
  * TODO: this class seems to be pointless. Just merge it with {@link HttpTransportPipe}.
@@ -272,6 +275,7 @@ final class HttpClientTransport {
         }
     }
 
+
     protected HttpURLConnection createHttpConnection()
             throws IOException {
 
@@ -303,6 +307,9 @@ final class HttpClientTransport {
             }
         }
 
+       writeBasicAuthAsNeeded(context, reqHeaders);
+
+
         // allow interaction with the web page - user may have to supply
         // username, password id web page is accessed from web browser
 
@@ -327,7 +334,7 @@ final class HttpClientTransport {
         }
          */
         httpConnection.setRequestMethod(method);
-        
+
         Integer reqTimeout = (Integer)context.invocationProperties.get(BindingProviderProperties.REQUEST_TIMEOUT);
         if (reqTimeout != null) {
             httpConnection.setReadTimeout(reqTimeout);
@@ -361,6 +368,25 @@ final class HttpClientTransport {
         if (!LAST_ENDPOINT.equalsIgnoreCase(endpoint.toString())) {
             redirectCount = START_REDIRECT_COUNT;
             LAST_ENDPOINT = endpoint.toString();
+        }
+    }
+
+
+    private void writeBasicAuthAsNeeded(Packet context, Map<String, List<String>> reqHeaders) {
+
+        String user = (String) context.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+
+        if (user != null) {
+            String pw = (String) context.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+            if (pw != null) {
+                StringBuffer buf = new StringBuffer(user);
+                buf.append(":");
+                buf.append(pw);
+
+                String creds = printBase64Binary(buf.toString().getBytes());
+
+                reqHeaders.put("Authorization", Collections.singletonList(new String("Basic " + creds).trim()));
+            }
         }
     }
 
