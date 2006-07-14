@@ -149,8 +149,9 @@ public class DOMUtil {
                         localName = attr.getNodeName();
                     }
                     boolean attrPrefixDecl = isPrefixDeclared(writer, attrNS, attrPrefix);
-                    if (!attrPrefixDecl) {
-                        // attr namesapce is declared on the curretn node but
+                    if (!attrPrefix.equals("") && !attrPrefixDecl) {
+                        // attr has namespace but namespace decl is there in ancestor node
+                        // So write the namespace decl before writing the attr
                         writer.writeNamespace(attrPrefix, attrNS);
                     }
                     writer.writeAttribute(attrPrefix, attrNS, localName, attr.getNodeValue());
