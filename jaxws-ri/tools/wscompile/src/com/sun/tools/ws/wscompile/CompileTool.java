@@ -466,6 +466,11 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         return true;
     }
 
+    @Override
+    public boolean wasSuccessful() {
+        return environment.getErrorCount()==0;
+    }
+
     protected boolean isValidWSGenClass(String className) {        
         Class clazz = getClass(className);
         if (clazz == null) {
