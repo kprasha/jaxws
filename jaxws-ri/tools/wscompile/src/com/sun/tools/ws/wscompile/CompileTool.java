@@ -663,9 +663,13 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
                         public Result getWSDL(String suggestedFilename) {
+                            return getResult(suggestedFilename,true);
+                        }
+                        public Result getResult(String suggestedFilename, boolean recordFile) {
                             File wsdlFile =
                                 new File(nonclassDestDir, suggestedFilename);
-                            wsdlFileName[0] = wsdlFile;
+                            if(recordFile)
+                                wsdlFileName[0] = wsdlFile;
 
                             Result result = new StreamResult();
                             try {
@@ -679,10 +683,10 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         public Result getSchemaOutput(String namespace, String suggestedFilename) {
                             if (namespace.equals(""))
                                 return null;
-                            return getWSDL(suggestedFilename);
+                            return getResult(suggestedFilename,false);
                         }
                         public Result getAbstractWSDL(Holder<String> filename) {
-                            return getWSDL(filename.value);
+                            return getResult(filename.value,false);
                         }
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);
@@ -695,7 +699,10 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         }
     }
 
-    static class ReportOutput { // used as a namespace
+    /**
+     * "Namespace" for code needed to generate the report file.
+     */
+    static class ReportOutput {
         @XmlElement("report")
         interface Report extends TypedXmlWriter {
             @XmlElement
