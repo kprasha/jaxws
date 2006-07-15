@@ -45,6 +45,11 @@ import com.sun.tools.ws.processor.util.ProcessorEnvironmentBase;
 import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.util.JavaCompilerHelper;
 import com.sun.tools.ws.util.ToolBase;
+import com.sun.xml.txw2.TXW;
+import com.sun.xml.txw2.TypedXmlWriter;
+import com.sun.xml.txw2.annotation.XmlElement;
+import com.sun.xml.txw2.annotation.XmlAttribute;
+import com.sun.xml.txw2.output.StreamSerializer;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -62,9 +67,12 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Holder;
+import javax.jws.WebService;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -401,10 +409,15 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             } else if (args[i].startsWith("-help")) {
                 help();
                 return false;
-            } else if (args[i].startsWith("-Xnocompile")) {
-                // -nocompile implies -keep
+            } else if (args[i].equals("-Xnocompile")) {
+                // -nocompile implies -keep. this is undocumented switch.
                 nocompile = true;
                 keepGenerated = true;
+                args[i] = null;
+            } else if (args[i].equals("-XwsgenReport")) {
+                // undocumented switch for the test harness
+                args[i] = null;
+                wsgenReport = new File(args[++i]);
                 args[i] = null;
             } else if (args[i].equals("-Xdonotoverwrite")) {
                 if(program.equals(WSIMPORT)) {
@@ -639,11 +652,15 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             if (portName != null)
                 rtModeler.setPortName(portName);
             AbstractSEIModelImpl rtModel = rtModeler.buildRuntimeModel();
+
+            final File[] wsdlFileName = new File[1]; // used to capture the generated WSDL file.
+
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
                         public Result getWSDL(String suggestedFilename) {
                             File wsdlFile =
                                 new File(nonclassDestDir, suggestedFilename);
+                            wsdlFileName[0] = wsdlFile;
 
                             Result result = new StreamResult();
                             try {
@@ -667,8 +684,67 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         }
                     }, bindingID.createBinding(), null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
+
+            if(wsgenReport!=null)
+                generateWsgenReport(endpointClass,rtModel,wsdlFileName[0]);
         }
     }
+
+    static class ReportOutput { // used as a namespace
+        @XmlElement("report")
+        interface Report extends TypedXmlWriter {
+            @XmlElement
+            void wsdl(String file); // location of WSDL
+            @XmlElement
+            QualifiedName portType();
+            @XmlElement
+            QualifiedName service();
+            @XmlElement
+            QualifiedName port();
+
+            /**
+             * Name of the class that has {@link WebService}.
+             */
+            @XmlElement
+            void implClass(String name);
+        }
+
+        interface QualifiedName extends TypedXmlWriter {
+            @XmlAttribute
+            void uri(String ns);
+            @XmlAttribute
+            void localName(String localName);
+        }
+
+        private static void writeQName( QName n, QualifiedName w ) {
+            w.uri(n.getNamespaceURI());
+            w.localName(n.getLocalPart());
+        }
+    }
+
+    /**
+     * Generates a small XML file that captures the key activity of wsgen,
+     * so that test harness can pick up artifacts.
+     */
+    private void generateWsgenReport(Class<?> endpointClass, AbstractSEIModelImpl rtModel, File wsdlFile) {
+        try {
+            ReportOutput.Report report = TXW.create(ReportOutput.Report.class,
+                new StreamSerializer(new BufferedOutputStream(new FileOutputStream(wsgenReport))));
+
+            report.wsdl(wsdlFile.getAbsolutePath());
+            ReportOutput.writeQName(rtModel.getServiceQName(), report.service());
+            ReportOutput.writeQName(rtModel.getPortName(), report.port());
+            ReportOutput.writeQName(rtModel.getPortTypeName(), report.portType());
+
+            report.implClass(endpointClass.getName());
+
+            report.commit();
+        } catch (IOException e) {
+            // this is code for the test, so we can be lousy in the error handling
+            throw new Error(e);
+        }
+    }
+
 
     static public BindingID getBindingID(String protocol) {
         if (protocol.equals(SOAP11))
@@ -935,6 +1011,12 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     protected String userClasspath = null;
     protected Set<String> bindingFiles = new HashSet<String>();
     protected boolean genWsdl = false;
+    /**
+     * If non-null, generate a file that captures the information
+     * necessary for the test harness to figure out what wsgen
+     * generated.
+     */
+    private File wsgenReport = null;
     protected String protocol = SOAP11;
     protected boolean protocolSet = false;
     protected String transport = HTTP;
