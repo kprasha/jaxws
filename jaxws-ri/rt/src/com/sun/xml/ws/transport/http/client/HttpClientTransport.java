@@ -33,6 +33,8 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +53,15 @@ import static javax.xml.bind.DatatypeConverter.printBase64Binary;
  * @author WS Development Team
  */
 final class HttpClientTransport {
-
+    
+    // Need to use JAXB first to register DatatypeConverter
+    static {
+        try {
+            JAXBContext.newInstance().createUnmarshaller();
+        } catch(JAXBException je) {
+            // Nothing much can be done. Intentionally left empty
+        }
+    }
     private static String LAST_ENDPOINT = "";
     private static boolean redirect = true;
     private static final int START_REDIRECT_COUNT = 3;
@@ -382,10 +392,8 @@ final class HttpClientTransport {
                 StringBuffer buf = new StringBuffer(user);
                 buf.append(":");
                 buf.append(pw);
-
                 String creds = printBase64Binary(buf.toString().getBytes());
-
-                reqHeaders.put("Authorization", Collections.singletonList(new String("Basic " + creds).trim()));
+                reqHeaders.put("Authorization", Collections.singletonList("Basic "+creds));
             }
         }
     }
