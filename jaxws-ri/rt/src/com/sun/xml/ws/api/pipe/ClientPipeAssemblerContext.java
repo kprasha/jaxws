@@ -88,7 +88,6 @@ public final class ClientPipeAssemblerContext {
      * Creates a {@link Pipe} that invokes protocol and logical handlers.
      */
     public Pipe createHandlerPipe(Pipe next) {
-        boolean isClient = true;
         HandlerPipe soapHandlerPipe = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
         if (binding instanceof SOAPBinding) {
