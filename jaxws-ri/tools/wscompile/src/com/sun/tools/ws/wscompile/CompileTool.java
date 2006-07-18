@@ -26,6 +26,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.tools.ws.ToolVersion;
+import com.sun.tools.ws.wscompile.CompileTool.ReportOutput.Schema;
 import com.sun.tools.ws.processor.Processor;
 import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.ProcessorNotificationListener;
@@ -639,18 +640,9 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 // this should never happen
                 environment.error(getMessage("wsgen.class.not.found", endpoint));
             }
-//<<<<<<< CompileTool.java
-//            BindingID bindingID = getBindingID(protocol);
-//            if (bindingID == null) {
-//                BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
-//                if (bindingType != null &&
-//                    bindingType.value().length()>0)
-//                    bindingID = BindingID.parse(bindingType.value());
-//=======
             BindingID bindingID = getBindingID(protocol);
             if (!protocolSet) {
                 bindingID = BindingID.parse(endpointClass);
-//>>>>>>> 1.35
             }
             RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, serviceName, bindingID);
             rtModeler.setClassLoader(classLoader);
@@ -659,34 +651,38 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             AbstractSEIModelImpl rtModel = rtModeler.buildRuntimeModel();
 
             final File[] wsdlFileName = new File[1]; // used to capture the generated WSDL file.
+            final Map<String,File> schemaFiles = new HashMap<String,File>();
 
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
-                        public Result getWSDL(String suggestedFilename) {
-                            return getResult(suggestedFilename,true);
+                        private File toFile(String suggestedFilename) {
+                            return new File(nonclassDestDir, suggestedFilename);
                         }
-                        public Result getResult(String suggestedFilename, boolean recordFile) {
-                            File wsdlFile =
-                                new File(nonclassDestDir, suggestedFilename);
-                            if(recordFile)
-                                wsdlFileName[0] = wsdlFile;
-
+                        private Result toResult(File file) {
                             Result result = new StreamResult();
                             try {
-                                result = new StreamResult(new FileOutputStream(wsdlFile));
-                                result.setSystemId(wsdlFile.toString().replace('\\', '/'));
+                                result = new StreamResult(new FileOutputStream(file));
+                                result.setSystemId(file.getPath().replace('\\', '/'));
                             } catch (FileNotFoundException e) {
-                                environment.error(getMessage("wsgen.could.not.create.file", wsdlFile.toString()));
+                                environment.error(getMessage("wsgen.could.not.create.file", file.getPath()));
                             }
                             return result;
+                        }
+
+                        public Result getWSDL(String suggestedFilename) {
+                            File f = toFile(suggestedFilename);
+                            wsdlFileName[0] = f;
+                            return toResult(f);
                         }
                         public Result getSchemaOutput(String namespace, String suggestedFilename) {
                             if (namespace.equals(""))
                                 return null;
-                            return getResult(suggestedFilename,false);
+                            File f = toFile(suggestedFilename);
+                            schemaFiles.put(namespace,f);
+                            return toResult(f);
                         }
                         public Result getAbstractWSDL(Holder<String> filename) {
-                            return getResult(filename.value,false);
+                            return toResult(toFile(filename.value));
                         }
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);
@@ -695,7 +691,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)
-                generateWsgenReport(endpointClass,rtModel,wsdlFileName[0]);
+                generateWsgenReport(endpointClass,rtModel,wsdlFileName[0],schemaFiles);
         }
     }
 
@@ -719,6 +715,9 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
              */
             @XmlElement
             void implClass(String name);
+
+            @XmlElement
+            Schema schema();
         }
 
         interface QualifiedName extends TypedXmlWriter {
@@ -726,6 +725,13 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             void uri(String ns);
             @XmlAttribute
             void localName(String localName);
+        }
+
+        interface Schema extends TypedXmlWriter {
+            @XmlAttribute
+            void ns(String ns);
+            @XmlAttribute
+            void location(String filePath);
         }
 
         private static void writeQName( QName n, QualifiedName w ) {
@@ -738,7 +744,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
      * Generates a small XML file that captures the key activity of wsgen,
      * so that test harness can pick up artifacts.
      */
-    private void generateWsgenReport(Class<?> endpointClass, AbstractSEIModelImpl rtModel, File wsdlFile) {
+    private void generateWsgenReport(Class<?> endpointClass, AbstractSEIModelImpl rtModel, File wsdlFile, Map<String,File> schemaFiles) {
         try {
             ReportOutput.Report report = TXW.create(ReportOutput.Report.class,
                 new StreamSerializer(new BufferedOutputStream(new FileOutputStream(wsgenReport))));
@@ -749,6 +755,12 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             ReportOutput.writeQName(rtModel.getPortTypeName(), report.portType());
 
             report.implClass(endpointClass.getName());
+
+            for (Map.Entry<String,File> e : schemaFiles.entrySet()) {
+                Schema s = report.schema();
+                s.ns(e.getKey());
+                s.location(e.getValue().getAbsolutePath());
+            }
 
             report.commit();
         } catch (IOException e) {
