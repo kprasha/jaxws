@@ -46,6 +46,10 @@ final class FastInfosetStreamSOAP11Codec extends FastInfosetStreamSOAPCodec {
         super(that);
     }
 
+    public String getMimeType() {
+        return FastInfosetMIMETypes.SOAP_11;
+    }
+    
     public Codec copy() {
         return new FastInfosetStreamSOAP11Codec(this);
     }
@@ -58,8 +62,6 @@ final class FastInfosetStreamSOAP11Codec extends FastInfosetStreamSOAPCodec {
             new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, "");
 
     protected ContentType getContentType(String soapAction) {
-        // TODO: set Accept header
-
         if (soapAction == null || soapAction.length() == 0) {
             return defaultContentType;
         } else {

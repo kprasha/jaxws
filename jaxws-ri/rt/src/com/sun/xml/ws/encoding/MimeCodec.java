@@ -32,7 +32,8 @@ import java.util.UUID;
  * @author Kohsuke Kawaguchi
  */
 abstract class MimeCodec implements Codec {
-
+    public static final String MULTIPART_RELATED_MIME_TYPE = "multipart/related";
+    
     private String boundary;
     private boolean hasAttachments;
     protected Codec rootCodec;
@@ -42,6 +43,10 @@ abstract class MimeCodec implements Codec {
         this.version = version;
     }
     
+    public String getMimeType() {
+        return MULTIPART_RELATED_MIME_TYPE;
+    }
+
     // TODO: preencode String literals to byte[] so that they don't have to
     // go through char[]->byte[] conversion at runtime.
     public ContentType encode(Packet packet, OutputStream out) throws IOException {
@@ -72,7 +77,7 @@ abstract class MimeCodec implements Codec {
             OutputUtil.writeAsAscii("--"+boundary, out);
             OutputUtil.writeAsAscii("--", out);
         }
-        return hasAttachments ? new ContentTypeImpl("multipart/related", null, null) : primaryCt;
+        return hasAttachments ? new ContentTypeImpl(MULTIPART_RELATED_MIME_TYPE, null, null) : primaryCt;
     }
     
     public ContentType getStaticContentType(Packet packet) {
@@ -81,9 +86,9 @@ abstract class MimeCodec implements Codec {
 
         if (hasAttachments) {
             boundary = "uuid:" + UUID.randomUUID().toString();
-            String boundaryParameter = "boundary=\"" + boundary +"\"";
+            String boundaryParameter = "boundary=\"" + boundary + "\"";
             // TODO use primaryEncoder to get type
-            String messageContentType =  "Multipart/Related; type=\"text/xml\"; "+boundaryParameter;
+            String messageContentType =  MULTIPART_RELATED_MIME_TYPE + "; type=\"text/xml\"; " + boundaryParameter;
             return new ContentTypeImpl(messageContentType, packet.soapAction, null);
         } else {
             return rootCodec.getStaticContentType(packet);

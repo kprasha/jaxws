@@ -55,6 +55,10 @@ public final class XMLHTTPCodec extends MimeCodec {
         this.rootCodec = new SimpleCodec();
     }
     
+    public String getMimeType() {
+        return null;
+    }
+    
     @Override
     public ContentType getStaticContentType(Packet packet) {
         Message msg = packet.getMessage();
@@ -170,6 +174,10 @@ public final class XMLHTTPCodec extends MimeCodec {
     
     private static final class SimpleCodec implements Codec {
         private final ContentType contentType = new ContentTypeImpl("text/xml");
+        
+        public String getMimeType() {
+            return null;
+        }
         
         public ContentType getStaticContentType(Packet packet) {
             Message msg = packet.getMessage();

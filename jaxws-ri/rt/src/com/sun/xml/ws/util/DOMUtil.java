@@ -123,6 +123,7 @@ public class DOMUtil {
                         prefixDecl = true;
                     }
                     // this is a namespace declaration, not an attribute
+                    writer.setPrefix(attr.getLocalName(), attr.getNodeValue());
                     writer.writeNamespace(attr.getLocalName(), attr.getNodeValue());
                 }
             }
@@ -152,6 +153,7 @@ public class DOMUtil {
                     if (!attrPrefix.equals("") && !attrPrefixDecl) {
                         // attr has namespace but namespace decl is there in ancestor node
                         // So write the namespace decl before writing the attr
+                        writer.setPrefix(attr.getLocalName(), attr.getNodeValue());
                         writer.writeNamespace(attrPrefix, attrNS);
                     }
                     writer.writeAttribute(attrPrefix, attrNS, localName, attr.getNodeValue());

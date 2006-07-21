@@ -67,6 +67,8 @@ import java.util.UUID;
  * @author Vivek Pandey
  */
 public class MtomCodec extends MimeCodec {
+    public static final String XOP_XML_MIME_TYPE = "application/xop+xml";
+    
     private final StreamSOAPCodec codec;
 
     // encoding related parameters
@@ -82,15 +84,19 @@ public class MtomCodec extends MimeCodec {
         super(version);
         this.codec = codec;
         createConteTypeHeader();
-        this.soapXopContentType = XOP_CONTENT_TYPE +";charset=utf-8;type=\""+version.contentType+"\"";
+        this.soapXopContentType = XOP_XML_MIME_TYPE +";charset=utf-8;type=\""+version.contentType+"\"";
     }
 
     private void createConteTypeHeader(){
         boundary = "uuid:" + UUID.randomUUID().toString();
         String boundaryParameter = "boundary=\"" + boundary +"\"";
-        messageContentType =  "Multipart/Related;type=\""+XOP_CONTENT_TYPE +"\";" + boundaryParameter + ";start-info=\"" + version.contentType+"\"";
+        messageContentType =  "Multipart/Related;type=\""+XOP_XML_MIME_TYPE +"\";" + boundaryParameter + ";start-info=\"" + version.contentType+"\"";
     }
 
+    public String getMimeType() {
+        return XOP_XML_MIME_TYPE;
+    }
+    
     /**
      * Return the soap 1.1 and soap 1.2 specific XOP packaged ContentType
      *
@@ -496,7 +502,6 @@ public class MtomCodec extends MimeCodec {
         }
     }
 
-    private static final String XOP_CONTENT_TYPE = "application/xop+xml";
     private static final String XOP_PREF ="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
     private static final String XOP_SUFF ="\"/>";
     private static final String XOP_LOCALNAME = "Include";

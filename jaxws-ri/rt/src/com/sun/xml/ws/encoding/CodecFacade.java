@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.channels.WritableByteChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.StringTokenizer;
 
 /**
  * Codec that can handle MTOM, SwA, and plain SOAP payload.
@@ -49,10 +50,15 @@ import java.nio.channels.ReadableByteChannel;
  * @author Kohsuke Kawaguchi
  */
 public class CodecFacade extends MimeCodec {
-    private static final String MULTIPART = "multipart";
-    
-    private static final String FASTINFOSET = "fastinfoset";
-    
+    /**
+     * Base HTTP Accept request-header.
+     */
+    private static final String BASE_ACCEPT_VALUE =
+        "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2";
+
+    /**
+     * True if the Fast Infoset codec should be used
+     */
     private boolean _useFastInfosetForEncoding;
     
     // The XML SOAP codec
@@ -69,6 +75,21 @@ public class CodecFacade extends MimeCodec {
     
     private final SOAPBindingImpl binding;
     
+    /**
+     * The Fast Infoset MIME type
+     */
+    private final String fiMimeType;
+    
+    /**
+     * The Accept header for XML encodings
+     */
+    private final String xmlAccept;
+    
+    /**
+     * The Accept header for Fast Infoset and XML encodings
+     */
+    private final String fiXmlAccept;
+    
     private class AcceptContentType implements ContentType {
         private ContentType _c;
         private String _accept;
@@ -76,9 +97,9 @@ public class CodecFacade extends MimeCodec {
         public AcceptContentType set(Packet p, ContentType c) {
             // TODO: need to compose based on underlying codecs
             if (p.contentNegotiation != ContentNegotiation.none) {
-                _accept = "application/fastinfoset, text/xml";
+                _accept = fiXmlAccept;
             } else {
-                _accept = null;
+                _accept = xmlAccept;
             }
             _c = c;
             return this;
@@ -89,7 +110,7 @@ public class CodecFacade extends MimeCodec {
         }
         
         public String getSOAPActionHeader() {
-            return _c.getContentType();
+            return _c.getSOAPActionHeader();
         }
         
         public String getAcceptHeader() {
@@ -103,13 +124,28 @@ public class CodecFacade extends MimeCodec {
         super(binding.getSOAPVersion());
         
         xmlSoapCodec = StreamSOAPCodec.create(version);
+        
         fiSoapCodec = getFICodec(version);
         
         xmlMtomCodec = new MtomCodec(version, xmlSoapCodec);
         
         xmlSwaCodec = new SwACodec(version, xmlSoapCodec);
         
+        fiMimeType = fiSoapCodec.getMimeType();
+        
+        xmlAccept = xmlSoapCodec.getMimeType() + ", " + 
+                xmlMtomCodec.getMimeType() + ", " + 
+                xmlSwaCodec.getMimeType() + ", " + 
+                BASE_ACCEPT_VALUE;
+        
+        fiXmlAccept = fiSoapCodec.getMimeType() + ", " +
+                xmlAccept;
+        
         this.binding = (SOAPBindingImpl)binding;
+    }
+    
+    public String getMimeType() {
+        return null;
     }
     
     public ContentType getStaticContentType(Packet packet) {
@@ -135,7 +171,6 @@ public class CodecFacade extends MimeCodec {
                 throw new RuntimeException("Fast Infoset Runtime not present");
             }
             
-            // TODO ensure fast infoset is accepted
             _useFastInfosetForEncoding = true;
             fiSoapCodec.decode(in, contentType, packet);
         } else
@@ -173,25 +208,42 @@ public class CodecFacade extends MimeCodec {
     @Override
     protected void decode(MimeMultipartParser mpp, Packet packet) throws IOException {
         // is this SwA or XOP?
-        if(mpp.getRootPart().getContentType().startsWith("application/xop+xml"))
+        if(isApplicationXopXml(mpp.getRootPart().getContentType()))
             xmlMtomCodec.decode(mpp,packet);
         else
             xmlSwaCodec.decode(mpp,packet);
     }
     
-    private boolean isMultipartRelated(String contentType){
-        return contentType.length() >= MULTIPART.length() && 
-                MULTIPART.equalsIgnoreCase(contentType.substring(0,MULTIPART.length()));
+    private boolean isMultipartRelated(String contentType) {
+        return compareStrings(contentType, MimeCodec.MULTIPART_RELATED_MIME_TYPE);
     }
     
-    private boolean isFastInfoset(String contentType){
-        // TODO take into account SOAP version
-        return contentType.contains(FASTINFOSET);
+    private boolean isApplicationXopXml(String contentType) {
+        return compareStrings(contentType, MtomCodec.XOP_XML_MIME_TYPE);
+    }
+    
+    private boolean isFastInfoset(String contentType) {
+        return compareStrings(contentType, fiMimeType);
+    }
+    
+    private boolean compareStrings(String a, String b) {
+        return a.length() >= b.length() && 
+                b.equalsIgnoreCase(
+                    a.substring(0,
+                        b.length()));
     }
     
     private boolean isFastInfosetAcceptable(String accept) {
-        // TODO take into account SOAP version
-        return (accept != null) ? accept.contains(FASTINFOSET) : false;
+        if (accept == null) return false;
+        
+        StringTokenizer st = new StringTokenizer(accept, ",");
+        while (st.hasMoreTokens()) {
+            final String token = st.nextToken().trim();
+            if (token.equalsIgnoreCase(fiMimeType)) {
+                return true;
+            }
+        }        
+        return false;
     }
     
     /**

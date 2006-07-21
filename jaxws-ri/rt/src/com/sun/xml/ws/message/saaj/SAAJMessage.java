@@ -478,6 +478,7 @@ public class SAAJMessage extends Message {
             for(int i=0;i< attrs.getLength();i++){
                 Attr attr = (Attr)attrs.item(i);
                 if(attr.getNamespaceURI().equals("http://www.w3.org/2000/xmlns/")){
+                    writer.setPrefix(attr.getLocalName(),attr.getValue());
                     writer.writeNamespace(attr.getLocalName(),attr.getValue());
                 } else{
                     writer.writeAttribute(attr.getPrefix(),attr.getNamespaceURI(),attr.getLocalName(),attr.getValue());
