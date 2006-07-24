@@ -57,7 +57,7 @@ abstract class MimeCodec implements Codec {
 
         if (hasAttachments) {
             OutputUtil.writeln("--"+boundary, out);
-            OutputUtil.writeln("Content-Type: text/xml", out);
+            OutputUtil.writeln("Content-Type: " + rootCodec.getMimeType(), out);
             OutputUtil.writeln(out);
         }
         ContentType primaryCt = rootCodec.encode(packet, out);
@@ -88,7 +88,9 @@ abstract class MimeCodec implements Codec {
             boundary = "uuid:" + UUID.randomUUID().toString();
             String boundaryParameter = "boundary=\"" + boundary + "\"";
             // TODO use primaryEncoder to get type
-            String messageContentType =  MULTIPART_RELATED_MIME_TYPE + "; type=\"text/xml\"; " + boundaryParameter;
+            String messageContentType =  MULTIPART_RELATED_MIME_TYPE + 
+                    "; type=\"" + rootCodec.getMimeType() + "\"; " +
+                    boundaryParameter;
             return new ContentTypeImpl(messageContentType, packet.soapAction, null);
         } else {
             return rootCodec.getStaticContentType(packet);

@@ -245,7 +245,7 @@ public class CodecFacade extends MimeCodec {
     }
     
     private boolean isXml(String contentType) {
-        return compareStrings(contentType, fiMimeType);
+        return compareStrings(contentType, xmlMimeType);
     }
     
     private boolean isFastInfoset(String contentType) {
