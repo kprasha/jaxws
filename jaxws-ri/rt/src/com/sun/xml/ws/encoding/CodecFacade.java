@@ -227,7 +227,7 @@ public class CodecFacade extends MimeCodec {
         if(isApplicationXopXml(rootContentType))
             xmlMtomCodec.decode(mpp,packet);
         else if (isFastInfoset(rootContentType))
-            xmlSwaCodec.decode(mpp,packet);
+            fiSwaCodec.decode(mpp,packet);
         else if (isXml(rootContentType))
             xmlSwaCodec.decode(mpp,packet);
         else {
