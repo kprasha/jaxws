@@ -96,7 +96,8 @@ public class CodecFacade extends MimeCodec {
         
         public AcceptContentType set(Packet p, ContentType c) {
             // TODO: need to compose based on underlying codecs
-            if (p.contentNegotiation != ContentNegotiation.none) {
+            if (p.contentNegotiation == ContentNegotiation.optimistic 
+                    || p.contentNegotiation == ContentNegotiation.pessimistic) {
                 _accept = fiXmlAccept;
             } else {
                 _accept = xmlAccept;
