@@ -221,6 +221,7 @@ public final class StreamMessage extends AbstractMessageImpl {
      */
     private void writeEnvelope(XMLStreamWriter writer) throws XMLStreamException {
         assert unconsumed();
+        writer.writeStartDocument();
         envelopeTag.writeStart(writer);
 
         //write headers
@@ -237,6 +238,7 @@ public final class StreamMessage extends AbstractMessageImpl {
             writePayloadTo(writer);
         writer.writeEndElement();
         writer.writeEndElement();
+        writer.writeEndDocument();
     }
 
     public void writePayloadTo(ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {

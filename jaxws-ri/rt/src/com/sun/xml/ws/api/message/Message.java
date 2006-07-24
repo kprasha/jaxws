@@ -485,6 +485,10 @@ public abstract class Message {
      *
      * This method writes just the payload of the message to the writer.
      * This consumes the message.
+     * The implementation will not write
+     * {@link XMLStreamWriter#writeStartDocument()}
+     * nor
+     * {@link XMLStreamWriter#writeEndDocument()} 
      *
      * <p>
      * If there's no payload, this method is no-op.
@@ -500,10 +504,6 @@ public abstract class Message {
      * to the given writer.
      *
      * This consumes the message.
-     * The implementation will not write
-     * {@link XMLStreamWriter#writeStartDocument()}
-     * nor
-     * {@link XMLStreamWriter#writeEndDocument()} 
      *
      * @throws XMLStreamException
      *      If the {@link XMLStreamWriter} reports an error,

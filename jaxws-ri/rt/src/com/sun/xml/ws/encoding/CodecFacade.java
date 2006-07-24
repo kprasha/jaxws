@@ -73,10 +73,18 @@ public class CodecFacade extends MimeCodec {
     // The XML SWA codec
     private final MimeCodec xmlSwaCodec;
     
+    // The Fast Infoset SWA codec
+    private final MimeCodec fiSwaCodec;
+    
     private final SOAPBindingImpl binding;
     
     /**
-     * The Fast Infoset MIME type
+     * The XML SOAP MIME type
+     */
+    private final String xmlMimeType;
+    
+    /**
+     * The Fast Infoset SOAP MIME type
      */
     private final String fiMimeType;
     
@@ -125,14 +133,19 @@ public class CodecFacade extends MimeCodec {
         super(binding.getSOAPVersion());
         
         xmlSoapCodec = StreamSOAPCodec.create(version);
+        xmlMimeType = xmlSoapCodec.getMimeType();
         
         fiSoapCodec = getFICodec(version);
+        fiMimeType = fiSoapCodec.getMimeType();
         
         xmlMtomCodec = new MtomCodec(version, xmlSoapCodec);
         
         xmlSwaCodec = new SwACodec(version, xmlSoapCodec);
         
-        fiMimeType = fiSoapCodec.getMimeType();
+        if (fiSoapCodec != null)
+            fiSwaCodec = new SwACodec(version, fiSoapCodec);
+        else 
+            fiSwaCodec = null;
         
         xmlAccept = xmlSoapCodec.getMimeType() + ", " + 
                 xmlMtomCodec.getMimeType() + ", " + 
@@ -209,10 +222,18 @@ public class CodecFacade extends MimeCodec {
     @Override
     protected void decode(MimeMultipartParser mpp, Packet packet) throws IOException {
         // is this SwA or XOP?
-        if(isApplicationXopXml(mpp.getRootPart().getContentType()))
+        final String rootContentType = mpp.getRootPart().getContentType();
+        
+        if(isApplicationXopXml(rootContentType))
             xmlMtomCodec.decode(mpp,packet);
-        else
+        else if (isFastInfoset(rootContentType))
             xmlSwaCodec.decode(mpp,packet);
+        else if (isXml(rootContentType))
+            xmlSwaCodec.decode(mpp,packet);
+        else {
+            // TODO localize exception
+            throw new IOException("");
+        }
     }
     
     private boolean isMultipartRelated(String contentType) {
@@ -221,6 +242,10 @@ public class CodecFacade extends MimeCodec {
     
     private boolean isApplicationXopXml(String contentType) {
         return compareStrings(contentType, MtomCodec.XOP_XML_MIME_TYPE);
+    }
+    
+    private boolean isXml(String contentType) {
+        return compareStrings(contentType, fiMimeType);
     }
     
     private boolean isFastInfoset(String contentType) {
@@ -265,11 +290,10 @@ public class CodecFacade extends MimeCodec {
         // Note: Using FI with MTOM does not make sense
         if (_useFastInfosetForEncoding && fiSoapCodec != null) {
             final Message m = p.getMessage();
-            if(m==null || m.getAttachments().isEmpty())
+            if(m==null || m.getAttachments().isEmpty() || binding.isMTOMEnabled())
                 return fiSoapCodec;
             else
-                // TODO: swaRef attachements
-                throw new RuntimeException("TODO: Fast Infoset with swaRef attachments");
+                return fiSwaCodec;
         } 
                 
         if(binding.isMTOMEnabled())
