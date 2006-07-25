@@ -37,8 +37,8 @@ import javax.xml.ws.handler.MessageContext;
 
 class MessageContextImpl implements MessageContext {
     
-    private Map<String,Object> internalMap = new HashMap<String,Object>();
-    private Set<String> handlerScopeProps;
+    private final Map<String,Object> internalMap = new HashMap<String,Object>();
+    private final Set<String> handlerScopeProps;
     /** Creates a new instance of MessageContextImpl */
     public MessageContextImpl(Packet packet) {
         handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
@@ -91,6 +91,10 @@ class MessageContextImpl implements MessageContext {
     }
     
     public Object put(String key, Object value) {
+        if(!keyExists(key)) {
+            //new property, default to Scope.HANDLER
+            handlerScopeProps.add(key);
+        }
         return internalMap.put(key,value);
     }
     public Object get(Object key) {
@@ -98,6 +102,12 @@ class MessageContextImpl implements MessageContext {
     }
     
     public void putAll(Map<? extends String, ? extends Object> t) {
+        for(String key: t.keySet()) {
+            if(!keyExists(key)) {
+                //new property, default to Scope.HANDLER
+                handlerScopeProps.add(key);
+            }
+        }
         internalMap.putAll(t);
     }
     
@@ -105,6 +115,7 @@ class MessageContextImpl implements MessageContext {
         internalMap.clear();
     }
     public Object remove(Object key){
+        handlerScopeProps.remove(key);
         return internalMap.remove(key);
     }
     public Set<String> keySet() {
@@ -144,7 +155,7 @@ class MessageContextImpl implements MessageContext {
         packet.createMapView().keySet().retainAll(internalMap.keySet());
         packet.otherProperties.keySet().retainAll(internalMap.keySet());
         packet.invocationProperties.keySet().retainAll(internalMap.keySet());
-        packet.getHandlerScopePropertyNames(false).retainAll(internalMap.keySet());
+
     }
-    
+
 }
