@@ -27,11 +27,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Request context implementation.
@@ -105,7 +102,7 @@ public final class RequestContext extends PropertySet {
      */
     private static ContentNegotiation defaultContentNegotiation =
             ContentNegotiation.obtainFromSystemProperty();
-    
+
     /**
      * Stores properties that don't fit the strongly-typed fields.
      */
@@ -147,7 +144,7 @@ public final class RequestContext extends PropertySet {
      * property.
      */
     public ContentNegotiation contentNegotiation = defaultContentNegotiation;
-    
+
     @Property(ContentNegotiation.PROPERTY)
     public String getContentNegotiationString() {
         return contentNegotiation.toString();
@@ -165,7 +162,7 @@ public final class RequestContext extends PropertySet {
             }
         }
     }
-    
+
     /**
      * {@link Map} exposed to the user application.
      */
@@ -227,7 +224,10 @@ public final class RequestContext extends PropertySet {
                 packet.endpointAddress = endpointAddress;
             packet.contentNegotiation = contentNegotiation;
             packet.invocationProperties.putAll(others);
+            //if it is not standard property it deafults to Scope.HANDLER
+            packet.getHandlerScopePropertyNames(false).addAll(others.keySet());
         } else {
+            Set<String> handlerScopePropertyNames = new HashSet<String>();
             // fallback mode, simply copy map in a slow way
             for (Entry<String,Object> entry : mapView.fallbackMap.entrySet()) {
                 String key = entry.getKey();
@@ -235,7 +235,13 @@ public final class RequestContext extends PropertySet {
                     packet.put(key,entry.getValue());
                 else
                     packet.invocationProperties.put(key,entry.getValue());
+
+                //if it is not standard property it deafults to Scope.HANDLER
+                if(!super.supports(key)) {
+                    handlerScopePropertyNames.add(key);
+                }
             }
+            packet.getHandlerScopePropertyNames(false).addAll(handlerScopePropertyNames);
         }
     }
 
