@@ -50,6 +50,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
+import javax.xml.ws.WebServiceException;
 import java.io.OutputStream;
 import java.util.Map;
 
@@ -199,7 +200,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {
-        try {
+       try {
             if(infoset==null) {
                 XMLStreamBufferResult sbr = new XMLStreamBufferResult();
                 bridge.marshal(jaxbObject,sbr);
@@ -207,7 +208,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
             }
             return infoset.readAsXMLStreamReader();
         } catch (JAXBException e) {
-            throw new XMLStreamException2(e);
+           // bug 6449684, spec 4.3.4
+           throw new WebServiceException(e);
         }
     }
 
@@ -220,7 +222,10 @@ public final class JAXBMessage extends AbstractMessageImpl {
                 contentHandler = new FragmentContentHandler(contentHandler);
             bridge.marshal(jaxbObject,contentHandler);
         } catch (JAXBException e) {
-            errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
+            // this is really more helpful but spec compliance
+            // errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
+            // bug 6449684, spec 4.3.4
+            throw new WebServiceException(e.getMessage(),e);
         }
     }
 
@@ -241,7 +246,8 @@ public final class JAXBMessage extends AbstractMessageImpl {
             bridge.marshal(jaxbObject,sw);
         }
         catch (JAXBException e) {
-            throw new XMLStreamException2(e);
+            // bug 6449684, spec 4.3.4
+            throw new WebServiceException(e);
         }
     }
 
