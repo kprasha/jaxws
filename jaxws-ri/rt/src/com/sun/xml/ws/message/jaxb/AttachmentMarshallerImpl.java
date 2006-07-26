@@ -27,11 +27,13 @@ final class AttachmentMarshallerImpl extends AttachmentMarshaller {
     }
 
     public String addMtomAttachment(DataHandler data, String elementNamespace, String elementLocalName) {
-        throw new UnsupportedOperationException();
+        // We don't use JAXB for handling XOP
+        throw new IllegalStateException();
     }
 
     public String addMtomAttachment(byte[] data, int offset, int length, String mimeType, String elementNamespace, String elementLocalName) {
-        throw new UnsupportedOperationException();
+        // We don't use JAXB for handling XOP
+        throw new IllegalStateException();
     }
 
     public String addSwaRefAttachment(DataHandler data) {

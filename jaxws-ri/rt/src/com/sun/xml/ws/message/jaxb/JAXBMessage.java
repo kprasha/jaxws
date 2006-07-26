@@ -34,11 +34,9 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -67,7 +65,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
      */
     private final Object jaxbObject;
     
-    private final AttachmentSet attachmentSet;
+    private final AttachmentSetImpl attachmentSet;
 
     private final Bridge bridge;
 
@@ -220,7 +218,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
         try {
             if(fragment)
                 contentHandler = new FragmentContentHandler(contentHandler);
-            bridge.marshal(jaxbObject,contentHandler);
+            bridge.marshal(jaxbObject,contentHandler,new AttachmentMarshallerImpl(attachmentSet));
         } catch (JAXBException e) {
             // this is really more helpful but spec compliance
             // errorHandler.fatalError(new SAXParseException(e.getMessage(),NULL_LOCATOR,e));
@@ -231,19 +229,19 @@ public final class JAXBMessage extends AbstractMessageImpl {
 
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
-            // TODO: XOP handling
-
             // If writing to Zephyr, get output stream and use JAXB UTF-8 writer
+            AttachmentMarshallerImpl am = new AttachmentMarshallerImpl(attachmentSet);
+
             if (sw instanceof Map) {
                 OutputStream os = (OutputStream) ((Map) sw).get("sjsxp-outputstream");
                 if (os != null) {
                     sw.writeCharacters("");        // Force completion of open elems
-                    bridge.marshal(jaxbObject, os, sw.getNamespaceContext());
+                    bridge.marshal(jaxbObject, os, sw.getNamespaceContext(),am);
                     return;
                 }
             }
 
-            bridge.marshal(jaxbObject,sw);
+            bridge.marshal(jaxbObject,sw,am);
         }
         catch (JAXBException e) {
             // bug 6449684, spec 4.3.4
