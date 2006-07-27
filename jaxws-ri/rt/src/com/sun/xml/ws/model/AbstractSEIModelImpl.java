@@ -158,7 +158,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         knownNamespaceURIs = new ArrayList<String>();
         for (String namespace : jaxbContext.getKnownNamespaceURIs()) {
             if (namespace.length() > 0) {
-                if (!namespace.equals(SOAPNamespaceConstants.XSD))
+                if (!namespace.equals(SOAPNamespaceConstants.XSD) && !namespace.equals(SOAPNamespaceConstants.XMLNS))
                     knownNamespaceURIs.add(namespace);
             }
         }
