@@ -108,7 +108,7 @@ abstract class MessageFiller {
         }
         
         String getContentId() {
-            return contentIdPart+UUID.randomUUID()+"@jaxws.sun.com";
+            return "<"+contentIdPart+UUID.randomUUID()+"@jaxws.sun.com"+">";
         }
     }
     

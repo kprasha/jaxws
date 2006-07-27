@@ -67,7 +67,7 @@ abstract class MimeCodec implements Codec {
             // Encode all the attchments
             for (Attachment att : msg.getAttachments()) {
                 OutputUtil.writeln("--"+boundary, out);
-                OutputUtil.writeln("Content-Id: <" + att.getContentId()+">", out);
+                OutputUtil.writeln("Content-Id: " + att.getContentId(), out);
                 OutputUtil.writeln("Content-Type: " + att.getContentType(), out);
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
                 OutputUtil.writeln(out);                    // write \r\n
