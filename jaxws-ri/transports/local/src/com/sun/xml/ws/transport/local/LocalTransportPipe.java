@@ -102,9 +102,11 @@ final class LocalTransportPipe implements Pipe {
 
 
             LocalConnectionImpl con = new LocalConnectionImpl(reqHeaders);
-
-            ContentType contentType = codec.encode(request, con.getOutput());
+            // Calling getStaticContentType sets some internal state in the codec
+            // TODO : need to fix this properly in Codec
+            ContentType contentType = codec.getStaticContentType(request);
             String requestContentType = contentType.getContentType();
+            codec.encode(request, con.getOutput());
             reqHeaders.put("Content-Type", Collections.singletonList(requestContentType));
             
             String requestAccept = contentType.getAcceptHeader();

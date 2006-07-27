@@ -77,6 +77,7 @@ abstract class MimeCodec implements Codec {
             OutputUtil.writeAsAscii("--"+boundary, out);
             OutputUtil.writeAsAscii("--", out);
         }
+        // TODO not returing correct multipart/related type(no boundary)
         return hasAttachments ? new ContentTypeImpl(MULTIPART_RELATED_MIME_TYPE, null, null) : primaryCt;
     }
     
