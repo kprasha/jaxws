@@ -194,7 +194,7 @@ final class LocalTransportPipe implements Pipe {
                     System.out.println(header.getValue());
                 } else {
                     for (String value : header.getValue()) {
-                        System.out.println(header.getValue()+": "+value);
+                        System.out.println(header.getKey()+": "+value);
                     }
                 }
             }
