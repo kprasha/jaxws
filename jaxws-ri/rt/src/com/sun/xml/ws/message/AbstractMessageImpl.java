@@ -102,15 +102,15 @@ public abstract class AbstractMessageImpl extends Message {
         w.writeStartDocument();
         w.writeStartElement("S","Envelope",soapNsUri);
         w.writeNamespace("S",soapNsUri);
-        w.writeStartElement("S","Header",soapNsUri);
         if(hasHeaders()) {
+            w.writeStartElement("S","Header",soapNsUri);
             HeaderList headers = getHeaders();
             int len = headers.size();
             for( int i=0; i<len; i++ ) {
                 headers.get(i).writeTo(w);
             }
+            w.writeEndElement();
         }
-        w.writeEndElement();
         // write the body
         w.writeStartElement("S","Body",soapNsUri);
 
@@ -133,16 +133,16 @@ public abstract class AbstractMessageImpl extends Message {
         contentHandler.startDocument();
         contentHandler.startPrefixMapping("S",soapNsUri);
         contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
-        contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
         if(hasHeaders()) {
+            contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
             HeaderList headers = getHeaders();
             int len = headers.size();
             for( int i=0; i<len; i++ ) {
                 // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
                 headers.get(i).writeTo(contentHandler,errorHandler);
             }
+            contentHandler.endElement(soapNsUri,"Header","S:Header");
         }
-        contentHandler.endElement(soapNsUri,"Header","S:Header");
         // write the body
         contentHandler.startElement(soapNsUri,"Body","S:Body",EMPTY_ATTS);
         writePayloadTo(contentHandler,errorHandler, true);

@@ -90,11 +90,10 @@ public class MtomCodec extends MimeCodec {
     private void createConteTypeHeader(){
         boundary = "uuid:" + UUID.randomUUID().toString();
         String boundaryParameter = "boundary=\"" + boundary +"\"";
-        messageContentType =  "Multipart/Related;type=\""+XOP_XML_MIME_TYPE +"\";" + boundaryParameter + ";start-info=\"" + version.contentType+"\"";
-    }
-
-    public String getMimeType() {
-        return XOP_XML_MIME_TYPE;
+        messageContentType = MULTIPART_RELATED_MIME_TYPE + 
+                ";type=\"" + XOP_XML_MIME_TYPE + "\";" + 
+                boundaryParameter + 
+                ";start-info=\"" + version.contentType + "\"";
     }
     
     /**

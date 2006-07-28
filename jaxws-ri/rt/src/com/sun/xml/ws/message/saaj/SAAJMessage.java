@@ -452,14 +452,14 @@ public class SAAJMessage extends Message {
 
             writer.writeStartElement(env.getPrefix(),"Envelope", env.getNamespaceURI());
             writeAttributes(env.getAttributes(),writer);
-            writer.writeStartElement(env.getPrefix(),"Header",env.getNamespaceURI());
             if(hasHeaders()) {
+                writer.writeStartElement(env.getPrefix(),"Header",env.getNamespaceURI());
                 int len = headers.size();
                 for( int i=0; i<len; i++ ) {
                     headers.get(i).writeTo(writer);
                 }
+                writer.writeEndElement();
             }
-            writer.writeEndElement();
 
             DOMUtil.serializeNode(sm.getSOAPBody(),writer);
             writer.writeEndElement();
