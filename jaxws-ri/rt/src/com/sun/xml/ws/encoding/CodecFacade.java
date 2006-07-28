@@ -149,7 +149,6 @@ public class CodecFacade extends MimeCodec {
         
         xmlAccept = xmlSoapCodec.getMimeType() + ", " + 
                 xmlMtomCodec.getMimeType() + ", " + 
-                xmlSwaCodec.getMimeType() + ", " + 
                 BASE_ACCEPT_VALUE;
         
         fiXmlAccept = fiSoapCodec.getMimeType() + ", " +
