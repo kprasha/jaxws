@@ -59,6 +59,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private final Map<String, WSDLPartImpl> outParts;
     private final Map<String, WSDLPartImpl> fltParts;
     private WSDLOperationImpl operation;
+    private String soapAction;
 
     private final WSDLBoundPortTypeImpl owner;
 
@@ -82,6 +83,14 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
 
     public QName getName(){
         return name;
+    }
+
+    public String getSOAPAction() {
+        return soapAction;
+    }
+
+    public void setSoapAction(String soapAction) {
+        this.soapAction = soapAction!=null?soapAction:"";
     }
 
     /**

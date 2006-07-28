@@ -178,7 +178,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         }
     }
 
-    public WSDLBoundOperation getOperation(String namespaceUri, String localName) {
+    public WSDLBoundOperationImpl getOperation(String namespaceUri, String localName) {
         if(namespaceUri==null && localName == null)
             return emptyPayloadOperation;
         else

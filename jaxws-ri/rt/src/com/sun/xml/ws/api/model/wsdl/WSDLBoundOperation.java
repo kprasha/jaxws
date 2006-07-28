@@ -23,6 +23,7 @@
 package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -37,6 +38,12 @@ public interface WSDLBoundOperation extends WSDLObject, WSDLExtensible {
      * Short-cut for {@code getOperation().getName()}
      */
     @NotNull QName getName();
+
+    /**
+     * Gives soapbinding:operation@soapAction value. soapbinding:operation@soapAction is optional attribute.
+     * If not present an empty String is returned as per BP 1.1 R2745.
+     */
+    @NotNull String getSOAPAction();
 
     /**
      * Gets the wsdl:portType/wsdl:operation model - {@link WSDLOperation},
