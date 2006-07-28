@@ -50,7 +50,7 @@ public final class JavaMethodImpl implements JavaMethod {
     /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
     private final List<ParameterImpl> unmReqParams = Collections.unmodifiableList(requestParams);
     private final List<ParameterImpl> unmResParams = Collections.unmodifiableList(responseParams);
-    private SOAPBinding binding;
+    private SOAPBindingImpl binding;
     private MEP mep;
     private String operationName;
     private WSDLBoundOperationImpl wsdlOperation;
@@ -103,7 +103,7 @@ public final class JavaMethodImpl implements JavaMethod {
     /**
      * @return the Binding object
      */
-    public SOAPBinding getBinding() {
+    public SOAPBindingImpl getBinding() {
         if (binding == null)
             return new SOAPBindingImpl();
         return binding;
@@ -112,7 +112,7 @@ public final class JavaMethodImpl implements JavaMethod {
     /**
      * @param binding
      */
-    void setBinding(SOAPBinding binding) {
+    void setBinding(SOAPBindingImpl binding) {
         this.binding = binding;
     }
 

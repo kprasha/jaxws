@@ -331,6 +331,11 @@ public class RuntimeWSDLParser {
                 }else{
                     bindingOp.setStyle(binding.getStyle());
                 }
+                String soapAction = reader.getAttributeValue(null, "soapAction");
+
+                if(soapAction != null)
+                    bindingOp.setSoapAction(soapAction);
+
                 XMLStreamReaderUtil.next(reader);
             }else{
                 extension.bindingOperationElements(bindingOp, reader);

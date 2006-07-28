@@ -462,6 +462,8 @@ public class RuntimeModeler {
         javaMethod.setMEP(mep);
 
         String action = null;
+
+
         String operationName = method.getName();
         if (webMethod != null ) {
             action = webMethod.action();
@@ -469,6 +471,14 @@ public class RuntimeModeler {
                 webMethod.operationName() :
                 operationName;
         }
+
+        //override the @WebMethod.action value by the one from the WSDL
+        if(binding != null){
+            WSDLBoundOperationImpl bo = binding.getBinding().get(new QName(targetNamespace, operationName));
+            if(bo != null)
+                action = bo.getSOAPAction();
+        }
+
         javaMethod.setOperationName(operationName);
         SOAPBinding methodBinding =
             method.getAnnotation(SOAPBinding.class);

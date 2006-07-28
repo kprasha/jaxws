@@ -288,12 +288,19 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     public void applyParameterBinding(WSDLBoundPortTypeImpl wsdlBinding){
         if(wsdlBinding == null)
             return;
+
         if(wsdlBinding.isRpcLit())
             wsdlBinding.finalizeRpcLitBinding();
         for(JavaMethodImpl method : javaMethods){
             if(method.isAsync())
                 continue;
-            QName opName = new QName(wsdlBinding.getPortTypeName().getNamespaceURI());
+            QName opName = new QName(wsdlBinding.getPortTypeName().getNamespaceURI(), method.getOperationName());
+
+            //patch the soapaction correctly from the WSDL
+            WSDLBoundOperationImpl bo = wsdlBinding.get(opName);
+            String action = bo.getSOAPAction();
+            method.getBinding().setSOAPAction(action);
+
             boolean isRpclit = method.getBinding().isRpcLit();
             List<ParameterImpl> reqParams = method.requestParams;
             List<ParameterImpl> reqAttachParams = null;
