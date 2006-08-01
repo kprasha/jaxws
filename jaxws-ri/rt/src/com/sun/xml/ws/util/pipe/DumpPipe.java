@@ -63,7 +63,7 @@ public class DumpPipe extends AbstractFilterPipeImpl {
         this.name = name;
         this.out = out;
         this.staxOut = XMLOutputFactory.newInstance();
-        staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
+        //staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
     }
 
     /**
