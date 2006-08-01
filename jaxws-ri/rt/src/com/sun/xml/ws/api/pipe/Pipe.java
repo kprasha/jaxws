@@ -76,7 +76,10 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * <h2>Pipe Lifecycle</h2>
  * {@link Pipe}line is expensive to set up, so once it's created it will be reused.
  * A {@link Pipe}line is not reentrant; one pipeline is used to process one request/response
- * at at time. Where a need arises to process multiple requests concurrently, a pipeline
+ * at at time. The same pipeline instance may serve request/response for different threads,
+ * if one comes after another and they don't overlap.
+ * <p> 
+ * Where a need arises to process multiple requests concurrently, a pipeline
  * gets cloned through {@link PipeCloner}. Note that this need may happen on
  * both server (because it quite often serves multiple requests concurrently)
  * and client (because it needs to support asynchronous method invocations.)
@@ -94,7 +97,8 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  * that live in the server-side of JAX-WS.
  * <p>
  * This last invocation gives a chance for some pipes to clean up any state/resource
- * acquired (such as WS-RM's sequence, WS-Trust's SecurityToken.)
+ * acquired (such as WS-RM's sequence, WS-Trust's SecurityToken), although as stated above,
+ * this is not required for clients.
  *
  *
  *
