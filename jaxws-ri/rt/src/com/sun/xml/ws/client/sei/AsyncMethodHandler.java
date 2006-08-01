@@ -37,6 +37,8 @@ import javax.xml.ws.Holder;
 import javax.xml.ws.Response;
 import javax.xml.ws.WebServiceException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 import com.sun.xml.ws.model.JavaMethodImpl;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;

@@ -22,9 +22,13 @@
 
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.util.CompletedFuture;
+
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 /**
@@ -42,6 +46,8 @@ public final class ResponseImpl<T> extends FutureTask<T> implements Response<T>,
     private final AsyncHandler<T> handler;
     private ResponseContext responseContext;
 
+    private final Callable<T> callable;
+
     /**
      *
      * @param callable
@@ -52,21 +58,47 @@ public final class ResponseImpl<T> extends FutureTask<T> implements Response<T>,
      */
     public ResponseImpl(Callable<T> callable, AsyncHandler<T> handler) {
         super(callable);
+        this.callable = callable;
         this.handler = handler;
     }
 
     @Override
-    protected void set(T v) {
+    public void run() {
+        // override so that we call set()
+        try {
+            set(callable.call());
+        } catch (Throwable t) {
+            setException(t);
+        }
+    }
+
+    @Override
+    protected void set(final T v) {
         // call the handler before we mark the future as 'done'
         if (handler!=null) {
             try {
-                handler.handleResponse(this);
+                /**
+                 * {@link Response} object passed into the callback.
+                 * We need a separate {@link Future} because we don't want {@link ResponseImpl}
+                 * to be marked as 'done' before the callback finishes execution.
+                 * (That would provide implicit synchronization between the application code
+                 * in the main thread and the callback code, and is compatible with the JAX-RI 2.0 FCS.
+                 */
+                class CallbackFuture<T> extends CompletedFuture<T> implements Response<T> {
+                    public CallbackFuture(T v) {
+                        super(v);
+                    }
+
+                    public Map<String, Object> getContext() {
+                        return ResponseImpl.this.getContext();
+                    }
+                }
+                handler.handleResponse(new CallbackFuture<T>(v));
             } catch (Throwable e) {
                 super.setException(e);
                 return;
             }
         }
-
         super.set(v);
     }
 
