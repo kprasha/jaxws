@@ -56,16 +56,18 @@ public final class ResponseImpl<T> extends FutureTask<T> implements Response<T>,
     }
 
     @Override
-    protected void done() {
-        if (handler == null)
-            return;
-
-        try {
-            if (!isCancelled())
+    protected void set(T v) {
+        // call the handler before we mark the future as 'done'
+        if (handler!=null) {
+            try {
                 handler.handleResponse(this);
-        } catch (Throwable e) {
-            super.setException(e);
+            } catch (Throwable e) {
+                super.setException(e);
+                return;
+            }
         }
+
+        super.set(v);
     }
 
     public ResponseContext getContext() {
