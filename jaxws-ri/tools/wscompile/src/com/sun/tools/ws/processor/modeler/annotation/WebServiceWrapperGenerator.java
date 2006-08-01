@@ -37,30 +37,26 @@ import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.writer.ProgressCodeWriter;
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.InterfaceDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.ReferenceType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.VoidType;
-
+import com.sun.mirror.type.MirroredTypeException;
 import com.sun.tools.ws.processor.generator.GeneratorBase;
 import com.sun.tools.ws.processor.generator.GeneratorConstants;
 import com.sun.tools.ws.processor.generator.Names;
 import com.sun.tools.ws.processor.modeler.ModelerException;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.processor.util.GeneratedFileInfo;
 import com.sun.tools.ws.processor.util.DirectoryUtil;
+import com.sun.tools.ws.processor.util.GeneratedFileInfo;
+import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wscompile.FilerCodeWriter;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
-import com.sun.tools.ws.ToolVersion;
 import com.sun.xml.ws.util.StringUtils;
 
 import javax.jws.Oneway;
@@ -74,19 +70,18 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebFault;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 
 /**
@@ -175,10 +170,10 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
     private boolean duplicateName(String name) {
         for (String str : wrapperNames) {
             if (str.equalsIgnoreCase(name))
-		return true;
+        return true;
         }
         wrapperNames.add(name);
-	return false;
+    return false;
     }
 
     private boolean generateWrappers(MethodDeclaration method, WebMethod webMethod) {
@@ -215,7 +210,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         boolean canOverwriteRequest = builder.canOverWriteClass(requestClassName);
         if (!canOverwriteRequest) {
             builder.log("Class " + requestClassName + " exists. Not overwriting.");
-        } 
+        }
         if (duplicateName(requestClassName) && canOverwriteRequest) {
             builder.onError("webserviceap.method.request.wrapper.bean.name.not.unique",
                              new Object[] {typeDecl.getQualifiedName(), method.toString()});
@@ -280,7 +275,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             writeXmlElementDeclaration(reqCls, reqName,reqNamespace);
             writeXmlElementDeclaration(resCls, resName, resNamespace);
 
-            collectMembers(method, operationName, typeNamespace, reqMembers, resMembers);
+            collectMembers(method, reqMembers, resMembers);
 
             // XmlType
             writeXmlTypeDeclaration(reqCls, reqName, reqNamespace, reqMembers);
@@ -295,25 +290,24 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         }
         return true;
     }
-    
-    private void collectMembers(MethodDeclaration method, String operationName, String namespace,
-                               ArrayList<MemberInfo> requestMembers,
-                               ArrayList<MemberInfo> responseMembers) {
-                           
-        AnnotationProcessorEnvironment apEnv = builder.getAPEnv();
+
+    private void collectMembers(MethodDeclaration method,
+                                ArrayList<MemberInfo> requestMembers,
+                                ArrayList<MemberInfo> responseMembers) {
+
         WebResult webResult = method.getAnnotation(WebResult.class);
         String responseElementName = RETURN;
         String responseNamespace = wrapped ? EMTPY_NAMESPACE_ID : typeNamespace;
         boolean isResultHeader = false;
-        if (webResult != null) { 
+        if (webResult != null) {
             if (webResult.name().length() > 0) {
                 responseElementName = webResult.name();
             }
-            responseNamespace = webResult.targetNamespace().length() > 1 ? 
+            responseNamespace = webResult.targetNamespace().length() > 1 ?
                 webResult.targetNamespace() :
                 responseNamespace;
             isResultHeader = webResult.header();
-        }  
+        }
 
         // class members 
         WebParam webParam;
@@ -327,10 +321,10 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
 
 //        TypeMirror typeMirror = apEnv.getTypeUtils().getErasure(method.getReturnType());
         TypeMirror typeMirror = getSafeType(method.getReturnType());
-        String retType = typeMirror.toString();                
-        if (!(method.getReturnType() instanceof VoidType) && !isResultHeader) {                    
-            responseMembers.add(new MemberInfo(-1, typeMirror, RETURN_VALUE, 
-                new QName(responseNamespace, responseElementName)));
+
+        if (!(method.getReturnType() instanceof VoidType) && !isResultHeader) {
+            responseMembers.add(new MemberInfo(typeMirror, RETURN_VALUE,
+                new QName(responseNamespace, responseElementName), method));
         }
 
         for (ParameterDeclaration param : method.getParameters()) {
@@ -346,21 +340,21 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             if (holderType != null) {
                 paramType = holderType;
             }
-            paramName =  "arg"+paramIndex; 
+            paramName =  "arg"+paramIndex;
             if (webParam != null && webParam.header()) {
                 continue;
-            }                   
+            }
             if (webParam != null) {
-                mode = webParam.mode(); 
+                mode = webParam.mode();
                 if (webParam.name().length() > 0)
                     paramName = webParam.name();
                 if (webParam.targetNamespace().length() > 0)
                     paramNamespace = webParam.targetNamespace();
             }
-            MemberInfo memInfo = new MemberInfo(paramIndex, paramType, paramName, 
-                new QName(paramNamespace, paramName));
-            if (holderType != null) {          
-                if (mode == null || mode.equals(WebParam.Mode.INOUT)) {   
+            MemberInfo memInfo = new MemberInfo(paramType, paramName,
+                new QName(paramNamespace, paramName), param);
+            if (holderType != null) {
+                if (mode == null || mode.equals(WebParam.Mode.INOUT)) {
                     requestMembers.add(memInfo);
                 }
                 responseMembers.add(memInfo);
@@ -369,28 +363,25 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             }
         }
     }
-    
+
     private TypeMirror getSafeType(TypeMirror type) {
 //        System.out.println("type: "+type+" type.getClass(): "+type.getClass());
         TypeMirror retType = makeSafeVisitor.apply(type, builder.getAPEnv().getTypeUtils());
 //        System.out.println("retType: "+retType+" retType.getClass(): "+retType.getClass());
         return retType;
     }
-       
-    private JType getType(TypeMirror typeMirror) throws IOException {
+
+    private JType getType(TypeMirror typeMirror) {
         String type = typeMirror.toString();
-        JType jType = null;
         try {
 //            System.out.println("typeName: "+typeName);
-            jType = cm.parseType(type);
+            return cm.parseType(type);
 //            System.out.println("type: "+type);
-            return jType;
         } catch (ClassNotFoundException e) {
-            jType = cm.ref(type);
+            return cm.ref(type);
         }
-        return jType;
     }
-    
+
     private ArrayList<MemberInfo> sortMembers(ArrayList<MemberInfo> members) {
         Map<String, MemberInfo> sortedMap = new java.util.TreeMap<String, MemberInfo>();
         for (MemberInfo member : members) {
@@ -400,8 +391,8 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         sortedMembers.addAll(sortedMap.values());
         return sortedMembers;
     }
-        
-    private void writeMembers(JDefinedClass cls, ArrayList<MemberInfo> members) throws IOException {
+
+    private void writeMembers(JDefinedClass cls, ArrayList<MemberInfo> members) {
         if (cls == null)
             return;
         for (MemberInfo memInfo : members) {
@@ -409,50 +400,65 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             JFieldVar field = cls.field(JMod.PRIVATE, type, memInfo.getParamName());
             QName elementName = memInfo.getElementName();
             if (elementName != null) {
-                if (soapStyle.equals(SOAPStyle.RPC) || wrapped) {                   
+                if (soapStyle.equals(SOAPStyle.RPC) || wrapped) {
                     JAnnotationUse xmlElementAnn = field.annotate(XmlElement.class);
                     xmlElementAnn.param("name", elementName.getLocalPart());
                     xmlElementAnn.param("namespace", elementName.getNamespaceURI());
                 } else {
-                    JAnnotationUse xmlValueAnnn = field.annotate(XmlValue.class);                    
+                    field.annotate(XmlValue.class);
                 }
+            }
+
+            // copy adapter if needed
+            XmlJavaTypeAdapter xjta = memInfo.getDecl().getAnnotation(XmlJavaTypeAdapter.class);
+            if(xjta!=null) {
+                JAnnotationUse xjtaA = field.annotate(XmlJavaTypeAdapter.class);
+                try {
+                    xjta.value();
+                    throw new AssertionError();
+                } catch (MirroredTypeException e) {
+                    xjtaA.param("value",getType(e.getTypeMirror()));
+                }
+                // XmlJavaTypeAdapter.type() is for package only. No need to copy.
             }
         }
         for (MemberInfo memInfo : members) {
-            writeMember(cls, memInfo.getParamIndex(), memInfo.getParamType(), 
-                        memInfo.getParamName(), memInfo.getElementName());
+            writeMember(cls, memInfo.getParamType(),
+                        memInfo.getParamName());
         }
     }
-    
+
     protected JDefinedClass getCMClass(String className, com.sun.codemodel.ClassType type) {
-        JDefinedClass cls = null;
+        JDefinedClass cls;
         try {
             cls = cm._class(className, type);
         } catch (com.sun.codemodel.JClassAlreadyExistsException e){
             cls = cm._getClass(className);
-        }        
+        }
         return cls;
-    }      
+    }
 
-    private boolean generateExceptionBean(ClassDeclaration thrownDecl, String beanPackage) throws IOException {
+    private boolean generateExceptionBean(ClassDeclaration thrownDecl, String beanPackage) {
         if (builder.isRemoteException(thrownDecl))
             return false;
-        AnnotationProcessorEnvironment apEnv = builder.getAPEnv();
+
         String exceptionName = ClassNameInfo.getName(thrownDecl.getQualifiedName());
         if (processedExceptions.contains(exceptionName))
             return false;
         processedExceptions.add(exceptionName);
         WebFault webFault = thrownDecl.getAnnotation(WebFault.class);
         String className = beanPackage+ exceptionName + BEAN;
-        
-        Map<String, TypeMirror> propertyToTypeMap;
-        propertyToTypeMap = TypeModeler.getExceptionProperties(thrownDecl);
+
+        TreeMap<String,MethodDeclaration> propertyToTypeMap = new TreeMap<String,MethodDeclaration>();
+
+        TypeModeler.collectExceptionProperties(thrownDecl,propertyToTypeMap);
+
         boolean isWSDLException = isWSDLException(propertyToTypeMap, thrownDecl);
         String namespace = typeNamespace;
         String name = exceptionName;
         FaultInfo faultInfo;
         if (isWSDLException) {
-            TypeMirror beanType =  getSafeType(propertyToTypeMap.get(FAULT_INFO));
+            TypeMirror beanType =  getSafeType(propertyToTypeMap.get(FAULT_INFO).getReturnType());
             faultInfo = new FaultInfo(TypeMonikerFactory.getTypeMoniker(beanType), true);
             namespace = webFault.targetNamespace().length()>0 ?
                                webFault.targetNamespace() : namespace;
@@ -461,7 +467,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             faultInfo.setElementName(new QName(namespace, name));
             seiContext.addExceptionBeanEntry(thrownDecl.getQualifiedName(), faultInfo, builder);
             return false;
-        } 
+        }
         if (webFault != null) {
             namespace = webFault.targetNamespace().length()>0 ?
                         webFault.targetNamespace() : namespace;
@@ -469,58 +475,54 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                    webFault.name() : name;
             className = webFault.faultBean().length()>0 ?
                         webFault.faultBean() : className;
-            
+
         }
         JDefinedClass cls = getCMClass(className, CLASS);
         faultInfo = new FaultInfo(className, false);
 
         if (duplicateName(className)) {
             builder.onError("webserviceap.method.exception.bean.name.not.unique",
-                             new Object[] {typeDecl.getQualifiedName(), thrownDecl.getQualifiedName()});                                                        
+                             new Object[] {typeDecl.getQualifiedName(), thrownDecl.getQualifiedName()});
         }
 
         ArrayList<MemberInfo> members = new ArrayList<MemberInfo>();
-        MemberInfo member;
-        String typeString;
-        TypeMirror erasureType;
-        TreeSet<String> keys = new TreeSet<String>(propertyToTypeMap.keySet());
-        for (String key : keys) {
-            TypeMirror type = propertyToTypeMap.get(key);
-            erasureType =  getSafeType(type);
-            member = new MemberInfo(-10, erasureType, key, null);
+        for (String key : propertyToTypeMap.keySet()) {
+            MethodDeclaration method = propertyToTypeMap.get(key);
+            TypeMirror erasureType =  getSafeType(method.getReturnType());
+            MemberInfo member = new MemberInfo(erasureType, key, null, method);
             members.add(member);
-        } 
+        }
         faultInfo.setMembers(members);
-        
+
         boolean canOverWriteBean = builder.canOverWriteClass(className);
         if (!canOverWriteBean) {
             builder.log("Class " + className + " exists. Not overwriting.");
-            seiContext.addExceptionBeanEntry(thrownDecl.getQualifiedName(), faultInfo, builder);   
+            seiContext.addExceptionBeanEntry(thrownDecl.getQualifiedName(), faultInfo, builder);
             return false;
-        }           
+        }
         if (seiContext.getExceptionBeanName(thrownDecl.getQualifiedName()) != null)
             return false;
- 
+
         //write class comment - JAXWS warning
         JDocComment comment = cls.javadoc();
         for (String doc : GeneratorBase.getJAXWSClassComment(builder.getSourceVersion())) {
             comment.add(doc);
         }
-        
+
         // XmlElement Declarations
         writeXmlElementDeclaration(cls, name, namespace);
-        
+
         // XmlType Declaration
         members = sortMembers(members);
         writeXmlTypeDeclaration(cls, exceptionName, typeNamespace, members);
-        
+
         writeMembers(cls, members);
 
         seiContext.addExceptionBeanEntry(thrownDecl.getQualifiedName(), faultInfo, builder);
         return true;
     }
-    
-    protected boolean isWSDLException(Map<String, TypeMirror>map, ClassDeclaration thrownDecl) {
+
+    protected boolean isWSDLException(Map<String,MethodDeclaration> map, ClassDeclaration thrownDecl) {
         WebFault webFault = thrownDecl.getAnnotation(WebFault.class);
         if (webFault == null)
             return false;
@@ -529,8 +531,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         return true;
     }
 
-    private void writeXmlElementDeclaration(JDefinedClass cls, String elementName, String namespaceUri)
-        throws IOException {
+    private void writeXmlElementDeclaration(JDefinedClass cls, String elementName, String namespaceUri) {
 
        if (cls == null)
             return;
@@ -542,9 +543,9 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         JAnnotationUse xmlAccessorTypeAnn = cls.annotate(cm.ref(XmlAccessorType.class));
         xmlAccessorTypeAnn.param("value", XmlAccessType.FIELD);
     }
-   
+
     private void writeXmlTypeDeclaration(JDefinedClass cls, String typeName, String namespaceUri,
-                                         ArrayList<MemberInfo> members) throws IOException {
+                                         ArrayList<MemberInfo> members) {
         if (cls == null)
             return;
         JAnnotationUse xmlTypeAnn = cls.annotate(cm.ref(XmlType.class));
@@ -558,30 +559,28 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         }
     }
 
-    private void writeMember(JDefinedClass cls, int paramIndex, TypeMirror paramType, 
-        String paramName, QName elementName) throws IOException {
+    private void writeMember(JDefinedClass cls, TypeMirror paramType,
+                             String paramName) {
 
         if (cls == null)
             return;
         String capPropName = StringUtils.capitalize(paramName);
         String getterPrefix = paramType.equals("boolean") || paramType.equals("java.lang.Boolean") ? "is" : "get";
-        JMethod m = null;
-        JDocComment methodDoc = null;
         JType propType = getType(paramType);
-        m = cls.method(JMod.PUBLIC, propType, getterPrefix+capPropName);
-        methodDoc = m.javadoc();
+        JMethod m = cls.method(JMod.PUBLIC, propType, getterPrefix+capPropName);
+        JDocComment methodDoc = m.javadoc();
         JCommentPart ret = methodDoc.addReturn();
         ret.add("returns "+propType.name());
         JBlock body = m.body();
-        body._return( JExpr._this().ref(paramName) );        
-        
-        m = cls.method(JMod.PUBLIC, cm.VOID, "set"+capPropName); 
+        body._return( JExpr._this().ref(paramName) );
+
+        m = cls.method(JMod.PUBLIC, cm.VOID, "set"+capPropName);
         JVar param = m.param(propType, paramName);
         methodDoc = m.javadoc();
         JCommentPart part = methodDoc.addParam(paramName);
         part.add("the value for the "+ paramName+" property");
         body = m.body();
-        body.assign( JExpr._this().ref(paramName), param );        
+        body.assign( JExpr._this().ref(paramName), param );
     }
 }      
     

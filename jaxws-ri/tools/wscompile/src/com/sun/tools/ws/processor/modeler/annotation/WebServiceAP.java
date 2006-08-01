@@ -38,30 +38,22 @@ import com.sun.tools.ws.processor.ProcessorOptions;
 import com.sun.tools.ws.processor.generator.GeneratorUtil;
 import com.sun.tools.ws.processor.generator.Names;
 import com.sun.tools.ws.processor.model.Model;
-import com.sun.tools.ws.processor.model.ModelProperties;
 import com.sun.tools.ws.processor.model.Operation;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
-import com.sun.tools.ws.processor.model.jaxb.JAXBModel;
 import com.sun.tools.ws.processor.modeler.ModelerException;
-import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.SEIContext;
 import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.util.ToolBase;
 import com.sun.tools.ws.ToolVersion;
-import com.sun.tools.xjc.api.JavaCompiler;
-import com.sun.tools.xjc.api.Reference;
-import com.sun.tools.xjc.api.XJC;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessage;
 
 import javax.jws.WebService;
-import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -389,7 +381,7 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
 
     public TypeMirror getHolderValueType(TypeMirror type) {
-        return TypeModeler.getHolderValueType(type, defHolderDecl, apEnv);
+        return TypeModeler.getHolderValueType(type, defHolderDecl);
     }
 
     public boolean canOverWriteClass(String className) {
