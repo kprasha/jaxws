@@ -38,22 +38,15 @@ import com.sun.mirror.type.InterfaceType;
 import com.sun.mirror.type.ReferenceType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.VoidType;
-import com.sun.mirror.util.DeclarationVisitor;
 import com.sun.mirror.util.SimpleDeclarationVisitor;
 import com.sun.mirror.util.SourcePosition;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
-
-import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.modeler.JavaSimpleTypeCreator;
 import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.SEIContext;
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
+import com.sun.xml.ws.model.RuntimeModeler;
 
 import javax.jws.HandlerChain;
 import javax.jws.Oneway;
@@ -63,12 +56,10 @@ import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
-import javax.xml.namespace.QName;
-
-import com.sun.tools.xjc.api.Reference;
-import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext;
-import com.sun.tools.ws.processor.modeler.annotation.ModelBuilder;
-import com.sun.tools.ws.processor.modeler.annotation.WebServiceConstants;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 /**
  *
@@ -112,15 +103,14 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     }
     
     public void visitInterfaceDeclaration(InterfaceDeclaration d) {
-        WebService webService = (WebService)d.getAnnotation(WebService.class);
+        WebService webService = d.getAnnotation(WebService.class);
         if (!shouldProcessWebService(webService, d))
             return;
         if (builder.checkAndSetProcessed(d))
             return;
         typeDecl = d;
         if (endpointInterfaceName != null && !endpointInterfaceName.equals(d.getQualifiedName())) {
-            builder.onError(d.getPosition(), "webserviceap.endpointinterfaces.do.not.match", new Object[]
-            {endpointInterfaceName, d.getQualifiedName()});
+            builder.onError(d.getPosition(), "webserviceap.endpointinterfaces.do.not.match", endpointInterfaceName, d.getQualifiedName());
         }
         verifySEIAnnotations(webService, d);
         endpointInterfaceName = d.getQualifiedName();
@@ -163,15 +153,15 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     protected void verifySEIAnnotations(WebService webService, InterfaceDeclaration d) {
         if (webService.endpointInterface().length() > 0) {
             builder.onError(d.getPosition(), "webservicefactory.endpointinterface.on.interface",
-                    new Object[] {d.getQualifiedName(), webService.endpointInterface()});
+                d.getQualifiedName(), webService.endpointInterface());
         }
         if (webService.serviceName().length() > 0) {
             builder.onError(d.getPosition(), "webserviceap.invalid.sei.annotation.element",
-                    new Object[] {"serviceName", d.getQualifiedName()});
+                "serviceName", d.getQualifiedName());
         }
         if (webService.portName().length() > 0) {
             builder.onError(d.getPosition(), "webserviceap.invalid.sei.annotation.element",
-                    new Object[] {"portName", d.getQualifiedName()});
+                "portName", d.getQualifiedName());
         }
     }
     
@@ -221,8 +211,8 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (targetNamespace == null || targetNamespace.length() == 0) {
             String packageName = d.getPackage().getQualifiedName();
             if (packageName == null || packageName.length() == 0) {
-                builder.onError(d.getPosition(), "webserviceap.no.package.class.must.have.targetnamespace", 
-                        new Object[] {d.getQualifiedName()});
+                builder.onError(d.getPosition(), "webserviceap.no.package.class.must.have.targetnamespace",
+                    d.getQualifiedName());
             }
             targetNamespace = getNamespace(d.getPackage());
         }
@@ -272,14 +262,14 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             changed = true;
             if (pushedSOAPBinding)
                 builder.onError(bindingDecl.getPosition(), "webserviceap.mixed.binding.style",
-                        new Object[] {classDecl.getQualifiedName()});
+                    classDecl.getQualifiedName());
         }
         if (soapBinding.style().equals(SOAPBinding.Style.RPC)) {
             soapStyle = SOAPStyle.RPC;
             wrapped = true;
             if (soapBinding.parameterStyle().equals(ParameterStyle.BARE)) {
                 builder.onError(bindingDecl.getPosition(), "webserviceap.rpc.literal.must.not.be.bare",
-                        new Object[] {classDecl.getQualifiedName()});
+                    classDecl.getQualifiedName());
             }
             
         } else {
@@ -291,7 +281,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         }
         if (soapBinding.use().equals(SOAPBinding.Use.ENCODED)) {
             builder.onError(bindingDecl.getPosition(), "webserviceap.rpc.encoded.not.supported",
-                    new Object[] {classDecl.getQualifiedName()});
+                classDecl.getQualifiedName());
         }
         if (changed || soapBindingStack.empty()) {
             soapBindingStack.push(soapBinding);
@@ -329,7 +319,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         hasWebMethods = false;
         if (webService == null)
             builder.onError(intf.getPosition(), "webserviceap.endpointinterface.has.no.webservice.annotation",
-                    new Object[] {intf.getQualifiedName()});
+                intf.getQualifiedName());
         if (isLegalSEI(intf))
             return true;
         return false;
@@ -365,10 +355,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
                 if (webMethod.exclude()) {
                     if (webMethod.operationName().length() > 0)
                         builder.onError(method.getPosition(), "webserviceap.invalid.webmethod.element.with.exclude",
-                                new Object[] {"operationName", d.getQualifiedName(), method.toString()});
+                            "operationName", d.getQualifiedName(), method.toString());
                                 if (webMethod.action().length() > 0)
                                     builder.onError(method.getPosition(), "webserviceap.invalid.webmethod.element.with.exclude",
-                                            new Object[] {"action", d.getQualifiedName(), method.toString()});
+                                        "action", d.getQualifiedName(), method.toString());
                 } else {
                     return true;
                 }
@@ -381,7 +371,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         builder.log("ProcessedMethods Interface: "+d);
         hasWebMethods = false;
         for (MethodDeclaration methodDecl : d.getMethods()) {
-            methodDecl.accept((DeclarationVisitor)this);
+            methodDecl.accept(this);
         }
         for (InterfaceType superType : d.getSuperinterfaces())
             processMethods(superType.getDeclaration());
@@ -395,7 +385,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (d.getAnnotation(WebService.class) != null) {
             // Super classes must have @WebService annotations to pick up their methods
             for (MethodDeclaration methodDecl : d.getMethods()) {
-                methodDecl.accept((DeclarationVisitor)this);
+                methodDecl.accept(this);
             }
         }
         if (d.getSuperclass() != null) {
@@ -419,8 +409,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             intTypeDecl = (InterfaceDeclaration)builder.getTypeDeclaration(endpointInterfaceName);
         }
         if (intTypeDecl == null)
-            builder.onError("webserviceap.endpointinterface.class.not.found",
-                    new Object[] {endpointInterfaceName});
+            builder.onError("webserviceap.endpointinterface.class.not.found", endpointInterfaceName);
                     return intTypeDecl;
     }
     
@@ -428,7 +417,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     private void inspectEndpointInterface(String endpointInterfaceName, ClassDeclaration d) {
         TypeDeclaration intTypeDecl = getEndpointInterfaceDecl(endpointInterfaceName, d);
         if (intTypeDecl != null)
-            intTypeDecl.accept((DeclarationVisitor)this);
+            intTypeDecl.accept(this);
     }
     
     public void visitMethodDeclaration(MethodDeclaration method) {
@@ -497,22 +486,22 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         Collection<Modifier> modifiers = classDecl.getModifiers();
         if (!modifiers.contains(Modifier.PUBLIC)){
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.not.public",
-                    new Object[] {classDecl.getQualifiedName()});
+                classDecl.getQualifiedName());
                     return false;
         }
         if (modifiers.contains(Modifier.FINAL)) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.is.final",
-                    new Object[] {classDecl.getQualifiedName()});
+                classDecl.getQualifiedName());
                     return false;
         }
         if (modifiers.contains(Modifier.ABSTRACT)) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.is.abstract",
-                    new Object[] {classDecl.getQualifiedName()});
+                classDecl.getQualifiedName());
                     return false;
         }
         if (classDecl.getDeclaringType() != null && !modifiers.contains(Modifier.STATIC)) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.is.innerclass.not.static",
-                    new Object[] {classDecl.getQualifiedName()});
+                classDecl.getQualifiedName());
                     return false;
         }
         boolean hasDefaultConstructor = false;
@@ -525,7 +514,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         }
         if (!hasDefaultConstructor) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.no.default.constructor",
-                    new Object[] {classDecl.getQualifiedName()});
+                classDecl.getQualifiedName());
                     return false;
         }
         if (webService.endpointInterface().length() == 0) {
@@ -557,8 +546,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             }
             if (!implementsMethod) {
                 builder.onError(method.getPosition(), "webserviceap.method.not.implemented",
-                        new Object[] {intfDecl.getSimpleName(), classDecl.getSimpleName(),
-                                method});
+                        intfDecl.getSimpleName(), classDecl.getSimpleName(), method);
                                 return false;
             }
         }
@@ -583,13 +571,12 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     }
     
     protected boolean isLegalSEI(InterfaceDeclaration intf) {
-        for (FieldDeclaration field : intf.getFields()) {
+        for (FieldDeclaration field : intf.getFields())
             if (field.getConstantValue() != null) {
                 builder.onError("webserviceap.sei.cannot.contain.constant.values",
-                        new Object[] {intf.getQualifiedName(), field.getSimpleName()});
-                        return false;
+                    intf.getQualifiedName(), field.getSimpleName());
+                return false;
             }
-        }
         if (!methodsAreLegal(intf))
             return false;
         return true;
@@ -627,15 +614,15 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             return true;
         if (typeDecl instanceof ClassDeclaration && method.getModifiers().contains(Modifier.ABSTRACT)) {
             builder.onError(method.getPosition(), "webserviceap.webservice.method.is.abstract",
-                    new Object[] {typeDecl.getQualifiedName(), method.getSimpleName()});
+                typeDecl.getQualifiedName(), method.getSimpleName());
                     return false;
         }
         
         if (!isLegalType(method.getReturnType())) {
             builder.onError(method.getPosition(), "webserviceap.method.return.type.cannot.implement.remote",
-                    new Object[] {typeDecl.getQualifiedName(),
-                            method.getSimpleName(),
-                            method.getReturnType()});
+                typeDecl.getQualifiedName(),
+                method.getSimpleName(),
+                method.getReturnType());
         }
         boolean isOneway = method.getAnnotation(Oneway.class) != null;
         if (isOneway && !isValidOnewayMethod(method, typeDecl))
@@ -646,7 +633,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (soapBinding != null) {
             if (soapBinding.style().equals(SOAPBinding.Style.RPC)) {
                 builder.onError(method.getPosition(),"webserviceap.rpc.soapbinding.not.allowed.on.method",
-                        new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                    typeDecl.getQualifiedName(), method.toString());
             }
         }
         
@@ -664,25 +651,25 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             if (inParams != 1) {
                 builder.onError(method.getPosition(),
                         "webserviceap.doc.bare.and.no.one.in",
-                        new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                    typeDecl.getQualifiedName(), method.toString());
             }
             if (method.getReturnType() instanceof VoidType) {
                 if (outParam == null && !isOneway) {
                     builder.onError(method.getPosition(),
                             "webserviceap.doc.bare.no.out",
-                            new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                        typeDecl.getQualifiedName(), method.toString());
                 }
                 if (outParams != 1) {
                     if (!isOneway && outParams != 0)
                         builder.onError(method.getPosition(),
                                 "webserviceap.doc.bare.no.return.and.no.out",
-                                new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                            typeDecl.getQualifiedName(), method.toString());
                 }
             } else {
                 if (outParams > 0) {
                     builder.onError(outParam.getPosition(),
                             "webserviceap.doc.bare.return.and.out",
-                            new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                        typeDecl.getQualifiedName(), method.toString());
                 }
             }
         }
@@ -695,10 +682,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             int paramIndex) {
         if (!isLegalType(param.getType())) {
             builder.onError(param.getPosition(), "webserviceap.method.parameter.types.cannot.implement.remote",
-                    new Object[] {typeDecl.getQualifiedName(),
-                            method.getSimpleName(),
-                            param.getSimpleName(),
-                            param.getType().toString()});
+                typeDecl.getQualifiedName(),
+                method.getSimpleName(),
+                param.getSimpleName(),
+                param.getType().toString());
                             return false;
         }
         TypeMirror holderType;
@@ -711,10 +698,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (holderType != null) {
             if (mode != null &&  mode==WebParam.Mode.IN)
                 builder.onError(param.getPosition(), "webserviceap.holder.parameters.must.not.be.in.only",
-                        new Object[] {typeDecl.getQualifiedName(), method.toString(), paramIndex});
+                    typeDecl.getQualifiedName(), method.toString(), paramIndex);
         } else if (mode != null && mode!=WebParam.Mode.IN) {
             builder.onError(param.getPosition(), "webserviceap.non.in.parameters.must.be.holder",
-                    new Object[] {typeDecl.getQualifiedName(), method.toString(), paramIndex});
+                typeDecl.getQualifiedName(), method.toString(), paramIndex);
         }
         
 
@@ -731,14 +718,14 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (!(method.getReturnType() instanceof VoidType)) {
             // this is an error, cannot be Oneway and have a return type
             builder.onError(method.getPosition(), "webserviceap.oneway.operation.cannot.have.return.type",
-                    new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                typeDecl.getQualifiedName(), method.toString());
             valid = false;
         }
         ParameterDeclaration outParam = getOutParameter(method);
         if (outParam != null) {
             builder.onError(outParam.getPosition(),
                     "webserviceap.oneway.and.out",
-                    new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                typeDecl.getQualifiedName(), method.toString());
             valid = false;
         }
         if (!isDocLitWrapped() && soapStyle.equals(SOAPStyle.DOCUMENT)) {
@@ -746,7 +733,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             if (inCnt != 1) {
                 builder.onError(method.getPosition(),
                         "webserviceap.oneway.and.not.one.in",
-                        new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                    typeDecl.getQualifiedName(), method.toString());
                 valid = false;
             }
         }
@@ -754,8 +741,8 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         for (ReferenceType thrownType : method.getThrownTypes()) {
             exDecl = ((ClassType)thrownType).getDeclaration();
             if (!builder.isRemoteException(exDecl)) {
-                builder.onError(method.getPosition(), "webserviceap.oneway.operation.cannot.declare.exceptions", 
-                        new Object[] {typeDecl.getQualifiedName(), method.toString(), exDecl.getQualifiedName()});
+                builder.onError(method.getPosition(), "webserviceap.oneway.operation.cannot.declare.exceptions",
+                    typeDecl.getQualifiedName(), method.toString(), exDecl.getQualifiedName());
                 valid = false;
             }                
         }
@@ -805,7 +792,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     protected ParameterDeclaration getOutParameter(MethodDeclaration method) {
         WebParam webParam;
         for (ParameterDeclaration param : method.getParameters()) {
-            webParam = (WebParam)param.getAnnotation(WebParam.class);
+            webParam = param.getAnnotation(WebParam.class);
             if (webParam != null && webParam.mode()!=WebParam.Mode.IN) {
                 return param;
             }

@@ -177,11 +177,11 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
         onError(new LocalizableMessage(getResourceBundleName(), key));
     }
 
-    public void onError(String key, Object[] args) throws ModelerException {
+    public void onError(String key, Object... args) throws ModelerException {
         onError(null, key, args);
     }
     
-    public void onError(SourcePosition pos, String key, Object[] args) throws ModelerException {
+    public void onError(SourcePosition pos, String key, Object... args) throws ModelerException {
         onError(pos, new LocalizableMessage(getResourceBundleName(), key, args));
     }
 

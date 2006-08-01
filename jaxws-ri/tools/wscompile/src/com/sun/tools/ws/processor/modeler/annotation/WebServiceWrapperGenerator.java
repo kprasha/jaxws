@@ -157,7 +157,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 ClassDeclaration typeDecl = ((ClassType)thrownType).getDeclaration();
                 if (typeDecl == null)
                     builder.onError("webserviceap.could.not.find.typedecl",
-                         new Object[] {thrownType.toString(), context.getRound()});
+                         thrownType.toString(), context.getRound());
                 boolean tmp = generateExceptionBean(typeDecl, beanPackage);
                 beanGenerated = beanGenerated || tmp;
             }
@@ -213,7 +213,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         }
         if (duplicateName(requestClassName) && canOverwriteRequest) {
             builder.onError("webserviceap.method.request.wrapper.bean.name.not.unique",
-                             new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                             typeDecl.getQualifiedName(), method.toString());
         }
 
         String responseClassName = null;
@@ -235,7 +235,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             }
             if (duplicateName(responseClassName) && canOverwriteResponse) {
                 builder.onError("webserviceap.method.response.wrapper.bean.name.not.unique",
-                                 new Object[] {typeDecl.getQualifiedName(), method.toString()});
+                    typeDecl.getQualifiedName(), method.toString());
             }
   ///// fix for wsgen CR 6442344
             gfi=new GeneratedFileInfo();

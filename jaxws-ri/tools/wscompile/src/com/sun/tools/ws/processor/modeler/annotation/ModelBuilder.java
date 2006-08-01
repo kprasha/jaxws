@@ -62,8 +62,8 @@ public interface ModelBuilder {
     public File getSourceDir();
     public String getXMLName(String javaName);
     public void onError(String key);
-    public void onError(String key, Object[] args) throws ModelerException;
-    public void onError(SourcePosition srcPos, String key, Object[] args) throws ModelerException;
+    public void onError(String key, Object... args) throws ModelerException;
+    public void onError(SourcePosition srcPos, String key, Object... args) throws ModelerException;
     public void onError(Localizable msg) throws ModelerException;
     public void onWarning(Localizable msg);
     public void onInfo(Localizable msg);
