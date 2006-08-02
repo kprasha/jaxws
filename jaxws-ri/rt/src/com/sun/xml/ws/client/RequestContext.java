@@ -223,9 +223,11 @@ public final class RequestContext extends PropertySet {
             if(endpointAddress!=null)
                 packet.endpointAddress = endpointAddress;
             packet.contentNegotiation = contentNegotiation;
-            packet.invocationProperties.putAll(others);
-            //if it is not standard property it deafults to Scope.HANDLER
-            packet.getHandlerScopePropertyNames(false).addAll(others.keySet());
+            if(!others.isEmpty()) {
+                packet.invocationProperties.putAll(others);
+                //if it is not standard property it deafults to Scope.HANDLER
+                packet.getHandlerScopePropertyNames(false).addAll(others.keySet());
+            }
         } else {
             Set<String> handlerScopePropertyNames = new HashSet<String>();
             // fallback mode, simply copy map in a slow way
@@ -241,7 +243,9 @@ public final class RequestContext extends PropertySet {
                     handlerScopePropertyNames.add(key);
                 }
             }
-            packet.getHandlerScopePropertyNames(false).addAll(handlerScopePropertyNames);
+            
+            if(!handlerScopePropertyNames.isEmpty())
+                packet.getHandlerScopePropertyNames(false).addAll(handlerScopePropertyNames);
         }
     }
 
