@@ -333,9 +333,11 @@ public abstract class SOAPFaultBuilder {
             faultRole = soapFaultException.getFault().getFaultActor();
         }
 
-        if (faultCode == null && code == null) {
+        if (faultCode == null) {
             faultCode = getDefaultFaultCode(soapVersion);
             code = new CodeType(faultCode);
+        }else{
+            code = new CodeType(faultCode);            
         }
 
         if (faultString == null) {
