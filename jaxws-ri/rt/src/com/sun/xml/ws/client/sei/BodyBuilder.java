@@ -243,6 +243,12 @@ abstract class BodyBuilder {
         private final Bridge[] parameterBridges;
 
         /**
+         * List of Parameters packed in the body.
+         * Only used for error diagnostics.
+         */
+        private final List<ParameterImpl> children;
+
+        /**
          * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
         RpcLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
@@ -250,7 +256,7 @@ abstract class BodyBuilder {
             // we'll use CompositeStructure to pack requests
             assert wp.getTypeReference().type==CompositeStructure.class;
 
-            List<ParameterImpl> children = wp.getWrapperChildren();
+            this.children = wp.getWrapperChildren();
 
             parameterBridges = new Bridge[children.size()];
             for( int i=0; i<parameterBridges.length; i++ )
@@ -266,8 +272,14 @@ abstract class BodyBuilder {
             cs.values = new Object[parameterBridges.length];
 
             // fill in wrapped parameters from methodArgs
-            for( int i=indices.length-1; i>=0; i-- )
-                cs.values[i] = getters[i].get(methodArgs[indices[i]]);
+            for( int i=indices.length-1; i>=0; i-- ) {
+                Object arg = getters[i].get(methodArgs[indices[i]]);
+                if(arg==null) {
+                    throw new WebServiceException("Method Parameter: "+
+                        children.get(i).getName()+" cannot be null. This is BP 1.1 R2211 violation.");
+                }
+                cs.values[i] = arg;
+            }
 
             return cs;
         }
