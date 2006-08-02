@@ -191,7 +191,7 @@ final class EndpointMethodHandler {
                                 soapVersion);
                     }
                 } else {
-                    bodyBuilder = new EndpointResponseMessageBuilder.Bare(param, seiModel, soapVersion);
+                    bodyBuilder = new EndpointResponseMessageBuilder.Bare(param, soapVersion);
                 }
                 break;
             case HEADER:

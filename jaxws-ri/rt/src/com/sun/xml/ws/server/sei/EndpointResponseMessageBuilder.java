@@ -70,16 +70,14 @@ abstract class EndpointResponseMessageBuilder {
     private static abstract class JAXB extends EndpointResponseMessageBuilder {
         /**
          * This object determines the binding of the object returned
-         * from {@link #build(Object[])}.
+         * from {@link #createMessage(Object[], Object)}
          */
         private final Bridge bridge;
-        private final SEIModel seiModel;
         private final SOAPVersion soapVersion;
 
-        protected JAXB(Bridge bridge, SEIModel seiModel, SOAPVersion soapVersion) {
+        protected JAXB(Bridge bridge, SOAPVersion soapVersion) {
             assert bridge!=null;
             this.bridge = bridge;
-            this.seiModel = seiModel;
             this.soapVersion = soapVersion;
         }
 
@@ -110,8 +108,8 @@ abstract class EndpointResponseMessageBuilder {
         /**
          * Creates a {@link EndpointResponseMessageBuilder} from a bare parameter.
          */
-        Bare(ParameterImpl p, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(p.getBridge(), seiModel, soapVersion);
+        Bare(ParameterImpl p, SOAPVersion soapVersion) {
+            super(p.getBridge(), soapVersion);
             this.methodPos = p.getIndex();
             this.getter = ValueGetter.get(p);
         }
@@ -144,8 +142,8 @@ abstract class EndpointResponseMessageBuilder {
          */
         protected final ValueGetter[] getters;
 
-        protected Wrapped(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(wp.getBridge(), seiModel, soapVersion);
+        protected Wrapped(WrapperParameter wp, SOAPVersion soapVersion) {
+            super(wp.getBridge(), soapVersion);
 
             List<ParameterImpl> children = wp.getWrapperChildren();
 
@@ -180,7 +178,7 @@ abstract class EndpointResponseMessageBuilder {
          * Creates a {@link EndpointResponseMessageBuilder} from a {@link WrapperParameter}.
          */
         DocLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(wp, seiModel, soapVersion);
+            super(wp, soapVersion);
 
             wrapper = (Class)wp.getBridge().getTypeReference().type;
 
@@ -251,14 +249,19 @@ abstract class EndpointResponseMessageBuilder {
         private final Bridge[] parameterBridges;
 
         /**
+         * Used for error diagnostics.
+         */
+        private final List<ParameterImpl> children;
+
+        /**
          * Creates a {@link EndpointResponseMessageBuilder} from a {@link WrapperParameter}.
          */
         RpcLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(wp, seiModel, soapVersion);
+            super(wp, soapVersion);
             // we'll use CompositeStructure to pack requests
             assert wp.getTypeReference().type==CompositeStructure.class;
 
-            List<ParameterImpl> children = wp.getWrapperChildren();
+            this.children = wp.getWrapperChildren();
 
             parameterBridges = new Bridge[children.size()];
             for( int i=0; i<parameterBridges.length; i++ )
@@ -275,11 +278,17 @@ abstract class EndpointResponseMessageBuilder {
 
             // fill in wrapped parameters from methodArgs
             for( int i=indices.length-1; i>=0; i-- ) {
+                Object v;
                 if (indices[i] == -1) {
-                    cs.values[i] = getters[i].get(returnValue);
+                    v = getters[i].get(returnValue);
                 } else {
-                    cs.values[i] = getters[i].get(methodArgs[indices[i]]);
+                    v = getters[i].get(methodArgs[indices[i]]);
                 }
+                if(v==null) {
+                    throw new WebServiceException("Method Parameter: "+
+                        children.get(i).getName() +" cannot be null. This is BP 1.1 R2211 violation.");
+                }
+                cs.values[i] = v;
             }
 
             return cs;
