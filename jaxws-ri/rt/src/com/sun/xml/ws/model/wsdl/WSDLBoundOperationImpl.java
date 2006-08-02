@@ -317,6 +317,38 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         return null;
     }
 
+    private String reqNamespace;
+    private String respNamespace;
+
+    /**
+     * For rpclit gives namespace value on soapbinding:body@namespace
+     *
+     * @return   non-null for rpclit and null for doclit
+     * @see com.sun.xml.ws.model.RuntimeModeler#processRpcMethod(com.sun.xml.ws.model.JavaMethodImpl, String, javax.jws.WebMethod, String, java.lang.reflect.Method, javax.jws.WebService)
+     */
+    public String getRequestNamespace(){
+        return reqNamespace;
+    }
+
+    public void setRequestNamespace(String ns){
+        reqNamespace = ns;
+    }
+
+
+    /**
+     * For rpclit gives namespace value on soapbinding:body@namespace
+     *
+     * @return   non-null for rpclit and null for doclit
+     *      * @see com.sun.xml.ws.modeler.RuntimeModeler#processRpcMethod(com.sun.xml.ws.model.JavaMethod, String, javax.jws.WebMethod, String, java.lang.reflect.Method, javax.jws.WebService)
+     */
+    public String getResponseNamespace(){
+        return respNamespace;
+    }
+
+    public void setResponseNamespace(String ns){
+        respNamespace = ns;
+    }
+
     WSDLBoundPortTypeImpl getOwner(){
         return owner;
     }

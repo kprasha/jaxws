@@ -54,8 +54,8 @@ public class ParameterImpl implements Parameter {
     private String partName;
     private final int index;
     private final Mode mode;
-    private final TypeReference typeReference;
-    private final QName name;
+    private TypeReference typeReference;
+    private QName name;
     private final JavaMethodImpl parent;
 
     public ParameterImpl(JavaMethodImpl parent, TypeReference type, Mode mode, int index) {
@@ -104,6 +104,16 @@ public class ParameterImpl implements Parameter {
     public TypeReference getTypeReference() {
         return typeReference;
     }
+
+    /**
+     * Sometimes we need to overwrite the typeReferenc, such as during patching for rpclit
+     * @see AbstractSEIModelImpl#applyParameterBinding(com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl)
+     */
+    void setTypeReference(TypeReference type){
+        typeReference = type;
+        name = type.tagName;
+    }
+
 
     public Mode getMode() {
         return mode;

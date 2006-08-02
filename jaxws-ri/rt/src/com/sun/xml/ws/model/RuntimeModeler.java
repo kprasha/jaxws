@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
@@ -362,7 +363,7 @@ public class RuntimeModeler {
         if (clazz.isInterface()) {
             return true;
         }
-        Class declClass = method.getDeclaringClass();
+        Class declClass = method.getDeclaringClass();        
         boolean declHasWebService = getPrivClassAnnotation(declClass, WebService.class) != null;
         WebMethod webMethod = getPrivMethodAnnotation(method, WebMethod.class);
         if (webMethod != null && !webMethod.exclude() &&
@@ -545,7 +546,7 @@ public class RuntimeModeler {
         RequestWrapper reqWrapper = method.getAnnotation(RequestWrapper.class);
         ResponseWrapper resWrapper = method.getAnnotation(ResponseWrapper.class);
         String beanPackage = packageName + PD_JAXWS_PACKAGE_PD;
-        if (packageName.length() == 0)
+        if (packageName == null || (packageName != null && packageName.length() == 0))
             beanPackage = JAXWS_PACKAGE_PD;
         String requestClassName;
         if(reqWrapper != null && reqWrapper.className().length()>0){
@@ -728,8 +729,6 @@ public class RuntimeModeler {
     protected void processRpcMethod(JavaMethodImpl javaMethod, String methodName,
                                     WebMethod webMethod, String operationName, Method method, WebService webService) {
         boolean isOneway = method.isAnnotationPresent(Oneway.class);
-        QName reqElementName = new QName(targetNamespace, operationName);
-        QName resElementName = null;
 
         // use Map to build parameters in the part order when they are known.
         // if part is unbound, we just put them at the end, and for that we
@@ -738,12 +737,32 @@ public class RuntimeModeler {
         // but I think it's a pretty safe assumption - KK.
         Map<Integer, ParameterImpl> resRpcParams = new TreeMap<Integer, ParameterImpl>();
         Map<Integer, ParameterImpl> reqRpcParams = new TreeMap<Integer, ParameterImpl>();
+
+        //Lets take the service namespace and overwrite it with the one we get it from wsdl
+        String reqNamespace = targetNamespace;
+        String respNamespace = targetNamespace;
+
         if(binding != null && binding.getBinding().isRpcLit()){
             binding.getBinding().finalizeRpcLitBinding();
+            QName opQName = new QName(binding.getBinding().getPortTypeName().getNamespaceURI(), operationName);
+            WSDLBoundOperationImpl op = binding.getBinding().get(opQName);
+            if(op != null){
+                //it cant be null, but lets not fail and try to work with service namespce
+                if(op.getRequestNamespace() != null){
+                    reqNamespace = op.getRequestNamespace();
+                }
+
+                //it cant be null, but lets not fail and try to work with service namespce
+                if(op.getResponseNamespace() != null){
+                    respNamespace = op.getResponseNamespace();
+                }
+            }
         }
 
+        QName reqElementName = new QName(reqNamespace, operationName);
+        QName resElementName = null;
         if (!isOneway) {
-            resElementName = new QName(targetNamespace, operationName+RESPONSE);
+            resElementName = new QName(respNamespace, operationName+RESPONSE);
         }
 
         Class wrapperType = CompositeStructure.class;

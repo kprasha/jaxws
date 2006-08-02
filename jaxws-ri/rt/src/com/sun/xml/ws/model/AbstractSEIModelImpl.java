@@ -306,8 +306,13 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             List<ParameterImpl> reqAttachParams = null;
             for(ParameterImpl param:reqParams){
                 if(param.isWrapperStyle()){
-                    if(isRpclit)
+                    if(isRpclit){
+                        WrapperParameter reqParam = (WrapperParameter)param;
+                        if(bo.getRequestNamespace() != null){
+                            patchRpclitNamespace(bo.getRequestNamespace(), reqParam);
+                        }
                         reqAttachParams = applyRpcLitParamBinding(method, (WrapperParameter)param, wsdlBinding, Mode.IN);
+                    }
                     continue;
                 }
                 String partName = param.getPartName();
@@ -322,8 +327,13 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             List<ParameterImpl> resParams = method.responseParams;
             for(ParameterImpl param:resParams){
                 if(param.isWrapperStyle()){
-                    if(isRpclit)
+                    if(isRpclit){
+                        WrapperParameter respParam = (WrapperParameter)param;
+                        if(bo.getResponseNamespace() != null){
+                            patchRpclitNamespace(bo.getResponseNamespace(), respParam);
+                        }
                         resAttachParams = applyRpcLitParamBinding(method, (WrapperParameter)param, wsdlBinding, Mode.OUT);
+                    }
                     continue;
                 }
                 //if the parameter is not inout and its header=true then dont get binding from WSDL
@@ -351,7 +361,16 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         }
     }
 
-
+    /**
+     * For rpclit wrapper element inside <soapenv:Body>, the targetNamespace should be taked from
+     * the soapbind:body@namespace value. Since no annotations on SEI/impl class captures it so we
+     * need to get it from WSDL and patch it.     *
+     */
+    private void patchRpclitNamespace(String namespace, WrapperParameter param){
+        TypeReference type = param.getTypeReference();
+        TypeReference newType = new TypeReference(new QName(namespace, type.tagName.getLocalPart()), type.type, type.annotations);
+        param.setTypeReference(newType);
+    }
 
     /**
      * Applies binding related information to the RpcLitPayload. The payload map is populated correctly.
@@ -481,12 +500,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     public String getTargetNamespace() {
         return targetNamespace;
     }
-
-    private ThreadLocal<BridgeContext> bridgeContext = new ThreadLocal<BridgeContext>() {
-        protected BridgeContext initialValue() {
-            return jaxbContext.createBridgeContext();
-        }
-    };
 
     private Pool.Marshaller marshallers;
     protected JAXBRIContext jaxbContext;

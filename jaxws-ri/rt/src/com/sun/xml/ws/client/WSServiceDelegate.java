@@ -368,15 +368,8 @@ public class WSServiceDelegate extends WSService {
 
         SEIPortInfo eif = seiContext.get(portInterface);
 
-        //apply parameter bindings
-        SOAPSEIModel model = eif.model;
-        if (portName != null) {
-            WSDLBoundPortTypeImpl binding = getPortModel(portName).getBinding();
-            model.applyParameterBinding(binding);
-        }
-
         BindingImpl binding = eif.createBinding();
-        SEIStub pis = new SEIStub(this, binding, model, createPipeline(eif,binding));
+        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif,binding));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
             new Class[]{ portInterface, BindingProvider.class, Closeable.class }, pis));
