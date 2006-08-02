@@ -66,14 +66,13 @@ public final class ResponseImpl<T> extends FutureTask<T> implements Response<T>,
     public void run() {
         // override so that we call set()
         try {
-            set(callable.call());
+            set(callable.call(), null);
         } catch (Throwable t) {
-            setException(t);
+            set(null, t);
         }
     }
-
-    @Override
-    protected void set(final T v) {
+    
+    protected void set(final T v, final Throwable t) {
         // call the handler before we mark the future as 'done'
         if (handler!=null) {
             try {
@@ -85,21 +84,25 @@ public final class ResponseImpl<T> extends FutureTask<T> implements Response<T>,
                  * in the main thread and the callback code, and is compatible with the JAX-RI 2.0 FCS.
                  */
                 class CallbackFuture<T> extends CompletedFuture<T> implements Response<T> {
-                    public CallbackFuture(T v) {
-                        super(v);
+                    public CallbackFuture(T v, Throwable t) {
+                        super(v, t);
                     }
 
                     public Map<String, Object> getContext() {
                         return ResponseImpl.this.getContext();
                     }
                 }
-                handler.handleResponse(new CallbackFuture<T>(v));
+                handler.handleResponse(new CallbackFuture<T>(v, t));
             } catch (Throwable e) {
                 super.setException(e);
                 return;
             }
         }
-        super.set(v);
+        if (t != null) {
+            super.setException(t); 
+        } else {
+            super.set(v);
+        }
     }
 
     public ResponseContext getContext() {
