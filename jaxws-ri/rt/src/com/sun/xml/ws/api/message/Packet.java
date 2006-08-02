@@ -96,7 +96,10 @@ import java.util.Set;
  * Similarly, {@link BindingProvider#getResponseContext() response context}
  * is constructed from {@link Packet} (or rather it's just a view of {@link Packet}.)
  * by using properties from both
- * {@link #invocationProperties} and {@link #otherProperties}.
+ * {@link #invocationProperties} and {@link #otherProperties},
+ * modulo properties named explicitly in {@link #getHandlerScopePropertyNames(boolean)}.
+ * IOW, properties added to {@link #invocationProperties} and {@link #otherProperties}
+ * are exposed to the response context by default.
  *
  *
  *
