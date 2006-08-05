@@ -469,6 +469,8 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
     @Override
     public boolean wasSuccessful() {
+        if(doNothing)
+            return true;
         return environment.getErrorCount()==0;
     }
 
