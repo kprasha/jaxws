@@ -126,10 +126,13 @@ public class ClientSOAPHandlerPipe extends HandlerPipe {
         // should be used for the entire MEP
         soapHandlers = new ArrayList<SOAPHandler>();
         HandlerConfiguration handlerConfig = ((BindingImpl) binding).getHandlerConfig();
-        soapHandlers.addAll(handlerConfig.getSoapHandlers());
-        roles = new HashSet<String>();
-        roles.addAll(handlerConfig.getRoles());
-        processor = new SOAPHandlerProcessor(true, this, binding, soapHandlers);
+        List<SOAPHandler> soapSnapShot= handlerConfig.getSoapHandlers();
+        if (!soapSnapShot.isEmpty()) {
+            soapHandlers.addAll(soapSnapShot);
+            roles = new HashSet<String>();
+            roles.addAll(handlerConfig.getRoles());
+            processor = new SOAPHandlerProcessor(true, this, binding, soapHandlers);
+        }
     }
 
     MessageUpdatableContext getContext(Packet packet) {

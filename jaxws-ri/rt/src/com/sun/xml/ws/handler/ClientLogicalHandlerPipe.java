@@ -129,13 +129,16 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
         // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
         logicalHandlers = new ArrayList<LogicalHandler>();
-        logicalHandlers.addAll(((BindingImpl) binding).getHandlerConfig().getLogicalHandlers());
-        if (binding.getSOAPVersion() == null) {
-            processor = new XMLHandlerProcessor(this, binding,
-                    logicalHandlers);
-        } else {
-            processor = new SOAPHandlerProcessor(true, this, binding,
-                    logicalHandlers);
+        List<LogicalHandler> logicalSnapShot= ((BindingImpl) binding).getHandlerConfig().getLogicalHandlers();
+        if (!logicalSnapShot.isEmpty()) {
+            logicalHandlers.addAll(logicalSnapShot);
+            if (binding.getSOAPVersion() == null) {
+                processor = new XMLHandlerProcessor(this, binding,
+                        logicalHandlers);
+            } else {
+                processor = new SOAPHandlerProcessor(true, this, binding,
+                        logicalHandlers);
+            }
         }
     }
 

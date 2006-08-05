@@ -126,13 +126,16 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
 
     private void setUpProcessorOnce() {
         logicalHandlers = new ArrayList<LogicalHandler>();
-        logicalHandlers.addAll(((BindingImpl) binding).getHandlerConfig().getLogicalHandlers());
-        if (binding.getSOAPVersion() == null) {
-            processor = new XMLHandlerProcessor(this, binding,
-                    logicalHandlers);
-        } else {
-            processor = new SOAPHandlerProcessor(false, this, binding,
-                    logicalHandlers);
+        List<LogicalHandler> logicalSnapShot= ((BindingImpl) binding).getHandlerConfig().getLogicalHandlers();
+        if (!logicalSnapShot.isEmpty()) {
+            logicalHandlers.addAll(logicalSnapShot);
+            if (binding.getSOAPVersion() == null) {
+                processor = new XMLHandlerProcessor(this, binding,
+                        logicalHandlers);
+            } else {
+                processor = new SOAPHandlerProcessor(false, this, binding,
+                        logicalHandlers);
+            }
         }
     }
 

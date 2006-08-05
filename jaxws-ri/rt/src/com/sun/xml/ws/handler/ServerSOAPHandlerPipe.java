@@ -136,10 +136,13 @@ public class ServerSOAPHandlerPipe extends HandlerPipe {
     private void setUpProcessorOnce() {
         soapHandlers = new ArrayList<SOAPHandler>();
         HandlerConfiguration handlerConfig = ((BindingImpl) binding).getHandlerConfig();
-        soapHandlers.addAll(handlerConfig.getSoapHandlers());
-        roles = new HashSet<String>();
-        roles.addAll(handlerConfig.getRoles());
-        processor = new SOAPHandlerProcessor(false, this, binding, soapHandlers);
+        List<SOAPHandler> soapSnapShot= handlerConfig.getSoapHandlers();
+        if (!soapSnapShot.isEmpty()) {
+            soapHandlers.addAll(soapSnapShot);
+            roles = new HashSet<String>();
+            roles.addAll(handlerConfig.getRoles());
+            processor = new SOAPHandlerProcessor(false, this, binding, soapHandlers);
+        }
     }
 
     void setUpProcessor() {

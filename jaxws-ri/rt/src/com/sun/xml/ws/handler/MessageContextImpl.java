@@ -37,21 +37,29 @@ import javax.xml.ws.handler.MessageContext;
 
 class MessageContextImpl implements MessageContext {
     
-    private final Map<String,Object> internalMap = new HashMap<String,Object>();
-    private final Set<String> handlerScopeProps;
+    private Map<String,Object> internalMap = new HashMap<String,Object>();
+    private Set<String> handlerScopeProps;
+    Packet packet;
+    boolean packetPropsAccessed = false;
+
+    void populateMap() {
+        if(!packetPropsAccessed) {
+            packetPropsAccessed = true;
+            handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
+            internalMap.putAll(packet.createMapView());
+            internalMap.putAll(packet.invocationProperties);
+            internalMap.putAll(packet.otherProperties);
+        }
+    }
     /** Creates a new instance of MessageContextImpl */
     public MessageContextImpl(Packet packet) {
-        handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
-        internalMap.putAll(packet.createMapView());
-        internalMap.putAll(packet.invocationProperties);
-        internalMap.putAll(packet.otherProperties);
+        this.packet = packet;
     }
-    
     protected void updatePacket() {
         throw new UnsupportedOperationException("wrong call");
     }
     public void setScope(String name, Scope scope) {
-
+        populateMap();
         if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
         
         //TODO: check in intrenalMap
@@ -64,7 +72,7 @@ class MessageContextImpl implements MessageContext {
     }
     
     public Scope getScope(String name) {
-
+        populateMap();
         if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
 
         if(handlerScopeProps.contains(name)) {
@@ -75,22 +83,27 @@ class MessageContextImpl implements MessageContext {
     }
     
     public int size() {
+        populateMap();
         return internalMap.size();
     }
     
     public boolean isEmpty() {
+        populateMap();
         return internalMap.isEmpty();
     }
     
     public boolean containsKey(Object key) {
+        populateMap();
         return internalMap.containsKey(key);
     }
     
     public boolean containsValue(Object value) {
+        populateMap();
         return internalMap.containsValue(value);
     }
     
     public Object put(String key, Object value) {
+        populateMap();
         if(!keyExists(key)) {
             //new property, default to Scope.HANDLER
             handlerScopeProps.add(key);
@@ -98,10 +111,12 @@ class MessageContextImpl implements MessageContext {
         return internalMap.put(key,value);
     }
     public Object get(Object key) {
+        populateMap();
         return internalMap.get(key);
     }
     
     public void putAll(Map<? extends String, ? extends Object> t) {
+        populateMap();
         for(String key: t.keySet()) {
             if(!keyExists(key)) {
                 //new property, default to Scope.HANDLER
@@ -112,19 +127,24 @@ class MessageContextImpl implements MessageContext {
     }
     
     public void clear() {
+        populateMap();
         internalMap.clear();
     }
     public Object remove(Object key){
+        populateMap();
         handlerScopeProps.remove(key);
         return internalMap.remove(key);
     }
     public Set<String> keySet() {
+        populateMap();
         return internalMap.keySet();
     }
     public Set<Map.Entry<String, Object>> entrySet(){
+        populateMap();
         return internalMap.entrySet();
     }
     public Collection<Object> values() {
+        populateMap();
         return internalMap.values();
     }
 
@@ -136,26 +156,27 @@ class MessageContextImpl implements MessageContext {
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
     void fill(Packet packet) {
-        for (Entry<String,Object> entry : internalMap.entrySet()) {
-            String key = entry.getKey();
-            if(packet.supports(key)) {
-                try {
-                    packet.put(key,entry.getValue());
-                } catch(ReadOnlyPropertyException e) {
-                    // Nothing to do
+        if(packetPropsAccessed) {
+            for (Entry<String, Object> entry : internalMap.entrySet()) {
+                String key = entry.getKey();
+                if (packet.supports(key)) {
+                    try {
+                        packet.put(key, entry.getValue());
+                    } catch (ReadOnlyPropertyException e) {
+                        // Nothing to do
+                    }
+                } else if (packet.otherProperties.containsKey(key)) {
+                    packet.otherProperties.put(key, entry.getValue());
+                } else {
+                    packet.invocationProperties.put(key, entry.getValue());
                 }
-            } else if(packet.otherProperties.containsKey(key)) {
-                packet.otherProperties.put(key,entry.getValue());
-            } else {
-                packet.invocationProperties.put(key,entry.getValue());
             }
-        }
-        
-        //Remove properties which are removed by user.
-        packet.createMapView().keySet().retainAll(internalMap.keySet());
-        packet.otherProperties.keySet().retainAll(internalMap.keySet());
-        packet.invocationProperties.keySet().retainAll(internalMap.keySet());
 
+            //Remove properties which are removed by user.
+            packet.createMapView().keySet().retainAll(internalMap.keySet());
+            packet.otherProperties.keySet().retainAll(internalMap.keySet());
+            packet.invocationProperties.keySet().retainAll(internalMap.keySet());
+        }
     }
 
 }

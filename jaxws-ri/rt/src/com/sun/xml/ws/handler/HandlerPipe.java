@@ -88,37 +88,36 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
         // the roles and handlerchain after a stub/proxy is created.
         setUpProcessor();
 
-        if(isHandlerChainEmpty()) {
-            return next.process(packet);
-        }
-
         MessageUpdatableContext context = getContext(packet);
-        boolean isOneWay = checkOneWay(packet);
         Packet reply;
         try {
-            // Call handlers on Request
-            boolean handlerResult = callHandlersOnRequest(context, isOneWay);
-            //Update Packet with user modifications
-            context.updatePacket();
-
-            // the only case where no message is sent
-            if (!isOneWay && !handlerResult) {
-                return packet;
+            boolean isOneWay = checkOneWay(packet);
+            if(!isHandlerChainEmpty()) {
+                // Call handlers on Request
+                boolean handlerResult = callHandlersOnRequest(context, isOneWay);
+                //Update Packet with user modifications
+                context.updatePacket();
+                // the only case where no message is sent
+                if (!isOneWay && !handlerResult) {
+                    return packet;
+                }
             }
-
             requestProcessingSucessful = true;
             // Call next Pipe.process() on msg
             reply = next.process(packet);
-
-            if (isHandleFalse() || reply.getMessage() == null) {
+            context =  getContext(reply);
+            if (isHandleFalse() || (reply.getMessage() == null)) {
                 // Cousin HandlerPipe returned false during Response processing.
                 // or it is oneway request
+                // or handler chain is empty
                 // Don't call handlers.
                 return reply;
             }
-            context =  getContext(reply);
-            // Call handlers on Response
-            callHandlersOnResponse(context,isHandleFault(reply));
+            boolean isFault = isHandleFault(reply);
+            if( !isHandlerChainEmpty()) {
+                // Call handlers on Response
+                callHandlersOnResponse(context,isFault);
+            }
         } finally {
             // Clean up the exchange for next invocation.
             exchange = null;
