@@ -39,6 +39,10 @@ public interface AttachmentSet extends Iterable<Attachment> {
     /**
      * Gets the attachment by the content ID.
      *
+     * @param contentId
+     *      The content ID like "foo-bar-zot@abc.com", without
+     *      surrounding '&lt;' and '>' used as the transfer syntax. 
+     *
      * @return null
      *      if no such attachment exist.
      */
