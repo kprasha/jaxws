@@ -153,6 +153,10 @@ public final class MimeMultipartParser {
             String contentType = (contentTypes != null) ? contentTypes[0] : "application/octet-stream";
             String [] contentIds = ih.getHeader("content-id");
             String contentId = (contentIds != null) ? contentIds[0] : null;
+            if(contentId!=null && contentId.length()>2) {
+                if(contentId.charAt(0)=='<')   contentId=contentId.substring(1,contentId.length()-1);
+            }
+
             ByteArrayBuffer bos = new ByteArrayBuffer();
             b = readBody(in, boundaryBytes, bos);
             StreamAttachment as = new StreamAttachment(bos, contentId, contentType);

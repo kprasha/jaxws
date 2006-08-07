@@ -181,7 +181,7 @@ public abstract class AbstractMessageImpl extends Message {
         for(Attachment att : getAttachments()) {
             AttachmentPart part = msg.createAttachmentPart();
             part.setDataHandler(att.asDataHandler());
-            part.setContentId(att.getContentId());
+            part.setContentId('<'+att.getContentId()+'>');
             msg.addAttachmentPart(part);
         }
         return msg;
