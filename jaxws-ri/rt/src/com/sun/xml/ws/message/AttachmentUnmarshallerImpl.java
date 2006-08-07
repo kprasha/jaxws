@@ -24,15 +24,28 @@ public final class AttachmentUnmarshallerImpl extends AttachmentUnmarshaller {
         this.attachments = attachments;
     }
 
+    @Override
     public DataHandler getAttachmentAsDataHandler(String cid) {
-        Attachment a = attachments.get(cid);
+        Attachment a = attachments.get(stripScheme(cid));
         if(a==null)
             throw new WebServiceException(EncodingMessages.NO_SUCH_CONTENT_ID(cid));
         return a.asDataHandler();
     }
 
-    //This should not get called as XOP processing is disabled.
+    @Override
     public byte[] getAttachmentAsByteArray(String cid) {
-        throw new IllegalStateException();
+        Attachment a = attachments.get(stripScheme(cid));
+        if(a==null)
+            throw new WebServiceException(EncodingMessages.NO_SUCH_CONTENT_ID(cid));
+        return a.asByteArray();
+    }
+
+    /**
+     * The CID reference has 'cid:' prefix, so get rid of it.
+     */
+    private String stripScheme(String cid) {
+        if(cid.startsWith("cid:")) // work defensively, in case the input is wrong
+            cid = cid.substring(4);
+        return cid;
     }
 }

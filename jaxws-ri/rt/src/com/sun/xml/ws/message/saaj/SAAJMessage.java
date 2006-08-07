@@ -392,6 +392,12 @@ public class SAAJMessage extends Message {
         }
     }
 
+    /**
+     * {@link AttachmentSet} for SAAJ.
+     *
+     * SAAJ wants '&lt;' and '>' for the content ID, but {@link AttachmentSet}
+     * doesn't. S this class also does the conversion between them.
+     */
     private class SAAJAttachmentSet implements AttachmentSet {
 
         private Map<String, Attachment> attMap;
@@ -414,7 +420,7 @@ public class SAAJMessage extends Message {
                     return null;
                 attMap = createAttachmentMap();
             }
-            return attMap.get(contentId);
+            return attMap.get('<'+contentId+'>');
         }
 
         public boolean isEmpty() {
@@ -446,7 +452,7 @@ public class SAAJMessage extends Message {
         }
 
         public void add(Attachment att) {
-            attMap.put(att.getContentId(), att);
+            attMap.put('<'+att.getContentId()+'>', att);
         }
     }
 
