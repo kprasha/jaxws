@@ -23,9 +23,6 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.istack.Nullable;
 
-import java.util.Collections;
-import java.util.Iterator;
-
 /**
  * A set of {@link Attachment} on a {@link Message}.
  *
@@ -41,7 +38,7 @@ public interface AttachmentSet extends Iterable<Attachment> {
      *
      * @param contentId
      *      The content ID like "foo-bar-zot@abc.com", without
-     *      surrounding '&lt;' and '>' used as the transfer syntax. 
+     *      surrounding '&lt;' and '>' used as the transfer syntax.
      *
      * @return null
      *      if no such attachment exist.
