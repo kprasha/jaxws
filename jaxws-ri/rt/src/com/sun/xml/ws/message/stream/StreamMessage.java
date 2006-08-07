@@ -35,6 +35,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentSetImpl;
+import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
@@ -188,14 +189,21 @@ public final class StreamMessage extends AbstractMessageImpl {
             return null;
         assert unconsumed();
         // TODO: How can the unmarshaller process this as a fragment?
-        return unmarshaller.unmarshal(reader);
+        if(hasAttachments())
+            unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshallerImpl(getAttachments()));
+        try {
+            return unmarshaller.unmarshal(reader);
+        } finally{
+            unmarshaller.setAttachmentUnmarshaller(null);
+        }
     }
 
     public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
         if(!hasPayload())
             return null;
         assert unconsumed();
-        return bridge.unmarshal(reader);
+        return bridge.unmarshal(reader,
+            hasAttachments()? new AttachmentUnmarshallerImpl(getAttachments()) : null );
     }
 
     public XMLStreamReader readPayload() {

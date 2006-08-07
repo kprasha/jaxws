@@ -87,11 +87,18 @@ public abstract class AbstractMessageImpl extends Message {
     }
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
-        return (T)unmarshaller.unmarshal(readPayloadAsSource());
+        if(hasAttachments())
+            unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshallerImpl(getAttachments()));
+        try {
+            return (T) unmarshaller.unmarshal(readPayloadAsSource());
+        } finally{
+            unmarshaller.setAttachmentUnmarshaller(null);
+        }
     }
 
     public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
-        return bridge.unmarshal(readPayloadAsSource());
+        return bridge.unmarshal(readPayloadAsSource(),
+            hasAttachments()? new AttachmentUnmarshallerImpl(getAttachments()) : null );
     }
 
     /**

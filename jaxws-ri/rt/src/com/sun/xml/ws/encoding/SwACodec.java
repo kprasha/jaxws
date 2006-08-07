@@ -22,20 +22,15 @@
 
 package com.sun.xml.ws.encoding;
 
-import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.message.stream.StreamAttachment;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * {@link Codec} that uses MIME/multipart as the base format.

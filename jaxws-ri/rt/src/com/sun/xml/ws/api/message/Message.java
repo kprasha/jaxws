@@ -213,8 +213,16 @@ public abstract class Message {
         }
         return attachmentSet;
     }
+
+    /**
+     * Optimization hint for the derived class to check
+     * if we may have some attachments.
+     */
+    protected boolean hasAttachments() {
+        return attachmentSet!=null;
+    }
     
-    private AttachmentSet attachmentSet;
+    protected AttachmentSet attachmentSet;
 
     private WSDLBoundOperation operation = null;
 

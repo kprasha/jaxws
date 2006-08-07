@@ -22,15 +22,14 @@
 
 package com.sun.xml.ws.message;
 
+import com.sun.istack.FragmentContentHandler;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.istack.FragmentContentHandler;
 import org.w3c.dom.Element;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -102,11 +101,18 @@ public final class DOMMessage extends AbstractMessageImpl {
     }
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
-        return (T)unmarshaller.unmarshal(payload);
+        if(hasAttachments())
+            unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshallerImpl(getAttachments()));
+        try {
+            return (T)unmarshaller.unmarshal(payload);
+        } finally{
+            unmarshaller.setAttachmentUnmarshaller(null);
+        }
     }
 
     public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
-        return bridge.unmarshal(payload);
+        return bridge.unmarshal(payload,
+            hasAttachments()? new AttachmentUnmarshallerImpl(getAttachments()) : null);
     }
 
     public XMLStreamReader readPayload() throws XMLStreamException {

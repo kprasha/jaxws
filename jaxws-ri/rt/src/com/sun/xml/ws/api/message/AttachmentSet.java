@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.api.message;
 
+import com.sun.istack.Nullable;
+
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -40,6 +42,7 @@ public interface AttachmentSet extends Iterable<Attachment> {
      * @return null
      *      if no such attachment exist.
      */
+    @Nullable
     Attachment get(String contentId);
 
     /**

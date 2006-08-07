@@ -22,6 +22,7 @@
 package com.sun.xml.ws.message.saaj;
 
 import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -31,6 +32,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -73,7 +75,6 @@ public class SAAJMessage extends Message {
     private HeaderList headers;
     private String payloadLocalName;
     private String payloadNamspace;
-    private AttachmentSet attSet;
     private Element payload;
 
     private boolean parsedHeader;
@@ -104,7 +105,7 @@ public class SAAJMessage extends Message {
     private SAAJMessage(HeaderList headers, AttachmentSet as, SOAPMessage sm) {
         this(sm);
         this.headers = headers;
-        this.attSet = as;
+        this.attachmentSet = as;
     }
 
     public boolean hasHeaders() {
@@ -142,10 +143,16 @@ public class SAAJMessage extends Message {
      * Gets the attachments of this message
      * (attachments live outside a message.)
      */
+    @Override
+    @NotNull
     public AttachmentSet getAttachments() {
-        if (attSet == null)
-            attSet = new SAAJAttachmentSet(sm);
-        return attSet;
+        if (attachmentSet == null)
+            attachmentSet = new SAAJAttachmentSet(sm);
+        return attachmentSet;
+    }
+
+    protected boolean hasAttachments() {
+        return !getAttachments().isEmpty();
     }
 
     /**
@@ -217,7 +224,8 @@ public class SAAJMessage extends Message {
         try {
             Node pn = sm.getSOAPBody().getFirstChild();
             if (pn != null)
-                return bridge.unmarshal(pn);
+                return bridge.unmarshal(pn,
+                    new AttachmentUnmarshallerImpl(getAttachments()));
             return null;
         } catch (SOAPException e) {
             throw new WebServiceException(e);
