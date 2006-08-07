@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.api.message;
 
+import com.sun.istack.NotNull;
+
 import javax.activation.DataHandler;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
@@ -36,8 +38,12 @@ public interface Attachment {
 
     /**
      * Content ID of the attachment. Uniquely identifies an attachment.
+     *
+     * @return
+     *      The content ID like "foo-bar-zot@abc.com", without
+     *      surrounding '&lt;' and '>' used as the transfer syntax.
      */
-    String getContentId();
+    @NotNull String getContentId();
 
     /**
      * Gets the MIME content-type of this attachment.
