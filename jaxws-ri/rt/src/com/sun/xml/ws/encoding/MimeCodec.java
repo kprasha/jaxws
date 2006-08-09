@@ -67,7 +67,12 @@ abstract class MimeCodec implements Codec {
             // Encode all the attchments
             for (Attachment att : msg.getAttachments()) {
                 OutputUtil.writeln("--"+boundary, out);
-                OutputUtil.writeln("Content-Id: <" + att.getContentId()+'>', out);
+                //SAAJ's AttachmentPart.getContentId() returns content id already enclosed with
+                //angle brackets. For now put angle bracket only if its not there
+                String cid = att.getContentId();
+                if(cid != null && cid.length() >0 && cid.charAt(0) != '<')
+                    cid = '<' + cid + '>';
+                OutputUtil.writeln("Content-Id:" + cid, out);
                 OutputUtil.writeln("Content-Type: " + att.getContentType(), out);
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
                 OutputUtil.writeln(out);                    // write \r\n
