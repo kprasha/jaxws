@@ -38,8 +38,7 @@ final class AttachmentMarshallerImpl extends AttachmentMarshaller {
 
     public String addSwaRefAttachment(DataHandler data) {
         String cid = encodeCid(null);
-        String cidBracket = '<' + cid + '>';
-        Attachment att = new SwarefAttachment(cidBracket, data);
+        Attachment att = new SwarefAttachment(cid, data);
         attachments.add(att);
         cid = "cid:" + cid;
         return cid;
