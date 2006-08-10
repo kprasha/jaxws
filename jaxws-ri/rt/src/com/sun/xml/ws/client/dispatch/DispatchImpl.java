@@ -43,6 +43,7 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.bind.JAXBException;
@@ -275,5 +276,16 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         void setReceiver(ResponseContextReceiver receiver) {
             this.receiver = receiver;
         }
+    }
+    
+    public void setEndpointReference(EndpointReference endpointReference) {
+    }
+
+    public EndpointReference getEndpointReference() {
+        return null;
+    }
+
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+        return null;
     }
 }

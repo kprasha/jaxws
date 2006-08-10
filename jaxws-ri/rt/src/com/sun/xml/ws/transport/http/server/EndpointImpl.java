@@ -44,6 +44,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.ws.Binding;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.WebServicePermission;
+import javax.xml.ws.EndpointReference;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -284,4 +286,11 @@ public class EndpointImpl extends Endpoint {
         }
     }
 
+    public EndpointReference getEndpointReference() {
+        return null;
+    }
+
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+        return null;
+    }
 }

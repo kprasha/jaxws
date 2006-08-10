@@ -56,6 +56,7 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
@@ -268,7 +269,7 @@ public class WSServiceDelegate extends WSService {
         if (!ports.containsKey(portName)) {
             BindingID bid = (bindingId == null) ? BindingID.SOAP11_HTTP : BindingID.parse(bindingId);
             ports.put(portName,
-                new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bid));
+                      new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bid));
         } else
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
@@ -474,6 +475,15 @@ public class WSServiceDelegate extends WSService {
             daemonThread.setDaemon(Boolean.TRUE);
             return daemonThread;
         }
+    }
+    
+    public <T> T getPort(Class<T> serviceEndpointInterface, EndpointReference endpointReference) {
+        return null;
+    }
+    public void addPort(QName portName, String bindingId, String[] features, String endpointAddress) {
+    }
+
+    public void addPort(EndpointReference endpointReference) {
     }
 }
 

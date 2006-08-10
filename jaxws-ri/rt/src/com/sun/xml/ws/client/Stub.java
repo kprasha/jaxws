@@ -34,6 +34,8 @@ import com.sun.xml.ws.util.Pool.PipePool;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.EndpointReference;
+
 import java.util.Map;
 
 /**
@@ -159,5 +161,16 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     public String toString() {
         return RuntimeVersion.VERSION+": Stub for "+getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+    }
+
+    public void setEndpointReference(EndpointReference endpointReference) {
+    }
+
+    public EndpointReference getEndpointReference() {
+        return null;
+    }
+
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+        return null;
     }
 }

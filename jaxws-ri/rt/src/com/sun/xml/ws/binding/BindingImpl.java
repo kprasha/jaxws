@@ -72,6 +72,10 @@ public abstract class BindingImpl implements WSBinding {
         setHandlerConfig(createHandlerConfig(chain));
     }
 
+    public String[] getFeatures() {
+        return new String[0];
+    }
+
     /**
      * This is called when ever Binding.setHandlerChain() or SOAPBinding.setRoles()
      * is called.

@@ -28,8 +28,11 @@ import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
+import javax.xml.transform.Source;
+
 import java.net.URL;
 
 /**
@@ -57,6 +60,14 @@ public class ProviderImpl extends Provider {
             implementor);
         endpoint.publish(address);
         return endpoint;
+    }
+
+    public Endpoint createEndpoint(String bindingId, String[] features, Object implementor) {
+        return null;
+    }
+
+    public EndpointReference readEndpointReference(Source eprInfoset) {
+        return null;
     }
 
 }
