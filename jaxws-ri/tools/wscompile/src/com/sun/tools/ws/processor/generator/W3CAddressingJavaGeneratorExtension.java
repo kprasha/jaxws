@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingJavaGeneratorExtension.java,v 1.1.2.1 2006-08-11 20:03:40 arungupta Exp $
+ $Id: W3CAddressingJavaGeneratorExtension.java,v 1.1.2.2 2006-08-11 21:48:40 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -60,7 +60,7 @@ public class W3CAddressingJavaGeneratorExtension extends TJavaGeneratorExtension
         }
 
         // explicit output action
-        if (o.getOutput().getAction() != null && !o.getOutput().getAction().equals("")) {
+        if (o.getOutput() != null && o.getOutput().getAction() != null && !o.getOutput().getAction().equals("")) {
             // explicitly specified
             if (actionAnn == null)
                 actionAnn = jMethod.annotate(Action.class);
@@ -69,7 +69,7 @@ public class W3CAddressingJavaGeneratorExtension extends TJavaGeneratorExtension
         }
 
         // explicit fault action
-        if (o.getFaults().size() > 0) {
+        if (o.getFaults() != null && o.getFaults().size() > 0) {
             Map<String, JClass> map = o.getFaults();
             JAnnotationArrayMember jam = null;
 
