@@ -48,6 +48,8 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import java.net.URL;
 import java.util.Enumeration;
 import javax.xml.ws.WebServiceException;
+import javax.xml.namespace.QName;
+
 import com.sun.org.apache.xml.internal.resolver.CatalogManager;
 import com.sun.org.apache.xml.internal.resolver.tools.CatalogResolver;
 import com.sun.istack.Nullable;
@@ -89,6 +91,15 @@ public class XmlUtil {
         String name,
         String nsURI) {
         Attr a = e.getAttributeNodeNS(nsURI, name);
+        if (a == null)
+            return null;
+        return a.getValue();
+    }
+
+    public static String getAttributeNSOrNull(
+        Element e,
+        QName name) {
+        Attr a = e.getAttributeNodeNS(name.getNamespaceURI(), name.getLocalPart());
         if (a == null)
             return null;
         return a.getValue();
