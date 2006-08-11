@@ -101,6 +101,7 @@ public class Output extends Entity implements TWSDLExtensible {
     private Documentation _documentation;
     private String _name;
     private QName _message;
+    private String _action;
     private ExtensibilityHelper _helper;
     private TWSDLExtensible parent;
 
@@ -130,5 +131,13 @@ public class Output extends Entity implements TWSDLExtensible {
 
     public Iterable<? extends TWSDLExtension> extensions() {
         return _helper.extensions();
+    }
+
+    public String getAction() {
+        return _action;
+    }
+
+    public void setAction(String _action) {
+        this._action = _action;
     }
 }

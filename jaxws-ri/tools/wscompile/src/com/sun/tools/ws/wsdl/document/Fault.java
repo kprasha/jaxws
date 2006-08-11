@@ -105,6 +105,7 @@ public class Fault extends Entity implements TWSDLExtensible {
     private Documentation _documentation;
     private String _name;
     private QName _message;
+    private String _action;
     private ExtensibilityHelper _helper;
 
     public String getNameValue() {
@@ -144,4 +145,12 @@ public class Fault extends Entity implements TWSDLExtensible {
     }
 
     private TWSDLExtensible parent;
+
+    public String getAction() {
+        return _action;
+    }
+
+    public void setAction(String _action) {
+        this._action = _action;
+    }
 }

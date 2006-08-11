@@ -48,11 +48,14 @@ import javax.xml.ws.Holder;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import java.util.ArrayList;
 
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
     private TJavaGeneratorExtension extension;
+    List<TJavaGeneratorExtension> extensionHandlers;
+
     public SeiGenerator() {
     }
 
@@ -76,7 +79,15 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         super(model, config, properties);
         this.model = model;
         this.wsdlModelInfo = (WSDLModelInfo)config.getModelInfo();
-        this.extension = new JavaGeneratorExtensionFacade(extensions);
+        extensionHandlers = new ArrayList<TJavaGeneratorExtension>();
+
+        // register handlers for default extensions
+        register(new W3CAddressingJavaGeneratorExtension());
+        
+        for (TJavaGeneratorExtension j : extensions)
+            register(j);
+
+        this.extension = new JavaGeneratorExtensionFacade(extensionHandlers.toArray(new TJavaGeneratorExtension[0]));
     }
 
     public GeneratorBase getGenerator(Model model, Configuration config, Properties properties, SOAPVersion ver) {
@@ -458,5 +469,9 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
                 "generator.nestedGeneratorError",
                 e);
         }
+    }
+
+    private void register(TJavaGeneratorExtension h) {
+        extensionHandlers.add(h);
     }
 }

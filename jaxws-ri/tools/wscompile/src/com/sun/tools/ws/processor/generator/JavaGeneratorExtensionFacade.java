@@ -24,7 +24,6 @@ package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.JMethod;
 import com.sun.tools.ws.api.TJavaGeneratorExtension;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLOperation;
 
 /**
