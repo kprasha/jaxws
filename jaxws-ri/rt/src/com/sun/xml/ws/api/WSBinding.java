@@ -96,4 +96,8 @@ public interface WSBinding extends Binding {
      * Call it to enabled/disable mtom
      */
     void setMTOMEnabled(boolean value);
+
+    void setFeatures(String[] features);
+
+    boolean hasFeature(String feature);
 }

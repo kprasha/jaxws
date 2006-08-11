@@ -293,6 +293,14 @@ public abstract class BindingID {
         return SOAP11_HTTP;
     }
 
+    public static String[] features(Class<?> implClass) {
+        BindingType bindingType = implClass.getAnnotation(BindingType.class);
+        if (bindingType != null)
+            return bindingType.features();
+        else
+            return new String[0];
+    }
+
     /**
      * Constant that represents implementation specific SOAP1.2/HTTP which is
      * used to generate non-standard WSDLs

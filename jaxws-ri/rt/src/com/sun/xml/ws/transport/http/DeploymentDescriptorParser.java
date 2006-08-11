@@ -226,6 +226,7 @@ public class DeploymentDescriptorParser<A> {
 
             WSBinding binding = BindingImpl.create(bindingId);
             binding.setMTOMEnabled(effectiveMtomValue);
+            binding.setFeatures(BindingID.features(implementorClass));
             String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
 

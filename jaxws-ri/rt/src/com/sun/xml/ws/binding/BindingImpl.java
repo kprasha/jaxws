@@ -48,6 +48,7 @@ public abstract class BindingImpl implements WSBinding {
 
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
+    private String[] features;
 
     protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
@@ -72,8 +73,12 @@ public abstract class BindingImpl implements WSBinding {
         setHandlerConfig(createHandlerConfig(chain));
     }
 
+    public void setFeatures(String[] features) {
+        this.features = features;
+    }
+
     public String[] getFeatures() {
-        return new String[0];
+        return features;
     }
 
     /**
@@ -117,5 +122,12 @@ public abstract class BindingImpl implements WSBinding {
 
     public void setMTOMEnabled(boolean value){}
 
+    public boolean hasFeature(String feature) {
+        for (String f : getFeatures()) {
+            if (feature.equals(f))
+                return true;
+        }
 
+        return false;
+    }
 }

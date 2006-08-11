@@ -186,6 +186,7 @@ public class WSDLGenerator {
     private String portWSDLID;
     private String schemaPrefix;
     private WSDLGeneratorExtension extension;
+    List<WSDLGeneratorExtension> extensionHandlers;
 
     private String endpointAddress = REPLACE_WITH_ACTUAL_URL;
     private Container container;
@@ -205,7 +206,15 @@ public class WSDLGenerator {
         this.wsdlResolver = wsdlResolver;
         this.binding = binding;
         this.container = container;
-        this.extension = new WSDLGeneratorExtensionFacade(extensions);
+        extensionHandlers = new ArrayList<WSDLGeneratorExtension>();
+
+        // register handlers for default extensions
+        register(new W3CAddressingWSDLGeneratorExtension());
+
+        for (WSDLGeneratorExtension w : extensions)
+            register(w);
+
+        this.extension = new WSDLGeneratorExtensionFacade(extensionHandlers.toArray(new WSDLGeneratorExtension[0]));
     }
 
     /**
@@ -1077,5 +1086,9 @@ public class WSDLGenerator {
         public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
             return createOutputFile(namespaceUri, suggestedFileName);
         }
+    }
+
+    private void register(WSDLGeneratorExtension h) {
+        extensionHandlers.add(h);
     }
 }
