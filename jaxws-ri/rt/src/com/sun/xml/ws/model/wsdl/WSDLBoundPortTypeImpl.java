@@ -48,6 +48,8 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
+    private boolean addressingEnabled;
+    private boolean isAddressingRequired;
 
     /**
      * Operations keyed by the payload tag name.
@@ -191,6 +193,22 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
 
     public boolean isMTOMEnabled() {
         return mtomEnabled;
+    }
+
+    public void enableAddressing() {
+        addressingEnabled = true;
+    }
+
+    public boolean isAddressingEnabled() {
+        return addressingEnabled;
+    }
+
+    public void setAddressingRequired(boolean required) {
+        isAddressingRequired = required;
+    }
+
+    public boolean isAddressingRequired() {
+        return isAddressingRequired;
     }
 
     public SOAPVersion getSOAPVersion(){

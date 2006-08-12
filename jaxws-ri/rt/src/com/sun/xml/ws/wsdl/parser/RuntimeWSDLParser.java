@@ -47,7 +47,6 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.resources.ClientMessages;
 import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.jws.soap.SOAPBinding.Style;
@@ -60,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.*;
 
 /**
@@ -89,6 +87,7 @@ public class RuntimeWSDLParser {
      * The {@link WSDLParserExtension}. Always non-null.
      */
     private final WSDLParserExtension extension;
+    List<WSDLParserExtension> extensionParsers;
 
     public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver!=null;
@@ -139,7 +138,16 @@ public class RuntimeWSDLParser {
 
     private RuntimeWSDLParser(XMLEntityResolver resolver, WSDLParserExtension... extensions) {
         this.resolver = resolver;
-        this.extension = new WSDLParserExtensionFacade(extensions);
+
+        extensionParsers = new ArrayList<WSDLParserExtension>();
+
+        // register handlers for default extensions
+        register(new W3CAddressingWSDLParserExtension());
+
+        for (WSDLParserExtension e : extensions)
+            register(e);
+
+        this.extension = new WSDLParserExtensionFacade(extensionParsers.toArray(new WSDLParserExtension[0]));
     }
 
     private void parseWSDL(URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
@@ -654,5 +662,9 @@ public class RuntimeWSDLParser {
     private XMLStreamReader createReader(URL wsdlLoc) throws IOException {
         InputStream stream = wsdlLoc.openStream();
         return new TidyXMLStreamReader(XMLStreamReaderFactory.createFreshXMLStreamReader(wsdlLoc.toExternalForm(), stream), stream);
+    }
+
+    private void register(WSDLParserExtension e) {
+        extensionParsers.add(e);
     }
 }

@@ -21,15 +21,17 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.model.wsdl.*;
-import com.sun.istack.Nullable;
-
-import javax.jws.soap.SOAPBinding.Style;
-import javax.jws.WebParam.Mode;
-import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.jws.WebParam.Mode;
+import javax.jws.soap.SOAPBinding.Style;
+import javax.xml.namespace.QName;
+
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 
 /**
  * Implementation of {@link WSDLBoundOperation}
@@ -60,6 +62,7 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     private final Map<String, WSDLPartImpl> fltParts;
     private WSDLOperationImpl operation;
     private String soapAction;
+    private ANONYMOUS anonymous;
 
     private final WSDLBoundPortTypeImpl owner;
 
@@ -361,4 +364,19 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
         messages = parent.getMessages();
         operation = owner.getPortType().get(name.getLocalPart());
     }
+
+    public void setAnonymous(ANONYMOUS anonymous) {
+        this.anonymous = anonymous;
+    }
+
+    /**
+     * Gets the soapbinding:binding/operation/wsaw:Anonymous. A default value of OPTIONAL is returned.
+     *
+     * @return Anonymous value of the operation
+     */
+    public ANONYMOUS getAnonymous() {
+        return anonymous;
+    }
+
+    public enum ANONYMOUS { optional, required, prohibited }
 }

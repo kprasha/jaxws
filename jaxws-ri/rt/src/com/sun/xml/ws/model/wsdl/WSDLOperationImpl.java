@@ -28,6 +28,8 @@ import com.sun.istack.NotNull;
 import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Implementaiton of {@link WSDLOperation}
@@ -43,11 +45,13 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
     private final QNameMap<WSDLFaultImpl> faultMap;
     protected Iterable<WSDLMessageImpl> messages;
     private final WSDLPortType owner;
+    private final Map<String,String> faultActionMap;
 
     public WSDLOperationImpl(WSDLPortTypeImpl owner, QName name) {
         this.name = name;
         this.faults = new ArrayList<WSDLFaultImpl>();
         this.faultMap = new QNameMap<WSDLFaultImpl>();
+        this.faultActionMap = new HashMap<String,String>();
         this.owner = owner;
     }
 
@@ -71,7 +75,7 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
         this.input = input;
     }
 
-    public WSDLOutput getOutput() {
+    public WSDLOutputImpl getOutput() {
         return output;
     }
 
@@ -101,6 +105,10 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
             }
         }
         return null;
+    }
+
+    public Map<String,String> getFaultActionMap() {
+        return faultActionMap;
     }
 
     WSDLPortType getOwner() {

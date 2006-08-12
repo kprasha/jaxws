@@ -38,6 +38,8 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private EndpointAddress address;
     private final QName bindingName;
     private final WSDLServiceImpl owner;
+    private boolean addressingEnabled;
+    private boolean isAddressingRequired;
 
     /**
      * To be set after the WSDL parsing is complete.
@@ -72,6 +74,22 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     public void setAddress(EndpointAddress address) {
         assert address!=null;
         this.address = address;
+    }
+
+    public void enableAddressing() {
+        addressingEnabled = true;
+    }
+
+    public boolean isAddressingEnabled() {
+        return addressingEnabled;
+    }
+
+    public void setAddressingRequired(boolean required) {
+        isAddressingRequired = required;
+    }
+
+    public boolean isAddressingRequired() {
+        return isAddressingRequired;
     }
 
     public WSDLBoundPortTypeImpl getBinding() {
