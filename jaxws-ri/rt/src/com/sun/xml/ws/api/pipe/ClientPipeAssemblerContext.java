@@ -10,6 +10,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
+import com.sun.xml.ws.addressing.WsaClientPipe;
 
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -96,6 +97,13 @@ public final class ClientPipeAssemblerContext {
             next = soapHandlerPipe;
         }
         return new ClientLogicalHandlerPipe(binding, next, soapHandlerPipe);
+    }
+
+    /**
+     * Creates WS-Addressing pipe
+     */
+    public Pipe createWsaPipe(Pipe next) {
+        return new WsaClientPipe(wsdlModel, binding, next);
     }
     
     /**

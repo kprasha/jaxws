@@ -1,17 +1,15 @@
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.handler.*;
-import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
+import com.sun.xml.ws.addressing.WsaServerPipe;
 
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -118,7 +116,14 @@ public final class ServerPipeAssemblerContext {
         }
         return next;
     }
-      
+
+    /**
+     * Creates WS-Addressing pipe
+     */
+    public Pipe createWsaPipe(Pipe next) {
+        return new WsaServerPipe(seiModel, wsdlModel, binding, next);
+    }
+
     /** 
      * The last {@link Pipe} in the pipeline. The assembler is expected to put
      * additional {@link Pipe}s in front of it.

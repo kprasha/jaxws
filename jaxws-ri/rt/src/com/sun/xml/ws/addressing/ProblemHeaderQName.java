@@ -18,26 +18,32 @@
  [name of copyright owner]
 */
 /*
- $Id: UsingAddressing.java,v 1.1.2.2 2006-08-18 21:56:16 arungupta Exp $
+ $Id: ProblemHeaderQName.java,v 1.1.2.1 2006-08-18 21:56:13 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
 */
 
-package com.sun.xml.ws.wsdl.writer;
+package com.sun.xml.ws.addressing;
 
-import com.sun.xml.txw2.TypedXmlWriter;
-import com.sun.xml.txw2.annotation.XmlAttribute;
-import com.sun.xml.txw2.annotation.XmlElement;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
-import com.sun.xml.ws.wsdl.writer.document.StartWithExtensionsType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
+import javax.xml.namespace.QName;
 
 /**
  * @author Arun Gupta
  */
-@XmlElement(value = W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME,
-            ns = W3CAddressingConstants.WSAW_USING_ADDRESSING_NAME)
-public interface UsingAddressing extends TypedXmlWriter, StartWithExtensionsType {
-    @XmlAttribute(value = "required", ns = "http://schemas.xmlsoap.org/wsdl/")
-    public UsingAddressing required(boolean b);
+@XmlRootElement(name="ProblemHeaderQName", namespace= W3CAddressingConstants.WSA_NAMESPACE_NAME)
+public class ProblemHeaderQName {
+
+    @XmlValue
+    private QName value;
+
+    /** Creates a new instance of ProblemHeaderQName */
+    public ProblemHeaderQName() {
+    }
+
+    public ProblemHeaderQName(QName name) {
+        this.value = name;
+    }
 }

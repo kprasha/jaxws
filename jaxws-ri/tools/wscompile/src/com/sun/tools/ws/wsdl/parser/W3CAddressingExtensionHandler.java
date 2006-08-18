@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.1 2006-08-11 20:03:42 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.2 2006-08-18 21:56:10 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -34,7 +34,7 @@ import com.sun.tools.ws.util.xml.XmlUtil;
 import com.sun.tools.ws.wsdl.document.Fault;
 import com.sun.tools.ws.wsdl.document.Input;
 import com.sun.tools.ws.wsdl.document.Output;
-import com.sun.xml.ws.wsdl.parser.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import org.w3c.dom.Element;
 
 /**

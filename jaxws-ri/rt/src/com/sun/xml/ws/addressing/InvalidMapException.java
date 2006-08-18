@@ -18,26 +18,34 @@
  [name of copyright owner]
 */
 /*
- $Id: UsingAddressing.java,v 1.1.2.2 2006-08-18 21:56:16 arungupta Exp $
+ $Id: InvalidMapException.java,v 1.1.2.1 2006-08-18 21:56:12 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
 */
 
-package com.sun.xml.ws.wsdl.writer;
+package com.sun.xml.ws.addressing;
 
-import com.sun.xml.txw2.TypedXmlWriter;
-import com.sun.xml.txw2.annotation.XmlAttribute;
-import com.sun.xml.txw2.annotation.XmlElement;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
-import com.sun.xml.ws.wsdl.writer.document.StartWithExtensionsType;
+import javax.xml.ws.WebServiceException;
+import javax.xml.namespace.QName;
 
 /**
  * @author Arun Gupta
  */
-@XmlElement(value = W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME,
-            ns = W3CAddressingConstants.WSAW_USING_ADDRESSING_NAME)
-public interface UsingAddressing extends TypedXmlWriter, StartWithExtensionsType {
-    @XmlAttribute(value = "required", ns = "http://schemas.xmlsoap.org/wsdl/")
-    public UsingAddressing required(boolean b);
+public class InvalidMapException extends WebServiceException {
+    QName name;
+    QName subsubcode;
+
+    public InvalidMapException(QName name, QName subsubcode) {
+        this.name = name;
+        this.subsubcode = subsubcode;
+    }
+
+    public QName getMapQName() {
+        return name;
+    }
+
+    public QName getSubsubcode() {
+        return subsubcode;
+    }
 }

@@ -43,6 +43,7 @@ import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 
 /**
  * W3C WS-Addressing Runtime WSDL parser extension

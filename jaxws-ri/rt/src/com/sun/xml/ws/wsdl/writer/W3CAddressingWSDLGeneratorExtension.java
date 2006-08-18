@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.1 2006-08-11 21:54:30 arungupta Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.2 2006-08-18 21:56:17 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -39,7 +39,7 @@ import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-import com.sun.xml.ws.wsdl.parser.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 
 /**
  * @author Arun Gupta
