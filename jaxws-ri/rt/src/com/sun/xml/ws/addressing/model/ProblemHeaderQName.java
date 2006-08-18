@@ -20,14 +20,28 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing;
+package com.sun.xml.ws.addressing.model;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
+import javax.xml.namespace.QName;
+
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 
 /**
  * @author Arun Gupta
  */
-public interface AddressingConstants {
-    public static final String CLIENT_INBOUND = "client.inbound";
-    public static final String CLIENT_OUTBOUND = "client.outbound";
-    public static final String SERVER_INBOUND = "server.inbound";
-    public static final String SERVER_OUTBOUND = "server.outbound";
+@XmlRootElement(name="ProblemHeaderQName", namespace= W3CAddressingConstants.WSA_NAMESPACE_NAME)
+public class ProblemHeaderQName {
+
+    @XmlValue
+    private QName value;
+
+    /** Creates a new instance of ProblemHeaderQName */
+    public ProblemHeaderQName() {
+    }
+
+    public ProblemHeaderQName(QName name) {
+        this.value = name;
+    }
 }

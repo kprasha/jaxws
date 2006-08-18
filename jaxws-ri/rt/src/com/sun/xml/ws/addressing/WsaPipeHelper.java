@@ -1,33 +1,31 @@
 /*
- The contents of this file are subject to the terms
- of the Common Development and Distribution License
- (the "License").  You may not use this file except
- in compliance with the License.
- 
- You can obtain a copy of the license at
- https://jwsdp.dev.java.net/CDDLv1.0.html
- See the License for the specific language governing
- permissions and limitations under the License.
- 
- When distributing Covered Code, include this CDDL
- HEADER in each file and include the License file at
- https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
- add the following below this CDDL HEADER, with the
- fields enclosed by brackets "[]" replaced with your
- own identifying information: Portions Copyright [yyyy]
- [name of copyright owner]
-*/
-/*
- $Id: WsaPipeHelper.java,v 1.1.2.1 2006-08-18 21:56:14 arungupta Exp $
-
- Copyright (c) 2006 Sun Microsystems, Inc.
- All rights reserved.
-*/
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License).  You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the license at
+ * https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * you own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ */
 
 package com.sun.xml.ws.addressing;
 
 import java.util.UUID;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -47,6 +45,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
@@ -64,7 +66,15 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.addressing.model.AddressingProperties;
+import com.sun.xml.ws.addressing.model.Elements;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
+import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.addressing.model.Relationship;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 
 /**
  * @author Arun Gupta
@@ -139,20 +149,18 @@ public abstract class WsaPipeHelper {
             packet.soapAction = ap.getAction();
         }
 
-//        if (ap.getReferenceParameters() != null && !ap.getReferenceParameters().getElements().isEmpty()) {
-//            ReferenceParameters refps = ap.getReferenceParameters();
-//            for (Object refp : refps.getElements()) {
-//                if (refp instanceof Element) {
-//                    hl.add(Headers.create((Element)refp));
-//                }
-//            }
-//        }
-//
-//        if (ap.getRelatesTo() != null && ap.getRelatesTo().length > 0) {
-//            for (Relationship rel : ap.getRelatesTo()) {
-//                hl.add(Headers.create(soapVersion, marshaller, ac.getRelatesToQName(), rel));
-//            }
-//        }
+        if (ap.getReferenceParameters() != null && !ap.getReferenceParameters().getElements().isEmpty()) {
+            Elements refps = ap.getReferenceParameters();
+            for (Element refp : refps.getElements()) {
+                hl.add(Headers.create(refp));
+            }
+        }
+
+        if (ap.getRelatesTo() != null && ap.getRelatesTo().size() > 0) {
+            for (Relationship rel : ap.getRelatesTo()) {
+                hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), rel));
+            }
+        }
     }
 
 
@@ -211,10 +219,11 @@ public abstract class WsaPipeHelper {
                 m.getHeaders().add(Headers.create(s11FaultDetail));
             }
 
-//            if (mid != null) {
-//                Relationship rel = ab.newRelationship(mid.toString());
-//                m.getHeaders().add(Headers.create(binding.getSOAPVersion(), marshaller, getRelatesToQName(), rel));
-//            }
+            if (mid != null) {
+                Relationship rel = new Relationship(mid.toString());
+                rel.setType(getRelationshipType());
+                m.getHeaders().add(Headers.create(binding.getSOAPVersion(), marshaller, getRelatesToQName(), rel));
+            }
 
             return packet.createResponse(m);
         }
@@ -296,8 +305,8 @@ public abstract class WsaPipeHelper {
 
 //                    // TODO: RelatesTo header is unmarshalled twice
 //                    // TODO: needs cleanup
-//                    AttributedURI mid2 = (AttributedURI)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue();
-//                    Relationship rel = ab.newRelationship(mid2.getURI());
+//                    String mid2 = (String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue();
+//                    Relationship rel = new Relationship(mid2);
 //                    if (mid2.getAttributes() != null) {
 //                        String relType = mid2.getAttributes().get(ac.getRelationshipTypeQName());
 //                        if (relType != null) {
@@ -321,14 +330,14 @@ public abstract class WsaPipeHelper {
                 }
             }
 
-//            if (faultyHeader != null) {
-//                throw new InvalidMapException(faultyHeader, InvalidMapException.INVALID_CARDINALITY);
-//            }
+            if (faultyHeader != null) {
+                throw new InvalidMapException(faultyHeader, W3CAddressingConstants.INVALID_CARDINALITY);
+            }
 
             HeaderList hl = message.getHeaders();
             for (Header h : hl) {
                 if (isReferenceParameter(h)) {
-//                    ap.getReferenceParameters().addElement(unmarshalRefp(h));
+                    ap.getReferenceParameters().getElements().add(unmarshalRefp(h));
                 }
             }
 
@@ -548,8 +557,9 @@ public abstract class WsaPipeHelper {
             throw new AddressingException(e);
         }
     }
+*/
 
-    private static Object unmarshalRefp(Header h) {
+    private static Element unmarshalRefp(Header h) {
         try {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             Element element = doc.createElement("wrapper");
@@ -561,12 +571,11 @@ public abstract class WsaPipeHelper {
             DOMResult result = new DOMResult();
 
             XmlUtil.newTransformer().transform(source, result);
-            return result.getNode().getFirstChild();
+            return (Element)result.getNode().getFirstChild();
         } catch (Exception ex) {
             throw new WebServiceException(ex);
         }
     }
-*/
 
     private void validateAction(Packet packet, String gotA) {
         // TODO: For now, validation happens only on server-side
@@ -774,6 +783,7 @@ public abstract class WsaPipeHelper {
     protected abstract AddressingProperties toReply(AddressingProperties ap);
     protected abstract AddressingProperties toFault(AddressingProperties ap);
     protected abstract String getAnonymousURI();
+    protected abstract String getRelationshipType();
 
 
     protected static final DocumentBuilder db;

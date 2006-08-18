@@ -20,14 +20,31 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing;
+package com.sun.xml.ws.addressing.model;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.namespace.QName;
+
+import org.w3c.dom.Element;
 
 /**
  * @author Arun Gupta
  */
-public interface AddressingConstants {
-    public static final String CLIENT_INBOUND = "client.inbound";
-    public static final String CLIENT_OUTBOUND = "client.outbound";
-    public static final String SERVER_INBOUND = "server.inbound";
-    public static final String SERVER_OUTBOUND = "server.outbound";
+public class Elements {
+    @XmlAnyElement
+    List<Element> elements;
+    @XmlAnyAttribute
+    Map<QName,String> attributes;
+
+    public Map<QName, String> getAttributes() {
+        return attributes;
+    }
+
+    public List<Element> getElements() {
+        return elements;
+    }
 }

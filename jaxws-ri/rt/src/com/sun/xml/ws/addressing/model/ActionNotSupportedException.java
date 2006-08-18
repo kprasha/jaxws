@@ -20,14 +20,25 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing;
+package com.sun.xml.ws.addressing.model;
+
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Arun Gupta
  */
-public interface AddressingConstants {
-    public static final String CLIENT_INBOUND = "client.inbound";
-    public static final String CLIENT_OUTBOUND = "client.outbound";
-    public static final String SERVER_INBOUND = "server.inbound";
-    public static final String SERVER_OUTBOUND = "server.outbound";
+public class ActionNotSupportedException extends WebServiceException {
+    String action;
+
+    protected ActionNotSupportedException() {
+        super();
+    }
+
+    public ActionNotSupportedException(String action) {
+        this.action = action;
+    }
+
+    public String getAction() {
+        return action;
+    }
 }

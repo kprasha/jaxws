@@ -20,14 +20,22 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing;
+package com.sun.xml.ws.addressing.model;
+
+import javax.xml.ws.WebServiceException;
+import javax.xml.namespace.QName;
 
 /**
  * @author Arun Gupta
  */
-public interface AddressingConstants {
-    public static final String CLIENT_INBOUND = "client.inbound";
-    public static final String CLIENT_OUTBOUND = "client.outbound";
-    public static final String SERVER_INBOUND = "server.inbound";
-    public static final String SERVER_OUTBOUND = "server.outbound";
+public class MapRequiredException extends WebServiceException {
+    QName name;
+
+    public MapRequiredException(QName name) {
+        this.name = name;
+    }
+
+    public QName getMapQName() {
+        return name;
+    }
 }
