@@ -29,8 +29,7 @@ public class Relationship {
     private String id;
     private String type;
 
-    public Relationship(String id) {
-        this.id = id;
+    public Relationship() {
     }
 
     public Relationship(String id, String type) {

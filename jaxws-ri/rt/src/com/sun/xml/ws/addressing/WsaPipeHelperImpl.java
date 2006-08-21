@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.addressing;
 
+import java.util.List;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -33,6 +35,7 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import javax.xml.XMLConstants;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -44,14 +47,16 @@ import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.addressing.model.ProblemAction;
 import com.sun.xml.ws.addressing.model.ProblemHeaderQName;
+import com.sun.xml.ws.addressing.model.Elements;
+import com.sun.xml.ws.addressing.model.Relationship;
 import org.w3c.dom.Element;
 
 /**
  * @author Arun Gupta
  */
-public class AddressingWsaPipeHelperImpl extends WsaPipeHelper {
+public class WsaPipeHelperImpl extends WsaPipeHelper {
 
-    private AddressingWsaPipeHelperImpl() {
+    private WsaPipeHelperImpl() {
         try {
             jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
                                          ObjectFactory.class);
@@ -63,7 +68,7 @@ public class AddressingWsaPipeHelperImpl extends WsaPipeHelper {
         }
     }
 
-    public AddressingWsaPipeHelperImpl(SEIModel seiModel, WSDLPort wsdlPort, WSBinding binding) {
+    public WsaPipeHelperImpl(SEIModel seiModel, WSDLPort wsdlPort, WSBinding binding) {
         this();
         this.seiModel = seiModel;
         this.wsdlPort = wsdlPort;
@@ -182,7 +187,7 @@ public class AddressingWsaPipeHelperImpl extends WsaPipeHelper {
         }
 
         @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="RelatesTo")
-        final JAXBElement<String> createRelationship(String u) {
+        final JAXBElement<Relationship> createRelationship(Relationship u) {
             return null;
         }
 
@@ -278,18 +283,22 @@ public class AddressingWsaPipeHelperImpl extends WsaPipeHelper {
         return W3CAddressingConstants.INVALID_MAP_TEXT;
     }
 
+    @Override
     protected AddressingProperties toReply(AddressingProperties ap) {
         return toReplyOrFault(ap, false);
     }
 
+    @Override
     protected AddressingProperties toFault(AddressingProperties ap) {
         return toReplyOrFault(ap, true);
     }
 
+    @Override
     protected String getAnonymousURI() {
         return W3CAddressingConstants.WSA_ANONYMOUS_ADDRESS;
     }
 
+    @Override
     protected String getRelationshipType() {
         return W3CAddressingConstants.WSA_RELATIONSHIP_REPLY;
     }
@@ -319,17 +328,7 @@ public class AddressingWsaPipeHelperImpl extends WsaPipeHelper {
             throw new MapRequiredException(W3CAddressingConstants.WSA_MESSAGEID_QNAME);
         }
 
-//        RelationshipImpl impl = new RelationshipImpl(uri.getURI());
-//        Map<QName, String> atts = uri.getAttributes();
-//        if (atts != null) {
-//            for (QName name: atts.keySet()) {
-//                impl.addAttribute(name, atts.get(name));
-//            }
-//        }
-//
-//        Relationship[] r = new Relationship[1];
-//        r[0] = impl;
-//        setRelatesTo(r);
+        response.getRelatesTo().add(new Relationship(uri, W3CAddressingConstants.WSA_RELATIONSHIP_REPLY));
 
         return response;
     }
@@ -347,16 +346,27 @@ public class AddressingWsaPipeHelperImpl extends WsaPipeHelper {
 
         props.setTo(uri);
 
-//        ReferenceParameters params = source.getReferenceParameters();
-//
-//        if (params != null) {
-//            setReferenceParameters(params);
-//            for (Object refp : refParams.getElements()) {
-//                if (refp instanceof Element)
-//                    addIsRefp((Element)refp);
-//            }
-//        }
+        Elements params = ((EndpointReferenceImpl)source).getRefParams();
+
+        if (params != null) {
+            Elements elems = props.getReferenceParameters();
+            for (Element refp : params.getElements())
+                addIsRefp(refp);
+        }
 
         return props;
     }
+
+    void addIsRefp(Element refp) {
+        refp.setAttributeNS(W3CAddressingConstants.WSA_NAMESPACE_NAME,
+            W3CAddressingConstants.WSA_NAMESPACE_PREFIX + ":" + W3CAddressingConstants.WSA_IS_REFERENCE_PARAMETER_QNAME.getLocalPart(),
+            "true");
+
+        // TODO: This may cause a namespace prefix conflict and is a tricky problem
+        // TODO: to solve. For example, parent might have a similar prefix used
+        // TODO: for some other purpose, etc.
+        refp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,"xmlns:"+W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+            W3CAddressingConstants.WSA_NAMESPACE_NAME);
+    }
+
 }

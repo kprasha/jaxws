@@ -52,6 +52,6 @@ public abstract class WsaPipe extends AbstractPipeImpl {
     }
 
     private WsaPipeHelper getPipeHelper() {
-        return new AddressingWsaPipeHelperImpl(seiModel, wsdlPort, binding);
+        return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);
     }
 }

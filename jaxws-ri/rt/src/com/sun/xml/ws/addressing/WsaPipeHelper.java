@@ -125,27 +125,27 @@ public abstract class WsaPipeHelper {
         SOAPVersion soapVersion = binding.getSOAPVersion();
 
         if (ap.getTo() != null && !ap.getTo().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, W3CAddressingConstants.WSA_TO_QNAME, ap.getTo()));
+            hl.add(Headers.create(soapVersion, marshaller, getToQName(), ap.getTo()));
         }
 
         if (ap.getMessageID() != null && !ap.getMessageID().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, W3CAddressingConstants.WSA_MESSAGEID_QNAME, ap.getMessageID()));
+            hl.add(Headers.create(soapVersion, marshaller, getMessageIDQName(), ap.getMessageID()));
         }
 
         if (ap.getFrom() != null && !ap.getFrom().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, W3CAddressingConstants.WSA_FROM_QNAME, ap.getFrom()));
+            hl.add(Headers.create(soapVersion, marshaller, getFromQName(), ap.getFrom()));
         }
 
         if (ap.getReplyTo() != null && !ap.getReplyTo().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, W3CAddressingConstants.WSA_REPLYTO_QNAME, ap.getReplyTo()));
+            hl.add(Headers.create(soapVersion, marshaller, getReplyToQName(), ap.getReplyTo()));
         }
 
         if (ap.getFaultTo() != null && !ap.getFaultTo().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, W3CAddressingConstants.WSA_FAULTTO_QNAME, ap.getFaultTo()));
+            hl.add(Headers.create(soapVersion, marshaller, getFaultToQName(), ap.getFaultTo()));
         }
 
         if (ap.getAction() != null && !ap.getAction().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, W3CAddressingConstants.WSA_ACTION_QNAME, ap.getAction()));
+            hl.add(Headers.create(soapVersion, marshaller, getActionQName(), ap.getAction()));
             packet.soapAction = ap.getAction();
         }
 
@@ -220,8 +220,7 @@ public abstract class WsaPipeHelper {
             }
 
             if (mid != null) {
-                Relationship rel = new Relationship(mid.toString());
-                rel.setType(getRelationshipType());
+                Relationship rel = new Relationship(mid.toString(), getRelationshipType());
                 m.getHeaders().add(Headers.create(binding.getSOAPVersion(), marshaller, getRelatesToQName(), rel));
             }
 

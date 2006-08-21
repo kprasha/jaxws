@@ -23,6 +23,7 @@
 package com.sun.xml.ws.addressing.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.xml.ws.EndpointReference;
 
@@ -36,7 +37,7 @@ public class AddressingProperties {
     EndpointReference faultTo;
     String action;
     String messageid;
-    List<Relationship> relatesto;
+    List<Relationship> relatesto = new ArrayList<Relationship>();
     Elements referenceParameters;
     Elements metadata;
 
