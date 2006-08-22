@@ -20,47 +20,37 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing.model;
+package com.sun.xml.ws.addressing;
 
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlValue;
+
+import com.sun.xml.ws.addressing.model.Relationship;
 
 /**
  * @author Arun Gupta
  */
-public class Relationship {
-    private String id;
-
-    @XmlTransient
-    private String type;
-
-    public Relationship() {
+public class RelationshipImpl extends Relationship {
+    public RelationshipImpl() {
     }
 
-    public Relationship(String id) {
-        this.id = id;
+    public RelationshipImpl(String id) {
+        super(id);
     }
 
-    public Relationship(String id, String type) {
-        this(id);
-        this.type = type;
+    public RelationshipImpl(String id, String type) {
+        super(id, type);
     }
 
-    @XmlValue
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    @Override
+    @XmlAttribute(name="RelationshipType", namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME)
     public String getType() {
-        return type;
+        return super.getType();
     }
 
-    @XmlTransient
+    @Override
     public void setType(String type) {
-        this.type = type;
+        super.setType(type);
     }
 }

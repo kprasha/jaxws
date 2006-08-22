@@ -156,11 +156,7 @@ public abstract class WsaPipeHelper {
             }
         }
 
-        if (ap.getRelatesTo() != null && ap.getRelatesTo().size() > 0) {
-            for (Relationship rel : ap.getRelatesTo()) {
-                hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), rel));
-            }
-        }
+        writeRelatesTo(ap, hl, soapVersion);
     }
 
 
@@ -301,26 +297,9 @@ public abstract class WsaPipeHelper {
                     }
                     ap.setMessageID((String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue());
                 } else if (local.equals(getRelatesToQName().getLocalPart())) {
-
-//                    // TODO: RelatesTo header is unmarshalled twice
-//                    // TODO: needs cleanup
-//                    String mid2 = (String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue();
-//                    Relationship rel = new Relationship(mid2);
-//                    if (mid2.getAttributes() != null) {
-//                        String relType = mid2.getAttributes().get(ac.getRelationshipTypeQName());
-//                        if (relType != null) {
-//                            rel.setType(relType);
-//                        }
-//                    }
-//                    List<Relationship> lRels = new ArrayList<Relationship>();
-//                    if (ap.getRelatesTo() != null) {
-//                        Relationship[] rels = ap.getRelatesTo();
-//                        for (Relationship r : rels) {
-//                            lRels.add(r);
-//                        }
-//                    }
-//                    lRels.add(rel);
-//                    ap.setRelatesTo(lRels.toArray(new Relationship[0]));
+                    String mid2 = (String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue();
+                    Relationship rel = newRelationship(mid2);
+                    ap.getRelatesTo().add(rel);
                 } else if (local.equals(getFaultDetailQName().getLocalPart())) {
                     // TODO: should anything be done here ?
                     // TODO: fault detail element - only for SOAP 1.1
@@ -783,6 +762,9 @@ public abstract class WsaPipeHelper {
     protected abstract AddressingProperties toFault(AddressingProperties ap);
     protected abstract String getAnonymousURI();
     protected abstract String getRelationshipType();
+    protected abstract void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion);
+    protected abstract Relationship newRelationship(Relationship r);
+    protected abstract Relationship newRelationship(String mid);
 
 
     protected static final DocumentBuilder db;

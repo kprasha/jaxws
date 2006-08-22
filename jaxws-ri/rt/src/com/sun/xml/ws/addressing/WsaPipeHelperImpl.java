@@ -38,6 +38,9 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.XMLConstants;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -59,7 +62,8 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     private WsaPipeHelperImpl() {
         try {
             jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
-                                         ObjectFactory.class);
+                                         ObjectFactory.class,
+                                         RelationshipImpl.class);
             unmarshaller = jc.createUnmarshaller();
             marshaller = jc.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
@@ -187,7 +191,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         }
 
         @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="RelatesTo")
-        final JAXBElement<Relationship> createRelationship(Relationship u) {
+        final JAXBElement<RelationshipImpl> createRelationship(RelationshipImpl u) {
             return null;
         }
 
@@ -303,6 +307,24 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         return W3CAddressingConstants.WSA_RELATIONSHIP_REPLY;
     }
 
+    @Override
+    protected void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion) {
+        if (ap.getRelatesTo() != null && ap.getRelatesTo().size() > 0) {
+            for (Relationship rel : ap.getRelatesTo()) {
+                RelationshipImpl reli = (RelationshipImpl)rel;
+                hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
+            }
+        }
+    }
+
+    protected Relationship newRelationship(Relationship r) {
+        return new RelationshipImpl(r.getId(), r.getType());
+    }
+
+    protected Relationship newRelationship(String mid) {
+        return new RelationshipImpl(mid);
+    }
+
     private AddressingProperties toReplyOrFault(AddressingProperties source, boolean isFault) {
         if (source == null) {
             throw new WebServiceException("Source addressing properties is null."); // TODO i18n
@@ -328,7 +350,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
             throw new MapRequiredException(W3CAddressingConstants.WSA_MESSAGEID_QNAME);
         }
 
-        response.getRelatesTo().add(new Relationship(uri, W3CAddressingConstants.WSA_RELATIONSHIP_REPLY));
+        response.getRelatesTo().add(new RelationshipImpl(uri, W3CAddressingConstants.WSA_RELATIONSHIP_REPLY));
 
         return response;
     }
