@@ -1,27 +1,11 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
-  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=us-ascii">
-  <title>JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ -- APT</title>
-  <meta name="CREATED" content="20050329;10375410">
-  <meta name="CHANGED" content="20050401;8213207">
-  <link rel="stylesheet" type="text/css" href="style/default.css"/>
+
+<head caption="APT">
+    <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
+
 <body dir="ltr" lang="en-US">
 <center>
-<h1><a class="mozTocH1" name="mozTocId872588"></a>
-  Java<sup><font size="-2">TM</font></sup> API for XML Web Services<br />
-      APT
-</h1>
-   <b>Specification Version:</b> @@SPEC_VERSION@@<br />
-   <b>Reference Implementation (RI) Version:</b> @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@<br />
-  </center>
-
-<hr>
-<p>Last Modified: 4/26/06</p>
-<br>
-<p></p>
 <h1><a class="mozTocH1" name="mozTocId642262"></a><code>apt<br>
 </code></h1>
 <p>The <code>apt</code> tool provides a facility for programmatically
@@ -271,10 +255,10 @@ endpoint implementation class.</p>
 documentation <a
  href="http://java.sun.com/j2se/1.5.0/docs/guide/apt/index.html">here</a>.</p>
 <h2></h2>
-<h2><a name="apttask" id="apttask"></a>Ant task<br>
+<h2><a name="apttask"></a>Ant task<br>
 </h2>
 <p>An Ant task for the <code>apt</code> tool is provided with JAX-WS
-@@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ . The attributes and elements supported by the Ant task are
+${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} . The attributes and elements supported by the Ant task are
 listed below:</p>
 <pre>&lt;apt<br>    
   verbose="true|false"<br>    
@@ -293,7 +277,7 @@ listed below:</p>
   debug="true|false"<br>    
   debuglevel="lines|vars|source"<br>    
   nowarn="true|false"<br>    
-  deprecation="true|false"<br>    
+  deprecaption="true|false"<br>
   bootclasspath="&lt;path&gt;"<br>    
   extdirs="&lt;path&gt;"<br>    
   endorseddirs="&lt;path&gt;"<br>    
@@ -655,8 +639,5 @@ rounds. The classpath is a reference to a <a
 <code>jaxws.classpath</code>, defined elsewhere in the build
 environment. This will also fork off the <code>apt</code> process
 using the default <code>java</code> executable.</p>
-<hr>
-<p><a href="../dist/docs/Copyright.html"><i><font size="2">Copyright &#169;
-2006 Sun Microsystems, Inc. All rights reserved.</font></i></a></p>
 </body>
 </html>

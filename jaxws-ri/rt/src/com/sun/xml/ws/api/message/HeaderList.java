@@ -23,6 +23,9 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.protocol.soap.ClientMUPipe;
+import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 
@@ -32,6 +35,7 @@ import java.util.BitSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * A list of {@link Header}s on a {@link Message}.
@@ -87,9 +91,9 @@ import java.util.Collection;
  *
  * <p>
  * Intuitively speaking, at the end of the day, if a header is not
- * understood but {@link Header#isMustUnderstood()} is true, a bad thing
+ * understood but {@link Header#isIgnorable(SOAPVersion, Set)} is false, a bad thing
  * will happen. The actual implementation of the checking is more complicated,
- * for that see {@link MUPipe}.
+ * for that see {@link ClientMUPipe}/{@link ServerMUPipe}.
  *
  * @see Message#getHeaders()
  */

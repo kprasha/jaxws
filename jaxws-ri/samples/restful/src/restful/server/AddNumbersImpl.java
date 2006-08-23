@@ -19,6 +19,8 @@
  * 
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
+
+
 package restful.server;
 
 import java.io.ByteArrayInputStream;
@@ -47,7 +49,7 @@ public class AddNumbersImpl implements Provider<Source> {
     public Source invoke(Source source) {
         try {
             MessageContext mc = wsContext.getMessageContext();
-            // check for a PATH_INFO request
+            String query = (String)mc.get(MessageContext.QUERY_STRING);
             String path = (String)mc.get(MessageContext.PATH_INFO);
             System.out.println("Query String = "+query);
             System.out.println("PathInfo = "+path);
@@ -60,14 +62,6 @@ public class AddNumbersImpl implements Provider<Source> {
             } else {
                 throw new HTTPException(404);
             }
-            String query = (String)mc.get(MessageContext.QUERY_STRING);
-            System.out.println("Query String = "+query);
-//            System.out.println("PathInfo = "+path);
-            ServletRequest req = (ServletRequest)mc.get(MessageContext.SERVLET_REQUEST);
-            int num1 = Integer.parseInt(req.getParameter("num1"));
-            int num2 = Integer.parseInt(req.getParameter("num2"));
-            System.out.println("num1: "+num1+" num2: "+num2);
-            return createResultSource(num1+num2);
         } catch(Exception e) {
             e.printStackTrace();
             throw new HTTPException(500);
@@ -81,10 +75,6 @@ public class AddNumbersImpl implements Provider<Source> {
         st.nextToken();
         int number2 = Integer.parseInt(st.nextToken());
         int sum = number1+number2;
-        return createResultSource(sum);
-    }
-    
-    private Source createResultSource(int sum) {
         String body =
             "<ns:addNumbersResponse xmlns:ns=\"http://duke.example.org\"><ns:return>"
             +sum

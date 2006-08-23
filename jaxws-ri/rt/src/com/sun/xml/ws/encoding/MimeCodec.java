@@ -35,6 +35,7 @@ abstract class MimeCodec implements Codec {
     public static final String MULTIPART_RELATED_MIME_TYPE = "multipart/related";
     
     private String boundary;
+    private String messageContentType;
     private boolean hasAttachments;
     protected Codec rootCodec;
     protected final SOAPVersion version;
@@ -83,7 +84,7 @@ abstract class MimeCodec implements Codec {
             OutputUtil.writeAsAscii("--", out);
         }
         // TODO not returing correct multipart/related type(no boundary)
-        return hasAttachments ? new ContentTypeImpl(MULTIPART_RELATED_MIME_TYPE, null, null) : primaryCt;
+        return hasAttachments ? new ContentTypeImpl(messageContentType, packet.soapAction, null) : primaryCt;
     }
     
     public ContentType getStaticContentType(Packet packet) {
@@ -94,7 +95,7 @@ abstract class MimeCodec implements Codec {
             boundary = "uuid:" + UUID.randomUUID().toString();
             String boundaryParameter = "boundary=\"" + boundary + "\"";
             // TODO use primaryEncoder to get type
-            String messageContentType =  MULTIPART_RELATED_MIME_TYPE + 
+            messageContentType =  MULTIPART_RELATED_MIME_TYPE + 
                     "; type=\"" + rootCodec.getMimeType() + "\"; " +
                     boundaryParameter;
             return new ContentTypeImpl(messageContentType, packet.soapAction, null);

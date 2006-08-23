@@ -156,19 +156,17 @@ major-version=${release.impl.version}
 
     <target name="architecture-document" depends="prepare"
             description="generate architecture documents (which is just a glorified javadoc)">
-<!--      <ant dir="tools/taglets" target="compile" />  -->
       <mkdir dir="${build.home}/javadoc" />
-      
       <taskdef name="sequence-diagram" classname="com.sun.xml.bind.taglets.SequenceDiagramTask">
         <classpath>
           <pathelement path="${basedir}/tools/lib/taglets.jar" />
         </classpath>
       </taskdef>
       <sequence-diagram
-        src="${basedir}/rt/src"
+        src="${basedir}/javadoc"
         dest="${build.home}/javadoc"
         includes="**/*.seq" />
-      
+
       <javadoc
             destdir="${build.home}/javadoc"
             use="true"
@@ -177,46 +175,133 @@ major-version=${release.impl.version}
             windowtitle="JAX-WS RI"
             doctitle="JAX-WS RI"
             access="package">
-        <doclet name="com.sun.xml.bind.taglets.CustomHtmlDoclet"
-                path="${basedir}/tools/lib/taglets.jar">
-        </doclet>
-        <arg value="-quiet"/>
+
+	<doclet name="wrappertaglet.WrapperTaglet" path="${basedir}/tools/lib/wrappertaglet.jar:${basedir}/tools/lib/UmlGraph-4.4.jar:${basedir}/tools/lib/taglets.jar" >
+		<param name="-inferrel"/>
+		<param name="-inferdep"/>
+		<param name="-hide" value="java.*"/>
+		<param name="-collpackages" value="java.util.*"/>
+		<param name="-qualify"/>
+		<param name="-postfixpackage"/>
+		<param name="-nodefontsize" value="9"/>
+		<param name="-nodefontpackagesize" value="7"/>
+	</doclet>
+	<arg value="-quiet"/>
 
         <packageset dir="${basedir}/javadoc"/>
         <group title="Root Architecture Document" packages="jaxws" />
 
-        <packageset dir="${basedir}/rt/src"/>
-        <group title="Runtime" packages="com.sun.xml.ws.*,com.sun.pept.*" />
 
         <packageset dir="${basedir}/tools/wscompile/src"/>
-        <group title="Tools" packages="com.sun.tools.ws.*,com.sun.istack.*" />
-   
-        <!--        <packageset dir="${runtime.src}"/>
-        <packageset dir="${runtime-api.src}"/>
-        <packageset dir="${schemagen.src}"/>
-        <group title="Runtime API for JAX-WS" packages="com.sun.xml.bind.api" />
-        <group title="Runtime" packages="com.sun.xml.bind*" />
+        <group title="Tools" packages="com.sun.tools.ws,
+					com.sun.tools.ws.ant,
+					com.sun.tools.ws.api,
+					com.sun.tools.ws.api.wsdl,
+					com.sun.tools.ws.processor,
+					com.sun.tools.ws.processor.config,
+					com.sun.tools.ws.processor.config.parser,
+					com.sun.tools.ws.processor.generator,
+					com.sun.tools.ws.processor.model,
+					com.sun.tools.ws.processor.model.exporter,
+					com.sun.tools.ws.processor.model.java,
+					com.sun.tools.ws.processor.model.jaxb,
+					com.sun.tools.ws.processor.modeler,
+					com.sun.tools.ws.processor.modeler.annotation,
+					com.sun.tools.ws.processor.modeler.wsdl,
+					com.sun.tools.ws.processor.util,
+					com.sun.tools.ws.spi,
+					com.sun.tools.ws.util,
+					com.sun.tools.ws.util.xml,
+					com.sun.tools.ws.wscompile,
+					com.sun.tools.ws.wsdl.document,
+					com.sun.tools.ws.wsdl.document.http,
+					com.sun.tools.ws.wsdl.document.jaxws,
+					com.sun.tools.ws.wsdl.document.mime,
+					com.sun.tools.ws.wsdl.document.schema,
+					com.sun.tools.ws.wsdl.document.soap,
+					com.sun.tools.ws.wsdl.framework,
+					com.sun.tools.ws.wsdl.parser" />
+        <packageset dir="${basedir}/rt/src"/>
+        <group title="Server runtime" packages="com.sun.xml.ws.server,
+						com.sun.xml.ws.server.provider,
+						com.sun.xml.ws.server.sei"/>
 
-        <packageset dir="${xjc.src}"/>
-        <group title="XJC API for JAX-WS" packages="com.sun.tools.xjc.api" />
-        <group title="XJC" packages="com.sun.tools.xjc*:com.sun.tools.jxc*" />
--->
+        <packageset dir="${basedir}/rt/src"/>
+        <group title="Client runtime" packages="com.sun.xml.ws.client,
+						com.sun.xml.ws.client.dispatch,
+						com.sun.xml.ws.client.sei"/>
+
+        <packageset dir="${basedir}/rt/src"/>
+        <group title="Common runtime" packages="com.sun.xml.ws.encoding,
+					com.sun.xml.ws.encoding.soap,
+					com.sun.xml.ws.encoding.soap.streaming,
+					com.sun.xml.ws.encoding.xml,
+					com.sun.xml.ws.fault,
+					com.sun.xml.ws.handler,
+					com.sun.xml.ws.protocol.soap,
+					com.sun.xml.ws.protocol.xml,
+					com.sun.xml.ws.transport,
+					com.sun.xml.ws.transport.http,
+					com.sun.xml.ws.transport.http.client,
+					com.sun.xml.ws.transport.http.server"/>
+
+
+        <packageset dir="${basedir}/rt/src"/>
+        <group title="SPI packages" packages="com.sun.xml.ws.api.message,
+					com.sun.xml.ws.api.message.stream,
+					com.sun.xml.ws.api.model,
+					com.sun.xml.ws.api.model.soap,
+					com.sun.xml.ws.api.model.wsdl,
+					com.sun.xml.ws.api.pipe,
+					com.sun.xml.ws.api.pipe.helper,
+					com.sun.xml.ws.api.server,
+					com.sun.xml.ws.api,
+					com.sun.xml.ws.api.wsdl.parser,
+					com.sun.xml.ws.api.wsdl.writer"/>
+
+
+        <packageset dir="${basedir}/rt/src"/>
+        <group title="WSDL processing" packages="com.sun.xml.ws.wsdl,
+						com.sun.xml.ws.wsdl.parser,
+						com.sun.xml.ws.wsdl.writer,
+						com.sun.xml.ws.wsdl.writer.document,
+						com.sun.xml.ws.wsdl.writer.document.http,
+						com.sun.xml.ws.wsdl.writer.document.soap,
+						com.sun.xml.ws.wsdl.writer.document.soap12,
+						com.sun.xml.ws.wsdl.writer.document.xsd"/>
+        <packageset dir="${basedir}/rt/src"/>
+	<group title="Message abstraction" packages="com.sun.xml.ws.message,
+						com.sun.xml.ws.message.jaxb,
+						com.sun.xml.ws.message.saaj,
+						com.sun.xml.ws.message.source,
+						com.sun.xml.ws.message.stream"/>
+
+        <packageset dir="${basedir}/rt/src"/>
+	<group title="Model abstraction" packages="com.sun.xml.ws.model,com.sun.xml.ws.model.soap,com.sun.xml.ws.model.wsdl"/>
+
+        <packageset dir="${basedir}/rt/src"/>
+	<group title="Annotation processing" packages="com.sun.istack.ws"/>
+
+	<packageset dir="${basedir}/rt/src"/>
+	<group title="Internal utilities" packages="com.sun.xml.ws.util,
+						com.sun.xml.ws.util.exception,
+						com.sun.xml.ws.util.localization,
+						com.sun.xml.ws.util.pipe,
+						com.sun.xml.ws.util.xml"/>
+
+
+
+        <arg value="-quiet"/>
+	        <classpath refid="tools.compile.classpath"/>
         <link href="https://jaxb.dev.java.net/nonav/jaxb20-pr/api/"
           offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxb-api"   />
-<!--        <link href="http://java.sun.com/webservices/docs/1.6/api/"
-          offline="true" packagelistloc="${basedir}/tools/javadoc-link/saaj"   />          -->
         <link href="http://java.sun.com/j2se/1.5.0/docs/api/"
           offline="true" packagelistloc="${basedir}/tools/javadoc-link/j2se5.0"  />
         <link href="https://jaxb-architecture-document.dev.java.net/nonav/doc/"
           offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxb-ri"  />
-
         <classpath refid="tools.compile.classpath"/>
-<!--        <classpath>
-          <fileset dir="${build.home}/../lib" includes="**/*.jar" />
-        </classpath>-->
       </javadoc>
     </target>
-
 
   <target name="runtime-build" depends="runtime-compile">
     <!-- Copy resource files etc -->
@@ -287,7 +372,7 @@ major-version=${release.impl.version}
     <copy    todir="${build.home}/lib">
       <fileset dir="${lib.home}/" 
                includes="**/*.jar" 
-               excludes="ant.jar, ant-junit.jar, ant-launcher.jar, ant-nodeps.jar, ant-trax.jar, junit.jar"/>
+               excludes="ant.jar, ant-junit.jar, ant-launcher.jar, ant-nodeps.jar, ant-trax.jar, junit.jar, htmlmacro.jar"/>
     </copy>
 
     <!-- Copying the manifest -->
@@ -324,33 +409,38 @@ major-version=${release.impl.version}
 
   <target name="main" depends="image" description="build everything into the build directory"/>
   
-  
-  <target name="docs" depends="prepare" >
-    <copy todir="${build.home}/docs">
-      <fileset dir="${docs.home}">
-        <include name="**/*.html" />
-        <include name="**/*.txt" />
-        <include name="**/*.jpg" />
-        <include name="**/*.css"/>
-        <include name="**/*.xsd"/>
-        <exclude name="**/internal/**" />
-      </fileset>
-      <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
-      <filterset begintoken="@@" endtoken="@@">
-        <filter token="SPEC_VERSION" 
-                value="${release.spec.version}" />
-        <filter token="IMPL_VERSION"
-                value="${release.impl.version}"/>
-        <filter token="IMPL_VERSION_SUFFIX"
-                value="${release.impl.version.suffix}"/>
-        <!--filter token="@@JWSDP_VERSION@@"
-                value="${jwsdp.impl.version}"/>
-        <filter token="@@JWSDP_ROOTDIR@@" 
-                value="${jwsdp.root.directory}"/-->
-      </filterset>
-    </copy>
-  </target>
-    
+
+  <target name="docs" depends="prepare">
+      <copy todir="${build.home}/docs">
+          <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
+          <filterset begintoken="@@" endtoken="@@">
+            <filter token="SPEC_VERSION"
+                    value="${release.spec.version}" />
+            <filter token="IMPL_VERSION"
+                    value="${release.impl.version}"/>
+            <filter token="IMPL_VERSION_SUFFIX"
+                    value="${release.impl.version.suffix}"/>
+          </filterset>
+      </copy>
+      <copy todir="${build.home}/docs">
+          <fileset dir="${docs.home}" includes="style/*" />
+      </copy>
+
+      <taskdef name="htmlmacro" classname="com.sun.wts.tools.htmlmacro.HtmlMacroTask">
+          <classpath>
+            <pathelement path="${lib.home}/htmlmacro.jar" />
+          </classpath>
+      </taskdef>
+      <htmlmacro  destdir="${build.home}/docs">
+      <documents dir="${docs.home}" includes="*.html *.xsd"/>
+      <tags dir="${docs.home}/tags" includes="**/*.tag" />
+      <property key="SPEC_VERSION" value="${release.spec.version}"/>
+      <property key="IMPL_VERSION" value="${release.impl.version}"/>
+      <property key="IMPL_VERSION_SUFFIX" value="${release.impl.version.suffix}"/>
+      </htmlmacro>
+    </target>
+
+
   <target name="dist" depends="image, docs">
     <mkdir dir="${dist.home}"/>
     <mkdir dir="${dist20.home}"/>
@@ -531,6 +621,20 @@ major-version=${release.impl.version}
          dest="lib/FastInfoset.src.zip" />
   </target>
 
+    <target name="integrate-htmlmacro-hudson" depends="prepare"
+             description="integrate the last successful htmlmacro Hudson build">
+       <get src="http://kohsuke.sfbay.sun.com/hudson/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
+            dest="${lib.home}/htmlmacro.zip" />
+       <mkdir dir="${lib.home}/htmlmacro" />
+       <unzip src="${lib.home}/htmlmacro.zip" dest="${lib.home}/htmlmacro"/>
+       <copy todir="lib" overwrite="true">
+         <fileset dir="${lib.home}/htmlmacro/" includes="*.zip,*.jar"/>
+       </copy>
+        <delete dir="${lib.home}/htmlmacro" />
+        <delete file="${lib.home}/htmlmacro.zip"/>
+     </target>
+
+
     <taskdef name="installerBuilder"
         classname="com.sun.tools.xjc.installer.builder.BuilderTask">
       <classpath>
@@ -559,7 +663,7 @@ major-version=${release.impl.version}
       </antcall>
       <tstamp/>
       <!-- generate the class -->
-      <installerBuilder classFile="${build.home}/JAXWS2.0.1ea_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS2.0.1m1_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${build.home}/jaxws-ri.zip" />
     </target>
@@ -622,7 +726,7 @@ major-version=${release.impl.version}
       </zip>
           
       <!-- generate the installer -->
-      <installerBuilder classFile="${build.home}/JAXWS2.0.1ea_source_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS2.0.1m1_source_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${source.drop.dir}/jaxws-src-installer.zip"/>
       <delete dir="${source.drop.dir}"/>

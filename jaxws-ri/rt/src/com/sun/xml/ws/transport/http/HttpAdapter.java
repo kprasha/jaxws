@@ -26,6 +26,7 @@ package com.sun.xml.ws.transport.http;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -36,8 +37,8 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.PropertySet;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+
 import java.util.TreeMap;
 
 import javax.xml.ws.WebServiceException;
@@ -146,24 +147,25 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             Packet packet = new Packet();
             packet.acceptableMimeTypes = con.getRequestHeader("Accept");
             packet.addSatellite(con);
-            codec.decode(in, ct, packet);
             try {
-                packet = head.process(packet,con.getWebServiceContextDelegate(),this);
-            } catch(Exception e) {
-                e.printStackTrace();
-                if (!closed) {
-                    writeInternalServerError(con);
+                codec.decode(in, ct, packet);
+                try {
+                    packet = head.process(packet,con.getWebServiceContextDelegate(),this);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    if (!closed) {
+                        writeInternalServerError(con);
+                    }
+                    return;
                 }
-                return;
+            } catch(ExceptionHasMessage e) {
+                e.printStackTrace();
+                packet.setMessage(e.getFaultMessage());
             }
+
             if (closed) {
                 return;                 // Connection is already closed
             }
-
-            ContentType contentType = codec.getStaticContentType(packet);
-            ct = contentType.getContentType();
-            if (ct == null)
-                throw new UnsupportedOperationException();
 
             Message responseMessage = packet.getMessage();
             if (responseMessage==null) {
@@ -177,10 +179,20 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                         : HttpURLConnection.HTTP_OK );
                 }
 
-                con.setContentTypeResponseHeader(ct);
-                OutputStream os = con.getOutput();
-                codec.encode(packet, os);
-                os.close();
+                ContentType contentType = codec.getStaticContentType(packet);
+                if (contentType != null) {
+                    con.setContentTypeResponseHeader(contentType.getContentType());
+                    OutputStream os = con.getOutput();
+                    codec.encode(packet, os);
+                    os.close();
+                } else {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    contentType = codec.encode(packet, baos);
+                    con.setContentTypeResponseHeader(contentType.getContentType());
+                    OutputStream os = con.getOutput();
+                    baos.writeTo(os);
+                    os.close();
+                }
             }
         }
 

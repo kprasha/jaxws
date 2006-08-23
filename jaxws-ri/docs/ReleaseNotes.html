@@ -1,123 +1,114 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
-  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=us-ascii">
-  <title>JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ -- Release Notes</title>
-  <link rel="stylesheet" type="text/css" href="style/default.css"/>
-  <meta name="CREATED" content="20050329;10192585">
-  <meta name="CHANGED" content="20050401;7572193">
+<head caption="Release Notes">
+    <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
-<body bgcolor="#ffffff" dir="ltr" lang="en-US">
-  <center>
-  <h1>  Java<sup><font size="-2">TM</font></sup> API for XML Web Services<br />
-      Release Notes
-  </h1>
-  <b>Specification Version:</b> @@SPEC_VERSION@@<br />
-  <b>Reference Implementation (RI) Version:</b> @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@<br />
-  </center>
 
-<hr>
-<p>Last Modified: 4/26/06</p>
+<body>
+<p>
 The documentation/samples included with JAX-WS that is distributed on Java.net or
-as part of JWSDP, documents how to use JAX-WS in a non-Java EE 5 servlet container using a 
+as part of JWSDP, documents how to use JAX-WS in a non-Java EE 5 servlet container using a
 proprietary deployment descriptor <code>sun-jaxws.xml</code> and servlet
 <code>com.sun.xml.ws.transport.http.servlet.WSServlet</code>.
 This means that you can run JAX-WS RI applications in any servlet container that has been
-enabled with the JAX-WS RI.  Applications that use the proprietary DD and servlet 
-will run in a JAX-WS RI enabled Java EE 5 servlet container, but 
+enabled with the JAX-WS RI. Applications that use the proprietary DD and servlet
+will run in a JAX-WS RI enabled Java EE 5 servlet container, but
 they will be non-portable. If you
 wish to use JAX-WS in a Java EE container in a Java EE portable manner you need to use the
-standard Java EE 5 deployment descriptor; please refer to the 
-<a href="http://java.sun.com/javaee/index.jsp">Java EE 5</a> or <a href="https://glassfish.dev.java.net/">Glassfish</a> 
-documentation/samples.  The majority of the documentation included with JAX-WS is 
+standard Java EE 5 deployment descriptor; please refer to the
+<a href="http://java.sun.com/javaee/index.jsp">Java EE 5</a> or <a href="https://glassfish.dev.java.net/">Glassfish</a>
+documentation/samples. The majority of the documentation included with JAX-WS is
 valid with Java EE 5 as well.
+</p>
 <h2>Online Documentation</h2>
-<p>The documentation for JAX-WS @@IMPL_VERSION@@ as well as the sample applications
-will
-be periodically updated in the JAX-WS project on Java.net.</p>
+
+<p>The documentation for JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} as well as the sample applications
+    will be periodically updated in the JAX-WS project on Java.net.</p>
+
 <p>Please go to <a href="http://jax-ws.dev.java.net/">http://jax-ws.dev.java.net</a>
-for the
-latest documentation and samples.</p>
+    for the
+    latest documentation and samples.</p>
+
 <h2>Required Software</h2>
 <ul>
-  <li>
-    <p>Requires <a href="http://java.sun.com/j2se/1.5.0/download.jsp">JDK
-5.0 Update 2</a> or later</p>
-  </li>
-  <li>
-    <p>Requires <a href="http://ant.apache.org/bindownload.cgi">Ant 1.6.2</a> or
-    later</p>
-  </li>
-  <li>
-    <p>Requires <a
- href="http://java.sun.com/j2ee/1.4/download.html#sdk">Sun Java System
-Application Server 8.2 UR1</a> (Application Server) (if you
-intend to deploy Web service endpoints)</p>
-  </li>
+    <li>
+        <p>Requires <a href="http://java.sun.com/j2se/1.5.0/download.jsp">JDK
+            5.0 Update 2</a> or later</p>
+    </li>
+    <li>
+        <p>Requires <a href="http://ant.apache.org/bindownload.cgi">Ant 1.6.2</a> or
+            later</p>
+    </li>
+    <li>
+        <p>Requires 
+		<a href="https://glassfish.dev.java.net/public/downloadsindex.html">
+		Glassfish v2 Milestone1</a></p>
+    </li>
 </ul>
+
 <h2>What This Release Includes</h2>
+
 <p>This release implements the <a
- href="http://jcp.org/en/jsr/detail?id=224">Java<sup>TM</sup>for XML
-Web Services
-2.0 Specification</a>.</p>
+        href="http://jcp.org/en/jsr/detail?id=224">Java<sup>TM</sup>for XML
+    Web Services
+    2.0 Specification</a>.</p>
 <!--<h2>What's New in This Release</h2>
 <ul>
 </ul> -->
 <h2>Installation Instructions</h2>
+
 <p>The following applies to the JAX-WS standalone bundles. If you have
-installed JAX-WS as part of the JWSDP, then installation is complete.</p>
-<p>Once the JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ bundle is extracted, it needs to be installed
-on the
-Application Server. Make sure <code>AS_HOME</code> is set to the installation
-directory of the Application Server. You need to invoke <code>ANT_HOME/bin/ant install</code>
-command from the root directory of the extracted bundle to install
-JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@
-binaries on the Application Server. However this step is
-required
-if you intend to build and deploy a Web service on the Application
-Server.</p>
+    installed JAX-WS as part of the JWSDP, then installation is complete.</p>
+
+<p>Once the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} bundle is extracted, it needs to be installed
+    on the
+    Application Server. Make sure <code>AS_HOME</code> is set to the installation
+    directory of the Application Server. You need to invoke <code>ANT_HOME/bin/ant install</code>
+    command from the root directory of the extracted bundle to install
+    JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}
+    binaries on the Application Server. However this step is
+    required
+    if you intend to build and deploy a Web service on the Application
+    Server.</p>
+
 <p>If you intend to only invoke an already existing Web service, then
-alternatively you can use the <code>wsimport</code> and <code>wsgen</code>
-scripts in the <code>bin</code> directory of the JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ bundle.</p>
+    alternatively you can use the <code>wsimport</code> and <code>wsgen</code>
+    scripts in the <code>bin</code> directory of the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} bundle.</p>
 
 <h2>Current Limitations</h2>
 <ul>
-<li>
-The <code>java.util.Collection</code> classes cannot be used with rpc/literal or document/literal BARE style
-due to a limitation in JAXB.  However, they do work in the default document/literal WRAPPED style.
-</li>
+    <li>
+        The <code>java.util.Collection</code> classes cannot be used with rpc/literal or document/literal BARE style
+        due to a limitation in JAXB. However, they do work in the default document/literal WRAPPED style.
+    </li>
 </ul>
+
 <h2>Known Bugs/Issues</h2>
 <ul>
-<li>
-JAX-WS has a bug relating to the WS-I Basic Profile 1.1 <a href="http://www.ws-i.org/Profiles/BasicProfile-1.1-2004-08-24.html#Bindings_and_Parts">R2211</a> 
-requirement.  Currently, JAX-WS is using <code>xsi:nill="true"</code> to represent null parameters in rpc/lit mode.
-</li>
-  <li>
-Although JAX-WS customizations are portable across implementations, the names of 
-WSDL and schema files generated are not specified.  Therefore each vendor may and
-most likely will generate different names.  Therefore, when switching between 
-implementations of JAX-WS, it may be necessary to modify your customization files
-to reflect different WSDL and schema file names.<p>
-This holds true for different releases of the JAX-WS RI. The JAX-WS RI may in 
-each release change these file names to resolve bugs.  If and when this does occur,
-a developer would need to change the filenames in their customization files to match 
-the new file names. 
-  </li>
+    <li>
+        Although JAX-WS customizations are portable across implementations, the names of
+        WSDL and schema files generated are not specified. Therefore each vendor may and
+        most likely will generate different names. Therefore, when switching between
+        implementations of JAX-WS, it may be necessary to modify your customization files
+        to reflect different WSDL and schema file names.</li>
+	<li>
+        This holds true for different releases of the JAX-WS RI. The JAX-WS RI may in
+        each release change these file names to resolve bugs. If and when this does occur,
+        a developer would need to change the filenames in their customization files to match
+        the new file names.
+    </li>
 </ul>
 <ul>
 </ul>
+
 <h2>For More Information</h2>
+
 <p>For white papers and the latest JAX-WS technology and documentation,
-go
-to <a href="http://jax-ws.dev.java.net/">http://jax-ws.dev.java.net</a>.</p>
+    go
+    to <a href="http://jax-ws.dev.java.net/">http://jax-ws.dev.java.net</a>.</p>
+
 <p>Please use the <a
- href="http://forums.java.net/jive/forum.jspa?forumID=46&amp;start=0">JAXB
-2.0
-and JAXWS 2.0</a> forum for feedback.</p>
-<hr>
-<p><a href="Copyright.html"><i><font size="2">Copyright &#169; 2006 Sun
-Microsystems, Inc. All rights reserved.</font></i></a></p>
+        href="http://forums.java.net/jive/forum.jspa?forumID=46&amp;start=0">JAXB
+    2.0
+    and JAXWS 2.0</a> forum for feedback.</p>
 </body>
 </html>

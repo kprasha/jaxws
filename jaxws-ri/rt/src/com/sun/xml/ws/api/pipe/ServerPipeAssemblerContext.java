@@ -5,11 +5,13 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.handler.*;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.xml.ws.addressing.WsaServerPipe;
+import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
+import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
+import com.sun.xml.ws.handler.HandlerPipe;
 
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -21,7 +23,7 @@ import javax.xml.ws.soap.SOAPBinding;
  * @author Jitendra Kotamraju
  */
 public final class ServerPipeAssemblerContext {
-    
+
     private final SEIModel seiModel;
     private final WSDLPort wsdlModel;
     private final WSEndpoint endpoint;
@@ -31,14 +33,14 @@ public final class ServerPipeAssemblerContext {
     public ServerPipeAssemblerContext(@Nullable SEIModel seiModel,
             @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint endpoint,
             @NotNull Pipe terminal) {
-        
+
         this.seiModel = seiModel;
         this.wsdlModel = wsdlModel;
         this.endpoint = endpoint;
         this.terminal = terminal;
         this.binding = endpoint.getBinding();
     }
-    
+
     /**
      * The created pipeline will use seiModel to get java concepts for the endpoint
      *
@@ -58,7 +60,7 @@ public final class ServerPipeAssemblerContext {
     public @Nullable WSDLPort getWsdlModel() {
         return wsdlModel;
     }
-    
+
     /**
      *
      * The created pipeline is used to serve this {@link WSEndpoint}.
@@ -80,7 +82,7 @@ public final class ServerPipeAssemblerContext {
         else
             return next;
     }
-    
+
     /**
      * Creates a {@link Pipe} that does the monitoring of the invocation for a
      * container
@@ -91,7 +93,7 @@ public final class ServerPipeAssemblerContext {
             return hook.createMonitoringPipe(seiModel,wsdlModel,endpoint,next);
         return next;
     }
-    
+
     /**
      * Creates a {@link Pipe} that adds container specific security
      */
@@ -101,13 +103,12 @@ public final class ServerPipeAssemblerContext {
             return hook.createSecurityPipe(seiModel,wsdlModel,endpoint,next);
         return next;
     }
-    
+
     /**
      * Creates a {@link Pipe} that invokes protocol and logical handlers.
      */
     public @NotNull Pipe createHandlerPipe(@NotNull Pipe next) {
         if (!binding.getHandlerChain().isEmpty()) {
-            boolean isClient = false;
             HandlerPipe cousin = new ServerLogicalHandlerPipe(binding, wsdlModel, next);
             next = cousin;
             if (binding instanceof SOAPBinding) {
@@ -124,18 +125,18 @@ public final class ServerPipeAssemblerContext {
         return new WsaServerPipe(seiModel, wsdlModel, binding, next);
     }
 
-    /** 
+    /**
      * The last {@link Pipe} in the pipeline. The assembler is expected to put
      * additional {@link Pipe}s in front of it.
      *
      * <p>
      * (Just to give you the idea how this is used, normally the terminal pipe
-     * is the one that invokes the user application or {@link Provider}.)
+     * is the one that invokes the user application or {@link javax.xml.ws.Provider}.)
      *
      * @return always non-null terminal pipe
      */
      public @NotNull Pipe getTerminalPipe() {
          return terminal;
     }
-     
+
 }

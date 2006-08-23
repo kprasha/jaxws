@@ -22,18 +22,14 @@
 
 <project>
     <property environment="env"/>
-    <property file="../../../jwsdp-shared/bin/sjsas.props"/>
-    <condition property="as.home" value="${DOMAIN_DIR}/..">
-        <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-    </condition>
-    <condition property="as.home" value="${env.AS_HOME}">
-        <not>
-            <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-        </not>
-    </condition>
 
-    <property name="build.home" value="${basedir}/build"/>
-    <property name="build.war.home" value="${build.home}/war"/>
+    <property name="as.home" value="${env.AS_HOME}"/>
+   <property name="lib.home" value="${env.JAXWS_HOME}/lib"/>
+   <property name="lib.sample.home" value="${basedir}/../lib"/>
+   <property name="build.home" value="${basedir}/build"/>
+   <property name="build.war.home" value="${build.home}/war"/>
+   <property name="build.classes.home" value="${build.home}/classes"/>
+
     <property name="domain" value="domain1"/>
 
     <target name="deploy" depends="deploy-tomcat, deploy-appserver"/>

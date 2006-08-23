@@ -433,11 +433,7 @@ public class MtomCodec extends MimeCodec {
         private String decodeCid(String cid) {
             if (cid.startsWith("cid:"))
                 cid = cid.substring(4, cid.length());
-            try {
-                return "<" + URLDecoder.decode(cid, "UTF-8") + ">";
-            } catch (UnsupportedEncodingException e) {
-                throw new WebServiceException(e);
-            }
+            return cid;
         }
 
         public char[] getTextCharacters() {

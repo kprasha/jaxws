@@ -21,6 +21,6 @@
  */
 
 /**
- * {@link Pipe} and related abstractions.
+ * {@link com.sun.xml.ws.api.pipe.Pipe} and related abstractions.
  */
 package com.sun.xml.ws.api.pipe;

@@ -31,7 +31,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.message.AttachmentSetImpl;
@@ -40,6 +39,7 @@ import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.protocol.soap.VersionMismatchException;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -122,6 +122,9 @@ public abstract class StreamSOAPCodec implements Codec {
         if(reader.getEventType()!=XMLStreamConstants.START_ELEMENT)
             XMLStreamReaderUtil.nextElementContent(reader);
         XMLStreamReaderUtil.verifyReaderState(reader,XMLStreamConstants.START_ELEMENT);
+        if (SOAP_ENVELOPE.equals(reader.getLocalName()) && !SOAP_NAMESPACE_URI.equals(reader.getNamespaceURI())) {
+            throw new VersionMismatchException(soapVersion, SOAP_NAMESPACE_URI, reader.getNamespaceURI());
+        }
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_ENVELOPE);
 
         TagInfoset envelopeTag = new TagInfoset(reader);
@@ -233,6 +236,8 @@ public abstract class StreamSOAPCodec implements Codec {
         // the pipe line.
         return new MutableXMLStreamBuffer();
     }
+
+
 
 
     /**

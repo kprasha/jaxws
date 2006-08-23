@@ -28,8 +28,8 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.encoding.CodecFacade;
-import com.sun.xml.ws.encoding.XMLHTTPCodec;
+import com.sun.xml.ws.encoding.SOAPBindingCodec;
+import com.sun.xml.ws.encoding.XMLHTTPBindingCodec;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.BindingType;
@@ -336,7 +336,7 @@ public abstract class BindingID {
      */
     public static final BindingID XML_HTTP = new Impl(SOAPVersion.SOAP_11, HTTPBinding.HTTP_BINDING,false) {
         public Codec createEncoder(WSBinding binding) {
-            return XMLHTTPCodec.INSTANCE;
+            return new XMLHTTPBindingCodec();
         }
     };
 
@@ -389,7 +389,7 @@ public abstract class BindingID {
         }
 
         public @NotNull Codec createEncoder(WSBinding binding) {
-            return new CodecFacade(binding);
+            return new SOAPBindingCodec(binding);
         }
 
         public Boolean isMTOMEnabled() {

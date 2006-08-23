@@ -1,5 +1,5 @@
 /**
- * $Id: HelloImpl.java,v 1.2.12.1 2006-04-12 00:08:38 ofung Exp $
+ * $Id: HelloImpl.java,v 1.2.12.1.2.1 2006-08-23 01:04:22 vivekp Exp $
  */
 package mime.server;
 
@@ -52,12 +52,6 @@ public class HelloImpl {
 
     }
 
-    /**
-     *
-     * @param data
-     * @return
-     *     returns javax.xml.transform.Source
-     */
     public Source detail(DetailType data){
         return new StreamSource(new ByteArrayInputStream(sampleXML.getBytes()));
     }
@@ -66,10 +60,12 @@ public class HelloImpl {
      *
      * @param data
      * @return
-     *     returns javax.activation.DataHandler
+     *     returns ClaimFormTypeResponse
      */
-    public DataHandler claimForm(DataHandler data){
-        return data;
+    public ClaimFormTypeResponse claimForm(ClaimFormTypeRequest data){
+        ClaimFormTypeResponse resp = new ClaimFormTypeResponse();
+        resp.setResponse(data.getRequest());
+        return resp;
     }
 
     private final String sampleXML = "?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n" +            

@@ -27,20 +27,8 @@
     <import file="etc/deploy-targets.xml"/>
 
     <property environment="env"/>
-    <property file="../../../jwsdp-shared/bin/sjsas.props"/>
-    <condition property="lib.home" value="${DOMAIN_DIR}/../lib">
-        <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-    </condition>
-    <condition property="lib.home" value="${env.JAXWS_HOME}/lib">
-        <not>
-            <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-        </not>
-    </condition>
 
     <property file="etc/build.properties"/>
-    <property name="build.home" value="${basedir}/build"/>
-    <property name="build.classes.home" value="${build.home}/classes"/>
-    <property name="build.war.home" value="${build.home}/war"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
@@ -178,21 +166,6 @@
 
     <target name="server-j2se-stop" depends="setup">
         <get src="http://localhost:9090/stop" dest="stop.status"/>
-    </target>
-
-    <target name="server-j2se" depends="setup">
-
-        <antcall target="clean" />
-
-        <antcall target="build-server-java" />
-
-        <java fork="true" classname="${j2se.sei}">
-            <classpath>
-                <path refid="jaxws.classpath"/>
-                <pathelement location="${build.classes.home}"/>
-            </classpath>
-        </java>
-
     </target>
 
 

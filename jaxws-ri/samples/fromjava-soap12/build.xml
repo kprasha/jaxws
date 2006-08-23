@@ -24,18 +24,7 @@
 
 <project basedir="." default="help" name="fromjava-soap12">
 
-    <import file="etc/deploy-targets.xml"/>
-
-    <property environment="env"/>
-    <property file="../../../jwsdp-shared/bin/sjsas.props"/>
-    <condition property="lib.home" value="${DOMAIN_DIR}/../lib">
-        <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-    </condition>
-    <condition property="lib.home" value="${env.JAXWS_HOME}/lib">
-        <not>
-            <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-        </not>
-    </condition>
+    <import file="etc/deploy-targets.xml"/>  
 
     <property file="etc/build.properties"/>
     <property name="build.home" value="${basedir}/build"/>

@@ -40,7 +40,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.StringTokenizer;
 
 /**
- * Codec that can handle MTOM, SwA, and plain SOAP payload.
+ * SOAP binding {@link Codec} that can handle MTOM, SwA, and plain SOAP payload.
  *
  * <p>
  * This is used when we need to determine the encoding from what we received (for decoding)
@@ -49,7 +49,7 @@ import java.util.StringTokenizer;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-public class CodecFacade extends MimeCodec {
+public class SOAPBindingCodec extends MimeCodec {
     /**
      * Base HTTP Accept request-header.
      */
@@ -129,14 +129,14 @@ public class CodecFacade extends MimeCodec {
     
     private AcceptContentType _adaptingContentType = new AcceptContentType();
     
-    public CodecFacade(WSBinding binding) {
+    public SOAPBindingCodec(WSBinding binding) {
         super(binding.getSOAPVersion());
         
         xmlSoapCodec = StreamSOAPCodec.create(version);
         xmlMimeType = xmlSoapCodec.getMimeType();
         
         fiSoapCodec = getFICodec(version);
-        fiMimeType = fiSoapCodec.getMimeType();
+        fiMimeType = (fiSoapCodec != null) ? fiSoapCodec.getMimeType() : "";
         
         xmlMtomCodec = new MtomCodec(version, xmlSoapCodec);
         
@@ -213,8 +213,8 @@ public class CodecFacade extends MimeCodec {
         }
     }
     
-    public CodecFacade copy() {
-        return new CodecFacade(binding);
+    public SOAPBindingCodec copy() {
+        return new SOAPBindingCodec(binding);
     }
     
     
@@ -225,9 +225,15 @@ public class CodecFacade extends MimeCodec {
         
         if(isApplicationXopXml(rootContentType))
             xmlMtomCodec.decode(mpp,packet);
-        else if (isFastInfoset(rootContentType))
+        else if (isFastInfoset(rootContentType)) {
+            if (fiSoapCodec == null) {
+                // TODO: use correct error message
+                throw new RuntimeException("Fast Infoset Runtime not present");
+            }
+            
+            _useFastInfosetForEncoding = true;
             fiSwaCodec.decode(mpp,packet);
-        else if (isXml(rootContentType))
+        } else if (isXml(rootContentType))
             xmlSwaCodec.decode(mpp,packet);
         else {
             // TODO localize exception

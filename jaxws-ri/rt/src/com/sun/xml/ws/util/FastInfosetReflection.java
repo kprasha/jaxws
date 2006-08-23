@@ -228,21 +228,29 @@ public class FastInfosetReflection {
     }
     
     public static Source FastInfosetSource_new(InputStream is) 
-        throws Exception 
     {
         if (fiFastInfosetSource_new == null) {
             throw new RuntimeException("Unable to locate Fast Infoset implementation");
         }
-        return (Source) fiFastInfosetSource_new.newInstance(is);        
+        
+        try {
+            return (Source) fiFastInfosetSource_new.newInstance(is);        
+        } catch(Exception e) {
+            throw new RuntimeException("Unable to utilize Fast Infoset implementation", e);
+        }
     }
     
     public static InputStream FastInfosetSource_getInputStream(Source source) 
-        throws Exception 
     {
         if (fiFastInfosetSource_getInputStream == null) {
             throw new RuntimeException("Unable to locate Fast Infoset implementation");
         }
-        return (InputStream) fiFastInfosetSource_getInputStream.invoke(source);
+        
+        try {
+            return (InputStream) fiFastInfosetSource_getInputStream.invoke(source);
+        } catch(Exception e) {
+            throw new RuntimeException("Unable to utilize Fast Infoset implementation", e);
+        }
     }
     
     public static void FastInfosetSource_setInputStream(Source source,

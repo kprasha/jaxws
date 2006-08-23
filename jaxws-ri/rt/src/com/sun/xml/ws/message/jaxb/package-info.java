@@ -21,7 +21,7 @@
  */
 
 /**
- * {@link Message} implementation for JAXB.
+ * {@link com.sun.xml.ws.api.message.Message} implementation for JAXB.
  *
  * <pre>
  * TODO:

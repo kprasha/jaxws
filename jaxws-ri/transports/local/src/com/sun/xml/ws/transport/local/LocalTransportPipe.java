@@ -32,6 +32,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
+import java.io.ByteArrayOutputStream;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
@@ -105,8 +106,16 @@ final class LocalTransportPipe implements Pipe {
             // Calling getStaticContentType sets some internal state in the codec
             // TODO : need to fix this properly in Codec
             ContentType contentType = codec.getStaticContentType(request);
-            String requestContentType = contentType.getContentType();
-            codec.encode(request, con.getOutput());
+            String requestContentType = null;
+            if (contentType != null) {
+                requestContentType = contentType.getContentType();
+                codec.encode(request, con.getOutput());
+            } else {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                contentType = codec.encode(request, baos);
+                requestContentType = contentType.getContentType();
+                baos.writeTo(con.getOutput());
+            }
             reqHeaders.put("Content-Type", Collections.singletonList(requestContentType));
             
             String requestAccept = contentType.getAcceptHeader();
@@ -149,19 +158,29 @@ final class LocalTransportPipe implements Pipe {
         if (requestContentType.contains("fastinfoset")) {
             if (!responseContentType.contains("fastinfoset")) {
                 throw new RuntimeException(
-                        "Request is encoded using Fast Infoset but response is not not");
+                        "Request is encoded using Fast Infoset but response (" + 
+                        responseContentType + 
+                        ") is not");
+            } else if (conneg == ContentNegotiation.none) {
+                throw new RuntimeException(
+                        "Request is encoded but Fast Infoset content negotiation is set to none");
             }
         } else if (requestAccept.contains("fastinfoset")) {
             if (!responseContentType.contains("fastinfoset")) {
                 throw new RuntimeException(
                         "Fast Infoset is acceptable but response is not encoded in Fast Infoset");
+            } else if (conneg == ContentNegotiation.none) {
+                throw new RuntimeException(
+                        "Fast Infoset is acceptable but Fast Infoset content negotiation is set to none");
             }
         } else if (conneg == ContentNegotiation.pessimistic) {
             throw new RuntimeException(
                     "Content negotitaion is set to pessimistic but Fast Infoset is not acceptable");
         } else if (conneg == ContentNegotiation.optimistic) {
             throw new RuntimeException(
-                    "Content negotitaion is set to optimistic but the request is not encoded using Fast Infoset");
+                    "Content negotitaion is set to optimistic but the request (" + 
+                    requestContentType + 
+                    ") is not encoded using Fast Infoset");
         }
     }
     

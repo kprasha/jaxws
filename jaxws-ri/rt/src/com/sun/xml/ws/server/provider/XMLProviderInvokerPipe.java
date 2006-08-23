@@ -32,7 +32,7 @@ import javax.activation.DataSource;
 import javax.xml.transform.Source;
 import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
-import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
+import com.sun.xml.ws.encoding.xml.XMLMessage.MessageDataSource;
 
 /**
  * This pipe is used to invoke XML/HTTP {@link Provider} endpoints.
@@ -65,8 +65,8 @@ public class XMLProviderInvokerPipe extends ProviderInvokerPipe {
     
     private static final class DataSourceParameter implements Parameter<DataSource> {
         public DataSource getParameter(Message msg) {
-            return (msg instanceof HasDataSource)
-                ? ((HasDataSource)msg).getDataSource()
+            return (msg instanceof MessageDataSource)
+                ? ((MessageDataSource)msg).getDataSource()
                 : XMLMessage.getDataSource(msg);
         }
     }

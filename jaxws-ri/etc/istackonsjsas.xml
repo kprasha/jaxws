@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 
-<project name="JAX-WS 2.0.1 FCS On Sun Java System App Server 8.1/8.2" default="help" basedir=".">
+<project name="JAX-WS 2.0.1 M1 On Sun Java System App Server 8.1/8.2" default="help" basedir=".">
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>

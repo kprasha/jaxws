@@ -28,7 +28,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.xml.XMLMessage;
-import com.sun.xml.ws.encoding.xml.XMLMessage.HasDataSource;
+import com.sun.xml.ws.encoding.xml.XMLMessage.MessageDataSource;
 import com.sun.xml.ws.message.source.PayloadSourceMessage;
 
 import javax.activation.DataSource;
@@ -69,8 +69,8 @@ public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
         Message message = response.getMessage();
 
-        if (message instanceof HasDataSource) {
-            HasDataSource hasDS = (HasDataSource)message;
+        if (message instanceof MessageDataSource) {
+            MessageDataSource hasDS = (MessageDataSource)message;
             // TODO Need to call hasUnconsumedDataSource()
             return hasDS.getDataSource();
         } else if (message instanceof PayloadSourceMessage) {

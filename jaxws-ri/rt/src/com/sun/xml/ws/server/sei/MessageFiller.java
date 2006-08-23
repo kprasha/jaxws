@@ -29,8 +29,6 @@ import com.sun.xml.ws.message.ByteArrayAttachment;
 import com.sun.xml.ws.message.DataHandlerAttachment;
 import com.sun.xml.ws.message.JAXBAttachment;
 import com.sun.xml.ws.model.ParameterImpl;
-import java.awt.Image;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.UUID;
@@ -172,6 +170,6 @@ abstract class MessageFiller {
     }
     
     private static boolean isXMLMimeType(String mimeType){
-        return (mimeType.equals("text/xml") || mimeType.equals("application/xml")) ? true : false;
+        return mimeType.equals("text/xml") || mimeType.equals("application/xml");
     }
 }

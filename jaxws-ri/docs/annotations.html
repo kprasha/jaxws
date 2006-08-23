@@ -1,31 +1,10 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
-	<TITLE>JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ -- Annotations</TITLE>
-	<META NAME="GENERATOR" CONTENT="StarSuite 8  (Win32)">
-	<META NAME="CREATED" CONTENT="20050329;10243973">
-	<META NAME="CHANGEDBY" CONTENT="Rama Pulavarthi">
-	<META NAME="CHANGED" CONTENT="20060427;12592170">
-	<STYLE>
-	<!--
-		H1 { color: #000099; font-family: sans-serif; text-align: center }
-		H2 { color: #000099; font-family: sans-serif; text-align: center }
-		H3 { color: #000099; font-family: sans-serif; text-align: left }
-		H4 { color: #000099; font-family: sans-serif; text-align: left }
-		CODE { font-family: "Courier", monospace }
-	-->
-	</STYLE>
-</HEAD>
-<BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER><A NAME="1. Overview|outline"></A>Java<FONT SIZE=1><SUP>TM</SUP></FONT>
-API for XML Web Services<BR>Annotations 
-</H1>
-<P ALIGN=CENTER STYLE="margin-bottom: 0in"><B>Specification Version:</B>
-@@SPEC_VERSION@@<BR><B>Reference Implementation (RI) Version:</B>
-@@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@</P>
-<HR>
-<P>Last Modified: 6/29/06</P>
+<html>
+
+<head caption="Annotations">
+    <link rel="stylesheet" type="text/css" href="style/default.css"/>
+</head>
+
+<body>
 <H2>Contents</H2>
 <PRE><A HREF="#1.%20Overview%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">1. Overview</FONT></FONT></A>
 <A HREF="#JSR 181"><FONT SIZE=3><FONT FACE="Thorndale, serif">2. JSR 181 (Web Services Metadata) Annotations</FONT></FONT></A>
@@ -57,7 +36,7 @@ API for XML Web Services<BR>Annotations
     <A HREF="#5.3_javax.annotation.PreDestroy"><FONT SIZE=3><FONT FACE="Thorndale, serif">5.3 javax.annotation.PreDestroy</FONT></FONT></A></PRE><H2>
 1. Overview</H2>
 <P STYLE="margin-bottom: 0in">Annotations play a critical role in
-JAX-WS @@SPEC_VERSION@@. First, annotations are used in mapping Java
+JAX-WS ${SPEC_VERSION}. First, annotations are used in mapping Java
 to WSDL and schema. Second, annotations are used a runtime to control
 how the JAX-WS runtime processes and responds to web service
 invocations. Currently the annotations utilized by JAXR-WS 2.0 are
@@ -65,9 +44,10 @@ defined in separate JSRs: 1) <A HREF="http://www.jcp.org/en/jsr/detail?id=181">J
 181: <I>Web Services Metadata for the Java<FONT SIZE=1><SUP>TM</SUP></FONT>
 Platform</I></A>, 2) <A HREF="http://www.jcp.org/en/jsr/detail?id=222">JSR
 222: <I>Java<FONT SIZE=1><SUP>TM</SUP></FONT> Architecture for XML
+222: <I>Java<FONT SIZE=1><SUP>TM</SUP></FONT> Architecture for XML
 Binding (JAXB) 2.0</I></A>, 3) <A HREF="http://www.jcp.org/en/jsr/detail?id=224">JSR
 224: <I>Java<FONT SIZE=1><SUP>TM</SUP></FONT> API for XML Web
-Services (JAX-WS) 2.0</I></A>, 4)&nbsp; <A HREF="http://www.jcp.org/en/jsr/detail?id=250">JSR
+Services (JAX-WS) 2.0</I></A>, 4)  <A HREF="http://www.jcp.org/en/jsr/detail?id=250">JSR
 250: <I>Common Annotations for the Java<SUP>TM</SUP> Platform</I></A>.</P>
 <H2><A NAME="JSR 181"></A>2. JSR 181 (Web Services Metadata)
 Annotations</H2>
@@ -183,7 +163,7 @@ specification.</FONT></FONT></SPAN></P>
 		</TD>
 		<TD WIDTH=54% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>Not
-			currently used by JAX-WS @@IMPL_VERSION@@</FONT></FONT></FONT></P>
+			currently used by JAX-WS ${IMPL_VERSION}</FONT></FONT></FONT></P>
 		</TD>
 		<TD WIDTH=30% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT><BR>
@@ -228,7 +208,7 @@ public class AddNumbersImpl {
 <P>If you are familiar with JAX-RPC 1.1, you will notice that the
 <FONT FACE="Cumberland, monospace">AddNumbersImpl</FONT>
 implementation class does not implement a service endpoint interface.
-In JAX-WS @@SPEC_VERSION@@ a service endpoint interface is no longer
+In JAX-WS ${SPEC_VERSION} a service endpoint interface is no longer
 required. If a service endpoint interfaces is desired, then the
 @WebService annotation on the endpoint implementation is modified to
 specify the endpoint interface and the actual service endpoint
@@ -728,7 +708,7 @@ endpoint implementation or service endpoint interface. This
 annotation lets the developer choose between document/literal
 wrapped, document/literal bare, rpc/literal and rpc/encoded endpoints
 with the default being document/literal wrapped. JAX-WS
-@@SPEC_VERSION@@ does not support rpc/encoded. The main difference
+${SPEC_VERSION} does not support rpc/encoded. The main difference
 between document/literal bare and document/literal wrapped is that
 methods on a document/literal wrapped endpoint can have multiple
 parameters bound to the body of a SOAP message, while a
@@ -773,7 +753,7 @@ of the implied wrapper element around the invocation body.</P>
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>Defines
 			the encoding used for messages used in web service. Can only be
 			<FONT FACE="Cumberland, monospace">LITERAL</FONT> for JAX-WS
-			@@SPEC_VERSION@@</FONT></FONT></FONT></P>
+			${SPEC_VERSION}</FONT></FONT></FONT></P>
 		</TD>
 		<TD WIDTH=30% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>LITERAL</FONT></FONT></FONT></P>
@@ -2488,12 +2468,5 @@ public class HelloImpl {
         ...
     }
 }</PRE>
-<HR>
-<P><A HREF="Copyright.html"><I><FONT SIZE=2>Copyright &copy; 2006 Sun
-Microsystems, Inc. All rights reserved.</FONT></I></A></P>
-<P><BR><BR>
-</P>
-<P><BR><BR>
-</P>
-</BODY>
-</HTML>
+</body>
+</html>

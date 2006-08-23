@@ -21,8 +21,8 @@
  */
 
 /**
- * <h1>JAX-WS 2.0 Tools</h1>
- * This document describes the tools included with JAX-WS 2.0. 
+ * <h1>JAX-WS 2.0.1 Tools</h1>
+ * This document describes the tools included with JAX-WS 2.0.1. 
  *
  * {@DotDiagram
      digraph G {

@@ -27,20 +27,8 @@
     <import file="etc/deploy-targets.xml"/>
 
     <property environment="env"/>
-    <property file="../../../jwsdp-shared/bin/sjsas.props"/>
-    <condition property="lib.home" value="${DOMAIN_DIR}/../lib">
-        <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-    </condition>
-    <condition property="lib.home" value="${env.JAXWS_HOME}/lib">
-        <not>
-            <available file="../../../jwsdp-shared/bin/sjsas.props"/>
-        </not>
-    </condition>
 
     <property file="etc/build.properties"/>
-    <property name="build.home" value="${basedir}/build"/>
-    <property name="build.classes.home" value="${build.home}/classes"/>
-    <property name="build.war.home" value="${build.home}/war"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
@@ -109,6 +97,7 @@
 
     <target name="client" depends="generate-client">
         <javac
+                debug="true"
                 fork="true"
                 srcdir="${basedir}/src"
                 destdir="${build.classes.home}"
@@ -119,6 +108,18 @@
 
     <target name="run">
         <java fork="true" classname="${client}">
+            <classpath>
+                <path refid="jaxws.classpath"/>
+                <pathelement location="${build.classes.home}"/>
+                <pathelement location="${basedir}/etc"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-debug">
+        <java fork="true" classname="${client}">
+        <jvmarg value="-Xdebug"/>
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
