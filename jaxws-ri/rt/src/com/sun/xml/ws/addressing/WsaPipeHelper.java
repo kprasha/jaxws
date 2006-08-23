@@ -240,8 +240,10 @@ public abstract class WsaPipeHelper {
 
         WSDLPortImpl impl = (WSDLPortImpl)wsdlPort;
 
-        if (wsdlPort != null && impl.isAddressingEnabled() && !impl.isAddressingRequired() && !hIter.hasNext())
-            return null;
+        if (wsdlPort != null) {
+            if (!impl.isAddressingRequired() && !hIter.hasNext())
+                return null;
+        }
 
         try {
             Header midHeader = message.getHeaders().get(getMessageIDQName(), true);

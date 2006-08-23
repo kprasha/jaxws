@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 /**
  * @author Arun Gupta
@@ -48,12 +49,19 @@ public class WsaClientPipe extends WsaPipe {
     }
 
     public Packet process(Packet packet) {
-        Packet p = packet;
+        // Dispatch w/o WSDL
+        if (wsdlPort == null) {
+            return next.process(packet);
+        }
 
-        p = helper.writeClientOutboundHeaders(p);
-        p = next.process(p);
-//        p = helper.readClientInboundHeaders(p);
+        WSDLPortImpl impl = (WSDLPortImpl)wsdlPort;
+        if (!impl.isAddressingEnabled())
+            return next.process(packet);
 
-        return p;
+        packet = helper.writeClientOutboundHeaders(packet);
+        packet = next.process(packet);
+//        packet = helper.readClientInboundHeaders(packet);
+
+        return packet;
     }
 }
