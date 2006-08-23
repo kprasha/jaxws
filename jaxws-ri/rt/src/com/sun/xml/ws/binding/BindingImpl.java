@@ -123,6 +123,9 @@ public abstract class BindingImpl implements WSBinding {
     public void setMTOMEnabled(boolean value){}
 
     public boolean hasFeature(String feature) {
+        if (feature == null || getFeatures() == null)
+            return false;
+
         for (String f : getFeatures()) {
             if (feature.equals(f))
                 return true;
