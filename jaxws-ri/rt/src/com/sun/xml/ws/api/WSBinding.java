@@ -99,5 +99,7 @@ public interface WSBinding extends Binding {
 
     void setFeatures(String[] features);
 
+    String[] getFeatures();
+
     boolean hasFeature(String feature);
 }

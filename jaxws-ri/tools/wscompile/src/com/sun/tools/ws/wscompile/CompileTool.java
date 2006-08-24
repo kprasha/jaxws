@@ -68,6 +68,7 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Holder;
+import javax.xml.ws.BindingType;
 import javax.jws.WebService;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -689,7 +690,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);
                         }
-                    }, bindingID.createBinding(), null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, bindingID.createBinding(endpointClass.getAnnotation(BindingType.class).features()), null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)

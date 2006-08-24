@@ -90,6 +90,10 @@ public abstract class BindingID {
         return BindingImpl.create(this);
     }
 
+    public final @NotNull WSBinding createBinding(String[] features) {
+        return BindingImpl.create(this, features);
+    }
+
     /**
      * Gets the SOAP version of this binding.
      *

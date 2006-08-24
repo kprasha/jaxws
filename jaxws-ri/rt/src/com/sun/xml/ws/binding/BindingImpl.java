@@ -112,6 +112,13 @@ public abstract class BindingImpl implements WSBinding {
             return new SOAPBindingImpl(bindingId);
     }
 
+    public static BindingImpl create(@NotNull BindingID bindingId, String[] features) {
+        if(bindingId.equals(BindingID.XML_HTTP))
+            return new HTTPBindingImpl();
+        else
+            return new SOAPBindingImpl(bindingId, features);
+    }
+
     public static WSBinding getDefaultBinding() {
         return new SOAPBindingImpl(BindingID.SOAP11_HTTP);
     }

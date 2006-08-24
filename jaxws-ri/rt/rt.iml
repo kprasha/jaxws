@@ -101,18 +101,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/sjsxp.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/jsr173_1.0_src.zip!/src" />
-          <root url="jar://$MODULE_DIR$/../lib/sjsxp-src.zip!/src" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../lib/jsr250-api.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -153,22 +141,33 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/stax-ex.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/activation.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/stax-ex-src.zip!/src/java" />
+          <root url="jar://$MODULE_DIR$/../lib/activation-src.zip!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/activation.jar!/" />
+          <root url="jar://$MODULE_DIR$/../build/lib/jaxws-rt.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/activation-src.zip!/" />
+          <root url="file://$MODULE_DIR$/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../build/lib/jaxws-tools.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../tools/wscompile/src" />
         </SOURCES>
       </library>
     </orderEntry>

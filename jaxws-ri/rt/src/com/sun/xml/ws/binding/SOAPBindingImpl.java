@@ -72,6 +72,14 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     }
 
     /**
+     * Use {@link BindingImpl#create(BindingID)} to create this.
+     */
+    SOAPBindingImpl(BindingID bindingId, String[] features) {
+        this(bindingId);
+        setFeatures(features);
+    }
+
+    /**
      *  This method should be called if the binding has SOAPSEIModel
      *  The Headers understood by the Port are set, so that they can be used for MU
      *  processing.
