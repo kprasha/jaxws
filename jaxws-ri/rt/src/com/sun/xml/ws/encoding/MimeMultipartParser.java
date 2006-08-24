@@ -152,9 +152,10 @@ public final class MimeMultipartParser {
             String[] contentTypes = ih.getHeader("content-type");
             String contentType = (contentTypes != null) ? contentTypes[0] : "application/octet-stream";
             String [] contentIds = ih.getHeader("content-id");
-            String contentId = (contentIds != null) ? contentIds[0] : null;
-            if(contentId!=null && contentId.length()>2) {
-                if(contentId.charAt(0)=='<')   contentId=contentId.substring(1,contentId.length()-1);
+            String mimeContentId = (contentIds != null) ? contentIds[0] : null;
+            String contentId = mimeContentId;
+            if(mimeContentId!=null && mimeContentId.length()>2) {
+                if(contentId.charAt(0)=='<')   contentId=mimeContentId.substring(1,mimeContentId.length()-1);
             }
 
             ByteArrayBuffer bos = new ByteArrayBuffer();
@@ -162,7 +163,7 @@ public final class MimeMultipartParser {
             StreamAttachment as = new StreamAttachment(bos, contentId, contentType);
             if (start == null && firstPart) {
                 root = as;      // Taking first part as root part
-            } else if (contentId != null && start != null && start.equals(contentId)) {
+            } else if (mimeContentId != null && start != null && start.equals(mimeContentId)) {
                 root = as;      // root part as identified by start parameter
             } else if (contentId != null) {
                 attachments.put(contentId, as);     // Attachment part
