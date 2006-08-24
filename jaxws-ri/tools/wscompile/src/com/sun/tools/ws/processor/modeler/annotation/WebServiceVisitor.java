@@ -610,8 +610,12 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     
     
     protected boolean isLegalMethod(MethodDeclaration method, TypeDeclaration typeDecl) {
-        if (hasWebMethods && method.getAnnotation(WebMethod.class) == null)
+        WebMethod webMethod = method.getAnnotation(WebMethod.class);
+        if (hasWebMethods && (webMethod == null))
             return true;
+        if (!hasWebMethods && (webMethod !=null) && webMethod.exclude()) {
+            return true;
+        }
         if (typeDecl instanceof ClassDeclaration && method.getModifiers().contains(Modifier.ABSTRACT)) {
             builder.onError(method.getPosition(), "webserviceap.webservice.method.is.abstract",
                 typeDecl.getQualifiedName(), method.getSimpleName());
