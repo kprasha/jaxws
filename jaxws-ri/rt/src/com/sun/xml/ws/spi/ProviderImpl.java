@@ -23,22 +23,29 @@ package com.sun.xml.ws.spi;
 
 
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.W3CEndpointReference;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
-import javax.xml.transform.Source;
-
 import java.net.URL;
 
 /**
  * @author WS Development Team
  */
 public class ProviderImpl extends Provider {
+
+    private final static JAXBContext eprjc = getEPRJaxbContext();
 
     @Override
     public Endpoint createEndpoint(String bindingId, Object implementor) {
@@ -67,7 +74,20 @@ public class ProviderImpl extends Provider {
     }
 
     public EndpointReference readEndpointReference(Source eprInfoset) {
-        return null;
+        Unmarshaller unmarshaller;
+        try {
+            unmarshaller = eprjc.createUnmarshaller();
+            return (EndpointReference) unmarshaller.unmarshal(eprInfoset);
+        } catch (JAXBException e) {
+            throw new WebServiceException("Error creating Marshaller or marshalling.", e);
+        }
     }
 
+    private final static JAXBContext getEPRJaxbContext() {
+        try {
+            return JAXBContext.newInstance(MemberSubmissionEndpointReference.class, W3CEndpointReference.class);
+        } catch (JAXBException e) {
+            throw new WebServiceException("Error creating JAXBContext for W3CEndpointReference. ", e);
+        }
+    }
 }
