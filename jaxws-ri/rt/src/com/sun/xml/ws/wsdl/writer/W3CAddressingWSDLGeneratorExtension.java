@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.2 2006-08-18 21:56:17 arungupta Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.3 2006-08-25 22:14:39 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -93,6 +93,9 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
         if (a != null && a.fault() != null) {
             for (FaultAction fa : a.fault()) {
                 if (fa.className().getName().equals(ce.getExcpetionClass().getName())) {
+                    if (fa.value().equals(""))
+                        return;
+
                     addAttribute(fault, fa.value());
                     return;
                 }
