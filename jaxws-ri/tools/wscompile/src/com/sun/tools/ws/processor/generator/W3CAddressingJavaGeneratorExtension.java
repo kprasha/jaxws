@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingJavaGeneratorExtension.java,v 1.1.2.2 2006-08-11 21:48:40 arungupta Exp $
+ $Id: W3CAddressingJavaGeneratorExtension.java,v 1.1.2.3 2006-08-25 04:12:22 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -48,7 +48,8 @@ public class W3CAddressingJavaGeneratorExtension extends TJavaGeneratorExtension
     public void writeMethodAnnotations(TWSDLOperation two, JMethod jMethod) {
         JAnnotationUse actionAnn = null;
 
-        assert !(two instanceof Operation);
+        if (!(two instanceof Operation))
+            return;
 
         Operation o = ((Operation)two);
 
