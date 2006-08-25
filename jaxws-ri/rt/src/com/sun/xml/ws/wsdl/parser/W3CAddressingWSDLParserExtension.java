@@ -144,7 +144,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
         String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
-        if (action != null) {
+        if (action != null && !action.equals("")) {
             String name = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
             impl.getFaultActionMap().put(name, action);
         }
