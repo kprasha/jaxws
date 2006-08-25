@@ -23,7 +23,7 @@ package com.sun.xml.ws.spi;
 
 
 import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
+//import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
@@ -85,7 +85,8 @@ public class ProviderImpl extends Provider {
 
     private final static JAXBContext getEPRJaxbContext() {
         try {
-            return JAXBContext.newInstance(MemberSubmissionEndpointReference.class, W3CEndpointReference.class);
+            //return JAXBContext.newInstance(MemberSubmissionEndpointReference.class, W3CEndpointReference.class);
+            return JAXBContext.newInstance(W3CEndpointReference.class);
         } catch (JAXBException e) {
             throw new WebServiceException("Error creating JAXBContext for W3CEndpointReference. ", e);
         }
