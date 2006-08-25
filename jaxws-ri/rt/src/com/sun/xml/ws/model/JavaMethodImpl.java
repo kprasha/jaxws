@@ -214,7 +214,7 @@ public final class JavaMethodImpl implements JavaMethod {
      */
     public CheckedExceptionImpl getCheckedException(Class exceptionClass) {
         for (CheckedExceptionImpl ce : exceptions) {
-            if (ce.getExcpetionClass()==exceptionClass)
+            if (ce.getExceptionClass()==exceptionClass)
                 return ce;
         }
         return null;

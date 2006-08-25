@@ -226,7 +226,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     public boolean isCheckedException(Method m, Class ex) {
         JavaMethodImpl jm = getJavaMethod(m);
         for (CheckedExceptionImpl ce : jm.getCheckedExceptions()) {
-            if (ce.getExcpetionClass().equals(ex))
+            if (ce.getExceptionClass().equals(ex))
                 return true;
         }
         return false;

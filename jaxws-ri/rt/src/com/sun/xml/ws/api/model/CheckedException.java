@@ -59,7 +59,7 @@ public interface CheckedException {
      * @return
      *      always non-null same object.
      */
-    Class<? extends RemoteException> getExcpetionClass();
+    Class getExceptionClass();
 
     /**
      * The detail bean is serialized inside the detail entry in the SOAP message.

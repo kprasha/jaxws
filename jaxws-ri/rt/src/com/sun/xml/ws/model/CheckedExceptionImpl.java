@@ -77,7 +77,7 @@ public final class CheckedExceptionImpl implements CheckedException {
      * @return the <code>Class</clode> for this object
      * 
      */
-    public Class getExcpetionClass() {
+    public Class getExceptionClass() {
         return exceptionClass;
     }
 

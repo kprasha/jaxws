@@ -94,7 +94,7 @@ public abstract class SOAPFaultBuilder {
             return createUserDefinedException(ce);
 
         }
-        Class exceptionClass = ce.getExcpetionClass();
+        Class exceptionClass = ce.getExceptionClass();
         try {
             Constructor constructor = exceptionClass.getConstructor(String.class, (Class) ce.getDetailType().type);
             Object exception = constructor.newInstance(getFaultString(), getJAXBObject(jaxbDetail, ce));
@@ -195,7 +195,7 @@ public abstract class SOAPFaultBuilder {
     }
 
     private Exception createUserDefinedException(CheckedExceptionImpl ce) {
-        Class exceptionClass = ce.getExcpetionClass();
+        Class exceptionClass = ce.getExceptionClass();
         try {
             Constructor constructor = exceptionClass.getConstructor(String.class);
             Object exception = constructor.newInstance(getFaultString());
