@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.2 2006-08-18 21:56:10 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.3 2006-08-25 22:57:50 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -30,6 +30,8 @@ import java.util.Map;
 
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
+import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.tools.ws.util.xml.XmlUtil;
 import com.sun.tools.ws.wsdl.document.Fault;
 import com.sun.tools.ws.wsdl.document.Input;
@@ -41,8 +43,15 @@ import org.w3c.dom.Element;
  * @author Arun Gupta
  */
 public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
+    private final ProcessorEnvironment env;
+
     public W3CAddressingExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap) {
+        this(extensionHandlerMap, null);
+    }
+
+    public W3CAddressingExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap, ProcessorEnvironment env) {
         super(extensionHandlerMap);
+        this.env = env;
     }
 
     @Override
@@ -70,11 +79,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleInputExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
         if (actionValue == null || actionValue.equals("")) {
-            Util.fail(
-                "parsing.invalidExtensionElement",
-                e.getTagName(),
-                e.getNamespaceURI());
-            return false; // keep compiler happy
+            return warnEmptyAction(parent);
         }
 
         context.push();
@@ -88,11 +93,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleOutputExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
         if (actionValue == null || actionValue.equals("")) {
-            Util.fail(
-                "parsing.invalidExtensionElement",
-                e.getTagName(),
-                e.getNamespaceURI());
-            return false; // keep compiler happy
+            return warnEmptyAction(parent);
         }
 
         context.push();
@@ -106,11 +107,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleFaultExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
         if (actionValue == null || actionValue.equals("")) {
-            Util.fail(
-                "parsing.invalidExtensionElement",
-                e.getTagName(),
-                e.getNamespaceURI());
-            return false; // keep compiler happy
+            return warnEmptyAction(parent);
         }
 
         context.push();
@@ -123,5 +120,10 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     @Override
     public boolean handlePortExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         return handleBindingExtension(context, parent, e);
+    }
+
+    private boolean warnEmptyAction(TWSDLExtensible parent) {
+        env.warn(WsdlMessages.localizableWARNING_INVALID_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+        return false; // keep compiler happy
     }
 }
