@@ -144,7 +144,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
         String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
-        if (action != null && !action.equals("")) {
+        if (action != null) {
             String name = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
             impl.getFaultActionMap().put(name, action);
         }
@@ -208,7 +208,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         for (WSDLOperationImpl o : porttype.getOperations()) {
             // TODO: this may be performance intensive. Alternatively default action
             // TODO: can be calculated when the operation is actually invoked.
-            if (o.getInput().getAction() == null) {
+            if (o.getInput().getAction() == null || o.getInput().getAction().equals("")) {
                 // explicit wsaw:Action is not specified
                 WSDLBoundOperationImpl wboi = binding.get(o.getName());
                 String soapAction = wboi.getSOAPAction();
@@ -225,7 +225,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
             if (o.getOutput() == null)
                 continue;
 
-            if (o.getOutput().getAction() == null) {
+            if (o.getOutput().getAction() == null || o.getOutput().getAction().equals("")) {
                 o.getOutput().setAction(defaultOutputAction(o));
             }
 
@@ -234,7 +234,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
 
             Map<String,String> map = o.getFaultActionMap();
             for (WSDLFault f : o.getFaults()) {
-                if (map.get(f.getName()) == null)
+                if (map.get(f.getName()) == null || map.get(f.getName()).equals(""))
                     map.put(f.getName(), defaultFaultAction(f.getName(), o));
             }
         }
