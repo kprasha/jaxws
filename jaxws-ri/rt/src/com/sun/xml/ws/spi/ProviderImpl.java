@@ -24,7 +24,6 @@ package com.sun.xml.ws.spi;
 
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
-import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference2;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
 
