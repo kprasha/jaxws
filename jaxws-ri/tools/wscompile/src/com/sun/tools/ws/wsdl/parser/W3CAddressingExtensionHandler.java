@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.3 2006-08-25 22:57:50 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.4 2006-08-25 23:31:23 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -107,7 +107,8 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleFaultExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
         if (actionValue == null || actionValue.equals("")) {
-            return warnEmptyAction(parent);
+            env.warn(WsdlMessages.localizableWARNING_FAULT_EMPTY_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+            return false; // keep compiler happy
         }
 
         context.push();
@@ -123,7 +124,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     }
 
     private boolean warnEmptyAction(TWSDLExtensible parent) {
-        env.warn(WsdlMessages.localizableWARNING_INVALID_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+        env.warn(WsdlMessages.localizableWARNING_INPUT_OUTPUT_EMPTY_ACTION(parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
         return false; // keep compiler happy
     }
 }
