@@ -655,6 +655,10 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
             final File[] wsdlFileName = new File[1]; // used to capture the generated WSDL file.
             final Map<String,File> schemaFiles = new HashMap<String,File>();
+            BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
+            String[] features = null;
+            if (bindingType != null)
+                features = bindingType.features();
 
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
@@ -690,7 +694,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);
                         }
-                    }, bindingID.createBinding(endpointClass.getAnnotation(BindingType.class).features()), null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, features == null ? bindingID.createBinding() : bindingID.createBinding(features), null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)
