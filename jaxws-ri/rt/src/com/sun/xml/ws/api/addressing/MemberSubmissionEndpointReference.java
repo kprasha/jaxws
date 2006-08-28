@@ -42,6 +42,18 @@ public final class MemberSubmissionEndpointReference extends EndpointReference {
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
 
+      /**
+     *Default Constuctor for MemberSubmissionEPR
+     *
+     * @param source A source object containing valid XmlInfoset
+     * instance consistent with the W3C WS-Addressing Core
+     * recommendation.
+     *
+     * @throws 
+     *  
+     */
+    public MemberSubmissionEndpointReference(){}
+
     /**
      * construct an EPR from infoset representation
      *
