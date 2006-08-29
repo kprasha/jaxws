@@ -50,6 +50,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private boolean mtomEnabled;
     private boolean addressingEnabled;
     private boolean isAddressingRequired;
+    private String addressingNamespace;
 
     /**
      * Operations keyed by the payload tag name.
@@ -195,8 +196,13 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return mtomEnabled;
     }
 
-    public void enableAddressing() {
+    public void enableAddressing(String namespace) {
         addressingEnabled = true;
+        addressingNamespace = namespace;
+    }
+
+    public String getAddressingVersion() {
+        return addressingNamespace;
     }
 
     public boolean isAddressingEnabled() {
