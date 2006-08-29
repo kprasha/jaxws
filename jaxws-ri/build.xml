@@ -534,7 +534,7 @@ major-version=${release.impl.version}
     <!-- ${suffix} can be overridden to "" for posting releases -->
     <property name="suffix" value="-SNAPSHOT" />
     <maven-repository-importer
-        destdir="build/maven-repo" version="${release.impl.version}${suffix}">
+        destdir="build/maven-repo" version="${release.impl.version}${release.impl.version.suffix}">
       <artifact
         jar="${build.home}/lib/jaxws-api.jar"
         pom="etc/poms/jaxws-api.pom" />
@@ -560,7 +560,7 @@ major-version=${release.impl.version}
   
     <target name="integrate-jaxb-hudson" depends="prepare"
             description="integrate the last successful JAXB Hudson build">
-      <get src="http://kohsuke.sfbay.sun.com/hudson/job/jaxb-ri/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/jaxb-ri.zip"
+      <get src="http://kohsuke.sfbay.sun.com/hudson/job/jaxb-ri-2.1/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/jaxb-ri.zip"
            dest="${build.home}/jaxb-ri.zip" />
       <mkdir dir="${build.home}/jaxb" />
       <unzip src="${build.home}/jaxb-ri.zip" dest="${build.home}/jaxb"/>
@@ -651,9 +651,9 @@ major-version=${release.impl.version}
         <param name="compile.debug" value="true"/>
       </antcall>
       <move tofile="${build.home}/jaxws${release.jar.version}.jar"
-         file="${build.home}/JAXWS2.0.1ea_${DSTAMP}.jar"/>
+         file="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_${DSTAMP}.jar"/>
       <move tofile="${build.home}/jaxws${release.jar.version}-src.jar"
-         file="${build.home}/JAXWS2.0.1ea_source_${DSTAMP}.jar"/>
+         file="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_source_${DSTAMP}.jar"/>
     </target>
 
     <target name="generate-binary"
@@ -663,7 +663,7 @@ major-version=${release.impl.version}
       </antcall>
       <tstamp/>
       <!-- generate the class -->
-      <installerBuilder classFile="${build.home}/JAXWS2.0.1m1_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${build.home}/jaxws-ri.zip" />
     </target>
@@ -726,7 +726,7 @@ major-version=${release.impl.version}
       </zip>
           
       <!-- generate the installer -->
-      <installerBuilder classFile="${build.home}/JAXWS2.0.1m1_source_${DSTAMP}.jar"
+      <installerBuilder classFile="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_source_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
           zipFile="${source.drop.dir}/jaxws-src-installer.zip"/>
       <delete dir="${source.drop.dir}"/>
