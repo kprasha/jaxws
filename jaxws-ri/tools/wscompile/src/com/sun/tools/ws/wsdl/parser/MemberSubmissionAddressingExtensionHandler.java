@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: MemberSubmissionAddressingExtensionHandler.java,v 1.1.2.2 2006-08-18 21:56:10 arungupta Exp $
+ $Id: MemberSubmissionAddressingExtensionHandler.java,v 1.1.2.3 2006-08-29 04:07:39 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -28,9 +28,9 @@ package com.sun.tools.ws.wsdl.parser;
 
 import java.util.Map;
 
-import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-import com.sun.xml.ws.addressing.MemberSubmissionAddressingConstants;
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import org.w3c.dom.Element;
 
 /**

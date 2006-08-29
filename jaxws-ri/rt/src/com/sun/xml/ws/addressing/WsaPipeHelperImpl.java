@@ -48,7 +48,6 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.addressing.model.AddressingProperties;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.ProblemAction;
 import com.sun.xml.ws.addressing.model.ProblemHeaderQName;
 import com.sun.xml.ws.addressing.model.Elements;
 import com.sun.xml.ws.addressing.model.Relationship;
