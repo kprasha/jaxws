@@ -96,7 +96,7 @@ public abstract class WsaPipeHelper {
         // wsa:ReplyTo
         // null or "true" is equivalent to request/response MEP
         if (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort)) {
-            EndpointReferenceImpl epr = new EndpointReferenceImpl();
+            EndpointReference epr = newEndpointReference();
             ap.setReplyTo(epr);
         }
 
@@ -768,6 +768,7 @@ public abstract class WsaPipeHelper {
     protected abstract void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion);
     protected abstract Relationship newRelationship(Relationship r);
     protected abstract Relationship newRelationship(String mid);
+    protected abstract EndpointReference newEndpointReference();
 
 
     protected static final DocumentBuilder db;

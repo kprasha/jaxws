@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- *
+ * 
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- *
+ * 
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,12 +16,13 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- *
+ * 
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing;
+package com.sun.xml.ws.addressing.v200408;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -33,24 +34,25 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
-import javax.xml.XMLConstants;
 
-import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.addressing.ProblemHeaderQName;
+import com.sun.xml.ws.addressing.RelationshipImpl;
+import com.sun.xml.ws.addressing.WsaPipeHelper;
+import com.sun.xml.ws.addressing.ProblemAction;
+import com.sun.xml.ws.addressing.model.AddressingProperties;
+import com.sun.xml.ws.addressing.model.Elements;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
+import com.sun.xml.ws.addressing.model.Relationship;
+import static com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants.*;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.addressing.model.AddressingProperties;
-import com.sun.xml.ws.addressing.model.InvalidMapException;
-import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.Elements;
-import com.sun.xml.ws.addressing.model.Relationship;
 import org.w3c.dom.Element;
-
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.*;
 
 /**
  * @author Arun Gupta
@@ -62,13 +64,12 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         try {
             jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
                                          ObjectFactory.class,
-                                         RelationshipImpl.class,
-                                         ProblemAction.class,
-                                         ProblemHeaderQName.class);
+                                         RelationshipImpl.class);
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
     }
+
 
     private WsaPipeHelperImpl() {
         try {
@@ -126,44 +127,6 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     @Override
     protected final void checkAnonymousSemantics(WSDLBoundOperation wbo, AddressingProperties ap) {
-        if (wbo == null)
-            return;
-
-        if (ap == null)
-            return;
-
-        WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)wbo;
-        WSDLBoundOperationImpl.ANONYMOUS anon = impl.getAnonymous();
-
-        String replyTo = null;
-        String faultTo = null;
-
-        if (ap.getReplyTo() != null)
-            replyTo = ((EndpointReferenceImpl) ap.getReplyTo()).getAddress();
-
-        if (ap.getFaultTo() != null)
-            faultTo = ((EndpointReferenceImpl) ap.getFaultTo()).getAddress();
-
-        if (anon == WSDLBoundOperationImpl.ANONYMOUS.optional) {
-            // no check is required
-        } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.required) {
-            if (replyTo != null && !replyTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getReplyToQName(), ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
-
-            if (faultTo != null && !faultTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getFaultToQName(), ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
-
-        } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.prohibited) {
-            if (replyTo != null && replyTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getReplyToQName(), ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
-
-            if (faultTo != null && faultTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getFaultToQName(), ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
-
-        } else {
-            // cannot reach here
-            throw new WebServiceException("Invalid value in TWsaWSDLBindingOperationExtension: \"" + anon + "\"");
-        }
     }
 
     @XmlRegistry
@@ -327,10 +290,11 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     @Override
     protected void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion) {
-        RelationshipImpl reli = (RelationshipImpl)rel;
+        com.sun.xml.ws.addressing.RelationshipImpl reli = (RelationshipImpl)rel;
         hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
     }
 
+    @Override
     protected Relationship newRelationship(Relationship r) {
         return new RelationshipImpl(r.getId(), r.getType());
     }
@@ -382,7 +346,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
         String uri = ((EndpointReferenceImpl)source).getAddress();
         if (uri == null)
-            throw new InvalidMapException(INVALID_MAP_QNAME, MISSING_ADDRESS_IN_EPR);
+            throw new InvalidMapException(INVALID_MAP_QNAME, WSA_ADDRESS_QNAME);
 
         props.setTo(uri);
 
@@ -390,23 +354,10 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
         if (params != null) {
             for (Element refp : params.getElements()) {
-                addIsRefp(refp);
                 props.getReferenceParameters().getElements().add(refp);
             }
         }
 
         return props;
-    }
-
-    void addIsRefp(Element refp) {
-        refp.setAttributeNS(WSA_NAMESPACE_NAME,
-            WSA_NAMESPACE_PREFIX + ":" + WSA_IS_REFERENCE_PARAMETER_QNAME.getLocalPart(),
-            "true");
-
-        // TODO: This may cause a namespace prefix conflict and is a tricky problem
-        // TODO: to solve. For example, parent might have a similar prefix used
-        // TODO: for some other purpose, etc.
-        refp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,"xmlns:"+WSA_NAMESPACE_PREFIX,
-            WSA_NAMESPACE_NAME);
     }
 }
