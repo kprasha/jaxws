@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 
 /**
  * @author Arun Gupta
@@ -52,7 +53,10 @@ public abstract class WsaPipe extends AbstractPipeImpl {
     }
 
     private WsaPipeHelper getPipeHelper() {
-//        return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);
-        return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(seiModel, wsdlPort, binding);
+        String ns = wsdlPort.getBinding().getAddressingVersion();
+        if (ns.equals(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME))
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(seiModel, wsdlPort, binding);
+        else
+            return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);
     }
 }

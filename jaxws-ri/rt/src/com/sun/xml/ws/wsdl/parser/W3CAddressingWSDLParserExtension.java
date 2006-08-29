@@ -57,7 +57,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
 
         QName ua = reader.getName();
         if (ua.equals(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
-            impl.enableAddressing();
+            impl.enableAddressing(W3CAddressingConstants.WSA_NAMESPACE_NAME);
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
             impl.setAddressingRequired(Boolean.parseBoolean(required));
 
@@ -123,8 +123,10 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
         String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
-        impl.getInput().setAction(action);
-        impl.getInput().setDefaultAction(action == null);
+        if (action != null) {
+            impl.getInput().setAction(action);
+            impl.getInput().setDefaultAction(false);
+        }
 
         return false;
     }
@@ -134,7 +136,9 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
         String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
-        impl.getOutput().setAction(action);
+        if (action != null) {
+            impl.getOutput().setAction(action);
+        }
 
         return false;
     }
@@ -193,9 +197,13 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         }
 
         if (!binding.isAddressingEnabled() && port.isAddressingEnabled()) {
-            binding.enableAddressing();
+            binding.enableAddressing(getNamespaceURI());
             binding.setAddressingRequired(binding.isAddressingRequired());
         }
+    }
+
+    protected String getNamespaceURI() {
+        return W3CAddressingConstants.WSA_NAMESPACE_NAME;
     }
 
     /**
