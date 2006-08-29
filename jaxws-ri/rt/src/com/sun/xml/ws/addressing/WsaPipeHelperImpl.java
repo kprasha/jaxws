@@ -385,9 +385,10 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         Elements params = ((EndpointReferenceImpl)source).getRefParams();
 
         if (params != null) {
-            Elements elems = props.getReferenceParameters();
-            for (Element refp : params.getElements())
+            for (Element refp : params.getElements()) {
                 addIsRefp(refp);
+                props.getReferenceParameters().getElements().add(refp);
+            }
         }
 
         return props;

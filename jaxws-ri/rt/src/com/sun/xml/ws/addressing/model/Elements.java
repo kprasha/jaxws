@@ -24,6 +24,8 @@ package com.sun.xml.ws.addressing.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAnyAttribute;
@@ -41,10 +43,16 @@ public class Elements {
     Map<QName,String> attributes;
 
     public Map<QName, String> getAttributes() {
+        if (attributes == null)
+            attributes = new HashMap<QName, String>();
+
         return attributes;
     }
 
     public List<Element> getElements() {
+        if (elements == null)
+            elements = new ArrayList<Element>();
+
         return elements;
     }
 }

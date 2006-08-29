@@ -102,10 +102,14 @@ public class AddressingProperties {
     }
 
     public Elements getMetadata() {
+        if (metadata == null)
+            metadata = new Elements();
         return metadata;
     }
 
     public Elements getReferenceParameters() {
+        if (referenceParameters == null)
+            referenceParameters = new Elements();
         return referenceParameters;
     }
 
