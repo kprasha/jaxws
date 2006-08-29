@@ -22,8 +22,6 @@
 
 package com.sun.xml.ws.addressing;
 
-import java.util.List;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -48,7 +46,6 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.addressing.model.AddressingProperties;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.ProblemHeaderQName;
 import com.sun.xml.ws.addressing.model.Elements;
 import com.sun.xml.ws.addressing.model.Relationship;
 import org.w3c.dom.Element;
@@ -66,7 +63,8 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
             jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
                                          ObjectFactory.class,
                                          RelationshipImpl.class,
-                                         ProblemAction.class);
+                                         ProblemAction.class,
+                                         ProblemHeaderQName.class);
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }

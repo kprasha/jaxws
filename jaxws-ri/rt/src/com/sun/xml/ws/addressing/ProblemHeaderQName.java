@@ -20,18 +20,18 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing.model;
+package com.sun.xml.ws.addressing;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 import javax.xml.namespace.QName;
 
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.WSA_NAMESPACE_NAME;
 
 /**
  * @author Arun Gupta
  */
-@XmlRootElement(name="ProblemHeaderQName", namespace= W3CAddressingConstants.WSA_NAMESPACE_NAME)
+@XmlRootElement(name="ProblemHeaderQName", namespace= WSA_NAMESPACE_NAME)
 public class ProblemHeaderQName {
 
     @XmlValue
