@@ -52,7 +52,7 @@ public final class MemberSubmissionEndpointReference extends EndpointReference {
      * @throws 
      *  
      */
-    public MemberSubmissionEndpointReference(){}
+    protected MemberSubmissionEndpointReference(){}
 
     /**
      * construct an EPR from infoset representation
@@ -72,9 +72,9 @@ public final class MemberSubmissionEndpointReference extends EndpointReference {
             if (unmarshaller == null)
                 unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
             MemberSubmissionEndpointReference epr = (MemberSubmissionEndpointReference)unmarshaller.unmarshal(source);
-            this.address = epr.address;
-            this.metadata = epr.metadata;
-            this.referenceParameters = epr.referenceParameters;
+            this.addrezz = epr.addrezz;
+            this.metaData = epr.metaData;
+            this.referenceParams = epr.referenceParams;
         } catch (JAXBException e) {
             throw new WebServiceException("Error unmarshalling W3CEndpointReference " ,e);
         } catch (ClassCastException e) {
@@ -105,26 +105,26 @@ public final class MemberSubmissionEndpointReference extends EndpointReference {
     }
 
     // private but necessary properties for databinding
-    @XmlElement(name="Address",namespace= MemberSubmissionEndpointReference.NS)
-    private MemberSubmissionEndpointReference.Address address;
-    @XmlElement(name="ReferenceParameters",namespace= MemberSubmissionEndpointReference.NS)
-    private MemberSubmissionEndpointReference.Elements referenceParameters;
-    @XmlElement(name="Metadata",namespace= MemberSubmissionEndpointReference.NS)
-    private MemberSubmissionEndpointReference.Elements metadata;
+    @XmlElement(name="Addrezz",namespace= MemberSubmissionEndpointReference.NS)
+    private MemberSubmissionEndpointReference.Addrezz addrezz;
+    @XmlElement(name="ReferenceParams",namespace= MemberSubmissionEndpointReference.NS)
+    private MemberSubmissionEndpointReference.Elementz referenceParams;
+    @XmlElement(name="MetaData",namespace= MemberSubmissionEndpointReference.NS)
+    private MemberSubmissionEndpointReference.Elementz metaData;
 
-    private static class Address {
+    private static class Addrezz {
         @XmlValue
-        String uri;
+        String uRI;
         @XmlAnyAttribute
-        Map<QName,String> attributes;
+        Map<QName,String> attrs;
     }
 
 
-    private static class Elements {
+    private static class Elementz {
         @XmlAnyElement
-        List<Element> elements;
+        List<Element> elementz;
         @XmlAnyAttribute
-        Map<QName,String> attributes;
+        Map<QName,String> attrs;
     }
 
     // Could use MemberSubmissionAdressingConstants - but
