@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.4 2006-08-25 23:31:23 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.5 2006-08-29 19:34:19 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -27,6 +27,8 @@
 package com.sun.tools.ws.wsdl.parser;
 
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
@@ -59,9 +61,17 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
         return W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME;
     }
 
+    protected QName getActionQName() {
+        return W3CAddressingConstants.WSAW_ACTION_QNAME;
+    }
+
+    protected QName getWSDLExtensionQName() {
+        return W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME;
+    }
+
     @Override
     public boolean handleBindingExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        if (XmlUtil.matchesTagNS(e, W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
+        if (XmlUtil.matchesTagNS(e, getWSDLExtensionQName())) {
             context.push();
             context.registerNamespaces(e);
 
@@ -77,7 +87,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
 
     @Override
     public boolean handleInputExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
+        String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
             return warnEmptyAction(parent);
         }
@@ -91,7 +101,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
 
     @Override
     public boolean handleOutputExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
+        String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
             return warnEmptyAction(parent);
         }
@@ -105,7 +115,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
 
     @Override
     public boolean handleFaultExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
-        String actionValue = XmlUtil.getAttributeNSOrNull(e, W3CAddressingConstants.WSAW_ACTION_QNAME);
+        String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
             env.warn(WsdlMessages.localizableWARNING_FAULT_EMPTY_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
             return false; // keep compiler happy
