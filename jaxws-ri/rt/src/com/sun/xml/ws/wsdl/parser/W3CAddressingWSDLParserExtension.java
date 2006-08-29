@@ -245,7 +245,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
      *
      * @param binding WSDLBoundPortTypeImpl
      */
-    private void patchAnonymousDefault(WSDLBoundPortTypeImpl binding) {
+    protected void patchAnonymousDefault(WSDLBoundPortTypeImpl binding) {
         for (WSDLBoundOperationImpl wbo : binding.getBindingOperations()) {
             if (wbo.getAnonymous() == null)
                 wbo.setAnonymous(WSDLBoundOperationImpl.ANONYMOUS.optional);
@@ -287,6 +287,6 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
             name;
     }
 
-    private static final String SLASH_DELIMITER = "/";
-    private static final String COLON_DELIMITER = ":";
+    protected static final String COLON_DELIMITER = ":";
+    protected static final String SLASH_DELIMITER = "/";
 }
