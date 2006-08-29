@@ -32,6 +32,8 @@ import javax.xml.namespace.QName;
 public interface MemberSubmissionAddressingConstants {
     public static final String WSA_NAMESPACE_NAME = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
     public static final String WSA_NAMESPACE_WSDL_NAME = WSA_NAMESPACE_NAME;
+    public static final String WSA_NAMESPACE_POLICY_NAME = "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
+
     public static final String WSA_NAMESPACE_PREFIX = "wsa";
     public static final String WSA_NAMESPACE_WSDL_PREFIX = "wsa";
 
@@ -70,6 +72,8 @@ public interface MemberSubmissionAddressingConstants {
     public static final String WSAW_ACTION_NAME = "Action";
     public static final QName WSAW_ACTION_QNAME = new QName(WSA_NAMESPACE_WSDL_NAME, WSAW_ACTION_NAME);
 
+    public static final String WSAW_USING_ADDRESSING_NAME = "UsingAddressing";
+    public static final QName WSAW_USING_ADDRESSING_QNAME = new QName(WSA_NAMESPACE_WSDL_NAME, WSAW_USING_ADDRESSING_NAME);
     public static final String WSDL_INSTANCE_NAMESPACE_NAME = "http://www.w3.org/2004/08/wsdl-instance";
 
     public static final QName INVALID_MAP_QNAME = new QName(WSA_NAMESPACE_NAME, "InvalidMessageInformationHeader");
