@@ -36,7 +36,7 @@ public class RelationshipImpl extends Relationship {
     }
 
     public RelationshipImpl(String id) {
-        super(id);
+        this(id, W3CAddressingConstants.WSA_RELATIONSHIP_REPLY);
     }
 
     public RelationshipImpl(String id, String type) {

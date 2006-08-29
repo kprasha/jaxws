@@ -26,28 +26,33 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.ws.EndpointReference;
 import javax.xml.transform.Result;
+import javax.xml.ws.EndpointReference;
 
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.WSA_ADDRESS_NAME;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.WSA_ANONYMOUS_ADDRESS;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.WSA_METADATA_NAME;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.WSA_NAMESPACE_NAME;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.WSA_REFERENCEPARAMETERS_NAME;
 import com.sun.xml.ws.addressing.model.Elements;
 
 /**
  * @author Arun Gupta
  */
 @XmlAccessorType(value = XmlAccessType.FIELD)
-@XmlRootElement(name="EndpointReference",namespace= W3CAddressingConstants.WSA_NAMESPACE_NAME)
+@XmlRootElement(name="EndpointReference",namespace= WSA_NAMESPACE_NAME)
 public class EndpointReferenceImpl extends EndpointReference {
-    @XmlElement(name = "Address", namespace = W3CAddressingConstants.WSA_NAMESPACE_NAME)
+    @XmlElement(name = WSA_ADDRESS_NAME, namespace = WSA_NAMESPACE_NAME)
     private String address;
 
-    @XmlElement(name = "ReferenceParameters", namespace = W3CAddressingConstants.WSA_NAMESPACE_NAME)
+    @XmlElement(name = WSA_REFERENCEPARAMETERS_NAME, namespace = WSA_NAMESPACE_NAME)
     private Elements refParams;
 
-    @XmlElement(name = "Metadata", namespace = W3CAddressingConstants.WSA_NAMESPACE_NAME)
+    @XmlElement(name = WSA_METADATA_NAME, namespace = WSA_NAMESPACE_NAME)
     private Elements metadata;
 
     public EndpointReferenceImpl() {
-        address = W3CAddressingConstants.WSA_ANONYMOUS_ADDRESS;
+        address = WSA_ANONYMOUS_ADDRESS;
     }
 
     public EndpointReferenceImpl(String address) {

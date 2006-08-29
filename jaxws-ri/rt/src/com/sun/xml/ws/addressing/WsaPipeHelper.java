@@ -216,8 +216,8 @@ public abstract class WsaPipeHelper {
             }
 
             if (mid != null) {
-                Relationship rel = new Relationship(mid.toString(), getRelationshipType());
-                m.getHeaders().add(Headers.create(binding.getSOAPVersion(), marshaller, getRelatesToQName(), rel));
+                Relationship rel = newRelationship(mid.toString());
+                writeRelatesTo(rel, m.getHeaders(), binding.getSOAPVersion());
             }
 
             return packet.createResponse(m);
@@ -765,6 +765,7 @@ public abstract class WsaPipeHelper {
     protected abstract String getAnonymousURI();
     protected abstract String getRelationshipType();
     protected abstract void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion);
+    protected abstract void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion);
     protected abstract Relationship newRelationship(Relationship r);
     protected abstract Relationship newRelationship(String mid);
 
@@ -781,8 +782,6 @@ public abstract class WsaPipeHelper {
         }
     }
 
-
-    protected JAXBContext jc;
     protected Unmarshaller unmarshaller;
     protected Marshaller marshaller;
 

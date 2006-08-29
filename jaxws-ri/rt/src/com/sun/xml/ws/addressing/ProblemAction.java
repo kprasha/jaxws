@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.addressing.model;
+package com.sun.xml.ws.addressing;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;

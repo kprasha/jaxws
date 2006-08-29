@@ -54,16 +54,27 @@ import com.sun.xml.ws.addressing.model.Elements;
 import com.sun.xml.ws.addressing.model.Relationship;
 import org.w3c.dom.Element;
 
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.*;
+
 /**
  * @author Arun Gupta
  */
 public class WsaPipeHelperImpl extends WsaPipeHelper {
+    static final JAXBContext jc;
 
-    private WsaPipeHelperImpl() {
+    static {
         try {
             jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
                                          ObjectFactory.class,
-                                         RelationshipImpl.class);
+                                         RelationshipImpl.class,
+                                         ProblemAction.class);
+        } catch (JAXBException e) {
+            throw new WebServiceException(e);
+        }
+    }
+
+    private WsaPipeHelperImpl() {
+        try {
             unmarshaller = jc.createUnmarshaller();
             marshaller = jc.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
@@ -110,7 +121,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
             if (binding == null)
                 return null;
 
-            return binding.getSOAPVersion().saajSoapFactory.createElement(new QName(W3CAddressingConstants.WSA_NAMESPACE_NAME, "FaultDetail"));
+            return binding.getSOAPVersion().saajSoapFactory.createElement(new QName(WSA_NAMESPACE_NAME, "FaultDetail"));
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
@@ -140,17 +151,17 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
             // no check is required
         } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.required) {
             if (replyTo != null && !replyTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getReplyToQName(), W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
+                throw new InvalidMapException(getReplyToQName(), ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
             if (faultTo != null && !faultTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getFaultToQName(), W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
+                throw new InvalidMapException(getFaultToQName(), ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
         } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.prohibited) {
             if (replyTo != null && replyTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getReplyToQName(), W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
+                throw new InvalidMapException(getReplyToQName(), ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 
             if (faultTo != null && faultTo.equals(getAnonymousURI()))
-                throw new InvalidMapException(getFaultToQName(), W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
+                throw new InvalidMapException(getFaultToQName(), ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 
         } else {
             // cannot reach here
@@ -160,37 +171,37 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     @XmlRegistry
     final class ObjectFactory {
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="From")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="From")
         final JAXBElement<EndpointReferenceImpl> createFrom(EndpointReferenceImpl u) {
             return null;
         }
 
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="Action")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="Action")
         final JAXBElement<String> createAction(String u) {
             return null;
         }
 
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="To")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="To")
         final JAXBElement<String> createTo(String u) {
             return null;
         }
 
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="ReplyTo")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="ReplyTo")
         final JAXBElement<EndpointReferenceImpl> createReplyTo(EndpointReferenceImpl u) {
             return null;
         }
 
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="FaultTo")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="FaultTo")
         final JAXBElement<EndpointReferenceImpl> createFaultTo(EndpointReferenceImpl u) {
             return null;
         }
 
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="MessageID")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="MessageID")
         final JAXBElement<String> createMessageID(String u) {
             return null;
         }
 
-        @XmlElementDecl(namespace=W3CAddressingConstants.WSA_NAMESPACE_NAME,name="RelatesTo")
+        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="RelatesTo")
         final JAXBElement<RelationshipImpl> createRelationship(RelationshipImpl u) {
             return null;
         }
@@ -199,92 +210,92 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     @Override
     protected String getNamespaceURI() {
-        return W3CAddressingConstants.WSA_NAMESPACE_NAME;
+        return WSA_NAMESPACE_NAME;
     }
 
     @Override
     protected QName getMessageIDQName() {
-        return W3CAddressingConstants.WSA_MESSAGEID_QNAME;
+        return WSA_MESSAGEID_QNAME;
     }
 
     @Override
     protected QName getFromQName() {
-        return W3CAddressingConstants.WSA_FROM_QNAME;
+        return WSA_FROM_QNAME;
     }
 
     @Override
     protected QName getToQName() {
-        return W3CAddressingConstants.WSA_TO_QNAME;
+        return WSA_TO_QNAME;
     }
 
     @Override
     protected QName getReplyToQName() {
-        return W3CAddressingConstants.WSA_REPLYTO_QNAME;
+        return WSA_REPLYTO_QNAME;
     }
 
     @Override
     protected QName getFaultToQName() {
-        return W3CAddressingConstants.WSA_FAULTTO_QNAME;
+        return WSA_FAULTTO_QNAME;
     }
 
     @Override
     protected QName getActionQName() {
-        return W3CAddressingConstants.WSA_ACTION_QNAME;
+        return WSA_ACTION_QNAME;
     }
 
     @Override
     protected QName getRelatesToQName() {
-        return W3CAddressingConstants.WSA_RELATESTO_QNAME;
+        return WSA_RELATESTO_QNAME;
     }
 
     @Override
     protected QName getRelationshipTypeQName() {
-        return W3CAddressingConstants.WSA_RELATIONSHIPTYPE_QNAME;
+        return WSA_RELATIONSHIPTYPE_QNAME;
     }
 
     @Override
     protected String getDefaultFaultAction() {
-        return W3CAddressingConstants.WSA_DEFAULT_FAULT_ACTION;
+        return WSA_DEFAULT_FAULT_ACTION;
     }
 
     @Override
     protected QName getIsReferenceParameterQName() {
-        return W3CAddressingConstants.WSA_REFERENCEPARAMETERS_QNAME;
+        return WSA_REFERENCEPARAMETERS_QNAME;
     }
 
     @Override
     protected QName getMapRequiredQName() {
-        return W3CAddressingConstants.MAP_REQUIRED_QNAME;
+        return MAP_REQUIRED_QNAME;
     }
 
     @Override
     protected String getMapRequiredText() {
-        return W3CAddressingConstants.MAP_REQUIRED_TEXT;
+        return MAP_REQUIRED_TEXT;
     }
 
     @Override
     protected QName getActionNotSupportedQName() {
-        return W3CAddressingConstants.ACTION_NOT_SUPPORTED_QNAME;
+        return ACTION_NOT_SUPPORTED_QNAME;
     }
 
     @Override
     protected String getActionNotSupportedText() {
-        return W3CAddressingConstants.ACTION_NOT_SUPPORTED_TEXT;
+        return ACTION_NOT_SUPPORTED_TEXT;
     }
 
     @Override
     protected QName getFaultDetailQName() {
-        return W3CAddressingConstants.FAULT_DETAIL_QNAME;
+        return FAULT_DETAIL_QNAME;
     }
 
     @Override
     protected QName getInvalidMapQName() {
-        return W3CAddressingConstants.INVALID_MAP_QNAME;
+        return INVALID_MAP_QNAME;
     }
 
     @Override
     protected String getInvalidMapText() {
-        return W3CAddressingConstants.INVALID_MAP_TEXT;
+        return INVALID_MAP_TEXT;
     }
 
     @Override
@@ -299,12 +310,12 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     @Override
     protected String getAnonymousURI() {
-        return W3CAddressingConstants.WSA_ANONYMOUS_ADDRESS;
+        return WSA_ANONYMOUS_ADDRESS;
     }
 
     @Override
     protected String getRelationshipType() {
-        return W3CAddressingConstants.WSA_RELATIONSHIP_REPLY;
+        return WSA_RELATIONSHIP_REPLY;
     }
 
     @Override
@@ -315,6 +326,12 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
                 hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
             }
         }
+    }
+
+    @Override
+    protected void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion) {
+        RelationshipImpl reli = (RelationshipImpl)rel;
+        hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
     }
 
     protected Relationship newRelationship(Relationship r) {
@@ -347,10 +364,10 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
         String uri = source.getMessageID();
         if (uri == null) {
-            throw new MapRequiredException(W3CAddressingConstants.WSA_MESSAGEID_QNAME);
+            throw new MapRequiredException(WSA_MESSAGEID_QNAME);
         }
 
-        response.getRelatesTo().add(new RelationshipImpl(uri, W3CAddressingConstants.WSA_RELATIONSHIP_REPLY));
+        response.getRelatesTo().add(new RelationshipImpl(uri, WSA_RELATIONSHIP_REPLY));
 
         return response;
     }
@@ -364,7 +381,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
         String uri = ((EndpointReferenceImpl)source).getAddress();
         if (uri == null)
-            throw new InvalidMapException(W3CAddressingConstants.INVALID_MAP_QNAME, W3CAddressingConstants.MISSING_ADDRESS_IN_EPR);
+            throw new InvalidMapException(INVALID_MAP_QNAME, MISSING_ADDRESS_IN_EPR);
 
         props.setTo(uri);
 
@@ -380,15 +397,14 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     }
 
     void addIsRefp(Element refp) {
-        refp.setAttributeNS(W3CAddressingConstants.WSA_NAMESPACE_NAME,
-            W3CAddressingConstants.WSA_NAMESPACE_PREFIX + ":" + W3CAddressingConstants.WSA_IS_REFERENCE_PARAMETER_QNAME.getLocalPart(),
+        refp.setAttributeNS(WSA_NAMESPACE_NAME,
+            WSA_NAMESPACE_PREFIX + ":" + WSA_IS_REFERENCE_PARAMETER_QNAME.getLocalPart(),
             "true");
 
         // TODO: This may cause a namespace prefix conflict and is a tricky problem
         // TODO: to solve. For example, parent might have a similar prefix used
         // TODO: for some other purpose, etc.
-        refp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,"xmlns:"+W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
-            W3CAddressingConstants.WSA_NAMESPACE_NAME);
+        refp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,"xmlns:"+WSA_NAMESPACE_PREFIX,
+            WSA_NAMESPACE_NAME);
     }
-
 }

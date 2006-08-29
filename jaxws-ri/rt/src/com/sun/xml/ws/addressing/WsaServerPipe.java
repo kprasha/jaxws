@@ -56,8 +56,10 @@ public class WsaServerPipe extends WsaPipe {
             return next.process(packet);
 
         Packet p = helper.readServerInboundHeaders(packet);
-        p = next.process(p);
-        p = helper.writeServerOutboundHeaders(p);
+        if (!p.getMessage().isFault()) {
+            p = next.process(p);
+            p = helper.writeServerOutboundHeaders(p);
+        }
 
         return p;
     }
