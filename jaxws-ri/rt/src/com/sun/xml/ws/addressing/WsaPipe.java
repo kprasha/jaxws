@@ -62,7 +62,7 @@ public abstract class WsaPipe extends AbstractPipeImpl {
         }
 
         String ns = wsdlPort.getBinding().getAddressingVersion();
-        if (ns.equals(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME))
+        if (ns != null && ns.equals(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME))
             return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(seiModel, wsdlPort, binding);
         else
             return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);
