@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.addressing.v200408;
 
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -35,10 +34,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 
-import com.sun.xml.ws.addressing.ProblemHeaderQName;
-import com.sun.xml.ws.addressing.RelationshipImpl;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
-import com.sun.xml.ws.addressing.ProblemAction;
 import com.sun.xml.ws.addressing.model.AddressingProperties;
 import com.sun.xml.ws.addressing.model.Elements;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
@@ -64,7 +60,9 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         try {
             jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
                                          ObjectFactory.class,
-                                         RelationshipImpl.class);
+                                         RelationshipImpl.class,
+                                         ProblemAction.class,
+                                         ProblemHeaderQName.class);
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
@@ -290,7 +288,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     @Override
     protected void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion) {
-        com.sun.xml.ws.addressing.RelationshipImpl reli = (RelationshipImpl)rel;
+        RelationshipImpl reli = (RelationshipImpl)rel;
         hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
     }
 

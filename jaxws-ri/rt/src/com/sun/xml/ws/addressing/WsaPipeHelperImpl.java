@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.addressing;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -33,24 +34,22 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
-import javax.xml.XMLConstants;
 
-import com.sun.xml.ws.api.WSBinding;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.*;
+import com.sun.xml.ws.addressing.model.AddressingProperties;
+import com.sun.xml.ws.addressing.model.Elements;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
+import com.sun.xml.ws.addressing.model.Relationship;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.addressing.model.AddressingProperties;
-import com.sun.xml.ws.addressing.model.InvalidMapException;
-import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.Elements;
-import com.sun.xml.ws.addressing.model.Relationship;
 import org.w3c.dom.Element;
-
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.*;
 
 /**
  * @author Arun Gupta
