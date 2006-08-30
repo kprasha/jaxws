@@ -81,6 +81,24 @@ public abstract class BindingImpl implements WSBinding {
         return features;
     }
 
+    public void enableFeature(String feature) {
+        if (hasFeature(feature))
+            return;
+
+        String[] oldFeatures = null;
+        if (features != null) {
+            oldFeatures = features.clone();
+            features = new String[features.length+1];
+            for (int i=0; i<oldFeatures.length; i++) {
+                features[i] = oldFeatures[i];
+            }
+            features[oldFeatures.length] = feature;
+        } else {
+            features = new String[1];
+            features[0] = feature;
+        }
+    }
+
     /**
      * This is called when ever Binding.setHandlerChain() or SOAPBinding.setRoles()
      * is called.
