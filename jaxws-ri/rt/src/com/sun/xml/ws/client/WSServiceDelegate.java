@@ -264,6 +264,10 @@ public class WSServiceDelegate extends WSService {
         return getPort(portName, portInterface);
     }
 
+    public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface) {
+        return null;  //TODO
+    }
+
 
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
@@ -279,6 +283,10 @@ public class WSServiceDelegate extends WSService {
         PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding();
         return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port,binding));
+    }
+
+    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode) {
+        return null;  //TODO
     }
 
     /**
@@ -328,6 +336,10 @@ public class WSServiceDelegate extends WSService {
         BindingImpl binding = port.createBinding();
         return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,
             createPipeline(port,binding));
+    }
+
+    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode) {
+        return null;  //TODO
     }
 
     public QName getServiceName() {
