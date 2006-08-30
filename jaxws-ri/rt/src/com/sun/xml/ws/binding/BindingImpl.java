@@ -158,4 +158,8 @@ public abstract class BindingImpl implements WSBinding {
 
         return false;
     }
+
+    public String getBindingID(){
+        return bindingId.toString();
+    }
 }
