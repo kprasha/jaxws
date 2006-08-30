@@ -12,6 +12,7 @@ import com.sun.xml.ws.addressing.WsaServerPipe;
 import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
 import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
 import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -122,7 +123,11 @@ public final class ServerPipeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Pipe createWsaPipe(Pipe next) {
-        return new WsaServerPipe(seiModel, wsdlModel, binding, next);
+        WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
+        if (impl.isAddressingEnabled())
+            return new WsaServerPipe(seiModel, wsdlModel, binding, next);
+        else
+            return next;
     }
 
     /**

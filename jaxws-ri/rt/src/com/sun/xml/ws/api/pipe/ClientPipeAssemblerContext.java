@@ -11,6 +11,8 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.addressing.WsaClientPipe;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 
 import javax.xml.ws.soap.SOAPBinding;
 
@@ -103,7 +105,18 @@ public final class ClientPipeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Pipe createWsaPipe(Pipe next) {
-        return new WsaClientPipe(wsdlModel, binding, next);
+        if (wsdlModel == null) {
+            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE) ||
+                    binding.hasFeature(SOAPBinding.ADDRESSING_FEATURE))
+                return new WsaClientPipe(wsdlModel, binding, next);
+            else
+                return next;
+        }
+        WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
+        if (impl.isAddressingEnabled())
+            return new WsaClientPipe(wsdlModel, binding, next);
+        else
+            return next;
     }
     
     /**

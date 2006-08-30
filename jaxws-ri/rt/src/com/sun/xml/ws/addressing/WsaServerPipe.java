@@ -51,10 +51,6 @@ public class WsaServerPipe extends WsaPipe {
             return next.process(packet);
         }
 
-        WSDLPortImpl impl = (WSDLPortImpl)wsdlPort;
-        if (!impl.isAddressingEnabled())
-            return next.process(packet);
-
         Packet p = helper.readServerInboundHeaders(packet);
         if (!p.getMessage().isFault()) {
             p = next.process(p);
