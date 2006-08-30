@@ -307,6 +307,8 @@ public class EndpointImpl extends Endpoint {
                 writer.writeStartDocument();
                 writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
                         "EndpointReference", W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                writer.writeNamespace(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        W3CAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
                         "Address", W3CAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeCharacters(eprAddress);
@@ -317,7 +319,7 @@ public class EndpointImpl extends Endpoint {
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
-            System.out.println(bos.toString());
+            //System.out.println(bos.toString());
             return (T) new W3CEndpointReference(new StreamSource(bos.newInputStream()));
         } else {
             // check if it is Member Submission and return it.
