@@ -26,6 +26,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
@@ -35,6 +36,7 @@ import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.addressing.EndpointReferenceImpl;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.istack.NotNull;
@@ -297,9 +299,9 @@ public class EndpointImpl extends Endpoint {
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
         if (!isPublished()) {
-                throw new WebServiceException("Endpoint is not published yet");
+            throw new WebServiceException("Endpoint is not published yet");
         }
-        if(clazz.isAssignableFrom(W3CEndpointReference.class)) {
+        if (clazz.isAssignableFrom(W3CEndpointReference.class)) {
             String eprAddress = ((HttpEndpoint) actualEndpoint).getEPRAddress();
             final ByteOutputStream bos = new ByteOutputStream();
             XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
@@ -321,9 +323,32 @@ public class EndpointImpl extends Endpoint {
             }
             //System.out.println(bos.toString());
             return (T) new W3CEndpointReference(new StreamSource(bos.newInputStream()));
+        } else if (clazz.isAssignableFrom(MemberSubmissionEndpointReference.class)) {
+            String eprAddress = ((HttpEndpoint) actualEndpoint).getEPRAddress();
+            final ByteOutputStream bos = new ByteOutputStream();
+            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+            try {
+                writer.writeStartDocument();
+                writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        "EndpointReference", MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+                writer.writeNamespace(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+                writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        "Address", MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+                writer.writeCharacters(eprAddress);
+                writer.writeEndElement();
+                writer.writeEndElement();
+                writer.writeEndDocument();
+                writer.flush();
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
+            //System.out.println(bos.toString());
+            return (T) new MemberSubmissionEndpointReference(new StreamSource(bos.newInputStream()));
         } else {
-            // check if it is Member Submission and return it.
-            return null;
+            throw new WebServiceException(clazz + "is not a recognizable EndpointReference");
         }
+
     }
 }
+
