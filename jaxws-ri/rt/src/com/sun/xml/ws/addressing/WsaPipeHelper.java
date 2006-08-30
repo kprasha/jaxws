@@ -311,7 +311,7 @@ public abstract class WsaPipeHelper {
             }
 
             if (faultyHeader != null) {
-                throw new InvalidMapException(faultyHeader, W3CAddressingConstants.INVALID_CARDINALITY);
+                throw new InvalidMapException(faultyHeader, getInvalidCardinalityQName());
             }
 
             HeaderList hl = message.getHeaders();
@@ -769,6 +769,7 @@ public abstract class WsaPipeHelper {
     protected abstract Relationship newRelationship(Relationship r);
     protected abstract Relationship newRelationship(String mid);
     protected abstract EndpointReference newEndpointReference();
+    protected abstract QName getInvalidCardinalityQName();
 
 
     protected static final DocumentBuilder db;

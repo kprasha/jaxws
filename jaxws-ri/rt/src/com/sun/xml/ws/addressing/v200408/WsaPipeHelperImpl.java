@@ -305,6 +305,10 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         return new EndpointReferenceImpl();
     }
 
+    protected QName getInvalidCardinalityQName() {
+        return MemberSubmissionAddressingConstants.INVALID_MAP_QNAME;
+    }
+
     private AddressingProperties toReplyOrFault(AddressingProperties source, boolean isFault) {
         if (source == null) {
             throw new WebServiceException("Source addressing properties is null."); // TODO i18n
@@ -349,7 +353,13 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         props.setTo(uri);
 
         Elements params = ((EndpointReferenceImpl)source).getRefParams();
+        if (params != null) {
+            for (Element refp : params.getElements()) {
+                props.getReferenceParameters().getElements().add(refp);
+            }
+        }
 
+        params = ((EndpointReferenceImpl)source).getMetadata();
         if (params != null) {
             for (Element refp : params.getElements()) {
                 props.getReferenceParameters().getElements().add(refp);

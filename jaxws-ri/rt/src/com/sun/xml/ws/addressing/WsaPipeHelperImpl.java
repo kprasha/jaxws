@@ -342,6 +342,10 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         return new EndpointReferenceImpl();
     }
 
+    protected QName getInvalidCardinalityQName() {
+        return W3CAddressingConstants.INVALID_CARDINALITY;
+    }
+
     private AddressingProperties toReplyOrFault(AddressingProperties source, boolean isFault) {
         if (source == null) {
             throw new WebServiceException("Source addressing properties is null."); // TODO i18n
