@@ -65,6 +65,18 @@ final class HttpEndpoint {
         publish(httpContext);
     }
 
+    /**
+     * This can be called only after publish
+     * @return address of the Endpoint
+     */
+    public String getEPRAddress() {
+        if(address == null) {
+            // Application created its own HttpContext
+            return httpContext.getServer().getAddress().toString();
+        } else
+            return address;
+    }
+
     public void stop() {
         if (address == null) {
             // Application created its own HttpContext

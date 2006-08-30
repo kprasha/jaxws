@@ -33,6 +33,10 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.addressing.EndpointReferenceImpl;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.istack.NotNull;
 
 import java.net.MalformedURLException;
@@ -41,10 +45,11 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.ws.Binding;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.WebServicePermission;
-import javax.xml.ws.EndpointReference;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.*;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -287,10 +292,36 @@ public class EndpointImpl extends Endpoint {
     }
 
     public EndpointReference getEndpointReference() {
-        return null;
+        return getEndpointReference(W3CEndpointReference.class);
     }
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
-        return null;
+        if (!isPublished()) {
+                throw new WebServiceException("Endpoint is not published yet");
+        }
+        if(clazz.isAssignableFrom(W3CEndpointReference.class)) {
+            String eprAddress = ((HttpEndpoint) actualEndpoint).getEPRAddress();
+            final ByteOutputStream bos = new ByteOutputStream();
+            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+            try {
+                writer.writeStartDocument();
+                writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        "EndpointReference", W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        "Address", W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                writer.writeCharacters(eprAddress);
+                writer.writeEndElement();
+                writer.writeEndElement();
+                writer.writeEndDocument();
+                writer.flush();
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
+            System.out.println(bos.toString());
+            return (T) new W3CEndpointReference(new StreamSource(bos.newInputStream()));
+        } else {
+            // check if it is Member Submission and return it.
+            return null;
+        }
     }
 }
