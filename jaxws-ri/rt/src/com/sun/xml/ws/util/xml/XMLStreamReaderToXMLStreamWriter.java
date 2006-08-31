@@ -26,6 +26,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.XMLConstants;
 
 /**
  * Reads a sub-tree from {@link XMLStreamReader} and writes to {@link XMLStreamWriter}
@@ -165,6 +166,11 @@ public class XMLStreamReaderToXMLStreamWriter {
     protected void handleAttribute(int i) throws XMLStreamException {
         String nsUri = in.getAttributeNamespace(i);
         String prefix = in.getAttributePrefix(i);
+         if (fixNull(nsUri).equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+             //Its a namespace decl, ignore as it is already written.
+             return;
+         }
+
         if(nsUri==null || prefix == null || prefix.equals("")) {
             out.writeAttribute(
                 in.getAttributeLocalName(i),
