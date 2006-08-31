@@ -37,6 +37,10 @@ public interface MemberSubmissionAddressingConstants {
     public static final String WSA_NAMESPACE_PREFIX = "wsa";
     public static final String WSA_NAMESPACE_WSDL_PREFIX = "wsa";
 
+    public static final String WSA_SERVICENAME_NAME = "ServiceName";
+    public static final String WSA_PORTTYPE_NAME = "PortType";
+    public static final String WSA_PORTNAME_NAME = "PortName";
+
     public static final String WSA_REFERENCEPROPERTIES_NAME = "ReferenceProperties";
     public static final QName WSA_REFERENCEPROPERTIES_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_REFERENCEPROPERTIES_NAME);
 
