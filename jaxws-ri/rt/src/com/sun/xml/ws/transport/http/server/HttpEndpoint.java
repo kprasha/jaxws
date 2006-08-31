@@ -24,6 +24,7 @@ package com.sun.xml.ws.transport.http.server;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.HttpAdapterList;
 import com.sun.xml.ws.server.ServerRtException;
@@ -102,5 +103,9 @@ final class HttpEndpoint {
     void writePrimaryWsdl(XMLStreamWriter writer, final String baseAddress)
             throws IOException, XMLStreamException {
         adapter.writeWSDL(writer, baseAddress, "wsdl");
+    }
+
+    WSDLPort getWSDLPort(){
+        return adapter.getEndpoint().getPort();
     }
 }
