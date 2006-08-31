@@ -342,7 +342,7 @@ public class EndpointImpl extends Endpoint {
                         MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeCharacters(eprAddress);
                 writer.writeEndElement();
-                writeMSMetaData(writer,eprAddress);
+                writeMSMetaData(writer);
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
@@ -409,8 +409,39 @@ public class EndpointImpl extends Endpoint {
         writer.writeEndElement();
     }
 
-    private void writeMSMetaData(XMLStreamWriter writer, String baseAddress) {
+    private void writeMSMetaData(XMLStreamWriter writer) throws XMLStreamException {
+        WSDLPort wsdlport = ((HttpEndpoint) actualEndpoint).getWSDLPort();
 
+        //Write Interface info
+        writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                MemberSubmissionAddressingConstants.WSA_PORTTYPE_NAME,
+                MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+        QName portType = getPortTypeName(wsdlport);
+        String portTypePrefix = portType.getPrefix();
+        if(portTypePrefix == null || portTypePrefix.equals("")) {
+            //TODO check prefix again
+            portTypePrefix = "wsns";
+        }
+        writer.writeNamespace(portTypePrefix,portType.getNamespaceURI());
+        writer.writeCharacters(portTypePrefix+":"+portType.getLocalPart());
+        writer.writeEndElement();
+
+        //Write service and Port info
+        writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
+                MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+        QName service = getServiceName(wsdlport);
+        QName port = getPortName(wsdlport);
+        String servicePrefix = service.getPrefix();
+        if(servicePrefix == null || servicePrefix.equals("")) {
+            //TODO check prefix again
+            servicePrefix = "wsns";
+        }
+        writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
+                port.getLocalPart());
+        writer.writeNamespace(servicePrefix,service.getNamespaceURI());
+        writer.writeCharacters(servicePrefix+":"+service.getLocalPart());
+        writer.writeEndElement();
     }
 }
 
