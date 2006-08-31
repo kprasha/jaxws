@@ -27,7 +27,11 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.HttpAdapterList;
 import com.sun.xml.ws.server.ServerRtException;
+
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 import java.util.concurrent.Executor;
+import java.io.IOException;
 
 /**
  * Hides {@link HttpContext} so that {@link EndpointImpl}
@@ -69,7 +73,7 @@ final class HttpEndpoint {
      * This can be called only after publish
      * @return address of the Endpoint
      */
-    public String getEPRAddress() {
+    String getEPRAddress() {
         if(address == null) {
             // Application created its own HttpContext
             return httpContext.getServer().getAddress().toString();
@@ -93,5 +97,10 @@ final class HttpEndpoint {
 
     private void publish (HttpContext context) {
         context.setHandler(new WSHttpHandler(adapter, executor));
+    }
+
+    void writePrimaryWsdl(XMLStreamWriter writer, final String baseAddress)
+            throws IOException, XMLStreamException {
+        adapter.writeWSDL(writer, baseAddress, "wsdl");
     }
 }

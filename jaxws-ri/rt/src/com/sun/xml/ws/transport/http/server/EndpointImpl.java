@@ -263,7 +263,7 @@ public class EndpointImpl extends Endpoint {
 
         return r;
     }
-    
+
     /**
      * Gets wsdl from @WebService or @WebServiceProvider
      */
@@ -312,13 +312,19 @@ public class EndpointImpl extends Endpoint {
                 writer.writeNamespace(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
                         W3CAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
-                        "Address", W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                        W3CAddressingConstants.WSA_ADDRESS_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeCharacters(eprAddress);
+                writer.writeEndElement();
+                writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                        W3CAddressingConstants.WSA_METADATA_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                ((HttpEndpoint) actualEndpoint).writePrimaryWsdl(writer,eprAddress);
                 writer.writeEndElement();
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
             } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            } catch (IOException e) {
                 throw new WebServiceException(e);
             }
             //System.out.println(bos.toString());
@@ -334,7 +340,8 @@ public class EndpointImpl extends Endpoint {
                 writer.writeNamespace(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
                         MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
-                        "Address", MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+                        MemberSubmissionAddressingConstants.WSA_ADDRESS_NAME,
+                        MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeCharacters(eprAddress);
                 writer.writeEndElement();
                 writer.writeEndElement();
