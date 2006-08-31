@@ -36,7 +36,10 @@ public interface W3CAddressingConstants {
     public static final String WSA_NAMESPACE_PREFIX = "wsa";
 
     public static final String WSA_NAMESPACE_WSDL_PREFIX = "wsaw";
-
+    public static final String WSAW_SERVICENAME_NAME = "ServiceName";
+    public static final String WSAW_INTERFACENAME_NAME = "InterfaceName";
+    public static final String WSAW_ENDPOINTNAME_NAME = "EndpointName";
+    
     public static final String WSA_REFERENCEPROPERTIES_NAME = "ReferenceParameters";
     public static final QName WSA_REFERENCEPROPERTIES_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_REFERENCEPROPERTIES_NAME);
 
