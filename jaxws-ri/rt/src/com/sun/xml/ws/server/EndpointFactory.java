@@ -30,7 +30,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -43,7 +42,6 @@ import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
@@ -58,6 +56,7 @@ import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.istack.Nullable;
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceException;
@@ -183,7 +182,7 @@ public class EndpointFactory {
 
         // create WSDL model
         if (wsdlPort == null && primaryDoc != null) {
-            wsdlPort = getWSDLPort(primaryDoc, docList, implType, serviceName, portName);
+            wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
         }
 
         {// error check
@@ -304,11 +303,13 @@ public class EndpointFactory {
         }
     }
 
-
     /**
-     * Checks {@link WebServiceProvider} and determines the service name.
+     * If service name is not already set via DD or programmatically, it uses
+     * annotations {@link WebServiceProvider}, {@link WebService} on implementorClass to get PortName.
+     *
+     * @return non-null service name
      */
-    public static QName getDefaultServiceName(Class<?> implType) {
+    public static @NotNull QName getDefaultServiceName(Class<?> implType) {
         QName serviceName;
         WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
         if (wsProvider!=null) {
@@ -324,9 +325,11 @@ public class EndpointFactory {
 
     /**
      * If portName is not already set via DD or programmatically, it uses
-     * annotations on implementorClass to set PortName.
+     * annotations on implementorClass to get PortName.
+     *
+     * @return non-null port name
      */
-    public static QName getDefaultPortName(QName serviceName, Class<?> implType) {
+    public static @NotNull QName getDefaultPortName(QName serviceName, Class<?> implType) {
         QName portName;
         WebServiceProvider wsProvider = implType.getAnnotation(WebServiceProvider.class);
         if (wsProvider!=null) {
@@ -336,6 +339,7 @@ public class EndpointFactory {
         } else {
             portName = RuntimeModeler.getPortName(implType, serviceName.getNamespaceURI());
         }
+        assert portName != null;
         return portName;
     }
     
@@ -446,20 +450,25 @@ public class EndpointFactory {
         }
         return primaryDoc;
     }
-    
-    private static WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
-        Class<?> implType, QName serviceName, QName portName) {
+
+    /**
+     * Parses the primary WSDL and returns the {@link WSDLPort} for the given service and port names
+     *
+     * @param primaryWsdl Primary WSDL
+     * @param metadata it may contain imported WSDL and schema documents
+     * @param serviceName service name in wsdl
+     * @param portName port name in WSDL
+     * @return non-null wsdl port object
+     */
+    private static @NotNull WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
+            @NotNull QName serviceName, @NotNull QName portName) {
         URL wsdlUrl = primaryWsdl.getSystemId();
         try {
             // TODO: delegate to another entity resolver
             WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                 new Parser(primaryWsdl), new EntityResolverImpl(metadata),
                 ServiceFinder.find(WSDLParserExtension.class).toArray());
-            if(serviceName == null)
-                serviceName = RuntimeModeler.getServiceName(implType);
-            if(portName != null) {
-                return wsdlDoc.getService(serviceName).get(portName);
-            }
+            return wsdlDoc.getService(serviceName).get(portName);
         } catch (IOException e) {
             throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
         } catch (XMLStreamException e) {
@@ -469,7 +478,6 @@ public class EndpointFactory {
         } catch (ServiceConfigurationError e) {
             throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
         }
-        return null;
     }
 
     /**
