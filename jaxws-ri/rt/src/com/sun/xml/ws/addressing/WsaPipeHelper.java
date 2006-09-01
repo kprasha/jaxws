@@ -770,6 +770,8 @@ public abstract class WsaPipeHelper {
     protected abstract Relationship newRelationship(String mid);
     protected abstract EndpointReference newEndpointReference();
     protected abstract QName getInvalidCardinalityQName();
+    protected abstract String getNoneURI();
+    protected abstract String getAddress(EndpointReference epr);
 
 
     protected static final DocumentBuilder db;

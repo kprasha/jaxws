@@ -309,6 +309,17 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         return MemberSubmissionAddressingConstants.INVALID_MAP_QNAME;
     }
 
+    protected String getNoneURI() {
+        return MemberSubmissionAddressingConstants.WSA_NONE_ADDRESS;
+    }
+
+    protected String getAddress(EndpointReference epr) {
+        if (epr == null)
+            return null;
+        else
+            return ((EndpointReferenceImpl)epr).getAddress();
+    }
+
     private AddressingProperties toReplyOrFault(AddressingProperties source, boolean isFault) {
         if (source == null) {
             throw new WebServiceException("Source addressing properties is null."); // TODO i18n

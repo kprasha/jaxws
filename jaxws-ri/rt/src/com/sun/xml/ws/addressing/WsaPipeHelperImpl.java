@@ -346,6 +346,17 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         return W3CAddressingConstants.INVALID_CARDINALITY;
     }
 
+    protected String getNoneURI() {
+        return W3CAddressingConstants.WSA_NONE_ADDRESS;
+    }
+
+    protected String getAddress(EndpointReference epr) {
+        if (epr == null)
+            return null;
+        else
+            return ((EndpointReferenceImpl)epr).getAddress();
+    }
+
     private AddressingProperties toReplyOrFault(AddressingProperties source, boolean isFault) {
         if (source == null) {
             throw new WebServiceException("Source addressing properties is null."); // TODO i18n
