@@ -36,6 +36,7 @@ import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.JAXBTypeAndAnnotation;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
+import com.sun.tools.xjc.api.JAXBModel;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.ServiceFinder;
 
@@ -45,6 +46,7 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -138,6 +140,9 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         //@SOAPBinding
         writeSOAPBinding(port, cls);
 
+        //@XmlSeeAlso
+        writeXmlSeeAlso(port, cls);
+
         for (Operation operation: port.getOperations()) {
             JavaMethod method = operation.getJavaMethod();
 
@@ -191,6 +196,17 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         if(env.verbose())
             cw = new ProgressCodeWriter(cw, System.out);
         cm.build(cw);
+    }
+
+    private void writeXmlSeeAlso(Port port, JDefinedClass cls) {        
+        if(model.getJAXBModel().getS2JJAXBModel() != null){
+            JAnnotationUse xmlSeeAlso = cls.annotate(cm.ref(XmlSeeAlso.class));
+            JAnnotationArrayMember paramArray = xmlSeeAlso.paramArray("value");
+           for(JClass of:model.getJAXBModel().getS2JJAXBModel().getAllObjectFactories()){
+               paramArray = paramArray.param(of);
+           }
+        }
+
     }
 
     private void writeWebMethod(Operation operation, JMethod m) {

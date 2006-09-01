@@ -49,6 +49,7 @@ import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.Response;
 import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebFault;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -357,6 +358,10 @@ public class RuntimeModeler {
             // RuntimeModel to link to WSDLModel
             processMethod(method, webService);
         }
+        //Add additional jaxb classes referenced by {@link XmlSeeAlso}
+        XmlSeeAlso xmlSeeAlso = getPrivClassAnnotation(clazz, XmlSeeAlso.class);
+        if(xmlSeeAlso != null)
+            model.setAdditionalClasses(xmlSeeAlso.value());
     }
 
     protected boolean isWebMethod(Method method, Class clazz) {

@@ -138,11 +138,16 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
 
     private JAXBRIContext createJAXBContext() {
         final List<TypeReference> types = getAllTypeReferences();
-        final Class[] cls = new Class[types.size()];
+        final Class[] cls = new Class[types.size() + additionalClasses.size()];
         int i = 0;
+        for(Class additionalClass:additionalClasses){
+            cls[i++] = additionalClass;
+        }
+
         for (TypeReference type : types) {
             cls[i++] = (Class) type.type;
         }
+
         try {
             //jaxbContext = JAXBRIContext.newInstance(cls, types, targetNamespace, false);
             // Need to avoid doPriv block once JAXB is fixed. Afterwards, use the above
@@ -500,6 +505,19 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     public String getTargetNamespace() {
         return targetNamespace;
     }
+
+
+    /**
+     * Sets additional classes obtained from {@link javax.xml.bind.annotation.XmlSeeAlso} annotation. In starting
+     * from wsdl case these classes would most likely be JAXB ObjectFactory that references other classes.
+     */
+    public void setAdditionalClasses(Class[] additionalClasses) {
+        for(Class cls:additionalClasses){
+            this.additionalClasses.add(cls);
+        }
+    }
+
+    private List<Class> additionalClasses = new ArrayList<Class>();
 
     private Pool.Marshaller marshallers;
     protected JAXBRIContext jaxbContext;
