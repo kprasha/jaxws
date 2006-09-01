@@ -45,7 +45,6 @@ import java.util.List;
  * @author WS Development Team
  */
 public abstract class BindingImpl implements WSBinding {
-
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
     private String[] features;
@@ -162,4 +161,10 @@ public abstract class BindingImpl implements WSBinding {
     public String getBindingID(){
         return bindingId.toString();
     }
+
+    public void disableFeature(String feature) {
+        //TODO: implement
+    }
+
+
 }

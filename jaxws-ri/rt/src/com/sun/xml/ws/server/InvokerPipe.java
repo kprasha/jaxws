@@ -33,6 +33,7 @@ import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.handler.MessageContext;
 import java.security.Principal;
 
@@ -115,6 +116,14 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
         public boolean isUserInRole(String role) {
             Packet packet = getCurrentPacket();
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
+        }
+
+        public EndpointReference getEndpointReference() {
+            return null;  //TODO: implement
+        }
+
+        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+            return null;  //TODO: implement
         }
     };
 }
