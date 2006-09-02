@@ -73,7 +73,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final Class<T> implementationClass;
 
 
-    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, @Nullable ServiceDefinitionImpl serviceDef, Pipe terminalPipe) {
+    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, @Nullable ServiceDefinitionImpl serviceDef, InvokerPipe terminalPipe) {
         this.binding = binding;
         this.soapVersion = binding.getSOAPVersion();
         this.container = container;
@@ -91,6 +91,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
         ServerPipeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe);
         this.masterPipeline = assembler.createServer(context);
+        terminalPipe.setEndpoint(this);
     }
 
     public @NotNull Class<T> getImplementationClass() {

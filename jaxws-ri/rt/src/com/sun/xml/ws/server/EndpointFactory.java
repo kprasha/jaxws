@@ -139,7 +139,7 @@ public class EndpointFactory {
         // two concrete or abstract WSDLs
         SDDocumentImpl primaryDoc = findPrimary(docList);
 
-        Pipe terminal;
+        InvokerPipe terminal;
         WSDLPort wsdlPort = null;
         AbstractSEIModelImpl seiModel = null;
 

@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
@@ -49,10 +50,15 @@ import java.security.Principal;
 public abstract class InvokerPipe<T> extends AbstractPipeImpl {
 
     private final Invoker invoker;
+    private WSEndpoint endpoint;
 
     protected InvokerPipe(Invoker invoker) {
         this.invoker = invoker;
         invoker.start(webServiceContext);
+    }
+
+    public void setEndpoint(WSEndpoint enpoint) {
+        this.endpoint = endpoint;
     }
 
     /**
@@ -64,7 +70,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
         return invoker.resolve(request);
     }
      */
-    
+
     /**
      * Returns the {@link Invoker} object that serves the request.
      */
