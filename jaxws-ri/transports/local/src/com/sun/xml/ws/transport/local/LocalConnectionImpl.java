@@ -78,6 +78,10 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         return false;   // not really supported
     }
 
+    public String getEPRAddress(Packet request) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public @NotNull String getRequestMethod() {
         return "POST";   // not really supported
     }

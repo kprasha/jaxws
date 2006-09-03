@@ -77,4 +77,12 @@ public interface WebServiceContextDelegate {
      * @see WebServiceContext#isUserInRole(String)
      */
     boolean isUserInRole(Packet request,String role);
+
+    /**
+     * Gets the Base address from the request
+     * @param request
+     *      Always non-null.
+     * @see WebServiceContext#getEndpointReference
+     */
+    String getEPRAddress(Packet request);
 }

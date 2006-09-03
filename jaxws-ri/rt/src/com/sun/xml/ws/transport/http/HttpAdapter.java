@@ -42,6 +42,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.TreeMap;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.EndpointReference;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -298,39 +299,6 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         os.close();
     }
 
-    /**
-         * Writes out the WSDL (and other referenced documents)
-         * in response to the GET requests to URLs like "?wsdl" or "?xsd=2".
-         *
-         * @param writer
-         *      The writer to which the wsdl is written
-         * @param baseAddress
-         *      The requested base URL (such as "http://myhost:2045/foo/bar").
-         *      Used to reference other resoures. Must not be null.
-         * @param queryString
-         *      The query string given by the client (which indicates
-         *      what document to serve.) Can be null (but it causes an 404 not found.)
-         */
-        public void writeWSDL(XMLStreamWriter writer, final String baseAddress, String queryString)
-            throws IOException, XMLStreamException {
-            SDDocument doc = wsdls.get(queryString);
-            if (doc == null) {
-                throw new WebServiceException("WSDL Not Found");
-            }
-            final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
-            final String address = portAddressResolver.getAddressFor(endpoint.getPort().getName().getLocalPart());
-            assert address != null;
-            DocumentAddressResolver resolver = new DocumentAddressResolver() {
-                public String getRelativeAddressFor(SDDocument current, SDDocument referenced) {
-                    // the map on endpoint should account for all SDDocument
-                    assert revWsdls.containsKey(referenced);
-                    return address+'?'+ revWsdls.get(referenced);
-                }
-            };
-
-            doc.writeTo(portAddressResolver, resolver, writer);
-    }
-
     private void writeNotFoundErrorPage(WSHTTPConnection con, String message) throws IOException {
         con.setStatus(HttpURLConnection.HTTP_NOT_FOUND);
         con.setContentTypeResponseHeader("text/html; charset=UTF-8");
@@ -357,5 +325,5 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
             return new HttpAdapter(endpoint, this);
         }
-    }
+    }     
 }

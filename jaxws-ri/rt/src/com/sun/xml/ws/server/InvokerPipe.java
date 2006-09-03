@@ -35,6 +35,7 @@ import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.W3CEndpointReference;
 import javax.xml.ws.handler.MessageContext;
 import java.security.Principal;
 
@@ -57,7 +58,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
         invoker.start(webServiceContext);
     }
 
-    public void setEndpoint(WSEndpoint enpoint) {
+    public void setEndpoint(WSEndpoint endpoint) {
         this.endpoint = endpoint;
     }
 
@@ -125,11 +126,13 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
         }
 
         public EndpointReference getEndpointReference() {
-            return null;  //TODO: implement
+            return getEndpointReference(W3CEndpointReference.class);
         }
 
         public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
-            return null;  //TODO: implement
+            Packet packet = getCurrentPacket();
+            String address = packet.webServiceContextDelegate.getEPRAddress(packet);
+            return (T) endpoint.getEndpointReference(clazz,address);
         }
     };
 }

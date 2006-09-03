@@ -31,6 +31,7 @@ import com.sun.xml.ws.server.ServerRtException;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.EndpointReference;
 import java.util.concurrent.Executor;
 import java.io.IOException;
 
@@ -74,7 +75,7 @@ final class HttpEndpoint {
      * This can be called only after publish
      * @return address of the Endpoint
      */
-    String getEPRAddress() {
+    private String getEPRAddress() {
         if(address == null) {
             // Application created its own HttpContext
             return httpContext.getServer().getAddress().toString();
@@ -100,12 +101,8 @@ final class HttpEndpoint {
         context.setHandler(new WSHttpHandler(adapter, executor));
     }
 
-    void writePrimaryWsdl(XMLStreamWriter writer, final String baseAddress)
-            throws IOException, XMLStreamException {
-        adapter.writeWSDL(writer, baseAddress, "wsdl");
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+        return adapter.getEndpoint().getEndpointReference(clazz, getEPRAddress());
     }
 
-    WSDLPort getWSDLPort(){
-        return adapter.getEndpoint().getPort();
-    }
 }

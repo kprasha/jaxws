@@ -34,6 +34,7 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.EndpointReference;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.net.URL;
@@ -316,4 +317,8 @@ public abstract class WSEndpoint<T> {
             implType,processHandlerAnnotation,invoker,serviceName,portName,container,binding,primaryWsdl,metadata,
             XmlUtil.createEntityResolver(catalogUrl));
     }
+
+    public abstract <T extends EndpointReference> T getEndpointReference(
+            Class<T> clazz,
+            String address);
 }
