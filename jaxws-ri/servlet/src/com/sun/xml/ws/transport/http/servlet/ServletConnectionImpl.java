@@ -150,8 +150,8 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         return request.isUserInRole(role);
     }
 
-    public String getEPRAddress(Packet request) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public String getEPRAddress(Packet p) {
+        return ServletAdapter.getBaseAddress(request) + request.getServletPath();
     }
 
     @Override

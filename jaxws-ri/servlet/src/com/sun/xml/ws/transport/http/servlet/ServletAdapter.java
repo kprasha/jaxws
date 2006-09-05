@@ -109,7 +109,7 @@ public final class ServletAdapter extends HttpAdapter {
     /**
      * Computes the base URL of the given request.
      */
-    private String getBaseAddress(HttpServletRequest request) {
+    static String getBaseAddress(HttpServletRequest request) {
         StringBuilder addrBuf = new StringBuilder();
         addrBuf.append(request.getScheme());
         addrBuf.append("://");
