@@ -98,7 +98,7 @@ public interface SDDocument {
      * Writes the document to the given {@link XMLStreamWriter}.
      *
      * <p>
-     * The same as {@link #writeTo(String,DocumentAddressResolver,OutputStream)} except
+     * The same as {@link #writeTo(PortAddressResolver,DocumentAddressResolver,OutputStream)} except
      * it writes to an {@link XMLStreamWriter}.
      *
      * <p>

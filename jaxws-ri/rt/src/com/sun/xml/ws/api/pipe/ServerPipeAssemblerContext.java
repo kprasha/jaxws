@@ -31,16 +31,18 @@ public final class ServerPipeAssemblerContext {
     private final WSEndpoint endpoint;
     private final WSBinding binding;
     private final Pipe terminal;
+    private final boolean isSynchronous;
 
     public ServerPipeAssemblerContext(@Nullable SEIModel seiModel,
             @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint endpoint,
-            @NotNull Pipe terminal) {
+            @NotNull Pipe terminal, boolean isSynchronous) {
 
         this.seiModel = seiModel;
         this.wsdlModel = wsdlModel;
         this.endpoint = endpoint;
         this.terminal = terminal;
         this.binding = endpoint.getBinding();
+        this.isSynchronous = isSynchronous;
     }
 
     /**
@@ -153,4 +155,13 @@ public final class ServerPipeAssemblerContext {
          return terminal;
     }
 
+    /**
+     * If this server pipeline is known to be used for serving synchronous transport,
+     * then this method returns true. This can be potentially use as an optimization
+     * hint, since often synchronous versions are cheaper to execute than asycnhronous
+     * versions.
+     */
+    public boolean isSynchronous() {
+        return isSynchronous;
+    }
 }

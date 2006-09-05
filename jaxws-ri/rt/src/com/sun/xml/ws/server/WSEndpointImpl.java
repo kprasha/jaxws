@@ -86,7 +86,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final Class<T> implementationClass;
 
 
-    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, @Nullable ServiceDefinitionImpl serviceDef, InvokerPipe terminalPipe) {
+    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, @Nullable ServiceDefinitionImpl serviceDef, InvokerPipe terminalPipe, boolean isSynchronous) {
         this.binding = binding;
         this.soapVersion = binding.getSOAPVersion();
         this.container = container;
@@ -102,7 +102,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 Thread.currentThread().getContextClassLoader(), binding.getBindingId());
         assert assembler!=null;
 
-        ServerPipeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe);
+        ServerPipeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe, isSynchronous);
         this.masterPipeline = assembler.createServer(context);
         terminalPipe.setEndpoint(this);
     }

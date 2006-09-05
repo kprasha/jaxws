@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 
@@ -273,6 +274,12 @@ public abstract class WSEndpoint<T> {
      *      TODO: shouldn't the implementation find this from the metadata list?
      * @param metadata
      *      Other documents that become {@link SDDocument}s. Can be null.
+     * @param isTransportSynchronous
+     *      If the caller knows that the returned {@link WSEndpoint} is going to be
+     *      used by a synchronous-only transport, then it may pass in <tt>true</tt>
+     *      to allow the callee to perform an optimization based on that knowledge
+     *      (since often synchronous version is cheaper than an asynchronous version.)
+     *      This value is visible from {@link ServerPipeAssemblerContext#isSynchronous()}.
      *
      * @return newly constructed {@link WSEndpoint}.
      * @throws WebServiceException
@@ -288,10 +295,30 @@ public abstract class WSEndpoint<T> {
         @NotNull WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata,
-        @Nullable EntityResolver resolver) {
+        @Nullable EntityResolver resolver,
+        boolean isTransportSynchronous) {
         return EndpointFactory.createEndpoint(
-            implType,processHandlerAnnotation, invoker,serviceName,portName,container,binding,primaryWsdl,metadata,resolver);
+            implType,processHandlerAnnotation, invoker,serviceName,portName,container,binding,primaryWsdl,metadata,resolver,isTransportSynchronous);
     }
+
+    /**
+     * Deprecated version that assumes <tt>isTransportSynchronous==false</tt>
+     */
+    @Deprecated
+    public static <T> WSEndpoint<T> create(
+        @NotNull Class<T> implType,
+        boolean processHandlerAnnotation,
+        @NotNull Invoker invoker,
+        @NotNull QName serviceName,
+        @NotNull QName portName,
+        @Nullable Container container,
+        @NotNull WSBinding binding,
+        @Nullable SDDocumentSource primaryWsdl,
+        @Nullable Collection<? extends SDDocumentSource> metadata,
+        @Nullable EntityResolver resolver) {
+        return create(implType,processHandlerAnnotation,invoker,serviceName,portName,container,binding,primaryWsdl,metadata,resolver,false);
+    }
+
 
     /**
      * The same as

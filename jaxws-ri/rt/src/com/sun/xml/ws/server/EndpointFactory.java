@@ -99,7 +99,7 @@ public class EndpointFactory {
         Class<T> implType, boolean processHandlerAnnotation, Invoker invoker, QName serviceName, QName portName,
         Container container, WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
-        @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver) {
+        @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver, boolean isTransportSynchronous) {
 
         if(invoker ==null || implType ==null)
             throw new IllegalArgumentException();
@@ -195,7 +195,7 @@ public class EndpointFactory {
 
         ServiceDefinitionImpl serviceDefiniton = (primaryDoc != null) ? new ServiceDefinitionImpl(docList, primaryDoc) : null;
 
-        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal);
+        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal, isTransportSynchronous);
     }
 
     private static <T> void processHandlerAnnotation(WSBinding binding, Class<T> implType, QName serviceName, QName portName) {
