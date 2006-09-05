@@ -137,7 +137,7 @@ final class WSHttpHandler implements HttpHandler {
      * @return
      *      a string like "http://foo.bar:1234/abc/def"
      */
-    private String getRequestAddress(HttpExchange msg) {
+    static String getRequestAddress(HttpExchange msg) {
         StringBuilder strBuf = new StringBuilder();
         strBuf.append((msg instanceof HttpsExchange) ? "https" : "http");
         strBuf.append("://");

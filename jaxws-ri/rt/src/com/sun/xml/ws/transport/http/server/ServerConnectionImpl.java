@@ -133,7 +133,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     public String getEPRAddress(Packet request) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return WSHttpHandler.getRequestAddress(httpExchange);
     }
 
     @Override
