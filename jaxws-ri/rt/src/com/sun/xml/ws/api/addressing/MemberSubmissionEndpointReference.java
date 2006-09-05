@@ -33,8 +33,8 @@ import java.util.Map;
  */
 
 // XmlRootElement allows this class to be marshalled on its own
-@XmlRootElement(name = "EndpointReference", namespace = MemberSubmissionEndpointReference.NS)
-@XmlType(name = "EndpointReferenceType", namespace = MemberSubmissionEndpointReference.NS)
+@XmlRootElement(name = "EndpointReference", namespace = MemberSubmissionEndpointReference.MSNS)
+@XmlType(name = "EndpointReferenceType", namespace = MemberSubmissionEndpointReference.MSNS)
 public final class MemberSubmissionEndpointReference extends EndpointReference implements MemberSubmissionAddressingConstants {
 
     private final static JAXBContext msjc = MemberSubmissionEndpointReference.getMSJaxbContext();
@@ -48,7 +48,7 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
      * @throws
      */
     //may need public default constructor - kw
-    protected MemberSubmissionEndpointReference() {
+    public MemberSubmissionEndpointReference() {
     }
 
     /**
@@ -67,7 +67,7 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
             if (unmarshaller == null)
                 unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
             MemberSubmissionEndpointReference epr = (MemberSubmissionEndpointReference) unmarshaller.unmarshal(source);
-            this.address = epr.address;
+            this.addr = epr.addr;
             this.metadata = epr.metadata;
             this.referenceParameters = epr.referenceParameters;
         } catch (JAXBException e) {
@@ -100,28 +100,33 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
     }
 
     // private but necessary properties for databinding
-    @XmlElement(name = WSA_ADDRESS_NAME, namespace = WSA_NAMESPACE_NAME)
-    private MemberSubmissionEndpointReference.Address address;
-    @XmlElement(name = WSA_REFERENCEPROPERTIES_NAME, namespace = WSA_NAMESPACE_NAME)
-    private MemberSubmissionEndpointReference.Element referenceParameters;
-    @XmlElement(name = WSA_REFERENCEPARAMETERS_NAME, namespace = WSA_NAMESPACE_NAME)
-    private MemberSubmissionEndpointReference.Element metadata;
+    @XmlElement(name = "Address", namespace = MemberSubmissionEndpointReference.MSNS)
+    private Address addr;
+    @XmlElement(name = "ReferenceProperties", namespace = MemberSubmissionEndpointReference.MSNS)
+    private Element referenceParameters;
+    @XmlElement(name = "ReferenceParameters", namespace = MemberSubmissionEndpointReference.MSNS)
+    private Element metadata;
 
+    @XmlType(name = "MemberSubmissionAddressType", namespace = MemberSubmissionEndpointReference.MSNS)
     private static class Address {
         @XmlValue
         String uri;
         @XmlAnyAttribute
         Map<QName, String> attributes;
+
+
     }
 
-
+    @XmlType(name = "MemberSubmissionElementType", namespace = MemberSubmissionEndpointReference.MSNS)
     private static class Element {
         @XmlAnyElement
         List<Element> elements;
         @XmlAnyAttribute
         Map<QName, String> attributes;
+
+
     }
 
 
-    protected static final String NS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
+    protected static final String MSNS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
 }
