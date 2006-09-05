@@ -1,30 +1,29 @@
 package com.sun.xml.ws.api.addressing;
 
-import org.w3c.dom.Element;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 
-import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.JAXBException;
-import javax.xml.ws.W3CEndpointReference;
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
-import javax.xml.transform.Source;
-import javax.xml.transform.Result;
-import javax.xml.namespace.QName;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents a W3C Addressing EndpointReferece which is
  * a remote reference to a web service endpoint that supports the
  * W3C WS-Addressing 1.0 - Core Recommendation.
- * <p>
+ * <p/>
  * Developers should use this class in their SEIs if they want to
  * pass/return endpoint references that represent the W3C WS-Addressing
  * recommendation.
- * <p>
+ * <p/>
  * JAXB will use the JAXB annotations and bind this class to XML infoset
  * that is consistent with that defined by WS-Addressing.  See
  * http://www.w3.org/TR/2006/REC-ws-addr-core-20060509/
@@ -34,58 +33,54 @@ import java.util.List;
  */
 
 // XmlRootElement allows this class to be marshalled on its own
-@XmlRootElement(name="EndpointReference",namespace= MemberSubmissionEndpointReference.NS)
-@XmlType(name="EndpointReferenceType",namespace= MemberSubmissionEndpointReference.NS)
-public final class MemberSubmissionEndpointReference extends EndpointReference {
+@XmlRootElement(name = "EndpointReference", namespace = MemberSubmissionEndpointReference.NS)
+@XmlType(name = "EndpointReferenceType", namespace = MemberSubmissionEndpointReference.NS)
+public final class MemberSubmissionEndpointReference extends EndpointReference implements MemberSubmissionAddressingConstants {
 
     private final static JAXBContext msjc = MemberSubmissionEndpointReference.getMSJaxbContext();
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
 
-      /**
-     *Default Constuctor for MemberSubmissionEPR
+    /**
+     * Default Constuctor for MemberSubmissionEPR
      *
-     * @param source A source object containing valid XmlInfoset
-     * instance consistent with the W3C WS-Addressing Core
-     * recommendation.
-     *
-     * @throws 
-     *  
+     * @param 
+     * @throws
      */
-    protected MemberSubmissionEndpointReference(){}
+    //may need public default constructor - kw
+    protected MemberSubmissionEndpointReference() {
+    }
 
     /**
      * construct an EPR from infoset representation
      *
      * @param source A source object containing valid XmlInfoset
-     * instance consistent with the W3C WS-Addressing Core
-     * recommendation.
-     *
+     *               instance consistent with the W3C WS-Addressing Core
+     *               recommendation.
      * @throws javax.xml.ws.WebServiceException
-     *   if the source does not contain a valid W3C WS-Addressing
-     *   EndpointReference.
-     * @throws NullPointerException
-     *   if the <code>null</code> <code>source</code> value is given
+     *                              if the source does not contain a valid W3C WS-Addressing
+     *                              EndpointReference.
+     * @throws NullPointerException if the <code>null</code> <code>source</code> value is given
      */
     public MemberSubmissionEndpointReference(Source source) {
         try {
             if (unmarshaller == null)
                 unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
-            MemberSubmissionEndpointReference epr = (MemberSubmissionEndpointReference)unmarshaller.unmarshal(source);
-            this.addrezz = epr.addrezz;
-            this.metaData = epr.metaData;
-            this.referenceParams = epr.referenceParams;
+            MemberSubmissionEndpointReference epr = (MemberSubmissionEndpointReference) unmarshaller.unmarshal(source);
+            this.address = epr.address;
+            this.metadata = epr.metadata;
+            this.referenceParameters = epr.referenceParameters;
         } catch (JAXBException e) {
-            throw new WebServiceException("Error unmarshalling W3CEndpointReference " ,e);
+            throw new WebServiceException("Error unmarshalling MemberSubmissionEndpointReference ", e);
         } catch (ClassCastException e) {
-            throw new WebServiceException("Source did not contain W3CEndpointReference", e);
+            throw new WebServiceException("Source did not contain MemberSubmissionEndpointReference", e);
         }
     }
 
     /**
      * {@inheritDoc}
-     **/
-    public void writeTo(Result result){
+     */
+    public void writeTo(Result result) {
         try {
             if (marshaller == null)
                 marshaller = MemberSubmissionEndpointReference.msjc.createMarshaller();
@@ -100,34 +95,33 @@ public final class MemberSubmissionEndpointReference extends EndpointReference {
         try {
             return JAXBContext.newInstance(MemberSubmissionEndpointReference.class);
         } catch (JAXBException e) {
-            throw new WebServiceException("Error creating JAXBContext for W3CEndpointReference. ", e);
+            throw new WebServiceException("Error creating JAXBContext for MemberSubmissionEndpointReference. ", e);
         }
     }
 
     // private but necessary properties for databinding
-    @XmlElement(name="Addrezz",namespace= MemberSubmissionEndpointReference.NS)
-    private MemberSubmissionEndpointReference.Addrezz addrezz;
-    @XmlElement(name="ReferenceParams",namespace= MemberSubmissionEndpointReference.NS)
-    private MemberSubmissionEndpointReference.Elementz referenceParams;
-    @XmlElement(name="MetaData",namespace= MemberSubmissionEndpointReference.NS)
-    private MemberSubmissionEndpointReference.Elementz metaData;
+    @XmlElement(name = WSA_ADDRESS_NAME, namespace = WSA_NAMESPACE_NAME)
+    private MemberSubmissionEndpointReference.Address address;
+    @XmlElement(name = WSA_REFERENCEPROPERTIES_NAME, namespace = WSA_NAMESPACE_NAME)
+    private MemberSubmissionEndpointReference.Element referenceParameters;
+    @XmlElement(name = WSA_REFERENCEPARAMETERS_NAME, namespace = WSA_NAMESPACE_NAME)
+    private MemberSubmissionEndpointReference.Element metadata;
 
-    private static class Addrezz {
+    private static class Address {
         @XmlValue
-        String uRI;
+        String uri;
         @XmlAnyAttribute
-        Map<QName,String> attrs;
+        Map<QName, String> attributes;
     }
 
 
-    private static class Elementz {
+    private static class Element {
         @XmlAnyElement
-        List<Element> elementz;
+        List<Element> elements;
         @XmlAnyAttribute
-        Map<QName,String> attrs;
+        Map<QName, String> attributes;
     }
 
-    // Could use MemberSubmissionAdressingConstants - but
-    // shouldn't it be defined here for databinding...
+
     protected static final String NS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
 }
