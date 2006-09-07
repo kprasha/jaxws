@@ -152,7 +152,7 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         public int size() {
             return createBackupMap().size();
         }
-        
+
     }
 
     private Map<String, Object> createBackupMap() {
@@ -164,7 +164,6 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
                 backupMap.put(e.getKey(), e.getValue());
             }
         }
-        backupMap.putAll(packet.invocationProperties);
         return backupMap;
     }
 
