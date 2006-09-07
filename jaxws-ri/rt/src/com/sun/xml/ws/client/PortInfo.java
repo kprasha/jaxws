@@ -23,41 +23,58 @@ package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
 
 /**
  * Information about a port.
- *
+ * <p/>
  * This object is owned by {@link WSServiceDelegate} to keep track of a port,
  * since a port maybe added dynamically.
  *
  * @author JAXWS Development Team
  */
 class PortInfo {
-    private final @NotNull WSServiceDelegate owner;
+    private final
+    @NotNull
+    WSServiceDelegate owner;
 
-    public final @NotNull QName portName;
-    public final @NotNull EndpointAddress targetEndpoint;
-    public final @NotNull BindingID bindingId;
+    public final
+    @NotNull
+    QName portName;
+    public final
+    @NotNull
+    EndpointAddress targetEndpoint;
+    public final
+    @NotNull
+    BindingID bindingId;
 
     /**
      * If a port is known statically to a WSDL, {@link PortInfo} may
      * have the corresponding WSDL model. This would occur when the
      * service was created with the WSDL location and the port is defined
      * in the WSDL.
-     *
+     * <p/>
      * If this is a {@link SEIPortInfo}, then this is always non-null.
      */
-    public final @Nullable WSDLPort portModel;
+    public final
+    @Nullable
+    WSDLPort portModel;
 
     public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId) {
+        this.owner = owner;
+        this.targetEndpoint = targetEndpoint;
+        this.portName = name;
+        this.bindingId = bindingId;
+        this.portModel = null;
+    }
+
+    //temporary will be removed
+    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, String[] features) {
         this.owner = owner;
         this.targetEndpoint = targetEndpoint;
         this.portName = name;
@@ -70,10 +87,10 @@ class PortInfo {
         this.targetEndpoint = port.getAddress();
         this.portName = port.getName();
         this.bindingId = port.getBinding().getBindingId();
-        this.portModel = port;        
+        this.portModel = port;
     }
 
     public BindingImpl createBinding() {
-        return owner.createBinding(portName,bindingId);
+        return owner.createBinding(portName, bindingId);
     }
 }
