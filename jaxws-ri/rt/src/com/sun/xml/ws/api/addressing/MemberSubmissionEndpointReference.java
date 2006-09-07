@@ -34,8 +34,8 @@ import java.util.Map;
 
 // XmlRootElement allows this class to be marshalled on its own
 @XmlRootElement(name = "EndpointReference", namespace = MemberSubmissionEndpointReference.MSNS)
-@XmlType(name = "EndpointReferenceType", namespace = MemberSubmissionEndpointReference.MSNS)
-public final class MemberSubmissionEndpointReference extends EndpointReference implements MemberSubmissionAddressingConstants {
+@XmlType(name = "MemberSubmissionEndpointReferenceType", namespace = MemberSubmissionEndpointReference.MSNS)
+public class MemberSubmissionEndpointReference extends EndpointReference implements MemberSubmissionAddressingConstants {
 
     private final static JAXBContext msjc = MemberSubmissionEndpointReference.getMSJaxbContext();
     private Marshaller marshaller;
@@ -43,9 +43,6 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
 
     /**
      * Default Constuctor for MemberSubmissionEPR
-     *
-     * @param 
-     * @throws
      */
     //may need public default constructor - kw
     public MemberSubmissionEndpointReference() {
@@ -63,6 +60,10 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
      * @throws NullPointerException if the <code>null</code> <code>source</code> value is given
      */
     public MemberSubmissionEndpointReference(Source source) {
+
+        if (source == null)
+            throw new WebServiceException("Source parameter can not be null on constructor");
+
         try {
             if (unmarshaller == null)
                 unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
@@ -113,8 +114,6 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
         String uri;
         @XmlAnyAttribute
         Map<QName, String> attributes;
-
-
     }
 
     @XmlType(name = "MemberSubmissionElementType", namespace = MemberSubmissionEndpointReference.MSNS)
@@ -123,8 +122,6 @@ public final class MemberSubmissionEndpointReference extends EndpointReference i
         List<Element> elements;
         @XmlAnyAttribute
         Map<QName, String> attributes;
-
-
     }
 
 
