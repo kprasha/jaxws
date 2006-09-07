@@ -25,8 +25,10 @@ import javax.xml.namespace.QName;
 
 public class HeaderFault extends Fault {
 
+    public HeaderFault() {}
+
     public HeaderFault(String name) {
-        super(name, null);
+        super(name);
     }
 
     public QName getMessage() {
