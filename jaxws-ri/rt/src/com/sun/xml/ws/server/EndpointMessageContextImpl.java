@@ -22,11 +22,7 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.message.Packet;
-import java.util.AbstractMap;
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceContext;
 
@@ -69,17 +65,10 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         if (packet.supports(key)) {
             return packet.get(key);    // strongly typed
         }
-
         if (packet.getHandlerScopePropertyNames(true).contains(key)) {
             return null;            // no such application-scope property
         }
-
-        Object v = packet.invocationProperties.get(key);
-        if (v != null) {
-            return v;
-        }
-
-        return packet.otherProperties.get(key);
+        return packet.invocationProperties.get(key);
     }
 
     @Override
@@ -94,15 +83,6 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
             }
             // Overwrite existing APPLICATION scoped property
             packet.invocationProperties.put(key, value);
-            return old;
-        }
-        old = packet.otherProperties.get(key);
-        if (old != null) {
-            if (packet.getHandlerScopePropertyNames(true).contains(key)) {
-                throw new IllegalArgumentException("Cannot overwrite property in HANDLER scope");
-            }
-            // Overwrite existing APPLICATION scoped property
-            packet.otherProperties.put(key, value);
             return old;
         }
         // No existing property. So Add a new property
@@ -124,15 +104,6 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
             packet.invocationProperties.remove(key);
             return old;
         }
-        old = packet.otherProperties.get(key);
-        if (old != null) {
-            if (packet.getHandlerScopePropertyNames(true).contains(key)) {
-                throw new IllegalArgumentException("Cannot remove property in HANDLER scope");
-            }
-            // Remove existing APPLICATION scoped property
-            packet.otherProperties.remove(key);
-            return old;
-        }
         // No existing property.
         return null;
     }
@@ -145,30 +116,56 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
     }
 
     public void setScope(String name, MessageContext.Scope scope) {
+        throw new UnsupportedOperationException(
+                "All the properties in this context are in APPLICATION scope. Cannot do setScope().");
     }
 
     public MessageContext.Scope getScope(String name) {
-        return null;
+        throw new UnsupportedOperationException(
+                "All the properties in this context are in APPLICATION scope. Cannot do getScope().");
     }
 
     private class EntrySet extends AbstractSet<Map.Entry<String, Object>> {
 
         public Iterator<Map.Entry<String, Object>> iterator() {
-            return null;
-        }
-        public boolean contains(Object o) {
-            return false;
-        }
-        public boolean remove(Object o) {
-            return EndpointMessageContextImpl.this.remove(o) != null;
+            final Iterator<Map.Entry<String, Object>> it = createBackupMap().entrySet().iterator();
+
+            return new Iterator() {
+                Map.Entry<String, Object> cur;
+
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                public Object next() {
+                    cur = it.next();
+                    return cur;
+                }
+
+                public void remove() {
+                    it.remove();
+                    EndpointMessageContextImpl.this.remove(cur.getKey());
+                }
+            };
         }
 
         public int size() {
-            return 0;
+            return createBackupMap().size();
         }
-        public void clear() {
-            EndpointMessageContextImpl.this.clear();
+        
+    }
+
+    private Map<String, Object> createBackupMap() {
+        Map<String, Object> backupMap = new HashMap<String, Object>();
+        backupMap.putAll(packet.createMapView());
+        Set<String> handlerProps = packet.getHandlerScopePropertyNames(true);
+        for(Map.Entry<String, Object> e : packet.invocationProperties.entrySet()) {
+            if (!handlerProps.contains(e.getKey())) {
+                backupMap.put(e.getKey(), e.getValue());
+            }
         }
+        backupMap.putAll(packet.invocationProperties);
+        return backupMap;
     }
 
 }
