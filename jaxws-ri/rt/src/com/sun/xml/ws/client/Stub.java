@@ -29,21 +29,20 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.util.RuntimeVersion;
 import com.sun.xml.ws.util.Pool.PipePool;
+import com.sun.xml.ws.util.RuntimeVersion;
 
 import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.EndpointReference;
-
+import javax.xml.ws.WebServiceException;
 import java.util.Map;
 
 /**
  * Base class for stubs, which accept method invocations from
  * client applications and pass the message to a {@link Pipe}
  * for processing.
- *
- * <p>
+ * <p/>
+ * <p/>
  * This class implements the management of pipe instances,
  * and most of the {@link BindingProvider} methods.
  *
@@ -53,10 +52,12 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     /**
      * Reuse pipelines as it's expensive to create.
-     *
+     * <p/>
      * Set to null when {@link #close() closed}.
      */
     private Pool<Pipe> pipes;
+
+    protected EndpointReference endpointReference;
 
     protected final BindingImpl binding;
 
@@ -68,14 +69,11 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
     private ResponseContext responseContext;
 
     /**
-     * @param master
-     *      The created stub will send messages to this pipe.
-     * @param binding
-     *      As a {@link BindingProvider}, this object will
-     *      return this binding from {@link BindingProvider#getBinding()}.
-     * @param defaultEndPointAddress
-     *      The destination of the message. The actual destination
-     *      could be overridden by {@link RequestContext}.
+     * @param master                 The created stub will send messages to this pipe.
+     * @param binding                As a {@link BindingProvider}, this object will
+     *                               return this binding from {@link BindingProvider#getBinding()}.
+     * @param defaultEndPointAddress The destination of the message. The actual destination
+     *                               could be overridden by {@link RequestContext}.
      */
     protected Stub(Pipe master, BindingImpl binding, EndpointAddress defaultEndPointAddress) {
         this.pipes = new PipePool(master);
@@ -85,24 +83,21 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     /**
      * Passes a message to a pipe for processing.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * Unlike {@link Pipe#process(Packet)},
      * this method is thread-safe and can be invoked from
      * multiple threads concurrently.
      *
-     * @param packet
-     *      The message to be sent to the server
-     * @param requestContext
-     *      The {@link RequestContext} when this invocation is originally scheduled.
-     *      This must be the same object as {@link #requestContext} for synchronous
-     *      invocations, but for asynchronous invocations, it needs to be a snapshot
-     *      captured at the point of invocation, to correctly satisfy the spec requirement.
-     * @param receiver
-     *      Receives the {@link ResponseContext}. Since the spec requires
-     *      that the asynchronous invocations must not update response context,
-     *      depending on the mode of invocation they have to go to different places.
-     *      So we take a setter that abstracts that away. 
+     * @param packet         The message to be sent to the server
+     * @param requestContext The {@link RequestContext} when this invocation is originally scheduled.
+     *                       This must be the same object as {@link #requestContext} for synchronous
+     *                       invocations, but for asynchronous invocations, it needs to be a snapshot
+     *                       captured at the point of invocation, to correctly satisfy the spec requirement.
+     * @param receiver       Receives the {@link ResponseContext}. Since the spec requires
+     *                       that the asynchronous invocations must not update response context,
+     *                       depending on the mode of invocation they have to go to different places.
+     *                       So we take a setter that abstracts that away.
      */
     protected final Packet process(Packet packet, RequestContext requestContext, ResponseContextReceiver receiver) {
         {// fill in Packet
@@ -114,7 +109,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         Packet reply;
 
         Pool<Pipe> pool = pipes;
-        if(pool==null)
+        if (pool == null)
             throw new WebServiceException("close method has already been invoked"); // TODO: i18n
 
         // then send it away!
@@ -133,7 +128,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
     }
 
     public void close() {
-        if(pipes!=null) {
+        if (pipes != null) {
             // multi-thread safety of 'close' needs to be considered more carefully.
             // some calls might be pending while this method is invoked. Should we
             // block until they are complete, or should we abort them (but how?)
@@ -147,7 +142,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         return binding;
     }
 
-    public final Map<String,Object> getRequestContext() {
+    public final Map<String, Object> getRequestContext() {
         return requestContext.getMapView();
     }
 
@@ -160,16 +155,21 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
     }
 
     public String toString() {
-        return RuntimeVersion.VERSION+": Stub for "+getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+        return RuntimeVersion.VERSION + ": Stub for " + getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
 
+    //temp
     public void setEndpointReference(EndpointReference endpointReference) {
+        this.endpointReference = endpointReference;
     }
 
+    //temp
     public EndpointReference getEndpointReference() {
-        return null;
+        return this.endpointReference;
     }
 
+
+    //this is all temporary
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
         return null;
     }
