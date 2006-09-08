@@ -110,6 +110,15 @@ public final class PipeCloner {
     }
 
     /**
+     * The {@link Pipe} version of {@link #add(Tube, Tube)}.
+     */
+    public void add(Pipe original, Pipe copy) {
+        assert !master2copy.containsKey(original);
+        assert original!=null && copy!=null;
+        master2copy.put(original,copy);
+    }
+
+    /**
      * This method must be called from within the copy constructor
      * to notify that the copy was created.
      *
@@ -119,7 +128,7 @@ public final class PipeCloner {
      * before you start copying the pipes you refer to,
      * or else there's a chance of inifinite loop.
      */
-    public void add(Pipe original, Pipe copy) {
+    public void add(Tube original, Tube copy) {
         assert !master2copy.containsKey(original);
         assert original!=null && copy!=null;
         master2copy.put(original,copy);
