@@ -24,9 +24,6 @@ package com.sun.xml.ws.api.model;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-
-import javax.jws.WebParam.Mode;
 import java.lang.reflect.Method;
 
 /**
@@ -45,17 +42,18 @@ public interface JavaMethod {
      * On the server side, it uses this for invocation of the web service
      *
      * <p>
-     * @WebService(endpointInterface="I")
+     * {@link @WebService}(endpointInterface="I")
      * class A { }
+     *
      * In this case, it retuns A's method 
      *
      * <p>
-     * @WebService(endpointInterface="I")
+     * {@link @WebService}(endpointInterface="I")
      * class A implements I { }
      * In this case, it returns I's method
      *
      * <p>
-     * @WebService
+     * {@link @WebService}
      * class A { }
      * In this case, it returns A's method
      *  
@@ -67,17 +65,17 @@ public interface JavaMethod {
      * Returns the SEI method if there is one.
      *
      * <p>
-     * @WebService(endpointInterface="I")
+     * {@link @WebService}(endpointInterface="I")
      * class A { }
      * In this case, it retuns I's method 
      *
      * <p>
-     * @WebService(endpointInterface="I")
+     * {@link @WebService}(endpointInterface="I")
      * class A implements I { }
      * In this case, it returns I's method
      *
      * <p>
-     * @WebService
+     * {@link @WebService}
      * class A { }
      * In this case, it returns A's method
      *  
