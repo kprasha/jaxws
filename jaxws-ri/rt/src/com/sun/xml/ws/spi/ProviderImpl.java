@@ -32,10 +32,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.W3CEndpointReference;
-import javax.xml.ws.WebServiceException;
+import javax.xml.ws.*;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import java.net.URL;
@@ -81,6 +78,18 @@ public class ProviderImpl extends Provider {
         } catch (JAXBException e) {
             throw new WebServiceException("Error creating Marshaller or marshalling.", e);
         }
+    }
+
+    public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     private final static JAXBContext getEPRJaxbContext() {
