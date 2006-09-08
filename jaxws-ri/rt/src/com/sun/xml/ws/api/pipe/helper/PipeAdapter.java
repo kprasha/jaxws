@@ -23,6 +23,14 @@ public class PipeAdapter extends AbstractTube {
     }
 
     /**
+     * Copy constructor
+     */
+    public PipeAdapter(PipeAdapter that, PipeCloner cloner) {
+        cloner.add(that,this);
+        this.next = cloner.copy(that.next);
+    }
+
+    /**
      * Uses the current fiber and runs the whole pipe to the completion
      * (meaning everything from now on will run synchronously.)
      */
@@ -39,6 +47,6 @@ public class PipeAdapter extends AbstractTube {
     }
 
     public PipeAdapter copy(PipeCloner cloner) {
-        return new PipeAdapter(next.copy(cloner));
+        return new PipeAdapter(this);
     }
 }
