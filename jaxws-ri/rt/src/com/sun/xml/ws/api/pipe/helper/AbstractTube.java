@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 
 /**
@@ -47,5 +48,14 @@ public abstract class AbstractTube implements Tube, Pipe {
      */
     public Packet process(Packet p) {
         return Fiber.current().runSync(this,p);
+    }
+
+    /**
+     * Needs to be implemented by the derived class, but we can't make it abstract
+     * without upsetting javac.
+     */
+    public AbstractTube copy(PipeCloner cloner) {
+        // TODO: implement this method later
+        throw new UnsupportedOperationException();
     }
 }

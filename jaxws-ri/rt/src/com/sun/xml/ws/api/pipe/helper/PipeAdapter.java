@@ -38,7 +38,7 @@ public class PipeAdapter extends AbstractTube {
         next.preDestroy();
     }
 
-    public Pipe copy(PipeCloner cloner) {
-        return next.copy(cloner);
+    public PipeAdapter copy(PipeCloner cloner) {
+        return new PipeAdapter(next.copy(cloner));
     }
 }
