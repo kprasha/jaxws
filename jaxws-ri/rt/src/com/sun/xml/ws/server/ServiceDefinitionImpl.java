@@ -24,9 +24,11 @@ package com.sun.xml.ws.server;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +53,8 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
      * Set when {@link WSEndpointImpl} is created.
      */
     /*package*/ WSEndpointImpl<?> owner;
+
+    /*package*/ final List<SDDocumentFilter> filters = new ArrayList<SDDocumentFilter>();
 
     /**
      * @param docs
@@ -82,6 +86,10 @@ public final class ServiceDefinitionImpl implements ServiceDefinition {
 
     public @NotNull SDDocument getPrimary() {
         return primaryWsdl;
+    }
+
+    public void addFilter(SDDocumentFilter filter) {
+        filters.add(filter);
     }
 
     public Iterator<SDDocument> iterator() {

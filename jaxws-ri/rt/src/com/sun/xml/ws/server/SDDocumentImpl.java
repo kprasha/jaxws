@@ -25,19 +25,20 @@ package com.sun.xml.ws.server;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import com.sun.xml.ws.wsdl.parser.ParserUtil;
+import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -195,10 +196,12 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
     }
 
     public void writeTo(PortAddressResolver portAddressResolver, DocumentAddressResolver resolver, XMLStreamWriter out) throws XMLStreamException, IOException {
+        for (SDDocumentFilter f : owner.filters) {
+            out = f.filter(this,out);
+        }
+
         new WSDLPatcher(owner.owner,this,portAddressResolver,resolver).bridge(
-            source.read(xif),
-            out
-        );
+            source.read(xif), out );
     }
 
 
