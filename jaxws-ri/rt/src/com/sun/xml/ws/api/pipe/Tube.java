@@ -253,5 +253,5 @@ public interface Tube {
      *      always non-null {@link Pipe}.
      * @param cloner
      */
-    Tube copy(PipeCloner cloner);
+    Tube copy(TubeCloner cloner);
 }

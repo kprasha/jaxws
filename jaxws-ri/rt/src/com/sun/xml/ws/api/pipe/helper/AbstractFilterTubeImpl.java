@@ -2,8 +2,8 @@ package com.sun.xml.ws.api.pipe.helper;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 
 /**
  * Convenient default implementation for filtering {@link Tube}.
@@ -22,7 +22,7 @@ public abstract class AbstractFilterTubeImpl extends AbstractTubeImpl {
         this.next = next;
     }
 
-    protected AbstractFilterTubeImpl(AbstractFilterTubeImpl that, PipeCloner cloner) {
+    protected AbstractFilterTubeImpl(AbstractFilterTubeImpl that, TubeCloner cloner) {
         super(that, cloner);
         this.next = cloner.copy(that.next);
     }

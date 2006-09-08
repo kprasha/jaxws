@@ -3,9 +3,10 @@ package com.sun.xml.ws.util.pipe;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -49,7 +50,7 @@ public class DumpTube extends AbstractFilterTubeImpl {
     /**
      * Copy constructor.
      */
-    protected DumpTube(DumpTube that, PipeCloner cloner) {
+    protected DumpTube(DumpTube that, TubeCloner cloner) {
         super(that,cloner);
         this.name = that.name;
         this.out = that.out;
@@ -109,7 +110,7 @@ public class DumpTube extends AbstractFilterTubeImpl {
     }
 
 
-    public DumpTube copy(PipeCloner cloner) {
+    public AbstractTubeImpl copy(TubeCloner cloner) {
         return new DumpTube(this,cloner);
     }
 

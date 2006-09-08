@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 
 /**
  * {@link Tube} that invokes {@link Pipe}.
@@ -34,9 +35,9 @@ public class PipeAdapter extends AbstractTubeImpl {
     /**
      * Copy constructor
      */
-    public PipeAdapter(PipeAdapter that, PipeCloner cloner) {
+    private PipeAdapter(PipeAdapter that, TubeCloner cloner) {
         super(that,cloner);
-        this.next = cloner.copy(that.next);
+        this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
     /**
@@ -55,7 +56,7 @@ public class PipeAdapter extends AbstractTubeImpl {
         next.preDestroy();
     }
 
-    public PipeAdapter copy(PipeCloner cloner) {
-        return new PipeAdapter(this);
+    public PipeAdapter copy(TubeCloner cloner) {
+        return new PipeAdapter(this,cloner);
     }
 }

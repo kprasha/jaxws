@@ -23,8 +23,9 @@
 package com.sun.xml.ws.util.pipe;
 
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 
 import java.io.PrintStream;
@@ -66,11 +67,11 @@ public class DumpPipe extends DumpTube {
     /**
      * Copy constructor.
      */
-    private DumpPipe(DumpPipe that, PipeCloner cloner) {
+    private DumpPipe(DumpPipe that, TubeCloner cloner) {
         super(that,cloner);
     }
 
-    public DumpPipe copy(PipeCloner cloner) {
+    public AbstractTubeImpl copy(TubeCloner cloner) {
         return new DumpPipe(this,cloner);
     }
 }

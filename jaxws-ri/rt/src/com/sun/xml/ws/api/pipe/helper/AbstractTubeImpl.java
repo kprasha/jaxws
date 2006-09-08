@@ -6,6 +6,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 
 /**
  * Base class for {@link Tube} implementation.
@@ -31,7 +32,7 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
     /**
      * Copy constructor.
      */
-    protected AbstractTubeImpl(AbstractTubeImpl that, PipeCloner cloner) {
+    protected AbstractTubeImpl(AbstractTubeImpl that, TubeCloner cloner) {
         cloner.add(that,this);
     }
 
@@ -67,8 +68,9 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
      * Needs to be implemented by the derived class, but we can't make it abstract
      * without upsetting javac.
      */
-    public AbstractTubeImpl copy(PipeCloner cloner) {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException();
+    public final AbstractTubeImpl copy(PipeCloner cloner) {
+        return copy((TubeCloner)cloner);
     }
+
+    public abstract AbstractTubeImpl copy(TubeCloner cloner);
 }
