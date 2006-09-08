@@ -21,8 +21,8 @@
  */
 package com.sun.xml.ws.api.pipe;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Clones the whole pipeline.
@@ -35,21 +35,29 @@ import java.util.HashMap;
  * @author Kohsuke Kawaguchi
  */
 public final class PipeCloner {
-    private final Map<Pipe,Pipe> master2copy = new HashMap<Pipe,Pipe>();
+    // Pipe to pipe, or tube to tube
+    private final Map<Object,Object> master2copy = new HashMap<Object,Object>();
 
     /**
-     * Invoked by a client of a pipe to clone the whole pipeline.
+     * {@link Pipe} version of {@link #clone(Tube)}
+     */
+    public static Pipe clone(Pipe p) {
+        return new PipeCloner().copy(p);
+    }
+
+    /**
+     * Invoked by a client of a tube to clone the whole pipeline.
      *
      * <p>
-     * {@link Pipe}s implementing the {@link Pipe#copy(PipeCloner)} method
-     * shall use {@link #copy(Pipe)} method.
+     * {@link Tube}s implementing the {@link Tube#copy(PipeCloner)} method
+     * shall use {@link #copy(Tube)} method.
      *
      * @param p
      *      The entry point of a pipeline to be copied. must not be null.
      * @return
      *      The cloned pipeline. Always non-null.
      */
-    public static Pipe clone(Pipe p) {
+    public static Tube clone(Tube p) {
         return new PipeCloner().copy(p);
     }
 
@@ -57,33 +65,46 @@ public final class PipeCloner {
     private PipeCloner() {}
 
     /**
-     * Invoked by a {@link Pipe#copy(PipeCloner)} implementation
+     * {@link Pipe} version of {@link #copy(Tube)}
+     */
+    public <T extends Pipe> T copy(T p) {
+        Pipe r = (Pipe)master2copy.get(p);
+        if(r==null) {
+            r = p.copy(this);
+            // the pipe must puts its copy to the map by itself
+            assert master2copy.get(p)==r : "the pipe must call the add(...) method to register itself before start copying other pipes, but "+p+" hasn't done so";
+        }
+        return (T)r;
+    }
+
+    /**
+     * Invoked by a {@link Tube#copy(PipeCloner)} implementation
      * to copy a reference to another pipe.
      *
      * <p>
-     * This method is for {@link Pipe} implementations, not for users.
+     * This method is for {@link Tube} implementations, not for users.
      *
      * <p>
-     * If the given pipe is already copied for this cloning episode,
+     * If the given tube is already copied for this cloning episode,
      * this method simply returns that reference. Otherwise it copies
-     * a pipe, make a note, and returns a copied pipe. This additional
+     * a tube, make a note, and returns a copied tube. This additional
      * step ensures that a graph is cloned isomorphically correctly.
      *
      * <p>
      * (Think about what happens when a graph is A->B, A->C, B->D, and C->D
      * if you don't have this step.)
      *
-     * @param p
-     *      The pipe to be copied.
+     * @param t
+     *      The tube to be copied.
      * @return
-     *      The cloned pipe. Always non-null.
+     *      The cloned tube. Always non-null.
      */
-    public <T extends Pipe> T copy(T p) {
-        Pipe r = master2copy.get(p);
+    public <T extends Tube> T copy(T t) {
+        Tube r = (Tube)master2copy.get(t);
         if(r==null) {
-            r = p.copy(this);
+            r = t.copy(this);
             // the pipe must puts its copy to the map by itself
-            assert master2copy.get(p)==r : "the pipe must call the add(...) method to register itself before start copying other pipes, but "+p+" hasn't done so";
+            assert master2copy.get(t)==r : "the tube must call the add(...) method to register itself before start copying other pipes, but "+t +" hasn't done so";
         }
         return (T)r;
     }
