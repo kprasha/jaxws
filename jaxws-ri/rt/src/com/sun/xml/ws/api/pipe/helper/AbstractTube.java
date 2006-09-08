@@ -1,6 +1,10 @@
-package com.sun.xml.ws.api.pipe;
+package com.sun.xml.ws.api.pipe.helper;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 
 /**
  * Base class for {@link Tube} implementation.

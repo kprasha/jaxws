@@ -1,6 +1,8 @@
-package com.sun.xml.ws.api.pipe;
+package com.sun.xml.ws.api.pipe.helper;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
 
 /**
  * Convenient default implementation for filtering {@link Tube}.
