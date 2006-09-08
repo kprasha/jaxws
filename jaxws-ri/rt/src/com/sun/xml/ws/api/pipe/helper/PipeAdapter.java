@@ -15,10 +15,19 @@ import com.sun.xml.ws.api.pipe.Tube;
  * @author Kohsuke Kawaguchi
  * @author Jitendra Kotamraju
  */
-public class PipeAdapter extends AbstractTube {
+public class PipeAdapter extends AbstractTubeImpl {
     private final Pipe next;
 
-    public PipeAdapter(Pipe next) {
+    public static Tube adapt(Pipe p) {
+        if (p instanceof Tube) {
+            return (Tube) p;
+        } else {
+            return new PipeAdapter(p);
+        }
+    }
+
+
+    private PipeAdapter(Pipe next) {
         this.next = next;
     }
 
@@ -26,7 +35,7 @@ public class PipeAdapter extends AbstractTube {
      * Copy constructor
      */
     public PipeAdapter(PipeAdapter that, PipeCloner cloner) {
-        cloner.add(that,this);
+        super(that,cloner);
         this.next = cloner.copy(that.next);
     }
 

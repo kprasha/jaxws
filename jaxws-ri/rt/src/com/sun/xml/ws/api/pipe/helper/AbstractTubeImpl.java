@@ -16,11 +16,24 @@ import com.sun.xml.ws.api.pipe.Tube;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class AbstractTube implements Tube, Pipe {
+public abstract class AbstractTubeImpl implements Tube, Pipe {
     /**
      * Instance resued for better performance.
      */
     private final NextAction na = new NextAction();
+
+    /**
+     * Default constructor.
+     */
+    protected AbstractTubeImpl() {
+    }
+
+    /**
+     * Copy constructor.
+     */
+    protected AbstractTubeImpl(AbstractTubeImpl that, PipeCloner cloner) {
+        cloner.add(that,this);
+    }
 
     protected final NextAction doInvoke(Tube next, Packet packet) {
         na.invoke(next,packet);
@@ -54,7 +67,7 @@ public abstract class AbstractTube implements Tube, Pipe {
      * Needs to be implemented by the derived class, but we can't make it abstract
      * without upsetting javac.
      */
-    public AbstractTube copy(PipeCloner cloner) {
+    public AbstractTubeImpl copy(PipeCloner cloner) {
         // TODO: implement this method later
         throw new UnsupportedOperationException();
     }

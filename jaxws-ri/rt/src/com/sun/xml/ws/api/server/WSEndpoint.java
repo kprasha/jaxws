@@ -28,19 +28,20 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import org.xml.sax.EntityResolver;
 
+import javax.xml.namespace.QName;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.EndpointReference;
-import javax.xml.namespace.QName;
-import java.util.Collection;
 import java.net.URL;
-
-import org.xml.sax.EntityResolver;
+import java.util.Collection;
+import java.util.concurrent.Executor;
 
 /**
  * Root object that hosts the {@link Packet} processing code
@@ -139,6 +140,23 @@ public abstract class WSEndpoint<T> {
     public abstract @Nullable WSDLPort getPort();
 
     /**
+     * TODO: javadoc
+     */
+    public abstract void setExecutor(Executor exec);
+
+    /**
+     * TODO: javadoc
+     */
+    public final void schedule( Packet request, CompletionCallback callback ) {
+        schedule(request,callback,null);
+    }
+
+    /**
+     * TODO: javadoc
+     */
+    public abstract void schedule( Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor );
+
+    /**
      * Creates a new {@link PipeHead} to process
      * incoming requests.
      *
@@ -199,7 +217,6 @@ public abstract class WSEndpoint<T> {
          *      <p>
          *      Therefore, it should be recorded by the caller in a way that
          *      allows developers to fix a bug.
-         *
          */
         @NotNull Packet process(
             @NotNull Packet request, @Nullable WebServiceContextDelegate wscd, @Nullable TransportBackChannel tbc);

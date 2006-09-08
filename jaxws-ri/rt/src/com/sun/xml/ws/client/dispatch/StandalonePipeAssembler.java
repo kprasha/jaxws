@@ -25,6 +25,7 @@
  */
 package com.sun.xml.ws.client.dispatch;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
@@ -39,7 +40,8 @@ import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
  * @author Jitendra Kotamraju
  */
 public class StandalonePipeAssembler implements PipelineAssembler {
-    
+
+    @NotNull
     public Pipe createClient(ClientPipeAssemblerContext context) {
         Pipe head = context.createTransportPipe();
 
@@ -76,7 +78,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     static {
         boolean b = false;
         try {
-            b = Boolean.getBoolean(StandalonePipeAssembler.class.getName()+".dump");            
+            b = Boolean.getBoolean(StandalonePipeAssembler.class.getName()+".dump");
         } catch (Throwable t) {
             // treat it as false
         }

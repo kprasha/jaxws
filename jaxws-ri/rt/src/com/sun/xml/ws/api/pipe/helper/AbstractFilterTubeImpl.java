@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.pipe.helper;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 
 /**
@@ -14,24 +15,29 @@ import com.sun.xml.ws.api.pipe.Tube;
  * 
  * @author Kohsuke Kawaguchi
  */
-public abstract class AbstractFilterTube extends AbstractTube {
+public abstract class AbstractFilterTubeImpl extends AbstractTubeImpl {
     protected final Tube next;
 
-    public AbstractFilterTube(Tube next) {
+    protected AbstractFilterTubeImpl(Tube next) {
         this.next = next;
     }
 
-    /**
-     * Default no-op implementation.
-     */
-    public NextAction processRequest(Packet p) {
-        return doInvoke(next,p);
+    protected AbstractFilterTubeImpl(AbstractFilterTubeImpl that, PipeCloner cloner) {
+        super(that, cloner);
+        this.next = cloner.copy(that.next);
     }
 
     /**
      * Default no-op implementation.
      */
-    public NextAction processResponse(Packet p) {
-        return doReturnWith(p);
+    public NextAction processRequest(Packet request) {
+        return doInvoke(next,request);
+    }
+
+    /**
+     * Default no-op implementation.
+     */
+    public NextAction processResponse(Packet response) {
+        return doReturnWith(response);
     }
 }

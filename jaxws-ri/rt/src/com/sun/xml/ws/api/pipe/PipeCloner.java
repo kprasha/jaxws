@@ -21,7 +21,7 @@
  */
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.api.pipe.helper.AbstractTube;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -139,7 +139,7 @@ public final class PipeCloner {
     /**
      * Disambiguation version.
      */
-    public void add(AbstractTube original, AbstractTube copy) {
+    public void add(AbstractTubeImpl original, AbstractTubeImpl copy) {
         add((Tube)original,copy);
     }
 }

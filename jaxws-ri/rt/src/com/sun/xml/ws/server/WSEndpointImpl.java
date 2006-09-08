@@ -24,6 +24,9 @@ package com.sun.xml.ws.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.messaging.saaj.util.ByteOutputStream;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
@@ -31,33 +34,33 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.PipelineAssemblerFactory;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
+import com.sun.xml.ws.api.server.CompletionCallback;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
-import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
-import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 
 import javax.annotation.PreDestroy;
-import javax.xml.ws.handler.Handler;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.W3CEndpointReference;
 import javax.xml.ws.WebServiceException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.namespace.QName;
-import java.lang.reflect.Method;
-import java.util.logging.Logger;
+import javax.xml.ws.handler.Handler;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 /**
  * {@link WSEndpoint} implementation.
@@ -139,6 +142,15 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         return seiModel;
     }
 
+    public void setExecutor(Executor exec) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public void schedule(Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
 
     public @NotNull PipeHead createPipeHead() {
         return new PipeHead() {
