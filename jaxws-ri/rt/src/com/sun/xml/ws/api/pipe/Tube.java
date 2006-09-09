@@ -1,9 +1,11 @@
 package com.sun.xml.ws.api.pipe;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.Adapter;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.Dispatch;
@@ -28,10 +30,9 @@ import java.text.SimpleDateFormat;
  * {@link Tube}s run asynchronously. That is, there is no guarantee that
  * {@link #processRequest(Packet)} and {@link #processResponse(Packet)} runs
  * in the same thread, nor is there any guarantee that this tube and next
- * tube runs in the same thread. One thread may be used to run multiple
- * pipeline in turn (just like a real CPU runs multiple threads in turn.)
- *
- * TODO: pick up from here
+ * tube runs in the same thread. Furthermore, one thread may be used to
+ * run multiple pipeline in turn (just like a real CPU runs multiple
+ * threads in turn.)
  *
  *
  * <h2>Tube examples</h2>
@@ -188,8 +189,89 @@ import java.text.SimpleDateFormat;
  * @author Jitendra Kotamraju
  */
 public interface Tube {
-    NextAction processRequest(Packet p);
-    NextAction processResponse(Packet p);
+    /**
+     * Acts on a request and perform some protocol specific operation.
+     *
+     * TODO: exception handling semantics need more discussion
+     *
+     * @throws WebServiceException
+     *      On the server side, this signals an error condition where
+     *      a fault reply is in order (or the exception gets eaten by
+     *      the top-most transport {@link Adapter} if it's one-way.)
+     *      This frees each {@link Pipe} from try/catching a
+     *      {@link WebServiceException} in every layer.
+     *
+     *      Note that this method is also allowed to return
+     *      {@link NextAction#returnWith(Packet)} with
+     *      a {@link Packet} that has a fault as the payload.
+     *
+     *      <p>
+     *      On the client side, the {@link WebServiceException} thrown
+     *      will be propagated all the way back to the calling client
+     *      applications. (The consequence of that is that if you are
+     *      a filtering {@link Pipe}, you must not catch the exception
+     *      that your next {@link Pipe} threw.
+     *
+     * @throws RuntimeException
+     *      Other runtime exception thrown by this method must
+     *      be treated as a bug in the tube implementation,
+     *      and therefore should not be converted into a fault.
+     *      (Otherwise it becomes very difficult to debug implementation
+     *      problems.)
+     *
+     *      <p>
+     *      On the server side, this exception should be most likely
+     *      just logged. On the client-side it gets propagated to the
+     *      client application.
+     *
+     *      <p>
+     *      The consequence of this is that if a pipe calls
+     *      into an user application (such as {@link SOAPHandler}
+     *      or {@link LogicalHandler}), where a {@link RuntimeException}
+     *      is *not* a bug in the JAX-WS implementation, it must be catched
+     *      and wrapped into a {@link WebServiceException}.
+     *
+     * @param request
+     *      The packet that represents a request message.
+     *      If the packet has a non-null message, it must be a valid
+     *      unconsumed {@link Message}. This message represents the
+     *      SOAP message to be sent as a request.
+     *      <p>
+     *      The packet is also allowed to carry no message, which indicates
+     *      that this is an output-only request.
+     *      (that's called "solicit", right? - KK)
+     *
+     * @return
+     *      A {@link NextAction} object that represents the next action
+     *      to be taken by the JAX-WS runtime.
+     */
+    @NotNull NextAction processRequest(@NotNull Packet request);
+
+    /**
+     * Acts on a response and performs some protocol specific operation.
+     *
+     * <p>
+     * Once a {@link #processRequest(Packet)} is invoked, this method
+     * will be always invoked with the response, before this {@link Tube}
+     * processes another request.
+     *
+     * @param response
+     *      If the packet has a non-null message, it must be
+     *      a valid unconsumed {@link Message}. This message represents
+     *      a response to the request message passed to
+     *      {@link #processRequest(Packet)} earlier.
+     *      <p>
+     *      The packet is also allowed to carry no message, which indicates
+     *      that there was no response. This is used for things like
+     *      one-way message and/or one-way transports.
+     *
+     * TODO: exception handling semantics need more discussion
+     *
+     * @return
+     *      A {@link NextAction} object that represents the next action
+     *      to be taken by the JAX-WS runtime.
+     */
+    @NotNull NextAction processResponse(@NotNull Packet response);
 
     /**
      * Invoked before the last copy of the pipeline is about to be discarded,

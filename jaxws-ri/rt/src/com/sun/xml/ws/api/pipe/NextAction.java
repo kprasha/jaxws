@@ -4,7 +4,7 @@ import com.sun.xml.ws.api.message.Packet;
 
 /**
  * Indicates what shall happen after {@link Tube#processRequest(Packet)} or
- * {@link Tube#processResponse(com.sun.xml.ws.api.message.Packet)} returns.
+ * {@link Tube#processResponse(Packet)} returns.
  *
  * <p>
  * To allow reuse of this object, this class is mutable.
@@ -31,8 +31,8 @@ public final class NextAction {
 
     /**
      * Indicates that the next action should be to
-     * invoke the next valve's {@link Tube#processRequest(Packet)},
-     * then later invoke the current valve's {@link Tube#processResponse(Packet)}
+     * invoke the next tube's {@link Tube#processRequest(Packet)},
+     * then later invoke the current tube's {@link Tube#processResponse(Packet)}
      * with the response packet.
      */
     public void invoke(Tube next, Packet p) {
@@ -41,8 +41,8 @@ public final class NextAction {
 
     /**
      * Indicates that the next action should be to
-     * invoke the next valve's {@link Tube#processRequest(Packet)},
-     * but the current valve doesn't want to receive the response packet to
+     * invoke the next tube's {@link Tube#processRequest(Packet)},
+     * but the current tube doesn't want to receive the response packet to
      * its {@link Tube#processResponse(Packet)}.
      */
     public void invokeAndForget(Tube next, Packet p) {

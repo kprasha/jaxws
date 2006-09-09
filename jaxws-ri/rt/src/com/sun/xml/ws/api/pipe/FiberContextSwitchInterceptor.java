@@ -6,7 +6,21 @@ import java.security.PrivilegedAction;
 /**
  * Interception for {@link Fiber} context switch.
  *
- * TODO: doc improvement!
+ * <p>
+ * Even though pipeline runs asynchronously, sometimes it's desirable
+ * to bind some state to the current thread running a fiber. Such state
+ * may include security subject (in terms of {@link AccessController#doPrivileged}),
+ * or a transaction.
+ *
+ * <p>
+ * This mechanism makes it possible to do such things, by allowing
+ * some code to be executed before and after a thread executes a fiber.
+ *
+ * <p>
+ * The design also encapsulates the entire fiber execution in a single
+ * opaque method invocation {@link Work#execute}, allowing the use of
+ * <tt>finally</tt> block. 
+ *
  *
  * @author Kohsuke Kawaguchi
  */

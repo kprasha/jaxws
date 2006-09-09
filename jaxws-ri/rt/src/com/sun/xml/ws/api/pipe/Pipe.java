@@ -23,8 +23,8 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
 
 import javax.annotation.PreDestroy;
 import javax.xml.ws.Dispatch;
@@ -212,6 +212,8 @@ import javax.xml.ws.handler.soap.SOAPHandler;
  *
  * @see AbstractPipeImpl
  * @see AbstractFilterPipeImpl
+ * @deprecated
+ *      Use {@link Tube}.
  */
 public interface Pipe {
     /**
