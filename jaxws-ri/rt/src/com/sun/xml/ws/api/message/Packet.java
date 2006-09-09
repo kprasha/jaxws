@@ -411,23 +411,6 @@ public final class Packet extends DistributedPropertySet {
      */
     @Deprecated
     public Boolean isOneWay;
-    
-    /**
-     * Bag to capture "other" properties that do not have
-     * strongly-typed presence on this object.
-     *
-     * Properties in this map will have the same life span
-     * as the Message itself.
-     *
-     * <p>
-     * See <a href="#properties">class javadoc</a> for more discussion.
-     *
-     * TODO: allocate this instance lazily.
-     *
-     * @deprecated
-     *      It seems like nobody needs this, so we're considering to remove it.
-     */
-    public final Map<String,Object> otherProperties = new HashMap<String,Object>();
 
     /**
      * Lazily created set of handler-scope property names.

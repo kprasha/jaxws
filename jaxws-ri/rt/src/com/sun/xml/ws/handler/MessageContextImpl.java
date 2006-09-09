@@ -48,7 +48,6 @@ class MessageContextImpl implements MessageContext {
             handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
             internalMap.putAll(packet.createMapView());
             internalMap.putAll(packet.invocationProperties);
-            internalMap.putAll(packet.otherProperties);
         }
     }
     /** Creates a new instance of MessageContextImpl */
@@ -165,8 +164,6 @@ class MessageContextImpl implements MessageContext {
                     } catch (ReadOnlyPropertyException e) {
                         // Nothing to do
                     }
-                } else if (packet.otherProperties.containsKey(key)) {
-                    packet.otherProperties.put(key, entry.getValue());
                 } else {
                     packet.invocationProperties.put(key, entry.getValue());
                 }
@@ -174,7 +171,6 @@ class MessageContextImpl implements MessageContext {
 
             //Remove properties which are removed by user.
             packet.createMapView().keySet().retainAll(internalMap.keySet());
-            packet.otherProperties.keySet().retainAll(internalMap.keySet());
             packet.invocationProperties.keySet().retainAll(internalMap.keySet());
         }
     }

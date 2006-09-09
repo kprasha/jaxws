@@ -77,7 +77,7 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
         }
 
         Packet packet = new Packet(new SAAJMessage(arg));
-        packet.otherProperties.put(MessageContext.HTTP_REQUEST_HEADERS,ch);
+        packet.invocationProperties.put(MessageContext.HTTP_REQUEST_HEADERS,ch);
         return packet;
     }
 

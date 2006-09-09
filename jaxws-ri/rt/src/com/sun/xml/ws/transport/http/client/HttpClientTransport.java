@@ -292,7 +292,7 @@ final class HttpClientTransport {
         boolean verification = false;
         // does the client want client hostname verification by the service
         String verificationProperty =
-            (String) context.otherProperties.get(HOSTNAME_VERIFICATION_PROPERTY);
+            (String) context.invocationProperties.get(HOSTNAME_VERIFICATION_PROPERTY);
         if (verificationProperty != null) {
             if (verificationProperty.equalsIgnoreCase("true"))
                 verification = true;
@@ -300,7 +300,7 @@ final class HttpClientTransport {
 
         // does the client want request redirection to occur
         String redirectProperty =
-            (String) context.otherProperties.get(REDIRECT_REQUEST_PROPERTY);
+            (String) context.invocationProperties.get(REDIRECT_REQUEST_PROPERTY);
         if (redirectProperty != null) {
             if (redirectProperty.equalsIgnoreCase("false"))
                 redirect = false;

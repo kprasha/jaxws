@@ -79,7 +79,7 @@ public class ResponseContext extends AbstractMap<String,Object> {
         if(packet.supports(key))
             return packet.containsKey(key);    // strongly typed
 
-        if(packet.invocationProperties.containsKey(key) || packet.otherProperties.containsKey(key))
+        if(packet.invocationProperties.containsKey(key))
             // if handler-scope, hide it
             return !packet.getHandlerScopePropertyNames(true).contains(key);
 
@@ -93,10 +93,7 @@ public class ResponseContext extends AbstractMap<String,Object> {
         if(packet.getHandlerScopePropertyNames(true).contains(key))
             return null;            // no such application-scope property
 
-        Object v = packet.invocationProperties.get(key);
-        if(v!=null)     return v;
-
-        return packet.otherProperties.get(key);
+        return packet.invocationProperties.get(key);
     }
 
     public Object put(String key, Object value) {
@@ -129,7 +126,6 @@ public class ResponseContext extends AbstractMap<String,Object> {
 
             // export application-scope properties
             r.putAll(packet.invocationProperties);
-            r.putAll(packet.otherProperties);
 
             // hide handler-scope properties
             r.keySet().removeAll(packet.getHandlerScopePropertyNames(true));
