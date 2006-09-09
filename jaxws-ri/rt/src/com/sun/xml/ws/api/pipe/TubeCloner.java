@@ -4,7 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO: javadoc
+ * Clones the whole pipeline.
+ *
+ * <p>
+ * Since {@link Tube}s may form an arbitrary directed graph, someone needs
+ * to keep track of isomorphism for a clone to happen correctly. This class
+ * serves that role.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -28,6 +33,8 @@ public class TubeCloner {
      *      The cloned pipeline. Always non-null.
      */
     public static Tube clone(Tube p) {
+        // we often want to downcast TubeCloner to PipeCloner,
+        // so let's create PipeCloner to make that possible
         return new PipeCloner().copy(p);
     }
 
