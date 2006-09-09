@@ -1,14 +1,41 @@
 package com.sun.xml.ws.api.pipe;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.List;
-import java.util.ArrayList;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.server.Adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * User-level thread used to implement CPS.
+ * User-level thread&#x2E; Represents the execution of one request/response processing.
  *
- * TODO: doc improvement!
+ * <p>
+ * JAX-WS RI is capable of running a large number of request/response concurrently by
+ * using a relatively small number of threads. This is made possible by utilizing
+ * a {@link Fiber} &mdash; a user-level thread that gets created for each request/response
+ * processing.
+ *
+ * <p>
+ * A fiber remembers where in the pipeline the processing is at, what needs to be
+ * executed on the way out (when processing response), and other additional information
+ * specific to the execution of a particular request/response.
+ *
+ * <h2>Suspend/Resume</h2>
+ * <p>
+ * Fiber can be {@link NextAction#suspend() suspended} by a {@link Tube}.
+ * When a fiber is suspended, it will be kept on the side until it is
+ * {@link #resume(Packet) resumed}. This allows threads to go execute
+ * other runnable fibers, allowing efficient utilization of smaller number of
+ * threads.
+ *
+ * <h2>Context-switch Interception</h2>
+ * <p>
+ * {@link FiberContextSwitchInterceptor} allows {@link Tube}s and {@link Adapter}s
+ * to perform additional processing every time a thread starts running a fiber
+ * and stops running it.
  *
  * <h2>Context ClassLoader</h2>
  * <p>
@@ -200,13 +227,35 @@ public class Fiber implements Runnable {
     }
 
     /**
-     * Runs the fiber synchronously, starting from the scheduled
-     * {@link Tube}.
+     * Runs a given {@link Tube} (and everything thereafter) synchronously.
+     *
+     * <p>
+     * This method blocks and returns only when all the successive {@link Tube}s
+     * complete their request/response processing. This method can be used
+     * if a {@link Tube} needs to fallback to synchronous processing.
+     *
+     * <h3>Example:</h3>
+     * <pre>
+     * class FooTube extends {@link AbstractFilterTubeImpl} {
+     *   NextAction processRequest(Packet request) {
+     *     // run everything synchronously and return with the response packet
+     *     return doReturnWith(Fiber.current().runSync(next,request));
+     *   }
+     *   NextAction processResponse(Packet response) {
+     *     // never be invoked
+     *   }
+     * }
+     * </pre>
+     *
+     * @param startPoint
+     *      The first tube that will act on the packet.
+     * @param request
+     *      The request packet to be passed to <tt>startPoint.processRequest()</tt>.
      *
      * @return
-     *      The response packet.
+     *      The response packet to the <tt>request</tt>.
      */
-    public synchronized Packet runSync(Tube startPoint, Packet packet) {
+    public synchronized @NotNull Packet runSync(@NotNull Tube startPoint, @NotNull Packet request) {
         // save the current continuation, so that we return runSync() without executing them.
         final Tube[] oldCont = conts;
         final int oldContSize = contsSize;
@@ -218,7 +267,7 @@ public class Fiber implements Runnable {
 
         try {
             synchronous = true;
-            this.packet = packet;
+            this.packet = request;
             doRun(startPoint);
             return this.packet;
         } finally {
@@ -242,13 +291,13 @@ public class Fiber implements Runnable {
         }
     }
 
-    /**
-     * Blocks until the fiber completes.
-     */
-    public synchronized void join() throws InterruptedException {
-        while(!completed)
-            wait();
-    }
+    ///**
+    // * Blocks until the fiber completes.
+    // */
+    //public synchronized void join() throws InterruptedException {
+    //    while(!completed)
+    //        wait();
+    //}
 
     /**
      * Invokes all registered {@link InterceptorHandler}s and then call into
@@ -417,22 +466,32 @@ public class Fiber implements Runnable {
         return "fiber"+id;
     }
 
-    public static Fiber current() {
-        return CURRENT_FIBER.get();
+    /**
+     * Gets the current fiber that's running.
+     *
+     * <p>
+     * This works like {@link Thread#currentThread()}.
+     * This method only works when invoked from {@link Tube}.
+     */
+    public static @NotNull Fiber current() {
+        Fiber fiber = CURRENT_FIBER.get();
+        if(fiber==null)
+            throw new IllegalStateException("Can be only used from fibers");
+        return fiber;
     }
 
     /**
      * Creates a new {@link Fiber} as a sibling of the current fiber.
      */
     public static Fiber create() {
-        Fiber fiber = current();
-        if(fiber==null)
-            throw new IllegalStateException("Can be only used from fibers");
-        return fiber.owner.createFiber();
+        return current().owner.createFiber();
     }
 
     private static final ThreadLocal<Fiber> CURRENT_FIBER = new ThreadLocal<Fiber>();
 
+    /**
+     * Used to allocate unique number for each fiber.
+     */
     private static final AtomicInteger iotaGen = new AtomicInteger();
 
     /**

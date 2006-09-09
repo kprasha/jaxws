@@ -46,8 +46,8 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
         return na;
     }
 
-    protected final NextAction doReturnWith(Packet packet) {
-        na.returnWith(packet);
+    protected final NextAction doReturnWith(Packet response) {
+        na.returnWith(response);
         return na;
     }
 
