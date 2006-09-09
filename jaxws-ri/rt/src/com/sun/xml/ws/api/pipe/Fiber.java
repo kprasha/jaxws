@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.server.Adapter;
@@ -46,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Kohsuke Kawaguchi
  * @author Jitendra Kotamraju
  */
-public class Fiber implements Runnable {
+public final class Fiber implements Runnable {
     /**
      * {@link Tube}s whose {@link Tube#processResponse(Packet)} method needs
      * to be invoked on the way back.
@@ -94,7 +95,7 @@ public class Fiber implements Runnable {
     /**
      * Is this fiber completed?
      */
-    private boolean completed;
+    private volatile boolean completed;
 
     /**
      * Is this {@link Fiber} currently running in the synchronous mode?
@@ -125,9 +126,26 @@ public class Fiber implements Runnable {
     private boolean needsToReenter;
 
     /**
-     * Fiber's context {@link ClassLoader}. Can be null.
+     * Fiber's context {@link ClassLoader}.
      */
-    private ClassLoader contextClassLoader;
+    private @Nullable ClassLoader contextClassLoader;
+
+    private @Nullable CompletionCallback completionCallback;
+
+    /**
+     * Callback to be invoked when a {@link Fiber} finishs execution.
+     */
+    public interface CompletionCallback {
+        /**
+         * Indicates that the fiber has finished its execution.
+         *
+         * <p>
+         * Since the JAX-WS RI runs asynchronously,
+         * this method maybe invoked by a different thread
+         * than any of the threads that started it or run a part of tubeline.
+         */
+        void onCompletion(@NotNull Packet response);
+    }
 
     Fiber(Engine engine) {
         this.owner = engine;
@@ -143,16 +161,45 @@ public class Fiber implements Runnable {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
     }
 
-    public void start(Tube startPoint, Packet packet) {
-        next = startPoint;
-        this.packet = packet;
+    /**
+     * Starts the execution of this fiber asynchronously.
+     *
+     * <p>
+     * This method works like {@link Thread#start()}.
+     *
+     * @param tubeline
+     *      The first tube of the tubeline that will act on the packet.
+     * @param request
+     *      The request packet to be passed to <tt>startPoint.processRequest()</tt>.
+     * @param completionCallback
+     *      The callback to be invoked when the processing is finished and the
+     *      final response packet is available.
+     *
+     * @see #runSync(Tube,Packet)
+     */
+    public void start(@NotNull Tube tubeline, @NotNull Packet request, @Nullable CompletionCallback completionCallback) {
+        next = tubeline;
+        this.packet = request;
+        this.completionCallback = completionCallback;
         owner.addRunnable(this);
     }
 
     /**
-     * Application will call this method when this continuation becomes runnable again.
+     * Wakes up a suspended fiber.
+     *
+     * <p>
+     * If a fiber was suspended from the {@link Tube#processRequest(Packet)} method,
+     * then the execution will be resumed from the corresponding
+     * {@link Tube#processResponse(Packet)} method with the specified response packet
+     * as the parameter.
+     *
+     * <p>
+     * If a fiber was suspended from the {@link Tube#processResponse(Packet)} method,
+     * then the execution will be resumed from the next tube's
+     * {@link Tube#processResponse(Packet)} method with the specified response packet
+     * as the parameter.
      */
-    public synchronized void resume(Packet response) {
+    public synchronized void resume(@NotNull Packet response) {
         if(DEBUG)
             System.out.println(getName()+" resumed");
         packet = response;
@@ -180,9 +227,24 @@ public class Fiber implements Runnable {
 
     /**
      * Adds a new {@link FiberContextSwitchInterceptor} to this fiber.
-     * TODO: doc improvement
+     *
+     * <p>
+     * The newly installed fiber will take effect immediately after the current
+     * tube returns from its {@link Tube#processRequest(Packet)} or
+     * {@link Tube#processResponse(Packet)}, before the next tube begins processing.
+     *
+     * <p>
+     * So when the tubeline consists of X and Y, and when X installs an interceptor,
+     * the order of execution will be as follows:
+     *
+     * <ol>
+     *  <li>X.processRequest()
+     *  <li>interceptor gets installed
+     *  <li>interceptor.execute() is invoked
+     *  <li>Y.processRequest()
+     * </ol>
      */
-    public void addInterceptor(FiberContextSwitchInterceptor interceptor) {
+    public void addInterceptor(@NotNull FiberContextSwitchInterceptor interceptor) {
         if(interceptors ==null) {
             interceptors = new ArrayList<FiberContextSwitchInterceptor>();
             interceptorHandler = new InterceptorHandler();
@@ -192,9 +254,30 @@ public class Fiber implements Runnable {
     }
 
     /**
-     * TODO: doc improvement
+     * Removes a {@link FiberContextSwitchInterceptor} from this fiber.
+     *
+     * <p>
+     * The removal of the interceptor takes effect immediately after the current
+     * tube returns from its {@link Tube#processRequest(Packet)} or
+     * {@link Tube#processResponse(Packet)}, before the next tube begins processing.
+     *
+     *
+     * <p>
+     * So when the tubeline consists of X and Y, and when Y uninstalls an interceptor
+     * on the way out, then the order of execution will be as follows:
+     *
+     * <ol>
+     *  <li>Y.processResponse() (notice that this happens with interceptor.execute() in the callstack)
+     *  <li>interceptor gets uninstalled
+     *  <li>interceptor.execute() returns
+     *  <li>X.processResponse()
+     * </ol>
+     *
+     * @return
+     *      true if the specified interceptor was removed. False if
+     *      the specified interceptor was not registered with this fiber to begin with.
      */
-    public boolean removeInterceptor(FiberContextSwitchInterceptor interceptor) {
+    public boolean removeInterceptor(@NotNull FiberContextSwitchInterceptor interceptor) {
         if(interceptors !=null && interceptors.remove(interceptor)) {
             needsToReenter = true;
             return true;
@@ -205,18 +288,21 @@ public class Fiber implements Runnable {
     /**
      * Gets the context {@link ClassLoader} of this fiber.
      */
-    public ClassLoader getContextClassLoader() {
+    public @Nullable ClassLoader getContextClassLoader() {
         return contextClassLoader;
     }
 
-    public ClassLoader setContextClassLoader(ClassLoader contextClassLoader) {
+    /**
+     * Sets the context {@link ClassLoader} of this fiber.
+     */
+    public ClassLoader setContextClassLoader(@Nullable ClassLoader contextClassLoader) {
         ClassLoader r = this.contextClassLoader;
         this.contextClassLoader = contextClassLoader;
         return r;
     }
 
     /**
-     * Not to be called from application. This is an implementation detail
+     * DO NOT CALL THIS METHOD. This is an implementation detail
      * of {@link Fiber}.
      */
     @Deprecated
@@ -247,15 +333,16 @@ public class Fiber implements Runnable {
      * }
      * </pre>
      *
-     * @param startPoint
-     *      The first tube that will act on the packet.
+     * @param tubeline
+     *      The first tube of the tubeline that will act on the packet.
      * @param request
      *      The request packet to be passed to <tt>startPoint.processRequest()</tt>.
-     *
      * @return
      *      The response packet to the <tt>request</tt>.
+     *
+     * @see #start(Tube, Packet, CompletionCallback)
      */
-    public synchronized @NotNull Packet runSync(@NotNull Tube startPoint, @NotNull Packet request) {
+    public synchronized @NotNull Packet runSync(@NotNull Tube tubeline, @NotNull Packet request) {
         // save the current continuation, so that we return runSync() without executing them.
         final Tube[] oldCont = conts;
         final int oldContSize = contsSize;
@@ -268,7 +355,7 @@ public class Fiber implements Runnable {
         try {
             synchronous = true;
             this.packet = request;
-            doRun(startPoint);
+            doRun(tubeline);
             return this.packet;
         } finally {
             conts = oldCont;
@@ -288,6 +375,8 @@ public class Fiber implements Runnable {
                 System.out.println(getName()+" completed\n");
             completed = true;
             notifyAll();
+            if(completionCallback!=null)
+                completionCallback.onCompletion(packet);
         }
     }
 
@@ -467,6 +556,39 @@ public class Fiber implements Runnable {
     }
 
     /**
+     * Returns true if this fiber is still running or suspended.
+     */
+    public boolean isAlive() {
+        return !completed;
+    }
+
+    /**
+     * (ADVANCED) Returns true if the current fiber is being executed synchronously.
+     *
+     * <p>
+     * Fiber may run synchronously for various reasons. Perhaps this is
+     * on client side and application has invoked a synchronous method call.
+     * Perhaps this is on server side and we have deployed on a synchronous
+     * transport (like servlet.)
+     *
+     * <p>
+     * When a fiber is run synchronously (IOW by {@link #runSync(Tube, Packet)}),
+     * further invocations to {@link #runSync(Tube, Packet)} can be done
+     * without degrading the performance.
+     *
+     * <p>
+     * So this value can be used as a further optimization hint for
+     * advanced {@link Tube}s to choose the best strategy to invoke
+     * the next {@link Tube}. For example, a tube may want to install
+     * a {@link FiberContextSwitchInterceptor} if running async, yet
+     * it might find it faster to do {@link #runSync(Tube, Packet)}
+     * if it's already running synchronously.
+     */
+    public static boolean isSynchronous() {
+        return current().synchronous;
+    }
+
+    /**
      * Gets the current fiber that's running.
      *
      * <p>
@@ -480,12 +602,13 @@ public class Fiber implements Runnable {
         return fiber;
     }
 
-    /**
-     * Creates a new {@link Fiber} as a sibling of the current fiber.
-     */
-    public static Fiber create() {
-        return current().owner.createFiber();
-    }
+    // don't know if we want to expose this.
+    ///**
+    // * Creates a new {@link Fiber} as a sibling of the current fiber.
+    // */
+    //public static Fiber create() {
+    //    return current().owner.createFiber();
+    //}
 
     private static final ThreadLocal<Fiber> CURRENT_FIBER = new ThreadLocal<Fiber>();
 
