@@ -36,11 +36,10 @@ import java.net.URL;
  * <pre>
  * TODO:
  *      how does those documents refer to each other?
- * TODO:
- *      rename!
+ *
  * </pre>
  *
- * @author Jitu
+ * @author Jitendra Kotamraju
  */
 public interface SDDocument {
 
@@ -67,7 +66,9 @@ public interface SDDocument {
     boolean isSchema();
 
     /**
-     * Gets the system ID of the document where it's taken from.
+     * Gets the system ID of the document where it's taken from. Generated documents
+     * use a fake URL that can be used to resolve relative URLs. So donot use this URL
+     * for reading or writing.
      */
     URL getURL();
 

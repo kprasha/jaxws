@@ -66,5 +66,11 @@ public interface ServiceDefinition extends Iterable<SDDocument> {
      */
     @NotNull SDDocument getPrimary();
 
-    void addFilter(SDDocumentFilter filter);
+    /**
+     * Adds a filter that is called while writing {@link SDDocument}'s infoset. This
+     * filter is applied to the all the other reachable {@link SDDocument}s.
+     *
+     * @param filter that is called while
+     */
+    void addFilter(@NotNull SDDocumentFilter filter);
 }
