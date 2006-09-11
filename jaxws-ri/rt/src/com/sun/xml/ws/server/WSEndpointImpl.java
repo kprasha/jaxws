@@ -47,6 +47,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 
 import javax.annotation.PreDestroy;
 import javax.xml.namespace.QName;
@@ -222,8 +223,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                         W3CAddressingConstants.WSA_ADDRESS_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                //writeW3CMetaData(writer, address, portAddressResolver, resolver);
-                writeW3CMetaData(writer);
+                writeW3CMetaData(writer,address);
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
@@ -262,7 +262,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         }
     }
 
-    private void writeW3CMetaData(XMLStreamWriter writer) throws XMLStreamException, IOException {
+    private void writeW3CMetaData(XMLStreamWriter writer, String eprAddress) throws XMLStreamException, IOException {
         if (port != null) {
             writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
                     W3CAddressingConstants.WSA_METADATA_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
@@ -298,7 +298,19 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
             writer.writeNamespace(servicePrefix, service.getNamespaceURI());
             writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
             writer.writeEndElement();
-            //getServiceDefinition().getPrimary().writeTo(portAddressResolver, resolver, writer);
+            //Inline the wsdl
+            writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                    WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
+                    WSDLConstants.NS_WSDL);
+            writer.writeNamespace(WSDLConstants.PREFIX_NS_WSDL, WSDLConstants.NS_WSDL);
+            writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                    WSDLConstants.QNAME_IMPORT.getLocalPart(),
+                    WSDLConstants.NS_WSDL);
+            writer.writeAttribute("namespace", service.getNamespaceURI());
+            writer.writeAttribute("location", eprAddress + "?wsdl");
+            writer.writeEndElement();
+            writer.writeEndElement();
+
             writer.writeEndElement();
         }
     }
