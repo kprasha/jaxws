@@ -488,6 +488,11 @@ public class WSServiceDelegate extends WSService {
         return null;
     }
 
+    public WSDLContext getWSDLContext(){
+            return this.wsdlContext;
+        }
+
+
     class DaemonThreadFactory implements ThreadFactory {
         public Thread newThread(Runnable r) {
             Thread daemonThread = new Thread(r);

@@ -163,7 +163,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         this.endpointReference = endpointReference;
     }
 
-    //temp
+   
     public EndpointReference getEndpointReference() {
         return this.endpointReference;
     }
