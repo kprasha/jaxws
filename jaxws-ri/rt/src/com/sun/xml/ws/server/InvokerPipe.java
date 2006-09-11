@@ -132,7 +132,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
         public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
             Packet packet = getCurrentPacket();
             String address = packet.webServiceContextDelegate.getEPRAddress(packet);
-            return (T) endpoint.getEndpointReference(clazz,address);
+            return (T) ((WSEndpointImpl)endpoint).getEndpointReference(clazz,address);
         }
     };
 }

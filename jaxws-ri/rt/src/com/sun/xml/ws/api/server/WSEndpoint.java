@@ -363,7 +363,4 @@ public abstract class WSEndpoint<T> {
             XmlUtil.createEntityResolver(catalogUrl));
     }
 
-    public abstract <T extends EndpointReference> T getEndpointReference(
-            Class<T> clazz,
-            String address);
 }

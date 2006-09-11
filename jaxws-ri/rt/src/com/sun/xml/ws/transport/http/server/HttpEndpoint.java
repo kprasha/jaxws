@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.HttpAdapterList;
 import com.sun.xml.ws.server.ServerRtException;
+import com.sun.xml.ws.server.WSEndpointImpl;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
@@ -102,7 +103,8 @@ final class HttpEndpoint {
     }
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
-        return adapter.getEndpoint().getEndpointReference(clazz, getEPRAddress());
+        WSEndpointImpl endpointImpl = (WSEndpointImpl) adapter.getEndpoint();
+        return (T) endpointImpl.getEndpointReference(clazz, getEPRAddress());
     }
 
 }
