@@ -25,12 +25,10 @@ import com.sun.xml.txw2.TypedXmlWriter;
 
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 
 import java.lang.reflect.Method;
 
@@ -66,10 +64,28 @@ public abstract class WSDLGeneratorExtension {
      *      If this extension is used at the runtime to generate WSDL, you get a {@link Container}
      *      that was given to {@link WSEndpoint#create}.
      *      TODO: think about tool side
+     * @deprecated
      */
     public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
         // for backward compatibility
         start(root,model,binding);
+    }
+
+    /**
+     * Called at the very beginning of the process.
+     * <p>
+     * This method is invoked so that the root element can be manipulated before
+     * any tags have been written. This allows to set e.g. namespace prefixes.
+     *
+     * Another purpose of this method is to let extensions know what model
+     * we are generating a WSDL for.
+     *
+     * @param ctxt     Provides the context for the generator extensions
+     *
+     */
+    public void start(WSDLGenExtnContext ctxt) {
+        // for backward compatibility
+        start(ctxt.getRoot(), ctxt.getModel(), ctxt.getBinding(), ctxt.getContainer());
     }
 
     /**

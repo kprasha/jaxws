@@ -175,7 +175,7 @@ public class EndpointFactory {
         // Generate WSDL for SEI endpoints(not for Provider endpoints)
         if (primaryDoc == null) {
             if (implType.getAnnotation(WebServiceProvider.class)==null) {
-                primaryDoc = generateWSDL(binding, seiModel, docList, container);
+                primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
             }
         }
 
@@ -369,7 +369,8 @@ public class EndpointFactory {
      * Generates the WSDL and XML Schema for the endpoint if necessary
      * It generates WSDL only for SOAP1.1, and for XSOAP1.2 bindings
      */
-    private static SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs, Container container) {
+    private static SDDocumentImpl generateWSDL(WSBinding binding, AbstractSEIModelImpl seiModel, List<SDDocumentImpl> docs,
+                                               Container container, Class implType) {
         BindingID bindingId = binding.getBindingId();
         if (!bindingId.canGenerateWSDL()) {
             throw new ServerRtException("can.not.generate.wsdl", bindingId);
@@ -382,7 +383,8 @@ public class EndpointFactory {
 
         // Generate WSDL and schema documents using runtime model
         WSDLGenResolver wsdlResolver = new WSDLGenResolver(docs,seiModel.getServiceQName(),seiModel.getPortTypeName());
-        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding, container, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+        WSDLGenerator wsdlGen = new WSDLGenerator(seiModel, wsdlResolver, binding, container, implType,
+                ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
         wsdlGen.doGeneration();
         return wsdlResolver.updateDocs();
     }

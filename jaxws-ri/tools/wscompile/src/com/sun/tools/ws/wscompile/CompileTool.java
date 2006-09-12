@@ -695,7 +695,8 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                         public Result getSchemaOutput(String namespace, Holder<String> filename) {
                             return getSchemaOutput(namespace, filename.value);
                         }
-                    }, features == null ? bindingID.createBinding() : bindingID.createBinding(features), null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                        // TODO pass correct impl's class name
+                    }, features == null ? bindingID.createBinding() : bindingID.createBinding(features), null, null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)

@@ -37,6 +37,7 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.encoding.soap.streaming.SOAPNamespaceConstants;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -190,6 +191,7 @@ public class WSDLGenerator {
 
     private String endpointAddress = REPLACE_WITH_ACTUAL_URL;
     private Container container;
+    private final Class implType;
 
     /**
      * Creates the WSDLGenerator
@@ -200,12 +202,13 @@ public class WSDLGenerator {
      * be invoked to generate WSDL extensions
      */
     public WSDLGenerator(AbstractSEIModelImpl model, WSDLResolver wsdlResolver, WSBinding binding, Container container,
-                         WSDLGeneratorExtension... extensions) {
+                         Class implType, WSDLGeneratorExtension... extensions) {
         this.model = model;
         resolver = new JAXWSOutputSchemaResolver();
         this.wsdlResolver = wsdlResolver;
         this.binding = binding;
         this.container = container;
+        this.implType = implType;
         extensionHandlers = new ArrayList<WSDLGeneratorExtension>();
 
         // register handlers for default extensions
@@ -276,7 +279,7 @@ public class WSDLGenerator {
         else
             serviceDefinitions._namespace(SOAP11_NAMESPACE, SOAP_PREFIX);
         serviceDefinitions.name(model.getServiceQName().getLocalPart());
-        extension.start(serviceDefinitions, model, binding, container);
+        extension.start(new WSDLGenExtnContext(serviceDefinitions, model, binding, container, implType));
         if (serviceStream != portStream && portStream != null) {
             // generate an abstract and concrete wsdl
             portDefinitions = TXW.create(Definitions.class, portStream);

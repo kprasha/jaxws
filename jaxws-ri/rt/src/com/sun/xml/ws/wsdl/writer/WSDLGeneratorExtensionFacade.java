@@ -23,11 +23,9 @@
 package com.sun.xml.ws.wsdl.writer;
 
 import com.sun.xml.txw2.TypedXmlWriter;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 
 import java.lang.reflect.Method;
 
@@ -50,9 +48,9 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
         this.extensions = extensions;
     }
 
-    public void start(TypedXmlWriter root, SEIModel model, WSBinding binding, Container container) {
+    public void start(WSDLGenExtnContext ctxt) {
         for (WSDLGeneratorExtension e : extensions)
-            e.start(root, model, binding, container);
+            e.start(ctxt);
     }
 
     public void addDefinitionsExtension(TypedXmlWriter definitions) {
