@@ -23,6 +23,8 @@ package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
+import com.sun.xml.fastinfoset.vocab.ParserVocabulary;
+import com.sun.xml.fastinfoset.vocab.SerializerVocabulary;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
@@ -59,12 +61,16 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
     
     private StreamSOAPCodec _soapCodec;
 
-    /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion) {
+    private boolean _retainState;
+    
+    /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion, boolean retainState) {
         _soapCodec = StreamSOAPCodec.create(soapVersion);
+        _retainState = retainState;
     }
 
     /* package */ FastInfosetStreamSOAPCodec(FastInfosetStreamSOAPCodec that) {
         this._soapCodec = that._soapCodec.copy();
+        this._retainState = that._retainState;
     }
 
 
@@ -110,7 +116,7 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
             _serializer.setOutputStream(out);
             return _serializer;
         } else {
-            return _serializer = new StAXDocumentSerializer(out);
+            return _serializer = FastInfosetCodec.createNewStreamWriter(out, _retainState);
         }
     }
 
@@ -119,24 +125,38 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
             _parser.setInputStream(in);
             return _parser;
         } else {
-            _parser = new StAXDocumentParser(in);
-            _parser.setStringInterning(true);
-            return _parser;
+            return _parser = FastInfosetCodec.createNewStreamReader(in, _retainState);
         }
     }
 
     /**
      * Creates a new {@link FastInfosetStreamSOAPCodec} instance.
+     *
+     * @param version the SOAP version of the codec.
+     * @return a new {@link FastInfosetStreamSOAPCodec} instance.
      */
     public static FastInfosetStreamSOAPCodec create(SOAPVersion version) {
+        return create(version, false);
+    }
+    
+    /**
+     * Creates a new {@link FastInfosetStreamSOAPCodec} instance.
+     *
+     * @param version the SOAP version of the codec.
+     * @param retainState if true the Codec should retain the state of
+     *        vocabulary tables for multiple encode/decode invocations.
+     * @return a new {@link FastInfosetStreamSOAPCodec} instance.
+     */
+    public static FastInfosetStreamSOAPCodec create(SOAPVersion version,
+            boolean retainState) {
         if(version==null)
             // this decoder is for SOAP, not for XML/HTTP
             throw new IllegalArgumentException();
         switch(version) {
         case SOAP_11:
-            return new FastInfosetStreamSOAP11Codec();
+            return new FastInfosetStreamSOAP11Codec(retainState);
         case SOAP_12:
-            return new FastInfosetStreamSOAP12Codec();
+            return new FastInfosetStreamSOAP12Codec(retainState);
         default:
             throw new AssertionError();
         }

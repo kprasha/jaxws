@@ -23,6 +23,8 @@ package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
+import com.sun.xml.fastinfoset.vocab.ParserVocabulary;
+import com.sun.xml.fastinfoset.vocab.SerializerVocabulary;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
@@ -55,7 +57,9 @@ public class FastInfosetCodec implements Codec {
     
     private StAXDocumentSerializer _serializer;
     
-    /* package */ FastInfosetCodec() {
+    private boolean _retainState;
+    
+    /* package */ FastInfosetCodec(boolean retainState) {
     }
 
     public String getMimeType() {
@@ -63,7 +67,7 @@ public class FastInfosetCodec implements Codec {
     }
 
     public Codec copy() { 
-        return new FastInfosetCodec();
+        return new FastInfosetCodec(_retainState);
     }
     
     public ContentType getStaticContentType(Packet packet) {
@@ -106,7 +110,7 @@ public class FastInfosetCodec implements Codec {
             _serializer.setOutputStream(out);
             return _serializer;
         } else {
-            return _serializer = new StAXDocumentSerializer(out);
+            return _serializer = createNewStreamWriter(out, _retainState);
         }
     }
 
@@ -115,16 +119,74 @@ public class FastInfosetCodec implements Codec {
             _parser.setInputStream(in);
             return _parser;
         } else {
-            _parser = new StAXDocumentParser(in);
-            _parser.setStringInterning(true);
-            return _parser;
+            return _parser = createNewStreamReader(in, _retainState);
         }
     }
 
     /**
      * Creates a new {@link FastInfosetCodec} instance.
+     *
+     * @return a new {@link FastInfosetCodec} instance.
      */
     public static FastInfosetCodec create() {
-        return new FastInfosetCodec();
+        return create(false);
+    }
+    
+    /**
+     * Creates a new {@link FastInfosetCodec} instance.
+     *
+     * @param retainState if true the Codec should retain the state of
+     *        vocabulary tables for multiple encode/decode invocations.
+     * @return a new {@link FastInfosetCodec} instance.
+     */
+    public static FastInfosetCodec create(boolean retainState) {
+        return new FastInfosetCodec(retainState);
+    }
+    
+    /**
+     * Create a new (@link StAXDocumentSerializer} instance.
+     *
+     * @param in the OutputStream to serialize to.
+     * @param retainState if true the serializer should retain the state of
+     *        vocabulary tables for multiple serializations.
+     * @return a new {@link StAXDocumentSerializer} instance.
+     */ 
+    /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out, boolean retainState) {        
+        StAXDocumentSerializer serializer = new StAXDocumentSerializer(out);
+        if (retainState) {
+            /**
+             * Create a serializer vocabulary external to the serializer.
+             * This will ensure that the vocabulary will never be cleared
+             * for each serialization and will be retained (and will grow)
+             * for each serialization
+             */
+            SerializerVocabulary vocabulary = new SerializerVocabulary();
+            serializer.setVocabulary(vocabulary);
+        }
+        return serializer;
+    }
+    
+    /**
+     * Create a new (@link StAXDocumentParser} instance.
+     *
+     * @param in the InputStream to parse from.
+     * @param retainState if true the parser should retain the state of
+     *        vocabulary tables for multiple parses.
+     * @return a new {@link StAXDocumentParser} instance.
+     */ 
+    /* package */ static StAXDocumentParser createNewStreamReader(InputStream in, boolean retainState) {
+        StAXDocumentParser parser = new StAXDocumentParser(in);
+        parser.setStringInterning(true);
+        if (retainState) {
+            /**
+             * Create a parser vocabulary external to the parser.
+             * This will ensure that the vocabulary will never be cleared
+             * for each parse and will be retained (and will grow)
+             * for each parse.
+             */
+            ParserVocabulary vocabulary = new ParserVocabulary();
+            parser.setVocabulary(vocabulary);
+        }
+        return parser;        
     }
 }

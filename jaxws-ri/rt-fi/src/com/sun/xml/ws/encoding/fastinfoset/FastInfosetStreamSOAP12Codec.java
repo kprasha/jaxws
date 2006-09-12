@@ -41,8 +41,8 @@ final class FastInfosetStreamSOAP12Codec extends FastInfosetStreamSOAPCodec {
     public static final ContentTypeImpl defaultContentType =
             new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12);
 
-    /*package*/ FastInfosetStreamSOAP12Codec() {
-        super(SOAPVersion.SOAP_12);
+    /*package*/ FastInfosetStreamSOAP12Codec(boolean retainState) {
+        super(SOAPVersion.SOAP_12, retainState);
     }
 
     private FastInfosetStreamSOAP12Codec(FastInfosetStreamSOAPCodec that) {

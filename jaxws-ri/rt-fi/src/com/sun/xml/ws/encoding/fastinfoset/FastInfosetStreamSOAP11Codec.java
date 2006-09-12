@@ -38,8 +38,8 @@ import javax.xml.stream.XMLStreamReader;
  * @author Paul.Sandoz@Sun.Com
  */
 final class FastInfosetStreamSOAP11Codec extends FastInfosetStreamSOAPCodec {
-    /*package*/ FastInfosetStreamSOAP11Codec() {
-        super(SOAPVersion.SOAP_11);
+    /*package*/ FastInfosetStreamSOAP11Codec(boolean retainState) {
+        super(SOAPVersion.SOAP_11, retainState);
     }
 
     private FastInfosetStreamSOAP11Codec(FastInfosetStreamSOAP11Codec that) {
