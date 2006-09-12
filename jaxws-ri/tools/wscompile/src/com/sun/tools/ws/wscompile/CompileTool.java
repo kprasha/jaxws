@@ -657,8 +657,9 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             final Map<String,File> schemaFiles = new HashMap<String,File>();
             BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
             String[] features = null;
-            if (bindingType != null)
-                features = bindingType.features();
+            if (bindingType != null) {}
+            // todDo: : AddressingFeature - kw
+              //  features = bindingType.
 
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
