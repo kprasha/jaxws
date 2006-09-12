@@ -3,6 +3,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.handler.*;
@@ -94,7 +95,7 @@ public final class ClientPipeAssemblerContext {
     public Pipe createDumpPipe(Pipe next) {
         return new DumpPipe("dump", System.out, next);
     }
-    
+
     /**
      * Creates a {@link Pipe} that performs SOAP mustUnderstand processing.
      * This pipe should be before HandlerPipes.
@@ -105,7 +106,7 @@ public final class ClientPipeAssemblerContext {
         else
             return next;
     }
-    
+
     /**
      * Creates a {@link Pipe} that invokes protocol and logical handlers.
      */
@@ -124,7 +125,7 @@ public final class ClientPipeAssemblerContext {
      */
     public Pipe createWsaPipe(Pipe next) {
         if (wsdlModel == null) {
-            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE)) //||
+            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID)) //||
                     //ToDO: AddreassingFeature check
                     //binding.
                 return new WsaClientPipe(wsdlModel, binding, next);

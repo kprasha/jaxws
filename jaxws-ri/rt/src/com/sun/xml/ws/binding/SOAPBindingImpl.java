@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.soap.SOAPHandler;
@@ -78,7 +79,8 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      */
     SOAPBindingImpl(BindingID bindingId, String[] features) {
         this(bindingId);
-        setFeatures(features);
+        WebServiceFeature[] wsfeatures = null; //TODO
+        setFeatures(wsfeatures);
     }
 
     /**

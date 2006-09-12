@@ -30,8 +30,8 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.ws.handler.Handler;
-import java.util.Collections;
-import java.util.List;
+import javax.xml.ws.WebServiceFeature;
+import java.util.*;
 
 /**
  * Instances are created by the service, which then
@@ -47,7 +47,8 @@ import java.util.List;
 public abstract class BindingImpl implements WSBinding {
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
-    private String[] features;
+    // Features that are enabled on the binding
+    private Map<String, WebServiceFeature> features;
 
     protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
@@ -70,32 +71,6 @@ public abstract class BindingImpl implements WSBinding {
      */
     public void setHandlerChain(List<Handler> chain) {
         setHandlerConfig(createHandlerConfig(chain));
-    }
-
-    public void setFeatures(String[] features) {
-        this.features = features;
-    }
-
-    public String[] getFeatures() {
-        return features;
-    }
-
-    public void enableFeature(String feature) {
-        if (hasFeature(feature))
-            return;
-
-        String[] oldFeatures = null;
-        if (features != null) {
-            oldFeatures = features.clone();
-            features = new String[features.length+1];
-            for (int i=0; i<oldFeatures.length; i++) {
-                features[i] = oldFeatures[i];
-            }
-            features[oldFeatures.length] = feature;
-        } else {
-            features = new String[1];
-            features[0] = feature;
-        }
     }
 
     /**
@@ -146,25 +121,38 @@ public abstract class BindingImpl implements WSBinding {
 
     public void setMTOMEnabled(boolean value){}
 
-    public boolean hasFeature(String feature) {
-        if (feature == null || getFeatures() == null)
-            return false;
-
-        for (String f : getFeatures()) {
-            if (feature.equals(f))
-                return true;
-        }
-
-        return false;
-    }
-
     public String getBindingID(){
         return bindingId.toString();
     }
 
-    public void disableFeature(String feature) {
-        //TODO: implement
+    public boolean hasFeature(String featureId) {
+        if (featureId == null || features == null)
+            return false;
+        return features.containsKey(featureId);
     }
 
+    private void disableFeature(WebServiceFeature feature) {
+        if (feature == null || features == null)
+            return;
+        features.remove(feature.getID());
+    }
+
+    private void enableFeature(WebServiceFeature feature) {
+        if (feature == null)
+            return;
+        if (!feature.isEnabled()) {
+            disableFeature(feature);
+            return;
+        }
+        if(features == null)
+            features =  new HashMap<String, WebServiceFeature>();
+        features.put(feature.getID(), feature);
+    }
+
+    public void setFeatures(WebServiceFeature[] newFeatures) {
+        for (WebServiceFeature f : newFeatures) {
+            enableFeature(f);
+        }
+    }
 
 }

@@ -24,6 +24,7 @@ package com.sun.xml.ws.addressing;
 
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -55,7 +56,7 @@ public abstract class WsaPipe extends AbstractPipeImpl {
 
     private WsaPipeHelper getPipeHelper() {
         if (wsdlPort == null) {
-            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE))
+            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID))
                 return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(seiModel, wsdlPort, binding);
             else
                 return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);

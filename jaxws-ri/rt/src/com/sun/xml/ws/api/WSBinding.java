@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.Binding;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import java.util.List;
 
@@ -97,7 +98,17 @@ public interface WSBinding extends Binding {
      */
     void setMTOMEnabled(boolean value);
 
-    void setFeatures(String[] features);
+    /**
+     * This method is called when Binding is created with WebServiceFeatures
+     * @param features WebServiceFeatures that should be enabled or disabled.
+     *        A feature is disabled if isenabled() returns false;
+     *
+     */
+    void setFeatures(WebServiceFeature[] features);
 
-    boolean hasFeature(String feature);
+    /**
+     * @param featureId
+     * @return true if the feature is enabled.
+     */
+    boolean hasFeature(String featureId);
 }

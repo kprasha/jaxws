@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.ServerPipelineHook;
@@ -127,7 +128,7 @@ public final class ServerPipeAssemblerContext {
      */
     public Pipe createWsaPipe(Pipe next) {
         if (wsdlModel == null) {
-            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE) )//||
+            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) )//||
                     //kw todo: AddressingFeature
                  //  binding.hasFeature())
                 return new WsaServerPipe(seiModel, wsdlModel, binding, next);
