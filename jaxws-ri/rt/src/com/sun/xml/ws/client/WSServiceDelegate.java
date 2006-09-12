@@ -246,6 +246,10 @@ public class WSServiceDelegate extends WSService {
         return createEndpointIFBaseProxy(portName, portInterface);
     }
 
+    public  <T> T getPort(QName qName, Class<T> aClass, WebServiceFeature[] webServiceFeatures) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public <T> T getPort(Class<T> portInterface) throws WebServiceException {
         //get the first port corresponding to the SEI
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
@@ -253,9 +257,13 @@ public class WSServiceDelegate extends WSService {
         return getPort(portName, portInterface);
     }
 
-    public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface) {
-        return null;  //TODO
+    public  <T> T getPort(Class<T> aClass, WebServiceFeature[] webServiceFeatures) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+   // public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface) {
+    //    return null;  //TODO
+    //}
 
 
     //these will be taken out
@@ -268,10 +276,10 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
     }
 
-    public void addPort(EndpointReference endpointReference) {
+   // public void addPort(EndpointReference endpointReference) {
 
 
-    }
+   // }
 
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
@@ -289,9 +297,13 @@ public class WSServiceDelegate extends WSService {
         return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding));
     }
 
-    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode) {
-        return null;  //TODO
+    public <T> Dispatch<T> createDispatch(QName qName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] webServiceFeatures) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    //public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode) {
+    //    return null;  //TODO
+    //}
 
     /**
      * Obtains {@link PortInfo} for the given name, with error check.
@@ -342,6 +354,10 @@ public class WSServiceDelegate extends WSService {
         BindingImpl binding = port.createBinding();
         return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,
                 createPipeline(port, binding));
+    }
+
+    public Dispatch<Object> createDispatch(QName qName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] webServiceFeatures) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode) {

@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.4 2006-08-25 22:47:53 ramapulavarthi Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.5 2006-09-12 02:17:17 kwalsh Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -49,7 +49,9 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
 
     @Override
     public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
-        enabled = binding.hasFeature(SOAPBinding.ADDRESSING_FEATURE);
+        //todo:
+        //enabled = binding.hasFeature(SOAPBinding.ADDRESSING_FEATURE);
+
 
         if (!enabled)
             return;

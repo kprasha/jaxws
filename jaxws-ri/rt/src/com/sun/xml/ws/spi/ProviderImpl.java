@@ -33,6 +33,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.ws.*;
+import javax.xml.ws.w3caddressing.W3CEndpointReference;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import java.net.URL;
@@ -80,15 +81,15 @@ public class ProviderImpl extends Provider {
         }
     }
 
-    public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface) {
+    public <T> T getPort(EndpointReference endpointReference, Class<T> aClass, WebServiceFeature[] webServiceFeatures) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode) {
+    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> aClass, Service.Mode mode, WebServiceFeature[] webServiceFeatures) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode) {
+    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] webServiceFeatures) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

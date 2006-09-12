@@ -106,8 +106,9 @@ public final class ClientPipeAssemblerContext {
      */
     public Pipe createWsaPipe(Pipe next) {
         if (wsdlModel == null) {
-            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE) ||
-                    binding.hasFeature(SOAPBinding.ADDRESSING_FEATURE))
+            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE)) //||
+                    //ToDO: AddreassingFeature check
+                    //binding.
                 return new WsaClientPipe(wsdlModel, binding, next);
             else
                 return next;

@@ -127,8 +127,9 @@ public final class ServerPipeAssemblerContext {
      */
     public Pipe createWsaPipe(Pipe next) {
         if (wsdlModel == null) {
-            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE) ||
-                    binding.hasFeature(SOAPBinding.ADDRESSING_FEATURE))
+            if (binding.hasFeature(SOAPBindingImpl.X_MEMBER_SUBMISSION_ADDRESSING_FEATURE) )//||
+                    //kw todo: AddressingFeature
+                 //  binding.hasFeature())
                 return new WsaServerPipe(seiModel, wsdlModel, binding, next);
             else
                 return next;

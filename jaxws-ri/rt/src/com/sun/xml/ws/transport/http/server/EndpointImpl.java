@@ -51,6 +51,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
+import javax.xml.ws.w3caddressing.W3CEndpointReference;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
 
