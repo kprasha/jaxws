@@ -294,7 +294,8 @@ public class EndpointImpl extends Endpoint {
                     "Cannot publish this endpoint. Endpoint has been already stopped.");
         }
     }
-
+    //TODO: return EPR based on addressing feature set on the Binding.
+    //TODO: return W3CEPR if addressing feature is not set.
     public EndpointReference getEndpointReference() {
         return getEndpointReference(W3CEndpointReference.class);
     }

@@ -125,6 +125,8 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
         }
 
+        //TODO: return EPR based on addressing feature set on the Binding.
+        //TODO: return W3CEPR if addressing feature is not set.
         public EndpointReference getEndpointReference() {
             return getEndpointReference(W3CEndpointReference.class);
         }
