@@ -3,6 +3,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.handler.*;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
@@ -28,12 +29,20 @@ public final class ClientPipeAssemblerContext {
     private final @NotNull WSDLPort wsdlModel;
     private final @NotNull WSService rootOwner;
     private final @NotNull WSBinding binding;
+    private final @NotNull Container container;
 
     public ClientPipeAssemblerContext(@NotNull EndpointAddress address, @NotNull WSDLPort wsdlModel, @NotNull WSService rootOwner, @NotNull WSBinding binding) {
+        this(address, wsdlModel, rootOwner, binding, Container.NONE);
+    }
+
+    public ClientPipeAssemblerContext(@NotNull EndpointAddress address, @NotNull WSDLPort wsdlModel,
+                                      @NotNull WSService rootOwner, @NotNull WSBinding binding,
+                                      @NotNull Container container) {
         this.address = address;
         this.wsdlModel = wsdlModel;
         this.rootOwner = rootOwner;
         this.binding = binding;
+        this.container = container;
     }
 
     /**
@@ -68,6 +77,15 @@ public final class ClientPipeAssemblerContext {
      */
     public @NotNull WSBinding getBinding() {
         return binding;
+    }
+
+    /**
+     * Returns the Container in which the client is running
+     *
+     * @return Container in which client is running
+     */
+    public Container getContainer() {
+        return container;
     }
 
     /**
