@@ -81,16 +81,19 @@ public class ProviderImpl extends Provider {
         }
     }
 
-    public <T> T getPort(EndpointReference endpointReference, Class<T> aClass, WebServiceFeature[] webServiceFeatures) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    //milestone 2
+    public <T> T getPort(EndpointReference endpointReference, Class<T> aClass, WebServiceFeature... webServiceFeatures) {
+        return null;
     }
 
-    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> aClass, Service.Mode mode, WebServiceFeature[] webServiceFeatures) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    //milestone 2
+    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> aClass, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
+        return null;
     }
 
-    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] webServiceFeatures) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    //milestone 2
+    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
+        return null;
     }
 
     private final static JAXBContext getEPRJaxbContext() {
