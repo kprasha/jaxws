@@ -29,6 +29,8 @@ import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.istack.NotNull;
@@ -125,9 +127,10 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
         }
 
-        //TODO: return EPR based on addressing feature set on the Binding.
-        //TODO: return W3CEPR if addressing feature is not set.
         public EndpointReference getEndpointReference() {
+            if(endpoint.getBinding().hasFeature(MemberSubmissionAddressingFeature.ID)) {
+                return getEndpointReference(MemberSubmissionEndpointReference.class);
+            }
             return getEndpointReference(W3CEndpointReference.class);
         }
 

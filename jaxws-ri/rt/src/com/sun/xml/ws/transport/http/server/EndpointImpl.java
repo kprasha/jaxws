@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
@@ -294,9 +295,11 @@ public class EndpointImpl extends Endpoint {
                     "Cannot publish this endpoint. Endpoint has been already stopped.");
         }
     }
-    //TODO: return EPR based on addressing feature set on the Binding.
-    //TODO: return W3CEPR if addressing feature is not set.
+
     public EndpointReference getEndpointReference() {
+        if(binding.hasFeature(MemberSubmissionAddressingFeature.ID)) {
+            return getEndpointReference(MemberSubmissionEndpointReference.class);
+        }
         return getEndpointReference(W3CEndpointReference.class);
     }
 
