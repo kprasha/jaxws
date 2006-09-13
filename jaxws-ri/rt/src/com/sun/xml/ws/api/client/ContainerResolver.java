@@ -32,12 +32,18 @@ import com.sun.istack.NotNull;
  *
  * <p>
  * ContainerResolver uses a static field to keep the instance of the resolver object.
- * Typically appserver may set its custom container resolver using the static method 
+ * Typically appserver may set its custom container resolver using the static method
  * {@link #setInstance(ContainerResolver)}
  *
  * @author Jitendra Kotamraju
  */
 public abstract class ContainerResolver {
+
+    private static final ContainerResolver NONE = new ContainerResolver() {
+        public Container getContainer() {
+            return Container.NONE;
+        }
+    };
 
     private static volatile ContainerResolver theResolver = ContainerResolver.NONE;
 
@@ -76,9 +82,5 @@ public abstract class ContainerResolver {
      */
     public abstract @NotNull Container getContainer();
 
-    private static final ContainerResolver NONE = new ContainerResolver() {
-        public Container getContainer() {
-            return Container.NONE;
-        }
-    };
+
 }
