@@ -75,7 +75,7 @@ public enum SOAPVersion {
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
             SOAP12Constants.URI_ENVELOPE,
-            "application/xml+soap",
+            "application/soap+xml",
             SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER, "role",
             javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL,
             new QName(com.sun.xml.ws.encoding.soap.SOAP12Constants.URI_ENVELOPE, "MustUnderstand"),
