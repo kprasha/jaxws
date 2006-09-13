@@ -1,10 +1,8 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
-import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 
 /**
@@ -29,16 +27,9 @@ public abstract class ServerPipelineHook {
      * This pipe will be injected to a point very close to the transport, allowing
      * it to measure the time it takes for processing as well as detecting errors.
      *
-     * @param seiModel
-     *      Represents abstraction of SEI.
-     *
-     * @param wsdlModel
-     *      The created pipeline will be used to serve this port.
-     *      Null if the service isn't associated with any port,
-     *      and otherwise non-null.
-     *
-     * @param owner
-     *      The created pipeline is used to serve this {@link WSEndpoint}.
+     * @param ctxt
+     *      Represents abstraction of SEI, WSDL abstraction etc. Context can be used
+     *      whether add a new pipe to the head or not.
      *
      * @param tail
      *      Head of the partially constructed pipeline. If the implementation
@@ -51,7 +42,7 @@ public abstract class ServerPipelineHook {
      *      no additional pipe is inserted. If the implementation adds
      *      new pipes, return the new head pipe.
      */
-    public @NotNull Pipe createMonitoringPipe(@Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
+    public @NotNull Pipe createMonitoringPipe(ServerPipeAssemblerContext ctxt, @NotNull Pipe tail) {
         return tail;
     }
     
@@ -62,16 +53,9 @@ public abstract class ServerPipelineHook {
      * This pipe will be injected to a point very close to the transport, allowing
      * it to do some security operations.
      *
-     * @param seiModel
-     *      Represents abstraction of SEI.
-     *
-     * @param wsdlModel
-     *      The created pipeline will be used to serve this port.
-     *      Null if the service isn't associated with any port,
-     *      and otherwise non-null.
-     *
-     * @param owner
-     *      The created pipeline is used to serve this {@link WSEndpoint}.
+     * @param ctxt
+     *      Represents abstraction of SEI, WSDL abstraction etc. Context can be used
+     *      whether add a new pipe to the head or not.
      *
      * @param tail
      *      Head of the partially constructed pipeline. If the implementation
@@ -84,7 +68,7 @@ public abstract class ServerPipelineHook {
      *      no additional pipe is inserted. If the implementation adds
      *      new pipes, return the new head pipe.
      */
-    public @NotNull Pipe createSecurityPipe(@Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
+    public @NotNull Pipe createSecurityPipe(ServerPipeAssemblerContext ctxt, @NotNull Pipe tail) {
         return tail;
     }
 }

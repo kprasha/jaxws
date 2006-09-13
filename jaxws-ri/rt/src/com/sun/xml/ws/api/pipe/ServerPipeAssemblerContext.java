@@ -95,7 +95,7 @@ public final class ServerPipeAssemblerContext {
     public @NotNull Pipe createMonitoringPipe(@NotNull Pipe next) {
         ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
         if (hook != null)
-            return hook.createMonitoringPipe(seiModel,wsdlModel,endpoint,next);
+            return hook.createMonitoringPipe(this, next);
         return next;
     }
 
@@ -105,7 +105,7 @@ public final class ServerPipeAssemblerContext {
     public @NotNull Pipe createSecurityPipe(@NotNull Pipe next) {
         ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
         if (hook != null)
-            return hook.createSecurityPipe(seiModel,wsdlModel,endpoint,next);
+            return hook.createSecurityPipe(this, next);
         return next;
     }
 
