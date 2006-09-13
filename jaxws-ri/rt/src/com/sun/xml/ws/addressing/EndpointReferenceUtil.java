@@ -38,7 +38,7 @@ import java.io.IOException;
  * @author Rama Pulavarthi
  */
 
-public class EndpointAddressReferenceUtil {
+public class EndpointReferenceUtil {
 
     public static <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address) {
         return getEndpointReference(clazz, address, null, null, null);

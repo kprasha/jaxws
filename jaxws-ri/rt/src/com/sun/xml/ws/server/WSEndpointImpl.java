@@ -24,7 +24,7 @@ package com.sun.xml.ws.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.addressing.EndpointAddressReferenceUtil;
+import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
@@ -197,7 +197,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         QName portType = getPortTypeName(port);
         QName service = getServiceName(port);
         QName portQN = getPortName(port);
-        return EndpointAddressReferenceUtil.getEndpointReference(clazz, address, service,
+        return EndpointReferenceUtil.getEndpointReference(clazz, address, service,
                 portQN.getLocalPart(),portType);
     }
 
