@@ -127,10 +127,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
         }
 
-        public EndpointReference getEndpointReference() {
-            if(endpoint.getBinding().hasFeature(MemberSubmissionAddressingFeature.ID)) {
-                return getEndpointReference(MemberSubmissionEndpointReference.class);
-            }
+        public EndpointReference getEndpointReference() {            
             return getEndpointReference(W3CEndpointReference.class);
         }
 

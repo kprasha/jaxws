@@ -297,9 +297,6 @@ public class EndpointImpl extends Endpoint {
     }
 
     public EndpointReference getEndpointReference() {
-        if(binding.hasFeature(MemberSubmissionAddressingFeature.ID)) {
-            return getEndpointReference(MemberSubmissionEndpointReference.class);
-        }
         return getEndpointReference(W3CEndpointReference.class);
     }
 
