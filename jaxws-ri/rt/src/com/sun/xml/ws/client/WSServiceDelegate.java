@@ -28,6 +28,8 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -143,6 +145,8 @@ public class WSServiceDelegate extends WSService {
      */
     private WSDLServiceImpl wsdlService;
 
+    private final Container container;
+
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, final Class<? extends Service> serviceClass) {
         //we cant create a Service without serviceName
@@ -150,6 +154,7 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NAME_NULL(serviceName));
         this.serviceName = serviceName;
         this.serviceClass = serviceClass;
+        this.container = ContainerResolver.getInstance().getContainer();
 
         if (wsdlDocumentLocation != null) {
             parseWSDL(wsdlDocumentLocation);
@@ -330,7 +335,7 @@ public class WSServiceDelegate extends WSService {
                 new ClientPipeAssemblerContext(
                         portInfo.targetEndpoint,
                         portInfo.portModel,
-                        this, binding));
+                        this, binding, container));
     }
 
     public EndpointAddress getEndpointAddress(QName qName) {
