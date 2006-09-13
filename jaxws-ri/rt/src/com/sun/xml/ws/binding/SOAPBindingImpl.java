@@ -49,8 +49,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
     public static final String X_SOAP12HTTP_BINDING =
         "http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/";
-    public static final String X_MEMBER_SUBMISSION_ADDRESSING_FEATURE =
-        "http://java.sun.com/xml/ns/jaxws/2004/08/addressing";
 
     private static final String ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
     private Set<String> roles;
