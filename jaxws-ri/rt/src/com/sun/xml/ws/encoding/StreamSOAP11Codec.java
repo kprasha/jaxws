@@ -37,6 +37,7 @@ import javax.xml.stream.XMLStreamReader;
  */
 final class StreamSOAP11Codec extends StreamSOAPCodec {
     public static final String SOAP11_MIME_TYPE = "text/xml";
+    public static final String SOAP11_CONTENT_TYPE = SOAP11_MIME_TYPE+"; charset=\"utf-8\"";
     
     /*package*/  StreamSOAP11Codec() {
         super(SOAPVersion.SOAP_11);
@@ -52,7 +53,7 @@ final class StreamSOAP11Codec extends StreamSOAPCodec {
     }
 
     public static final ContentTypeImpl defaultContentType =
-            new ContentTypeImpl(SOAP11_MIME_TYPE, "");
+            new ContentTypeImpl(SOAP11_CONTENT_TYPE, "");
 
     @Override
     protected ContentType getContentType(String soapAction) {
@@ -61,7 +62,7 @@ final class StreamSOAP11Codec extends StreamSOAPCodec {
         if (soapAction == null || soapAction.length() == 0) {
             return defaultContentType;
         } else {
-            return new ContentTypeImpl(SOAP11_MIME_TYPE, soapAction);
+            return new ContentTypeImpl(SOAP11_CONTENT_TYPE, soapAction);
         }
     }
 }
