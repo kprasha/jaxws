@@ -21,12 +21,12 @@
  */
 package com.sun.tools.ws.wscompile;
 
+import com.sun.istack.NotNull;
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.tools.ws.ToolVersion;
-import com.sun.tools.ws.wscompile.CompileTool.ReportOutput.Schema;
 import com.sun.tools.ws.processor.Processor;
 import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.ProcessorNotificationListener;
@@ -46,12 +46,14 @@ import com.sun.tools.ws.processor.util.ProcessorEnvironmentBase;
 import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.util.JavaCompilerHelper;
 import com.sun.tools.ws.util.ToolBase;
+import com.sun.tools.ws.wscompile.CompileTool.ReportOutput.Schema;
 import com.sun.xml.txw2.TXW;
 import com.sun.xml.txw2.TypedXmlWriter;
-import com.sun.xml.txw2.annotation.XmlElement;
 import com.sun.xml.txw2.annotation.XmlAttribute;
+import com.sun.xml.txw2.annotation.XmlElement;
 import com.sun.xml.txw2.output.StreamSerializer;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -64,29 +66,16 @@ import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.xml.ws.wsdl.writer.WSDLResolver;
 import org.xml.sax.EntityResolver;
 
+import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.ws.Holder;
-import javax.xml.ws.BindingType;
-import javax.jws.WebService;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.xml.ws.*;
+import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.MTOMFeature;
+import java.io.*;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  *    This is the real implementation class for both WsGen and WsImport. 
@@ -655,12 +644,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
             final File[] wsdlFileName = new File[1]; // used to capture the generated WSDL file.
             final Map<String,File> schemaFiles = new HashMap<String,File>();
-            BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
-            String[] features = null;
-            if (bindingType != null) {}
-            // todDo: : AddressingFeature - kw
-              //  features = bindingType.
-
+            WebServiceFeature[] wsfeatures = parseBindingType(endpointClass);
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
                         private File toFile(String suggestedFilename) {
@@ -696,12 +680,44 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                             return getSchemaOutput(namespace, filename.value);
                         }
                         // TODO pass correct impl's class name
-                    }, features == null ? bindingID.createBinding() : bindingID.createBinding(features), null, null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures), null, null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)
                 generateWsgenReport(endpointClass,rtModel,wsdlFileName[0],schemaFiles);
         }
+    }
+
+    private WebServiceFeature[] parseBindingType(@NotNull Class<?> endpointClass) {
+        List<WebServiceFeature> wsfeatures = null;
+        BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
+        if(bindingType != null) {
+            Feature[] features = bindingType.features();
+            if(features != null) {
+                wsfeatures = new ArrayList<WebServiceFeature>();
+                for(Feature f:features) {
+                    if(f.enabled()) {
+                        if(f.value().equals(AddressingFeature.ID) ) {
+                            wsfeatures.add(new AddressingFeature(true));
+                        } else if(f.value().equals(MemberSubmissionAddressingFeature.ID) ) {
+                            wsfeatures.add(new MemberSubmissionAddressingFeature(true));
+                        } else if(f.value().equals(MTOMFeature.ID) ) {
+                            MTOMFeature mtomfeature =new MTOMFeature(true);
+                            FeatureParameter[] params = f.parameters();
+                            if(params != null) {
+                                for(FeatureParameter param: params) {
+                                    if(param.name().equals(MTOMFeature.THRESHOLD)) {
+                                        mtomfeature.setThreshold(Integer.parseInt(param.value()));
+                                    }
+                                }
+                            }
+                            wsfeatures.add(mtomfeature);
+                        }
+                    }
+                }
+            }
+        }
+        return (WebServiceFeature[]) wsfeatures.toArray();
     }
 
     /**

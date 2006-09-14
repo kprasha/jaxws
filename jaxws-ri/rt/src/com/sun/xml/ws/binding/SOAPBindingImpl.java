@@ -75,10 +75,9 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     /**
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
-    SOAPBindingImpl(BindingID bindingId, String[] features) {
+    SOAPBindingImpl(BindingID bindingId, WebServiceFeature[] features) {
         this(bindingId);
-        WebServiceFeature[] wsfeatures = null; //TODO
-        setFeatures(wsfeatures);
+        setFeatures(features);
     }
 
     /**

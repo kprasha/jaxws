@@ -34,7 +34,7 @@ import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.Feature;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
@@ -91,7 +91,7 @@ public abstract class BindingID {
         return BindingImpl.create(this);
     }
 
-    public final @NotNull WSBinding createBinding(String[] features) {
+    public final @NotNull WSBinding createBinding(WebServiceFeature[] features) {
         return BindingImpl.create(this, features);
     }
 
@@ -296,14 +296,6 @@ public abstract class BindingID {
             }
         }
         return SOAP11_HTTP;
-    }
-
-    public static Feature[] features(Class<?> implClass) {
-        BindingType bindingType = implClass.getAnnotation(BindingType.class);
-        if (bindingType != null)
-            return bindingType.features();
-        else
-            return new Feature[0];
     }
 
     /**
