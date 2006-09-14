@@ -156,7 +156,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
      *         specifies
      */
     @Override
-    public EndpointReference getEndpointReference() {
+    public W3CEndpointReference getEndpointReference() {
 
 
         if (this.endpointReference != null)
@@ -193,6 +193,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
                 //System.out.println(bos.toString());
                 return new W3CEndpointReference(new StreamSource(bos.newInputStream()));
             } else if (this.endpointReference.getClass().isAssignableFrom(MemberSubmissionEndpointReference.class)) {
+                //TODO: Map MemberSubmissionEPR to W3CEPR
                 final ByteOutputStream bos = new ByteOutputStream();
                 XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
                 try {
@@ -214,7 +215,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
                     throw new WebServiceException(e);
                 }
                 System.out.println(bos.toString());
-                return new MemberSubmissionEndpointReference(new StreamSource(bos.newInputStream()));
+                return new W3CEndpointReference(new StreamSource(bos.newInputStream()));
 
             } else {
                 throw new WebServiceException(this.endpointReference.getClass() + "is not a recognizable EndpointReference");

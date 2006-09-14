@@ -35,6 +35,7 @@ import com.sun.xml.ws.util.RuntimeVersion;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.w3caddressing.W3CEndpointReference;
 import java.util.Map;
 
 /**
@@ -57,7 +58,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      */
     private Pool<Pipe> pipes;
 
-    protected EndpointReference endpointReference;
+    protected W3CEndpointReference endpointReference;
 
     protected final BindingImpl binding;
 
@@ -158,13 +159,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         return RuntimeVersion.VERSION + ": Stub for " + getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
 
-    //temp
-    public void setEndpointReference(EndpointReference endpointReference) {
-        this.endpointReference = endpointReference;
-    }
-
-   
-    public EndpointReference getEndpointReference() {
+    public W3CEndpointReference getEndpointReference() {
         return this.endpointReference;
     }
 
