@@ -127,7 +127,7 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
         }
 
-        public EndpointReference getEndpointReference() {            
+        public W3CEndpointReference getEndpointReference() {
             return getEndpointReference(W3CEndpointReference.class);
         }
 
