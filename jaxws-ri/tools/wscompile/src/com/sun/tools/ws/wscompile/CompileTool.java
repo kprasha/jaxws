@@ -717,7 +717,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 }
             }
         }
-        return (WebServiceFeature[]) wsfeatures.toArray();
+        return wsfeatures == null ? null : (WebServiceFeature[]) wsfeatures.toArray();
     }
 
     /**
