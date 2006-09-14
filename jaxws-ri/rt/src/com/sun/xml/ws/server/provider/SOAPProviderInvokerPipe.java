@@ -25,7 +25,6 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import javax.xml.soap.SOAPException;

@@ -22,15 +22,12 @@
 
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
+import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.istack.NotNull;
@@ -50,7 +47,7 @@ import java.security.Principal;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class InvokerPipe<T> extends AbstractPipeImpl {
+public abstract class InvokerPipe<T> extends AbstractTubeImpl {
 
     private final Invoker invoker;
     private WSEndpoint endpoint;
@@ -85,16 +82,37 @@ public abstract class InvokerPipe<T> extends AbstractPipeImpl {
 
     /**
      * {@link InvokerPipe} is stateless and terminal, so no need to create copies.
-     */
+     *
     public final Pipe copy(PipeCloner cloner) {
         cloner.add(this,this);
         return this;
     }
 
+
     public void preDestroy() {
         super.preDestroy();
         invoker.dispose();
     }
+     */
+
+    public void preDestroy() {
+        invoker.dispose();
+    }
+
+
+    public NextAction processRequest(Packet request) {
+        Packet res = process(request);
+        return doReturnWith(res);
+    }
+
+    public NextAction processResponse(Packet response) {
+        throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
+    }
+
+    public AbstractTubeImpl copy(TubeCloner cloner) {
+        return this;
+    }
+
 
     /**
      * Heart of {@link WebServiceContext}.
