@@ -150,8 +150,10 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public void setFeatures(WebServiceFeature[] newFeatures) {
-        for (WebServiceFeature f : newFeatures) {
-            enableFeature(f);
+        if (newFeatures != null) {
+            for (WebServiceFeature f : newFeatures) {
+                enableFeature(f);
+            }
         }
     }
 
