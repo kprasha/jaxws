@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
+import com.sun.xml.ws.binding.BindingTypeImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -66,7 +67,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceProvider;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.AddressingFeature;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -171,6 +174,16 @@ public class EndpointFactory {
                 processHandlerAnnotation(binding, implType, serviceName, portName);
             }
         }
+
+        if(wsdlPort != null ) {
+            if(((WSDLPortImpl)wsdlPort).isAddressingEnabled()){
+                WebServiceFeature[] addressingFeature = {new AddressingFeature(true)};
+                binding.setFeatures(addressingFeature);
+            }
+        }
+        WebServiceFeature[] wsfeatures = BindingTypeImpl.parseBindingType(implType);
+        binding.setFeatures(wsfeatures);
+
 
         // Generate WSDL for SEI endpoints(not for Provider endpoints)
         if (primaryDoc == null) {

@@ -64,6 +64,7 @@ import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.xml.ws.wsdl.writer.WSDLResolver;
+import com.sun.xml.ws.binding.BindingTypeImpl;
 import org.xml.sax.EntityResolver;
 
 import javax.jws.WebService;
@@ -644,7 +645,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
             final File[] wsdlFileName = new File[1]; // used to capture the generated WSDL file.
             final Map<String,File> schemaFiles = new HashMap<String,File>();
-            WebServiceFeature[] wsfeatures = parseBindingType(endpointClass);
+            WebServiceFeature[] wsfeatures = BindingTypeImpl.parseBindingType(endpointClass);
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
                         private File toFile(String suggestedFilename) {
@@ -688,37 +689,6 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         }
     }
 
-    private WebServiceFeature[] parseBindingType(@NotNull Class<?> endpointClass) {
-        List<WebServiceFeature> wsfeatures = null;
-        BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
-        if(bindingType != null) {
-            Feature[] features = bindingType.features();
-            if(features != null) {
-                wsfeatures = new ArrayList<WebServiceFeature>();
-                for(Feature f:features) {
-                    if(f.enabled()) {
-                        if(f.value().equals(AddressingFeature.ID) ) {
-                            wsfeatures.add(new AddressingFeature(true));
-                        } else if(f.value().equals(MemberSubmissionAddressingFeature.ID) ) {
-                            wsfeatures.add(new MemberSubmissionAddressingFeature(true));
-                        } else if(f.value().equals(MTOMFeature.ID) ) {
-                            MTOMFeature mtomfeature =new MTOMFeature(true);
-                            FeatureParameter[] params = f.parameters();
-                            if(params != null) {
-                                for(FeatureParameter param: params) {
-                                    if(param.name().equals(MTOMFeature.THRESHOLD)) {
-                                        mtomfeature.setThreshold(Integer.parseInt(param.value()));
-                                    }
-                                }
-                            }
-                            wsfeatures.add(mtomfeature);
-                        }
-                    }
-                }
-            }
-        }
-        return wsfeatures == null ? null : wsfeatures.toArray(new WebServiceFeature[] {});
-    }
 
     /**
      * "Namespace" for code needed to generate the report file.
