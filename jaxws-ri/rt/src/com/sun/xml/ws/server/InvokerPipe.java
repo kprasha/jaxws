@@ -110,6 +110,7 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
     }
 
     public AbstractTubeImpl copy(TubeCloner cloner) {
+        cloner.add(this,this);
         return this;
     }
 
