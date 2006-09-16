@@ -31,7 +31,11 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.message.DOMHeader;
 
 import javax.xml.namespace.QName;
@@ -49,7 +53,7 @@ import org.w3c.dom.Element;
  * @author Rama Pulavarthi
  */
 
-abstract class MUPipe extends AbstractFilterPipeImpl {
+abstract class MUPipe extends AbstractFilterTubeImpl {
 
     private static final String MU_FAULT_DETAIL_LOCALPART = "NotUnderstood";
     private final static QName MU_HEADER_DETAIL = new QName(SOAPVersion.SOAP_12.nsUri, MU_FAULT_DETAIL_LOCALPART);
@@ -62,7 +66,7 @@ abstract class MUPipe extends AbstractFilterPipeImpl {
     private final SOAPVersion soapVersion;
 
     protected MUPipe(WSBinding binding, Pipe next) {
-        super(next);
+        super(PipeAdapter.adapt(next));
         // MUPipe should n't be used for bindings other than SOAP.
         if (!(binding instanceof SOAPBinding)) {
             throw new WebServiceException(
@@ -73,9 +77,15 @@ abstract class MUPipe extends AbstractFilterPipeImpl {
 
     }
 
-    protected MUPipe(MUPipe that, PipeCloner cloner) {
+    protected MUPipe(MUPipe that, TubeCloner cloner) {
         super(that, cloner);
         soapVersion = that.soapVersion;
+    }
+
+
+
+    public void preDestroy() {
+        // noop
     }
 
     /**

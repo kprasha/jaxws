@@ -24,7 +24,9 @@ package com.sun.xml.ws.protocol.soap;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.namespace.QName;
@@ -37,12 +39,17 @@ import java.util.Set;
 
 public class ClientMUPipe extends MUPipe {
 
+    // TODO remove after moving to fiber
+    private Pipe next;
+
     public ClientMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
+        this.next = next;
     }
 
-    protected ClientMUPipe(ClientMUPipe that, PipeCloner cloner) {
+    protected ClientMUPipe(ClientMUPipe that, TubeCloner cloner) {
         super(that,cloner);
+        this.next = that.next;
     }
 
     /**
@@ -52,8 +59,7 @@ public class ClientMUPipe extends MUPipe {
      * @throws SOAPFaultException
      *         if all the headers in the packet are not understood, throws SOAPFaultException
      */
-
-    @Override
+    // TODO remove after moving to fiber
     public Packet process(Packet packet) {
         Packet reply = next.process(packet);
         //Oneway
@@ -70,7 +76,22 @@ public class ClientMUPipe extends MUPipe {
 
     }
 
-    public Pipe copy(PipeCloner cloner) {
+    public NextAction processRequest(Packet request) {
+        return doInvoke(super.next, request);
+    }
+
+    public NextAction processResponse(Packet response) {
+        HandlerConfiguration handlerConfig = response.handlerConfig;
+        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(response.getMessage().getHeaders(),
+                handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
+        if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
+            return doReturnWith(response);
+        }
+        // TODO should we convert to fault message
+        throw createMUSOAPFaultException(misUnderstoodHeaders);
+    }
+
+    public AbstractTubeImpl copy(TubeCloner cloner) {
         return new ClientMUPipe(this,cloner);
     }
 

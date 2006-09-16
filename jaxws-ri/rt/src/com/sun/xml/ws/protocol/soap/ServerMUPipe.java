@@ -25,6 +25,9 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
 import javax.xml.namespace.QName;
@@ -35,16 +38,29 @@ import java.util.Set;
  */
 
 public class ServerMUPipe extends MUPipe {
+    // TODO remove after moving to fiber
+    private Pipe next;
     private HandlerConfiguration handlerConfig;
     public ServerMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
         //On Server, HandlerConfiguration does n't change after publish.
         handlerConfig = ((BindingImpl)binding).getHandlerConfig();
+        this.next = next;
     }
 
-    protected ServerMUPipe(ServerMUPipe that, PipeCloner cloner) {
+    protected ServerMUPipe(ServerMUPipe that, TubeCloner cloner) {
         super(that,cloner);
         handlerConfig = that.handlerConfig;
+        this.next = that.next;
+    }
+
+    public NextAction processRequest(Packet request) {
+        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(request.getMessage().getHeaders(),
+                handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
+        if((misUnderstoodHeaders == null)  || misUnderstoodHeaders.isEmpty()) {
+            return doInvoke(super.next, request);
+        }
+        return doReturnWith(request.createResponse(createMUSOAPFaultMessage(misUnderstoodHeaders)));
     }
 
     /**
@@ -53,7 +69,7 @@ public class ServerMUPipe extends MUPipe {
      *      if all the headers in the packet are understood, returns the next Pipe.process()
      *      if all the headers in the packet are not understood, returns a Packet with SOAPFault Message
      */
-    @Override
+    // TODO remove after moving to fiber
     public Packet process(Packet packet) {
 
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(packet.getMessage().getHeaders(),
@@ -64,8 +80,9 @@ public class ServerMUPipe extends MUPipe {
         return packet.createResponse(createMUSOAPFaultMessage(misUnderstoodHeaders));
     }
 
-    public Pipe copy(PipeCloner cloner) {
-            return new ServerMUPipe(this,cloner);
+
+    public AbstractTubeImpl copy(TubeCloner cloner) {
+        return new ServerMUPipe(this,cloner);
     }
 
 }
