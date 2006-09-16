@@ -81,24 +81,19 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
     }
 
     /**
-     * {@link InvokerPipe} is stateless and terminal, so no need to create copies.
-     *
-    public final Pipe copy(PipeCloner cloner) {
+     * processRequest() and processResponse() do not share any instance variables
+     * while processing the request. {@link InvokerPipe} is stateless and terminal,
+     * so no need to create copies.
+     */
+    public final AbstractTubeImpl copy(TubeCloner cloner) {
         cloner.add(this,this);
         return this;
     }
 
-
     public void preDestroy() {
-        super.preDestroy();
+        //super.preDestroy();
         invoker.dispose();
     }
-     */
-
-    public void preDestroy() {
-        invoker.dispose();
-    }
-
 
     public NextAction processRequest(Packet request) {
         Packet res = process(request);
@@ -108,12 +103,6 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
     public NextAction processResponse(Packet response) {
         throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
     }
-
-    public AbstractTubeImpl copy(TubeCloner cloner) {
-        cloner.add(this,this);
-        return this;
-    }
-
 
     /**
      * Heart of {@link WebServiceContext}.
