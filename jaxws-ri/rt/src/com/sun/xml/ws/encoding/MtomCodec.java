@@ -254,6 +254,10 @@ public class MtomCodec extends MimeCodec {
                 ByteArrayBuffer bos = new ByteArrayBuffer(data, start, len, contentType);
                 mtomAttachmentStream.add(bos);
 
+                //flush the underlying writer to write-out any cached data to the underlying
+                // stream before writing directly to it
+                writer.flush();
+
                 //write out the xop reference
                 writer.writeCharacters("");
                 osWriter.write(XOP_PREF +bos.contentId+XOP_SUFF);
@@ -403,11 +407,12 @@ public class MtomCodec extends MimeCodec {
             {
                 //its xop reference, take the URI reference
                 String href = reader.getAttributeValue(null, "href");
-                href = decodeCid(href);
                 try {
-                    StreamAttachment att = mimeMP.getAttachmentPart(href);
-                    base64AttData = att.asBase64Data();
-                    textLength = base64AttData.getDataLen();
+                    StreamAttachment att = getAttachment(href);
+                    if(att != null){
+                        base64AttData = att.asBase64Data();
+                        textLength = base64AttData.getDataLen();
+                    }
                     textStart = 0;
                     xopReferencePresent = true;
                 } catch (IOException e) {
@@ -431,9 +436,40 @@ public class MtomCodec extends MimeCodec {
         }
 
         private String decodeCid(String cid) {
+            try {
+                cid = URLDecoder.decode(cid, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                //on recceiving side lets not fail now, try to look for it
+                return cid;
+            }
+            return cid;
+        }
+
+        private boolean needToDecode(String cid){
+            int numChars = cid.length();
+            int i=0;
+            char c;
+            while (i < numChars) {
+                c = cid.charAt(i++);
+                switch (c) {
+                    case '%':
+                        return true;
+                }
+            }
+            return false;
+        }
+
+
+        private StreamAttachment getAttachment(String cid) throws IOException {
             if (cid.startsWith("cid:"))
                 cid = cid.substring(4, cid.length());
-            return cid;
+            StreamAttachment att = mimeMP.getAttachmentPart(cid);
+            if(att == null && needToDecode(cid)){
+                //try not be url decoding it - this is required for Indigo interop, they write content-id without escaping
+                cid = decodeCid(cid);
+                return mimeMP.getAttachmentPart(cid);
+            }
+            return att;
         }
 
         public char[] getTextCharacters() {
