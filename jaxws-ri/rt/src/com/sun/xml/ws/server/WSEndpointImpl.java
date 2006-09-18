@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -62,6 +63,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final Pipe masterPipeline;
     private final ServiceDefinitionImpl serviceDef;
     private final SOAPVersion soapVersion;
+    private final Engine engine;
 
     /**
      * Set to true once we start shutting down this endpoint.
@@ -93,6 +95,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         ServerPipeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe, isSynchronous);
         this.masterPipeline = assembler.createServer(context);
         terminalPipe.setEndpoint(this);
+        engine = new Engine();
     }
 
     public @NotNull Class<T> getImplementationClass() {
@@ -139,15 +142,16 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public @NotNull PipeHead createPipeHead() {
         return new PipeHead() {
-            private final Pipe pipe = PipeCloner.clone(masterPipeline);
+            private final Tube tube = PipeAdapter.adapt(PipeCloner.clone(masterPipeline));
 
             public @NotNull Packet process(Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc) {
                 request.webServiceContextDelegate = wscd;
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;
+                Fiber fiber = engine.createFiber();
                 Packet response;
                 try {
-                    response = pipe.process(request);
+                    response = fiber.runSync(tube,request);
                 } catch (RuntimeException re) {
                     // Catch all runtime exceptions so that transport doesn't
                     // have to worry about converting to wire message
