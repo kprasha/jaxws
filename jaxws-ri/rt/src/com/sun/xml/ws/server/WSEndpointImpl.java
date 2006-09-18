@@ -142,7 +142,8 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public @NotNull PipeHead createPipeHead() {
         return new PipeHead() {
-            private final Tube tube = PipeAdapter.adapt(PipeCloner.clone(masterPipeline));
+            private final Pipe pipe = PipeCloner.clone(masterPipeline);
+            //private final Tube tube = PipeAdapter.adapt(PipeCloner.clone(masterPipeline));
 
             public @NotNull Packet process(Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc) {
                 request.webServiceContextDelegate = wscd;
@@ -151,7 +152,8 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 Fiber fiber = engine.createFiber();
                 Packet response;
                 try {
-                    response = fiber.runSync(tube,request);
+                    //response = fiber.runSync(tube,request);
+                    response = pipe.process(request);
                 } catch (RuntimeException re) {
                     // Catch all runtime exceptions so that transport doesn't
                     // have to worry about converting to wire message
