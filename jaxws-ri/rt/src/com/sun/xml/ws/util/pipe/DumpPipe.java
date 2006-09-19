@@ -39,8 +39,11 @@ import java.io.PrintStream;
  * @author Kohsuke Kawaguchi
  */
 public class DumpPipe extends DumpTube {
-    
-    // TODO remove after moving to Fiber
+
+    /**
+     * @deprecated
+     * TODO: remove after a little more of the runtime supports to Fiber
+     */
     private Pipe next;
 
     /**
@@ -81,6 +84,10 @@ public class DumpPipe extends DumpTube {
         return new DumpPipe(this,cloner);
     }
     
+    /**
+     * @deprecated
+     * TODO: remove after a little more of the runtime supports to Fiber
+     */
     public Packet process(Packet packet) {
         dump("request",packet);
         Packet reply = next.process(packet);
