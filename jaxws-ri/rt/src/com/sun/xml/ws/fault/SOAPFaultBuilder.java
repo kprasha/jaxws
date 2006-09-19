@@ -336,7 +336,7 @@ public abstract class SOAPFaultBuilder {
         if (faultCode == null) {
             faultCode = getDefaultFaultCode(soapVersion);
             code = new CodeType(faultCode);
-        }else{
+        }else if(code == null){
             code = new CodeType(faultCode);            
         }
 
