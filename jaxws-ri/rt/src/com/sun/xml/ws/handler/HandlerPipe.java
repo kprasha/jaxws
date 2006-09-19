@@ -27,7 +27,11 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.handler.HandlerProcessor.Direction;
 
 import javax.xml.ws.WebServiceException;
@@ -37,7 +41,7 @@ import javax.xml.ws.handler.MessageContext;
  * @author WS Development team
  */
 
-public abstract class HandlerPipe extends AbstractFilterPipeImpl {
+public abstract class HandlerPipe extends AbstractFilterTubeImpl {
     
     /**
      * handle hold reference to other Pipe for inter-pipe communication
@@ -48,30 +52,49 @@ public abstract class HandlerPipe extends AbstractFilterPipeImpl {
     private final @Nullable WSDLPort port;
     // flag used to decide whether to call close on cousinPipe
     boolean requestProcessingSucessful = false;
+    Pipe next;          // TODO Remove after moving to Fiber
+
     public HandlerPipe(Pipe next, WSDLPort port) {
-        super(next);
+        super(PipeAdapter.adapt(next));
         this.port = port;
+        this.next = next;
     }
 
     public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
-        super(next);
+        super(PipeAdapter.adapt(next));
         this.cousinPipe = cousinPipe;
         if(cousinPipe != null) {
             this.port = cousinPipe.port;
         } else {
             this.port = null;
         }
+        this.next = next;
     }
 
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
-    protected HandlerPipe(HandlerPipe that, PipeCloner cloner) {
+    protected HandlerPipe(HandlerPipe that, TubeCloner cloner) {
         super(that,cloner);
         if(that.cousinPipe != null) {
             this.cousinPipe = cloner.copy(that.cousinPipe);
         }
-        this.port = that.port;        
+        this.port = that.port;
+        this.next = that.next;
+    }
+
+    public NextAction processRequest(Packet request) {
+        // TODO fix the impl
+        return doInvoke(super.next,request);
+    }
+
+    public NextAction processResponse(Packet response) {
+        // TODO fix the impl
+        return doReturnWith(response);
+    }
+
+    public void preDestroy() {
+
     }
 
     public final Packet process( Packet packet) {

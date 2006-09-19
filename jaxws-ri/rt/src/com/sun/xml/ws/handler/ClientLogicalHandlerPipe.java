@@ -23,6 +23,8 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 
@@ -66,7 +68,7 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
 
-    private ClientLogicalHandlerPipe(ClientLogicalHandlerPipe that, PipeCloner cloner) {
+    private ClientLogicalHandlerPipe(ClientLogicalHandlerPipe that, TubeCloner cloner) {
         super(that, cloner);
         this.binding = that.binding;
     }
@@ -121,7 +123,7 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
         }
     }
 
-    public Pipe copy(PipeCloner cloner) {
+    public AbstractFilterTubeImpl copy(TubeCloner cloner) {
         return new ClientLogicalHandlerPipe(this, cloner);
     }
 
