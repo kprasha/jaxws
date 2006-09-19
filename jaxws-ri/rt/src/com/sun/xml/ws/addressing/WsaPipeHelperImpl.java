@@ -69,7 +69,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         }
     }
 
-    private WsaPipeHelperImpl() {
+    public WsaPipeHelperImpl() {
         try {
             unmarshaller = jc.createUnmarshaller();
             marshaller = jc.createMarshaller();
