@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.api.server;
 
-import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.client.ContainerResolver;
 
 /**
  * Root of the SPI implemented by the container
@@ -53,8 +53,9 @@ import com.sun.xml.ws.api.server.WSEndpoint;
  * while still providing the necessary service of hooking up those parties.
  *
  * <p>
- * Technologies that run inside JAX-WS can access this object through
- * {@link WSEndpoint#getContainer()}.
+ * Technologies that run inside JAX-WS server runtime can access this object through
+ * {@link WSEndpoint#getContainer()}. In the client runtime, it can be accessed from
+ * {@link ContainerResolver#getContainer()}
  *
  * @author Kohsuke Kawaguchi
  * @see WSEndpoint
