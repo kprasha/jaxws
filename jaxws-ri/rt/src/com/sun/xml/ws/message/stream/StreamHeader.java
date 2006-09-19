@@ -256,4 +256,12 @@ public abstract class StreamHeader implements Header {
         if(s==null) return "";
         else        return s;
     }
+
+    public String getStringContent() {
+        try {
+            return readHeader().getElementText();
+        } catch (XMLStreamException e) {
+            return null;
+        }
+    }
 }

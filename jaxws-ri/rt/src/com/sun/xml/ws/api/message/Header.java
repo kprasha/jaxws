@@ -295,4 +295,12 @@ public interface Header {
      *      The {@link ErrorHandler} that receives parsing errors.
      */
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException;
+
+    /**
+     * Used to obtain value XYZ from a header that looks like "&lt;header&gt;XYZ&lt;/header&gt;".
+     * The primary use of this heaer for now is to access certain Addressing headers quickly.
+     *
+     * @return String content value
+     */
+    public String getStringContent();
 }

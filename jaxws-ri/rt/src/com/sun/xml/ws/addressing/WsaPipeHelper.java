@@ -22,59 +22,56 @@
 
 package com.sun.xml.ws.addressing;
 
-import java.util.UUID;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.Detail;
 import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.Detail;
+import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.WebServiceException;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.WebServiceException;
 
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.AddressingProperties;
 import com.sun.xml.ws.addressing.model.Elements;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.Relationship;
+import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * @author Arun Gupta
@@ -248,7 +245,7 @@ public abstract class WsaPipeHelper {
         try {
             Header midHeader = message.getHeaders().get(getMessageIDQName(), true);
             if (midHeader != null) {
-                mid.append(((String)((JAXBElement)midHeader.readAsJAXB(unmarshaller)).getValue()));
+                mid.append(midHeader.getStringContent());
             }
 
             QName faultyHeader = null;
@@ -273,7 +270,7 @@ public abstract class WsaPipeHelper {
                         faultyHeader = getToQName();
                         break;
                     }
-                    ap.setTo((String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue());
+                    ap.setTo(h.getStringContent());
                 } else if (local.equals(getReplyToQName().getLocalPart())) {
                     if (ap.getReplyTo() != null) {
                         faultyHeader = getReplyToQName();
@@ -291,15 +288,15 @@ public abstract class WsaPipeHelper {
                         faultyHeader = getActionQName();
                         break;
                     }
-                    ap.setAction((String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue());
+                    ap.setAction(h.getStringContent());
                 } else if (local.equals(getMessageIDQName().getLocalPart())) {
                     if (ap.getMessageID() != null) {
                         faultyHeader = getMessageIDQName();
                         break;
                     }
-                    ap.setMessageID((String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue());
+                    ap.setMessageID(h.getStringContent());
                 } else if (local.equals(getRelatesToQName().getLocalPart())) {
-                    String mid2 = (String)((JAXBElement)h.readAsJAXB(unmarshaller)).getValue();
+                    String mid2 = h.getStringContent();
                     Relationship rel = newRelationship(mid2);
                     ap.getRelatesTo().add(rel);
                 } else if (local.equals(getFaultDetailQName().getLocalPart())) {

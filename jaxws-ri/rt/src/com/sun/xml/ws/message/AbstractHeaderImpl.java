@@ -30,6 +30,8 @@ import com.sun.xml.ws.api.message.Header;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
 import java.util.Set;
 
 /**
@@ -91,5 +93,13 @@ public abstract class AbstractHeaderImpl implements Header {
 
         char ch = value.charAt(0);
         return ch=='t' || ch=='1';
+    }
+
+    public String getStringContent() {
+        try {
+            return readHeader().getElementText();
+        } catch (XMLStreamException e) {
+            return null;
+        }
     }
 }
