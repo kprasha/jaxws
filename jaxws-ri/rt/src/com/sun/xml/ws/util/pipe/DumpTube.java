@@ -67,7 +67,7 @@ public class DumpTube extends AbstractFilterTubeImpl {
         return super.processResponse(response);
     }
 
-    private void dump(String header, Packet packet) {
+    protected void dump(String header, Packet packet) {
         out.println("====["+name+":"+header+"]====");
         if(packet.getMessage()==null)
             out.println("(none)");
