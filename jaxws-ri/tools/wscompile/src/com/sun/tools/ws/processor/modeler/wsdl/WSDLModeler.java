@@ -1218,6 +1218,7 @@ public class WSDLModeler extends WSDLModelerBase {
             // wsdl:fault message name is used to create the java exception name later on
             String faultName = getFaultClassName(portTypeFault);
             Fault fault = new Fault(faultName);
+            fault.setWsdlFaultName(portTypeFault.getName());
             setDocumentationIfPresent(fault, portTypeFault.getDocumentation());
 
             //get the soapbind:fault from wsdl:fault in the binding

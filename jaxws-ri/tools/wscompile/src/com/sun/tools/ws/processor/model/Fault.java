@@ -184,4 +184,14 @@ public class Fault extends ModelObject {
     private QName elementName = null;
     private String javaMemberName = null;
     private JClass exceptionClass;
+
+    public String getWsdlFaultName() {
+        return wsdlFaultName;
+    }
+
+    public void setWsdlFaultName(String wsdlFaultName) {
+        this.wsdlFaultName = wsdlFaultName;
+    }
+
+    private String wsdlFaultName;
 }
