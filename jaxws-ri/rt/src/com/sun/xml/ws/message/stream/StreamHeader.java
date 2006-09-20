@@ -23,8 +23,6 @@ package com.sun.xml.ws.message.stream;
 
 import com.sun.istack.FinalArrayList;
 import com.sun.istack.NotNull;
-import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
@@ -37,9 +35,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
@@ -62,8 +57,10 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
 
     protected boolean _isMustUnderstand;
 
-    // never null. role or actor value
-    protected String _role;
+    /**
+     * Role or actor value.
+     */
+    protected @NotNull String _role;
 
     protected boolean _isRelay;
 
@@ -151,11 +148,11 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
         return _isRelay;
     }
 
-    public String getNamespaceURI() {
+    public @NotNull String getNamespaceURI() {
         return _namespaceURI;
     }
 
-    public String getLocalPart() {
+    public @NotNull String getLocalPart() {
         return _localName;
     }
 
