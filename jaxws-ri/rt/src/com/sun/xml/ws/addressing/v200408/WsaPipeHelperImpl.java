@@ -48,6 +48,7 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.message.RelatesToHeader;
 import org.w3c.dom.Element;
 
 /**
@@ -280,8 +281,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     protected void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion) {
         if (ap.getRelatesTo() != null && ap.getRelatesTo().size() > 0) {
             for (Relationship rel : ap.getRelatesTo()) {
-                RelationshipImpl reli = (RelationshipImpl)rel;
-                hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
+                hl.add(new RelatesToHeader(getRelatesToQName(), rel.getId(), rel.getType()));
             }
         }
     }

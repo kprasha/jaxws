@@ -28,71 +28,45 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
-import com.sun.xml.ws.encoding.TagInfoset;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * @author Arun Gupta
  */
-public class StringHeader extends AbstractHeaderImpl {
-    protected final QName name;
-    protected final String value;
+public class RelatesToHeader extends StringHeader {
+    protected String type;
 
-    public StringHeader(QName name, String value) {
-        assert name != null;
-
-        this.name = name;
-        this.value = value;
+    public RelatesToHeader(QName name, String mid, String type) {
+        super(name, mid);
+        this.type = type;
     }
 
-    public @NotNull String getNamespaceURI() {
-        return name.getNamespaceURI();
+    public RelatesToHeader(QName name, String mid) {
+        super(name, mid);
     }
 
-    public @NotNull String getLocalPart() {
-        return name.getLocalPart();
+    public String getType() {
+        return type;
     }
 
-    @Nullable public String getAttribute(@NotNull String nsUri, @NotNull String localName) {
-        return getAttribute(name.getNamespaceURI(), name.getLocalPart());
-    }
-
-    public XMLStreamReader readHeader() throws XMLStreamException {
-        try {
-            MutableXMLStreamBuffer buf = new MutableXMLStreamBuffer();
-            XMLStreamWriter w = buf.createFromXMLStreamWriter();
-            writeTo(w);
-            return buf.readAsXMLStreamReader();
-        } catch (XMLStreamBufferException e) {
-            throw new XMLStreamException2(e);
-        }
-    }
-
+    @Override
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         w.writeStartElement("", name.getLocalPart(), name.getNamespaceURI());
         w.writeDefaultNamespace(name.getNamespaceURI());
+        if (type != null)
+            w.writeAttribute("RelatesTo", type);
         w.writeCharacters(value);
         w.writeEndElement();
     }
 
+    @Override
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         SOAPHeader header = saaj.getSOAPHeader();
         SOAPHeaderElement she = header.addHeaderElement(name);
-        she.addTextNode(value);
-    }
 
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        throw new UnsupportedOperationException();
+        // todo: cache QName
+        if (type != null)
+            she.addAttribute(new QName(name.getNamespaceURI(), "RelatesTo"), type);
+        she.addTextNode(value);
     }
 }
