@@ -1,6 +1,8 @@
 package com.sun.xml.ws.api.addressing;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -16,35 +18,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class represents a W3C Addressing EndpointReferece which is
- * a remote reference to a web service endpoint that supports the
- * W3C WS-Addressing 1.0 - Core Recommendation.
- * <p/>
- * Developers should use this class in their SEIs if they want to
- * pass/return endpoint references that represent the W3C WS-Addressing
- * recommendation.
- * <p/>
- * JAXB will use the JAXB annotations and bind this class to XML infoset
- * that is consistent with that defined by WS-Addressing.  See
- * http://www.w3.org/TR/2006/REC-ws-addr-core-20060509/
- * for more information on WS-Addressing EndpointReferences.
+ * Data model for Member Submission WS-Addressing specification. This is modeled after the
+ * member submission schema at:
  *
- * @since JAX-WS 2.1
+ *  http://schemas.xmlsoap.org/ws/2004/08/addressing/
+ *
+ * @author Kathy Walsh
+ * @author Vivek Pandey
  */
 
-// XmlRootElement allows this class to be marshalled on its own
 @XmlRootElement(name = "EndpointReference", namespace = MemberSubmissionEndpointReference.MSNS)
-@XmlType(name = "MemberSubmissionEndpointReferenceType", namespace = MemberSubmissionEndpointReference.MSNS)
+@XmlType(name = "EndpointReferenceType", namespace = MemberSubmissionEndpointReference.MSNS)
 public class MemberSubmissionEndpointReference extends EndpointReference implements MemberSubmissionAddressingConstants {
 
     private final static JAXBContext msjc = MemberSubmissionEndpointReference.getMSJaxbContext();
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
 
-    /**
-     * Default Constuctor for MemberSubmissionEPR
-     */
-    //may need public default constructor - kw
     public MemberSubmissionEndpointReference() {
     }
 
@@ -52,14 +42,13 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
      * construct an EPR from infoset representation
      *
      * @param source A source object containing valid XmlInfoset
-     *               instance consistent with the W3C WS-Addressing Core
-     *               recommendation.
+     *               instance consistent with the Member Submission WS-Addressing
      * @throws javax.xml.ws.WebServiceException
      *                              if the source does not contain a valid W3C WS-Addressing
      *                              EndpointReference.
-     * @throws NullPointerException if the <code>null</code> <code>source</code> value is given
+     * @throws WebServiceException if the <code>null</code> <code>source</code> value is given
      */
-    public MemberSubmissionEndpointReference(Source source) {
+    public MemberSubmissionEndpointReference(@NotNull Source source) {
 
         if (source == null)
             throw new WebServiceException("Source parameter can not be null on constructor");
@@ -68,9 +57,14 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
             if (unmarshaller == null)
                 unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
             MemberSubmissionEndpointReference epr = (MemberSubmissionEndpointReference) unmarshaller.unmarshal(source);
+
             this.addr = epr.addr;
-            this.metadata = epr.metadata;
+            this.referenceProperties = epr.referenceProperties;
             this.referenceParameters = epr.referenceParameters;
+            this.portTypeName = epr.portTypeName;
+            this.serviceName = epr.serviceName;
+            this.attributes = epr.attributes;
+            this.elements = epr.elements;
         } catch (JAXBException e) {
             throw new WebServiceException("Error unmarshalling MemberSubmissionEndpointReference ", e);
         } catch (ClassCastException e) {
@@ -78,9 +72,6 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void writeTo(Result result) {
         try {
             if (marshaller == null)
@@ -92,7 +83,7 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
         }
     }
 
-    private final static JAXBContext getMSJaxbContext() {
+    private static JAXBContext getMSJaxbContext() {
         try {
             return JAXBContext.newInstance(MemberSubmissionEndpointReference.class);
         } catch (JAXBException e) {
@@ -100,30 +91,54 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
         }
     }
 
-    // private but necessary properties for databinding
     @XmlElement(name = "Address", namespace = MemberSubmissionEndpointReference.MSNS)
-    private Address addr;
+    public Address addr;
+
     @XmlElement(name = "ReferenceProperties", namespace = MemberSubmissionEndpointReference.MSNS)
-    private Element referenceParameters;
+    public List<Element> referenceProperties;
+
     @XmlElement(name = "ReferenceParameters", namespace = MemberSubmissionEndpointReference.MSNS)
-    private Element metadata;
+    public List<Element> referenceParameters;
 
-    @XmlType(name = "MemberSubmissionAddressType", namespace = MemberSubmissionEndpointReference.MSNS)
-    private static class Address {
+    @XmlElement(name = "PortType", namespace = MemberSubmissionEndpointReference.MSNS)
+    public AttributedQName portTypeName;
+
+    @XmlElement(name = "ServiceName", namespace = MemberSubmissionEndpointReference.MSNS)
+    public ServiceNameType serviceName;
+
+    @XmlAnyAttribute
+    public Map<QName,String> attributes;
+
+    @XmlAnyElement
+    public List<Element> elements;
+
+    public static class Address {
+        public Address() {
+        }
+
         @XmlValue
-        String uri;
+        public String uri;
         @XmlAnyAttribute
-        Map<QName, String> attributes;
+        public Map<QName, String> attributes;
     }
 
-    @XmlType(name = "MemberSubmissionElementType", namespace = MemberSubmissionEndpointReference.MSNS)
-    private static class Element {
-        @XmlAnyElement
-        List<Element> elements;
+    public static class AttributedQName {
+        public AttributedQName() {
+        }
+
+        @XmlValue
+        public QName name;
         @XmlAnyAttribute
-        Map<QName, String> attributes;
+        public Map<QName, String> attributes;
     }
 
+    public static class ServiceNameType extends AttributedQName{
+        public ServiceNameType() {
+        }
+
+        @XmlAttribute(name="PortName")
+        public String portName;
+    }
 
     protected static final String MSNS = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
 }

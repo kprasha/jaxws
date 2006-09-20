@@ -58,7 +58,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      */
     private Pool<Pipe> pipes;
 
-    protected W3CEndpointReference endpointReference;
+    protected EndpointReference endpointReference;
 
     protected final BindingImpl binding;
 
@@ -160,12 +160,6 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
     }
 
     public W3CEndpointReference getEndpointReference() {
-        return this.endpointReference;
-    }
-
-
-    //this is all temporary
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
-        return null;
+        return getEndpointReference(W3CEndpointReference.class);
     }
 }

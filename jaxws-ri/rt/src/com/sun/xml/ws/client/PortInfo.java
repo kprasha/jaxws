@@ -38,7 +38,7 @@ import javax.xml.namespace.QName;
  *
  * @author JAXWS Development Team
  */
-class PortInfo {
+public class PortInfo {
     private final
     @NotNull
     WSServiceDelegate owner;

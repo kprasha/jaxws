@@ -22,32 +22,24 @@
 
 package com.sun.xml.ws.client.dispatch;
 
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.RequestContext;
-import com.sun.xml.ws.client.ResponseContextReceiver;
-import com.sun.xml.ws.client.ResponseImpl;
-import com.sun.xml.ws.client.Stub;
-import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.client.*;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.ws.AsyncHandler;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.Response;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.w3caddressing.W3CEndpointReference;
+import javax.xml.ws.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
-import javax.xml.bind.JAXBException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -279,11 +271,29 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    public W3CEndpointReference getEndpointReference() {
-        return null;
-    }
-
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
-        return null;
+        if (endpointReference != null) {
+            return EndpointReferenceUtil.transform(clazz, endpointReference);
+        }
+
+        PortInfo port = owner.safeGetPort(portname);
+
+        QName portTypeName = null;
+
+        //Dispatch was created with WSDL. If created without WSDL then the portType name will be null.
+        if(port.portModel != null){
+            WSDLBoundPortType binding = port.portModel.getBinding();
+            if(binding != null){
+                portTypeName = binding.getPortTypeName();
+            }
+        }
+
+        endpointReference = EndpointReferenceUtil.getEndpointReference(clazz,
+                owner.getEndpointAddress(portname).toString(),
+                owner.getServiceName(),
+                portname.getLocalPart(),
+                portTypeName);
+        
+        return (T) endpointReference;
     }
 }

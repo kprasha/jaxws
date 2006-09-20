@@ -28,10 +28,10 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
@@ -302,7 +302,7 @@ public class WSServiceDelegate extends WSService {
     /**
      * Obtains {@link PortInfo} for the given name, with error check.
      */
-    private
+    public
     @NotNull
     PortInfo safeGetPort(QName portName) {
         PortInfo port = ports.get(portName);
@@ -465,6 +465,10 @@ public class WSServiceDelegate extends WSService {
         seiContext.put(spi.sei, spi);
         ports.put(spi.portName, spi);
 
+    }
+
+    public WSDLServiceImpl getWsdlService() {
+        return wsdlService;
     }
 
     /**
