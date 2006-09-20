@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -55,6 +56,21 @@ public abstract class AbstractHeaderImpl implements Header {
         return readAsJAXB(bridge);
     }
 
+    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
+        try {
+            return (T)unmarshaller.unmarshal(readHeader());
+        } catch (Exception e) {
+            throw new JAXBException(e);
+        }
+    }
+
+    public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException {
+        try {
+            return bridge.unmarshal(readHeader());
+        } catch (XMLStreamException e) {
+            throw new JAXBException(e);
+        }
+    }
 
     public boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles) {
         // check mustUnderstand
