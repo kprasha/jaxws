@@ -37,7 +37,10 @@ import javax.xml.stream.XMLStreamReader;
  */
 @SuppressWarnings({"StringEquality"})
 public class StreamHeader11 extends StreamHeader {
+    protected static final String SOAP_1_1_MUST_UNDERSTAND = "mustUnderstand";
 
+    protected static final String SOAP_1_1_ROLE = "actor";
+    
     public StreamHeader11(XMLStreamReader reader, XMLStreamBuffer mark) {
         super(reader, mark);
     }

@@ -30,6 +30,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.message.AbstractHeaderImpl;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
@@ -56,16 +57,7 @@ import java.util.Set;
  *
  * @author Paul.Sandoz@Sun.Com
  */
-public abstract class StreamHeader implements Header {
-
-    protected static final String SOAP_1_1_MUST_UNDERSTAND = "mustUnderstand";
-    protected static final String SOAP_1_2_MUST_UNDERSTAND = SOAP_1_1_MUST_UNDERSTAND;
-
-    protected static final String SOAP_1_1_ROLE = "actor";
-    protected static final String SOAP_1_2_ROLE = "role";
-
-    protected static final String SOAP_1_2_RELAY = "relay";
-
+public abstract class StreamHeader extends AbstractHeaderImpl {
     protected final XMLStreamBuffer _mark;
 
     protected boolean _isMustUnderstand;
@@ -178,10 +170,6 @@ public abstract class StreamHeader implements Header {
         return null;
     }
 
-    public String getAttribute(QName name) {
-        return getAttribute(name.getNamespaceURI(),name.getLocalPart());
-    }
-
     /**
      * Reads the header as a {@link XMLStreamReader}
      */
@@ -198,11 +186,6 @@ public abstract class StreamHeader implements Header {
         } catch (Exception e) {
             throw new JAXBException(e);
         }
-    }
-
-    @Deprecated
-    public <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return readAsJAXB(bridge);
     }
 
     public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException {
