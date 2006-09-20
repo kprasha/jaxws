@@ -22,8 +22,12 @@
 
 package com.sun.xml.ws.api.addressing;
 
+import javax.xml.ws.soap.AddressingFeature;
+
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 /**
  * @author Arun Gupta
@@ -49,10 +53,34 @@ public enum AddressingVersion {
      * @return always non-null.
      */
     public static AddressingVersion fromNsUri(String nsUri) {
-        if(nsUri.equals(MEMBER.nsUri))
-            return MEMBER;
-        else
+        if (nsUri.equals(W3C.nsUri))
             return W3C;
+
+        if (nsUri.equals(MEMBER.nsUri))
+            return MEMBER;
+
+        return null;
+    }
+
+    public static AddressingVersion fromBinding(WSBinding binding) {
+        if (binding.hasFeature(AddressingFeature.ID))
+            return W3C;
+
+        if (binding.hasFeature(MemberSubmissionAddressingFeature.ID))
+            return MEMBER;
+
+        return null;
+    }
+
+    public static AddressingVersion fromPort(WSDLPort port) {
+        String ns = port.getBinding().getAddressingVersion();
+        if (ns.equals(W3C.nsUri))
+            return W3C;
+        
+        if (ns.equals(MEMBER.nsUri))
+            return MEMBER;
+
+        return null;
     }
 
     /**
