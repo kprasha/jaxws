@@ -1,5 +1,6 @@
 package com.sun.xml.ws.api.pipe.helper;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -49,6 +50,11 @@ public class PipeAdapter extends AbstractTubeImpl {
     }
 
     public NextAction processResponse(Packet p) {
+        throw new IllegalStateException();
+    }
+
+    @NotNull
+    public NextAction processException(@NotNull Throwable t) {
         throw new IllegalStateException();
     }
 

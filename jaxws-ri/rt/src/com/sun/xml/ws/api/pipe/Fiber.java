@@ -64,6 +64,8 @@ public final class Fiber implements Runnable {
 
     private Packet packet;
 
+    private Throwable/*but really it's either RuntimeException or Error*/ throwable;
+
     public final Engine owner;
 
     /**
@@ -145,6 +147,11 @@ public final class Fiber implements Runnable {
          * than any of the threads that started it or run a part of tubeline.
          */
         void onCompletion(@NotNull Packet response);
+
+        /**
+         * Indicates that the fiber has finished abnormally, by throwing a given {@link Throwable}.
+         */
+        void onCompletion(@NotNull Throwable error);
     }
 
     Fiber(Engine engine) {
@@ -356,6 +363,16 @@ public final class Fiber implements Runnable {
             synchronous = true;
             this.packet = request;
             doRun(tubeline);
+            if(throwable!=null) {
+                if (throwable instanceof RuntimeException) {
+                    throw (RuntimeException) throwable;
+                }
+                if (throwable instanceof Error) {
+                    throw (Error) throwable;
+                }
+                // our system is supposed to only accept Error or RuntimeException
+                throw new AssertionError(throwable);
+            }
             return this.packet;
         } finally {
             conts = oldCont;
@@ -375,8 +392,12 @@ public final class Fiber implements Runnable {
                 System.out.println(getName()+" completed\n");
             completed = true;
             notifyAll();
-            if(completionCallback!=null)
-                completionCallback.onCompletion(packet);
+            if(completionCallback!=null) {
+                if(throwable!=null)
+                    completionCallback.onCompletion(throwable);
+                else
+                    completionCallback.onCompletion(packet);
+            }
         }
     }
 
@@ -456,6 +477,8 @@ public final class Fiber implements Runnable {
 
     /**
      * To be invoked from {@link #doRun(Tube)}.
+     *
+     * @see #doRun(Tube)
      */
     private Tube _doRun(Tube next) {
         final Fiber old = CURRENT_FIBER.get();
@@ -467,19 +490,29 @@ public final class Fiber implements Runnable {
                     NextAction na;
                     Tube last;
 
-                    if(next!=null) {
-                        na = next.processRequest(packet);
-                        last = next;
-                    } else {
+                    if(throwable!=null) {
                         if(contsSize==0) {
                             // nothing else to execute. we are done.
                             return null;
                         }
                         last = popCont();
-                        na = last.processResponse(packet);
+                        na = last.processException(throwable);
+                    } else {
+                        if(next!=null) {
+                            na = next.processRequest(packet);
+                            last = next;
+                        } else {
+                            if(contsSize==0) {
+                                // nothing else to execute. we are done.
+                                return null;
+                            }
+                            last = popCont();
+                            na = last.processResponse(packet);
+                        }
                     }
 
                     packet = na.packet;
+                    throwable = na.throwable;
 
                     switch(na.kind) {
                     case NextAction.INVOKE:
@@ -489,6 +522,7 @@ public final class Fiber implements Runnable {
                         next = na.next;
                         break;
                     case NextAction.RETURN:
+                    case NextAction.THROW:
                         next = null;
                         break;
                     case NextAction.SUSPEND:
@@ -499,10 +533,12 @@ public final class Fiber implements Runnable {
                     default:
                         throw new AssertionError();
                     }
-                } catch (Throwable t) {
-                    // TODO fix it
+                } catch (RuntimeException t) {
                     packet = null;
-                    //packet = new Packet(t);
+                    throwable = t;
+                } catch (Error t) {
+                    packet = null;
+                    throwable = t;
                 }
             }
             // there's nothing we can execute right away.

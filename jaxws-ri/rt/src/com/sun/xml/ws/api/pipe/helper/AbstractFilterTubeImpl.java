@@ -1,5 +1,6 @@
 package com.sun.xml.ws.api.pipe.helper;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -30,15 +31,21 @@ public abstract class AbstractFilterTubeImpl extends AbstractTubeImpl {
     /**
      * Default no-op implementation.
      */
-    public NextAction processRequest(Packet request) {
+    public @NotNull NextAction processRequest(Packet request) {
         return doInvoke(next,request);
     }
 
     /**
      * Default no-op implementation.
      */
-    public NextAction processResponse(Packet response) {
+    public @NotNull NextAction processResponse(Packet response) {
         return doReturnWith(response);
     }
 
+    /**
+     * Default no-op implementation.
+     */
+    public @NotNull NextAction processException(Throwable t) {
+        return doThrow(t);
+    }
 }

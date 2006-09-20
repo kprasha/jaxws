@@ -15,20 +15,24 @@ public final class NextAction {
     int kind;
     Tube next;
     Packet packet;
-    Throwable t;
+    /**
+     * Really either {@link RuntimeException} or {@link Error}.
+     */
+    Throwable throwable;
 
     // public enum Kind { INVOKE, INVOKE_AND_FORGET, RETURN, SUSPEND }
 
     static final int INVOKE = 0;
     static final int INVOKE_AND_FORGET = 1;
     static final int RETURN = 2;
-    static final int HANDLE_EXCEPTION = 3;
+    static final int THROW = 3;
     static final int SUSPEND = 4;
 
-    private void set(int k, Tube v, Packet p) {
+    private void set(int k, Tube v, Packet p, Throwable t) {
         this.kind = k;
         this.next = v;
         this.packet = p;
+        this.throwable = t;
     }
 
     /**
@@ -38,7 +42,7 @@ public final class NextAction {
      * with the response packet.
      */
     public void invoke(Tube next, Packet p) {
-        set(INVOKE, next, p );
+        set(INVOKE, next, p, null);
     }
 
     /**
@@ -48,7 +52,7 @@ public final class NextAction {
      * its {@link Tube#processResponse(Packet)}.
      */
     public void invokeAndForget(Tube next, Packet p) {
-        set(INVOKE_AND_FORGET, next, p );
+        set(INVOKE_AND_FORGET, next, p, null);
     }
 
     /**
@@ -63,10 +67,15 @@ public final class NextAction {
     /**
      * Indicates that the next action is to flip the processing direction
      * and starts exception processing.
+     *
+     * @param t
+     *      Either {@link RuntimeException} or {@link Error}, but defined to
+     *      take {@link Throwable} because {@link Tube#processException(Throwable)}
+     *      takes {@link Throwable}.
      */
-    public void handleException(Throwable t) {
-        this.kind = HANDLE_EXCEPTION;
-        this.t = t;
+    public void throwException(Throwable t) {
+        assert t instanceof RuntimeException || t instanceof Error;
+        set(THROW,null,null,t);
     }
 
     /**

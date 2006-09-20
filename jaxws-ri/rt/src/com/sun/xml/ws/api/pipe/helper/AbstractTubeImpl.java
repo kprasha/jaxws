@@ -56,6 +56,11 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
         return na;
     }
 
+    protected final NextAction doThrow(Throwable t) {
+        na.throwException(t);
+        return na;
+    }
+
     /**
      * "Dual stack" compatibility mechanism.
      * Allows {@link Tube} to be invoked from a {@link Pipe}.
@@ -73,12 +78,4 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
     }
 
     public abstract AbstractTubeImpl copy(TubeCloner cloner);
-
-    /**
-     * Default no-op implementation.
-     */
-    public NextAction processException(Throwable t) {
-        na.handleException(t);
-        return na;
-    }
 }

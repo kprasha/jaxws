@@ -22,20 +22,21 @@
 
 package com.sun.xml.ws.server;
 
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
-import com.sun.istack.NotNull;
 
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.EndpointReference;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.w3caddressing.W3CEndpointReference;
 import java.security.Principal;
 
 /**
@@ -102,6 +103,10 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
 
     public NextAction processResponse(Packet response) {
         throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
     }
 
     /**
