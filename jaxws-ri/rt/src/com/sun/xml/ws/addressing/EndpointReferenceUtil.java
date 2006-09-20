@@ -224,15 +224,92 @@ public class EndpointReferenceUtil {
         throw new WebServiceException("Unknwon EndpointReference: "+epr.getClass());
     }
 
-    //TODO
-    private static W3CEndpointReference toW3CEpr(MemberSubmissionEndpointReference msEpr){
-        DOMResult result = new DOMResult();
-        msEpr.writeTo(result);
-        Node eprNode = result.getNode();
-        Element e = DOMUtil.getFirstElementChild(eprNode);
-        if(e == null)
-            return null;
-        return null;
+    //TODO: bit of redundency on writes of w3c epr, should modularize it
+    private static W3CEndpointReference toW3CEpr(MemberSubmissionEndpointReference msEpr) {
+        final ByteOutputStream bos = new ByteOutputStream();
+        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+        try {
+            writer.writeStartDocument();
+            writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                    "EndpointReference", W3CAddressingConstants.WSA_NAMESPACE_NAME);
+            writer.writeNamespace(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                    W3CAddressingConstants.WSA_NAMESPACE_NAME);
+            //write wsa:Address
+            writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX,
+                    W3CAddressingConstants.WSA_ADDRESS_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
+            writer.writeCharacters(msEpr.addr.uri);
+            writer.writeEndElement();
+            //TODO: write extension attributes on wsa:Address
+
+
+            //write ReferenceProperties
+            if(msEpr.referenceProperties != null && msEpr.referenceProperties.size() > 0){
+                writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX, W3CAddressingConstants.WSA_REFERENCEPARAMETERS_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                for(Element e : msEpr.referenceProperties){
+                    DOMUtil.serializeNode(e, writer);
+                }
+                writer.writeEndElement();
+            }
+
+            //write referenceParameters
+            if(msEpr.referenceParameters != null && msEpr.referenceParameters.size() > 0){
+                writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX, W3CAddressingConstants.WSA_METADATA_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
+                //Write Interface info
+                if(msEpr.portTypeName != null){
+                    writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                            MemberSubmissionAddressingConstants.WSA_PORTTYPE_NAME,
+                            MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+                    String portTypePrefix = fixNull(msEpr.portTypeName.name.getPrefix());
+                    writer.writeNamespace(portTypePrefix, msEpr.portTypeName.name.getNamespaceURI());
+                    if(!portTypePrefix.equals(""))
+                        writer.writeCharacters(msEpr.portTypeName.name.getLocalPart());
+                    else
+                        writer.writeCharacters(portTypePrefix + ":" + msEpr.portTypeName.name.getLocalPart());
+                    writer.writeEndElement();
+                }
+                if(msEpr.serviceName != null){
+                    //Write service and Port info
+                    writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                            MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
+                            MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+                    String servicePrefix = fixNull(msEpr.serviceName.name.getPrefix());
+                    if(msEpr.serviceName.portName != null)
+                        writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
+                                msEpr.serviceName.portName);
+
+                    writer.writeNamespace(servicePrefix, msEpr.serviceName.name.getNamespaceURI());
+                    if(servicePrefix.length() > 0)
+                        writer.writeCharacters(servicePrefix + ":" + msEpr.serviceName.name.getLocalPart());
+                    else
+                        writer.writeCharacters(msEpr.serviceName.name.getLocalPart());
+                    writer.writeEndElement();
+                }
+
+                for(Element e : msEpr.referenceParameters){
+                    DOMUtil.serializeNode(e, writer);
+                }
+
+                //</Metadata>
+                writer.writeEndElement();
+            }
+
+            //write extension elements
+            if((msEpr.elements != null) && (msEpr.elements.size() > 0)){
+                for(Element e : msEpr.elements){
+                    DOMUtil.serializeNode(e, writer);
+                }
+            }
+
+            //TODO:write extension attributes
+
+            //</EndpointReference>
+            writer.writeEndElement();
+            writer.writeEndDocument();
+            writer.flush();
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
+        return new W3CEndpointReference(new StreamSource(bos.newInputStream()));
     }
 
     private static MemberSubmissionEndpointReference toMSEpr(W3CEndpointReference w3cEpr){
