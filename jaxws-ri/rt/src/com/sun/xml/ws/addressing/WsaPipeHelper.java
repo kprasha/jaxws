@@ -70,6 +70,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.message.StringHeader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -122,11 +123,11 @@ public abstract class WsaPipeHelper {
         SOAPVersion soapVersion = binding.getSOAPVersion();
 
         if (ap.getTo() != null && !ap.getTo().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, getToQName(), ap.getTo()));
+            hl.add(new StringHeader(getToQName(), ap.getTo()));
         }
 
         if (ap.getMessageID() != null && !ap.getMessageID().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, getMessageIDQName(), ap.getMessageID()));
+            hl.add(new StringHeader(getMessageIDQName(), ap.getMessageID()));
         }
 
         if (ap.getFrom() != null && !ap.getFrom().equals("")) {
@@ -142,7 +143,7 @@ public abstract class WsaPipeHelper {
         }
 
         if (ap.getAction() != null && !ap.getAction().equals("")) {
-            hl.add(Headers.create(soapVersion, marshaller, getActionQName(), ap.getAction()));
+            hl.add(new StringHeader(getActionQName(), ap.getAction()));
             packet.soapAction = ap.getAction();
         }
 
