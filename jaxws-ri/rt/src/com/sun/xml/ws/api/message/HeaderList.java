@@ -24,12 +24,16 @@ package com.sun.xml.ws.api.message;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
+import com.sun.xml.ws.message.StringHeader;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.EndpointReference;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
@@ -115,6 +119,12 @@ public final class HeaderList extends ArrayList<Header> {
      */
     private BitSet moreUnderstoodBits = null;
 
+    private String to = null;
+    private String action = null;
+    private EndpointReference replyTo = null;
+    private EndpointReference faultTo = null;
+    private String messageId;
+
 
     /**
      * Creates an empty {@link HeaderList}.
@@ -130,6 +140,11 @@ public final class HeaderList extends ArrayList<Header> {
         this.understoodBits = that.understoodBits;
         if(that.moreUnderstoodBits!=null)
             this.moreUnderstoodBits = (BitSet)that.moreUnderstoodBits.clone();
+        this.to = that.to;
+        this.action = that.action;
+        this.replyTo = that.replyTo;
+        this.faultTo = that.faultTo;
+        this.messageId = that.messageId;
     }
 
     /**
@@ -384,6 +399,113 @@ public final class HeaderList extends ArrayList<Header> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    /**
+     * Gets the first {@link Header} of the specified name.
+     *
+     * @param nsUri Namespace URI of the header
+     * @param local Local name of the header
+     * @param markUnderstood
+     *      If this parameter is true, the returned headers will
+     *      be marked as <a href="#MU">"understood"</a> when they are returned
+     *      from {@link Iterator#next()}.
+     * @return null if header not found
+     */
+    private Header getFirstHeader(String nsUri, String local, boolean markUnderstood) {
+        Iterator<Header> iter = getHeaders(nsUri, local, markUnderstood);
+        if (iter.hasNext())
+            return iter.next();
+        else
+            return null;
+    }
+
+    /**
+     * Returns the value of first WS-Addressing To header from
+     * {@link AddressingVersion} version. Caches the value for
+     * subsequent invocation.
+     *
+     * @param version Version of WS-Addressing
+     * @return Value of WS-Addressing To header, null if no header is present
+     */
+    public String getTo(AddressingVersion version) {
+        Header h = getFirstHeader(version.getNsUri(), "To", true);
+        if (to != null && h != null) {
+            to = h.getStringContent();
+        }
+
+        return to;
+    }
+
+    /**
+     * Returns the value of first WS-Addressing Action header from
+     * {@link AddressingVersion} version. Caches the value for
+     * subsequent invocation.
+     *
+     * @param version Version of WS-Addressing
+     * @return Value of WS-Addressing Action header, null if no header is present
+     */
+    public String getAction(AddressingVersion version) {
+        Header h = getFirstHeader(version.getNsUri(), "Action", true);
+        if (action != null && h != null) {
+            action = h.getStringContent();
+        }
+
+        return action;
+    }
+
+    /**
+     * Add/replace WS-Addressing Action header with the given value.
+     *
+     * @param version Version of WS-Addressing
+     */
+    public void setAction(AddressingVersion version) {
+        Header h = getFirstHeader(version.getNsUri(), "Action", true);
+
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the value of first WS-Addressing ReplyTo header from
+     * {@link AddressingVersion} version. Caches the value for
+     * subsequent invocation.
+     *
+     * @param version Version of WS-Addressing
+     * @return Value of WS-Addressing ReplyTo header, null if no header is present
+     */
+    public EndpointReference getReplyTo(AddressingVersion version) {
+        Header h = getFirstHeader(version.getNsUri(), "ReplyTo", true);
+        if (replyTo != null && h != null) {
+            // read ReplyTo
+        }
+
+        return replyTo;
+    }
+
+    /**
+     * Returns the value of first WS-Addressing FaultTo header from
+     * {@link AddressingVersion} version. Caches the value for
+     * subsequent invocation.
+     *
+     * @param version Version of WS-Addressing
+     * @return Value of WS-Addressing FaultTo header, null if no header is present
+     */
+    public EndpointReference getFaultTo(AddressingVersion version) {
+        Header h = getFirstHeader(version.getNsUri(), "FaultTo", true);
+        if (faultTo != null && h != null) {
+            // read FaultTo
+        }
+
+        return faultTo;
+    }
+
+    public String getMessageID(AddressingVersion version) {
+        Header h = getFirstHeader(version.getNsUri(), "MessageID", true);
+        if (messageId != null && h != null) {
+            messageId = h.getStringContent();
+        }
+
+        return messageId;
     }
 
     /**
