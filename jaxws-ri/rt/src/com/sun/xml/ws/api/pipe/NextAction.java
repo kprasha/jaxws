@@ -15,13 +15,15 @@ public final class NextAction {
     int kind;
     Tube next;
     Packet packet;
+    Throwable t;
 
     // public enum Kind { INVOKE, INVOKE_AND_FORGET, RETURN, SUSPEND }
 
     static final int INVOKE = 0;
     static final int INVOKE_AND_FORGET = 1;
     static final int RETURN = 2;
-    static final int SUSPEND = 3;
+    static final int HANDLE_EXCEPTION = 3;
+    static final int SUSPEND = 4;
 
     private void set(int k, Tube v, Packet p) {
         this.kind = k;
@@ -56,6 +58,15 @@ public final class NextAction {
     public void returnWith( Packet response ) {
         this.kind = RETURN;
         this.packet = response;
+    }
+
+    /**
+     * Indicates that the next action is to flip the processing direction
+     * and starts exception processing.
+     */
+    public void handleException(Throwable t) {
+        this.kind = HANDLE_EXCEPTION;
+        this.t = t;
     }
 
     /**

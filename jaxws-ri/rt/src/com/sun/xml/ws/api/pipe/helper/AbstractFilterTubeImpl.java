@@ -40,4 +40,5 @@ public abstract class AbstractFilterTubeImpl extends AbstractTubeImpl {
     public NextAction processResponse(Packet response) {
         return doReturnWith(response);
     }
+
 }

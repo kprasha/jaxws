@@ -73,4 +73,12 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
     }
 
     public abstract AbstractTubeImpl copy(TubeCloner cloner);
+
+    /**
+     * Default no-op implementation.
+     */
+    public NextAction processException(Throwable t) {
+        na.handleException(t);
+        return na;
+    }
 }

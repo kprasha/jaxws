@@ -77,7 +77,7 @@ public class ClientMUPipe extends MUPipe {
     }
 
     public NextAction processRequest(Packet request) {
-        return doInvoke(super.next, request);
+        return super.processRequest(request);
     }
 
     public NextAction processResponse(Packet response) {
@@ -85,7 +85,7 @@ public class ClientMUPipe extends MUPipe {
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(response.getMessage().getHeaders(),
                 handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
-            return doReturnWith(response);
+            return super.processResponse(response);
         }
         // TODO should we convert to fault message
         throw createMUSOAPFaultException(misUnderstoodHeaders);

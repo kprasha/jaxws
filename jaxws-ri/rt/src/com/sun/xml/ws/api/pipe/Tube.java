@@ -273,6 +273,39 @@ public interface Tube {
      */
     @NotNull NextAction processResponse(@NotNull Packet response);
 
+
+    /**
+     * Acts on a exception and performs some clean up operations.
+     *
+     * <p>
+     * If a {@link #processRequest(Packet)}, {@link #processResponse(Packet)},
+     * {@link #processException(Throwable)} throws an exception, this method
+     * will be always invoked on all the {@link Tube}s in the remaining
+     * {@link NextAction}s.
+     *
+     * <p>
+     * On the server side, the {@link Throwable} thrown will be propagated to the
+     * top-most transport. The transport converts the exception to fault reply or
+     * simply logs in case of one-way MEP. If you are a filtering {@link Tube} like
+     * {@link AbstractTubeImpl}, you don't have to override the implementation). On
+     * the other hand, any intermediate {@link Tube} may want to convert the exception
+     * to a fault message.
+     *
+     * <p>
+     * On the client side, the {@link Throwable} thrown
+     * will be propagated all the way back to the calling client
+     * applications. (The consequence of that is that if you are
+     * a filtering {@link Tube} like {@link AbstractTubeImpl}, you don't have to
+     * override the implementation)
+     *
+     * @param t
+     *
+     * @return
+     *      A {@link NextAction} object that represents the next action
+     *      to be taken by the JAX-WS runtime.
+     */
+    @NotNull NextAction processException(@NotNull Throwable t);
+
     /**
      * Invoked before the last copy of the pipeline is about to be discarded,
      * to give {@link Tube}s a chance to clean up any resources.
