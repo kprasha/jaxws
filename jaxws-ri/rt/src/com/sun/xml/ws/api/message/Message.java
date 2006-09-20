@@ -26,6 +26,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -56,6 +57,7 @@ import javax.xml.ws.Dispatch;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.UUID;
 
 /**
  * Represents a SOAP message.
@@ -221,7 +223,7 @@ public abstract class Message {
     protected boolean hasAttachments() {
         return attachmentSet!=null;
     }
-    
+
     protected AttachmentSet attachmentSet;
 
     private WSDLBoundOperation operation = null;
@@ -262,7 +264,7 @@ public abstract class Message {
     public final @Nullable WSDLBoundOperation getOperation(@NotNull WSDLPort port) {
         return getOperation(port.getBinding());
     }
-    
+
     /**
      * Returns the java Method of which this message is an instance of.
      *
@@ -599,4 +601,40 @@ public abstract class Message {
     // TODO: update the class javadoc with 'lifescope'
     // and move the discussion about life scope there.
     public abstract Message copy();
+
+    private UUID uuid;
+
+    /**
+     * Retuns a unique id for the message. The id can be used for various things,
+     * like debug assistance, logging, and MIME encoding(say for boundary).
+     *
+     * This method will check the existence of the addressing <MessageID> header,
+     * and if present uses that value. Otherwise it generates one from UUID.random(),
+     * and return it without adding a new header. But it doesn't add a <MessageID>
+     * to the header list since we expect them to be added before calling this
+     * method.
+     *
+     * <p>
+     * Addressing tube will go do a separate verification on inbound
+     * headers to make sure that <MessageID> header is present when it's
+     * supposed to be.
+     *
+     * TODO javadoc parameters after parameters are decided
+     *
+     * @return unique id for the message
+     */
+    public @NotNull UUID getID(@NotNull WSBinding binding) {
+        if (uuid == null) {
+            // TODO how do we know if addressing is enabled
+            for(Header header: this.getHeaders()) {
+                String localPart = header.getLocalPart();
+                String nsUri = header.getNamespaceURI();
+                // check with MessageID header and return UUID
+                // TODO how to get MessageID QName
+                //uuid = UUID.fromString();
+            }
+            uuid = UUID.randomUUID();
+        }
+        return uuid;
+    }
 }
