@@ -613,6 +613,14 @@ major-version=${release.impl.version}
          dest="lib/sjsxp-src.zip" />
   </target>
 
+  <target name="integrate-jaxws21-api-hudson" depends="prepare"
+          description="integrate the last successful jaxws 2.1 API from Hudson build">
+    <get src="http://kohsuke.sfbay.sun.com/hudson/job/jsr224-2.1/lastSuccessfulBuild/artifact/jsr224/api/build/lib/jaxws-api.jar"
+         dest="lib/jaxws-api.jar" />
+    <get src="http://kohsuke.sfbay.sun.com/hudson/job/jsr224-2.1/lastSuccessfulBuild/artifact/jsr224/api/build/lib/jaxws-api-src.zip"
+         dest="lib/jaxws-api-src.zip" />
+  </target>
+
   <target name="integrate-FastInfoset-hudson" depends="prepare"
           description="integrate the last successful FastInfoset Hudson build">
     <get src="http://kohsuke.sfbay/hudson/job/fi/lastSuccessfulBuild/artifact/fi/FastInfoset/dist/FastInfoset.jar"

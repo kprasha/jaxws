@@ -40,7 +40,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.w3caddressing.W3CEndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -243,16 +243,16 @@ public class EndpointReferenceUtil {
 
 
             //write ReferenceProperties
-            if(msEpr.referenceProperties != null && msEpr.referenceProperties.size() > 0){
+            if(msEpr.referenceProperties != null && msEpr.referenceProperties.elements.size() > 0){
                 writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX, W3CAddressingConstants.WSA_REFERENCEPARAMETERS_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
-                for(Element e : msEpr.referenceProperties){
+                for(Element e : msEpr.referenceProperties.elements){
                     DOMUtil.serializeNode(e, writer);
                 }
                 writer.writeEndElement();
             }
 
             //write referenceParameters
-            if(msEpr.referenceParameters != null && msEpr.referenceParameters.size() > 0){
+            if(msEpr.referenceParameters != null && msEpr.referenceParameters.elements.size() > 0){
                 writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX, W3CAddressingConstants.WSA_METADATA_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
                 //Write Interface info
                 if(msEpr.portTypeName != null){
@@ -285,7 +285,7 @@ public class EndpointReferenceUtil {
                     writer.writeEndElement();
                 }
 
-                for(Element e : msEpr.referenceParameters){
+                for(Element e : msEpr.referenceParameters.elements){
                     DOMUtil.serializeNode(e, writer);
                 }
 
@@ -294,8 +294,8 @@ public class EndpointReferenceUtil {
             }
 
             //write extension elements
-            if((msEpr.elements != null) && (msEpr.elements.size() > 0)){
-                for(Element e : msEpr.elements){
+            if((msEpr.elements != null) && (msEpr.elements.elements.size() > 0)){
+                for(Element e : msEpr.elements.elements){
                     DOMUtil.serializeNode(e, writer);
                 }
             }
@@ -340,8 +340,8 @@ public class EndpointReferenceUtil {
                         for(int j=0; j < refParams.getLength(); j++){
                             if(refParams.item(j).getNodeType() == Node.ELEMENT_NODE){
                                 if(msEpr.referenceProperties == null)
-                                    msEpr.referenceProperties = new ArrayList<Element>();
-                                msEpr.referenceProperties.add((Element)refParams.item(i));
+                                    msEpr.referenceProperties.elements = new ArrayList<Element>();
+                                msEpr.referenceProperties.elements.add((Element)refParams.item(i));
                             }
                         }
                 }else if (child.getNamespaceURI().equals(W3CAddressingConstants.WSA_NAMESPACE_NAME) &&
@@ -397,15 +397,15 @@ public class EndpointReferenceUtil {
                         } else {
                             //its extensions in META-DATA and should be copied to ReferenceProperties in MS EPR
                             if (msEpr.referenceParameters == null)
-                                msEpr.referenceParameters = new ArrayList<Element>();
-                            msEpr.referenceParameters.add(elm);
+                                msEpr.referenceParameters.elements = new ArrayList<Element>();
+                            msEpr.referenceParameters.elements.add(elm);
                         }
                     }
                 }else{
                     //its extensions
                     if(msEpr.elements == null)
-                        msEpr.elements = new ArrayList<Element>();
-                    msEpr.elements.add((Element)child);
+                        msEpr.elements.elements = new ArrayList<Element>();
+                    msEpr.elements.elements.add((Element)child);
 
                 }
             }else if(nodes.item(i).getNodeType() == Node.ATTRIBUTE_NODE){

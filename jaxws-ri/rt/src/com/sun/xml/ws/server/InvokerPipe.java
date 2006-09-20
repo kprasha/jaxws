@@ -34,7 +34,7 @@ import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.EndpointReference;
-import javax.xml.ws.w3caddressing.W3CEndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.handler.MessageContext;
 import java.security.Principal;
 

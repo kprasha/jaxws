@@ -253,12 +253,16 @@ public class WSServiceDelegate extends WSService {
 
     //milestone 2
     public  <T> T getPort(QName qName, Class<T> aClass, WebServiceFeature... webServiceFeatures) {
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface, WebServiceFeature... features) {
+        throw new UnsupportedOperationException();
     }
 
     //milestone 2
     public  <T> T getPort(Class<T> aClass, WebServiceFeature... webServiceFeatures) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
      public <T> T getPort(Class<T> portInterface) throws WebServiceException {
@@ -296,7 +300,11 @@ public class WSServiceDelegate extends WSService {
 
     //milestone 2
     public <T> Dispatch<T> createDispatch(QName qName, Class<T> aClass, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode, WebServiceFeature... features) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -353,6 +361,10 @@ public class WSServiceDelegate extends WSService {
     //milestone 2.
     public Dispatch<Object> createDispatch(QName qName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
         return null;
+    }
+
+    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode, WebServiceFeature... features) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public QName getServiceName() {

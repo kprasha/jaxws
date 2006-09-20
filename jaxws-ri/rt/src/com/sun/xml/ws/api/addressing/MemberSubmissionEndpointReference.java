@@ -95,10 +95,10 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
     public Address addr;
 
     @XmlElement(name = "ReferenceProperties", namespace = MemberSubmissionEndpointReference.MSNS)
-    public List<Element> referenceProperties;
+    public Elements referenceProperties;
 
     @XmlElement(name = "ReferenceParameters", namespace = MemberSubmissionEndpointReference.MSNS)
-    public List<Element> referenceParameters;
+    public Elements referenceParameters;
 
     @XmlElement(name = "PortType", namespace = MemberSubmissionEndpointReference.MSNS)
     public AttributedQName portTypeName;
@@ -110,7 +110,7 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
     public Map<QName,String> attributes;
 
     @XmlAnyElement
-    public List<Element> elements;
+    public Elements elements;
 
     public static class Address {
         public Address() {
@@ -121,6 +121,14 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
         @XmlAnyAttribute
         public Map<QName, String> attributes;
     }
+
+    public static class Elements {
+        public Elements() {}
+
+        @XmlAnyElement
+        public List<Element> elements;
+    }
+
 
     public static class AttributedQName {
         public AttributedQName() {

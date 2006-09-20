@@ -35,7 +35,7 @@ import com.sun.xml.ws.util.RuntimeVersion;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.w3caddressing.W3CEndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.Map;
 
 /**
