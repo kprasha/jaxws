@@ -177,25 +177,6 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
         return _mark.readAsXMLStreamReader();
     }
 
-    public <T> T readAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
-        // TODO: How can the unmarshaller process this as a fragment?
-        try {
-            return (T)unmarshaller.unmarshal(_mark.readAsXMLStreamReader());
-        } catch (XMLStreamException e) {
-            throw new JAXBException(e);
-        } catch (Exception e) {
-            throw new JAXBException(e);
-        }
-    }
-
-    public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException {
-        try {
-            return bridge.unmarshal(_mark.readAsXMLStreamReader());
-        } catch (XMLStreamException e) {
-            throw new JAXBException(e);
-        }
-    }
-
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
             // TODO what about in-scope namespaces
@@ -238,13 +219,5 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
     private static String fixNull(String s) {
         if(s==null) return "";
         else        return s;
-    }
-
-    public String getStringContent() {
-        try {
-            return readHeader().getElementText();
-        } catch (XMLStreamException e) {
-            return null;
-        }
     }
 }
