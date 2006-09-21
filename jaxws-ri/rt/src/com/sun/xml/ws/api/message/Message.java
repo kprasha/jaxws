@@ -166,11 +166,11 @@ import java.util.UUID;
  *       message?
  * TODO: session?
  * TODO: Do we need to expose SOAPMessage explicitly?
- *       SOAPMessage could be the concrete representation but is it necessary to 
+ *       SOAPMessage could be the concrete representation but is it necessary to
  *       transform between different concrete representations?
  *       Perhaps this comes down to how use channels for creation and processing.
  * TODO: Do we need to distinguish better between creation and processing?
- *       Do we really need the requirement that a created message can be resused 
+ *       Do we really need the requirement that a created message can be resused
  *       for processing. Shall we bifurcate?
  *
  * TODO: SOAP version issue
@@ -239,7 +239,7 @@ public abstract class Message {
      * <p>
      * This method works only for a request. A pipe can determine an operation for a request,
      * and then keep it in a local variable to use it with a response, so there should be
-     * no need to find out operation from a response (besides, there might not be any response!).  
+     * no need to find out operation from a response (besides, there might not be any response!).
      *
      * @param boundPortType
      *      This represents the port for which this message is used.
@@ -274,7 +274,7 @@ public abstract class Message {
      * This method works only for a request. A pipe can determine a {@link Method}
      * for a request, and then keep it in a local variable to use it with a response,
      * so there should be no need to find out operation from a response (besides,
-     * there might not be any response!).  
+     * there might not be any response!).
      *
      * @param seiModel
      *      This represents the java model for the endpoint
@@ -499,7 +499,7 @@ public abstract class Message {
      * The implementation will not write
      * {@link XMLStreamWriter#writeStartDocument()}
      * nor
-     * {@link XMLStreamWriter#writeEndDocument()} 
+     * {@link XMLStreamWriter#writeEndDocument()}
      *
      * <p>
      * If there's no payload, this method is no-op.
@@ -630,7 +630,7 @@ public abstract class Message {
             //AddressingVersion version = binding.getAddressingVersion();
             //uuid = getHeaders().getMessageID(version);
             if (uuid == null) {
-                uuid = UUID.randomUUID().toString();
+                uuid = "uuid:" + UUID.randomUUID().toString();
             }
         }
         return uuid;
