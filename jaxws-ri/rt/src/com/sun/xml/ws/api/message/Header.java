@@ -297,8 +297,11 @@ public interface Header {
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException;
 
     /**
-     * Used to obtain value XYZ from a header that looks like "&lt;header&gt;XYZ&lt;/header&gt;".
-     * The primary use of this heaer for now is to access certain Addressing headers quickly.
+     * Used to obtain value XYZ from a header that looks like
+     * "&lt;header&gt;XYZ&lt;/header&gt;". The primary use of this header
+     * for now is to access certain Addressing headers quickly. It will
+     * be an error to call this method if the header has more structures
+     * in it.
      *
      * @return String content value
      */
