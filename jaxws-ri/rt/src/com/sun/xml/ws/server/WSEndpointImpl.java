@@ -204,7 +204,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         QName service = getServiceName(port);
         QName portQN = getPortName(port);
         return EndpointReferenceUtil.getEndpointReference(clazz, address, service,
-                portQN.getLocalPart(),portType);
+                (portQN == null?null:portQN.getLocalPart()),portType);
     }
 
     private QName getServiceName(WSDLPort wsdlport) {
