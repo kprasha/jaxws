@@ -91,4 +91,11 @@ public enum AddressingVersion {
     public String getNsUri() {
         return nsUri;
     }
+
+    public boolean equals(AddressingVersion that) {
+        if (that == null)
+            return false;
+
+        return nsUri.equals(that.nsUri);
+    }
 }

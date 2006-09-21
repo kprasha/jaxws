@@ -36,18 +36,12 @@ import com.sun.xml.ws.binding.SOAPBindingImpl;
  * @author Arun Gupta
  */
 public abstract class WsaPipe extends AbstractPipeImpl {
-    final SEIModel seiModel;
     final WSDLPort wsdlPort;
     final WSBinding binding;
     final WsaPipeHelper helper;
     final Pipe next;
 
     public WsaPipe(WSDLPort wsdlPort, WSBinding binding, Pipe next) {
-        this(null, wsdlPort, binding, next);
-    }
-
-    public WsaPipe(SEIModel seiModel, WSDLPort wsdlPort, WSBinding binding, Pipe next) {
-        this.seiModel = seiModel;
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         this.next = PipeCloner.clone(next);
@@ -57,15 +51,15 @@ public abstract class WsaPipe extends AbstractPipeImpl {
     private WsaPipeHelper getPipeHelper() {
         if (wsdlPort == null) {
             if (binding.hasFeature(MemberSubmissionAddressingFeature.ID))
-                return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(seiModel, wsdlPort, binding);
+                return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
             else
-                return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);
+                return new WsaPipeHelperImpl(wsdlPort, binding);
         }
 
         String ns = wsdlPort.getBinding().getAddressingVersion();
         if (ns != null && ns.equals(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME))
-            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(seiModel, wsdlPort, binding);
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
         else
-            return new WsaPipeHelperImpl(seiModel, wsdlPort, binding);
+            return new WsaPipeHelperImpl(wsdlPort, binding);
     }
 }

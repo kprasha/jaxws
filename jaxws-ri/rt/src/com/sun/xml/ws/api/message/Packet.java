@@ -21,8 +21,25 @@
  */
 package com.sun.xml.ws.api.message;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.LogicalMessageContext;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -31,19 +48,8 @@ import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.client.ResponseContext;
+import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.util.DistributedPropertySet;
-
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Represents a container of a {@link Message}.
@@ -485,15 +491,92 @@ public final class Packet extends DistributedPropertySet {
      * When a {@link Packet} for a reply is created, some properties need to be
      * copied over from a request to a response, and this method handles it correctly.
      *
+     * @deprecated
+     *      Use createClientResponse(Message) for client side and 
+     *      createServerResponse(Message, String) for server side response
+     *      creation.
+     *
      * @param msg
      *      The {@link Message} that represents a reply. Can be null.
      */
+    @Deprecated
     public Packet createResponse(Message msg) {
         Packet response = new Packet(this);
         response.setMessage(msg);
         return response;
     }
 
+    /**
+     * Creates a response {@link Packet} from a request packet ({@code this}).
+     *
+     * <p>
+     * When a {@link Packet} for a reply is created, some properties need to be
+     * copied over from a request to a response, and this method handles it correctly.
+     *
+     * @param msg
+     *      The {@link Message} that represents a reply. Can be null.
+     */
+    public Packet createClientResponse(Message msg) {
+        Packet response = new Packet(this);
+        response.setMessage(msg);
+        return response;
+    }
+
+    /**
+     * Creates a server-side response {@link Packet} from a request
+     * packet ({@code this}).
+     *
+     * @param msg The {@link Message} that represents a reply. Can be null.
+     * @param action Action for the server outbound message
+     * @param binding The response Binding
+     * @return response packet
+     */
+    public Packet createServerResponse(Message msg, String action, WSBinding binding) {
+        Packet r = createClientResponse(msg);
+        // TODO: fill in WS-Addressing headers
+
+        return r;
+    }
+
+    /**
+     * Creates a set of outbound WS-Addressing headers on the client.
+     * This method needs to be invoked right after such a Message is
+     * created which is error prone but so far only MEX, RM and JAX-WS
+     * creates a request so this ugliness is acceptable. If more components
+     * are identified using this, the we may revisit this.
+     *
+     * @param binding WSBinding
+     */
+    public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding) {
+        HeaderList hl = message.getHeaders();
+
+        WsaPipeHelper wsaHelper = getWsaHelper(wsdlPort, binding);
+        // wsa:To
+        StringHeader h = new StringHeader(wsaHelper.getToQName(), endpointAddress.toString());
+        hl.add(h);
+
+        // wsa:Action
+        String action = wsaHelper.getInputAction(this);
+        if (wsaHelper.isInputActionDefault(this) && (soapAction != null && !soapAction.equals(""))) {
+            action = soapAction;
+        }
+        if (action == null)
+            action = "http://fake.input.action";
+        soapAction = action;
+        h = new StringHeader(wsaHelper.getActionQName(), action);
+        hl.add(h);
+
+        // wsa:MessageId
+        h = new StringHeader(wsaHelper.getMessageIDQName(),
+                             "uuid:" + getMessage().getID(binding));
+    }
+
+    private WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
+        if (binding.getAddressingVersion().equals(W3CAddressingConstants.WSA_NAMESPACE_NAME))
+            return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
+        else
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+    }
 
 // completes TypedMap
     private static final PropertyMap model;

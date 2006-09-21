@@ -80,15 +80,14 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         }
     }
 
-    public WsaPipeHelperImpl(SEIModel seiModel, WSDLPort wsdlPort, WSBinding binding) {
+    public WsaPipeHelperImpl(WSDLPort wsdlPort, WSBinding binding) {
         this();
-        this.seiModel = seiModel;
         this.wsdlPort = wsdlPort;
         this.binding = binding;
     }
 
     @Override
-    protected final void getProblemActionDetail(String action, Element element) {
+    public final void getProblemActionDetail(String action, Element element) {
         ProblemAction pa = new ProblemAction(action);
         try {
             marshaller.marshal(pa, element);
@@ -98,7 +97,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     }
 
     @Override
-    protected final void getInvalidMapDetail(QName name, Element element) {
+    public final void getInvalidMapDetail(QName name, Element element) {
         ProblemHeaderQName phq = new ProblemHeaderQName(name);
         try {
             marshaller.marshal(phq, element);
@@ -108,12 +107,12 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     }
 
     @Override
-    protected final void getMapRequiredDetail(QName name, Element element) {
+    public final void getMapRequiredDetail(QName name, Element element) {
         getInvalidMapDetail(name, element);
     }
 
     @Override
-    protected final SOAPElement getSoap11FaultDetail() {
+    public final SOAPElement getSoap11FaultDetail() {
         try {
             if (binding == null)
                 return null;
@@ -206,117 +205,117 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     }
 
     @Override
-    protected String getNamespaceURI() {
+    public String getNamespaceURI() {
         return WSA_NAMESPACE_NAME;
     }
 
     @Override
-    protected QName getMessageIDQName() {
+    public QName getMessageIDQName() {
         return WSA_MESSAGEID_QNAME;
     }
 
     @Override
-    protected QName getFromQName() {
+    public QName getFromQName() {
         return WSA_FROM_QNAME;
     }
 
     @Override
-    protected QName getToQName() {
+    public QName getToQName() {
         return WSA_TO_QNAME;
     }
 
     @Override
-    protected QName getReplyToQName() {
+    public QName getReplyToQName() {
         return WSA_REPLYTO_QNAME;
     }
 
     @Override
-    protected QName getFaultToQName() {
+    public QName getFaultToQName() {
         return WSA_FAULTTO_QNAME;
     }
 
     @Override
-    protected QName getActionQName() {
+    public QName getActionQName() {
         return WSA_ACTION_QNAME;
     }
 
     @Override
-    protected QName getRelatesToQName() {
+    public QName getRelatesToQName() {
         return WSA_RELATESTO_QNAME;
     }
 
     @Override
-    protected QName getRelationshipTypeQName() {
+    public QName getRelationshipTypeQName() {
         return WSA_RELATIONSHIPTYPE_QNAME;
     }
 
     @Override
-    protected String getDefaultFaultAction() {
+    public String getDefaultFaultAction() {
         return WSA_DEFAULT_FAULT_ACTION;
     }
 
     @Override
-    protected QName getIsReferenceParameterQName() {
+    public QName getIsReferenceParameterQName() {
         return WSA_REFERENCEPARAMETERS_QNAME;
     }
 
     @Override
-    protected QName getMapRequiredQName() {
+    public QName getMapRequiredQName() {
         return MAP_REQUIRED_QNAME;
     }
 
     @Override
-    protected String getMapRequiredText() {
+    public String getMapRequiredText() {
         return MAP_REQUIRED_TEXT;
     }
 
     @Override
-    protected QName getActionNotSupportedQName() {
+    public QName getActionNotSupportedQName() {
         return ACTION_NOT_SUPPORTED_QNAME;
     }
 
     @Override
-    protected String getActionNotSupportedText() {
+    public String getActionNotSupportedText() {
         return ACTION_NOT_SUPPORTED_TEXT;
     }
 
     @Override
-    protected QName getFaultDetailQName() {
+    public QName getFaultDetailQName() {
         return FAULT_DETAIL_QNAME;
     }
 
     @Override
-    protected QName getInvalidMapQName() {
+    public QName getInvalidMapQName() {
         return INVALID_MAP_QNAME;
     }
 
     @Override
-    protected String getInvalidMapText() {
+    public String getInvalidMapText() {
         return INVALID_MAP_TEXT;
     }
 
     @Override
-    protected AddressingProperties toReply(AddressingProperties ap) {
+    public AddressingProperties toReply(AddressingProperties ap) {
         return toReplyOrFault(ap, false);
     }
 
     @Override
-    protected AddressingProperties toFault(AddressingProperties ap) {
+    public AddressingProperties toFault(AddressingProperties ap) {
         return toReplyOrFault(ap, true);
     }
 
     @Override
-    protected String getAnonymousURI() {
+    public String getAnonymousURI() {
         return WSA_ANONYMOUS_ADDRESS;
     }
 
     @Override
-    protected String getRelationshipType() {
+    public String getRelationshipType() {
         return WSA_RELATIONSHIP_REPLY;
     }
 
     @Override
-    protected void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion) {
+    public void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion) {
         if (ap.getRelatesTo() != null && ap.getRelatesTo().size() > 0) {
             for (Relationship rel : ap.getRelatesTo()) {
                 hl.add(new RelatesToHeader(getRelatesToQName(), rel.getId(), rel.getType()));
@@ -325,32 +324,32 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     }
 
     @Override
-    protected void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion) {
+    public void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion) {
         RelationshipImpl reli = (RelationshipImpl)rel;
         hl.add(Headers.create(soapVersion, marshaller, getRelatesToQName(), reli));
     }
 
-    protected Relationship newRelationship(Relationship r) {
+    public Relationship newRelationship(Relationship r) {
         return new RelationshipImpl(r.getId(), r.getType());
     }
 
-    protected Relationship newRelationship(String mid) {
+    public Relationship newRelationship(String mid) {
         return new RelationshipImpl(mid);
     }
 
-    protected EndpointReference newEndpointReference() {
+    public EndpointReference newEndpointReference() {
         return new EndpointReferenceImpl();
     }
 
-    protected QName getInvalidCardinalityQName() {
+    public QName getInvalidCardinalityQName() {
         return W3CAddressingConstants.INVALID_CARDINALITY;
     }
 
-    protected String getNoneURI() {
+    public String getNoneURI() {
         return W3CAddressingConstants.WSA_NONE_ADDRESS;
     }
 
-    protected String getAddress(EndpointReference epr) {
+    public String getAddress(EndpointReference epr) {
         if (epr == null)
             return null;
         else

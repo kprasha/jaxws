@@ -56,6 +56,7 @@ import com.sun.xml.ws.addressing.model.Relationship;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
@@ -89,7 +90,7 @@ public abstract class WsaPipeHelper {
         ap.setTo(to.toString());
 
         // wsa:MessageID
-        ap.setMessageID("uuid:" + UUID.randomUUID().toString());
+        ap.setMessageID(packet.getMessage().getID(binding));
 
         // wsa:ReplyTo
         // null or "true" is equivalent to request/response MEP
@@ -505,38 +506,6 @@ public abstract class WsaPipeHelper {
         }
     }
 
-/*
-    private AddressingProperties readInboundHeaders(Packet packet) {
-        StringBuffer mid = new StringBuffer();
-        return readInboundHeaders(packet, mid);
-    }
-
-    public final Packet readClientInboundHeaders(Packet packet) {
-        AddressingProperties ap = readInboundHeaders(packet);
-
-        if (ap != null) {
-            Set<String> set = packet.getHandlerScopePropertyNames(true);
-            if (set.contains(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES))
-                set.remove(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES);
-
-            packet.invocationProperties.put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, ap);
-        }
-
-        return packet;
-    }
-
-    private static QName tagname(Message message) {
-        SOAPMessage sm;
-        try {
-            sm = message.readAsSOAPMessage();
-            Node detail = sm.getSOAPBody().getFault().getDetail().getFirstChild();
-            return new QName(detail.getNamespaceURI(), detail.getLocalName());
-        } catch (SOAPException e) {
-            throw new AddressingException(e);
-        }
-    }
-*/
-
     private static Element unmarshalRefp(Header h) {
         try {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -574,7 +543,7 @@ public abstract class WsaPipeHelper {
         }
     }
 
-    private String getInputAction(Packet packet) {
+    public String getInputAction(Packet packet) {
         String action = null;
 
         if (wsdlPort != null) {
@@ -592,7 +561,7 @@ public abstract class WsaPipeHelper {
         return action;
     }
 
-    private boolean isInputActionDefault(Packet packet) {
+    public boolean isInputActionDefault(Packet packet) {
         if (wsdlPort == null)
             return false;
 
@@ -735,41 +704,41 @@ public abstract class WsaPipeHelper {
     protected void checkAnonymousSemantics(WSDLBoundOperation wbo, AddressingProperties ap) {
     }
 
-    protected abstract void getProblemActionDetail(String action, Element element);
-    protected abstract void getInvalidMapDetail(QName name, Element element);
-    protected abstract void getMapRequiredDetail(QName name, Element element);
-    protected abstract SOAPElement getSoap11FaultDetail();
+    public abstract void getProblemActionDetail(String action, Element element);
+    public abstract void getInvalidMapDetail(QName name, Element element);
+    public abstract void getMapRequiredDetail(QName name, Element element);
+    public abstract SOAPElement getSoap11FaultDetail();
 
-    protected abstract String getNamespaceURI();
-    protected abstract QName getMessageIDQName();
-    protected abstract QName getFromQName();
-    protected abstract QName getToQName();
-    protected abstract QName getReplyToQName();
-    protected abstract QName getFaultToQName();
-    protected abstract QName getActionQName();
-    protected abstract QName getRelatesToQName();
-    protected abstract QName getRelationshipTypeQName();
-    protected abstract QName getFaultDetailQName();
-    protected abstract String getDefaultFaultAction();
-    protected abstract QName getIsReferenceParameterQName();
-    protected abstract QName getMapRequiredQName();
-    protected abstract String getMapRequiredText();
-    protected abstract QName getActionNotSupportedQName();
-    protected abstract String getActionNotSupportedText();
-    protected abstract QName getInvalidMapQName();
-    protected abstract String getInvalidMapText();
-    protected abstract AddressingProperties toReply(AddressingProperties ap);
-    protected abstract AddressingProperties toFault(AddressingProperties ap);
-    protected abstract String getAnonymousURI();
-    protected abstract String getRelationshipType();
-    protected abstract void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion);
-    protected abstract void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion);
-    protected abstract Relationship newRelationship(Relationship r);
-    protected abstract Relationship newRelationship(String mid);
-    protected abstract EndpointReference newEndpointReference();
-    protected abstract QName getInvalidCardinalityQName();
-    protected abstract String getNoneURI();
-    protected abstract String getAddress(EndpointReference epr);
+    public abstract String getNamespaceURI();
+    public abstract QName getMessageIDQName();
+    public abstract QName getFromQName();
+    public abstract QName getToQName();
+    public abstract QName getReplyToQName();
+    public abstract QName getFaultToQName();
+    public abstract QName getActionQName();
+    public abstract QName getRelatesToQName();
+    public abstract QName getRelationshipTypeQName();
+    public abstract QName getFaultDetailQName();
+    public abstract String getDefaultFaultAction();
+    public abstract QName getIsReferenceParameterQName();
+    public abstract QName getMapRequiredQName();
+    public abstract String getMapRequiredText();
+    public abstract QName getActionNotSupportedQName();
+    public abstract String getActionNotSupportedText();
+    public abstract QName getInvalidMapQName();
+    public abstract String getInvalidMapText();
+    public abstract AddressingProperties toReply(AddressingProperties ap);
+    public abstract AddressingProperties toFault(AddressingProperties ap);
+    public abstract String getAnonymousURI();
+    public abstract String getRelationshipType();
+    public abstract void writeRelatesTo(AddressingProperties ap, HeaderList hl, SOAPVersion soapVersion);
+    public abstract void writeRelatesTo(Relationship rel, HeaderList hl, SOAPVersion soapVersion);
+    public abstract Relationship newRelationship(Relationship r);
+    public abstract Relationship newRelationship(String mid);
+    public abstract EndpointReference newEndpointReference();
+    public abstract QName getInvalidCardinalityQName();
+    public abstract String getNoneURI();
+    public abstract String getAddress(EndpointReference epr);
 
 
     protected static final DocumentBuilder db;
@@ -787,7 +756,6 @@ public abstract class WsaPipeHelper {
     protected Unmarshaller unmarshaller;
     protected Marshaller marshaller;
 
-    protected SEIModel seiModel;
     protected WSDLPort wsdlPort;
     protected WSBinding binding;
     private WSDLBoundOperation wbo;

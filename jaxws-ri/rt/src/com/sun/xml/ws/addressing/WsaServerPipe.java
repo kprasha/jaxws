@@ -38,12 +38,12 @@ import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
  * @author Arun Gupta
  */
 public class WsaServerPipe extends WsaPipe {
-    public WsaServerPipe(SEIModel seiModel, WSDLPort wsdlPort, WSBinding binding, Pipe next) {
-        super(seiModel, wsdlPort, binding, next);
+    public WsaServerPipe(WSDLPort wsdlPort, WSBinding binding, Pipe next) {
+        super(wsdlPort, binding, next);
     }
 
     public Pipe copy(PipeCloner cloner) {
-        WsaServerPipe that = new WsaServerPipe(seiModel, wsdlPort, binding, next);
+        WsaServerPipe that = new WsaServerPipe(wsdlPort, binding, next);
         cloner.add(this, that);
 
         return that;

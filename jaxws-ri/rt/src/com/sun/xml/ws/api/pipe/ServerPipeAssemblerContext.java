@@ -131,14 +131,14 @@ public final class ServerPipeAssemblerContext {
             if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) )//||
                     //kw todo: AddressingFeature
                  //  binding.hasFeature())
-                return new WsaServerPipe(seiModel, wsdlModel, binding, next);
+                return new WsaServerPipe(wsdlModel, binding, next);
             else
                 return next;
         }
 
         WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
         if (impl.isAddressingEnabled())
-            return new WsaServerPipe(seiModel, wsdlModel, binding, next);
+            return new WsaServerPipe(wsdlModel, binding, next);
         else
             return next;
     }
