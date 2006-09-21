@@ -32,18 +32,30 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.ws.*;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
 
 /**
+ * The entry point to the JAX-WS RI from the JAX-WS API.
+ *
  * @author WS Development Team
  */
 public class ProviderImpl extends Provider {
 
     private final static JAXBContext eprjc = getEPRJaxbContext();
+
+    /**
+     * Convenient singleton instance.
+     */
+    public static final ProviderImpl INSTANCE = new ProviderImpl();
 
     @Override
     public Endpoint createEndpoint(String bindingId, Object implementor) {

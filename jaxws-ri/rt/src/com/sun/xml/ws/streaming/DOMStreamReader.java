@@ -22,21 +22,28 @@
 
 package com.sun.xml.ws.streaming;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Collections;
-
-import org.w3c.dom.*;
-import static org.w3c.dom.Node.*;
-import javax.xml.namespace.QName;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.Location;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import com.sun.xml.ws.util.xml.DummyLocation;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import static org.w3c.dom.Node.*;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.ProcessingInstruction;
+
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -647,9 +654,8 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
     private static void displayDOM(Node node, java.io.OutputStream ostream) {
         try {
             System.out.println("\n====\n");
-            javax.xml.transform.TransformerFactory.newInstance().newTransformer().transform(
-                new javax.xml.transform.dom.DOMSource(node),
-                new javax.xml.transform.stream.StreamResult(ostream));
+            XmlUtil.newTransformer().transform(
+                new DOMSource(node), new StreamResult(ostream));
             System.out.println("\n====\n");
         }
         catch (Exception e) {
