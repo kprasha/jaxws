@@ -62,7 +62,7 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
 
     private final boolean _retainState;
     
-    private final ContentType _defaultContentType;
+    protected final ContentType _defaultContentType;
     
     /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion, boolean retainState, String mimeType) {
         _soapCodec = StreamSOAPCodec.create(soapVersion);
@@ -113,16 +113,8 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
 
     protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark);
     
+    protected abstract ContentType getContentType(String soapAction);
     
-    private ContentType getContentType(String soapAction) {
-        if (soapAction == null) {
-            return _defaultContentType;
-        } else {
-            return new ContentTypeImpl(
-                    _defaultContentType.getContentType() + ";action=\""+soapAction+"\"");
-        }
-    }
-
     private XMLStreamWriter getXMLStreamWriter(OutputStream out) {
         if (_serializer != null) {
             _serializer.setOutputStream(out);
