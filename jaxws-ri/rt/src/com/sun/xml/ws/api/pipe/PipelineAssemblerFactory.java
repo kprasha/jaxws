@@ -84,7 +84,7 @@ public abstract class PipelineAssemblerFactory {
 
         // default binding IDs that are known
         // TODO: replace this with proper ones
-        return new com.sun.xml.ws.client.dispatch.StandalonePipeAssembler();
+        return new com.sun.xml.ws.util.pipe.StandalonePipeAssembler();
     }
 
     private static final Logger logger = Logger.getLogger(PipelineAssemblerFactory.class.getName());

@@ -23,7 +23,7 @@
 /*
  * Copyright (c) 2006 Your Corporation. All Rights Reserved.
  */
-package com.sun.xml.ws.client.dispatch;
+package com.sun.xml.ws.util.pipe;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;

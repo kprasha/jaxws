@@ -25,7 +25,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.client.dispatch.StandalonePipeAssembler;
+import com.sun.xml.ws.util.pipe.StandalonePipeAssembler;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.util.ServiceFinder;
 
