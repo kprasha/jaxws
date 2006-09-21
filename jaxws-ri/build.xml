@@ -622,10 +622,10 @@ major-version=${release.impl.version}
   </target>
 
   <target name="integrate-FastInfoset-hudson" depends="prepare"
-          description="integrate the last successful FastInfoset Hudson build">
-    <get src="http://kohsuke.sfbay/hudson/job/fi/lastSuccessfulBuild/artifact/fi/FastInfoset/dist/FastInfoset.jar"
+          description="integrate the last successful FastInfoset 1.2 Hudson build">
+    <get src="http://kohsuke.sfbay/hudson/job/fi-1.2/lastSuccessfulBuild/artifact/fi/FastInfoset/dist/FastInfoset.jar"
          dest="lib/FastInfoset.jar" />
-    <get src="http://kohsuke.sfbay/hudson/job/fi/lastSuccessfulBuild/artifact/fi/FastInfoset/dist/FastInfoset.src.zip"
+    <get src="http://kohsuke.sfbay/hudson/job/fi-1.2/lastSuccessfulBuild/artifact/fi/FastInfoset/dist/FastInfoset.src.zip"
          dest="lib/FastInfoset.src.zip" />
   </target>
 
