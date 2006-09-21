@@ -95,9 +95,8 @@ public class EndpointReferenceUtil {
                         MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                //TODO: write ReferenceProperties
-                //TODO: write ReferenceParameters
-                writeMSMetaData(writer, service, port, portType);
+                //TODO: write ReferenceProperties                
+                writeMSMetaData(writer,address, service, port, portType);
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
@@ -149,28 +148,25 @@ public class EndpointReferenceUtil {
             writer.writeNamespace(servicePrefix, service.getNamespaceURI());
             writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
             writer.writeEndElement();
-
             //Inline the wsdl
-            writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
-                    WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
-                    WSDLConstants.NS_WSDL);
-            writer.writeNamespace(WSDLConstants.PREFIX_NS_WSDL, WSDLConstants.NS_WSDL);
-            writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
-                    WSDLConstants.QNAME_IMPORT.getLocalPart(),
-                    WSDLConstants.NS_WSDL);
-            writer.writeAttribute("namespace", service.getNamespaceURI());
-            writer.writeAttribute("location", eprAddress + "?wsdl");
-            writer.writeEndElement();
-            writer.writeEndElement();
+            writeWsdl(writer, service, eprAddress);
 
             writer.writeEndElement();
         }
     }
 
-    private static void writeMSMetaData(XMLStreamWriter writer,
+    private static void writeMSMetaData(XMLStreamWriter writer, String eprAddress,
                                         QName service,
                                         String port,
                                         QName portType) throws XMLStreamException {
+        //Write ReferenceParameters
+        writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                MemberSubmissionAddressingConstants.WSA_REFERENCEPARAMETERS_NAME,
+                MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+        //Inline the wsdl
+        writeWsdl(writer, service, eprAddress);
+        writer.writeEndElement();
+
         //Write Interface info
         writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
                 MemberSubmissionAddressingConstants.WSA_PORTTYPE_NAME,
@@ -197,6 +193,20 @@ public class EndpointReferenceUtil {
                 port);
         writer.writeNamespace(servicePrefix, service.getNamespaceURI());
         writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+        writer.writeEndElement();
+    }
+
+    private static void writeWsdl(XMLStreamWriter writer, QName service, String eprAddress) throws XMLStreamException {
+        writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
+                WSDLConstants.NS_WSDL);
+        writer.writeNamespace(WSDLConstants.PREFIX_NS_WSDL, WSDLConstants.NS_WSDL);
+        writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                WSDLConstants.QNAME_IMPORT.getLocalPart(),
+                WSDLConstants.NS_WSDL);
+        writer.writeAttribute("namespace", service.getNamespaceURI());
+        writer.writeAttribute("location", eprAddress + "?wsdl");
+        writer.writeEndElement();
         writer.writeEndElement();
     }
 
