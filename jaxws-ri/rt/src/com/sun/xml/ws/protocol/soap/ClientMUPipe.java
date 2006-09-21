@@ -39,7 +39,10 @@ import java.util.Set;
 
 public class ClientMUPipe extends MUPipe {
 
-    // TODO remove after moving to fiber
+    /**
+     * @deprecated
+     * TODO: remove after a little more of the runtime supports to Fiber
+     */
     private Pipe next;
 
     public ClientMUPipe(WSBinding binding, Pipe next) {
@@ -59,7 +62,10 @@ public class ClientMUPipe extends MUPipe {
      * @throws SOAPFaultException
      *         if all the headers in the packet are not understood, throws SOAPFaultException
      */
-    // TODO remove after moving to fiber
+    /**
+     * @deprecated
+     * TODO: remove after a little more of the runtime supports to Fiber
+     */
     public Packet process(Packet packet) {
         Packet reply = next.process(packet);
         //Oneway
@@ -87,7 +93,6 @@ public class ClientMUPipe extends MUPipe {
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
             return super.processResponse(response);
         }
-        // TODO should we convert to fault message
         throw createMUSOAPFaultException(misUnderstoodHeaders);
     }
 
