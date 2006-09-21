@@ -38,19 +38,13 @@ import javax.xml.stream.XMLStreamReader;
  * @author Paul.Sandoz@Sun.Com
  */
 final class FastInfosetStreamSOAP12Codec extends FastInfosetStreamSOAPCodec {
-    public static final ContentTypeImpl defaultContentType =
-            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12);
-
     /*package*/ FastInfosetStreamSOAP12Codec(boolean retainState) {
-        super(SOAPVersion.SOAP_12, retainState);
+        super(SOAPVersion.SOAP_12, retainState, 
+                (retainState) ? FastInfosetMIMETypes.STATEFUL_SOAP_12 : FastInfosetMIMETypes.SOAP_12);
     }
 
     private FastInfosetStreamSOAP12Codec(FastInfosetStreamSOAPCodec that) {
         super(that);
-    }
-
-    public String getMimeType() {
-        return FastInfosetMIMETypes.SOAP_12;
     }
     
     public Codec copy() {
@@ -60,13 +54,4 @@ final class FastInfosetStreamSOAP12Codec extends FastInfosetStreamSOAPCodec {
     protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
         return new StreamHeader12(reader, mark);
     }
-
-    protected ContentType getContentType(String soapAction) {
-        if (soapAction == null) {
-            return defaultContentType;
-        } else {
-            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_12 + ";action=\""+soapAction+"\"");
-        }
-    }
-
 }

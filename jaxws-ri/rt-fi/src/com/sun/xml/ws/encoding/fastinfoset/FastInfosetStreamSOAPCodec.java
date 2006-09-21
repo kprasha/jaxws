@@ -23,8 +23,6 @@ package com.sun.xml.ws.encoding.fastinfoset;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
-import com.sun.xml.fastinfoset.vocab.ParserVocabulary;
-import com.sun.xml.fastinfoset.vocab.SerializerVocabulary;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
@@ -32,6 +30,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.ws.encoding.ContentTypeImpl;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -59,20 +58,27 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
     
     private StAXDocumentSerializer _serializer;
     
-    private StreamSOAPCodec _soapCodec;
+    private final StreamSOAPCodec _soapCodec;
 
-    private boolean _retainState;
+    private final boolean _retainState;
     
-    /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion, boolean retainState) {
+    private final ContentType _defaultContentType;
+    
+    /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion, boolean retainState, String mimeType) {
         _soapCodec = StreamSOAPCodec.create(soapVersion);
         _retainState = retainState;
+        _defaultContentType = new ContentTypeImpl(mimeType);
     }
 
     /* package */ FastInfosetStreamSOAPCodec(FastInfosetStreamSOAPCodec that) {
         this._soapCodec = that._soapCodec.copy();
         this._retainState = that._retainState;
+        this._defaultContentType = that._defaultContentType;
     }
 
+    public String getMimeType() {
+        return _defaultContentType.getContentType();
+    }
 
     public ContentType getStaticContentType(Packet packet) {
         return getContentType(packet.soapAction);
@@ -105,12 +111,18 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
         throw new UnsupportedOperationException();
     }
 
-    
-    protected abstract ContentType getContentType(String soapAction);
-
     protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark);
     
     
+    private ContentType getContentType(String soapAction) {
+        if (soapAction == null) {
+            return _defaultContentType;
+        } else {
+            return new ContentTypeImpl(
+                    _defaultContentType.getContentType() + ";action=\""+soapAction+"\"");
+        }
+    }
+
     private XMLStreamWriter getXMLStreamWriter(OutputStream out) {
         if (_serializer != null) {
             _serializer.setOutputStream(out);

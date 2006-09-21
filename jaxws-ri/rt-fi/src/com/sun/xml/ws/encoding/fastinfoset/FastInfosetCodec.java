@@ -51,19 +51,22 @@ import org.jvnet.fastinfoset.FastInfosetSource;
  * @author Paul Sandoz
  */
 public class FastInfosetCodec implements Codec {
-    private static final ContentType contentType = new ContentTypeImpl("application/fastinfoset");
-
     private StAXDocumentParser _parser;
     
     private StAXDocumentSerializer _serializer;
     
-    private boolean _retainState;
+    private final boolean _retainState;
     
-    /* package */ FastInfosetCodec(boolean retainState) {
+    private final ContentType _contentType;
+    
+    /* package */ FastInfosetCodec(boolean retainState) {        
+        _retainState = retainState;
+        _contentType = (retainState) ? new ContentTypeImpl(FastInfosetMIMETypes.STATEFUL_INFOSET) :
+            new ContentTypeImpl(FastInfosetMIMETypes.INFOSET);
     }
 
     public String getMimeType() {
-        return contentType.getContentType();
+        return _contentType.getContentType();
     }
 
     public Codec copy() { 
@@ -71,7 +74,7 @@ public class FastInfosetCodec implements Codec {
     }
     
     public ContentType getStaticContentType(Packet packet) {
-        return contentType;
+        return _contentType;
     }
 
     public ContentType encode(Packet packet, OutputStream out) {
@@ -87,7 +90,7 @@ public class FastInfosetCodec implements Codec {
             }
         }
         
-        return contentType;
+        return _contentType;
     }
 
     public ContentType encode(Packet packet, WritableByteChannel buffer) {

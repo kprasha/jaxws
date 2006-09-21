@@ -39,17 +39,14 @@ import javax.xml.stream.XMLStreamReader;
  */
 final class FastInfosetStreamSOAP11Codec extends FastInfosetStreamSOAPCodec {
     /*package*/ FastInfosetStreamSOAP11Codec(boolean retainState) {
-        super(SOAPVersion.SOAP_11, retainState);
+        super(SOAPVersion.SOAP_11, retainState,
+                (retainState) ? FastInfosetMIMETypes.STATEFUL_SOAP_11 : FastInfosetMIMETypes.SOAP_11);
     }
 
     private FastInfosetStreamSOAP11Codec(FastInfosetStreamSOAP11Codec that) {
         super(that);
     }
 
-    public String getMimeType() {
-        return FastInfosetMIMETypes.SOAP_11;
-    }
-    
     public Codec copy() {
         return new FastInfosetStreamSOAP11Codec(this);
     }
@@ -57,16 +54,4 @@ final class FastInfosetStreamSOAP11Codec extends FastInfosetStreamSOAPCodec {
     protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
         return new StreamHeader11(reader, mark);
     }
-
-    public static final ContentTypeImpl defaultContentType =
-            new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, "");
-
-    protected ContentType getContentType(String soapAction) {
-        if (soapAction == null || soapAction.length() == 0) {
-            return defaultContentType;
-        } else {
-            return new ContentTypeImpl(FastInfosetMIMETypes.SOAP_11, soapAction);
-        }
-    }
-
 }
