@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.Binding;
@@ -63,6 +64,19 @@ public interface WSBinding extends Binding {
      *      binding shall be handled by {@link Pipe}s.
      */
     SOAPVersion getSOAPVersion();
+
+    /**
+     * Gets the WS-Addressing version of this binding.
+     *
+     * TODO: clarify what to do with XML/HTTP binding
+     *
+     * @return
+     *      If the binding is using SOAP and WS-Addressing is enabled,
+     *      this method returns a {@link AddressingVersion} constant.
+     *      If binding is not using SOAP or WS-Addressing is not enabled,
+     *      this method returns null.
+     */
+    AddressingVersion getAddressingVersion();
 
     /**
      * Creates a new {@link Codec} for this binding.

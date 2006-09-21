@@ -26,11 +26,15 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
+
 import java.util.*;
 
 /**
@@ -91,6 +95,15 @@ public abstract class BindingImpl implements WSBinding {
 
     public final SOAPVersion getSOAPVersion() {
         return bindingId.getSOAPVersion();
+    }
+
+    public AddressingVersion getAddressingVersion() {
+        if (hasFeature(AddressingFeature.ID))
+            return AddressingVersion.W3C;
+        if (hasFeature(MemberSubmissionAddressingFeature.ID))
+            return AddressingVersion.MEMBER;
+
+        return null;
     }
 
     public final @NotNull Codec createCodec() {
