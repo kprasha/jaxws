@@ -21,35 +21,22 @@
  */
 package com.sun.tools.ws.processor.modeler.wsdl;
 
-import static com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase.*;
 import com.sun.tools.ws.processor.config.ModelInfo;
+import static com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase.getExtensionOfType;
+import com.sun.tools.ws.wsdl.document.*;
+import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBinding;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-
+import com.sun.tools.ws.wsdl.document.soap.SOAP12Binding;
+import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
+import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
 import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import com.sun.tools.ws.wsdl.document.MessagePart;
-import com.sun.tools.ws.wsdl.document.Operation;
-import com.sun.tools.ws.wsdl.document.Message;
-import com.sun.tools.ws.wsdl.document.PortType;
-import com.sun.tools.ws.wsdl.document.Port;
-import com.sun.tools.ws.wsdl.document.Service;
-import com.sun.tools.ws.wsdl.document.WSDLDocument;
-import com.sun.tools.ws.wsdl.document.Binding;
-import com.sun.tools.ws.wsdl.document.BindingOperation;
-import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBinding;
-import com.sun.tools.ws.wsdl.document.soap.*;
+import java.util.*;
 
 
 /**
@@ -61,26 +48,69 @@ public class PseudoSchemaBuilder {
 
     private final StringWriter buf = new StringWriter();
     private final WSDLDocument wsdlDocument;
-    private final ModelInfo modelInfo;
     private WSDLModeler wsdlModeler;
     private final List<InputSource> schemas = new ArrayList<InputSource>();
     private final HashMap<QName, Port> bindingNameToPortMap = new HashMap<QName, Port>();
+    private static final String w3ceprSchemaBinding = "<bindings\n" +
+            "  xmlns=\"http://java.sun.com/xml/ns/jaxb\"\n" +
+            "  xmlns:wsa=\"http://www.w3.org/2005/08/addressing\"\n" +
+            "  version=\"2.1\">\n" +
+            "  \n" +
+            "  <bindings scd=\"x-schema::wsa\" if-exists=\"true\">\n" +
+            "    <schemaBindings map=\"false\" />\n" +
+            "    <bindings scd=\"wsa:EndpointReference\">\n" +
+            "      <class ref=\"javax.xml.ws.wsaddressing.W3CEndpointReference\"/>\n" +
+            "    </bindings>\n" +
+            "    <bindings scd=\"~wsa:EndpointReferenceType\">\n" +
+            "      <class ref=\"javax.xml.ws.wsaddressing.W3CEndpointReference\"/>\n" +
+            "    </bindings>\n" +
+            "  </bindings>\n" +
+            "</bindings>";
+
+    private static final String memberSubmissionEPR = "<bindings\n" +
+            "  xmlns=\"http://java.sun.com/xml/ns/jaxb\"\n" +
+            "  xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"\n" +
+            "  version=\"2.1\">\n" +
+            "  \n" +
+            "  <bindings scd=\"x-schema::wsa\" if-exists=\"true\">\n" +
+            "    <schemaBindings map=\"false\" />\n" +
+            "    <bindings scd=\"wsa:EndpointReference\">\n" +
+            "      <class ref=\"com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference\"/>\n" +
+            "    </bindings>\n" +
+            "    <bindings scd=\"~wsa:EndpointReferenceType\">\n" +
+            "      <class ref=\"com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference\"/>\n" +
+            "    </bindings>\n" +
+            "  </bindings>\n" +
+            "</bindings>";
+
+    private final static String sysId = "http://dummy.pseudo-schema#schema";
 
     public static List<InputSource> build(WSDLModeler wsdlModeler, ModelInfo modelInfo) {
-        PseudoSchemaBuilder b = new PseudoSchemaBuilder(wsdlModeler.document, modelInfo);
+        PseudoSchemaBuilder b = new PseudoSchemaBuilder(wsdlModeler.document);
         b.wsdlModeler = wsdlModeler;
-        JAXBModelBuilder analyzer = wsdlModeler.getJAXBModelBuilder();
         b.build();
-        for(int i = 0; i < b.schemas.size(); i++){
+        int i;
+        for(i = 0; i < b.schemas.size(); i++){
             InputSource is = b.schemas.get(i);
-            is.setSystemId("http://dummy.pseudo-schema#schema"+(i+1));
+            is.setSystemId(sysId+(i + 1));
         }
+        //add w3c EPR binding
+        InputSource is = new InputSource(new ByteArrayInputStream(w3ceprSchemaBinding.getBytes()));
+        is.setSystemId(sysId+(i +1));
+        b.schemas.add(is);
+
+
+        //TODO: uncomment after JAXB fixes the issue related to passing multiples of such bindings
+        //add member submission EPR binding
+//        InputSource is1 = new InputSource(new ByteArrayInputStream(memberSubmissionEPR.getBytes()));
+//        is1.setSystemId(sysId+(++i + 1));
+//        b.schemas.add(is1);
+
         return b.schemas;
     }
 
-    private PseudoSchemaBuilder(WSDLDocument _wsdl, ModelInfo _modelInfo) {
+    private PseudoSchemaBuilder(WSDLDocument _wsdl) {
         this.wsdlDocument = _wsdl;
-        this.modelInfo = _modelInfo;
     }
 
     private void build() {
@@ -132,8 +162,6 @@ public class PseudoSchemaBuilder {
             Operation operation = (Operation)boundedOps.iterator().next();
 
             // No pseudo schema required for doc/lit
-            SOAPStyle bindingStyle = soapBinding.getStyle();
-            SOAPStyle operationStyle = (soapOperation != null) ? soapOperation.getStyle() : bindingStyle;
             if(wsdlModeler.isAsync(portType, operation)){
                 buildAsync(portType, operation, bindingOperation);
             }
@@ -155,7 +183,7 @@ public class PseudoSchemaBuilder {
         if(outputMessage != null){
             List<MessagePart> allParts = new ArrayList<MessagePart>(outputMessage.getParts());
             if(allParts.size() > 1)
-                build(getOperationName(portType, operationName, bindingOperation.getOutput()), allParts);
+                build(getOperationName(operationName), allParts);
         }
 
     }
@@ -240,7 +268,7 @@ public class PseudoSchemaBuilder {
         }
     }
 
-    private QName getOperationName(PortType portType, String operationName, TWSDLExtensible binding){
+    private QName getOperationName(String operationName){
         if(operationName == null)
             return null;
 //        String namespaceURI = wsdlDocument.getDefinitions().getTargetNamespaceURI()+"?"+portType.getName()+"?" + operationName;
@@ -264,7 +292,4 @@ public class PseudoSchemaBuilder {
         buf.write(MessageFormat.format(msg,args));
         buf.write('\n');
     }
-
-    private static final Set<QName> nspaceToPackageSchema = new HashSet<QName>();
-    private static int  schemaCounter;
 }
