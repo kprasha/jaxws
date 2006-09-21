@@ -27,6 +27,7 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -602,7 +603,7 @@ public abstract class Message {
     // and move the discussion about life scope there.
     public abstract Message copy();
 
-    private UUID uuid;
+    private String uuid;
 
     /**
      * Retuns a unique id for the message. The id can be used for various things,
@@ -623,17 +624,14 @@ public abstract class Message {
      *
      * @return unique id for the message
      */
-    public @NotNull UUID getID(@NotNull WSBinding binding) {
+    public @NotNull String getID(@NotNull WSBinding binding) {
         if (uuid == null) {
-            // TODO how do we know if addressing is enabled
-            for(Header header: this.getHeaders()) {
-                String localPart = header.getLocalPart();
-                String nsUri = header.getNamespaceURI();
-                // check with MessageID header and return UUID
-                // TODO how to get MessageID QName
-                //uuid = UUID.fromString();
+            // TODO
+            //AddressingVersion version = binding.getAddressingVersion();
+            //uuid = getHeaders().getMessageID(version);
+            if (uuid == null) {
+                uuid = UUID.randomUUID().toString();
             }
-            uuid = UUID.randomUUID();
         }
         return uuid;
     }
