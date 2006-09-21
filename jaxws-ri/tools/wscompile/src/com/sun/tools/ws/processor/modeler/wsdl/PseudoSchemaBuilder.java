@@ -96,7 +96,7 @@ public class PseudoSchemaBuilder {
         }
         //add w3c EPR binding
         InputSource is = new InputSource(new ByteArrayInputStream(w3ceprSchemaBinding.getBytes()));
-        is.setSystemId(sysId+(i +1));
+        is.setSystemId(sysId+(++i +1));
         b.schemas.add(is);
 
 
