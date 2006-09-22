@@ -92,7 +92,13 @@ public class StringHeader extends AbstractHeaderImpl {
         she.addTextNode(value);
     }
 
-    public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        throw new UnsupportedOperationException();
+    public void writeTo(ContentHandler h, ErrorHandler errorHandler) throws SAXException {
+        String nsUri = name.getNamespaceURI();
+        String ln = name.getLocalPart();
+
+        h.startPrefixMapping("",nsUri);
+        h.startElement(nsUri,ln,ln,EMPTY_ATTS);
+        h.characters(value.toCharArray(),0,value.length());
+        h.endElement(nsUri,ln,ln);
     }
 }
