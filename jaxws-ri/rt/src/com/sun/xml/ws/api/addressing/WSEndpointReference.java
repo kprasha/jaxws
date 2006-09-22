@@ -127,7 +127,12 @@ public final class WSEndpointReference {
         // check for non-existent Address, that sort of things.
 
         StreamReaderBufferProcessor xsr = infoset.readAsXMLStreamReader();
-        xsr.nextTag(); // get to the start tag of <EndpointReference>
+
+        // parser should be either at the start element or the start document
+        if(xsr.getEventType()==XMLStreamReader.START_DOCUMENT)
+            xsr.nextTag();
+        assert xsr.getEventType()==XMLStreamReader.START_ELEMENT;
+
         if(!xsr.getNamespaceURI().equals(version.nsUri))
             throw new WebServiceException(AddressingMessages.WRONG_ADDRESSING_VERSION(
                 version.nsUri, xsr.getNamespaceURI()));
@@ -264,6 +269,7 @@ public final class WSEndpointReference {
     /**
      * Dumps the EPR infoset in a human-readable string.
      */
+    @Override
     public String toString() {
         try {
             // debug convenience
