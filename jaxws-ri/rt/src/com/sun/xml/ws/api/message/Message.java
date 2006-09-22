@@ -23,6 +23,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -609,6 +610,7 @@ public abstract class Message {
      * Retuns a unique id for the message. The id can be used for various things,
      * like debug assistance, logging, and MIME encoding(say for boundary).
      *
+     * <p>
      * This method will check the existence of the addressing <MessageID> header,
      * and if present uses that value. Otherwise it generates one from UUID.random(),
      * and return it without adding a new header. But it doesn't add a <MessageID>
@@ -620,15 +622,16 @@ public abstract class Message {
      * headers to make sure that <MessageID> header is present when it's
      * supposed to be.
      *
-     * TODO javadoc parameters after parameters are decided
+     * @param binding object created by {@link BindingID#createBinding()}
      *
      * @return unique id for the message
      */
     public @NotNull String getID(@NotNull WSBinding binding) {
         if (uuid == null) {
-            // TODO
-            //AddressingVersion version = binding.getAddressingVersion();
-            //uuid = getHeaders().getMessageID(version);
+            AddressingVersion version = binding.getAddressingVersion();
+            if (version != null) {
+                uuid = getHeaders().getMessageID(version);
+            }
             if (uuid == null) {
                 uuid = "uuid:" + UUID.randomUUID().toString();
             }
