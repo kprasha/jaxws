@@ -415,7 +415,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @return Value of WS-Addressing To header, null if no header is present
      */
     public String getTo(AddressingVersion version) {
-        Header h = getFirstHeader(version.getNsUri(), "To", true);
+        Header h = getFirstHeader(version.toTag, true);
         if (to != null && h != null) {
             to = h.getStringContent();
         }
@@ -432,7 +432,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @return Value of WS-Addressing Action header, null if no header is present
      */
     public String getAction(AddressingVersion version) {
-        Header h = getFirstHeader(version.getNsUri(), "Action", true);
+        Header h = getFirstHeader(version.actionTag, true);
         if (action != null && h != null) {
             action = h.getStringContent();
         }
@@ -446,7 +446,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @param version Version of WS-Addressing
      */
     public void setAction(AddressingVersion version) {
-        Header h = getFirstHeader(version.getNsUri(), "Action", true);
+        Header h = getFirstHeader(version.actionTag, true);
 
         throw new UnsupportedOperationException();
     }
@@ -460,7 +460,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @return Value of WS-Addressing ReplyTo header, null if no header is present
      */
     public EndpointReference getReplyTo(AddressingVersion version) {
-        Header h = getFirstHeader(version.getNsUri(), "ReplyTo", true);
+        Header h = getFirstHeader(version.replyToTag, true);
         if (replyTo != null && h != null) {
             // read ReplyTo
         }
