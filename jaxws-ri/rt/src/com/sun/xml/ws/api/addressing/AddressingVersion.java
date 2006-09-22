@@ -22,19 +22,19 @@
 
 package com.sun.xml.ws.api.addressing;
 
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.namespace.QName;
-
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
+ * 'Traits' object that absorbs differences of WS-Addressing versions.
+ *
  * @author Arun Gupta
  */
 public enum AddressingVersion {
@@ -70,9 +70,7 @@ public enum AddressingVersion {
 
         // create stock anonymous EPR
         try {
-            XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(
-                    XMLInputFactory.newInstance().createXMLStreamReader(getClass().getResourceAsStream(anonymousEprResrouceName)));
-            this.anonymousEpr = new WSEndpointReference(xsb);
+            this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResrouceName));
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
         } catch (XMLStreamBufferException e) {
@@ -128,12 +126,5 @@ public enum AddressingVersion {
      */
     public String getNsUri() {
         return nsUri;
-    }
-
-    public boolean equals(AddressingVersion that) {
-        if (that == null)
-            return false;
-
-        return nsUri.equals(that.nsUri);
     }
 }
