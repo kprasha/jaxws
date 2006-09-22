@@ -200,26 +200,31 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.endpoint");
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address) {
-        QName portType = getPortTypeName(port);
-        QName service = getServiceName(port);
-        QName portQN = getPortName(port);
+        QName service = getServiceName();
+        QName portQN = getPortName(service);
+        QName portType = getPortTypeName();
+
         return EndpointReferenceUtil.getEndpointReference(clazz, address, service,
                 (portQN == null?null:portQN.getLocalPart()),portType, port != null);
     }
 
-    private QName getServiceName(WSDLPort wsdlport) {
-        if(wsdlport == null)
-            return null;
-        return wsdlport.getOwner().getName();
+    private QName getServiceName() {
+        if(port == null) {
+            // there is no WSDL model
+            return EndpointFactory.getDefaultServiceName(implementationClass);
+        }
+        return port.getOwner().getName();
     }
-    private QName getPortName(WSDLPort wsdlport) {
-        if(wsdlport == null)
-            return null;
-        return wsdlport.getName();
+    private QName getPortName(QName service) {
+        if(port == null) {
+            // there is no WSDL model
+            return EndpointFactory.getDefaultPortName(service, implementationClass);
+        }
+        return port.getName();
     }
-    private QName getPortTypeName(WSDLPort wsdlport) {
-        if(wsdlport == null)
+    private QName getPortTypeName() {
+        if(port == null)
             return null;
-        return wsdlport.getBinding().getPortTypeName();
+        return port.getBinding().getPortTypeName();
     }
 }
