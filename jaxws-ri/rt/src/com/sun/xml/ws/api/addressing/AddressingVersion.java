@@ -51,20 +51,22 @@ public enum AddressingVersion {
      * Represents the ReplyTo for a specific WS-Addressing Version.
      * For example, wsa:ReplyTo where wsa binds to "http://www.w3.org/2005/08/addressing"
      */
+    public final QName toTag;
+    public final QName fromTag;
     public final QName replyToTag;
     public final QName faultToTag;
-    public final QName toTag;
     public final QName actionTag;
     public final QName messageIDTag;
 
 
     private AddressingVersion(String nsUri, String anonymousEprResrouceName) {
         this.nsUri = nsUri;
+        toTag = new QName(nsUri,"To");
+        fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
         faultToTag = new QName(nsUri,"FaultTo");
         actionTag = new QName(nsUri,"Action");
         messageIDTag = new QName(nsUri,"MessageID");
-        toTag = new QName(nsUri,"To");
 
         // create stock anonymous EPR
         try {
