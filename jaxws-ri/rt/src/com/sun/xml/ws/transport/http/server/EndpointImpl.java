@@ -284,7 +284,7 @@ public class EndpointImpl extends Endpoint {
         }
     }
 
-    public W3CEndpointReference getEndpointReference() {
+    public EndpointReference getEndpointReference() {
         return getEndpointReference(W3CEndpointReference.class);
     }
 
