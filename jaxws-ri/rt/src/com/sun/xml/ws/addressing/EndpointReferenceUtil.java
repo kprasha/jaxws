@@ -384,8 +384,10 @@ public class EndpointReferenceUtil {
                         NodeList refParams = child.getChildNodes();
                         for(int j=0; j < refParams.getLength(); j++){
                             if(refParams.item(j).getNodeType() == Node.ELEMENT_NODE){
-                                if(msEpr.referenceProperties == null)
+                                if(msEpr.referenceProperties == null){
+                                    msEpr.referenceProperties = new MemberSubmissionEndpointReference.Elements();                                    
                                     msEpr.referenceProperties.elements = new ArrayList<Element>();
+                                }
                                 msEpr.referenceProperties.elements.add((Element)refParams.item(i));
                             }
                         }
@@ -441,8 +443,10 @@ public class EndpointReferenceUtil {
                             msEpr.portTypeName.attributes = getAttributes(elm);
                         } else {
                             //its extensions in META-DATA and should be copied to ReferenceProperties in MS EPR
-                            if (msEpr.referenceParameters == null)
+                            if (msEpr.referenceParameters == null){
+                                msEpr.referenceParameters = new MemberSubmissionEndpointReference.Elements();
                                 msEpr.referenceParameters.elements = new ArrayList<Element>();
+                            }
                             msEpr.referenceParameters.elements.add(elm);
                         }
                     }
