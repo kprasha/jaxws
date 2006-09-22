@@ -407,25 +407,6 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Gets the first {@link Header} of the specified name.
-     *
-     * @param nsUri Namespace URI of the header
-     * @param local Local name of the header
-     * @param markUnderstood
-     *      If this parameter is true, the returned headers will
-     *      be marked as <a href="#MU">"understood"</a> when they are returned
-     *      from {@link Iterator#next()}.
-     * @return null if header not found
-     */
-    private Header getFirstHeader(String nsUri, String local, boolean markUnderstood) {
-        Iterator<Header> iter = getHeaders(nsUri, local, markUnderstood);
-        if (iter.hasNext())
-            return iter.next();
-        else
-            return null;
-    }
-
-    /**
      * Returns the value of first WS-Addressing To header from
      * {@link AddressingVersion} version. Caches the value for
      * subsequent invocation.
@@ -488,6 +469,24 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
+     * Gets the first {@link Header} of the specified name.
+     *
+     * @param name QName of the header
+     * @param markUnderstood
+     *      If this parameter is true, the returned headers will
+     *      be marked as <a href="#MU">"understood"</a> when they are returned
+     *      from {@link Iterator#next()}.
+     * @return null if header not found
+     */
+    private Header getFirstHeader(QName name, boolean markUnderstood) {
+        Iterator<Header> iter = getHeaders(name.getNamespaceURI(), name.getLocalPart(), markUnderstood);
+        if (iter.hasNext())
+            return iter.next();
+        else
+            return null;
+    }
+
+    /**
      * Returns the value of first WS-Addressing FaultTo header from
      * {@link AddressingVersion} version. Caches the value for
      * subsequent invocation.
@@ -496,7 +495,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @return Value of WS-Addressing FaultTo header, null if no header is present
      */
     public EndpointReference getFaultTo(AddressingVersion version) {
-        Header h = getFirstHeader(version.getNsUri(), "FaultTo", true);
+        Header h = getFirstHeader(version.faultToTag, true);
         if (faultTo != null && h != null) {
             // read FaultTo
         }
@@ -505,7 +504,7 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     public String getMessageID(AddressingVersion version) {
-        Header h = getFirstHeader(version.getNsUri(), "MessageID", true);
+        Header h = getFirstHeader(version.messageIDTag, true);
         if (messageId != null && h != null) {
             messageId = h.getStringContent();
         }
@@ -527,7 +526,7 @@ public final class HeaderList extends ArrayList<Header> {
 
         WsaPipeHelper wsaHelper = getWsaHelper(wsdlPort, binding);
         // wsa:To
-        StringHeader h = new StringHeader(wsaHelper.getToQName(), packet.endpointAddress.toString());
+        StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
         this.add(h);
 
         // wsa:Action
@@ -554,7 +553,7 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     private WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
-        if (binding.getAddressingVersion().equals(W3CAddressingConstants.WSA_NAMESPACE_NAME))
+        if (binding.getAddressingVersion().equals(AddressingVersion.W3C))
             return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
         else
             return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
