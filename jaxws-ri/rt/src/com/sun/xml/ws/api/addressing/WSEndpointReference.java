@@ -9,8 +9,11 @@ import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.resources.AddressingMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.ContentHandler;
@@ -31,6 +34,8 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Internal representation of the EPR.
@@ -43,6 +48,17 @@ import java.io.StringWriter;
  */
 public final class WSEndpointReference {
     private final XMLStreamBuffer infoset;
+    /**
+     * Version of the addressing spec.
+     */
+    private final AddressingVersion version;
+
+    /**
+     * Marked Reference parameters inside this EPR.
+     *
+     * Parsed when the object is created. can be empty but never null.
+     */
+    private @NotNull XMLStreamBuffer[] referenceParameters;
 
     /**
      * Creates from the spec version of {@link EndpointReference}.
@@ -51,25 +67,36 @@ public final class WSEndpointReference {
      * This method performs the data conversion, so it's slow.
      * Do not use this method in a performance critical path.
      */
-    public WSEndpointReference(EndpointReference epr) {
+    public WSEndpointReference(EndpointReference epr, AddressingVersion version) throws XMLStreamException {
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
         epr.writeTo(new XMLStreamBufferResult(xsb));
         this.infoset = xsb;
+        this.version = version;
+        parse();
     }
 
     /**
      * Creates a {@link WSEndpointReference} that wraps a given infoset.
      */
-    public WSEndpointReference(XMLStreamBuffer infoset) {
+    public WSEndpointReference(XMLStreamBuffer infoset, AddressingVersion version) throws XMLStreamException {
         this.infoset = infoset;
+        this.version = version;
+        parse();
     }
 
     /**
      * Creates a {@link WSEndpointReference} by parsing an infoset.
      */
-    public WSEndpointReference(InputStream infoset) throws XMLStreamBufferException, XMLStreamException {
-        this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(
-            XMLInputFactory.newInstance().createXMLStreamReader(infoset)));
+    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamBufferException, XMLStreamException {
+        this(XMLInputFactory.newInstance().createXMLStreamReader(infoset),version);
+    }
+
+    /**
+     * Creates a {@link WSEndpointReference} from the given infoset.
+     * The {@link XMLStreamReader} must point to either a document or an element.
+     */
+    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamBufferException, XMLStreamException {
+        this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
     }
 
     /**
@@ -83,6 +110,52 @@ public final class WSEndpointReference {
      */
     public @NotNull EndpointReference toSpec() {
         return ProviderImpl.INSTANCE.readEndpointReference(new XMLStreamBufferSource(infoset));
+    }
+
+    /**
+     * Gets the addressing version in use.
+     */
+    public @NotNull AddressingVersion getVersion() {
+        return version;
+    }
+
+    /**
+     * Parses inside EPR and mark all reference parameters.
+     */
+    private void parse() throws XMLStreamException {
+        // TODO: validate the EPR structure.
+        // check for non-existent Address, that sort of things.
+
+        StreamReaderBufferProcessor xsr = infoset.readAsXMLStreamReader();
+        xsr.nextTag(); // get to the start tag of <EndpointReference>
+        if(!xsr.getNamespaceURI().equals(version.nsUri))
+            throw new WebServiceException(AddressingMessages.WRONG_ADDRESSING_VERSION(
+                version.nsUri, xsr.getNamespaceURI()));
+
+        // since often EPR doesn't have a reference parameter, create array lazily
+        List<XMLStreamBuffer> marks=null;
+
+        while(xsr.nextTag()==XMLStreamReader.START_ELEMENT) {
+            if(version.isReferenceParameter(xsr.getLocalName())) {
+                XMLStreamBuffer mark;
+                while((mark = xsr.nextTagAndMark())!=null) {
+                    if(marks==null)
+                        marks = new ArrayList<XMLStreamBuffer>();
+                    marks.add(mark);
+                    XMLStreamReaderUtil.skipElement(xsr);
+                }
+            } else {
+                XMLStreamReaderUtil.skipElement(xsr);
+            }
+        }
+
+        // hit to </EndpointReference> by now
+
+        if(marks==null) {
+            this.referenceParameters = EMPTY_ARRAY;
+        } else {
+            this.referenceParameters = marks.toArray(new XMLStreamBuffer[marks.size()]);
+        }
     }
 
     /**
@@ -181,6 +254,14 @@ public final class WSEndpointReference {
     }
 
     /**
+     * Copies all the reference parameters in this EPR as headers
+     * to the given {@link HeaderList}.
+     */
+    public void addReferenceParameters(HeaderList outbound) {
+
+    }
+
+    /**
      * Dumps the EPR infoset in a human-readable string.
      */
     public String toString() {
@@ -220,4 +301,6 @@ public final class WSEndpointReference {
             super.processElement(uri, localName, qName);
         }
     }
+
+    private static final XMLStreamBuffer[] EMPTY_ARRAY = new XMLStreamBuffer[0];
 }

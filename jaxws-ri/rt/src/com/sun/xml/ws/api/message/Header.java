@@ -25,7 +25,10 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -39,6 +42,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.WebServiceException;
 import java.util.Set;
 
 
@@ -245,6 +249,19 @@ public interface Header {
      * Reads the header as a JAXB object by using the given unmarshaller.
      */
     public <T> T readAsJAXB(Bridge<T> bridge) throws JAXBException;
+
+    /**
+     * Reads this header as an {@link WSEndpointReference}.
+     *
+     * @param expected
+     *      The version of the addressing used to parse the EPR.
+     *      If the actual infoset and this doesn't agree, then
+     *      you'll get an {@link WebServiceException} stating that fact.
+     *
+     * @return
+     *      On a successful return, this method never returns null.
+     */
+    public @NotNull WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException, XMLStreamBufferException;
 
     /**
      * Writes out the header.

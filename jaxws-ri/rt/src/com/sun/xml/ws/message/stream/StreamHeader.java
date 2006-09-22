@@ -27,6 +27,8 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.message.AbstractHeaderImpl;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
@@ -206,6 +208,17 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         _mark.writeTo(contentHandler);
+    }
+
+    /**
+     * Creates an EPR without copying infoset.
+     *
+     * This is the most common implementation on which {@link Header#readAsEPR(AddressingVersion)}
+     * is invoked on.
+     */
+    @Override @NotNull
+    public WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException {
+        return new WSEndpointReference(_mark,expected);
     }
 
     protected abstract FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader);

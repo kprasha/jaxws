@@ -38,8 +38,18 @@ import javax.xml.ws.soap.AddressingFeature;
  * @author Arun Gupta
  */
 public enum AddressingVersion {
-    W3C(W3CAddressingConstants.WSA_NAMESPACE_NAME,"w3c-anonymous-epr.xml"),
-    MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME,"member-anonymous-epr.xml");
+    W3C(W3CAddressingConstants.WSA_NAMESPACE_NAME,"w3c-anonymous-epr.xml") {
+        @Override
+        public boolean isReferenceParameter(String localName) {
+            return localName.equals("ReferenceParameters");
+        }
+    },
+    MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME,"member-anonymous-epr.xml") {
+        @Override
+        public boolean isReferenceParameter(String localName) {
+            return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
+        }
+    };
 
     public final String nsUri;
 
@@ -70,7 +80,7 @@ public enum AddressingVersion {
 
         // create stock anonymous EPR
         try {
-            this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResrouceName));
+            this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResrouceName),this);
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
         } catch (XMLStreamBufferException e) {
@@ -127,4 +137,14 @@ public enum AddressingVersion {
     public String getNsUri() {
         return nsUri;
     }
+
+    /**
+     * Returns true if the given local name is considered as
+     * a reference parameter in EPR.
+     *
+     * For W3C, this means "ReferenceParameters",
+     * and for the member submission version, this means
+     * either "ReferenceParameters" or "ReferenceProperties".
+     */
+    public abstract boolean isReferenceParameter(String localName);
 }

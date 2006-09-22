@@ -25,17 +25,18 @@ package com.sun.xml.ws.message;
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
+import org.xml.sax.helpers.AttributesImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.util.Set;
-
-import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * Partial default implementation of {@link Header}.
@@ -72,6 +73,13 @@ public abstract class AbstractHeaderImpl implements Header {
         } catch (XMLStreamException e) {
             throw new JAXBException(e);
         }
+    }
+
+    /**
+     * Default implementation that copies the infoset. Not terribly efficient.
+     */
+    public WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException, XMLStreamBufferException {
+        return new WSEndpointReference(readHeader(),expected);
     }
 
     public boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles) {
