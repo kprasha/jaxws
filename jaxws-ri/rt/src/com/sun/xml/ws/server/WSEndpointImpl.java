@@ -149,7 +149,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 request.webServiceContextDelegate = wscd;
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;
-                Fiber fiber = engine.createFiber();
+                //Fiber fiber = engine.createFiber();
                 Packet response;
                 try {
                     //response = fiber.runSync(tube,request);
