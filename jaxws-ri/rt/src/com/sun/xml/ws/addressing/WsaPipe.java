@@ -25,26 +25,22 @@ package com.sun.xml.ws.addressing;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractPipeImpl;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 
 /**
  * @author Arun Gupta
  */
-public abstract class WsaPipe extends AbstractPipeImpl {
+public abstract class WsaPipe extends AbstractFilterPipeImpl {
     final WSDLPort wsdlPort;
     final WSBinding binding;
     final WsaPipeHelper helper;
-    final Pipe next;
 
     public WsaPipe(WSDLPort wsdlPort, WSBinding binding, Pipe next) {
+        super(next);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
-        this.next = PipeCloner.clone(next);
         helper = getPipeHelper();
     }
 
