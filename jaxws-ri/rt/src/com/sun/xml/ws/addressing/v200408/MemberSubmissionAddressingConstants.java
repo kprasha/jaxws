@@ -32,7 +32,7 @@ import javax.xml.namespace.QName;
 public interface MemberSubmissionAddressingConstants {
     public static final String WSA_NAMESPACE_NAME = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
     public static final String WSA_NAMESPACE_WSDL_NAME = WSA_NAMESPACE_NAME;
-    public static final String WSA_NAMESPACE_POLICY_NAME = "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing";
+    public static final String WSA_NAMESPACE_POLICY_NAME = "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy";
 
     public static final String WSA_NAMESPACE_PREFIX = "wsa";
     public static final String WSA_NAMESPACE_WSDL_PREFIX = "wsa";
