@@ -52,6 +52,8 @@ public enum AddressingVersion {
      * For example, wsa:ReplyTo where wsa binds to "http://www.w3.org/2005/08/addressing"
      */
     public final QName replyToTag;
+    public final QName faultToTag;
+    public final QName toTag;
     public final QName actionTag;
     public final QName messageIDTag;
 
@@ -59,8 +61,10 @@ public enum AddressingVersion {
     private AddressingVersion(String nsUri, String anonymousEprResrouceName) {
         this.nsUri = nsUri;
         replyToTag = new QName(nsUri,"ReplyTo");
+        faultToTag = new QName(nsUri,"FaultTo");
         actionTag = new QName(nsUri,"Action");
         messageIDTag = new QName(nsUri,"MessageID");
+        toTag = new QName(nsUri,"To");
 
         // create stock anonymous EPR
         try {
