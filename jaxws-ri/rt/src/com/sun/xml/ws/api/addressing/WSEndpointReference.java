@@ -289,6 +289,7 @@ public final class WSEndpointReference {
         private boolean root=true;
 
         public SAXBufferProcessorImpl(String rootLocalName) {
+            super(infoset);
             this.rootLocalName = rootLocalName;
         }
 
