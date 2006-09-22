@@ -91,7 +91,8 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
     protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
-        super(pipe, binding, owner.getEndpointAddress(port));
+        // todo: fill the correct value for WSDLPort later
+        super(pipe, binding, null, owner.getEndpointAddress(port));
         this.portname = port;
         this.mode = mode;
         this.owner = owner;

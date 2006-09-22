@@ -35,6 +35,8 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Set;
 
+import org.xml.sax.helpers.AttributesImpl;
+
 /**
  * Partial default implementation of {@link Header}.
  *
@@ -50,7 +52,7 @@ public abstract class AbstractHeaderImpl implements Header {
     }
 
     /**
-     * @deprecated 
+     * @deprecated
      */
     public final <T> T readAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
         return readAsJAXB(bridge);
@@ -118,4 +120,6 @@ public abstract class AbstractHeaderImpl implements Header {
             return null;
         }
     }
+
+    protected static final AttributesImpl EMPTY_ATTS = new AttributesImpl();
 }

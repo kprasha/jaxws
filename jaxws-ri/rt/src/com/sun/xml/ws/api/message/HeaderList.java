@@ -24,10 +24,15 @@ package com.sun.xml.ws.api.message;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.addressing.WsaPipeHelper;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 
@@ -508,6 +513,52 @@ public final class HeaderList extends ArrayList<Header> {
         return messageId;
     }
 
+    /**
+     * Creates a set of outbound WS-Addressing headers on the client.
+     * This method needs to be invoked right after such a Message is
+     * created which is error prone but so far only MEX, RM and JAX-WS
+     * creates a request so this ugliness is acceptable. If more components
+     * are identified using this, the we may revisit this.
+     *
+     * @param binding WSBinding
+     */
+    public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet) {
+        AddressingVersion ver = binding.getAddressingVersion();
+
+        WsaPipeHelper wsaHelper = getWsaHelper(wsdlPort, binding);
+        // wsa:To
+        StringHeader h = new StringHeader(wsaHelper.getToQName(), packet.endpointAddress.toString());
+        this.add(h);
+
+        // wsa:Action
+        // todo: abstract the algorithm of getting input action in getInputAction
+        String action = wsaHelper.getInputAction(packet);
+        if (wsaHelper.isInputActionDefault(packet) && (packet.soapAction != null && !packet.soapAction.equals(""))) {
+            action = packet.soapAction;
+        }
+        if (action == null)
+            action = "http://fake.input.action";
+        packet.soapAction = action;
+        h = new StringHeader(ver.actionTag, action);
+        this.add(h);
+
+        // wsa:MessageId
+        h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(binding));
+
+        // wsa:ReplyTo
+        // null or "true" is equivalent to request/response MEP
+        if (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort)) {
+            WSEndpointReference epr = ver.anonymousEpr;
+            add(epr.createHeader(ver.replyToTag));
+        }
+    }
+
+    private WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
+        if (binding.getAddressingVersion().equals(W3CAddressingConstants.WSA_NAMESPACE_NAME))
+            return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
+        else
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+    }
     /**
      * Adds a new {@link Header}.
      *

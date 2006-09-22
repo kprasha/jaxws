@@ -37,6 +37,7 @@ import java.io.StringWriter;
  * Instances of this class are immutable and thread-safe.
  *
  * @author Kohsuke Kawaguchi
+ * @see AddressingVersion#anonymousEpr
  */
 public final class WSEndpointReference {
     private final XMLStreamBuffer infoset;
@@ -165,7 +166,7 @@ public final class WSEndpointReference {
      *      unlike other methods. If it's making the caller's life miserable, then
      *      we can talk.)
      */
-    public Header asHeader(QName rootTagName) {
+    public Header createHeader(QName rootTagName) {
         return new EPRHeader(rootTagName,this);
     }
 

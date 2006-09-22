@@ -23,23 +23,55 @@
 package com.sun.xml.ws.api.addressing;
 
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 
 /**
  * @author Arun Gupta
  */
 public enum AddressingVersion {
-    W3C(W3CAddressingConstants.WSA_NAMESPACE_NAME),
-    MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+    W3C(W3CAddressingConstants.WSA_NAMESPACE_NAME,"w3c-anonymous-epr.xml"),
+    MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME,"member-anonymous-epr.xml");
 
     public final String nsUri;
 
-    private AddressingVersion(String nsUri) {
+    /**
+     * Represents the anonymous EPR.
+     */
+    public final WSEndpointReference anonymousEpr;
+    /**
+     * Represents the ReplyTo for a specific WS-Addressing Version.
+     * For example, wsa:ReplyTo where wsa binds to "http://www.w3.org/2005/08/addressing"
+     */
+    public final QName replyToTag;
+    public final QName actionTag;
+    public final QName messageIDTag;
+
+
+    private AddressingVersion(String nsUri, String anonymousEprResrouceName) {
         this.nsUri = nsUri;
+        replyToTag = new QName(nsUri,"ReplyTo");
+        actionTag = new QName(nsUri,"Action");
+        messageIDTag = new QName(nsUri,"MessageID");
+
+        // create stock anonymous EPR
+        try {
+            XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(
+                    XMLInputFactory.newInstance().createXMLStreamReader(getClass().getResourceAsStream(anonymousEprResrouceName)));
+            this.anonymousEpr = new WSEndpointReference(xsb);
+        } catch (XMLStreamException e) {
+            throw new Error(e); // bug in our code as EPR should parse.
+        } catch (XMLStreamBufferException e) {
+            throw new Error(e); // bug in our code
+        }
     }
 
     /**
@@ -76,7 +108,7 @@ public enum AddressingVersion {
         String ns = port.getBinding().getAddressingVersion();
         if (ns.equals(W3C.nsUri))
             return W3C;
-        
+
         if (ns.equals(MEMBER.nsUri))
             return MEMBER;
 

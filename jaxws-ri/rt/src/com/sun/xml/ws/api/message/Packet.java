@@ -538,46 +538,6 @@ public final class Packet extends DistributedPropertySet {
         return r;
     }
 
-    /**
-     * Creates a set of outbound WS-Addressing headers on the client.
-     * This method needs to be invoked right after such a Message is
-     * created which is error prone but so far only MEX, RM and JAX-WS
-     * creates a request so this ugliness is acceptable. If more components
-     * are identified using this, the we may revisit this.
-     *
-     * @param binding WSBinding
-     */
-    public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding) {
-        HeaderList hl = message.getHeaders();
-
-        WsaPipeHelper wsaHelper = getWsaHelper(wsdlPort, binding);
-        // wsa:To
-        StringHeader h = new StringHeader(wsaHelper.getToQName(), endpointAddress.toString());
-        hl.add(h);
-
-        // wsa:Action
-        String action = wsaHelper.getInputAction(this);
-        if (wsaHelper.isInputActionDefault(this) && (soapAction != null && !soapAction.equals(""))) {
-            action = soapAction;
-        }
-        if (action == null)
-            action = "http://fake.input.action";
-        soapAction = action;
-        h = new StringHeader(wsaHelper.getActionQName(), action);
-        hl.add(h);
-
-        // wsa:MessageId
-        h = new StringHeader(wsaHelper.getMessageIDQName(),
-                             "uuid:" + getMessage().getID(binding));
-    }
-
-    private WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
-        if (binding.getAddressingVersion().equals(W3CAddressingConstants.WSA_NAMESPACE_NAME))
-            return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
-        else
-            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
-    }
-
 // completes TypedMap
     private static final PropertyMap model;
 

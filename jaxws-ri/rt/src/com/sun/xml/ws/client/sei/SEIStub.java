@@ -56,7 +56,7 @@ import java.util.concurrent.Executor;
  */
 public final class SEIStub extends Stub implements InvocationHandler {
     public SEIStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Pipe master) {
-        super(master, binding, seiModel.getPort().getAddress());
+        super(master, binding, seiModel.getPort(), seiModel.getPort().getAddress());
         this.owner = owner;
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();

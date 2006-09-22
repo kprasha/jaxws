@@ -25,12 +25,14 @@ package com.sun.xml.ws.client;
 import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.PipePool;
 import com.sun.xml.ws.util.RuntimeVersion;
+import com.sun.istack.Nullable;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.EndpointReference;
@@ -68,6 +70,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      * {@link ResponseContext} from the last synchronous operation.
      */
     private ResponseContext responseContext;
+    @Nullable protected final WSDLPort wsdlPort;
 
     /**
      * @param master                 The created stub will send messages to this pipe.
@@ -76,8 +79,9 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      * @param defaultEndPointAddress The destination of the message. The actual destination
      *                               could be overridden by {@link RequestContext}.
      */
-    protected Stub(Pipe master, BindingImpl binding, EndpointAddress defaultEndPointAddress) {
+    protected Stub(Pipe master, BindingImpl binding, WSDLPort wsdlPort, EndpointAddress defaultEndPointAddress) {
         this.pipes = new PipePool(master);
+        this.wsdlPort = wsdlPort;
         this.binding = binding;
         this.requestContext.setEndpointAddress(defaultEndPointAddress);
     }
@@ -105,6 +109,8 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
             packet.proxy = this;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
+//            if (binding.isAddressingEnabled())
+//                packet.getMessage().getHeaders().fillRequestAddressingHeaders(wsdlPort, binding, packet);
         }
 
         Packet reply;

@@ -22,6 +22,15 @@
 
 package com.sun.xml.ws.binding;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.AddressingFeature;
+
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -30,12 +39,6 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
-
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.soap.AddressingFeature;
-
-import java.util.*;
 
 /**
  * Instances are created by the service, which then
@@ -53,6 +56,12 @@ public abstract class BindingImpl implements WSBinding {
     private final BindingID bindingId;
     // Features that are enabled on the binding
     private Map<String, WebServiceFeature> features;
+    /**
+     * Computed from {@link #features} by {@link #updateCache()}
+     * to make {@link #getAddressingVersion()} faster.
+     * // TODO: remove this constant value after debugging
+     */
+    private AddressingVersion addressingVersion = AddressingVersion.W3C;
 
     protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
@@ -98,12 +107,7 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public AddressingVersion getAddressingVersion() {
-        if (hasFeature(AddressingFeature.ID))
-            return AddressingVersion.W3C;
-        if (hasFeature(MemberSubmissionAddressingFeature.ID))
-            return AddressingVersion.MEMBER;
-
-        return null;
+        return addressingVersion;
     }
 
     public final @NotNull Codec createCodec() {
@@ -148,6 +152,18 @@ public abstract class BindingImpl implements WSBinding {
         if (feature == null || features == null)
             return;
         features.remove(feature.getID());
+        updateCache();
+    }
+
+    private void updateCache() {
+        addressingVersion = AddressingVersion.W3C;
+//        if (hasFeature(AddressingFeature.ID))
+//            addressingVersion = AddressingVersion.W3C;
+//        else
+//        if (hasFeature(MemberSubmissionAddressingFeature.ID))
+//            addressingVersion = AddressingVersion.MEMBER;
+//        else
+//            addressingVersion = null;
     }
 
     private void enableFeature(WebServiceFeature feature) {
@@ -160,6 +176,7 @@ public abstract class BindingImpl implements WSBinding {
         if(features == null)
             features =  new HashMap<String, WebServiceFeature>();
         features.put(feature.getID(), feature);
+        updateCache();
     }
 
     public void setFeatures(WebServiceFeature[] newFeatures) {
@@ -170,4 +187,7 @@ public abstract class BindingImpl implements WSBinding {
         }
     }
 
+    public boolean isAddressingEnabled() {
+        return addressingVersion!=null;
+    }
 }
