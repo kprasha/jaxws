@@ -21,29 +21,27 @@
  */
 package com.sun.xml.ws.api.message;
 
-import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.protocol.soap.ClientMUPipe;
-import com.sun.xml.ws.protocol.soap.ServerMUPipe;
-import com.sun.xml.ws.message.StringHeader;
-import com.sun.xml.ws.addressing.WsaPipeHelper;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.addressing.WsaPipeHelper;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Decoder;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.protocol.soap.ClientMUPipe;
+import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
-
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -479,7 +477,11 @@ public final class HeaderList extends ArrayList<Header> {
      * @return null if header not found
      */
     private Header getFirstHeader(QName name, boolean markUnderstood) {
-        Iterator<Header> iter = getHeaders(name.getNamespaceURI(), name.getLocalPart(), markUnderstood);
+        return getFirstHeader(name.getNamespaceURI(),name.getLocalPart(),markUnderstood);
+    }
+
+    private Header getFirstHeader(String nsUri, String localName, boolean markUnderstood) {
+        Iterator<Header> iter = getHeaders(nsUri, localName, markUnderstood);
         if (iter.hasNext())
             return iter.next();
         else
@@ -527,7 +529,7 @@ public final class HeaderList extends ArrayList<Header> {
         WsaPipeHelper wsaHelper = getWsaHelper(wsdlPort, binding);
         // wsa:To
         StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
-        this.add(h);
+        add(h);
 
         // wsa:Action
         // todo: abstract the algorithm of getting input action in getInputAction
@@ -539,10 +541,11 @@ public final class HeaderList extends ArrayList<Header> {
             action = "http://fake.input.action";
         packet.soapAction = action;
         h = new StringHeader(ver.actionTag, action);
-        this.add(h);
+        add(h);
 
         // wsa:MessageId
         h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(binding));
+        add(h);
 
         // wsa:ReplyTo
         // null or "true" is equivalent to request/response MEP
@@ -553,11 +556,16 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     private WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
-        if (binding.getAddressingVersion().equals(AddressingVersion.W3C))
-            return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
-        else
+        switch (binding.getAddressingVersion()) {
+        case MEMBER:
             return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+        case W3C:
+            return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
+        default:
+            throw new AssertionError(binding.getAddressingVersion());
+        }
     }
+
     /**
      * Adds a new {@link Header}.
      *
