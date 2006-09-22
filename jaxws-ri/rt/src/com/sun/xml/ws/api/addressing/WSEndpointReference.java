@@ -19,6 +19,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -28,6 +29,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import java.io.InputStream;
 import java.io.StringWriter;
 
 /**
@@ -60,6 +62,14 @@ public final class WSEndpointReference {
      */
     public WSEndpointReference(XMLStreamBuffer infoset) {
         this.infoset = infoset;
+    }
+
+    /**
+     * Creates a {@link WSEndpointReference} by parsing an infoset.
+     */
+    public WSEndpointReference(InputStream infoset) throws XMLStreamBufferException, XMLStreamException {
+        this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(
+            XMLInputFactory.newInstance().createXMLStreamReader(infoset)));
     }
 
     /**
@@ -117,7 +127,7 @@ public final class WSEndpointReference {
         SAXBufferProcessorImpl p = new SAXBufferProcessorImpl(localName);
         p.setContentHandler(contentHandler);
         p.setErrorHandler(errorHandler);
-        p.process();
+        p.process(infoset);
     }
 
     /**
