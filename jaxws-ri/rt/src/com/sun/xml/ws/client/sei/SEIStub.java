@@ -153,7 +153,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
                 port.getAddress().toString(),
                 owner.getServiceName(),
                 getPortName(port).getLocalPart(),
-                getPortTypeName(port));
+                getPortTypeName(port), true);
         
         return (T) endpointReference;
     }

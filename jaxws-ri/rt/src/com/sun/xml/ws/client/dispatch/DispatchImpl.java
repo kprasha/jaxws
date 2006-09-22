@@ -292,7 +292,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                 owner.getEndpointAddress(portname).toString(),
                 owner.getServiceName(),
                 portname.getLocalPart(),
-                portTypeName);
+                portTypeName, port.portModel != null);
         
         return (T) endpointReference;
     }
