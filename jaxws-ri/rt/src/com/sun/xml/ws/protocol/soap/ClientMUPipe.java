@@ -24,6 +24,7 @@ package com.sun.xml.ws.protocol.soap;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
@@ -48,6 +49,10 @@ public class ClientMUPipe extends MUPipe {
     public ClientMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
         this.next = next;
+    }
+    
+    public ClientMUPipe(WSBinding binding, Tube next) {
+        super(binding, next);
     }
 
     protected ClientMUPipe(ClientMUPipe that, TubeCloner cloner) {

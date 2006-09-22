@@ -24,7 +24,7 @@ package com.sun.xml.ws.protocol.soap;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
@@ -38,14 +38,25 @@ import java.util.Set;
  */
 
 public class ServerMUPipe extends MUPipe {
-    // TODO remove after moving to fiber
+
+    /**
+     * @deprecated
+     * TODO: remove after a little more of the runtime supports to Fiber
+     */
     private Pipe next;
+    
     private HandlerConfiguration handlerConfig;
     public ServerMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
         //On Server, HandlerConfiguration does n't change after publish.
         handlerConfig = ((BindingImpl)binding).getHandlerConfig();
         this.next = next;
+    }
+    
+    public ServerMUPipe(WSBinding binding, Tube next) {
+        super(binding, next);
+        //On Server, HandlerConfiguration does n't change after publish.
+        handlerConfig = ((BindingImpl)binding).getHandlerConfig();
     }
 
     protected ServerMUPipe(ServerMUPipe that, TubeCloner cloner) {
@@ -69,7 +80,10 @@ public class ServerMUPipe extends MUPipe {
      *      if all the headers in the packet are understood, returns the next Pipe.process()
      *      if all the headers in the packet are not understood, returns a Packet with SOAPFault Message
      */
-    // TODO remove after moving to fiber
+    /**
+     * @deprecated
+     * TODO: remove after a little more of the runtime supports to Fiber
+     */
     public Packet process(Packet packet) {
 
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(packet.getMessage().getHeaders(),

@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
@@ -66,15 +67,17 @@ abstract class MUPipe extends AbstractFilterTubeImpl {
     private final SOAPVersion soapVersion;
 
     protected MUPipe(WSBinding binding, Pipe next) {
-        super(PipeAdapter.adapt(next));
+        this(binding, PipeAdapter.adapt(next));
+    }
+    
+    protected MUPipe(WSBinding binding, Tube next) {
+        super(next);
         // MUPipe should n't be used for bindings other than SOAP.
         if (!(binding instanceof SOAPBinding)) {
             throw new WebServiceException(
                     "MUPipe should n't be used for bindings other than SOAP.");
         }
         this.soapVersion = binding.getSOAPVersion();
-
-
     }
 
     protected MUPipe(MUPipe that, TubeCloner cloner) {
