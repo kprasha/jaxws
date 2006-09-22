@@ -281,6 +281,10 @@ public final class WSEndpointReference {
         }
     }
 
+    public String getAddress() {
+        return null;
+    }
+
     /**
      * Filtering {@link SAXBufferProcessor} that replaces the root tag name.
      */
