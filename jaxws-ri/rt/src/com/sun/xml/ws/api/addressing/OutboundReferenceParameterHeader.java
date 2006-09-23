@@ -15,11 +15,13 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -92,15 +94,90 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
             }
 
             // we are adding one more attribute "wsa:IsReferenceParameter"
-            attributes.add(new Attribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter",TRUE_VALUE));
+            attributes.add(new Attribute(AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE));
         } catch (XMLStreamException e) {
             throw new WebServiceException("Unable to read the attributes for {"+nsUri+"}"+localName+" header",e);
         }
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException();
+        return new StreamReaderDelegate(infoset.readAsXMLStreamReader()) {
+            int state=0; /* 0:expecting root, 1:in root, 2:past root */
+            public int next() throws XMLStreamException {
+                return check(super.next());
+            }
+
+            public int nextTag() throws XMLStreamException {
+                return check(super.nextTag());
+            }
+
+            private int check(int type) {
+                switch(state) {
+                case 0:
+                    if(type==START_ELEMENT)
+                        state=1;
+                    break;
+                case 1:
+                    state=2;
+                }
+
+                return type;
+            }
+
+            public int getAttributeCount() {
+                if(state==1)    return super.getAttributeCount()+1;
+                else            return super.getAttributeCount();
+            }
+
+            public String getAttributeLocalName(int index) {
+                if(state==1 && index==super.getAttributeCount())
+                    return IS_REFERENCE_PARAMETER;
+                else
+                    return super.getAttributeLocalName(index);
+            }
+
+            public String getAttributeNamespace(int index) {
+                if(state==1 && index==super.getAttributeCount())
+                    return AddressingVersion.W3C.nsUri;
+                else
+                    return super.getAttributeNamespace(index);
+            }
+
+            public String getAttributePrefix(int index) {
+                if(state==1 && index==super.getAttributeCount())
+                    return "wsa";
+                else
+                    return super.getAttributePrefix(index);
+            }
+
+            public String getAttributeType(int index) {
+                if(state==1 && index==super.getAttributeCount())
+                    return "CDATA";
+                else
+                    return super.getAttributeType(index);
+            }
+
+            public String getAttributeValue(int index) {
+                if(state==1 && index==super.getAttributeCount())
+                    return TRUE_VALUE;
+                else
+                    return super.getAttributeValue(index);
+            }
+
+            public QName getAttributeName(int index) {
+                if(state==1 && index==super.getAttributeCount())
+                    return new QName(AddressingVersion.W3C.nsUri, IS_REFERENCE_PARAMETER, "wsa");
+                else
+                    return super.getAttributeName(index);
+            }
+
+            public String getAttributeValue(String namespaceUri, String localName) {
+                if(state==1 && localName.equals(IS_REFERENCE_PARAMETER) && namespaceUri.equals(AddressingVersion.W3C.nsUri))
+                    return TRUE_VALUE;
+                else
+                    return super.getAttributeValue(namespaceUri, localName);
+            }
+        };
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
@@ -117,7 +194,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
                     if(!root)   return;
                     root=true;
                     super.writeNamespace("wsa",AddressingVersion.W3C.nsUri);
-                    super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,"IsReferenceParameter",TRUE_VALUE);
+                    super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
                 }
 
                 public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
@@ -138,7 +215,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         try {
             Element node = (Element)infoset.writeTo(saaj.getSOAPHeader());
-            node.setAttributeNS(AddressingVersion.W3C.nsUri,"IsReferenceParameter",TRUE_VALUE);
+            node.setAttributeNS(AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
         } catch (XMLStreamBufferException e) {
             throw new SOAPException(e);
         }
@@ -155,7 +232,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
                     AttributesImpl atts2 = new AttributesImpl(atts);
                     atts2.addAttribute(
                         AddressingVersion.W3C.nsUri,
-                        "IsReferenceParameter",
+                        IS_REFERENCE_PARAMETER,
                         "wsa:IsReferenceParameter",
                         "CDATA",
                         TRUE_VALUE);
@@ -207,4 +284,5 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
      * saving three bytes is worth while...
      */
     private static final String TRUE_VALUE = "1";
+    private static final String IS_REFERENCE_PARAMETER = "IsReferenceParameter";
 }
