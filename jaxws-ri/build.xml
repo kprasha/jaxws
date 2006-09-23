@@ -322,6 +322,7 @@ major-version=${release.impl.version}
       <fileset dir="${basedir}/rt/build/classes"/>
       <fileset dir="${basedir}/rt-fi/build/classes"/>
       <fileset dir="${basedir}/servlet/build/classes"/>
+      <fileset dir="${basedir}/rt/src" includes="**/*.xml" />
     </jar>
   </target>
 
