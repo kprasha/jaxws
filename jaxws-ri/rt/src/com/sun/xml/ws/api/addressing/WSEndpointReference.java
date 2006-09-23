@@ -8,6 +8,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -57,8 +58,10 @@ public final class WSEndpointReference {
      * Marked Reference parameters inside this EPR.
      *
      * Parsed when the object is created. can be empty but never null.
+     * @see #parse()
      */
-    private @NotNull XMLStreamBuffer[] referenceParameters;
+    private @NotNull Header[] referenceParameters;
+    private String address;
 
     /**
      * Creates from the spec version of {@link EndpointReference}.
@@ -113,10 +116,17 @@ public final class WSEndpointReference {
     }
 
     /**
-     * Gets the addressing version in use.
+     * Gets the addressing version of this EPR.
      */
     public @NotNull AddressingVersion getVersion() {
         return version;
+    }
+
+    /**
+     * The value of the &lt;wsa:address> header.
+     */
+    public @NotNull String getAddress() {
+        return address;
     }
 
     /**
@@ -133,22 +143,32 @@ public final class WSEndpointReference {
             xsr.nextTag();
         assert xsr.getEventType()==XMLStreamReader.START_ELEMENT;
 
+        String rootLocalName = xsr.getLocalName();
         if(!xsr.getNamespaceURI().equals(version.nsUri))
             throw new WebServiceException(AddressingMessages.WRONG_ADDRESSING_VERSION(
                 version.nsUri, xsr.getNamespaceURI()));
 
         // since often EPR doesn't have a reference parameter, create array lazily
-        List<XMLStreamBuffer> marks=null;
+        List<Header> marks=null;
 
         while(xsr.nextTag()==XMLStreamReader.START_ELEMENT) {
-            if(version.isReferenceParameter(xsr.getLocalName())) {
+            String localName = xsr.getLocalName();
+            if(version.isReferenceParameter(localName)) {
                 XMLStreamBuffer mark;
                 while((mark = xsr.nextTagAndMark())!=null) {
                     if(marks==null)
-                        marks = new ArrayList<XMLStreamBuffer>();
-                    marks.add(mark);
+                        marks = new ArrayList<Header>();
+
+                    // TODO: need a different header for member submission version
+                    marks.add(new OutboundReferenceParameterHeader(
+                        mark, xsr.getNamespaceURI(), xsr.getLocalName()));
                     XMLStreamReaderUtil.skipElement(xsr);
                 }
+            } else
+            if(localName.equals("Address")) {
+                if(address!=null) // double <Address>. That's an error.
+                    throw new InvalidMapException(new QName(version.nsUri,rootLocalName),AddressingVersion.fault_duplicateAddressInEpr);
+                address = xsr.getElementText();
             } else {
                 XMLStreamReaderUtil.skipElement(xsr);
             }
@@ -159,8 +179,11 @@ public final class WSEndpointReference {
         if(marks==null) {
             this.referenceParameters = EMPTY_ARRAY;
         } else {
-            this.referenceParameters = marks.toArray(new XMLStreamBuffer[marks.size()]);
+            this.referenceParameters = marks.toArray(new OutboundReferenceParameterHeader[marks.size()]);
         }
+
+        if(address==null)
+            throw new InvalidMapException(new QName(version.nsUri,rootLocalName),version.fault_missingAddressInEpr);
     }
 
     /**
@@ -263,7 +286,9 @@ public final class WSEndpointReference {
      * to the given {@link HeaderList}.
      */
     public void addReferenceParameters(HeaderList outbound) {
-
+        for (Header header : referenceParameters) {
+            outbound.add(header);
+        }
     }
 
     /**
@@ -313,5 +338,5 @@ public final class WSEndpointReference {
         }
     }
 
-    private static final XMLStreamBuffer[] EMPTY_ARRAY = new XMLStreamBuffer[0];
+    private static final OutboundReferenceParameterHeader[] EMPTY_ARRAY = new OutboundReferenceParameterHeader[0];
 }

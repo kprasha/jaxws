@@ -68,6 +68,23 @@ public enum AddressingVersion {
     public final QName actionTag;
     public final QName messageIDTag;
 
+    /**
+     * Fault sub-sub-code that represents
+     * "Specifies that the invalid header was expected to be an EPR but did not contain an [address]."
+     */
+    public final QName fault_missingAddressInEpr;
+
+    private static final String EXTENDED_FAULT_NAMESPACE = "http://jax-ws.dev.java.net/addressing/fault";
+    
+    /**
+     * Fault sub-sub-code that represents duplicate &lt;Address> element in EPR.
+     * This is a fault code not defined in the spec.
+     */
+    public static final QName fault_duplicateAddressInEpr = new QName(
+        EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
+    );
+
+
 
     private AddressingVersion(String nsUri, String anonymousEprResrouceName) {
         this.nsUri = nsUri;
@@ -77,6 +94,8 @@ public enum AddressingVersion {
         faultToTag = new QName(nsUri,"FaultTo");
         actionTag = new QName(nsUri,"Action");
         messageIDTag = new QName(nsUri,"MessageID");
+
+        fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
 
         // create stock anonymous EPR
         try {
