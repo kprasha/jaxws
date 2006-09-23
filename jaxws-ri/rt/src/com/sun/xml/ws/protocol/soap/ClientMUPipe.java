@@ -23,10 +23,7 @@ package com.sun.xml.ws.protocol.soap;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
@@ -57,7 +54,7 @@ public class ClientMUPipe extends MUPipe {
 
     protected ClientMUPipe(ClientMUPipe that, TubeCloner cloner) {
         super(that,cloner);
-        this.next = that.next;
+        this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
     /**
