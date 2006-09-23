@@ -110,4 +110,9 @@ public class DOMHeader<N extends Element> extends AbstractHeaderImpl {
         Node clone = header.getOwnerDocument().importNode(node,true);
         header.appendChild(clone);
     }
+
+    @Override
+    public String getStringContent() {
+        return node.getNodeValue();
+    }
 }
