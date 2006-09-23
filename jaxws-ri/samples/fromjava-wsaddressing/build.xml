@@ -26,7 +26,7 @@
     <import file="etc/deploy-targets.xml"/>
 
     <property environment="env"/>
-    <property environment="log" value="true"/>
+    <property name="log" value="true"/>
 
     <property file="etc/build.properties"/>
 
