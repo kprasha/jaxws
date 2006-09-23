@@ -264,12 +264,29 @@ public class EndpointReferenceUtil {
             writer.writeCharacters(msEpr.addr.uri);
             writer.writeEndElement();
             //TODO: write extension attributes on wsa:Address
+            Element wsdlElement = null;
 
-            //write ReferenceProperties
-            if (msEpr.referenceProperties != null && msEpr.referenceProperties.elements.size() > 0) {
+            if ((msEpr.referenceProperties != null && msEpr.referenceProperties.elements.size() > 0) ||
+                    (msEpr.referenceParameters != null && msEpr.referenceParameters.elements.size() > 0)) {
+
                 writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_PREFIX, W3CAddressingConstants.WSA_REFERENCEPARAMETERS_NAME, W3CAddressingConstants.WSA_NAMESPACE_NAME);
-                for (Element e : msEpr.referenceProperties.elements) {
-                    DOMUtil.serializeNode(e, writer);
+
+                //write ReferenceProperties
+                if (msEpr.referenceProperties != null) {
+                    for (Element e : msEpr.referenceProperties.elements) {
+                        //TODO fix this later
+                        if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
+                                e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                            wsdlElement = e;
+                        } else
+                            DOMUtil.serializeNode(e, writer);
+                    }
+                }
+                //write referenceParameters
+                if (msEpr.referenceParameters != null) {
+                    for (Element e : msEpr.referenceParameters.elements) {
+                        DOMUtil.serializeNode(e, writer);
+                    }
                 }
                 writer.writeEndElement();
             }
@@ -284,7 +301,7 @@ public class EndpointReferenceUtil {
                         W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME);
                 String portTypePrefix = fixNull(msEpr.portTypeName.name.getPrefix());
                 writer.writeNamespace(portTypePrefix, msEpr.portTypeName.name.getNamespaceURI());
-                if (!portTypePrefix.equals(""))
+                if (portTypePrefix.equals(""))
                     writer.writeCharacters(msEpr.portTypeName.name.getLocalPart());
                 else
                     writer.writeCharacters(portTypePrefix + ":" + msEpr.portTypeName.name.getLocalPart());
@@ -311,13 +328,9 @@ public class EndpointReferenceUtil {
                     writer.writeCharacters(msEpr.serviceName.name.getLocalPart());
                 writer.writeEndElement();
             }
-
-            //write referenceParameters
-            if (msEpr.referenceParameters != null && msEpr.referenceParameters.elements.size() > 0) {
-                writeW3CMetadata(writer);
-                for (Element e : msEpr.referenceParameters.elements) {
-                    DOMUtil.serializeNode(e, writer);
-                }
+            //write WSDL
+            if(wsdlElement != null) {
+                DOMUtil.serializeNode(wsdlElement, writer);
             }
 
             if (w3cMetadataWritten)
@@ -378,11 +391,11 @@ public class EndpointReferenceUtil {
                     NodeList refParams = child.getChildNodes();
                     for (int j = 0; j < refParams.getLength(); j++) {
                         if (refParams.item(j).getNodeType() == Node.ELEMENT_NODE) {
-                            if (msEpr.referenceProperties == null) {
-                                msEpr.referenceProperties = new MemberSubmissionEndpointReference.Elements();
-                                msEpr.referenceProperties.elements = new ArrayList<Element>();
+                            if (msEpr.referenceParameters == null) {
+                                msEpr.referenceParameters = new MemberSubmissionEndpointReference.Elements();
+                                msEpr.referenceParameters.elements = new ArrayList<Element>();
                             }
-                            msEpr.referenceProperties.elements.add((Element) refParams.item(i));
+                            msEpr.referenceParameters.elements.add((Element) refParams.item(i));
                         }
                     }
                 } else if (child.getNamespaceURI().equals(W3CAddressingConstants.WSA_NAMESPACE_NAME) &&
@@ -437,11 +450,11 @@ public class EndpointReferenceUtil {
                             msEpr.portTypeName.attributes = getAttributes(elm);
                         } else {
                             //its extensions in META-DATA and should be copied to ReferenceProperties in MS EPR
-                            if (msEpr.referenceParameters == null) {
-                                msEpr.referenceParameters = new MemberSubmissionEndpointReference.Elements();
-                                msEpr.referenceParameters.elements = new ArrayList<Element>();
+                            if (msEpr.referenceProperties == null) {
+                                msEpr.referenceProperties = new MemberSubmissionEndpointReference.Elements();
+                                msEpr.referenceProperties.elements = new ArrayList<Element>();
                             }
-                            msEpr.referenceParameters.elements.add(elm);
+                            msEpr.referenceProperties.elements.add(elm);
                         }
                     }
                 } else {
