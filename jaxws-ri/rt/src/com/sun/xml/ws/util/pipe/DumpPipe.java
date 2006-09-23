@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 
@@ -77,7 +78,7 @@ public class DumpPipe extends DumpTube {
      */
     private DumpPipe(DumpPipe that, TubeCloner cloner) {
         super(that,cloner);
-        this.next = that.next;
+        this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
     public AbstractTubeImpl copy(TubeCloner cloner) {
