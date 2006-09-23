@@ -6,10 +6,14 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.message.AbstractHeaderImpl;
+import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
 import org.w3c.dom.Element;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -86,6 +90,9 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
 
                 attributes.add(new Attribute(namespaceURI,localName,value));
             }
+
+            // we are adding one more attribute "wsa:IsReferenceParameter"
+            attributes.add(new Attribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter",TRUE_VALUE));
         } catch (XMLStreamException e) {
             throw new WebServiceException("Unable to read the attributes for {"+nsUri+"}"+localName+" header",e);
         }
@@ -97,28 +104,80 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException();
+        try {
+            infoset.writeToXMLStreamWriter(new XMLStreamWriterFilter(w) {
+                private boolean root=true;
+
+                public void writeStartElement(String localName) throws XMLStreamException {
+                    super.writeStartElement(localName);
+                    writeAddedAttribute();
+                }
+
+                private void writeAddedAttribute() throws XMLStreamException {
+                    if(!root)   return;
+                    root=true;
+                    super.writeNamespace("wsa",AddressingVersion.W3C.nsUri);
+                    super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,"IsReferenceParameter",TRUE_VALUE);
+                }
+
+                public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
+                    super.writeStartElement(namespaceURI, localName);
+                    writeAddedAttribute();
+                }
+
+                public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+                    super.writeStartElement(prefix, localName, namespaceURI);
+                    writeAddedAttribute();
+                }
+            });
+        } catch (XMLStreamBufferException e) {
+            throw new XMLStreamException(e);
+        }
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         try {
             Element node = (Element)infoset.writeTo(saaj.getSOAPHeader());
-            node.setAttributeNS(AddressingVersion.W3C.nsUri,"IsReferenceParameter","1");
+            node.setAttributeNS(AddressingVersion.W3C.nsUri,"IsReferenceParameter",TRUE_VALUE);
         } catch (XMLStreamBufferException e) {
             throw new SOAPException(e);
         }
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        throw new UnsupportedOperationException();
+        class Filter extends XMLFilterImpl {
+            Filter(ContentHandler ch) { setContentHandler(ch); }
+            private int depth=0;
+            public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+                if(depth++==0) {
+                    // add one more attribute
+                    super.startPrefixMapping("wsa",AddressingVersion.W3C.nsUri);
+                    AttributesImpl atts2 = new AttributesImpl(atts);
+                    atts2.addAttribute(
+                        AddressingVersion.W3C.nsUri,
+                        "IsReferenceParameter",
+                        "wsa:IsReferenceParameter",
+                        "CDATA",
+                        TRUE_VALUE);
+                    atts = atts2;
+                }
+
+                super.startElement(uri, localName, qName, atts);
+            }
+
+            public void endElement(String uri, String localName, String qName) throws SAXException {
+                super.endElement(uri, localName, qName);
+                if(--depth==0)
+                    super.endPrefixMapping("wsa");
+            }
+        }
+
+        infoset.writeTo(new Filter(contentHandler),errorHandler);
     }
 
 
     /**
      * Keep the information about an attribute on the header element.
-     *
-     * TODO: this whole attribute handling could be done better, I think.
      */
     static final class Attribute {
         /**
@@ -142,4 +201,10 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
             else        return s;
         }
     }
+
+    /**
+     * We the performance paranoid people in the JAX-WS RI thinks
+     * saving three bytes is worth while...
+     */
+    private static final String TRUE_VALUE = "1";
 }
