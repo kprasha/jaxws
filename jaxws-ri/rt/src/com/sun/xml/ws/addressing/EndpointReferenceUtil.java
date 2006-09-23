@@ -135,19 +135,20 @@ public class EndpointReferenceUtil {
         }
 
         //Write service and Port info
-        writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_WSDL_PREFIX,
-                W3CAddressingConstants.WSAW_SERVICENAME_NAME,
-                W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME);
-        String servicePrefix = service.getPrefix();
-        if (servicePrefix == null || servicePrefix.equals("")) {
-            //TODO check prefix again
-            servicePrefix = "wsns";
+        if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
+            writer.writeStartElement(W3CAddressingConstants.WSA_NAMESPACE_WSDL_PREFIX,
+                    W3CAddressingConstants.WSAW_SERVICENAME_NAME,
+                    W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME);
+            String servicePrefix = service.getPrefix();
+            if (servicePrefix == null || servicePrefix.equals("")) {
+                //TODO check prefix again
+                servicePrefix = "wsns";
+            }
+            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port);
+            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+            writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+            writer.writeEndElement();
         }
-        writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port);
-        writer.writeNamespace(servicePrefix, service.getNamespaceURI());
-        writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
-        writer.writeEndElement();
-
         //Inline the wsdl
         if (hasWSDL) {
             writeWsdl(writer, service, eprAddress);
@@ -190,21 +191,22 @@ public class EndpointReferenceUtil {
         }
 
         assert service != null;
-
         //Write service and Port info
-        writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
-                MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
-                MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
-        String servicePrefix = service.getPrefix();
-        if (servicePrefix == null || servicePrefix.equals("")) {
-            //TODO check prefix again
-            servicePrefix = "wsns";
+        if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
+            writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
+                    MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
+                    MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
+            String servicePrefix = service.getPrefix();
+            if (servicePrefix == null || servicePrefix.equals("")) {
+                //TODO check prefix again
+                servicePrefix = "wsns";
+            }
+            writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
+                    port);
+            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+            writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+            writer.writeEndElement();
         }
-        writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
-                port);
-        writer.writeNamespace(servicePrefix, service.getNamespaceURI());
-        writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
-        writer.writeEndElement();
     }
 
     private static void writeWsdl(XMLStreamWriter writer, QName service, String eprAddress) throws XMLStreamException {
