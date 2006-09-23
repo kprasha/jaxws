@@ -103,7 +103,7 @@
                 keep="${keep}"
                 extension="${extension}"
                 destdir="${build.classes.home}"
-                package="fromjava_wsaddressing.client"
+                package="${client.package}"
                 wsdl="${client.wsdl}">
         </wsimport>
     </target>
