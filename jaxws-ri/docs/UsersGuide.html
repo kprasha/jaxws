@@ -16,7 +16,7 @@
 </div>
 
 <div style="margin-left:2em">
-	<A HREF="#2.1_JAX-WS_2.0_API">2.1 JAX-WS 2.0 API</A>
+	<A HREF="#2.1_JAX-WS_2.0_API">2.1 JAX-WS 2.1 API</A>
 </div>
 
 <div style="margin-left:2em">
@@ -56,7 +56,7 @@
 	<A HREF="#2.12_Asynchronous_Client_Operations_">2.12 Asynchronous Client Operations</A>
 </div>
 <div style="margin-left:1em">
-	<A HREF="#3._Programming_Model">3. Programming_Model</A>
+	<A HREF="#3._Programming_Model">3. Programming Model</A>
 </div>
 
 <div style="margin-left:2em">
@@ -98,19 +98,18 @@
 	<A HREF="#3.2.1.1_Generate_Client_Artifacts_">3.2.1.1 Generate Client Artifacts</A>
 </div>
 <div style="margin-left:3em">
-	<A HREF="#3.2.2_Dispatc">3.2.2 Dispatc</A>
+	<A HREF="#3.2.2_Dispatc">3.2.2 Dispatch</A>
 </div>
 <div style="margin-left:1em">
-	<A HREF="#4._Useful_Information_">4. Useful Information_</A>
-</div>
+	<A HREF="#4._Useful_Information_">4. Useful Information</A></div>
 
 <H2 style="text-align: left"><a name="1._Introduction">1.
     Introduction</a></H2>
 
 <P>This document describes the new features available in this release
-    of the <I>Java API for XML Web Services (JAX-WS) 2.0</I> <A HREF="http://jcp.org/en/jsr/detail?id=224">(JSR
+    of the <I>Java API for XML Web Services (JAX-WS) </I>&nbsp;<A HREF="http://jcp.org/en/jsr/detail?id=224">(JSR
     224)</A> Standard Implementation (SI). The main focus of this
-    document is to describe the tools used to develop JAX-WS 2.0_01 RI
+    document is to describe the tools used to develop JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} RI
     web service endpoints and clients. Readers of this document should be
     familiar with web services <A HREF="http://www.w3.org/TR/2000/REC-xml-20001006">XML</A>,
     <A HREF="http://www.w3.org/TR/2001/REC-xmlschema-1-20010502/">XML
@@ -138,18 +137,34 @@
 <h2 style="text-align: left"><a name="2.0_Features">2.
     Features</a></h2>
 
-<H4><a name="2.1_JAX-WS_2.0_API">2.1 JAX-WS 2.0 API</a></H4>
+<H4><a name="2.1_JAX-WS_2.0_API">2.1 JAX-WS </a>${SPEC_VERSION}<a name="2.1_JAX-WS_2.0_API"> API</a></H4>
 
-<P>Originally, JAX-WS 2.0 was named JAX-RPC 2.0 and the goal was to
-    be backward compatible with JAX-RPC 1.1. Sometime after JAX-RPC 2.0
-    EA1 release, JAX-RPC 2.0 specification was renamed to JAX-WS 2.0 and
-    the goal of being backward compatible with JAX-RPC 1.1 was abandoned.
-    JAX-WS 2.0 defines an all new set of packages and removes JAX-RPC 1.1
-    specific APIs. <BR><BR>This means that JAX-WS is a completely
-    different technology than JAX-RPC and thus cannot run JAX-RPC
-    applications. If you have an existing JAX-RPC application it must be
-    converted to work with JAX-WS.
-</P>
+<P>JAXWS ${SPEC_VERSION}is a Maintainence Release of JAXWS 2.0 API. JAXWS ${SPEC_VERSION}has 
+the following new features from JAXWS 2.0 specification:</P>
+<ul>
+	<li>Support for JAXB 2.1 APIs (JSR 222)</li>
+	<li>WS-Addressing support</li>
+	<li>APIs for EndpointReference<ul>
+		<li>Creation<ul>
+			<li>BindingProvider.getEndpointReference()</li>
+			<li>Endpoint.getEndpointReference()</li>
+			<li>MessageContext.getEndpointReference()</li>
+		</ul>
+		</li>
+		<li>EPR Propagation<ul>
+			<li>Using JAXB 2.1 bind W3C EPR to W3CEndpointReference class</li>
+			<li>Marshall/Unmarshall W3CEndpointReference class using JAXB</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li>User friendly APIs to enable/disable features, such as MTOM and 
+	Addressing</li>
+</ul>
+<p>JAX-RPC users should note that JAXWS is a completely different technology 
+than JAX-RPC and thus cannot run JAX-RPC
+    applications on top of JAXWS. If you have an existing JAX-RPC application it must be
+    converted to work with JAX-WS. </p>
 
 <H4><a name="2.2_Fully_Dynamic_Runtime_">2.2 Fully Dynamic Runtime</a></H4>
 
@@ -174,7 +189,15 @@
 <H4>
     <a name="2.3_MTOM_&amp;_swaRef">2.3 MTOM &amp; swaRef</a></H4>
 
-<P>JAX-WS 2.0 brings in support for optimized transmission of
+<P>MTOM and swaRef support was added in JAXWS 2.0 RI FCS release. MTOM and 
+swaref support is required by the JAXWS 2.0 specification. This means that the 
+MTOM or swaref solution developed with JAXWS ${SPEC_VERSION} RI will be fully 
+portable with any JAXWS 2.0 compliant implementation.</P>
+<P>MTOM implementation was completely re-written to allow streaming attachment 
+support and just like rest of the JAXWS runtime its written for better 
+performance. This implementation was released as part of JAXWS 2.0.1 M1 release.&nbsp;
+</P>
+<P>JAX-WS ${SPEC_VERSION} brings in support for optimized transmission of
     binary data as specified by <A HREF="http://www.w3.org/TR/soap12-mtom/">MTOM</A>
     (SOAP Message Transmission Optimization Mechanism)/<A HREF="http://www.w3.org/TR/xop10/">XOP
 </A>(XML Binary Optimized Packaing) and <A
@@ -199,13 +222,12 @@
         content of the element.</P>
 </UL>
 
-<P>For details on MTOM and swaRef features refer to <A HREF="mtom-swaref.html">JAX-WS
-    2.0 MTOM and swaRef</A>.</P>
+<P>For details on MTOM and swaRef features refer to <A HREF="mtom-swaref.html">MTOM and swaRef</A>.</P>
 
 <H4>    <a name="2.4_SOAP_1.2">2.4 SOAP 1.2</a></H4>
 
-<P>SOAP 1.2 support is added to JAX-WS 2.0. For details refer
-    to <A HREF="soap12.html">JAX-WS 2.0 SOAP 1.2.</A></P>
+<P>SOAP 1.2 support is added to JAX-WS ${SPEC_VERSION}. For details refer
+    to <A HREF="soap12.html">SOAP 1.2 .</A></P>
 <H4><a name="2.5_XML/HTTP_Binding_">2.5 XML/HTTP Binding</a></H4>
 
 <P>Support for XML/HTTP binding is added to JAX-WS 2.0. One can
@@ -215,55 +237,50 @@
     refer to restful sample.
 </P>
 
-<H4><a name="2.6_JAXB_2.0">2.6 JAXB 2.0</a></H4>
+<H4><a name="2.6_JAXB_2.0">2.6 JAXB 2.1</a></H4>
 
-<P>The most notable change in JAX-WS 2.0 is the use of JAXB 2.0
-    for data-binding between Java and XML. JAX-RPC 1.0 specified a
-    limited mapping between XML and Java, this was mainly due to the fact
-    that JAXB was not going to be done in time for JAX-RPC 1.0. With the
-    completion of JAXB, there is no longer a reason to have two separate
-    sets of mapping rules between XML and Java. JAX-WS will also support
-    the full set of JAXB binding customizations and optional schema
-    validation.</P>
+<P>JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} uses of JAXB 2.1
+    for data-binding between Java and XML which enables features such as 
+separate compilation, type substitution and other improvements. </P>
 
-<H4><a name="2.7_Annotations_">2.7
+<H4>2.7 W3C and Member Submission WS-Addressing </H4>
+<p>JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} brings in native support for 
+WS-Addressing for both W3C and Membersubmission specification. Applications 
+built on top of JAXWS can enable/disable WS-Addressing in JAXWS runtime using 
+JAXWS 2.1 defined standard APIs and Annotations. See WS-Addressing samples <b>
+fromjava-wsaddressing</b> and <b>fromwsdl-wsaddressing</b> with the jaxws ${IMPL_VERSION} 
+${IMPL_VERSION_SUFFIX} for details on the WS-Addressing programming model.</p>
+<H4><a name="2.7_Annotations_">2.8
     Annotations</a></H4>
 
-<P>JAX-WS 2.0 relies heavily on the use of annotations as
+<P>JAX-WS ${SPEC_VERSION} relies heavily on the use of annotations as
     provided by <I>A Metadata Facility for the Java Programming Language</I>
     <A HREF="http://jcp.org/en/jsr/detail?id=175">(JSR 175)</A> and and
     <I>Web Services Metadata for the Java Platform</I> <A HREF="http://jcp.org/en/jsr/detail?id=181.">(JSR
-    181)</A> as well as additional annotations defined by JAX-WS 2.0.
+    181)</A> as well as additional annotations defined by JAX-WS ${SPEC_VERSION}.
     These annotations are used to customize the mapping from Java to XML
     schema/WSDL and are used at runtime to alleviate the need for
     non-portable serializers/deserializers that were generated in JAX-RPC
     1.x.
 </P>
 
-<P>Another one of the shortcomings of the JAX-RPC 1.x SI, was
-    the inability to map parameter names to part meaningful part/element
-    names in the WSDL file. JSR 181 provides a WebParam annotation that
-    allows the developer to specify what the WSDL part/element name will
-    be.</P>
-
-<P>The JAX-WS SI utilizes a new tool apt
+<P>The JAX-WS SI utilizes a apt
     (annotation processing tool) that was introduced in J2SDK 5.0. apt
     allows the SI to process Java source files directly to generate the
     portable artifacts specified by the JAX-WS 2.0 specification. apt
     will be covered in more detail in section 3.1.1.</P>
 
 <P>For more information on the annotations used by JAX-WS 2.0
-    please refer to <A HREF="annotations.html">JAX-WS 2.0 annotations</A>.</P>
+    please refer to <A HREF="annotations.html">annotations</A>.</P>
 
-<H4><a name="2.8_Customizations_">2.8
+<H4><a name="2.8_Customizations_">2.9
     Customizations</a></H4>
 
-<P>The JAX-RPC 1.1 specification did not define a standard
-    customization architecture. However JAX-RPC 1.x SI had limited WSDL
-    to Java customization support. It allowed a JAX-RPC 1.x application
-    to:</P>
+<P>JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} carries forward customization 
+support introduced in JAXWS 2.0 RI. </P>
 <UL>
-    <LI><P>Define a package where Java artifacts mapped from a
+    <LI>
+	<P>Define a package where Java artifacts mapped from a
         WSDL file will be generated</P>
     <LI><P>Package customization for value classes mapped from the
         imported XML schemas by the WSDL document</P>
@@ -271,9 +288,6 @@
 
     <P>Handler chain customization</P>
 </UL>
-
-<P>But these customizations were not portable and could not be
-    used across other JAX-RPC implementations.</P>
 
 <P>JAX-WS 2.0 specification defines standard XML based
     customization for a WSDL file to Java mapping and to control certain
@@ -350,9 +364,9 @@
     2.0 please refer to <A HREF="customizations.html">JAX-WS 2.0
     customizations</A>.</P>
 
-<H4><a name="2.9_Improved_Handler_Framework_">2.9 Improved Handler Framework</a></H4>
+<H4><a name="2.9_Improved_Handler_Framework_">2.10 Improved Handler Framework</a></H4>
 
-<P>JAX-WS 2.0 defines two types of handlers: logical and
+<P>JAX-WS 2.0 specification defines two types of handlers: logical and
     protocol handlers. While protocol handlers have access to an entire
     message such as a SOAP message, logical handlers deal only with the
     payload of a message and are independent of the protocol being used.
@@ -360,10 +374,10 @@
     per-service basis. A new framework of context objects has been added
     to allow client code to share information easily with handlers.</P>
 
-<P>For more information on the handler framework in JAX-WS 2.0
-    please refer to <A HREF="handlers.html">JAX-WS 2.0 Handler Framework</A>.</P>
+<P>For more information on the handler framework in JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}
+    please refer to <A HREF="handlers.html">Handler Framework</A>.</P>
 
-<H4><a name="2.10_Provider">2.10
+<H4><a name="2.10_Provider">2.11
     Provider</a></H4>
 
 <P>Web service endpoints may choose to work at the XML message
@@ -371,10 +385,10 @@
     endpoints access messages or message payloads using this low level,
     generic API.</P>
 
-<P>For more information on providers in JAX-WS 2.0 please refer
-    to <A HREF="provider.html">JAX-WS 2.0 Provider</A>.</P>
+<P>For more information on providers in JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} please refer
+    to <A HREF="provider.html">Provider</A>.</P>
 
-<H4><a name="2.11_Dispatch">2.11
+<H4><a name="2.11_Dispatch">2.12
     Dispatch</a></H4>
 
 <P>The Dispatch API is intended for advanced XML developers who
@@ -384,12 +398,13 @@
     supported. The Dispatch API can be used in both Message
     and Payload modes.</P>
 
-<P>For more information on the Dispatch API in JAX-WS 2.0
-    please refer to <A HREF="dispatch.html">JAX-WS 2.0 Dispatch</A>.</P>
+<P>For more information on the Dispatch&nbsp;
+    please refer to <A HREF="dispatch.html">Dispatch</A>.</P>
 
-<H4><a name="2.12_Asynchronous_Client_Operations_">2.12 Asynchronous Client Operations</a></H4>
+<H4><a name="2.12_Asynchronous_Client_Operations_">2.13 Asynchronous Client Operations</a></H4>
 
-<P>For more information on asynchronous clients in JAX-WS 2.0
+<P>For more information on asynchronous clients in JAX-WS&nbsp; ${IMPL_VERSION} 
+${IMPL_VERSION_SUFFIX}
     please refer to <A HREF="asynch.html">JAX-WS 2.0 Asynchronous</A>.</P>
 
 <H2 style="text-align: left"><a name="3._Programming_Model">3.
@@ -436,7 +451,7 @@
 </OL>
 <H4><a name="3.1.1.1_Generate_Portable_Artifacts_">3.1.1.1 Generate Portable Artifacts</a></H4>
 
-<P>Portable artifacts generated by JAX-WS 2.0 include zero or
+<P>Portable artifacts generated by JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} include zero or
     more JavaBean classes to aide in the marshaling of method invocations
     and responses, as well as service-specific exceptions.</P>
 
@@ -455,9 +470,6 @@
 <UL>
     <LI><P STYLE="margin-bottom: 0in">It <EM>must</EM> carry a
         javax.jws.WebService annotation (see JSR 181).
-    </P>
-    <LI><P STYLE="margin-bottom: 0in">It <EM>may</EM> extend
-        java.rmi.Remote either directly or indirectly.
     </P>
     <LI><P STYLE="margin-bottom: 0in">Any of its methods <EM>may</EM>
         carry a javax.jws.WebMethod annotation (see 7.5.2).
@@ -505,7 +517,7 @@
 <P>
     If you are familiar with JAX-RPC 1.1, you will notice that this
         implementation class does not implement a service endpoint interface.
-        In JAX-WS 2.0 a service endpoint interface is no longer required.</P>
+        In JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} a service endpoint interface is no longer required.</P>
 
 <P>When starting from a Java endpoint implementation class, it
     is recommended that the portable artifacts be generated from source
@@ -815,8 +827,8 @@
     XML/HTTP Binding can be used with REST Web Services. Please see the
     restful sample program for more information.</P>
 
-<P>For more information on Dispatch in JAX-WS 2.0 please refer
-    to <A HREF="dispatch.html">JAX-WS 2.0 Dispatch</A>.</P>
+<P>For more information on Dispatch in JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} please refer
+    to <A HREF="dispatch.html">Dispatch</A>.</P>
 
 <H2 style="text-align: left"><a name="4._Useful_Information_">4.
     Useful Information</a></H2>

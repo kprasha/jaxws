@@ -5,10 +5,24 @@
 
 <body>
 <p>
-The documentation/samples included with JAX-WS that is distributed on Java.net or
-as part of JWSDP, documents how to use JAX-WS in a non-Java EE 5 servlet container using a
-proprietary deployment descriptor <code>sun-jaxws.xml</code> and servlet
-<code>com.sun.xml.ws.transport.http.servlet.WSServlet</code>.
+JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} is rename of JAXWS 2.0.1 M1 to 
+allow some crticial feature such as standard WS-Addressing support in JAXWS, 
+JAXB 2.1 API and type substitution. The development of JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
+is being done on the <b>mr-21 </b>branch in JAXWS CVS workspace.</p>
+<p>
+This release brings in the highly pluggable framework thru abstractions such as 
+Pipe and Message. Refer to the latest <span style="background-color: #FFFFFF">
+<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc-201/?jaxws/package-summary.html">
+architecture document</a></span>. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
+has many bug fixes made for interoperability with .NET 3.0. This is made mostly 
+possible due to WSIT, which uses JAXWS plugabble architecture to plug in support 
+for WS-Metadata, WS-Policy, WS-ReliableMessaging, WS-Transaction, WS-SecureConversation 
+and WS-Security.</p>
+<p>
+The documentation/samples included with JAX-WS that is distributed on Java.net documents how to use JAX-WS in a non-Java EE 5 servlet container using an 
+implementation specific deployment descriptor <code>sun-jaxws.xml</code> and servlet
+<code>com.sun.xml.ws.transport.http.servlet.WSServlet</code>.</p>
+<p>
 This means that you can run JAX-WS RI applications in any servlet container that has been
 enabled with the JAX-WS RI. Applications that use the proprietary DD and servlet
 will run in a JAX-WS RI enabled Java EE 5 servlet container, but
@@ -24,6 +38,10 @@ valid with Java EE 5 as well.
 <p>The documentation for JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} as well as the sample applications
     will be periodically updated in the JAX-WS project on Java.net.</p>
 
+<p>The architecture document describing the latest JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
+can be found <span style="background-color: #FFFFFF">
+<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc-201/?jaxws/package-summary.html">
+here</a></span>.</p>
 <p>Please go to <a href="http://jax-ws.dev.java.net/">http://jax-ws.dev.java.net</a>
     for the
     latest documentation and samples.</p>
@@ -39,36 +57,56 @@ valid with Java EE 5 as well.
             later</p>
     </li>
     <li>
-        <p>Requires 
+        <p>Tested to work with 
 		<a href="https://glassfish.dev.java.net/public/downloadsindex.html">
-		Glassfish v2 Milestone1</a></p>
+		Glassfish v2 Milestone1</a> and Apache Tomcat 5.x</p>
     </li>
 </ul>
 
 <h2>What This Release Includes</h2>
 
 <p>This release implements the <a
-        href="http://jcp.org/en/jsr/detail?id=224">Java<sup>TM</sup>for XML
-    Web Services
-    2.0 Specification</a>.</p>
+        href="http://jcp.org/en/jsr/detail?id=224">Java<sup>TM</sup>for XML Web 
+Services ${SPEC_VERSION} Specification</a>.</p>
 <!--<h2>What's New in This Release</h2>
 <ul>
 </ul> -->
+<h2>Whats new in this release</h2>
+<ul>
+	<li>@XmlSeeAlso or type substitution support, see type_substitution sample 
+	to see how you can achieve it</li>
+	<li>WS-Addressing implemented native to JAXWS runtime, see addressing sample 
+	to see how you can enable ws-addressing on a POJO</li>
+	<li>JAXB 2.1 RI</li>
+	<li>Following JAXWS 2.1 APIs<ul>
+		<li>BindingProvider.getEndpointReference()</li>
+		<li>BindingProvider.getEndpointReference(Class)</li>
+		<li>Endpoint.getEndpointReference()</li>
+		<li>Endpoint.getEndpointReferene(Class)</li>
+	</ul>
+	</li>
+	<li>Direct support of Member Submission EPR thru 
+	MemberSubmissionEndpointReference class</li>
+	<li>Bug fixes</li>
+</ul>
 <h2>Installation Instructions</h2>
 
-<p>The following applies to the JAX-WS standalone bundles. If you have
-    installed JAX-WS as part of the JWSDP, then installation is complete.</p>
+<p>The following applies to the JAX-WS standalone bundles.</p>
 
 <p>Once the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} bundle is extracted, it needs to be installed
     on the
-    Application Server. Make sure <code>AS_HOME</code> is set to the installation
+    Application Server.</p>
+<p>Make sure <code>AS_HOME</code> is set to the installation
     directory of the Application Server. You need to invoke <code>ANT_HOME/bin/ant install</code>
     command from the root directory of the extracted bundle to install
     JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}
-    binaries on the Application Server. However this step is
+    binaries on the Glassfish application server. However this step is
     required
     if you intend to build and deploy a Web service on the Application
     Server.</p>
+<p>To install JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} on Tomcat, simply 
+copy lib/*.jar from the root of JAXWS extracted bundle to $TOMCAT_HOME/shared/lib 
+directory.</p>
 
 <p>If you intend to only invoke an already existing Web service, then
     alternatively you can use the <code>wsimport</code> and <code>wsgen</code>
@@ -85,6 +123,31 @@ valid with Java EE 5 as well.
 <h2>Known Bugs/Issues</h2>
 <ul>
     <li>
+        @XmlSeeAlso annotated endpoint impl with interfaces in the method 
+		signature causes JAXB to throw NullPointerException.
+		<span style="background-color: #FFFFFF">See JAXB
+		<a href="https://jaxb.dev.java.net/issues/show_bug.cgi?id=248">Issue 
+		#248</a></span></li>
+	<li>
+        <span style="background-color: #FFFFFF">Propagation of 
+		W3CEndpointReference doesn't work.</span></li>
+	<li>
+        Member Submission EPR schema type fails to get mapped to implementation 
+		specific MemberSubmissionEndpointReference class.</li>
+	<li>
+        Endpoint.getEndpointReference() results into invalid EndpointReference. </li>
+	<li>
+        swaRef header types dont get marshalled/unmarshalled fails to go 
+		attachment</li>
+	<li>
+        MessageContext.INBOUND/OUTBOUND_ATTACHMENT_PROPERTY doesn't work.</li>
+	<li>
+        WSIT is not yet integrated with JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
+		and thus uses its own WS-Addressing implementation. WSIT M2 and JAXWS ${IMPL_VERSION} 
+		${IMPL_VERSION_SUFFIX} may not work togather because of certainl class 
+		conflicts. In the next release WSIT will integrate with JAXWS 2.1 and 
+		will fully use JAXWS 2.1 addressing implementation. </li>
+	<li>
         Although JAX-WS customizations are portable across implementations, the names of
         WSDL and schema files generated are not specified. Therefore each vendor may and
         most likely will generate different names. Therefore, when switching between
@@ -96,8 +159,6 @@ valid with Java EE 5 as well.
         a developer would need to change the filenames in their customization files to match
         the new file names.
     </li>
-</ul>
-<ul>
 </ul>
 
 <h2>For More Information</h2>
