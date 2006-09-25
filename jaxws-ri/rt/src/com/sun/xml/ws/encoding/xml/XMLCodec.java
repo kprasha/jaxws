@@ -54,8 +54,7 @@ public final class XMLCodec implements Codec {
     }
 
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
-        Message message = Messages.createUsingPayload(new StreamSource(in), 
-                SOAPVersion.SOAP_11);
+        Message message = XMLMessage.create(contentType, in);
         packet.setMessage(message);
     }
 
