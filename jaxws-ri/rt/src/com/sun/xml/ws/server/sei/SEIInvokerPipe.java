@@ -53,10 +53,14 @@ public class SEIInvokerPipe extends InvokerPipe {
     private static final String EMPTY_PAYLOAD_LOCAL = "";
     private static final String EMPTY_PAYLOAD_NSURI = "";
     private final SOAPVersion soapVersion;
+    private final WSBinding binding;
+    private final AbstractSEIModelImpl model;
 
     public SEIInvokerPipe(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
         super(invoker);
         this.soapVersion = binding.getSOAPVersion();
+        this.binding = binding;
+        this.model = model;
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         // fill in methodHandlers.
         for( JavaMethodImpl m : model.getJavaMethods() ) {
@@ -92,7 +96,7 @@ public class SEIInvokerPipe extends InvokerPipe {
                 : SOAP12Constants.FAULT_CODE_CLIENT;
             Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
                     soapVersion, faultString, faultCode);
-            res = req.createResponse(faultMsg);
+            res = req.createServerResponse(faultMsg, model.getPort(), binding);
         } else {
             res = handler.invoke(req);
         }

@@ -84,6 +84,7 @@ final class EndpointMethodHandler {
     private final MessageFiller[] outFillers;
 
     private final SEIInvokerPipe owner;
+    private WSBinding binding;
 
     public EndpointMethodHandler(SEIInvokerPipe owner, SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
         this.owner = owner;
@@ -97,6 +98,7 @@ final class EndpointMethodHandler {
         this.outFillers = fillers.toArray(new MessageFiller[fillers.size()]);
         this.isOneWay = method.getMEP().isOneWay();
         this.noOfArgs = this.method.getParameterTypes().length;
+        this.binding = binding;
     }
 
     /**
@@ -264,7 +266,7 @@ final class EndpointMethodHandler {
                 e.printStackTrace();
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
-            return req.createResponse(responseMessage);
+            return req.createServerResponse(responseMessage, seiModel.getPort(), binding);
         } finally {
             pool.recycle(m);
         }
