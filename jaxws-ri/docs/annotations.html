@@ -2529,24 +2529,84 @@ public class AddNumbers {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.arg1 = arg1;
 &nbsp;&nbsp;&nbsp; }
 }</PRE><A NAME="4.5 javax.xml.bind.annotation.XmlSeeAlso|outline"></A><h3><a name="4.5_javax.xml.bind.annotation.XmlSeeAlso__">4.5 javax.xml.bind.annotation.XmlSeeAlso </a></h3>
+  </P>
+  <P><FONT FACE="Thorndale, serif"><FONT SIZE=3>Instructs JAXB to also bind other classes when binding this class.
+   </FONT></FONT></P>
+  <TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>
+      <COL WIDTH=42*>
+      <COL WIDTH=139*>
+      <COL WIDTH=76*>
+      <TR VALIGN=TOP>
+          <TH WIDTH=16% BGCOLOR="#000000">
+              <P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Property</B></I></FONT></FONT></FONT></P>
+          </TH>
+          <TH WIDTH=54% BGCOLOR="#000000">
+              <P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Description</B></I></FONT></FONT></FONT></P>
+          </TH>
+          <TH WIDTH=30% BGCOLOR="#000000">
+              <P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Default</B></I></FONT></FONT></FONT></P>
+          </TH>
+      </TR>
+      <TR VALIGN=TOP>
+          <TD WIDTH=16% BGCOLOR="#ffffff">
+              <P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>value</FONT></FONT></FONT></P>
+          </TD>
+          <TD WIDTH=54% BGCOLOR="#ffffff">
+              <P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>
+              Other classes that JAXB can use when binding this class</FONT></FONT></FONT></P>
+          </TD>
+          <TD WIDTH=30% BGCOLOR="#ffffff">
+              <P STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT SIZE=3><FONT FACE="Cumberland, monospace">{}</FONT>
+              </FONT></FONT></P>
+          </TD>
+      </TR>
+  </TABLE>
+  <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4>
+  <PRE STYLE="margin-left: 0.48in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>/**
+   * Instructs JAXB to also bind other classes when binding this class.
+   *
+   * Java makes it impractical/impossible to list all sub-classes of
+   * a given class. This often gets in a way of JAXB users, as it JAXB
+   * cannot automatically list up the classes that need to be known
+   * to {@link JAXBContext}.
+   *
+   * For example, with the following class definitions:
+   *
+   *
+   * class Animal {}
+   * class Dog extends Animal {}
+   * class Cat extends Animal {}
+   *
+   *
+   * The user would be required to create {@link JAXBContext} as
+   * <tt>JAXBContext.newInstance(Dog.class,Cat.class)</tt>
+   * (<tt>Animal</tt> will be automatically picked up since <tt>Dog</tt>
+   * and <tt>Cat</tt> refers to it.)
+   *
+   * {@link XmlSeeAlso} annotation would allow you to write:
+   *
+   * &#64;XmlSeeAlso({Dog.class,Cat.class})
+   * class Animal {}
+   * class Dog extends Animal {}
+   * class Cat extends Animal {}
+   *
+   *
+   * This would allow you to do <tt>JAXBContext.newInstance(Animal.class)</tt>.
+   * By the help of this annotation, JAXB implementations will be able to
+   * correctly bind <tt>Dog</tt> and <tt>Cat</tt>.
+   *
+   * @author Kohsuke Kawaguchi
+   * @since JAXB2.1
+   * @version $Revision: 1.7.2.6.2.5 $
+   */
+  @Target({ElementType.TYPE})
+  @Retention(RUNTIME)
+  public @interface XmlSeeAlso {
+      Class[] value();
+  }</FONT></FONT></PRE><H4>
+  Example</H4>
 
-</font></font></font></font><FONT FACE="Times New Roman"><p>Instructs JAXB to also bind other classes when binding this class.</p><p>
-  Java makes it impractical/impossible to list all sub-classes of
-  a given class. This often gets in a way of JAXB users, as it JAXB cannot automatically list up the classes that need to be known
-  to {@link JAXBContext}.</p><p>
-  For example, with the following class definitions:</p></font><FONT FACE="Cumberland, monospace"><pre>
-&nbsp; class Animal {}
-&nbsp; class Dog extends Animal {}
-&nbsp; class Cat extends Animal {}</pre></font><FONT FACE="Times New Roman"><p>
-  The user would be required to create {@link JAXBContext} as </font><FONT FACE="Cumberland, monospace"><tt><font face="Times New Roman">JAXBContext.newInstance(Dog.class,Cat.class)</font></tt><FONT FACE="Times New Roman"> (  (</font><tt><font face="Times New Roman">Animal</font></tt><FONT FACE="Times New Roman"> will be automatically picked up since </font><tt><font face="Times New Roman">Dog</font></tt><FONT FACE="Times New Roman"> and </font><tt><font face="Times New Roman">Cat</font></tt><FONT FACE="Times New Roman"> refers to it.)</p><p>
-  {@link XmlSeeAlso} annotation would allow you to write:</p></font><pre>
-&nbsp; &#64;XmlSeeAlso({Dog.class,Cat.class})
-&nbsp; class Animal {}
-&nbsp; class Dog extends Animal {}
-&nbsp; class Cat extends Animal {}</pre><p>
-  This would allow you to do <tt>JAXBContext.newInstance(Animal.class)</tt>.
-  By the help of this annotation, JAXB implementations will be able to
-  correctly bind <tt>Dog</tt> and <tt>Cat</tt>. </p><H2>
+<H2>
 <A NAME="5._JSR_250_Common_Annotations"></A>5. JSR 250 (Common
 Annotations) Annotations</H2><FONT FACE="Times, serif"><P>The following annotations are being documented because JAX-WS
 endpoints use them for resource injection, and as lifecycle methods.
