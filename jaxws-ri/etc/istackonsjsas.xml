@@ -20,7 +20,7 @@
  [name of copyright owner]
 -->
 
-<project name="JAX-WS 2.0.1 M1 On Sun Java System App Server 8.1/8.2" default="help" basedir=".">
+<project name="JAX-WS 2.1 EA1 On Sun Java System App Server 8.1/8.2, GF v1, GF v2 M1" default="help" basedir=".">
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
@@ -44,7 +44,7 @@
     </target>
 
     <target name="install">
-        <echo message="Installing JAX-WS 2.0.1 on ${as.home} ..." />
+        <echo message="Installing JAX-WS 2.1 EA1 on ${as.home} ..." />
         <copy toDir="${backup.dir}">
             <fileset dir="${as.lib.home}">
                 <include name="saaj-*.jar"/>
@@ -113,7 +113,7 @@
     </target>
 
     <target name="help">
-        <echo message="install:    Installs JAX-WS 2.0.1 on the Application Server"/>
+        <echo message="install:    Installs JAX-WS 2.1 EA1 on the Application Server"/>
         <echo message="            Usage: ANT_HOME/bin/ant install"/>
     </target>
 </project>
