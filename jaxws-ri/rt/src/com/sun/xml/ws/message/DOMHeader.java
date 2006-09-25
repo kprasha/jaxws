@@ -113,6 +113,6 @@ public class DOMHeader<N extends Element> extends AbstractHeaderImpl {
 
     @Override
     public String getStringContent() {
-        return node.getNodeValue();
+        return node.getTextContent();
     }
 }
