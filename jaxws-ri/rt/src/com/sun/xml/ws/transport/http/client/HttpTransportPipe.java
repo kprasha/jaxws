@@ -116,12 +116,12 @@ public class HttpTransportPipe implements Pipe {
             Map<String, List<String>> respHeaders = con.getHeaders();
 
             if (con.statusCode== WSHTTPConnection.ONEWAY) {
-                return request.createResponse(null);    // one way. no response given.
+                return request.createClientResponse(null);    // one way. no response given.
             }
             String contentType = getContentType(respHeaders);
             // TODO check if returned MIME type is the same as that which was sent
             // or is acceptable if an Accept header was used
-            Packet reply = request.createResponse(null);
+            Packet reply = request.createClientResponse(null);
             reply.addSatellite(new HttpResponseProperties(con.getConnection()));
             InputStream response = con.getInput();
             if(dump) {
