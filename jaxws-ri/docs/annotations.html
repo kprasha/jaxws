@@ -2036,131 +2036,14 @@ element in the XML schema used by the WSDL of the web service.</P><TABLE WIDTH=1
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Defines
 			the local name of the XML element representing the annotated class</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
 			<PRE STYLE="font-style: normal; text-align: left; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot; &ndash; <FONT FACE="Thorndale, serif">the name is derived from the class </FONT></FONT></FONT></FONT>
-      
-
-
-
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </PRE></TD></TR><TR VALIGN=TOP>
 		<TD WIDTH=16% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>namespace</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>Defines
-			the namespace of the XML element <FONT FACE="Thorndale, serif">representing
-			the annotated class</FONT></FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<PRE STYLE="font-style: normal; text-align: left; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot; &ndash; <FONT FACE="Thorndale, serif">the namespace is derived from the package of the class </FONT></FONT></FONT></FONT>
-      
-
-      
-
-
-
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      
-
-      </PRE></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in">@Retention(RUNTIME)
+			the namespace of the XML element representing the annotated class</FONT></FONT></FONT></P></TD>
+      <TD WIDTH=30% BGCOLOR="#ffffff">
+			<FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot; &ndash; <FONT FACE="Thorndale, serif">the namespace is derived from the package of the class </FONT></FONT></FONT></FONT>
+</TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in">@Retention(RUNTIME)
 @Target({TYPE})
 public @interface XmlRootElement {
 &nbsp;&nbsp;&nbsp; /**
@@ -2228,209 +2111,57 @@ whether fields or properties are serialized by default.</P><P STYLE="margin-bott
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Specifies
 			whether fields or properties are serialized by default. The value
 			can be <FONT FACE="Cumberland, monospace">XmlAccessType.FIELD</FONT> or <FONT FACE="Cumberland, monospace">XmlAccessType.PROPERTY or </FONT><FONT FACE="Cumberland, monospace">XmlAccessType.PUBLIC_MEMBER or </FONT><FONT FACE="Cumberland, monospace">XmlAccessType.NONE</FONT></FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>XmlAccessType.PROPERTY</FONT></FONT></FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Inherited @Retention(RUNTIME) @Target({PACKAGE, TYPE})</FONT></FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>public @interface XmlAccessorType {</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">/**</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* Specifies whether fields or properties are serialized. </FONT>     
-     &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;     
-     <FONT FACE="Cumberland, monospace">* </FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* If the value is XmlAccessType.PROPERTY, then properties are</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* serialized by default and fields are assumed to be annotated</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* with {@link XmlTransient}.</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">*</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* If the value is XmlAccessType.FIELD, then fields are serialized by</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* default and properties are assumed to be annotated with </FONT>   
-     &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;   
-     <FONT FACE="Cumberland, monospace">* with {@link XmlTransient}.</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* </FONT>     
-     &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;     
-     <FONT FACE="Cumberland, monospace">*/</FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">XmlAccessType value() default XmlAccessType.PROPERTY;</FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>}</FONT></font></PRE><PRE STYLE="margin-left: 0.49in"><FONT FACE="Cumberland, monospace">
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>public enum XmlAccessType {</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>/**</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* Every getter/setter pair in a JAXB-bound class will be automatically</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* bound to XML, unless annotated by {@link XmlTransient}.</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* Fields are bound to XML only when they are explicitly annotated</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* by some of the JAXB annotations.</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*/</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>PROPERTY,</FONT></FONT>&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>/**</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* Every non static, non transient field in a JAXB-bound class will be automatically</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* bound to XML, unless annotated by {@link XmlTransient}.</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* Getter/setter pairs are bound to XML only when they are explicitly annotated</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* by some of the JAXB annotations.</FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*/</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>FIELD,</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>/**</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* Every public getter/setter pair and every public field will be</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* automatically bound to XML, unless annotated by {@link XmlTransient}.</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* Fields or getter/setter pairs that are private, protected, or </FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* defaulted to package-only access are bound to XML only when they are</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* explicitly annotated by the appropriate JAXB annotations.</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*/</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>PUBLIC_MEMBER,</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>/**</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* None of the fields or properties is bound to XML unless they</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>* are specifically&nbsp; annotated with some of the JAXB annotations.</FONT></FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace"><FONT SIZE=2>*</FONT>&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace"><FONT SIZE=2>NONE</FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>}</FONT></FONT></PRE><H4>
-EExample</H4><PRE STYLE="margin-left: 0.49in">@XmlRootElement(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;)
+			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>XmlAccessType.PROPERTY</FONT></FONT></FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4>
+  <PRE STYLE="margin-left: 0.49in"><FONT FACE="Cumberland, monospace">@Inherited @Retention(RUNTIME) @Target({PACKAGE, TYPE})
+public @interface XmlAccessorType {
+
+    /**
+     * Specifies whether fields or properties are serialized.
+     *
+     * @see XmlAccessType
+     */
+    XmlAccessType value() default XmlAccessType.PUBLIC_MEMBER;
+}
+/**
+ * Used by XmlAccessorType to control serialization of fields or
+ * properties.
+ *
+ */
+
+public enum XmlAccessType {
+    /**
+     * Every getter/setter pair in a JAXB-bound class will be automatically
+     * bound to XML, unless annotated by {@link XmlTransient}.
+     *
+     * Fields are bound to XML only when they are explicitly annotated
+     * by some of the JAXB annotations.
+     */
+    PROPERTY,
+    /**
+     * Every non static, non transient field in a JAXB-bound class will be automatically
+     * bound to XML, unless annotated by {@link XmlTransient}.
+     *
+     * Getter/setter pairs are bound to XML only when they are explicitly annotated
+     * by some of the JAXB annotations.
+     */
+    FIELD,
+    /**
+     * Every public getter/setter pair and every public field will be
+     * automatically bound to XML, unless annotated by {@link XmlTransient}.
+     *
+     * Fields or getter/setter pairs that are private, protected, or
+     * defaulted to package-only access are bound to XML only when they are
+     * explicitly annotated by the appropriate JAXB annotations.
+     */
+    PUBLIC_MEMBER,
+    /**
+     * None of the fields or properties is bound to XML unless they
+     * are specifically  annotated with some of the JAXB annotations.
+     */
+    NONE
+}
+  </FONT></PRE><H4>
+Example</H4><PRE STYLE="margin-left: 0.49in">@XmlRootElement(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;, propOrder = {
 &nbsp;&nbsp;&nbsp; &quot;arg0&quot;,
@@ -2476,18 +2207,9 @@ represented by schema components within a schema type's content model
 		<TD WIDTH=16% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>name</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Defines
-			the local name of the XML type representing this class in the XML
-			schema used by the WSDL of the web service</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<PRE STYLE="font-style: normal; text-align: left; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot;</FONT></FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      </PRE>
+			the local name of the XML type representing this class in the XML schema used by the WSDL of the web service</FONT></FONT></FONT></P></TD>
+      <TD WIDTH=30% BGCOLOR="#ffffff">
+			<FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot;</FONT></FONT></FONT>
 		</TD>
 	</TR>
 	<TR VALIGN=TOP>
@@ -2497,25 +2219,7 @@ represented by schema components within a schema type's content model
 			the namespace <FONT FACE="Thorndale, serif">of the XML type
 			representing this class in the XML schema used by the WSDL of the
 			web service</FONT></FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<PRE STYLE="font-style: normal; text-align: left; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot;</FONT></FONT></FONT>
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-      </PRE>
+			<FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot;</FONT></FONT></FONT>
 		</TD>
 	</TR>
 	<TR VALIGN=TOP>
@@ -2526,119 +2230,82 @@ represented by schema components within a schema type's content model
 			the list is the name of a Java identifier of the JavaBean
 			property. The order in which JavaBean properties are listed is the
 			order of XML Schema elements to which the JavaBean properties are
-			mapped.</FONT></FONT></P><PRE STYLE="margin-left: 0.02in"><FONT FACE="Thorndale, serif"><FONT SIZE=3>All of the JavaBean properties being mapped must be listed (i.e. if a JavaBean property mapping is prevented by @XmlTransient, then it does not have to be listed). Otherwise, it is an error.</FONT></FONT>
+			mapped.</FONT></FONT></P><FONT FACE="Thorndale, serif"><FONT SIZE=3>All of the JavaBean properties being mapped must be listed (i.e. if a JavaBean property mapping is prevented by @XmlTransient, then it does not have to be listed). Otherwise, it is an error.</FONT></FONT>
 
 <FONT SIZE=3><FONT FACE="Thorndale, serif">By default, the JavaBean properties are ordered using a<SPAN STYLE="text-decoration: none"><FONT COLOR="#000000"> default order specified in the <A HREF="http://www.jcp.org/en/jsr/detail?id=222">JAXB 2.0 specification</A>.</FONT></SPAN></FONT></FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      </PRE>
 		</TD>
 		<TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>{&ldquo;&rdquo;}</FONT></FONT></FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.5in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({TYPE})</FONT></FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>public @interface XmlType {</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">/**</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* Name of the XML Schema type which the class is mapped.</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">*/</FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">String name() default &quot;##default&quot; ;</FONT>&nbsp;&nbsp;&nbsp;
+			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>{&ldquo;&rdquo;}</FONT></FONT></FONT></P></TD></TR></TABLE>
+  <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.5in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({TYPE})
+public @interface XmlType {
+    /**
+     * Name of the XML Schema type which the class is mapped.
+     */
+    String name() default "##default" ;
 
-&nbsp;&nbsp;&nbsp;
+    /**
+     * Specifies the order for XML Schema elements when class is
+     * mapped to a XML Schema complex type.
+     *
+     * <p> Refer to the table for how the propOrder affects the
+     * mapping of class </p>
+     *
+     * <p> The propOrder is a list of names of JavaBean properties in
+     *     the class. Each name in the list is the name of a Java
+     *     identifier of the JavaBean property. The order in which
+     *     JavaBean properties are listed is the order of XML Schema
+     *     elements to which the JavaBean properties are mapped. </p>
+     * <p> All of the JavaBean properties being mapped to XML Schema elements
+     *     must be listed.
+     * <p> A JavaBean property or field listed in propOrder must not
+     *     be transient or annotated with <tt>@XmlTransient</tt>.
+     * <p> The default ordering of JavaBean properties is determined
+     *     by @{@link XmlAccessorOrder}.
+     */
+    String[] propOrder() default {""};
 
-&nbsp;&nbsp;&nbsp;
+    /**
+     * Name of the target namespace of the XML Schema type. By
+     * default, this is the target namespace to which the package
+     * containing the class is mapped.
+     */
+    String namespace() default "##default" ;
 
-&nbsp;&nbsp;&nbsp;
+    /**
+     * Class containing a no-arg factory method for creating an
+     * instance of this class. The default is this class.
+     *
+     * <p>If <tt>factoryClass</tt> is DEFAULT.class and
+     * <tt>factoryMethod</tt> is "", then there is no static factory
+     * method.
+     *
+     * <p>If <tt>factoryClass</tt> is DEFAULT.class and
+     * <tt>factoryMethod</tt> is not "", then
+     * <tt>factoryMethod</tt> is the name of a static factory method
+     * in this class.
+     *
+     * <p>If <tt>factoryClass</tt> is not DEFAULT.class, then
+     * <tt>factoryMethod</tt> must not be "" and must be the name of
+     * a static factory method specified in <tt>factoryClass</tt>.
+     */
+    Class factoryClass() default DEFAULT.class;
 
-&nbsp;&nbsp;&nbsp;
+    /**
+     * Used in {@link XmlType#factoryClass()} to
+     * signal that either factory mehod is not used or
+     * that it's in the class with this {@link XmlType} itself.
+     */
+    static final class DEFAULT {}
 
-    <FONT FACE="Cumberland, monospace">/**</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* Specifies the order for XML Schema elements when class is</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* mapped to a XML Schema complex type.</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* </FONT>     
-     &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;     
-     <FONT FACE="Cumberland, monospace">* Refer to the table for how the propOrder affects the</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* mapping of class </FONT>   
-     &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;   
-     <FONT FACE="Cumberland, monospace">* </FONT>     &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; The propOrder is a list of names of JavaBean properties in</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; the class. Each name in the list is the name of a Java</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; identifier of the JavaBean property. The order in which</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; JavaBean properties are listed is the order of XML Schema</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; elements to which the JavaBean properties are mapped. </FONT>  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; All of the JavaBean properties being mapped must be</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; listed (i.e. if a JavaBean property mapping is prevented</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; by @XmlTransient, then it does not have to be</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; listed). Otherwise, it is an error.</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; By default, the JavaBean properties are ordered using a</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <FONT FACE="Cumberland, monospace">*&nbsp;&nbsp;&nbsp;&nbsp; default order specified in the JAXB 2.0 specification.</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <FONT FACE="Cumberland, monospace">*/</FONT></PRE><PRE STYLE="margin-left: 0.5in">&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">String[] propOrder() default {&quot;&quot;};</FONT>
-&nbsp;&nbsp;
-&nbsp;&nbsp;
-&nbsp;&nbsp;
-&nbsp;&nbsp;
-&nbsp;&nbsp;
-   <FONT FACE="Cumberland, monospace">/**</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* Name of the target namespace of the XML Schema type. By</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* default, this is the target namespace to which the package</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* containing the class is mapped.</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">*/</FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">String namespace() default &quot;##default&quot; ;</FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>}</FONT></PRE><H4>
+    /**
+     * Name of a no-arg factory method in the class specified in
+     * <tt>factoryClass</tt> factoryClass().
+     *
+     */
+    String factoryMethod() default "";
+}
+
+  </FONT></FONT></PRE><H4>
 Example</H4><PRE STYLE="margin-left: 0.48in">
 @XmlRootElement(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -2710,113 +2377,77 @@ Schema complex type to which the containing class is mapped.</FONT></FONT></P><T
 		</TD>
 	</TR>
 </TABLE>
-<H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.48in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({FIELD, METHOD})</FONT></FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>public @interface XmlElement {</FONT></FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">/**</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">*</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;<FONT FACE="Cumberland, monospace"> * Name of the XML Schema element. </FONT>&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* If the value is &quot;##default&quot;, then element name is derived from the</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* JavaBean property name. </FONT>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">*/</FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">String name() default &quot;##default&quot;;</FONT></PRE><PRE STYLE="margin-left: 0.48in">&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">/**</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp;<FONT FACE="Cumberland, monospace"> * Customize the element declaration to be nillable. </FONT>&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; * If nillable() is true, then the JavaBean property is&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; * mapped to a XML Schema nillable element declaration.&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* If nillable() is false and the JavaBean property type is a</FONT>
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <FONT FACE="Cumberland, monospace">* collection type, then the JavaBean property is mapped to</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; * repeating occurrence. &nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Otherwise, the JavaBean property is mapped to an an &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* XML Schema element declaration with occurrence range of 0..1.&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">boolean nillable() default false;</FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">/**</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* Specifies the XML target namespace of the XML Schema</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* element. The namespace must be a valid namespace URI.</FONT>&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* </FONT>&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* It the value is &quot;##default&quot;, then the namespace is the</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* namespace of the containing class.</FONT>
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">* </FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp; <FONT FACE="Cumberland, monospace">*/</FONT>&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">String namespace() default &quot;##default&quot; ;</FONT>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">/**</FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* The Java class being referenced.</FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">*/</FONT>&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">Class type() default DEFAULT.class;</FONT>&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">/**</FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* Used in {@link XmlElement#type()} to</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* signal that the type be inferred from the signature</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">* of the property.</FONT>&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-     <FONT FACE="Cumberland, monospace">*/</FONT>&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-    <FONT FACE="Cumberland, monospace">static final class DEFAULT {}</FONT>
-<FONT FACE="Cumberland, monospace"><FONT SIZE=2>}</FONT></FONT></PRE><H4>
+<H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.48in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({FIELD, METHOD})
+public @interface XmlElement {
+    /**
+     * Name of the XML Schema element.
+     * <p> If the value is "##default", then element name is derived from the
+     * JavaBean property name.
+     */
+    String name() default "##default";
+
+    /**
+     * Customize the element declaration to be nillable.
+     * <p>If nillable() is true, then the JavaBean property is
+     * mapped to a XML Schema nillable element declaration.
+     */
+    boolean nillable() default false;
+
+    /**
+     * Customize the element declaration to be required.
+     * <p>If required() is true, then Javabean property is mapped to
+     * an XML schema element declaration with minOccurs="1".
+     * maxOccurs is "1" for a single valued property and "unbounded"
+     * for a multivalued property.
+     * <p>If required() is false, then the Javabean property is mapped
+     * to XML Schema element declaration with minOccurs="0".
+     * maxOccurs is "1" for a single valued property and "unbounded"
+     * for a multivalued property.
+     */
+
+    boolean required() default false;
+
+    /**
+     * XML target namespace of the XML Schema element.
+     * <p>
+     * If the value is "##default", then the namespace is determined
+     * as follows:
+     * <ol>
+     *  <li>
+     *  If the enclosing package has {@link XmlSchema} annotation,
+     *  and its {@link XmlSchema#elementFormDefault() elementFormDefault}
+     *  is {@link XmlNsForm#QUALIFIED QUALIFIED}, then the namespace of
+     *  the enclosing class.
+     *
+     *  <li>
+     *  Otherwise "" (which produces unqualified element in the default
+     *  namespace.
+     * </ol>
+     */
+    String namespace() default "##default";
+
+    /**
+     * Default value of this element.
+     *
+     * <p>
+     * The '\u0000' value specified as a default of this annotation element
+     * is used as a poor-man's substitute for null to allow implementations
+     * to recognize the 'no default value' state.
+     */
+    String defaultValue() default "\u0000";
+
+    /**
+     * The Java class being referenced.
+     */
+    Class type() default DEFAULT.class;
+
+    /**
+     * Used in {@link XmlElement#type()} to
+     * signal that the type be inferred from the signature
+     * of the property.
+     */
+    static final class DEFAULT {}
+}</FONT></FONT></PRE><H4>
 Example</H4><PRE STYLE="margin-left: 0.5in">@XmlRootElement(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;, propOrder = {
@@ -2898,7 +2529,7 @@ public class AddNumbers {
 &nbsp;&nbsp; *
 &nbsp;&nbsp; * @author Kohsuke Kawaguchi
 &nbsp;&nbsp; * @since JAXB2.1
-&nbsp;&nbsp; * @version $Revision: 1.7.2.6.2.6 $
+&nbsp;&nbsp; * @version $Revision: 1.7.2.6.2.7 $
 &nbsp;&nbsp; */
 &nbsp; @Target({ElementType.TYPE})
 &nbsp; @Retention(RUNTIME)
@@ -2946,17 +2577,10 @@ is initialized.</P><TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT FACE="times, serif">type</FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Java
 			type of the resource</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<PRE STYLE="font-style: normal; text-align: left; text-decoration: none">For field annotations,
+			For field annotations,
  the default is the type of the field.&nbsp; For method annotations,
  the default is the type of the JavaBeans property.
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      </PRE></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE>@Target({TYPE, FIELD, METHOD})
+</TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE>@Target({TYPE, FIELD, METHOD})
 @Retention(RUNTIME)
 public @interface Resource {
 &nbsp;&nbsp;&nbsp; ...
@@ -2969,7 +2593,7 @@ public @interface Resource {
 &nbsp;&nbsp;&nbsp;&nbsp; */
  Class type() default java.lang.Object.class;
 }</PRE><H4>
-ExaExample</H4><PRE>@WebService
+Example</H4><PRE>@WebService
 public class HelloImpl {
  @Resource
 &nbsp;&nbsp;&nbsp; private WebServiceContext context;
@@ -2977,7 +2601,7 @@ public class HelloImpl {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
 &nbsp;&nbsp;&nbsp; }
 }</PRE><H3>
-<A NAME="4.2 javax.xml.bind.annotation.XmlAccessorType|outline1"></A><A NAME="5.2_javax.annotation.PostConstruct"></A>
+<A NAME="5.2_javax.annotation.PostConstruct"></A>
 <FONT FACE="Thorndale, serif">5.2</FONT> javax.annotation.PostConstruct</H3><P STYLE="margin-bottom: 0in">This annotation is used on a method
 that needs to be executed after dependency injection is done to
 perform any initialization. This method MUST be invoked before the
@@ -2996,9 +2620,8 @@ public class HelloImpl {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
 &nbsp;&nbsp;&nbsp; }
 }</PRE><P>
-<BR><BR>
 </P>
-<H3><A NAME="4.3 javax.xml.bind.annotation.XmlType|outline1"></A><A NAME="5.3_javax.annotation.PreDestroy"></A>
+<H3><A NAME="5.3_javax.annotation.PreDestroy"></A>
 <FONT FACE="Thorndale, serif">5.3</FONT> javax.annotation.PreDestroy</H3><P>The PreDestroy annotation is used on methods as a callback
 notification to signal that the instance is in the process of being
 removed by the container. The method annotated with PreDestroy is
