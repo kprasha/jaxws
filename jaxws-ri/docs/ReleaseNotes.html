@@ -5,7 +5,7 @@
 
 <body>
 <p>
-JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} is rename of JAXWS 2.0.1 M1 to 
+JAXWS ${IMPL_VERSION}${IMPL_VERSION_SUFFIX}  is rename of JAXWS 2.0.1 M1 to 
 allow some crticial feature such as standard WS-Addressing support in JAXWS, 
 JAXB 2.1 API and type substitution. The development of JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
 is being done on the <b>mr-21 </b>branch in JAXWS CVS workspace.</p>
@@ -58,8 +58,7 @@ here</a></span>.</p>
     </li>
     <li>
         <p>Tested to work with 
-		<a href="https://glassfish.dev.java.net/public/downloadsindex.html">
-		Glassfish v2 Milestone1</a> and Apache Tomcat 5.x</p>
+		<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone1</a> and Apache Tomcat 5.x</p>
     </li>
 </ul>
 
@@ -73,8 +72,6 @@ Services ${SPEC_VERSION} Specification</a>.</p>
 </ul> -->
 <h2>Whats new in this release</h2>
 <ul>
-	<li>@XmlSeeAlso or type substitution support, see type_substitution sample 
-	to see how you can achieve it</li>
 	<li>WS-Addressing implemented native to JAXWS runtime, see addressing sample 
 	to see how you can enable ws-addressing on a POJO</li>
 	<li>JAXB 2.1 RI</li>
@@ -87,7 +84,8 @@ Services ${SPEC_VERSION} Specification</a>.</p>
 	</li>
 	<li>Direct support of Member Submission EPR thru 
 	MemberSubmissionEndpointReference class</li>
-	<li>Bug fixes</li>
+	<li>
+	<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?issue_type=DEFECT&issue_type=ENHANCEMENT&component=jax-ws&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&resolution=FIXED&target_milestone=2.1&email1=&emailtype1=exact&emailassigned_to1=1&emai">Bug fixes</a></li>
 </ul>
 <h2>Installation Instructions</h2>
 
@@ -130,14 +128,12 @@ directory.</p>
 		#248</a></span></li>
 	<li>
         <span style="background-color: #FFFFFF">Propagation of 
-		W3CEndpointReference doesn't work.</span></li>
+		W3CEndpointReference from client to the service endpoint doesn't work.</span></li>
 	<li>
         Member Submission EPR schema type fails to get mapped to implementation 
 		specific MemberSubmissionEndpointReference class.</li>
 	<li>
-        Endpoint.getEndpointReference() results into invalid EndpointReference. </li>
-	<li>
-        swaRef header types dont get marshalled/unmarshalled fails to go 
+        swaRef header types dont get marshalled/unmarshalled fails to get 
 		attachment</li>
 	<li>
         MessageContext.INBOUND/OUTBOUND_ATTACHMENT_PROPERTY doesn't work.</li>

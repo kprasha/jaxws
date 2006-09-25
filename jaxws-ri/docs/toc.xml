@@ -6,11 +6,11 @@
   </banner>
   <!-- this portion is excuted as the footer -->
   <footer>
-    $Revision: 1.1.4.1 $<br/>      $Date: 2006-08-23 01:03:53 $<br/>
+    $Revision: 1.1.4.2 $<br/>      $Date: 2006-09-25 22:55:09 $<br/>
     <a href="Copyright.html">Copyright&#169; 2006 Sun Microsystems, Inc. All rights reserved.</a>
   </footer>
     
-  <chapter name="JAXWS 2.0">
+  <chapter name="JAXWS 2.1 EA">
     <document name="Overview"
               url="index.html"/>
     <document name="Release Notes"

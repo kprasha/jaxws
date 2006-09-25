@@ -34,27 +34,31 @@
 	<A HREF="#2.5_XML/HTTP_Binding_">2.5 XML/HTTP Binding/A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.6_JAXB_2.0">2.6 JAXB 2.0</A>
+	<A HREF="#2.6_JAXB_2.0">2.6 JAXB 2.1</A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.7_Annotations_">2.7 Annotations</A>
+	<A HREF="#2.7_WS-Addressing">2.7 WS-Addresssing</A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.8_Customizations_">2.8 Customizations</A>
+	<A HREF="#2.7_Annotations_">2.8 Annotations</A>
+</div>
+<div style="margin-left:2em">
+	<A HREF="#2.8_Customizations_">2.9 Customizations</A>
 </div>
 
 <div style="margin-left:2em">
-	<A HREF="#2.9_Improved_Handler_Framework_">2.9 Improved Handler Framework</A>
+	<A HREF="#2.9_Improved_Handler_Framework_">2.10 Improved Handler Framework</A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.10_Provider">2.10 Provider</A>
+	<A HREF="#2.10_Provider">2.11 Provider</A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.11_Dispatch">2.11 Dispatch</A>
+	<A HREF="#2.11_Dispatch">2.12 Dispatch</A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.12_Asynchronous_Client_Operations_">2.12 Asynchronous Client Operations</A>
+	<A HREF="#2.12_Asynchronous_Client_Operations_">2.13 Asynchronous Client Operations</A>
 </div>
+
 <div style="margin-left:1em">
 	<A HREF="#3._Programming_Model">3. Programming Model</A>
 </div>
@@ -243,13 +247,56 @@ performance. This implementation was released as part of JAXWS 2.0.1 M1 release.
     for data-binding between Java and XML which enables features such as 
 separate compilation, type substitution and other improvements. </P>
 
-<H4>2.7 W3C and Member Submission WS-Addressing </H4>
+<H4><a name="2.7_WS-Addressing">2.7 WS-Addressing</a> </H4>
 <p>JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} brings in native support for 
-WS-Addressing for both W3C and Membersubmission specification. Applications 
+WS-Addressing for both W3C and MemberSubmission specification. Applications 
 built on top of JAXWS can enable/disable WS-Addressing in JAXWS runtime using 
 JAXWS 2.1 defined standard APIs and Annotations. See WS-Addressing samples <b>
 fromjava-wsaddressing</b> and <b>fromwsdl-wsaddressing</b> with the jaxws ${IMPL_VERSION} 
 ${IMPL_VERSION_SUFFIX} for details on the WS-Addressing programming model.</p>
+<p><b>Starting from Java class</b> </p>
+<P>
+@BindingType(value = SOAPBinding.SOAP11HTTP_BINDING, features = {@Feature(value = AddressingFeature.ID)})
+is used to enable addressing. With this annotation the generated WSDL for this service contains
+<wsaw:UsingAddressing/> in the binding section. At the minimal, this should be specified on an endpoint
+implementation to enable W3C WS-Addressing starting from Java.
+</P>
+<p>
+@Action and @FaultAction annotations are used to specify explicit wsa:Action values and notice how
+these are reflected the in the portType definitions of the generated wsdl. Without any explicit action
+values, default values are used as per WS-Addressing specification. Observe the SOAP request and response
+messages to see how wsa:Action is derived from these associations.
+</p>
+<b>Starting from WSDL</b> 
+
+<p>&lt;wsaw:UsingAddressing/&gt;
+extensibility element should be used inside <wsd::binding> element to enable
+addressing. 
+
+</p>
+
+<p><code>&lt;wsdl:portType name=&quot;AddNumbersPortType&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;
+&lt;wsdl:operation name=&quot;addNumbers3&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsdl:input message=&quot;tns:addNumbers3&quot; wsaw:Action=&quot;3in&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsdl:output message=&quot;tns:addNumbers3Response&quot; wsaw:Action=&quot;3out&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;wsdl:fault name=&quot;addNumbersFault&quot; message=&quot;tns:addNumbersFault&quot; wsaw:Action=&quot;3fault&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;
+&lt;/wsdl:operation&gt;<br>
+&lt;/wsdl:portType&gt;<br>
+<br>
+&lt;wsdl:binding name=&quot;AddNumbersBinding&quot; type=&quot;tns:AddNumbersPortType&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;
+&lt;wsaw:UsingAddressing/&gt;<br>
+&lt;/wsdl:binding&gt; </code></p>
+
+&lt;operation name=&quot;addNumbers2&quot;&gt;
+
+shows usage of explicit wsa:Action values on the input, output and fault message.
+
 <H4><a name="2.7_Annotations_">2.8
     Annotations</a></H4>
 
@@ -406,7 +453,6 @@ support introduced in JAXWS 2.0 RI. </P>
 <P>For more information on asynchronous clients in JAX-WS&nbsp; ${IMPL_VERSION} 
 ${IMPL_VERSION_SUFFIX}
     please refer to <A HREF="asynch.html">JAX-WS 2.0 Asynchronous</A>.</P>
-
 <H2 style="text-align: left"><a name="3._Programming_Model">3.
     Programming Model</a></H2>
 
