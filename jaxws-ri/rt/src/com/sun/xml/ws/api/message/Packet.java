@@ -34,10 +34,11 @@ import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -49,7 +50,9 @@ import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.util.DistributedPropertySet;
+import com.sun.istack.Nullable;
 
 /**
  * Represents a container of a {@link Message}.
@@ -246,7 +249,7 @@ public final class Packet extends DistributedPropertySet {
      * This property is used only on the client side.
      */
     public ContentNegotiation contentNegotiation;
-    
+
     @Property(ContentNegotiation.PROPERTY)
     public String getContentNegotiationString() {
         return (contentNegotiation != null) ? contentNegotiation.toString() : null;
@@ -264,7 +267,7 @@ public final class Packet extends DistributedPropertySet {
             }
         }
     }
-    
+
     /**
      * The list of MIME types that are acceptable to a receiver
      * of an outbound message.
@@ -280,7 +283,7 @@ public final class Packet extends DistributedPropertySet {
      *
      */
     public String acceptableMimeTypes;
-    
+
     /**
      * When non-null, this object is consulted to
      * implement {@link WebServiceContext} methods
@@ -527,13 +530,46 @@ public final class Packet extends DistributedPropertySet {
      * packet ({@code this}).
      *
      * @param msg The {@link Message} that represents a reply. Can be null.
-     * @param action Action for the server outbound message
      * @param binding The response Binding
      * @return response packet
      */
-    public Packet createServerResponse(Message msg, String action, WSBinding binding) {
+    public Packet createServerResponse(Message msg, WSDLPort wsdlPort, WSBinding binding) {
         Packet r = createClientResponse(msg);
-        // TODO: fill in WS-Addressing headers
+
+        AddressingVersion ver = binding.getAddressingVersion();
+        if (binding.getAddressingVersion() == null)
+            return r;
+
+        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
+        if (r.getMessage() == null)
+            return r;
+
+        HeaderList hl = r.getMessage().getHeaders();
+
+        // wsa:Action
+        hl.add(new StringHeader(ver.actionTag, wsaHelper.getOutputAction(this)));
+
+        // wsa:MessageID
+        hl.add(new StringHeader(ver.messageIDTag, message.getID(binding)));
+
+        // wsa:RelatesTo
+        Header mid = message.getHeaders().get(ver.messageIDTag, true);
+        if (mid != null)
+            hl.add(new RelatesToHeader(ver.relatesToTag, mid.getStringContent()));
+
+        WSEndpointReference refpEPR;
+        if (r.getMessage().isFault()) {
+            // choose FaultTo
+            refpEPR = message.getHeaders().getFaultTo(ver);
+
+            // if FaultTo is null, then use ReplyTo
+            if (refpEPR == null)
+                refpEPR = message.getHeaders().getReplyTo(ver);
+        } else {
+            // choose ReplyTo
+            refpEPR = message.getHeaders().getReplyTo(ver);
+        }
+        refpEPR.addReferenceParameters(hl);
 
         return r;
     }
