@@ -54,7 +54,7 @@ public class RelatesToHeader extends StringHeader {
         w.writeStartElement("", name.getLocalPart(), name.getNamespaceURI());
         w.writeDefaultNamespace(name.getNamespaceURI());
         if (type != null)
-            w.writeAttribute("RelatesTo", type);
+            w.writeAttribute("type", type);
         w.writeCharacters(value);
         w.writeEndElement();
     }
@@ -66,7 +66,7 @@ public class RelatesToHeader extends StringHeader {
 
         // todo: cache QName
         if (type != null)
-            she.addAttribute(new QName(name.getNamespaceURI(), "RelatesTo"), type);
+            she.addAttribute(new QName(name.getNamespaceURI(), "type"), type);
         she.addTextNode(value);
     }
 }
