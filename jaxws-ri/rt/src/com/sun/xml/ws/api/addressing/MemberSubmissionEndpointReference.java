@@ -110,7 +110,7 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
     public Map<QName,String> attributes;
 
     @XmlAnyElement
-    public Elements elements;
+    public List<Element> elements;
 
     public static class Address {
         public Address() {

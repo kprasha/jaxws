@@ -96,6 +96,11 @@ public class EndpointReferenceUtil {
                 writer.writeCharacters(address);
                 writer.writeEndElement();
                 writeMSMetaData(writer,address, service, port, portType, hasWSDL);
+                //Inline the wsdl as extensibility element
+                //Should it go under wsp:Policy?
+                if (hasWSDL) {
+                    writeWsdl(writer, service, address);
+                }
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
@@ -161,17 +166,7 @@ public class EndpointReferenceUtil {
                                         QName service,
                                         String port,
                                         QName portType, boolean hasWSDL) throws XMLStreamException {
-        //Inline the wsdl inside wsa:ResponseProperties
-        //Should it go under wsp:Policy?
-        if (hasWSDL) {
-            writer.writeStartElement(MemberSubmissionAddressingConstants.WSA_NAMESPACE_PREFIX,
-                    MemberSubmissionAddressingConstants.WSA_REFERENCEPROPERTIES_NAME,
-                    MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
-
-            writeWsdl(writer, service, eprAddress);
-
-            writer.writeEndElement();
-        }
+        // TODO: write ReferenceProperties
         //TODO: write ReferenceParameters
         if (portType != null) {
             //Write Interface info
@@ -264,8 +259,6 @@ public class EndpointReferenceUtil {
             writer.writeCharacters(msEpr.addr.uri);
             writer.writeEndElement();
             //TODO: write extension attributes on wsa:Address
-            Element wsdlElement = null;
-
             if ((msEpr.referenceProperties != null && msEpr.referenceProperties.elements.size() > 0) ||
                     (msEpr.referenceParameters != null && msEpr.referenceParameters.elements.size() > 0)) {
 
@@ -274,12 +267,7 @@ public class EndpointReferenceUtil {
                 //write ReferenceProperties
                 if (msEpr.referenceProperties != null) {
                     for (Element e : msEpr.referenceProperties.elements) {
-                        //TODO fix this later
-                        if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
-                                e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
-                            wsdlElement = e;
-                        } else
-                            DOMUtil.serializeNode(e, writer);
+                        DOMUtil.serializeNode(e, writer);
                     }
                 }
                 //write referenceParameters
@@ -328,6 +316,17 @@ public class EndpointReferenceUtil {
                     writer.writeCharacters(msEpr.serviceName.name.getLocalPart());
                 writer.writeEndElement();
             }
+            //TODO: revisit this
+            Element wsdlElement = null;
+            //Check for wsdl in extension elements
+            if ((msEpr.elements != null) && (msEpr.elements.size() > 0)) {
+                for (Element e : msEpr.elements) {
+                    if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
+                                e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                            wsdlElement = e;
+                     }
+                }
+            }
             //write WSDL
             if(wsdlElement != null) {
                 DOMUtil.serializeNode(wsdlElement, writer);
@@ -335,10 +334,14 @@ public class EndpointReferenceUtil {
 
             if (w3cMetadataWritten)
                 writer.writeEndElement();
-
+            //TODO revisit this
             //write extension elements
-            if ((msEpr.elements != null) && (msEpr.elements.elements.size() > 0)) {
-                for (Element e : msEpr.elements.elements) {
+            if ((msEpr.elements != null) && (msEpr.elements.size() > 0)) {
+                for (Element e : msEpr.elements) {
+                    if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
+                                e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                        // Don't write it as this is written already in Metadata
+                    }
                     DOMUtil.serializeNode(e, writer);
                 }
             }
@@ -449,19 +452,20 @@ public class EndpointReferenceUtil {
                             }
                             msEpr.portTypeName.attributes = getAttributes(elm);
                         } else {
-                            //its extensions in META-DATA and should be copied to ReferenceProperties in MS EPR
-                            if (msEpr.referenceProperties == null) {
-                                msEpr.referenceProperties = new MemberSubmissionEndpointReference.Elements();
-                                msEpr.referenceProperties.elements = new ArrayList<Element>();
+                            //TODO : Revisit this
+                            //its extensions in META-DATA and should be copied to extensions in MS EPR
+                            if (msEpr.elements == null) {
+                                msEpr.elements = new ArrayList<Element>();
                             }
-                            msEpr.referenceProperties.elements.add(elm);
+                            msEpr.elements.add(elm);
                         }
                     }
                 } else {
                     //its extensions
-                    if (msEpr.elements == null)
-                        msEpr.elements.elements = new ArrayList<Element>();
-                    msEpr.elements.elements.add((Element) child);
+                    if (msEpr.elements == null) {
+                        msEpr.elements = new ArrayList<Element>();
+                    }
+                    msEpr.elements.add((Element) child);
 
                 }
             } else if (nodes.item(i).getNodeType() == Node.ATTRIBUTE_NODE) {
