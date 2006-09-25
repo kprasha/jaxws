@@ -29,7 +29,6 @@
     <A HREF="#3.11%20javax.xml.ws.FeatureParameter%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.11 javax.xml.ws.FeatureParameter</FONT></FONT></A>
     <A HREF="#3.12%20javax.xml.ws.Action%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.12 javax.xml.ws.Action</FONT></FONT></A>
     <A HREF="#3.13%20javax.xml.ws.FaultAction%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.13 javax.xml.ws.FaultAction</FONT></FONT></A>
-
 <A HREF="#4.%20JSR%20222%20%28JAXB%29%20Annotations%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">4. JSR 222 (JAXB) Annotations</FONT></FONT></A>
     <A HREF="#4.1%20javax.xml.bind.annotation.XmlRootElement%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">4.1 javax.xml.bind.annotation.XmlRootElement </FONT></FONT></A>
     <A HREF="#4.2%20javax.xml.bind.annotation.XmlAccessorType%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">4.2 javax.xml.bind.annotation.XmlAccessorType</FONT></FONT></A>
@@ -2527,33 +2526,12 @@ public class AddNumbers {
 &nbsp;&nbsp; * By the help of this annotation, JAXB implementations will be able to
 &nbsp;&nbsp; * correctly bind <tt>Dog</tt> and <tt>Cat</tt>.
 &nbsp;&nbsp; *
-&nbsp;&nbsp; * @author Kohsuke Kawaguchi
-&nbsp;&nbsp; * @since JAXB2.1
-&nbsp;&nbsp; * @version $Revision: 1.7.2.6.2.7 $
 &nbsp;&nbsp; */
 &nbsp; @Target({ElementType.TYPE})
 &nbsp; @Retention(RUNTIME)
 &nbsp; public @interface XmlSeeAlso {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Class[] value();p;&nbsp; Class[] value();
-&nbsp; }</FONT></FONT></PRE><H4>Example</H4><pre>
-@WebService
-@XmlSeeAlso({B.class, C.class})
-public interface MyService {
-&nbsp;&nbsp;&nbsp; public A echo(A a);
-}
-</pre></font></font></font></font><FONT FACE="Times New Roman">or a wrapper class can be generated that references both of these classes as follows:
-</font>
-    <FONT FACE="Cumberland, monospace">
-<pre>
-@XmlSeeAlso({B.class, C.class})
-public class AddtionalTypesWrapper {
-}
-
-@XmlSeeAlso({AdditionalTypesWrapper.class})
-public interface MyService {
-&nbsp;&nbsp;&nbsp; public A echo(A a);
-}
-</pre><H2>
+&nbsp; }</FONT></FONT></PRE><H2>
   
 <A NAME="5._JSR_250_Common_Annotations"></A>5. JSR 250 (Common
 Annotations) Annotations</H2><FONT FACE="Times, serif"><P>The following annotations are being documented because JAX-WS
