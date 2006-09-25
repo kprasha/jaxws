@@ -597,7 +597,7 @@ public abstract class WsaPipeHelper {
         return action;
     }
 
-    private String getOutputAction(Packet packet) {
+    public String getOutputAction(Packet packet) {
         String action = "http://fake.output.action";
 
         if (wsdlPort != null) {
