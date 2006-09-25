@@ -158,7 +158,7 @@ specification.</FONT></FONT></SPAN></P>
 			<CODE>wsdl:portName</CODE></FONT></FONT></SPAN></P>
 		</TD>
 		<TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT>The <CODE>WebService.name</CODE> + &quot;Port&quot; 
+			<P ALIGN=LEFT>The <CODE>WebService.name</CODE> + &quot;Port&quot;
 			</P>
 		</TD>
 	</TR>
@@ -321,7 +321,7 @@ specification.</FONT></FONT></SPAN></P>
 @Target({METHOD})
 public @interface WebMethod {
     String operationName() default &quot;&quot;;
-    String action() default &quot;&quot;; 
+    String action() default &quot;&quot;;
     boolean exclude() default false;
 }</PRE><H4>
 Example</H4>
@@ -470,7 +470,7 @@ parameter to a message part or element.</P>
 <PRE STYLE="margin-left: 0.5in">@Retention(value=RetentionPolicy.RUNTIME)
 @Target({PARAMETER})
 public @interface WebParam {
-    
+
     public enum Mode {
         IN,
         OUT,
@@ -592,7 +592,7 @@ return value to a WSDL part or XML element.</P>
 <PRE STYLE="margin-left: 0.49in">@Retention(value=RetentionPolicy.RUNTIME)
 @Target({METHOD})
 public @interface WebResult {
-    
+
     String name() default &quot;return&quot;;
     String targetNamespace() default &quot;&quot;;
     boolean header() default false;
@@ -826,7 +826,7 @@ javax.xml.ws.BindingType</FONT></FONT></H3>
     As well as specify additional features that may be enabled.
 </P>
 <P>This annotation may be overriden programmatically or via
-deployment descriptors, depending on the platform in use. 
+deployment descriptors, depending on the platform in use.
 </P>
 <TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>
 	<COL WIDTH=42*>
@@ -947,6 +947,8 @@ public class AddNumbersImpl {
      }
 </PRE>
 <P>
+The deployed endpoint would use the SOAP1.2 over HTTP binding.</P>
+<P>
  Example 2: Here is another sample use of the BindingType annotation that specifies
    use of the SOAP1.1/HTTP binding, it enables both the
    AddressingFeature and the MTOMFeature and also sets the
@@ -963,8 +965,6 @@ public class AddNumbersImpl {
   public class MyWebService { ... }
   </pre>
     </P>
-<P>
-The deployed endpoint would use the SOAP1.2 over HTTP binding.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <H3><A NAME="3.2 javax.xml.ws.RequestWrapper|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.2
@@ -1052,7 +1052,7 @@ public @interface RequestWrapper {
 Example</H4>
 <PRE STYLE="margin-left: 0.49in">public interface AddNumbersImpl {
     /**
-     * 
+     *
      * @param arg1
      * @param arg0
      * @return
@@ -1156,7 +1156,7 @@ public @interface ResponseWrapper {
 Example</H4>
 <PRE STYLE="margin-left: 0.49in">public interface AddNumbersImpl {
     /**
-     * 
+     *
      * @param arg1
      * @param arg0
      * @return
@@ -1296,11 +1296,11 @@ the generated service interface itself. </FONT>
 	</TR>
 </TABLE>
 <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4>
-<PRE STYLE="margin-left: 0.49in">/** 
+<PRE STYLE="margin-left: 0.49in">/**
  *  Used to annotate the <CODE>get<EM>PortName</EM>()</CODE>
  *  methods of a generated service interface.
  *
- *  
+ *
 The information specified in this annotation is sufficient
  *  to uniquely identify a <CODE>wsdl:port</CODE> element
  *  inside a <CODE>wsdl:service</CODE>. The latter is
@@ -1344,7 +1344,7 @@ public class AddNumbersImplService
         super(WSDL_LOCATION, ADDNUMBERSIMPLSERVICE);
     }
     /**
-     * 
+     *
      * @return
      *     returns AddNumbersImpl
      */
@@ -1424,8 +1424,8 @@ the <A HREF="http://www.jcp.org/en/jsr/detail?id=224">JAX-WS 2.0</A>
 	</TR>
 </TABLE>
 <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4>
-<PRE STYLE="margin-left: 0.49in">/** 
- * Used to annotate service specific exception classes to customize 
+<PRE STYLE="margin-left: 0.49in">/**
+ * Used to annotate service specific exception classes to customize
  * to the local and namespace name of the fault element and the name
  * of the fault bean.
  *
@@ -1525,10 +1525,10 @@ interface provides a client view.</FONT></P>
 	</TR>
 </TABLE>
 <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4>
-<PRE STYLE="margin-left: 0.49in">/** 
+<PRE STYLE="margin-left: 0.49in">/**
  *  Used to annotate a generated service interface.
  *
- *  
+ *
 The information specified in this annotation is sufficient
  *  to uniquely identify a <CODE>wsdl:service</CODE>
  *  element inside a WSDL document. This <CODE>wsdl:service</CODE>
@@ -1579,7 +1579,7 @@ public class AddNumbersImplService
         super(WSDL_LOCATION, ADDNUMBERSIMPLSERVICE);
     }
     /**
-     * 
+     *
      * @return
      *     returns AddNumbersImpl
      */
@@ -1678,13 +1678,13 @@ public @interface WebServiceProvider {
     /**
      * Location of the WSDL description for the service.
      */
-    String wsdlLocation() default &quot;&quot;;    
-    
+    String wsdlLocation() default &quot;&quot;;
+
     /**
      * Service name.
      */
     String serviceName() default &quot;&quot;;
-    
+
     /**
      * Target namespace for the service
      */
@@ -1715,7 +1715,7 @@ public class AddNumbersImpl implements Provider {
             throw new RuntimeException(&quot;Error in provider endpoint&quot;, e);
         }
     }
-    
+
     private Source sendSource(int number1, int number2) {
         int sum = number1+number2;
         String body =
@@ -1725,7 +1725,7 @@ public class AddNumbersImpl implements Provider {
         Source source = new StreamSource(
             new ByteArrayInputStream(body.getBytes()));
         return source;
-    }    
+    }
 }</PRE><H3>
 <A NAME="3.9 javax.xml.ws.WebServiceRef|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.9
 javax.xml.ws.WebServiceRef</FONT></FONT></H3>
@@ -1832,7 +1832,7 @@ resources in the Java EE 5 sense. </FONT>
  *  (optionally) an injection target for it.
  *
  *  Web service references are resources in the Java EE 5 sense.
- * 
+ *
  *  @see javax.annotation.Resource
  *
  *  @since JAX-WS 2.0
@@ -1865,7 +1865,7 @@ public @interface WebServiceRef {
       * <CODE>java:comp/env</CODE> namespace.)  Many application servers
       * provide a way to map these local names to names of resources
       * known to the application server.  This mapped name is often a
-      * <I>global</I> JNDI name, but may be a name of any form. 
+      * <I>global</I> JNDI name, but may be a name of any form.
 
       *
       * Application servers are not required to support any particular
@@ -2302,7 +2302,7 @@ javax.xml.ws.FaultAction </FONT></FONT></H3>
 			Name of the exception class</FONT></FONT></FONT></P>
 		</TD>
 		<TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000"></FONT></P>
+			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000">there is no default and is required.</FONT></P>
 		</TD>
 	</TR>
 	<TR VALIGN=TOP>
@@ -2560,7 +2560,7 @@ public class AddNumbers {
     public void setArg1(int arg1) {
         this.arg1 = arg1;
     }
-}  
+}
 </PRE><H3>
 <A NAME="4.2 javax.xml.bind.annotation.XmlAccessorType|outline"></A><FONT FACE="Thorndale, serif">4.2</FONT>
 javax.xml.bind.annotation.XmlAccessorType</H3>
@@ -2681,7 +2681,7 @@ public class AddNumbers {
     public void setArg1(int arg1) {
         this.arg1 = arg1;
     }
-}  
+}
 </PRE><H3>
 <A NAME="4.3 javax.xml.bind.annotation.XmlType|outline"></A><FONT FACE="Thorndale, serif">4.3</FONT>
 javax.xml.bind.annotation.XmlType</H3>
@@ -2821,7 +2821,7 @@ public class AddNumbers {
     public void setArg1(int arg1) {
         this.arg1 = arg1;
     }
-}  
+}
 </PRE><P STYLE="margin-bottom: 0in">
 <BR>
 </P>
@@ -2976,7 +2976,7 @@ public class AddNumbers {
     public void setArg1(int arg1) {
         this.arg1 = arg1;
     }
-}  
+}
 </PRE><H2>
 <A NAME="5._JSR_250_Common_Annotations"></A>5. JSR 250 (Common
 Annotations) Annotations</H2>
