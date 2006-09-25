@@ -24,6 +24,7 @@ package com.sun.xml.ws.api.addressing;
 
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -43,11 +44,91 @@ public enum AddressingVersion {
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
         }
+
+        @Override
+        public WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
+            return new com.sun.xml.ws.addressing.WsaPipeHelperImpl(wsdlPort, binding);
+        }
+
+        @Override
+        public String getNoneUri() {
+            return nsUri + "/none";
+        }
+
+        @Override
+        public String getAnonymousUri() {
+            return nsUri + "/anonymous";
+        }
+
+        @Override
+        public String getMapRequiredLocalName() {
+            return "MessageAddressingHeaderRequired";
+        }
+
+        @Override
+        public String getMapRequiredText() {
+            return "A required header representing a Message Addressing Property is not present";
+        }
+
+        @Override
+        public String getInvalidMapLocalName() {
+            return "InvalidAddressingHeader";
+        }
+
+        @Override
+        public String getInvalidMapText() {
+            return "A header representing a Message Addressing Property is not valid and the message cannot be processed";
+        }
+
+        @Override
+        public String getInvalidCardinalityLocalName() {
+            return "InvalidCardinality";
+        }
     },
     MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME,"member-anonymous-epr.xml") {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
+        }
+
+        @Override
+        public WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+        }
+
+        @Override
+        public String getNoneUri() {
+            return "";
+        }
+
+        @Override
+        public String getAnonymousUri() {
+            return nsUri + "/role/anonymous";
+        }
+
+        @Override
+        public String getMapRequiredLocalName() {
+            return "MessageInformationHeaderRequired";
+        }
+
+        @Override
+        public String getMapRequiredText() {
+            return "A required message information header, To, MessageID, or Action, is not present.";
+        }
+
+        @Override
+        public String getInvalidMapLocalName() {
+            return "InvalidMessageInformationHeader";
+        }
+
+        @Override
+        public String getInvalidMapText() {
+            return "A message information header is not valid and the message cannot be processed.";
+        }
+
+        @Override
+        public String getInvalidCardinalityLocalName() {
+            return getInvalidMapLocalName();
         }
     };
 
@@ -67,6 +148,13 @@ public enum AddressingVersion {
     public final QName faultToTag;
     public final QName actionTag;
     public final QName messageIDTag;
+    public final QName relatesToTag;
+
+    public final QName mapRequiredTag;
+    public final QName actionNotSupportedTag;
+    public final String actionNotSupportedText;
+    public final QName invalidMapTag;
+    public final QName invalidCardinalityTag;
 
     /**
      * Fault sub-sub-code that represents
@@ -75,7 +163,7 @@ public enum AddressingVersion {
     public final QName fault_missingAddressInEpr;
 
     private static final String EXTENDED_FAULT_NAMESPACE = "http://jax-ws.dev.java.net/addressing/fault";
-    
+
     /**
      * Fault sub-sub-code that represents duplicate &lt;Address> element in EPR.
      * This is a fault code not defined in the spec.
@@ -86,7 +174,7 @@ public enum AddressingVersion {
 
 
 
-    private AddressingVersion(String nsUri, String anonymousEprResrouceName) {
+    private AddressingVersion(String nsUri, String anonymousEprResourceName) {
         this.nsUri = nsUri;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
@@ -94,12 +182,19 @@ public enum AddressingVersion {
         faultToTag = new QName(nsUri,"FaultTo");
         actionTag = new QName(nsUri,"Action");
         messageIDTag = new QName(nsUri,"MessageID");
+        relatesToTag = new QName(nsUri,"RelatesTo");
+
+        mapRequiredTag = new QName(nsUri,getMapRequiredLocalName());
+        actionNotSupportedTag = new QName(nsUri,"ActionNotSupported");
+        actionNotSupportedText = "The \"%s\" cannot be processed at the receiver";
+        invalidMapTag = new QName(nsUri,getInvalidMapLocalName());
+        invalidCardinalityTag = new QName(nsUri,getInvalidCardinalityLocalName());
 
         fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
 
         // create stock anonymous EPR
         try {
-            this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResrouceName),this);
+            this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResourceName),this);
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
         } catch (XMLStreamBufferException e) {
@@ -166,4 +261,28 @@ public enum AddressingVersion {
      * either "ReferenceParameters" or "ReferenceProperties".
      */
     public abstract boolean isReferenceParameter(String localName);
+
+    public abstract WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding);
+
+    public abstract String getNoneUri();
+
+    public abstract String getAnonymousUri();
+
+    public String getDefaultFaultAction() {
+        return nsUri + "/fault";
+    }
+
+    public QName getFaultDetailQName() {
+        return new QName(nsUri, "FaultDetail");
+    }
+
+    protected abstract String getMapRequiredLocalName();
+
+    public abstract String getMapRequiredText();
+
+    public abstract String getInvalidMapLocalName();
+
+    public abstract String getInvalidMapText();
+
+    public abstract String getInvalidCardinalityLocalName();
 }
