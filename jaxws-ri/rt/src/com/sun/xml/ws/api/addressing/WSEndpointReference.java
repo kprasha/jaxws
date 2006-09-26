@@ -90,7 +90,7 @@ public final class WSEndpointReference {
     /**
      * Creates a {@link WSEndpointReference} by parsing an infoset.
      */
-    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException, XMLStreamBufferException {
+    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException {
         this(XMLInputFactory.newInstance().createXMLStreamReader(infoset),version);
     }
 
@@ -98,7 +98,7 @@ public final class WSEndpointReference {
      * Creates a {@link WSEndpointReference} from the given infoset.
      * The {@link XMLStreamReader} must point to either a document or an element.
      */
-    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException, XMLStreamBufferException {
+    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException {
         this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
     }
 
