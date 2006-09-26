@@ -5,7 +5,6 @@ import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
@@ -238,7 +237,7 @@ public final class WSEndpointReference {
      *      EPR uses a different root tag name depending on the context.
      *      The returned {@link Source} will use the given local name
      */
-    public void writeTo(final @NotNull String localName, @NotNull XMLStreamWriter w) throws XMLStreamException, XMLStreamBufferException {
+    public void writeTo(final @NotNull String localName, @NotNull XMLStreamWriter w) throws XMLStreamException {
         infoset.writeToXMLStreamWriter(new XMLStreamWriterFilter(w) {
             private boolean root=true;
 
