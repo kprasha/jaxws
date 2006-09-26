@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: UsingAddressing.java,v 1.1.2.2 2006-08-18 21:56:16 arungupta Exp $
+ $Id: UsingAddressing.java,v 1.1.2.3 2006-09-26 22:17:15 ramapulavarthi Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -39,5 +39,5 @@ import com.sun.xml.ws.wsdl.writer.document.StartWithExtensionsType;
             ns = W3CAddressingConstants.WSAW_USING_ADDRESSING_NAME)
 public interface UsingAddressing extends TypedXmlWriter, StartWithExtensionsType {
     @XmlAttribute(value = "required", ns = "http://schemas.xmlsoap.org/wsdl/")
-    public UsingAddressing required(boolean b);
+    public void required(boolean b);
 }

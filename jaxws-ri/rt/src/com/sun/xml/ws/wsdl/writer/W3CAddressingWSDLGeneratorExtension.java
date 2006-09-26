@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.6 2006-09-14 01:08:57 ramapulavarthi Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.7 2006-09-26 22:17:15 ramapulavarthi Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -47,6 +47,7 @@ import com.sun.xml.ws.addressing.W3CAddressingConstants;
  */
 public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private boolean enabled;
+    private boolean required = false;
 
     @Override
     public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
@@ -54,7 +55,8 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
         enabled = binding.hasFeature(AddressingFeature.ID);
         if (!enabled)
             return;
-
+        AddressingFeature ftr = (AddressingFeature)binding.getFeature(AddressingFeature.ID);
+        required = ftr.isRequired();
         root._namespace(W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME, W3CAddressingConstants.WSA_NAMESPACE_WSDL_PREFIX);
     }
 
@@ -112,7 +114,9 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
     public void addBindingExtension(TypedXmlWriter binding) {
         if (!enabled)
             return;
-
         UsingAddressing ua = binding._element(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME, UsingAddressing.class);
+        if(required) {
+            ua.required(true);
+        }    
     }
 }

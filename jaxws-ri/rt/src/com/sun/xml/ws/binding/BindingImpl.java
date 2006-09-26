@@ -154,6 +154,12 @@ public abstract class BindingImpl implements WSBinding {
         return features.containsKey(featureId);
     }
 
+    public WebServiceFeature getFeature(String featureId) {
+        if (featureId == null || features == null)
+            return null;
+        return features.get(featureId);
+    }
+    
     private void disableFeature(WebServiceFeature feature) {
         if (feature == null || features == null)
             return;

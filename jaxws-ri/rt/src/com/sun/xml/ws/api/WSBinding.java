@@ -125,4 +125,11 @@ public interface WSBinding extends Binding {
      * @return true if the feature is enabled.
      */
     boolean hasFeature(String featureId);
+
+    /**
+     * @param featureId
+     * @return WebServiceFeature if the feature is enabled.
+     *         null if is is not enabled.
+     */
+    public WebServiceFeature getFeature(String featureId);
 }
