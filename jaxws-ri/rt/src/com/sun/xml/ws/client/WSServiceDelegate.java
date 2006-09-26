@@ -260,7 +260,6 @@ public class WSServiceDelegate extends WSService {
     }
 
 
-
     public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface, WebServiceFeature... features) {
         throw new UnsupportedOperationException();
     }
@@ -275,21 +274,8 @@ public class WSServiceDelegate extends WSService {
     }
 
      public <T> T getPort(Class<T> portInterface) throws WebServiceException {
-        //get the first port corresponding to the SEI
-        QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
-        QName portName = wsdlContext.getWSDLModel().getPortName(serviceName, portTypeName);
-        return getPort(portName, portInterface);
+        return getPort(portInterface, null);
     }
-
-    //these will be taken out
-    //private void addPort(QName portName, String bindingId, String[] features, String endpointAddress) {
-   //     if (!ports.containsKey(portName)) {
-   //         BindingID bid = (bindingId == null) ? BindingID.SOAP11_HTTP : BindingID.parse(bindingId);
-   //        ports.put(portName,
-      //              new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bid, features));
-      //  } else
-       //     throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
-   // }
 
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
         if (!ports.containsKey(portName)) {
@@ -302,14 +288,12 @@ public class WSServiceDelegate extends WSService {
 
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
-        PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding();
-        return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding));
+        return createDispatch(portName, aClass, mode, null);
     }
 
     //milestone 2
     public <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
-         PortInfo port = safeGetPort(portName);
+        PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding(webServiceFeatures);
         return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding));
     }
@@ -362,10 +346,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding();
-        return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,
-                createPipeline(port, binding));
+        return createDispatch(portName, jaxbContext,mode, null);
     }
 
     //milestone 2.
@@ -449,34 +430,8 @@ public class WSServiceDelegate extends WSService {
        * Determines the binding of the given port.
        */
       protected BindingImpl createBinding(QName portName, BindingID bindingId) {
-
-          //need to incorrporate featurexs - deprecate
-
-          // get handler chain
-          List<Handler> handlerChain;
-          if (handlerResolver != null) {
-              javax.xml.ws.handler.PortInfo portInfo = new PortInfoImpl(bindingId, portName, serviceName);
-              handlerChain = handlerResolver.getHandlerChain(portInfo);
-          } else {
-              handlerChain = new ArrayList<Handler>();
-          }
-
-          // create binding
-          BindingImpl bindingImpl = BindingImpl.create(bindingId);
-          PortInfo portInfo = ports.get(portName);
-          if (portInfo.portModel != null && portInfo.portModel.getBinding().isMTOMEnabled()) {
-              bindingImpl.setMTOMEnabled(true);
-          }
-          if (bindingImpl instanceof SOAPBinding) {
-              Set<String> roles = rolesMap.get(portName);
-              if (roles != null) {
-                  ((SOAPBinding) bindingImpl).setRoles(roles);
-              }
-          }
-
-          bindingImpl.setHandlerChain(handlerChain);
-
-          return bindingImpl;
+          //take out?
+          return createBinding(portName, bindingId, null);
       }
 
 
@@ -484,8 +439,6 @@ public class WSServiceDelegate extends WSService {
        * Determines the binding of the given port.
        */
       protected BindingImpl createBinding(QName portName, BindingID bindingId, WebServiceFeature... webServiceFeatures) {
-
-          //need to incorrporate featurexs - deprecate
 
           // get handler chain
           List<Handler> handlerChain;
@@ -521,7 +474,7 @@ public class WSServiceDelegate extends WSService {
      *
      * @return guaranteed to be non-null.
      */
-    private WSDLPortImpl getPortModel(QName portName) {
+     WSDLPortImpl getPortModel(QName portName) {
         WSDLPortImpl port = wsdlService.get(portName);
         if (port == null)
             throw new WebServiceException("Port \"" + portName + "\" not found in service \"" + serviceName + "\"");

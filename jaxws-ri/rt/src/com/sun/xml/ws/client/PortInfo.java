@@ -80,16 +80,7 @@ public class PortInfo {
         this.targetEndpoint = targetEndpoint;
         this.portName = name;
         this.bindingId = bindingId;
-        this.portModel = null;
-    }
-
-    //temporary will be removed
-    public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId, String[] features) {
-        this.owner = owner;
-        this.targetEndpoint = targetEndpoint;
-        this.portName = name;
-        this.bindingId = bindingId;
-        this.portModel = null;
+        this.portModel = getPortModel(owner, name);
     }
 
     public PortInfo(@NotNull WSServiceDelegate owner, @NotNull WSDLPort port) {
@@ -111,7 +102,7 @@ public class PortInfo {
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
             WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-            if (wsdlPort.isAddressingEnabled()) {
+            if (wsdlPort.isAddressingRequired()) {
                 //can only be W3CAddressFeature from WSDL?
                 wsdlAddressingFeature = new AddressingFeature(wsdlPort.isAddressingEnabled(), wsdlPort.isAddressingRequired());
                 wsdlFeatures.add(wsdlAddressingFeature);
@@ -130,6 +121,12 @@ public class PortInfo {
         return owner.createBinding(portName, bindingId, resolveFeatures(webServiceFeatures));
     }
 
+    private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
+        if (owner.getWSDLContext() != null)
+            return owner.getPortModel(portName);
+        return null;
+    }
+
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
         //Todo:MTOMFeature
         List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
@@ -146,21 +143,20 @@ public class PortInfo {
                     if (addressingFeature == null)
                         addressingFeature = (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID);
 
-                    if (((AddressingFeature) wsdlFeature).isRequired() && respectBindingFeature.isEnabled()) {
-                        // we need to either modify the existant AddressingFeature or add the AddressingFeature to
-                        // the WebServiceFeatures
-                        if (addressingFeature != null) {
-                            //passed in AddressingFeature wins - we don't care what the wsdl says here
-                            if (addressingFeature.isEnabled())
-                                //probably don't need to do this
-                                // but for plugfest let's be explicit
-                                addressingFeature.setRequired(true);
-                            else
-                                //ditto the above
-                                addressingFeature.setRequired(false);
-                        } else {
-                            featureMap.put(wsdlFeature.getID(), wsdlFeature);
-                        }
+                    if (addressingFeature == null) {
+                        if (((AddressingFeature) wsdlFeature).isRequired() && (respectBindingFeature != null)) {
+                            if (respectBindingFeature.isEnabled()) {
+                                //add the AddressingFeature to
+                                // the WebServiceFeatures
+                                ((AddressingFeature) wsdlFeature).setRequired(true);
+                                featureMap.put(wsdlFeature.getID(), wsdlFeature);
+                            } else {
+                                //explicitly disable addressing version
+                                AddressingFeature disableAddressing = new AddressingFeature(false, false);
+                                featureMap.put(disableAddressing.getID(),disableAddressing);
+                                //respect Bind feature disables - for dispatch we do not respect binding
+                            }
+                        } //respectBindingFeature is null don't respect wsdl
                     }
                 }
             }
@@ -174,16 +170,15 @@ public class PortInfo {
                 //if this is enabled just set it to required by spec rules
                 addressingFeature.setRequired(true);
         }
-
         return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
     }
 
     private static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
-        assert(webServiceFeatures != null);
         HashMap<String, WebServiceFeature> featureMap = new HashMap<String, WebServiceFeature>(5);
-        for (int i = webServiceFeatures.length; i >= 0; i--) {
-            featureMap.put(webServiceFeatures[i].getID(), webServiceFeatures[i]);
-        }
+        if (webServiceFeatures != null)
+            for (int i = 0; i < webServiceFeatures.length; i++) {
+                featureMap.put(webServiceFeatures[i].getID(), webServiceFeatures[i]);
+            }
         return featureMap;
     }
 }

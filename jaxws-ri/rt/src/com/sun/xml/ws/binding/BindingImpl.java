@@ -22,15 +22,6 @@
 
 package com.sun.xml.ws.binding;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.soap.AddressingFeature;
-
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -40,13 +31,21 @@ import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.AddressingFeature;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Instances are created by the service, which then
  * sets the handler chain on the binding impl.
- *
+ * <p/>
  * <p>This class is made abstract as we dont see a situation when a BindingImpl has much meaning without binding id.
  * IOw, for a specific binding there will be a class extending BindingImpl, for example SOAPBindingImpl.
- *
+ * <p/>
  * <p>The spi Binding interface extends Binding.
  *
  * @author WS Development Team
@@ -68,7 +67,9 @@ public abstract class BindingImpl implements WSBinding {
         setHandlerConfig(createHandlerConfig(Collections.<Handler>emptyList()));
     }
 
-    public @NotNull List<Handler> getHandlerChain() {
+    public
+    @NotNull
+    List<Handler> getHandlerChain() {
         return handlerConfig.getHandlerChain();
     }
 
@@ -98,7 +99,9 @@ public abstract class BindingImpl implements WSBinding {
 
     protected abstract HandlerConfiguration createHandlerConfig(List<Handler> handlerChain);
 
-    public @NotNull BindingID getBindingId(){
+    public
+    @NotNull
+    BindingID getBindingId() {
         return bindingId;
     }
 
@@ -110,19 +113,21 @@ public abstract class BindingImpl implements WSBinding {
         return addressingVersion;
     }
 
-    public final @NotNull Codec createCodec() {
+    public final
+    @NotNull
+    Codec createCodec() {
         return bindingId.createEncoder(this);
     }
 
     public static BindingImpl create(@NotNull BindingID bindingId) {
-        if(bindingId.equals(BindingID.XML_HTTP))
+        if (bindingId.equals(BindingID.XML_HTTP))
             return new HTTPBindingImpl();
         else
             return new SOAPBindingImpl(bindingId);
     }
 
     public static BindingImpl create(@NotNull BindingID bindingId, WebServiceFeature[] features) {
-        if(bindingId.equals(BindingID.XML_HTTP))
+        if (bindingId.equals(BindingID.XML_HTTP))
             return new HTTPBindingImpl();
         else
             return new SOAPBindingImpl(bindingId, features);
@@ -132,13 +137,14 @@ public abstract class BindingImpl implements WSBinding {
         return new SOAPBindingImpl(BindingID.SOAP11_HTTP);
     }
 
-    public boolean isMTOMEnabled(){
+    public boolean isMTOMEnabled() {
         return false;//default
     }
 
-    public void setMTOMEnabled(boolean value){}
+    public void setMTOMEnabled(boolean value) {
+    }
 
-    public String getBindingID(){
+    public String getBindingID() {
         return bindingId.toString();
     }
 
@@ -157,24 +163,26 @@ public abstract class BindingImpl implements WSBinding {
 
     private void updateCache() {
         addressingVersion = AddressingVersion.W3C;
-//        if (hasFeature(AddressingFeature.ID))
-//            addressingVersion = AddressingVersion.W3C;
-//        else
-//        if (hasFeature(MemberSubmissionAddressingFeature.ID))
-//            addressingVersion = AddressingVersion.MEMBER;
-//        else
-//            addressingVersion = null;
+        if (hasFeature(AddressingFeature.ID))
+            addressingVersion = AddressingVersion.W3C;
+        else if (hasFeature(MemberSubmissionAddressingFeature.ID))
+            addressingVersion = AddressingVersion.MEMBER;
+        else
+            addressingVersion = null;
     }
 
     private void enableFeature(WebServiceFeature feature) {
         if (feature == null)
             return;
+
+        if (features == null)
+            features = new HashMap<String, WebServiceFeature>();
+
         if (!feature.isEnabled()) {
             disableFeature(feature);
             return;
         }
-        if(features == null)
-            features =  new HashMap<String, WebServiceFeature>();
+
         features.put(feature.getID(), feature);
         updateCache();
     }
@@ -187,7 +195,10 @@ public abstract class BindingImpl implements WSBinding {
         }
     }
 
+
+    //what does this mean
     public boolean isAddressingEnabled() {
-        return (addressingVersion==null?false : true);
+        return (addressingVersion == null ? false : true);
     }
+
 }
