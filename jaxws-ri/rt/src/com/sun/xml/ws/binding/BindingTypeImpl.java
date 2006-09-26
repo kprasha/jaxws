@@ -46,7 +46,16 @@ public class BindingTypeImpl {
                     for(Feature f:features) {
                         if(f.enabled()) {
                             if(f.value().equals(AddressingFeature.ID) ) {
-                                wsfeatures.add(new AddressingFeature(true));
+                                AddressingFeature addFeature = new AddressingFeature(true);
+                                FeatureParameter[] params = f.parameters();
+                                if(params != null) {
+                                    for(FeatureParameter param: params) {
+                                        if(param.name().equals(AddressingFeature.IS_REQUIRED)) {
+                                            addFeature.setRequired(Boolean.valueOf(param.value()));
+                                        }
+                                    }
+                                }
+                                wsfeatures.add(addFeature);
                             } else if(f.value().equals(MemberSubmissionAddressingFeature.ID) ) {
                                 wsfeatures.add(new MemberSubmissionAddressingFeature(true));
                             } else if(f.value().equals(MTOMFeature.ID) ) {
