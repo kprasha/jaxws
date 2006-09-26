@@ -188,6 +188,6 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public boolean isAddressingEnabled() {
-        return addressingVersion!=null;
+        return (addressingVersion==null?false : true);
     }
 }

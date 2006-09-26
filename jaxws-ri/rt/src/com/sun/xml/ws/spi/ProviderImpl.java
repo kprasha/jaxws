@@ -98,16 +98,6 @@ public class ProviderImpl extends Provider {
         return null;
     }
 
-    //milestone 2
-    public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> aClass, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
-        return null;
-    }
-
-    //milestone 2
-    public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
-        return null;
-    }
-
     private final static JAXBContext getEPRJaxbContext() {
         try {
             return JAXBContext.newInstance(MemberSubmissionEndpointReference.class, W3CEndpointReference.class);

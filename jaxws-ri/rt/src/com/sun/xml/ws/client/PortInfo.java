@@ -25,10 +25,20 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.MTOMFeature;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Information about a port.
@@ -93,4 +103,88 @@ public class PortInfo {
     public BindingImpl createBinding() {
         return owner.createBinding(portName, bindingId);
     }
+
+    protected List<WebServiceFeature> extractWSDLFeatures() {
+        AddressingFeature wsdlAddressingFeature = null;
+        MTOMFeature wsdlMTOMFeature = null;
+        List<WebServiceFeature> wsdlFeatures = null;
+        if (portModel != null) {
+            wsdlFeatures = new ArrayList<WebServiceFeature>();
+            WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
+            if (wsdlPort.isAddressingEnabled()) {
+                //can only be W3CAddressFeature from WSDL?
+                wsdlAddressingFeature = new AddressingFeature(wsdlPort.isAddressingEnabled(), wsdlPort.isAddressingRequired());
+                wsdlFeatures.add(wsdlAddressingFeature);
+            }
+            if (wsdlPort.getBinding().isMTOMEnabled()) {
+                wsdlMTOMFeature = new MTOMFeature(wsdlPort.getBinding().isMTOMEnabled());
+                wsdlFeatures.add(wsdlMTOMFeature);
+            }
+            //these are the only features that jaxws pays attention portability wise.
+        }
+        return wsdlFeatures;
+    }
+
+
+    public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures) {
+        return owner.createBinding(portName, bindingId, resolveFeatures(webServiceFeatures));
+    }
+
+    protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
+        //Todo:MTOMFeature
+        List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
+        Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
+
+        if (wsdlFeatures != null) {
+            for (WebServiceFeature wsdlFeature : wsdlFeatures) {
+                if (wsdlFeature.getID().equals(AddressingFeature.ID)) {
+                    //look in webServiceFeatures
+                    //look for RespectBindingFeature
+                    RespectBindingFeature respectBindingFeature = (RespectBindingFeature) featureMap.get(RespectBindingFeature.ID);
+                    // look for AddressingFeature
+                    AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
+                    if (addressingFeature == null)
+                        addressingFeature = (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID);
+
+                    if (((AddressingFeature) wsdlFeature).isRequired() && respectBindingFeature.isEnabled()) {
+                        // we need to either modify the existant AddressingFeature or add the AddressingFeature to
+                        // the WebServiceFeatures
+                        if (addressingFeature != null) {
+                            //passed in AddressingFeature wins - we don't care what the wsdl says here
+                            if (addressingFeature.isEnabled())
+                                //probably don't need to do this
+                                // but for plugfest let's be explicit
+                                addressingFeature.setRequired(true);
+                            else
+                                //ditto the above
+                                addressingFeature.setRequired(false);
+                        } else {
+                            featureMap.put(wsdlFeature.getID(), wsdlFeature);
+                        }
+                    }
+                }
+            }
+        } else {
+            //case without wsdl
+            //lets just see if the AddressingFeature is enabled
+            AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
+            if (addressingFeature == null)
+                addressingFeature = (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID);
+            if (addressingFeature != null && addressingFeature.isEnabled())
+                //if this is enabled just set it to required by spec rules
+                addressingFeature.setRequired(true);
+        }
+
+        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
+    }
+
+    private static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
+        assert(webServiceFeatures != null);
+        HashMap<String, WebServiceFeature> featureMap = new HashMap<String, WebServiceFeature>(5);
+        for (int i = webServiceFeatures.length; i >= 0; i--) {
+            featureMap.put(webServiceFeatures[i].getID(), webServiceFeatures[i]);
+        }
+        return featureMap;
+    }
 }
+

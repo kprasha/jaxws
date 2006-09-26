@@ -28,6 +28,8 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.istack.NotNull;
 
+import javax.xml.ws.WebServiceFeature;
+
 
 /**
  * {@link PortInfo} that has {@link SEIModel}.
@@ -63,5 +65,14 @@ final class SEIPortInfo extends PortInfo {
             ((SOAPBindingImpl)bindingImpl).setPortKnownHeaders(model.getKnownHeaders());
         }
         return bindingImpl;
+    }
+
+    public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures) {
+         BindingImpl bindingImpl = super.createBinding();
+         if(bindingImpl instanceof SOAPBindingImpl) {
+            ((SOAPBindingImpl)bindingImpl).setPortKnownHeaders(model.getKnownHeaders());
+         }
+         bindingImpl.setFeatures(webServiceFeatures);
+         return bindingImpl;
     }
 }
