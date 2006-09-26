@@ -5,6 +5,7 @@ import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
@@ -89,7 +90,7 @@ public final class WSEndpointReference {
     /**
      * Creates a {@link WSEndpointReference} by parsing an infoset.
      */
-    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException {
+    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException, XMLStreamBufferException {
         this(XMLInputFactory.newInstance().createXMLStreamReader(infoset),version);
     }
 
@@ -97,7 +98,7 @@ public final class WSEndpointReference {
      * Creates a {@link WSEndpointReference} from the given infoset.
      * The {@link XMLStreamReader} must point to either a document or an element.
      */
-    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException {
+    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException, XMLStreamBufferException {
         this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
     }
 
@@ -237,9 +238,25 @@ public final class WSEndpointReference {
      *      EPR uses a different root tag name depending on the context.
      *      The returned {@link Source} will use the given local name
      */
-    public void writeTo(final @NotNull String localName, @NotNull XMLStreamWriter w) throws XMLStreamException {
+    public void writeTo(final @NotNull String localName, @NotNull XMLStreamWriter w) throws XMLStreamException, XMLStreamBufferException {
         infoset.writeToXMLStreamWriter(new XMLStreamWriterFilter(w) {
             private boolean root=true;
+
+            @Override
+            public void writeStartDocument() throws XMLStreamException {
+            }
+
+            @Override
+            public void writeStartDocument(String encoding, String version) throws XMLStreamException {
+            }
+
+            @Override
+            public void writeStartDocument(String version) throws XMLStreamException {
+            }
+
+            @Override
+            public void writeEndDocument() throws XMLStreamException {
+            }
 
             private String override(String ln) {
                 if(root) {

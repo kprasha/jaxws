@@ -26,11 +26,18 @@ import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.stream.buffer.XMLStreamBufferException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.WebServiceException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
 
 /**
  * 'Traits' object that absorbs differences of WS-Addressing versions.
@@ -154,6 +161,7 @@ public enum AddressingVersion {
     public final String actionNotSupportedText;
     public final QName invalidMapTag;
     public final QName invalidCardinalityTag;
+    public final QName problemHeaderQNameTag;
 
     /**
      * Fault sub-sub-code that represents
@@ -189,6 +197,8 @@ public enum AddressingVersion {
         invalidMapTag = new QName(nsUri,getInvalidMapLocalName());
         invalidCardinalityTag = new QName(nsUri,getInvalidCardinalityLocalName());
 
+        problemHeaderQNameTag = new QName(nsUri,"ProblemHeaderQName");
+
         fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
 
         // create stock anonymous EPR
@@ -196,6 +206,8 @@ public enum AddressingVersion {
             this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResourceName),this);
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
+        } catch (XMLStreamBufferException e) {
+            throw new Error(e); // bug in our code
         }
     }
 
@@ -282,4 +294,31 @@ public enum AddressingVersion {
     public abstract String getInvalidMapText();
 
     public abstract String getInvalidCardinalityLocalName();
+//
+//    private SOAPFault newActionNotSupportedFault(String action, WSBinding binding) {
+//        QName subcode = actionNotSupportedTag;
+//        String faultstring = String.format(actionNotSupportedText, action);
+//
+//        try {
+//            SOAPFactory factory;
+//            SOAPFault fault;
+//            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
+//                factory = SOAPVersion.SOAP_12.saajSoapFactory;
+//                fault = factory.createFault();
+//                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+//                fault.appendFaultSubcode(subcode);
+//                getProblemActionDetail(action, fault.addDetail());
+//            } else {
+//                factory = SOAPVersion.SOAP_11.saajSoapFactory;
+//                fault = factory.createFault();
+//                fault.setFaultCode(subcode);
+//            }
+//
+//            fault.setFaultString(faultstring);
+//
+//            return fault;
+//        } catch (SOAPException e) {
+//            throw new WebServiceException(e);
+//        }
+//    }
 }
