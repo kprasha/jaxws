@@ -569,7 +569,9 @@ public final class Packet extends DistributedPropertySet {
             // choose ReplyTo
             refpEPR = message.getHeaders().getReplyTo(ver);
         }
-        refpEPR.addReferenceParameters(hl);
+        if (refpEPR != null) {
+            refpEPR.addReferenceParameters(hl);
+        }
 
         return r;
     }
