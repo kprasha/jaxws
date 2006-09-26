@@ -41,11 +41,12 @@ public class WsaClientPipe extends WsaPipe {
         super(wsdlPort, binding, next);
     }
 
-    public Pipe copy(PipeCloner pipeCloner) {
-        WsaClientPipe that = new WsaClientPipe(wsdlPort, binding, next);
-        pipeCloner.add(this, that);
+    public WsaClientPipe(WsaClientPipe that, PipeCloner pipeCloner) {
+        super(that, pipeCloner);
+    }
 
-        return that;
+    public WsaClientPipe copy(PipeCloner cloner) {
+        return new WsaClientPipe(this, cloner);
     }
 
     public Packet process(Packet packet) {

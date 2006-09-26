@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 
 /**
@@ -42,6 +43,13 @@ public abstract class WsaPipe extends AbstractFilterPipeImpl {
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         helper = getPipeHelper();
+    }
+
+    public WsaPipe(WsaPipe that, PipeCloner cloner) {
+        super(that, cloner);
+        this.wsdlPort = that.wsdlPort;
+        this.binding = that.binding;
+        this.helper = that.helper;
     }
 
     private WsaPipeHelper getPipeHelper() {
