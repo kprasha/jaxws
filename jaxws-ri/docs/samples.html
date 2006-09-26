@@ -9,7 +9,7 @@
         href="http://jcp.org/en/jsr/detail?id=224">JSR
     224</a> under the <a href="http://jcp.org/">Java Community Process</a>
     (JCP). This document explains the samples that are bundled along with
-    the JAX-WS 2.1 EA1 RI.</p>
+    the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}RI.</p>
 
 The samples included with JAX-WS that is distributed on Java.net documents how to use JAX-WS in a non-Java EE 5 servlet container using a
 proprietary deployment descriptor <code>sun-jaxws.xml</code> and servlet
@@ -24,7 +24,9 @@ standard Java EE 5 deployment descriptor; please refer to the
 <a href="http://java.sun.com/javaee/index.jsp">Java EE 5</a> or <a href="https://glassfish.dev.java.net/">Glassfish</a>
 documentation/samples.
 
-<p>All these samples are tested to run on Glassfish v2 Milestone 1 build.</p>
+<p>All these samples are tested to run on 
+<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone 1</a> build 
+and on Apache Tomcat 5.x.</p>
 
 <h2><a name="1.0"></a><font color="#280099">1.0 Directory Structure</font></h2>
 
@@ -275,6 +277,11 @@ documentation/samples.
 		<li>
 		<p style="margin-bottom: 0in;">Set <code>JAXWS_HOME</code>
                     to the JAX-WS installation directory.</p></li>
+		<li>
+		<p style="margin-bottom: 0in;">'cd $JAXWS_HOME' then invoke 'ant 
+		install'. This will add jaxws 2.1 jars in the classpath-prefix before 
+		the jaxws-update.jar (jaxws 2.0.1) in domain.xml. This is required so 
+		that Glassfish picks-up JAXWS 2.1 jar and not jaxws 2.0.1 jar.</p></li>
 	</ol></li>
 </ol>
 

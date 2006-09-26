@@ -5,24 +5,15 @@
   <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
 
-<body lang="en-US" bgcolor="#ffffff" dir="ltr">
-<h1 align="center"><font color="#280099">Java<font size="1"><sup>TM</sup></font>
-API for XML Web Services<br>
-Samples Documentation</font> </h1>
-<p align="center"><b>Specification Version:</b>
-@@SPEC_VERSION@@<br>
-<b>Reference Implementation (RI) Version:</b>
-@@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@</p>
-
+<body>
 
 <p>Java APIs for XML Web Services 2.0 is developed as <a
         href="http://jcp.org/en/jsr/detail?id=224">JSR
     224</a> under the <a href="http://jcp.org/">Java Community Process</a>
     (JCP). This document explains the samples that are bundled along with
-    the JAX-WS 2.0.1 M1 RI.</p>
+    the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}RI.</p>
 
-The samples included with JAX-WS that is distributed on Java.net or
-as part of JWSDP, documents how to use JAX-WS in a non-Java EE 5 servlet container using a
+The samples included with JAX-WS that is distributed on Java.net documents how to use JAX-WS in a non-Java EE 5 servlet container using a
 proprietary deployment descriptor <code>sun-jaxws.xml</code> and servlet
 <code>com.sun.xml.ws.transport.http.servlet.WSServlet</code>.
 This means that you can these JAX-WS RI applications in any servlet container that has been
@@ -35,7 +26,9 @@ standard Java EE 5 deployment descriptor; please refer to the
 <a href="http://java.sun.com/javaee/index.jsp">Java EE 5</a> or <a href="https://glassfish.dev.java.net/">Glassfish</a>
 documentation/samples.
 
-<p>All these samples are tested to run on Glassfish v2 Milestone 1 build.</p>
+<p>All these samples are tested to run on 
+<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone 1</a> build 
+and on Apache Tomcat 5.x.</p>
 
 <h2><a name="1.0"></a><font color="#280099">1.0 Directory Structure</font></h2>
 
@@ -51,6 +44,20 @@ documentation/samples.
         <p>index.html, this file</p>
     </td>
 </tr>
+
+<tr>
+    <td>
+        <font color="#280099">fromjava-wsaddressing</font></td>
+    <td>
+        <font color="#280099">Starting from Java endpoint how to develop W3C WS-Addressing endpoint</font></td>
+</tr>
+<tr>
+    <td>
+        <font color="#280099">fromwsdl-wsaddressing</font></td>
+    <td>
+        <font color="#280099">Starting from WSDL how to develop a WS-Addressing endpoint</font></td>
+</tr>
+
 <tr valign="top">
     <td>
         <p>fromjava</p>
@@ -257,7 +264,7 @@ documentation/samples.
 		Glassfish v2 Milestone1</a> and install it.</p>
     </li>
     <li>
-	<p style="margin-bottom: 0in;">Make sure that the Application Server is configured for port 8080
+	<p style="margin-bottom: 0in;">Make sure that the Application Server is configured for port 8080 
 	(which is the default HTTP port for Glassfish installation) as samples
             hardcoded with this port info. Otherwise, you need to change samples to use the correct port.
 	</p></li>
@@ -272,6 +279,11 @@ documentation/samples.
 		<li>
 		<p style="margin-bottom: 0in;">Set <code>JAXWS_HOME</code>
                     to the JAX-WS installation directory.</p></li>
+		<li>
+		<p style="margin-bottom: 0in;">'cd $JAXWS_HOME' then invoke 'ant 
+		install'. This will add jaxws 2.1 jars in the classpath-prefix before 
+		the jaxws-update.jar (jaxws 2.0.1) in domain.xml. This is required so 
+		that Glassfish picks-up JAXWS 2.1 jar and not jaxws 2.0.1 jar.</p></li>
 	</ol></li>
 </ol>
 
