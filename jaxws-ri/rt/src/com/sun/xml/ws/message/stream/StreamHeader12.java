@@ -22,7 +22,6 @@
 package com.sun.xml.ws.message.stream;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.message.Util;
 import com.sun.istack.FinalArrayList;
 
@@ -47,7 +46,7 @@ public class StreamHeader12 extends StreamHeader {
         super(reader, mark);
     }
 
-    public StreamHeader12(XMLStreamReader reader) throws XMLStreamBufferException, XMLStreamException {
+    public StreamHeader12(XMLStreamReader reader) throws XMLStreamException {
         super(reader);
     }
 

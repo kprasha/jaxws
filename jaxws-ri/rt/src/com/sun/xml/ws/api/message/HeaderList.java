@@ -35,7 +35,6 @@ import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.xml.ws.resources.AddressingMessages;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
@@ -475,8 +474,6 @@ public final class HeaderList extends ArrayList<Header> {
                 replyTo = h.readAsEPR(version);
             } catch (XMLStreamException e) {
                 throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
-            } catch (XMLStreamBufferException e) {
-                throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
             }
         }
 
@@ -522,8 +519,6 @@ public final class HeaderList extends ArrayList<Header> {
             try {
                 faultTo = h.readAsEPR(version);
             } catch (XMLStreamException e) {
-                throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
-            } catch (XMLStreamBufferException e) {
                 throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
             }
         }

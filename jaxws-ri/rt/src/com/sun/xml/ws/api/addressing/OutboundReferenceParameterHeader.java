@@ -181,35 +181,31 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        try {
-            infoset.writeToXMLStreamWriter(new XMLStreamWriterFilter(w) {
-                private boolean root=true;
+        infoset.writeToXMLStreamWriter(new XMLStreamWriterFilter(w) {
+            private boolean root=true;
 
-                public void writeStartElement(String localName) throws XMLStreamException {
-                    super.writeStartElement(localName);
-                    writeAddedAttribute();
-                }
+            public void writeStartElement(String localName) throws XMLStreamException {
+                super.writeStartElement(localName);
+                writeAddedAttribute();
+            }
 
-                private void writeAddedAttribute() throws XMLStreamException {
-                    if(!root)   return;
-                    root=true;
-                    super.writeNamespace("wsa",AddressingVersion.W3C.nsUri);
-                    super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
-                }
+            private void writeAddedAttribute() throws XMLStreamException {
+                if(!root)   return;
+                root=true;
+                super.writeNamespace("wsa",AddressingVersion.W3C.nsUri);
+                super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
+            }
 
-                public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
-                    super.writeStartElement(namespaceURI, localName);
-                    writeAddedAttribute();
-                }
+            public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
+                super.writeStartElement(namespaceURI, localName);
+                writeAddedAttribute();
+            }
 
-                public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
-                    super.writeStartElement(prefix, localName, namespaceURI);
-                    writeAddedAttribute();
-                }
-            });
-        } catch (XMLStreamBufferException e) {
-            throw new XMLStreamException(e);
-        }
+            public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+                super.writeStartElement(prefix, localName, namespaceURI);
+                writeAddedAttribute();
+            }
+        });
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {

@@ -23,7 +23,6 @@ package com.sun.xml.ws.message.stream;
 
 import com.sun.istack.FinalArrayList;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.message.Util;
 
 import javax.xml.soap.SOAPConstants;
@@ -45,7 +44,7 @@ public class StreamHeader11 extends StreamHeader {
         super(reader, mark);
     }
 
-    public StreamHeader11(XMLStreamReader reader) throws XMLStreamBufferException, XMLStreamException {
+    public StreamHeader11(XMLStreamReader reader) throws XMLStreamException {
         super(reader);
     }
 

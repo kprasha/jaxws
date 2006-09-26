@@ -2,7 +2,6 @@ package com.sun.xml.ws.api.addressing;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.message.AbstractHeaderImpl;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.ContentHandler;
@@ -56,11 +55,7 @@ final class EPRHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        try {
-            epr.writeTo(localName, w);
-        } catch (XMLStreamBufferException e) {
-            throw new XMLStreamException(e);
-        }
+        epr.writeTo(localName, w);
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {

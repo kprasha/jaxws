@@ -26,7 +26,6 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.v2.runtime.MarshallerImpl;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.message.DOMHeader;
@@ -141,7 +140,7 @@ public abstract class Headers {
      * Note that the header implementation will read the entire data
      * into memory anyway, so this might not be as efficient as you might hope.
      */
-    public static Header create( SOAPVersion soapVersion, XMLStreamReader reader ) throws XMLStreamBufferException, XMLStreamException {
+    public static Header create( SOAPVersion soapVersion, XMLStreamReader reader ) throws XMLStreamException {
         switch(soapVersion) {
         case SOAP_11:
             return new StreamHeader11(reader);

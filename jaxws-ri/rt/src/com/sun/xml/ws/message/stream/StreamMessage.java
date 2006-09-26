@@ -26,7 +26,6 @@ import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Header;
@@ -286,8 +285,6 @@ public final class StreamMessage extends AbstractMessageImpl {
 
             return new StreamMessage(envelopeTag, headerTag, attachmentSet, HeaderList.copy(headers), bodyTag, clone, soapVersion);
         } catch (XMLStreamException e) {
-            throw new WebServiceException("Failed to copy a message",e);
-        } catch (XMLStreamBufferException e) {
             throw new WebServiceException("Failed to copy a message",e);
         }
     }

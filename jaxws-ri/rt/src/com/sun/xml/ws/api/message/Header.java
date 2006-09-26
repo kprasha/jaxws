@@ -25,7 +25,6 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
@@ -261,7 +260,7 @@ public interface Header {
      * @return
      *      On a successful return, this method never returns null.
      */
-    public @NotNull WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException, XMLStreamBufferException;
+    public @NotNull WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException;
 
     /**
      * Writes out the header.

@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.api.addressing;
 
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
@@ -197,8 +196,6 @@ public enum AddressingVersion {
             this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResourceName),this);
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
-        } catch (XMLStreamBufferException e) {
-            throw new Error(e); // bug in our code
         }
     }
 

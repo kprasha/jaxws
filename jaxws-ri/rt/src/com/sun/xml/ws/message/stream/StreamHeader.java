@@ -24,14 +24,12 @@ package com.sun.xml.ws.message.stream;
 import com.sun.istack.FinalArrayList;
 import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.message.AbstractHeaderImpl;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -125,7 +123,7 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
      *      By the end of this method, the parser will point at
      *      the end tag of this element.
      */
-    protected StreamHeader(XMLStreamReader reader) throws XMLStreamBufferException, XMLStreamException {
+    protected StreamHeader(XMLStreamReader reader) throws XMLStreamException {
         _localName = reader.getLocalName();
         _namespaceURI = reader.getNamespaceURI();
         attributes = processHeaderAttributes(reader);
@@ -177,12 +175,8 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        try {
-            // TODO what about in-scope namespaces
-            _mark.writeToXMLStreamWriter(w);
-        } catch (XMLStreamBufferException e) {
-            throw new XMLStreamException2(e);
-        }
+        // TODO what about in-scope namespaces
+        _mark.writeToXMLStreamWriter(w);
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {

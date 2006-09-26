@@ -3,7 +3,6 @@ package com.sun.xml.ws.api.addressing;
 import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
@@ -90,7 +89,7 @@ public final class WSEndpointReference {
     /**
      * Creates a {@link WSEndpointReference} by parsing an infoset.
      */
-    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamBufferException, XMLStreamException {
+    public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException {
         this(XMLInputFactory.newInstance().createXMLStreamReader(infoset),version);
     }
 
@@ -98,7 +97,7 @@ public final class WSEndpointReference {
      * Creates a {@link WSEndpointReference} from the given infoset.
      * The {@link XMLStreamReader} must point to either a document or an element.
      */
-    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamBufferException, XMLStreamException {
+    public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException {
         this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
     }
 
@@ -238,7 +237,7 @@ public final class WSEndpointReference {
      *      EPR uses a different root tag name depending on the context.
      *      The returned {@link Source} will use the given local name
      */
-    public void writeTo(final @NotNull String localName, @NotNull XMLStreamWriter w) throws XMLStreamBufferException, XMLStreamException {
+    public void writeTo(final @NotNull String localName, @NotNull XMLStreamWriter w) throws XMLStreamException {
         infoset.writeToXMLStreamWriter(new XMLStreamWriterFilter(w) {
             private boolean root=true;
 

@@ -24,7 +24,6 @@ package com.sun.xml.ws.encoding;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -161,8 +160,6 @@ public abstract class StreamSOAPCodec implements Codec {
                 } catch (XMLStreamException e) {
                     // TODO need to throw more meaningful exception
                     throw new WebServiceException(e);
-                } catch (XMLStreamBufferException e) {
-                    throw new WebServiceException(e);
                 }
             }
 
@@ -190,7 +187,7 @@ public abstract class StreamSOAPCodec implements Codec {
     }
 
     private XMLStreamBuffer cacheHeaders(XMLStreamReader reader,
-            Map<String, String> namespaces, HeaderList headers) throws XMLStreamException, XMLStreamBufferException {
+            Map<String, String> namespaces, HeaderList headers) throws XMLStreamException {
         MutableXMLStreamBuffer buffer = createXMLStreamBuffer();
         StreamReaderBufferCreator creator = new StreamReaderBufferCreator();
         creator.setXMLStreamBuffer(buffer);

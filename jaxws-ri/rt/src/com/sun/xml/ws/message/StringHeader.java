@@ -34,7 +34,6 @@ import javax.xml.stream.XMLStreamWriter;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.xml.sax.ContentHandler;
@@ -69,14 +68,10 @@ public class StringHeader extends AbstractHeaderImpl {
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
-        try {
-            MutableXMLStreamBuffer buf = new MutableXMLStreamBuffer();
-            XMLStreamWriter w = buf.createFromXMLStreamWriter();
-            writeTo(w);
-            return buf.readAsXMLStreamReader();
-        } catch (XMLStreamBufferException e) {
-            throw new XMLStreamException2(e);
-        }
+        MutableXMLStreamBuffer buf = new MutableXMLStreamBuffer();
+        XMLStreamWriter w = buf.createFromXMLStreamWriter();
+        writeTo(w);
+        return buf.readAsXMLStreamReader();
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {

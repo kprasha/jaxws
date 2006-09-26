@@ -25,7 +25,6 @@ package com.sun.xml.ws.message;
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
@@ -78,7 +77,7 @@ public abstract class AbstractHeaderImpl implements Header {
     /**
      * Default implementation that copies the infoset. Not terribly efficient.
      */
-    public WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException, XMLStreamBufferException {
+    public WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException {
         return new WSEndpointReference(readHeader(),expected);
     }
 
