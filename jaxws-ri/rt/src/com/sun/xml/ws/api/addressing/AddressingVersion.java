@@ -206,8 +206,6 @@ public enum AddressingVersion {
             this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResourceName),this);
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
-        } catch (XMLStreamBufferException e) {
-            throw new Error(e); // bug in our code
         }
     }
 
