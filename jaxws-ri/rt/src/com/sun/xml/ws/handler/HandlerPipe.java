@@ -57,6 +57,9 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
      * TODO: remove after a little more of the runtime supports to Fiber
      */
     Pipe next;
+    // TODO: For closing in Exceptions this is needed
+    // This is used for creating MessageContext in #close
+    Packet packet;
 
     public HandlerPipe(Pipe next, WSDLPort port) {
         super(PipeAdapter.adapt(next));
@@ -87,18 +90,95 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
+    @Override
     public NextAction processRequest(Packet request) {
-        // TODO fix the impl
-        return doInvoke(super.next,request);
+        this.packet = request;
+        setupExchange();
+        // This check is done to cover handler returning false in Oneway request
+        if (isHandleFalse()) {
+            // Cousin HandlerTube returned false during Oneway Request processing.
+            // Don't call handlers and dispatch the message.
+            remedyActionTaken = true;
+            return doInvoke(super.next, packet);
+        }
+
+        // This is done here instead of the constructor, since User can change
+        // the roles and handlerchain after a stub/proxy is created.
+        setUpProcessor();
+
+        MessageUpdatableContext context = getContext(packet);
+        try {
+            boolean isOneWay = checkOneWay(packet);
+            if (!isHandlerChainEmpty()) {
+                // Call handlers on Request
+                boolean handlerResult = callHandlersOnRequest(context, isOneWay);
+                //Update Packet with user modifications
+                context.updatePacket();
+                // the only case where no message is sent
+                if (!isOneWay && !handlerResult) {
+                    return doReturnWith(packet);
+                }
+            }
+            requestProcessingSucessful = true;
+            // Call next Pipe.process() on msg
+            return doInvoke(super.next, packet);
+        } finally {
+            if(!requestProcessingSucessful) {
+                // Clean up the exchange for next invocation.
+                exchange = null;
+                close(context.getMessageContext());
+                requestProcessingSucessful = false;
+            }
+
+        }
+
     }
 
+    @Override
     public NextAction processResponse(Packet response) {
-        // TODO fix the impl
-        return doReturnWith(response);
+        this.packet = response;
+        MessageUpdatableContext context = getContext(packet);
+        try {
+            if (isHandleFalse() || (packet.getMessage() == null)) {
+                // Cousin HandlerTube returned false during Response processing.
+                // or it is oneway request
+                // or handler chain is empty
+                // Don't call handlers.
+                return doReturnWith(packet);
+            }
+            boolean isFault = isHandleFault(packet);
+            if (!isHandlerChainEmpty()) {
+                // Call handlers on Response
+                callHandlersOnResponse(context, isFault);
+            }
+        } finally {
+            // Clean up the exchange for next invocation.
+            exchange = null;
+            close(context.getMessageContext());
+            requestProcessingSucessful = false;
+        }
+        //Update Packet with user modifications
+        context.updatePacket();
+
+        return doReturnWith(packet);
+
+    }
+
+    @Override
+    public NextAction processException(Throwable t) {
+        MessageUpdatableContext context = getContext(packet);
+        // Clean up the exchange for next invocation.
+        exchange = null;
+        close(context.getMessageContext());
+        requestProcessingSucessful = false;
+        //Update Packet with user modifications
+        context.updatePacket();
+
+        return doThrow(t);
     }
 
     public void preDestroy() {
-
+        //TODO Call predestroy on all handlers.
     }
 
     public final Packet process( Packet packet) {
