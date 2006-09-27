@@ -26,9 +26,9 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.SOAPFaultException;
 import java.util.Set;
 
 /**
@@ -37,16 +37,8 @@ import java.util.Set;
 
 public class ClientMUPipe extends MUPipe {
 
-    /**
-     * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    private Pipe next;
-
-
     public ClientMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
-        this.next = next;
     }
     
     public ClientMUPipe(WSBinding binding, Tube next) {
@@ -55,55 +47,33 @@ public class ClientMUPipe extends MUPipe {
 
     protected ClientMUPipe(ClientMUPipe that, TubeCloner cloner) {
         super(that,cloner);
-        this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
     /**
-     * Do MU Header Processing on incoming message (repsonse)
+     * Do MU Header Processing on incoming message (response)
+     *
      * @return
-     *         if all the headers in the packet are understood, returns the packet.
+     *         if all the headers in the packet are understood, returns an action to
+     *         call the previous pipes with response packet
      * @throws SOAPFaultException
      *         if all the headers in the packet are not understood, throws SOAPFaultException
      */
-    /**
-     * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    public Packet process(Packet packet) {
-        Packet reply = next.process(packet);
-        //Oneway
-        if(reply.getMessage() == null) {
-            return reply;
-        }
-        HandlerConfiguration handlerConfig = packet.handlerConfig;
-        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(reply.getMessage().getHeaders(),
-                handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
-        if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
-            return reply;
-        }
-        throw createMUSOAPFaultException(misUnderstoodHeaders);
-
-    }
-
-    public NextAction processRequest(Packet request) {
-
-        return super.processRequest(request);
-    }
-
+    @Override
     public NextAction processResponse(Packet response) {
         if (response.getMessage() == null) {
             return super.processResponse(response);
         }
         HandlerConfiguration handlerConfig = response.handlerConfig;
-        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(response.getMessage().getHeaders(),
-                handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
+        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(
+                response.getMessage().getHeaders(), handlerConfig.getRoles(),
+                handlerConfig.getKnownHeaders());
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
             return super.processResponse(response);
         }
         throw createMUSOAPFaultException(misUnderstoodHeaders);
     }
 
-    public AbstractTubeImpl copy(TubeCloner cloner) {
+    public ClientMUPipe copy(TubeCloner cloner) {
         return new ClientMUPipe(this,cloner);
     }
 

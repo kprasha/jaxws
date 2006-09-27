@@ -35,19 +35,13 @@ import java.util.Set;
  */
 
 public class ServerMUPipe extends MUPipe {
-
-    /**
-     * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    private Pipe next;
     
     private HandlerConfiguration handlerConfig;
+
     public ServerMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
         //On Server, HandlerConfiguration does n't change after publish.
         handlerConfig = ((BindingImpl)binding).getHandlerConfig();
-        this.next = next;
     }
     
     public ServerMUPipe(WSBinding binding, Tube next) {
@@ -59,10 +53,17 @@ public class ServerMUPipe extends MUPipe {
     protected ServerMUPipe(ServerMUPipe that, TubeCloner cloner) {
         super(that,cloner);
         handlerConfig = that.handlerConfig;
-        this.next = that.next;
-        this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
+    /**
+     * Do MU Header Processing on incoming message (request)
+     * @return
+     *      if all the headers in the packet are understood, returns action such that
+     *      next pipe will be inovked.
+     *      if all the headers in the packet are not understood, returns action such that
+     *      SOAPFault Message is sent to previous pipes.
+     */
+    @Override
     public NextAction processRequest(Packet request) {
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(request.getMessage().getHeaders(),
                 handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
@@ -72,28 +73,7 @@ public class ServerMUPipe extends MUPipe {
         return doReturnWith(request.createResponse(createMUSOAPFaultMessage(misUnderstoodHeaders)));
     }
 
-    /**
-     * Do MU Header Processing on incoming message (request)
-     * @return
-     *      if all the headers in the packet are understood, returns the next Pipe.process()
-     *      if all the headers in the packet are not understood, returns a Packet with SOAPFault Message
-     */
-    /**
-     * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    public Packet process(Packet packet) {
-
-        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(packet.getMessage().getHeaders(),
-                handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
-        if((misUnderstoodHeaders == null)  || misUnderstoodHeaders.isEmpty()) {
-            return next.process(packet);
-        }
-        return packet.createResponse(createMUSOAPFaultMessage(misUnderstoodHeaders));
-    }
-
-
-    public AbstractTubeImpl copy(TubeCloner cloner) {
+    public ServerMUPipe copy(TubeCloner cloner) {
         return new ServerMUPipe(this,cloner);
     }
 
