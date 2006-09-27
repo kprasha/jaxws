@@ -42,7 +42,7 @@ public class ClientMUPipe extends MUPipe {
      * TODO: remove after a little more of the runtime supports to Fiber
      */
     private Pipe next;
-    private HandlerConfiguration handlerConfig;
+
 
     public ClientMUPipe(WSBinding binding, Pipe next) {
         super(binding, next);
@@ -86,7 +86,7 @@ public class ClientMUPipe extends MUPipe {
     }
 
     public NextAction processRequest(Packet request) {
-        handlerConfig = request.handlerConfig;
+
         return super.processRequest(request);
     }
 
@@ -94,6 +94,7 @@ public class ClientMUPipe extends MUPipe {
         if (response.getMessage() == null) {
             return super.processResponse(response);
         }
+        HandlerConfiguration handlerConfig = response.handlerConfig;
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(response.getMessage().getHeaders(),
                 handlerConfig.getRoles(),handlerConfig.getKnownHeaders());
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
