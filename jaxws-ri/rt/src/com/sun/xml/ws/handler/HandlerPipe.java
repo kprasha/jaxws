@@ -52,11 +52,7 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
     private final @Nullable WSDLPort port;
     // flag used to decide whether to call close on cousinPipe
     boolean requestProcessingSucessful = false;
-    /**
-     * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    Pipe next;
+
     // TODO: For closing in Exceptions this is needed
     // This is used for creating MessageContext in #close
     Packet packet;
@@ -64,7 +60,6 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
     public HandlerPipe(Pipe next, WSDLPort port) {
         super(PipeAdapter.adapt(next));
         this.port = port;
-        this.next = next;
     }
 
     public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
@@ -75,7 +70,6 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         } else {
             this.port = null;
         }
-        this.next = next;
     }
 
     /**
@@ -86,8 +80,7 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         if(that.cousinPipe != null) {
             this.cousinPipe = cloner.copy(that.cousinPipe);
         }
-        this.port = that.port;
-        this.next = ((PipeCloner)cloner).copy(that.next);
+        this.port = that.port;        
     }
 
     @Override
