@@ -124,12 +124,8 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
             return doInvoke(super.next, packet);
         } finally {
             if(!requestProcessingSucessful) {
-                // Clean up the exchange for next invocation.
-                exchange = null;
-                close(context.getMessageContext());
-                requestProcessingSucessful = false;
+                cleanUpState(context.getMessageContext());
             }
-
         }
 
     }
@@ -152,10 +148,7 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
                 callHandlersOnResponse(context, isFault);
             }
         } finally {
-            // Clean up the exchange for next invocation.
-            exchange = null;
-            close(context.getMessageContext());
-            requestProcessingSucessful = false;
+            cleanUpState(context.getMessageContext());
         }
         //Update Packet with user modifications
         context.updatePacket();
@@ -166,22 +159,40 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
 
     @Override
     public NextAction processException(Throwable t) {
-        MessageUpdatableContext context = getContext(packet);
-        // Clean up the exchange for next invocation.
-        exchange = null;
-        close(context.getMessageContext());
-        requestProcessingSucessful = false;
-        //Update Packet with user modifications
-        context.updatePacket();
+        try {
+            return doThrow(t);
+        } finally {
+            MessageUpdatableContext context = getContext(packet);
+            cleanUpState(context.getMessageContext());
+            /* TODO revisit: commented this out as the modified packet is no longer used
+                    In future if the message is propagated even when an exception
+                    occurs, then uncomment context.updatePacket();
+            */
+            //Update Packet with user modifications
+            //context.updatePacket();
 
-        return doThrow(t);
+
+        }
     }
 
     public void preDestroy() {
         //TODO Call predestroy on all handlers.
     }
 
-    public final Packet process( Packet packet) {
+    /**
+     * Calls close on previously invoked handlers.
+     * Also, Cleans up any state left over in the Tube instance from the current
+     * invocation, as Tube instances can be reused after the completion of MEP.
+     *
+     */
+    private void cleanUpState(MessageContext mc) {
+        close(mc);
+        // Clean up the exchange for next invocation.
+        exchange = null;
+        requestProcessingSucessful = false;
+    }
+
+    /* public final Packet process( Packet packet) {
         setupExchange();
         // This check is done to cover handler returning false in Oneway request
         if(isHandleFalse()){
@@ -236,7 +247,7 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
 
         return reply;
     }
-
+    */
     abstract void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault);
 
     abstract boolean callHandlersOnRequest(MessageUpdatableContext context, boolean oneWay);
