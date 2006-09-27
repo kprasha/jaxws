@@ -28,6 +28,9 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.PipePool;
@@ -60,6 +63,8 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      */
     private Pool<Pipe> pipes;
 
+    private final Engine engine;
+
     protected EndpointReference endpointReference;
 
     protected final BindingImpl binding;
@@ -84,6 +89,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         this.requestContext.setEndpointAddress(defaultEndPointAddress);
+        engine = new Engine();
     }
 
     /**
@@ -119,10 +125,11 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         if (pool == null)
             throw new WebServiceException("close method has already been invoked"); // TODO: i18n
 
+        Fiber fiber = engine.createFiber();
         // then send it away!
         Pipe pipe = pool.take();
         try {
-            reply = pipe.process(packet);
+            reply = fiber.runSync(PipeAdapter.adapt(pipe), packet);
         } finally {
             pool.recycle(pipe);
         }
