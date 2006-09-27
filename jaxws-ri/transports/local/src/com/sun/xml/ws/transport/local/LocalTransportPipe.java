@@ -23,15 +23,15 @@ package com.sun.xml.ws.transport.local;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
+import com.sun.istack.NotNull;
+
 import java.io.ByteArrayOutputStream;
 
 import javax.xml.ws.WebServiceException;
@@ -49,9 +49,9 @@ import java.util.Map.Entry;
  * <p>
  * This is useful to test the whole client-server in a single VM.
  *
- * @author jitu
+ * @author Jitendra Kotamraju
  */
-final class LocalTransportPipe implements Pipe {
+final class LocalTransportPipe extends AbstractTubeImpl {
 
     /**
      * Represents the service running inside the local transport.
@@ -81,11 +81,15 @@ final class LocalTransportPipe implements Pipe {
     }
 
     /**
-     * Copy constructor for {@link Pipe#copy(PipeCloner)}.
+     * Copy constructor for {@link Tube#copy(TubeCloner)}.
      */
-    private LocalTransportPipe(LocalTransportPipe that, PipeCloner cloner) {
+    private LocalTransportPipe(LocalTransportPipe that, TubeCloner cloner) {
         this(that.adapter, that.codec.copy());
         cloner.add(that,this);
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        return doThrow(t);
     }
 
     public Packet process(Packet request) {
@@ -106,7 +110,7 @@ final class LocalTransportPipe implements Pipe {
             // Calling getStaticContentType sets some internal state in the codec
             // TODO : need to fix this properly in Codec
             ContentType contentType = codec.getStaticContentType(request);
-            String requestContentType = null;
+            String requestContentType;
             if (contentType != null) {
                 requestContentType = contentType.getContentType();
                 codec.encode(request, con.getOutput());
@@ -134,7 +138,7 @@ final class LocalTransportPipe implements Pipe {
             String responseContentType = getResponseContentType(con);
 
             if (con.getStatus() == WSHTTPConnection.ONEWAY) {
-                return request.createResponse(null);    // one way. no response given.
+                return request.createClientResponse(null);    // one way. no response given.
             }
 
             // TODO: check if returned MIME type is the same as that which was sent
@@ -142,7 +146,7 @@ final class LocalTransportPipe implements Pipe {
             
             checkFIConnegIntegrity(request.contentNegotiation, requestContentType, requestAccept, responseContentType);
             
-            Packet reply = request.createResponse(null);
+            Packet reply = request.createClientResponse(null);
             codec.decode(con.getInput(), responseContentType, reply);
             return reply;
         } catch (WebServiceException wex) {
@@ -194,14 +198,22 @@ final class LocalTransportPipe implements Pipe {
         return null;
     }
 
+    @NotNull
+    public NextAction processRequest(@NotNull Packet request) {
+        return doReturnWith(process(request));
+    }
+
+    @NotNull
+    public NextAction processResponse(@NotNull Packet response) {
+        throw new IllegalStateException("LocalTransportPipe's processResponse shouldn't be called.");
+    }
+
     public void preDestroy() {
     }
 
-    public Pipe copy(PipeCloner cloner) {
-        return new LocalTransportPipe(this,cloner);
+    public LocalTransportPipe copy(TubeCloner cloner) {
+        return new LocalTransportPipe(this, cloner);
     }
-
-
 
     private void dump(LocalConnectionImpl con, String caption, Map<String,List<String>> headers) {
         System.out.println("---["+caption +"]---");
