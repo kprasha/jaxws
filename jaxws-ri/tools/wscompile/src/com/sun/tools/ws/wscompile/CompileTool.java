@@ -53,6 +53,7 @@ import com.sun.xml.txw2.annotation.XmlAttribute;
 import com.sun.xml.txw2.annotation.XmlElement;
 import com.sun.xml.txw2.output.StreamSerializer;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -120,9 +121,14 @@ import java.util.*;
 public class CompileTool extends ToolBase implements ProcessorNotificationListener,
         AnnotationProcessorFactory {
 
-    public CompileTool(OutputStream out, String program) {
+    public CompileTool(OutputStream out, Container container, String program) {
         super(out, program);
         listener = this;
+        this.container = container;
+    }
+
+    public CompileTool(OutputStream out, String program) {
+        this(out, Container.NONE, program);
     }
 
     protected boolean parseArguments(String[] args) {
@@ -681,7 +687,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                             return getSchemaOutput(namespace, filename.value);
                         }
                         // TODO pass correct impl's class name
-                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures), null, null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures), container, null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)
@@ -998,6 +1004,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
     }
 
     private AnnotationProcessorContext context;
+    private final Container container;
 
     private WebServiceAP webServiceAP;
 

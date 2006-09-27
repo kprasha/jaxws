@@ -23,6 +23,8 @@ package com.sun.tools.ws.util;
 
 import com.sun.tools.ws.spi.WSToolsObjectFactory;
 import com.sun.tools.ws.wscompile.CompileTool;
+import com.sun.xml.ws.api.server.Container;
+
 import java.io.OutputStream;
 
 /**
@@ -33,14 +35,14 @@ import java.io.OutputStream;
 public class WSToolsObjectFactoryImpl extends WSToolsObjectFactory {
     
     @Override
-    public boolean wsimport(OutputStream logStream, String[] args) {
-        CompileTool tool = new CompileTool(logStream, "wsimport");
+    public boolean wsimport(OutputStream logStream, Container container, String[] args) {
+        CompileTool tool = new CompileTool(logStream, container, "wsimport");
         return tool.run(args);
     }
     
     @Override
-    public boolean wsgen(OutputStream logStream, String[] args) {
-        CompileTool tool = new CompileTool(logStream, "wsgen");
+    public boolean wsgen(OutputStream logStream, Container container, String[] args) {
+        CompileTool tool = new CompileTool(logStream, container, "wsgen");
         return tool.run(args);
     }
 }
