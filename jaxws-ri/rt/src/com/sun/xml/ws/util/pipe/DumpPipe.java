@@ -22,11 +22,9 @@
 
 package com.sun.xml.ws.util.pipe;
 
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 
@@ -43,17 +41,10 @@ public class DumpPipe extends DumpTube {
 
     /**
      * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    private Pipe next;
-
-    /**
-     * @deprecated
      *      until we complete migration to tube.
      */
     public DumpPipe(String name, PrintStream out, Pipe next) {
         this(name,out,PipeAdapter.adapt(next));
-        this.next = next;
     }
 
     public DumpPipe(String name, PrintStream out, Tube next) {
@@ -78,22 +69,10 @@ public class DumpPipe extends DumpTube {
      */
     private DumpPipe(DumpPipe that, TubeCloner cloner) {
         super(that,cloner);
-        this.next = ((PipeCloner)cloner).copy(that.next);
     }
 
     public AbstractTubeImpl copy(TubeCloner cloner) {
         return new DumpPipe(this,cloner);
-    }
-    
-    /**
-     * @deprecated
-     * TODO: remove after a little more of the runtime supports to Fiber
-     */
-    public Packet process(Packet packet) {
-        dump("request",packet);
-        Packet reply = next.process(packet);
-        dump("response",reply);
-        return reply;
     }
 
 }
