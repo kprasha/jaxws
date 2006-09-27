@@ -43,6 +43,8 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.Map;
 
+import org.w3c.dom.Element;
+
 /**
  * Base class for stubs, which accept method invocations from
  * client applications and pass the message to a {@link Pipe}
@@ -172,7 +174,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         return RuntimeVersion.VERSION + ": Stub for " + getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
 
-    public W3CEndpointReference getEndpointReference() {
-        return getEndpointReference(W3CEndpointReference.class);
+    public W3CEndpointReference getEndpointReference(Element...referenceParameters) {
+        return getEndpointReference(W3CEndpointReference.class, referenceParameters);
     }
 }

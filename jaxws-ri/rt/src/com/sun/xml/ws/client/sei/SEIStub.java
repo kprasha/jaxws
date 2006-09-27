@@ -48,6 +48,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import org.w3c.dom.Element;
+
 /**
  * {@link Stub} that handles method invocations
  * through a strongly-typed endpoint interface.
@@ -142,7 +144,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
 
 
 
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         if (endpointReference != null) {
             return EndpointReferenceUtil.transform(clazz, endpointReference);
         }
@@ -154,7 +156,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
                 owner.getServiceName(),
                 getPortName(port).getLocalPart(),
                 getPortTypeName(port), true);
-        
+
         return (T) endpointReference;
     }
 

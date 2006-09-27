@@ -45,6 +45,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.w3c.dom.Element;
+
 /**
  * TODO: update javadoc, use sandbox classes where can
  */
@@ -271,7 +273,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         if (endpointReference != null) {
             return EndpointReferenceUtil.transform(clazz, endpointReference);
         }

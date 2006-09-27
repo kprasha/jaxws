@@ -39,6 +39,8 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.security.Principal;
 
+import org.w3c.dom.Element;
+
 /**
  * Base code for {@link ProviderInvokerPipe} and {@link SEIInvokerPipe}.
  *
@@ -140,11 +142,11 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
         }
 
-        public EndpointReference getEndpointReference() {
-            return getEndpointReference(W3CEndpointReference.class);
+        public EndpointReference getEndpointReference(Element...referenceParameters) {
+            return getEndpointReference(W3CEndpointReference.class, referenceParameters);
         }
 
-        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
             Packet packet = getCurrentPacket();
             String address = packet.webServiceContextDelegate.getEPRAddress(packet);
             return (T) ((WSEndpointImpl)endpoint).getEndpointReference(clazz,address);

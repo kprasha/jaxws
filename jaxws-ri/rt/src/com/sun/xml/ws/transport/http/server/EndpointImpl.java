@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.xml.sax.EntityResolver;
+import org.w3c.dom.Element;
 
 
 /**
@@ -284,11 +285,11 @@ public class EndpointImpl extends Endpoint {
         }
     }
 
-    public EndpointReference getEndpointReference() {
+    public EndpointReference getEndpointReference(Element...referenceParameters) {
         return getEndpointReference(W3CEndpointReference.class);
     }
 
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         if (!isPublished()) {
             throw new WebServiceException("Endpoint is not published yet");
         }
