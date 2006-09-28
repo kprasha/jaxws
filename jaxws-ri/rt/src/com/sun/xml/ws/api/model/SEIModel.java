@@ -22,8 +22,8 @@
 
 package com.sun.xml.ws.api.model;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -128,36 +128,41 @@ public interface SEIModel {
      *
      * @return wsdl location uri - always non-null
      */
-    String getWSDLLocation();
+    @NotNull String getWSDLLocation();
 
     /**
      * wsdl:service qualified name for the port associated with the {@link SEIModel)
      *
      * @return wsdl:service@name value - always non-null
      */
-    QName getServiceQName();
+    @NotNull QName getServiceQName();
 
     /**
      * Gets the {@link WSDLPort} that represents the port that this SEI binds to.
      */
-    WSDLPort getPort();
+    @NotNull WSDLPort getPort();
 
     /**
      * Value of the wsdl:port name associated with the {@link SEIModel)
      *
      * @return wsdl:service/wsdl:port@name value, always non-null
      */
-    QName getPortName();
+    @NotNull QName getPortName();
 
     /**
      * Value of wsdl:portType bound to the port associated with the {@link SEIModel)
      *
      * @return
      */
-    QName getPortTypeName();
+    @NotNull QName getPortTypeName();
+
+    /**
+     *  Gives the wsdl:binding@name value
+     */
+    @NotNull QName getBoundPortTypeName();
 
     /**
      * Namespace of the wsd;:port associated with the {@link SEIModel)
      */
-    String getTargetNamespace();
+    @NotNull String getTargetNamespace();
 }

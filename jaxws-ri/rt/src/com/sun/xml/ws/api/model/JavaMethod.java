@@ -23,7 +23,9 @@
 package com.sun.xml.ws.api.model;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.model.soap.SOAPBinding;
+
 import java.lang.reflect.Method;
 
 /**
@@ -94,5 +96,23 @@ public interface JavaMethod {
      * @return the Binding object
      */
     SOAPBinding getBinding();
+
+    /**
+     * Gives the wsdl:operation@name value
+     */
+    @NotNull String getOperationName();
+
+
+    /**
+     * Gives the request wsdl:message@name value
+     */
+    @NotNull String getRequestMessageName();
+
+    /**
+     * Gives the response wsdl:messageName value
+     * @return null if its a oneway operation that is getMEP().isOneWay()==true.
+     * @see com.sun.xml.ws.api.model.MEP#isOneWay()
+     */
+    @Nullable String getResponseMessageName();
 
 }
