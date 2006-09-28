@@ -36,6 +36,7 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.util.Pool;
+import com.sun.istack.NotNull;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -102,6 +103,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
                         jm.addException(ce);
                     }
                 } catch (NoSuchMethodException ex) {
+                    throw new WebServiceException(ex);
                 }
             }
         }
@@ -489,6 +491,16 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         portTypeName = name;
     }
 
+    @NotNull
+    public QName getServiceQName(Class endpointImpl) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @NotNull
+    public QName getPortName(Class endpointImpl) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     /**
      * This is the targetNamespace for the WSDL containing the PortType
      * definition
@@ -505,6 +517,11 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         return targetNamespace;
     }
 
+    @NotNull
+    public QName getBoundPortTypeName() {
+        assert portName != null;
+        return new QName(targetNamespace, portName.getLocalPart()+"Binding");
+    }
 
     /**
      * Sets additional classes obtained from {@link javax.xml.bind.annotation.XmlSeeAlso} annotation. In starting

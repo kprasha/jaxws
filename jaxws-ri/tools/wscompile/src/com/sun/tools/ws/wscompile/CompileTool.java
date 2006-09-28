@@ -21,7 +21,6 @@
  */
 package com.sun.tools.ws.wscompile;
 
-import com.sun.istack.NotNull;
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
@@ -54,8 +53,8 @@ import com.sun.xml.txw2.annotation.XmlElement;
 import com.sun.xml.txw2.output.StreamSerializer;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
+import com.sun.xml.ws.binding.BindingTypeImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.util.JAXWSUtils;
@@ -65,46 +64,44 @@ import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.xml.ws.wsdl.writer.WSDLResolver;
-import com.sun.xml.ws.binding.BindingTypeImpl;
 import org.xml.sax.EntityResolver;
 
 import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.ws.*;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceFeature;
 import java.io.*;
 import java.net.URLClassLoader;
 import java.util.*;
 
 /**
- *    This is the real implementation class for both WsGen and WsImport. 
+ *    This is the real implementation class for both WsGen and WsImport.
  *
- *    <P>If the program being executed is WsGen, the CompileTool acts as an 
+ *    <P>If the program being executed is WsGen, the CompileTool acts as an
  *    {@link com.sun.mirror.apt.AnnotationProcessorFactory AnnotationProcessorFactory}
- *    and uses {@link com.sun.tools.ws.processor.modeler.annotation.WebServiceAP 
- *    WebServiceAP} as the {@link com.sun.mirror.apt.AnnotationProcessor 
+ *    and uses {@link com.sun.tools.ws.processor.modeler.annotation.WebServiceAP
+ *    WebServiceAP} as the {@link com.sun.mirror.apt.AnnotationProcessor
  *    AnnotationProcessor} for the APT framework.  In this case APT takes control
- *    while processing the SEI passed to WsGen.  The APT framework then invokes the 
- *    WebServiceAP to process classes that contain javax.jws.* annotations.  
+ *    while processing the SEI passed to WsGen.  The APT framework then invokes the
+ *    WebServiceAP to process classes that contain javax.jws.* annotations.
  *    WsGen uses the APT reflection library to process the SEI and to generate any
  *    JAX-WS spec mandated Java beans.
  *
- *    <p>If the program being executed is WsImport, the CompileTool creates a 
- *    {@link com.sun.tools.ws.processor.Processor  Processor} to help with the 
- *    processing.  First the {@link com.sun.tools.ws.processor.Processor#runModeler() 
- *    Processor.runModeler()} method is called to create an instance of the 
+ *    <p>If the program being executed is WsImport, the CompileTool creates a
+ *    {@link com.sun.tools.ws.processor.Processor  Processor} to help with the
+ *    processing.  First the {@link com.sun.tools.ws.processor.Processor#runModeler()
+ *    Processor.runModeler()} method is called to create an instance of the
  *    {@link com.sun.tools.ws.processor.modeler.wsdl.WSDLModeler WSDLModeler} to
- *    process the WSDL being imported, which intern processes the WSDL and creates 
- *    a {@link com.sun.tools.ws.processor.model.Model Model} that is returned to the 
- *    Processor.  The CompileTool then registers a number of 
- *    {@link com.sun.tools.ws.processor.ProcessorAction ProcessorActions} with the 
+ *    process the WSDL being imported, which intern processes the WSDL and creates
+ *    a {@link com.sun.tools.ws.processor.model.Model Model} that is returned to the
+ *    Processor.  The CompileTool then registers a number of
+ *    {@link com.sun.tools.ws.processor.ProcessorAction ProcessorActions} with the
  *    Processor.  Some of these ProcessorActions include
- *    the {@link com.sun.tools.ws.processor.generator.CustomExceptionGenerator 
+ *    the {@link com.sun.tools.ws.processor.generator.CustomExceptionGenerator
  *    CustomExceptionGenerator} to generate Exception classes,
- *    the {@link com.sun.tools.ws.processor.generator.JAXBTypeGenerator 
+ *    the {@link com.sun.tools.ws.processor.generator.JAXBTypeGenerator
  *    JAXBTypeGenerator} to generate JAXB types,
  *    the {@link com.sun.tools.ws.processor.generator.ServiceGenerator
  *    ServiceGenerator} to generate the Service interface, and
@@ -386,7 +383,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                     value = value.substring(1);
                     index = value.indexOf('/');
                     if (index == -1) {
-                        protocol = value; 
+                        protocol = value;
                         transport = HTTP;
                     } else {
                         protocol = value.substring(0, index);
@@ -442,7 +439,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                 if (program.equals(WSGEN)) {
                     if (!isValidWSGenClass(fileName))
                         return false;
-                } 
+                }
                 inputFiles.add(fileName);
             }
         }
@@ -471,12 +468,12 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         return environment.getErrorCount()==0;
     }
 
-    protected boolean isValidWSGenClass(String className) {        
+    protected boolean isValidWSGenClass(String className) {
         Class clazz = getClass(className);
         if (clazz == null) {
             onError(getMessage("wsgen.class.not.found", className));
             return false;
-        }        
+        }
         if (clazz.isEnum() || clazz.isInterface() ||
             clazz.isPrimitive()) {
             onError(getMessage("wsgen.class.must.be.implementation.class", className));
@@ -487,25 +484,25 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             if ((binding.equals(BindingID.SOAP12_HTTP) ||
                  binding.equals(BindingID.SOAP12_HTTP_MTOM)) &&
                     !(protocol.equals(X_SOAP12) && extensions)) {
-                onError(getMessage("wsgen.cannot.gen.wsdl.for.soap12.binding", 
-                        new Object[] {className, binding.toString()}));                                
+                onError(getMessage("wsgen.cannot.gen.wsdl.for.soap12.binding",
+                        new Object[] {className, binding.toString()}));
                 return false;
             }
             if (binding.equals(BindingID.XML_HTTP)) {
-                onError(getMessage("wsgen.cannot.gen.wsdl.for.non.soap.binding", 
-                        new Object[] {className, binding.toString()})); 
+                onError(getMessage("wsgen.cannot.gen.wsdl.for.non.soap.binding",
+                        new Object[] {className, binding.toString()}));
                 return false;
             }
             if (binding.equals(BindingID.X_SOAP12_HTTP) &&
-                !extensions) {                
-                onError(getMessage("wsgen.cannot.gen.wsdl.for.xsoap12.binding.wo.extention", 
-                        new Object[] {className, binding.toString()}));                                
+                !extensions) {
+                onError(getMessage("wsgen.cannot.gen.wsdl.for.xsoap12.binding.wo.extention",
+                        new Object[] {className, binding.toString()}));
                 return false;
             }
         }
         return true;
     }
-    
+
     protected boolean validateArguments() {
         if (!genWsdl) {
             if (serviceName != null) {
@@ -530,7 +527,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
 
     static public boolean isValidProtocol(String protocol) {
-        return (protocol.equalsIgnoreCase(SOAP11) ||   
+        return (protocol.equalsIgnoreCase(SOAP11) ||
                 protocol.equalsIgnoreCase(X_SOAP12));
     }
 
@@ -687,7 +684,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                             return getSchemaOutput(namespace, filename.value);
                         }
                         // TODO pass correct impl's class name
-                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures), container, null, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures), container, endpointClass, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)

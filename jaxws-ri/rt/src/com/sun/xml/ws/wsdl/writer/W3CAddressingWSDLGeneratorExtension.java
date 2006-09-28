@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.7 2006-09-26 22:17:15 ramapulavarthi Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.8 2006-09-28 00:29:14 vivekp Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,21 +26,19 @@
 
 package com.sun.xml.ws.wsdl.writer;
 
-import java.lang.reflect.Method;
-
-import javax.xml.ws.Action;
-import javax.xml.ws.FaultAction;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.soap.AddressingFeature;
-
 import com.sun.istack.NotNull;
 import com.sun.xml.txw2.TypedXmlWriter;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.CheckedException;
+import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
+
+import javax.xml.ws.Action;
+import javax.xml.ws.FaultAction;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * @author Arun Gupta
@@ -61,34 +59,34 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
     }
 
     @Override
-    public void addOperationInputExtension(TypedXmlWriter input, Method method) {
+    public void addOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
         if (!enabled)
             return;
 
-        Action a = method.getAnnotation(Action.class);
+        Action a = method.getMethod().getAnnotation(Action.class);
         if (a != null && !a.input().equals("")) {
             addAttribute(input, a.input());
         }
     }
 
     @Override
-    public void addOperationOutputExtension(TypedXmlWriter output, Method method) {
+    public void addOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
         if (!enabled)
             return;
 
-        Action a = method.getAnnotation(Action.class);
+        Action a = method.getMethod().getAnnotation(Action.class);
         if (a != null && !a.output().equals("")) {
             addAttribute(output, a.output());
         }
     }
 
     @Override
-    public void addOperationFaultExtension(TypedXmlWriter fault, Method method, CheckedException ce) {
+    public void addOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
         if (!enabled)
             return;
 
-        Action a = method.getAnnotation(Action.class);
-        Class[] exs = method.getExceptionTypes();
+        Action a = method.getMethod().getAnnotation(Action.class);
+        Class[] exs = method.getMethod().getExceptionTypes();
 
         if (exs == null)
             return;

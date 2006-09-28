@@ -22,12 +22,12 @@
 
 package com.sun.xml.ws.wsdl.writer;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.ws.api.model.CheckedException;
-import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
+import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
-
-import java.lang.reflect.Method;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 
 /**
  * {@link WSDLGeneratorExtension} that delegates to
@@ -51,6 +51,11 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
     public void start(WSDLGenExtnContext ctxt) {
         for (WSDLGeneratorExtension e : extensions)
             e.start(ctxt);
+    }
+
+    public void end(@NotNull WSDLGenExtnContext ctxt) {
+        for (WSDLGeneratorExtension e : extensions)
+            e.end(ctxt);
     }
 
     public void addDefinitionsExtension(TypedXmlWriter definitions) {
@@ -78,57 +83,57 @@ final class WSDLGeneratorExtensionFacade extends WSDLGeneratorExtension {
             e.addBindingExtension(binding);
     }
 
-    public void addOperationExtension(TypedXmlWriter operation, Method method) {
+    public void addOperationExtension(TypedXmlWriter operation, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addOperationExtension(operation, method);
     }
 
-    public void addBindingOperationExtension(TypedXmlWriter operation, Method method) {
+    public void addBindingOperationExtension(TypedXmlWriter operation, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addBindingOperationExtension(operation, method);
     }
 
-    public void addInputMessageExtension(TypedXmlWriter message, Method method) {
+    public void addInputMessageExtension(TypedXmlWriter message, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addInputMessageExtension(message, method);
     }
 
-    public void addOutputMessageExtension(TypedXmlWriter message, Method method) {
+    public void addOutputMessageExtension(TypedXmlWriter message, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addOutputMessageExtension(message, method);
     }
 
-    public void addOperationInputExtension(TypedXmlWriter input, Method method) {
+    public void addOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addOperationInputExtension(input, method);
     }
 
-    public void addOperationOutputExtension(TypedXmlWriter output, Method method) {
+    public void addOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addOperationOutputExtension(output, method);
     }
 
-    public void addBindingOperationInputExtension(TypedXmlWriter input, Method method) {
+    public void addBindingOperationInputExtension(TypedXmlWriter input, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addBindingOperationInputExtension(input, method);
     }
 
-    public void addBindingOperationOutputExtension(TypedXmlWriter output, Method method) {
+    public void addBindingOperationOutputExtension(TypedXmlWriter output, JavaMethod method) {
         for (WSDLGeneratorExtension e : extensions)
             e.addBindingOperationOutputExtension(output, method);
     }
 
-    public void addBindingOperationFaultExtension(TypedXmlWriter fault, Method method) {
+    public void addBindingOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
         for (WSDLGeneratorExtension e : extensions)
-            e.addBindingOperationFaultExtension(fault, method);
+            e.addBindingOperationFaultExtension(fault, method, ce);
     }
 
-    public void addFaultMessageExtension(TypedXmlWriter message, Method method) {
+    public void addFaultMessageExtension(TypedXmlWriter message, JavaMethod method, CheckedException ce) {
         for (WSDLGeneratorExtension e : extensions)
-            e.addFaultMessageExtension(message, method);
+            e.addFaultMessageExtension(message, method, ce);
     }
 
-    public void addOperationFaultExtension(TypedXmlWriter fault, Method method, CheckedException ce) {
+    public void addOperationFaultExtension(TypedXmlWriter fault, JavaMethod method, CheckedException ce) {
         for (WSDLGeneratorExtension e : extensions)
             e.addOperationFaultExtension(fault, method, ce);
     }
