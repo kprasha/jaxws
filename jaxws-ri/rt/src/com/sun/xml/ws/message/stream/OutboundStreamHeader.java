@@ -81,9 +81,6 @@ public final class OutboundStreamHeader extends AbstractHeaderImpl {
 
                 attributes.add(new Attribute(namespaceURI,localName,value));
             }
-
-            // we are adding one more attribute "wsa:IsReferenceParameter"
-            attributes.add(new Attribute(AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE));
         } catch (XMLStreamException e) {
             throw new WebServiceException("Unable to read the attributes for {"+nsUri+"}"+localName+" header",e);
         }
