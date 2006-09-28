@@ -102,9 +102,7 @@ public class MessagePart extends Entity {
     }
 
     public void validateThis() {
-        if (_descriptorKind == null || _descriptor == null) {
-            failValidation("validation.missingRequiredProperty", "descriptor");
-        }else if(_descriptor.getLocalPart().equals("")){
+        if(_descriptor != null && _descriptor.getLocalPart().equals("")){
             failValidation("validation.invalidElement", _descriptor.toString());
         }
     }
