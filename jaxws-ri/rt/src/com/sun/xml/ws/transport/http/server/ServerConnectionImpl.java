@@ -85,7 +85,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
             }
         }
     }
-    
+    @Override
     @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String,List<String>> getResponseHeaders() {
         return httpExchange.getResponseHeaders();

@@ -178,6 +178,12 @@ public abstract class WSHTTPConnection extends PropertySet {
     public abstract @NotNull Map<String,List<String>> getRequestHeaders();
 
     /**
+     * @return
+     *      HTTP response headers.
+     */
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    public abstract Map<String,List<String>> getResponseHeaders();
+    /**
      * Gets an HTTP request header.
      *
      * <p>

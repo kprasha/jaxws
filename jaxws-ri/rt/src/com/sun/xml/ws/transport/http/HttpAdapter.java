@@ -37,9 +37,9 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.PropertySet;
-import java.io.ByteArrayOutputStream;
+import com.sun.xml.ws.util.ByteArrayBuffer;
 
-import java.util.TreeMap;
+import java.io.ByteArrayOutputStream;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.EndpointReference;
@@ -51,9 +51,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -151,6 +149,12 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             packet.acceptableMimeTypes = con.getRequestHeader("Accept");
             packet.addSatellite(con);
             try {
+                if(dump) {
+                ByteArrayBuffer buf = new ByteArrayBuffer();
+                buf.write(in);
+                dump(buf, "HTTP request", con.getRequestHeaders());
+                in = buf.newInputStream();
+                }
                 codec.decode(in, ct, packet);
                 try {
                     packet = head.process(packet,con.getWebServiceContextDelegate(),this);
@@ -186,14 +190,24 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 if (contentType != null) {
                     con.setContentTypeResponseHeader(contentType.getContentType());
                     OutputStream os = con.getOutput();
-                    codec.encode(packet, os);
+                    if(dump) {
+                        ByteArrayBuffer buf = new ByteArrayBuffer();
+                        codec.encode(packet, buf);
+                        dump(buf, "HTTP response "+con.getStatus(), con.getResponseHeaders());
+                        buf.writeTo(os);
+                    } else {
+                        codec.encode(packet, os);
+                    }
                     os.close();
                 } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    contentType = codec.encode(packet, baos);
+                    ByteArrayBuffer buf = new ByteArrayBuffer();
+                    contentType = codec.encode(packet, buf);
                     con.setContentTypeResponseHeader(contentType.getContentType());
+                    if(dump) {
+                        dump(buf, "HTTP response "+con.getStatus(), con.getResponseHeaders());
+                    }
                     OutputStream os = con.getOutput();
-                    baos.writeTo(os);
+                    buf.writeTo(os);
                     os.close();
                 }
             }
@@ -325,5 +339,38 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         protected HttpAdapter createHttpAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
             return new HttpAdapter(endpoint, this);
         }
-    }     
+    }
+
+    private void dump(ByteArrayBuffer buf, String caption, Map<String, List<String>> headers) throws IOException {
+        System.out.println("---["+caption +"]---");
+        for (Entry<String,List<String>> header : headers.entrySet()) {
+            if(header.getValue().isEmpty()) {
+                // I don't think this is legal, but let's just dump it,
+                // as the point of the dump is to uncover problems.
+                System.out.println(header.getValue());
+            } else {
+                for (String value : header.getValue()) {
+                    System.out.println(header.getKey()+": "+value);
+                }
+            }
+        }
+
+        buf.writeTo(System.out);
+        System.out.println("--------------------");
+    }
+
+    /**
+     * Dumps what goes across HTTP transport.
+     */
+    private static final boolean dump;
+
+    static {
+        boolean b;
+        try {
+            b = Boolean.getBoolean(HttpAdapter.class.getName()+".dump");
+        } catch( Throwable t ) {
+            b = false;
+        }
+        dump = b;
+    }
 }

@@ -102,7 +102,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         }
 
     }
-
+    @Override
     @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String,List<String>> getResponseHeaders() {
         return responseHeaders;

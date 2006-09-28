@@ -102,6 +102,7 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         this.statusCode = statusCode;
     }
 
+    @Override
     public @Nullable Map<String, List<String>> getResponseHeaders() {
         return rspHeaders;
     }
