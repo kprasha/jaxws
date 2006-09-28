@@ -166,6 +166,7 @@ public enum AddressingVersion {
     public final QName invalidMapTag;
     public final QName invalidCardinalityTag;
     public final QName problemHeaderQNameTag;
+    public final QName faultDetailTag;
 
     /**
      * Fault sub-sub-code that represents
@@ -183,8 +184,6 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-
-
     private AddressingVersion(String nsUri, String anonymousEprResourceName) {
         this.nsUri = nsUri;
         toTag = new QName(nsUri,"To");
@@ -200,6 +199,7 @@ public enum AddressingVersion {
         actionNotSupportedText = "The \"%s\" cannot be processed at the receiver";
         invalidMapTag = new QName(nsUri,getInvalidMapLocalName());
         invalidCardinalityTag = new QName(nsUri,getInvalidCardinalityLocalName());
+        faultDetailTag = new QName(nsUri,"FaultDetail");
 
         problemHeaderQNameTag = new QName(nsUri,"ProblemHeaderQName");
 
