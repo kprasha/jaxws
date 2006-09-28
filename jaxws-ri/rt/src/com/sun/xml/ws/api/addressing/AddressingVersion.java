@@ -22,22 +22,18 @@
 
 package com.sun.xml.ws.api.addressing;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
+import com.sun.xml.ws.message.stream.OutboundStreamHeader;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.WebServiceException;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPException;
 
 /**
  * 'Traits' object that absorbs differences of WS-Addressing versions.
@@ -90,6 +86,10 @@ public enum AddressingVersion {
         public String getInvalidCardinalityLocalName() {
             return "InvalidCardinality";
         }
+
+        /*package*/ Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName) {
+            return new OutboundReferenceParameterHeader(mark,nsUri,localName);
+        }
     },
     MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME,"member-anonymous-epr.xml") {
         @Override
@@ -135,6 +135,10 @@ public enum AddressingVersion {
         @Override
         public String getInvalidCardinalityLocalName() {
             return getInvalidMapLocalName();
+        }
+
+        /*package*/ Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName) {
+            return new OutboundStreamHeader(mark,nsUri,localName);
         }
     };
 
@@ -292,6 +296,12 @@ public enum AddressingVersion {
     public abstract String getInvalidMapText();
 
     public abstract String getInvalidCardinalityLocalName();
+
+    /**
+     * Creates an outbound {@link Header} from a referene parameter.
+     */
+    /*package*/ abstract Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName);
+
 //
 //    private SOAPFault newActionNotSupportedFault(String action, WSBinding binding) {
 //        QName subcode = actionNotSupportedTag;

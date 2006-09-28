@@ -22,6 +22,14 @@
 
 package com.sun.xml.ws.message;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.ws.api.message.Header;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
@@ -31,21 +39,20 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.ws.encoding.TagInfoset;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
-
 /**
+ * {@link Header} that has a single text value in it
+ * (IOW, of the form &lt;foo>text&lt;/foo>.)
+ *
  * @author Arun Gupta
  */
 public class StringHeader extends AbstractHeaderImpl {
+    /**
+     * Tag name.
+     */
     protected final QName name;
+    /**
+     * Header value.
+     */
     protected final String value;
 
     public StringHeader(QName name, String value) {
@@ -64,7 +71,7 @@ public class StringHeader extends AbstractHeaderImpl {
     }
 
     @Nullable public String getAttribute(@NotNull String nsUri, @NotNull String localName) {
-        return getAttribute(name.getNamespaceURI(), name.getLocalPart());
+        return null;
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {

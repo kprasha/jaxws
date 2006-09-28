@@ -31,18 +31,25 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
+ * WS-Addressing &lt;RelatesTo> header.
+ *
+ * Used for outbound only.
+ *
  * @author Arun Gupta
  */
-public class RelatesToHeader extends StringHeader {
+public final class RelatesToHeader extends StringHeader {
     protected String type;
+    private final QName typeAttributeName;
 
-    public RelatesToHeader(QName name, String mid, String type) {
-        super(name, mid);
+    public RelatesToHeader(QName name, String messageId, String type) {
+        super(name, messageId);
         this.type = type;
+        this.typeAttributeName = new QName(name.getNamespaceURI(), "type");
     }
 
     public RelatesToHeader(QName name, String mid) {
         super(name, mid);
+        this.typeAttributeName = new QName(name.getNamespaceURI(), "type");
     }
 
     public String getType() {
@@ -64,9 +71,8 @@ public class RelatesToHeader extends StringHeader {
         SOAPHeader header = saaj.getSOAPHeader();
         SOAPHeaderElement she = header.addHeaderElement(name);
 
-        // todo: cache QName
         if (type != null)
-            she.addAttribute(new QName(name.getNamespaceURI(), "type"), type);
+            she.addAttribute(typeAttributeName, type);
         she.addTextNode(value);
     }
 }

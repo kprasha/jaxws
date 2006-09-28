@@ -159,7 +159,7 @@ public final class WSEndpointReference {
                         marks = new ArrayList<Header>();
 
                     // TODO: need a different header for member submission version
-                    marks.add(new OutboundReferenceParameterHeader(
+                    marks.add(version.createReferenceParameterHeader(
                         mark, xsr.getNamespaceURI(), xsr.getLocalName()));
                     XMLStreamReaderUtil.skipElement(xsr);
                 }
