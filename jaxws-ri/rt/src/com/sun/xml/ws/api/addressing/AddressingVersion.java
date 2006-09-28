@@ -63,7 +63,7 @@ public enum AddressingVersion {
         }
 
         @Override
-        public String getMapRequiredLocalName() {
+        /* package */ String getMapRequiredLocalName() {
             return "MessageAddressingHeaderRequired";
         }
 
@@ -73,7 +73,7 @@ public enum AddressingVersion {
         }
 
         @Override
-        public String getInvalidMapLocalName() {
+        /* package */ String getInvalidMapLocalName() {
             return "InvalidAddressingHeader";
         }
 
@@ -83,7 +83,7 @@ public enum AddressingVersion {
         }
 
         @Override
-        public String getInvalidCardinalityLocalName() {
+        /* package */ String getInvalidCardinalityLocalName() {
             return "InvalidCardinality";
         }
 
@@ -113,7 +113,7 @@ public enum AddressingVersion {
         }
 
         @Override
-        public String getMapRequiredLocalName() {
+        /* package */ String getMapRequiredLocalName() {
             return "MessageInformationHeaderRequired";
         }
 
@@ -123,7 +123,7 @@ public enum AddressingVersion {
         }
 
         @Override
-        public String getInvalidMapLocalName() {
+        /* package */ String getInvalidMapLocalName() {
             return "InvalidMessageInformationHeader";
         }
 
@@ -133,7 +133,7 @@ public enum AddressingVersion {
         }
 
         @Override
-        public String getInvalidCardinalityLocalName() {
+        /* package */ String getInvalidCardinalityLocalName() {
             return getInvalidMapLocalName();
         }
 
@@ -149,23 +149,66 @@ public enum AddressingVersion {
      */
     public final WSEndpointReference anonymousEpr;
     /**
-     * Represents the ReplyTo for a specific WS-Addressing Version.
-     * For example, wsa:ReplyTo where wsa binds to "http://www.w3.org/2005/08/addressing"
+     * Represents the To QName for a specific WS-Addressing Version.
      */
     public final QName toTag;
+
+    /**
+     * Represents the From QName for a specific WS-Addressing Version.
+     */
     public final QName fromTag;
+
+    /**
+     * Represents the ReplyTo QName for a specific WS-Addressing Version.
+     */
     public final QName replyToTag;
+
+    /**
+     * Represents the FaultTo QName for a specific WS-Addressing Version.
+     */
     public final QName faultToTag;
+
+    /**
+     * Represents the Action QName for a specific WS-Addressing Version.
+     */
     public final QName actionTag;
+
+    /**
+     * Represents the MessageID QName for a specific WS-Addressing Version.
+     */
     public final QName messageIDTag;
+
+    /**
+     * Represents the RelatesTo QName for a specific WS-Addressing Version.
+     */
     public final QName relatesToTag;
 
+    /**
+     * Represents the QName of the fault code when a required header representing a
+     * WS-Addressing Message Addressing Property is not present.
+     */
     public final QName mapRequiredTag;
     public final QName actionNotSupportedTag;
     public final String actionNotSupportedText;
+
+    /**
+     * Represents the QName of the fault code when a header representing a
+     * WS-Addressing Message Addressing Property is invalid and cannot be processed.
+     */
     public final QName invalidMapTag;
+
+    /**
+     * Represents the QName of the fault code when a header representing a
+     * WS-Addressing Message Addressing Property occurs greater than expected number.
+     */
     public final QName invalidCardinalityTag;
     public final QName problemHeaderQNameTag;
+
+    /**
+     * Represents the QName of the header element that is used to capture the fault detail
+     * if there is a fault processing WS-Addressing Message Addressing Property. This is
+     * only used for SOAP 1.1.
+     */
     public final QName faultDetailTag;
 
     /**
@@ -233,7 +276,13 @@ public enum AddressingVersion {
         return null;
     }
 
-    public static AddressingVersion fromBinding(WSBinding binding) {
+    /**
+     * Gets the {@link AddressingVersion} from a {@link WSBinding}
+     *
+     * @param binding WSDL binding
+     * @return addresing version
+     */
+    public static final AddressingVersion fromBinding(WSBinding binding) {
         if (binding.hasFeature(AddressingFeature.ID))
             return W3C;
 
@@ -243,7 +292,13 @@ public enum AddressingVersion {
         return null;
     }
 
-    public static AddressingVersion fromPort(WSDLPort port) {
+    /**
+     * Gets the {@link AddressingVersion} from a {@link WSDLPort}
+     *
+     * @param port WSDL port
+     * @return addresing version
+     */
+    public static final AddressingVersion fromPort(WSDLPort port) {
         String ns = port.getBinding().getAddressingVersion();
         if (ns.equals(W3C.nsUri))
             return W3C;
@@ -275,58 +330,71 @@ public enum AddressingVersion {
 
     public abstract WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding);
 
+    /**
+     * Gets the none URI value associated with this WS-Addressing version.
+     *
+     * @return none URI value
+     */
     public abstract String getNoneUri();
 
+    /**
+     * Gets the anonymous URI value associated with this WS-Addressing version.
+     *
+     * @return anonymous URI value
+     */
     public abstract String getAnonymousUri();
 
+    /**
+     * Gets the default fault Action value associated with this WS-Addressing version.
+     *
+     * @return default fault Action value
+     */
     public String getDefaultFaultAction() {
         return nsUri + "/fault";
     }
 
-    public QName getFaultDetailQName() {
-        return new QName(nsUri, "FaultDetail");
-    }
-
-    protected abstract String getMapRequiredLocalName();
-
-    public abstract String getMapRequiredText();
-
-    public abstract String getInvalidMapLocalName();
-
-    public abstract String getInvalidMapText();
-
-    public abstract String getInvalidCardinalityLocalName();
+    /**
+     * Gets the local name of the fault when a header representing a WS-Addressing Message
+     * Addresing Property is absent.
+     *
+     * @return local name
+     */
+    /* package */ abstract String getMapRequiredLocalName();
 
     /**
-     * Creates an outbound {@link Header} from a referene parameter.
+     * Gets the description text when a required WS-Addressing header representing a
+     * Message Addressing Property is absent.
+     *
+     * @return description text
+     */
+    public abstract String getMapRequiredText();
+
+    /**
+     * Gets the local name of the fault when a header representing a WS-Addressing Message
+     * Addresing Property is invalid and cannot be processed.
+     *
+     * @return local name
+     */
+    /* package */ abstract String getInvalidMapLocalName();
+
+    /**
+     * Gets the description text when a header representing a WS-Addressing
+     * Message Addressing Property is invalid and cannot be processed.
+     *
+     * @return description text
+     */
+    public abstract String getInvalidMapText();
+
+    /**
+     * Gets the local name of the fault when a header representing a WS-Addressing Message
+     * Addresing Property occurs greater than expected number.
+     *
+     * @return local name
+     */
+    /* package */ abstract String getInvalidCardinalityLocalName();
+
+    /**
+     * Creates an outbound {@link Header} from a reference parameter.
      */
     /*package*/ abstract Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName);
-
-//
-//    private SOAPFault newActionNotSupportedFault(String action, WSBinding binding) {
-//        QName subcode = actionNotSupportedTag;
-//        String faultstring = String.format(actionNotSupportedText, action);
-//
-//        try {
-//            SOAPFactory factory;
-//            SOAPFault fault;
-//            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
-//                factory = SOAPVersion.SOAP_12.saajSoapFactory;
-//                fault = factory.createFault();
-//                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
-//                fault.appendFaultSubcode(subcode);
-//                getProblemActionDetail(action, fault.addDetail());
-//            } else {
-//                factory = SOAPVersion.SOAP_11.saajSoapFactory;
-//                fault = factory.createFault();
-//                fault.setFaultCode(subcode);
-//            }
-//
-//            fault.setFaultString(faultstring);
-//
-//            return fault;
-//        } catch (SOAPException e) {
-//            throw new WebServiceException(e);
-//        }
-//    }
 }
