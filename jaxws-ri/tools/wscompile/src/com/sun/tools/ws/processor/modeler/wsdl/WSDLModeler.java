@@ -1692,7 +1692,7 @@ public class WSDLModeler extends WSDLModelerBase {
         if(unwrappable && (outParams != null)){
             int index = params.size();
             for(Parameter param:outParams){
-                if(param.getName().equals("return")){
+                if(JAXBRIContext.mangleNameToVariableName(param.getName()).equals("return")){
                     param.setParameterIndex(-1);
                 }else{
                     Parameter inParam = ModelerUtils.getParameter(param.getName(), params);
