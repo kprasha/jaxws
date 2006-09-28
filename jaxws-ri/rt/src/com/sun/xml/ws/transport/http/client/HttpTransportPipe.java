@@ -23,12 +23,11 @@ package com.sun.xml.ws.transport.http.client;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
@@ -41,11 +40,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * {@link Pipe} that sends a request to a remote HTTP server.
+ * {@link Pipe} and {@link com.sun.xml.ws.api.pipe.Tube} that sends a request to a remote HTTP server.
  *
- * @author jitu
+ * @author Jitendra Kotamraju
  */
-public class HttpTransportPipe implements Pipe {
+public class HttpTransportPipe extends AbstractTubeImpl {
 
     private final Codec codec;
 
@@ -58,11 +57,23 @@ public class HttpTransportPipe implements Pipe {
     }
 
     /**
-     * Copy constructor for {@link Pipe#copy(PipeCloner)}.
+     * Copy constructor for {@link Tube#copy(TubeCloner)}.
      */
-    private HttpTransportPipe(HttpTransportPipe that, PipeCloner cloner) {
+    private HttpTransportPipe(HttpTransportPipe that, TubeCloner cloner) {
         this( that.codec.copy() );
         cloner.add(that,this);
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        throw new IllegalStateException("HttpTransportPipe's processException shouldn't be called.");
+    }
+
+    public NextAction processRequest(@NotNull Packet request) {
+        return doReturnWith(process(request));
+    }
+
+    public NextAction processResponse(@NotNull Packet response) {
+        throw new IllegalStateException("HttpTransportPipe's processResponse shouldn't be called.");
     }
 
     public Packet process(Packet request) {
@@ -161,7 +172,7 @@ public class HttpTransportPipe implements Pipe {
     public void preDestroy() {
     }
 
-    public Pipe copy(PipeCloner cloner) {
+    public HttpTransportPipe copy(TubeCloner cloner) {
         return new HttpTransportPipe(this,cloner);
     }
 

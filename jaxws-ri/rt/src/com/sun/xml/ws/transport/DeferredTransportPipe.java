@@ -2,10 +2,9 @@ package com.sun.xml.ws.transport;
 
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.TransportPipeFactory;
+import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.istack.NotNull;
 
 import javax.xml.ws.BindingProvider;
 
@@ -25,7 +24,7 @@ import javax.xml.ws.BindingProvider;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class DeferredTransportPipe implements Pipe {
+public final class DeferredTransportPipe extends AbstractTubeImpl {
 
     private Pipe transport;
     private EndpointAddress address;
@@ -37,6 +36,18 @@ public final class DeferredTransportPipe implements Pipe {
     public DeferredTransportPipe(ClassLoader classLoader, ClientPipeAssemblerContext context) {
         this.classLoader = classLoader;
         this.context = context;
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        throw new IllegalStateException("DeferredTransportPipe's processException shouldn't be called.");
+    }
+
+    public NextAction processRequest(@NotNull Packet request) {
+        return doReturnWith(process(request));
+    }
+
+    public NextAction processResponse(@NotNull Packet response) {
+        throw new IllegalStateException("DeferredTransportPipe's processResponse shouldn't be called.");
     }
 
     public Packet process(Packet request) {
@@ -78,14 +89,14 @@ public final class DeferredTransportPipe implements Pipe {
         }
     }
 
-    public Pipe copy(PipeCloner cloner) {
+    public DeferredTransportPipe copy(TubeCloner cloner) {
         DeferredTransportPipe copy = new DeferredTransportPipe(classLoader,context);
         cloner.add(this,copy);
 
         // copied pipeline is still likely to work with the same endpoint address,
         // so also copy the cached transport pipe, if any
         if(transport!=null) {
-            copy.transport = cloner.copy(this.transport);
+            copy.transport = ((PipeCloner)cloner).copy(this.transport);
             copy.address = this.address;
         }
 
