@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
@@ -63,7 +64,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      * <p/>
      * Set to null when {@link #close() closed}.
      */
-    private Pool<Pipe> pipes;
+    private Pool<Tube> pipes;
 
     private final Engine engine;
 
@@ -86,7 +87,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      * @param defaultEndPointAddress The destination of the message. The actual destination
      *                               could be overridden by {@link RequestContext}.
      */
-    protected Stub(Pipe master, BindingImpl binding, WSDLPort wsdlPort, EndpointAddress defaultEndPointAddress) {
+    protected Stub(Tube master, BindingImpl binding, WSDLPort wsdlPort, EndpointAddress defaultEndPointAddress) {
         this.pipes = new PipePool(master);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
@@ -123,17 +124,17 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
         Packet reply;
 
-        Pool<Pipe> pool = pipes;
+        Pool<Tube> pool = pipes;
         if (pool == null)
             throw new WebServiceException("close method has already been invoked"); // TODO: i18n
 
         Fiber fiber = engine.createFiber();
         // then send it away!
-        Pipe pipe = pool.take();
+        Tube tube = pool.take();
         try {
-            reply = fiber.runSync(PipeAdapter.adapt(pipe), packet);
+            reply = fiber.runSync(tube, packet);
         } finally {
-            pool.recycle(pipe);
+            pool.recycle(tube);
         }
 
         // not that Packet can still be updated after
@@ -148,7 +149,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
             // multi-thread safety of 'close' needs to be considered more carefully.
             // some calls might be pending while this method is invoked. Should we
             // block until they are complete, or should we abort them (but how?)
-            Pipe p = pipes.take();
+            Tube p = pipes.take();
             pipes = null;
             p.preDestroy();
         }

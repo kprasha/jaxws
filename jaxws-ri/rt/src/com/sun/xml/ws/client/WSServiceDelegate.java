@@ -327,15 +327,15 @@ public class WSServiceDelegate extends WSService {
     /**
      * Creates a new pipeline for the given port name.
      */
-    private Pipe createPipeline(PortInfo portInfo, WSBinding binding) {
+    private Tube createPipeline(PortInfo portInfo, WSBinding binding) {
         BindingID bindingId = portInfo.bindingId;
 
-        PipelineAssembler assembler = PipelineAssemblerFactory.create(
+        TubelineAssembler assembler = TubelineAssemblerFactory.create(
                 Thread.currentThread().getContextClassLoader(), bindingId);
         if (assembler == null)
             throw new WebServiceException("Unable to process bindingID=" + bindingId);    // TODO: i18n
         return assembler.createClient(
-                new ClientPipeAssemblerContext(
+                new ClientTubeAssemblerContext(
                         portInfo.targetEndpoint,
                         portInfo.portModel,
                         this, binding, container));

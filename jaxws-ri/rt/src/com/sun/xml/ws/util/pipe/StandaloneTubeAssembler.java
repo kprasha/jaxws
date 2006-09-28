@@ -16,9 +16,17 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
     @NotNull
     public Tube createClient(ClientTubeAssemblerContext context) {
         ClientPipeAssemblerContext ctxt = new ClientPipeAssemblerContext(
-                context.getAddress(), context.getWsdlModel(), context.getService(),
-                context.getBinding(), context.getContainer());
-        return PipeAdapter.adapt(new StandalonePipeAssembler().createClient(ctxt));
+                    context.getAddress(), context.getWsdlModel(), context.getService(),
+                    context.getBinding(), context.getContainer());
+        Tube head = PipeAdapter.adapt(ctxt.createTransportPipe());
+        if (dump) {
+            // for debugging inject a dump pipe. this is left in the production code,
+            // as it would be very handy for a trouble-shooting at the production site.
+            head = context.createDumpTube(head);
+        }
+        head = PipeAdapter.adapt(context.createWsaPipe((Pipe)head));       // TODO cleanly
+        head = context.createClientMUTube(head);
+        return context.createHandlerTube(head);
     }
 
     /**

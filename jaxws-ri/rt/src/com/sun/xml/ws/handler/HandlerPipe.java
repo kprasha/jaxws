@@ -59,9 +59,11 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         this.port = port;
     }
 
+    /*
     public HandlerPipe(Pipe next, WSDLPort port) {
         this(PipeAdapter.adapt(next), port);
     }
+    */
 
     public HandlerPipe(Tube next, HandlerPipe cousinPipe) {
         super(next);
@@ -73,9 +75,11 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         }
     }
 
+    /*
     public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
         this(PipeAdapter.adapt(next), cousinPipe);
     }
+    */
 
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.

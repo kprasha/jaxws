@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.*;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
@@ -79,7 +80,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param pipe    Master pipe for the pipeline
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
-    protected DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
+    protected DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
         this(port, mode, owner, pipe, binding);
         this.clazz = aClass;
     }
@@ -92,7 +93,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param pipe    Master pipe for the pipeline
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
-    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
+    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
         super(pipe, binding, (owner.getWSDLContext() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port));
         this.portname = port;
         this.mode = mode;

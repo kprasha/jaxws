@@ -24,6 +24,7 @@ package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.message.saaj.SAAJMessage;
@@ -53,7 +54,7 @@ import java.util.Map;
  * @version 1.0
  */
 public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<SOAPMessage> {
-    public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, WSServiceDelegate owner, Pipe pipe, BindingImpl binding) {
+    public SOAPMessageDispatch(QName port, Class<SOAPMessage> aClass, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
         super(port, aClass, mode, owner, pipe, binding);
     }
 

@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContextReceiver;
@@ -57,7 +58,7 @@ import org.w3c.dom.Element;
  * @author Kohsuke Kawaguchi
  */
 public final class SEIStub extends Stub implements InvocationHandler {
-    public SEIStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Pipe master) {
+    public SEIStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master) {
         super(master, binding, seiModel.getPort(), seiModel.getPort().getAddress());
         this.owner = owner;
         this.seiModel = seiModel;

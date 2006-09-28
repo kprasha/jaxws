@@ -92,7 +92,7 @@ public abstract class Stubs {
      * createDispatch(port,owner,binding,SOAPMessage.class,mode,next);
      * </pre>
      */
-    public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+    public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
         DispatchImpl.checkValidSOAPMessageDispatch(binding, mode);
         return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, SOAPMessage.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
@@ -105,7 +105,7 @@ public abstract class Stubs {
      * createDispatch(port,owner,binding,DataSource.class,mode,next);
      * </pre>
      */
-    public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+    public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
         DispatchImpl.checkValidDataSourceDispatch(binding, mode);
         return new DataSourceDispatch(portName, DataSource.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
@@ -118,7 +118,7 @@ public abstract class Stubs {
      * createDispatch(port,owner,binding,Source.class,mode,next);
      * </pre>
      */
-    public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Pipe next) {
+    public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
         return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, Source.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
@@ -145,7 +145,7 @@ public abstract class Stubs {
     public static <T> Dispatch<T> createDispatch(QName portName,
                                                  WSService owner,
                                                  WSBinding binding,
-                                                 Class<T> clazz, Service.Mode mode, Pipe next) {
+                                                 Class<T> clazz, Service.Mode mode, Tube next) {
         if (clazz == SOAPMessage.class) {
             return (Dispatch<T>) createSAAJDispatch(portName, owner, binding, mode, next);
         } else if (clazz == Source.class) {
@@ -178,7 +178,7 @@ public abstract class Stubs {
     public static Dispatch<Object> createJAXBDispatch( QName portName,
                                            WSService owner,
                                            WSBinding binding,
-                                           JAXBContext jaxbContext, Service.Mode mode, Pipe next ) {
+                                           JAXBContext jaxbContext, Service.Mode mode, Tube next ) {
         return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
     }
 
@@ -199,7 +199,7 @@ public abstract class Stubs {
      *      see <a href="#param">common parameters</a>
      */
     public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
-                                  Class<T> portInterface, Pipe next ) {
+                                  Class<T> portInterface, Tube next ) {
 
         SEIStub ps = new SEIStub(service,(BindingImpl)binding, (SOAPSEIModel)model,next);
         return portInterface.cast(

@@ -25,6 +25,8 @@ package com.sun.xml.ws.util;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -142,16 +144,16 @@ public abstract class Pool<T> {
     /**
      * {@link Pipe} pool.
      */
-    public static final class PipePool extends Pool<Pipe> {
-        private final Pipe master;
+    public static final class PipePool extends Pool<Tube> {
+        private final Tube master;
 
-        public PipePool(Pipe master) {
+        public PipePool(Tube master) {
             this.master = master;
             recycle(master);    // we'll use master as a part of the pool, too.
         }
 
-        protected Pipe create() {
-            return PipeCloner.clone(master);
+        protected Tube create() {
+            return TubeCloner.clone(master);
         }
     }
 }

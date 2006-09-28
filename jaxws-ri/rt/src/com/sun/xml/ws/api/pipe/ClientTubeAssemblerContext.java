@@ -5,8 +5,20 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.util.pipe.DumpPipe;
+import com.sun.xml.ws.util.pipe.DumpTube;
+import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.handler.ClientSOAPHandlerPipe;
+import com.sun.xml.ws.handler.ClientLogicalHandlerPipe;
+import com.sun.xml.ws.transport.DeferredTransportPipe;
+import com.sun.xml.ws.protocol.soap.ClientMUPipe;
+import com.sun.xml.ws.addressing.WsaClientPipe;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+
+import javax.xml.ws.soap.SOAPBinding;
 
 /**
  * Factory for well-known {@link Tube} implementations
@@ -77,6 +89,56 @@ public final class ClientTubeAssemblerContext {
      */
     public Container getContainer() {
         return container;
+    }
+
+    /**
+     * creates a {@link Tube} that dumps messages that pass through.
+     */
+    public Tube createDumpTube(Tube next) {
+        return new DumpTube("dump", System.out, next);
+    }
+
+    /**
+     * Creates a {@link Tube} that invokes protocol and logical handlers.
+     */
+    public Tube createHandlerTube(Tube next) {
+        HandlerPipe soapHandlerPipe = null;
+        //XML/HTTP Binding can have only LogicalHandlerPipe
+        if (binding instanceof SOAPBinding) {
+            soapHandlerPipe = new ClientSOAPHandlerPipe(binding, wsdlModel, next);
+            next = soapHandlerPipe;
+        }
+        return new ClientLogicalHandlerPipe(binding, next, soapHandlerPipe);
+    }
+
+    /**
+     * Creates a {@link Tube} that performs SOAP mustUnderstand processing.
+     * This pipe should be before HandlerPipes.
+     */
+    public Tube createClientMUTube(Tube next) {
+        if(binding instanceof SOAPBinding)
+            return new ClientMUPipe(binding,next);
+        else
+            return next;
+    }
+
+    /**
+     * Creates WS-Addressing pipe
+     */
+    public Pipe createWsaPipe(Pipe next) {
+        if (wsdlModel == null) {
+            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID)) //||
+                    //ToDO: AddreassingFeature check
+                    //binding.
+                return new WsaClientPipe(wsdlModel, binding, next);
+            else
+                return next;
+        }
+        WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
+        if (impl.isAddressingEnabled())
+            return new WsaClientPipe(wsdlModel, binding, next);
+        else
+            return next;
     }
 
 }

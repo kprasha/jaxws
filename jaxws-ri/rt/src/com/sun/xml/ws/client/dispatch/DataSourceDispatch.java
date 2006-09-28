@@ -25,6 +25,7 @@ package com.sun.xml.ws.client.dispatch;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.xml.XMLMessage;
@@ -49,7 +50,7 @@ import java.io.InputStream;
  */
 public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
-    public DataSourceDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, WSServiceDelegate service, Pipe pipe, BindingImpl binding) {
+    public DataSourceDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, WSServiceDelegate service, Tube pipe, BindingImpl binding) {
        super(port, clazz, mode, service, pipe, binding);
     }
 
