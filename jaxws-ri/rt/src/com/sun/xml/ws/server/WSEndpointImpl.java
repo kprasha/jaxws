@@ -33,7 +33,6 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -60,7 +59,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final @NotNull Container container;
     private final WSDLPort port;
 
-    private final Pipe masterPipeline;
+    private final Tube masterTubeline;
     private final ServiceDefinitionImpl serviceDef;
     private final SOAPVersion soapVersion;
     private final Engine engine;
@@ -88,12 +87,12 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
             serviceDef.setOwner(this);
         }
 
-        PipelineAssembler assembler = PipelineAssemblerFactory.create(
+        TubelineAssembler assembler = TubelineAssemblerFactory.create(
                 Thread.currentThread().getContextClassLoader(), binding.getBindingId());
         assert assembler!=null;
 
-        ServerPipeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe, isSynchronous);
-        this.masterPipeline = assembler.createServer(context);
+        ServerTubeAssemblerContext context = new ServerTubeAssemblerContext(seiModel, port, this, terminalPipe, isSynchronous);
+        this.masterTubeline = assembler.createServer(context);
         terminalPipe.setEndpoint(this);
         engine = new Engine();
     }
@@ -142,8 +141,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public @NotNull PipeHead createPipeHead() {
         return new PipeHead() {
-            private final Pipe pipe = PipeCloner.clone(masterPipeline);
-            private final Tube tube = PipeAdapter.adapt(PipeCloner.clone(masterPipeline));
+            private final Tube tube = TubeCloner.clone(masterTubeline);
 
             public @NotNull Packet process(Packet request, WebServiceContextDelegate wscd, TransportBackChannel tbc) {
                 request.webServiceContextDelegate = wscd;
@@ -172,7 +170,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
             return;
         disposed = true;
 
-        masterPipeline.preDestroy();
+        masterTubeline.preDestroy();
 
         for (Handler handler : binding.getHandlerChain()) {
             for (Method method : handler.getClass().getMethods()) {

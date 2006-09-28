@@ -25,10 +25,7 @@ package com.sun.xml.ws.handler;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
@@ -57,19 +54,27 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
     // This is used for creating MessageContext in #close
     Packet packet;
 
-    public HandlerPipe(Pipe next, WSDLPort port) {
-        super(PipeAdapter.adapt(next));
+    public HandlerPipe(Tube next, WSDLPort port) {
+        super(next);
         this.port = port;
     }
 
-    public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
-        super(PipeAdapter.adapt(next));
+    public HandlerPipe(Pipe next, WSDLPort port) {
+        this(PipeAdapter.adapt(next), port);
+    }
+
+    public HandlerPipe(Tube next, HandlerPipe cousinPipe) {
+        super(next);
         this.cousinPipe = cousinPipe;
         if(cousinPipe != null) {
             this.port = cousinPipe.port;
         } else {
             this.port = null;
         }
+    }
+
+    public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
+        this(PipeAdapter.adapt(next), cousinPipe);
     }
 
     /**

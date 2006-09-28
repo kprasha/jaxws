@@ -24,7 +24,9 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -51,6 +53,13 @@ public class ServerSOAPHandlerPipe extends HandlerPipe {
      * Creates a new instance of SOAPHandlerPipe
      */
     public ServerSOAPHandlerPipe(WSBinding binding, WSDLPort port, Pipe next) {
+        this(binding, port, PipeAdapter.adapt(next));
+    }
+
+    /**
+     * Creates a new instance of SOAPHandlerPipe
+     */
+    public ServerSOAPHandlerPipe(WSBinding binding, WSDLPort port, Tube next) {
         super(next, port);
         if (binding.getSOAPVersion() != null) {
             // SOAPHandlerPipe should n't be used for bindings other than SOAP.
@@ -68,10 +77,20 @@ public class ServerSOAPHandlerPipe extends HandlerPipe {
      * LogicalHandlerPipe.
      * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
      */
-    public ServerSOAPHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
+    public ServerSOAPHandlerPipe(WSBinding binding, Tube next, HandlerPipe cousinPipe) {
         super(next, cousinPipe);
         this.binding = binding;
         setUpProcessorOnce();
+    }
+
+    /**
+     * This constructor is used on client-side where, LogicalHandlerPipe is created
+     * first and then a SOAPHandlerPipe is created with a handler to that
+     * LogicalHandlerPipe.
+     * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
+     */
+    public ServerSOAPHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
+        this(binding, PipeAdapter.adapt(next), cousinPipe);
     }
 
     /**

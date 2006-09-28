@@ -4,8 +4,17 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.protocol.soap.ServerMUPipe;
+import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
+import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
+import com.sun.xml.ws.addressing.WsaServerPipe;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+
+import javax.xml.ws.soap.SOAPBinding;
 
 /**
  * Factory for well-known server {@link Tube} implementations
@@ -102,6 +111,51 @@ public final class ServerTubeAssemblerContext {
      */
     public boolean isSynchronous() {
         return isSynchronous;
+    }
+
+    /**
+     * Creates a {@link Tube} that performs SOAP mustUnderstand processing.
+     * This pipe should be before HandlerPipes.
+     */
+    public @NotNull Tube createServerMUTube(@NotNull Tube next) {
+        if (binding instanceof SOAPBinding)
+            return new ServerMUPipe(binding,next);
+        else
+            return next;
+    }
+
+    /**
+     * Creates a {@link Pipe} that invokes protocol and logical handlers.
+     */
+    public @NotNull Tube createHandlerTube(@NotNull Tube next) {
+        if (!binding.getHandlerChain().isEmpty()) {
+            HandlerPipe cousin = new ServerLogicalHandlerPipe(binding, wsdlModel, next);
+            next = cousin;
+            if (binding instanceof SOAPBinding) {
+                return new ServerSOAPHandlerPipe(binding, next, cousin);
+            }
+        }
+        return next;
+    }
+
+    /**
+     * Creates WS-Addressing pipe
+     */
+    public Pipe createWsaPipe(Pipe next) {
+        if (wsdlModel == null) {
+            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) )//||
+                    //kw todo: AddressingFeature
+                 //  binding.hasFeature())
+                return new WsaServerPipe(wsdlModel, binding, next);
+            else
+                return next;
+        }
+
+        WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
+        if (impl.isAddressingEnabled())
+            return new WsaServerPipe(wsdlModel, binding, next);
+        else
+            return next;
     }
 
 }

@@ -27,10 +27,11 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
      * SOAPHandlerPipe and LogicalHandlerPipe for a particular Endpoint.
      */
     public Tube createServer(ServerTubeAssemblerContext context) {
-        ServerPipeAssemblerContext ctxt = new ServerPipeAssemblerContext(
-                context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(),
-                context.getTerminalPipe(), context.isSynchronous());
-        return PipeAdapter.adapt(new StandalonePipeAssembler().createServer(ctxt));
+        Tube head = context.getTerminalTube();
+        head = context.createHandlerTube(head);
+        head = context.createServerMUTube(head);
+        head = PipeAdapter.adapt(context.createWsaPipe((Pipe)head));    // TODO cleanly
+        return head;
     }
 
     /**
