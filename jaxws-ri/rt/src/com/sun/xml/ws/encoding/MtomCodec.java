@@ -166,18 +166,18 @@ public class MtomCodec extends MimeCodec {
     }
 
     private class ByteArrayBuffer{
-        private  byte[] buff;
-        private  int off;
-        private  int len;
-        private  String contentType;
-        String contentId;
+        private  final byte[] buff;
+        private  final int off;
+        private  final int len;
+        private  final String contentType;
+        final String contentId;
 
         ByteArrayBuffer(byte[] buff, int off, int len, String contentType) {
             this.buff = buff;
             this.off = off;
             this.len = len;
             this.contentType = contentType;
-            this.contentId = encodeCid(null);
+            this.contentId = encodeCid();
         }
 
         void write(OutputStream os) throws IOException {
@@ -213,24 +213,9 @@ public class MtomCodec extends MimeCodec {
         return new MtomCodec(version, codec.copy());
     }
 
-    private String encodeCid(String ns){
+    private String encodeCid(){
         String cid="example.jaxws.sun.com";
         String name = UUID.randomUUID()+"@";
-        if(ns != null && (ns.length() > 0)){
-            try {
-                URI uri = new URI(ns);
-                cid = uri.toURL().getHost();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-                return null;
-            } catch (MalformedURLException e) {
-                try {
-                    cid = URLEncoder.encode(ns, "UTF-8");
-                } catch (UnsupportedEncodingException e1) {
-                    throw new WebServiceException(e);
-                }
-            }
-        }
         return name + cid;
     }
 
@@ -394,13 +379,12 @@ public class MtomCodec extends MimeCodec {
             return reader.getTextStart();
         }
 
-        private class Base64DataEx extends Base64Data{
-            private final InputStream is;
-            public Base64DataEx(InputStream is) {
-                super();
-                this.is = is;
-            }
+        public int getEventType() {
+            if(xopReferencePresent)
+                return XMLStreamConstants.CHARACTERS;
+            return super.getEventType();
         }
+
         public int next() throws XMLStreamException {
             int event = reader.next();
             if ((event == XMLStreamConstants.START_ELEMENT) && reader.getLocalName().equals(XOP_LOCALNAME) && reader.getNamespaceURI().equals(XOP_NAMESPACEURI))
