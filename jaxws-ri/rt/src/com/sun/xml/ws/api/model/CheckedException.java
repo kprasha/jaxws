@@ -25,6 +25,7 @@ package com.sun.xml.ws.api.model;
 import com.sun.xml.bind.api.Bridge;
 
 import javax.xml.ws.WebFault;
+import javax.xml.namespace.QName;
 import java.rmi.RemoteException;
 
 /**
@@ -87,4 +88,10 @@ public interface CheckedException {
      * <code>public FaultBean getFaultInfo();</code>     
      */
     ExceptionType getExceptionType();
+
+    /**
+     * Gives the wsdl:portType/wsdl:operation/wsdl:fault@message value - that is the wsdl:message
+     * referenced by wsdl:fault
+     */
+    String getMessageName();
 }

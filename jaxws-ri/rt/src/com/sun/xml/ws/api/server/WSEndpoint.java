@@ -363,4 +363,18 @@ public abstract class WSEndpoint<T> {
             XmlUtil.createEntityResolver(catalogUrl));
     }
 
+    /**
+     * Gives the wsdl:service default name computed from the endpoint implementaiton class
+     */
+    public static @NotNull QName getDefaultServiceName(Class endpointClass){
+        return EndpointFactory.getDefaultServiceName(endpointClass);
+    }
+
+    /**
+     * Gives the wsdl:service/wsdl:port default name computed from the endpoint implementaiton class
+     */
+    public static @NotNull QName getDefaultPortName(QName serviceName, Class endpointClass){
+        return EndpointFactory.getDefaultPortName(serviceName, endpointClass);
+    }
+
 }
