@@ -417,7 +417,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @return Value of WS-Addressing To header, null if no header is present
      */
     public String getTo(AddressingVersion version) {
-        if (to != null)    
+        if (to != null)
             return to;
         Header h = getFirstHeader(version.toTag, true);
         if (h != null) {
@@ -460,15 +460,40 @@ public final class HeaderList extends ArrayList<Header> {
     /**
      * Returns the value of first WS-Addressing ReplyTo header from
      * {@link AddressingVersion} version. Caches the value for
-     * subsequent invocation.
+     * subsequent invocation. The header returned could be in a role not
+     * targeted at this node, for example "none".
      *
      * @param version Version of WS-Addressing
      * @return Value of WS-Addressing ReplyTo header, null if no header is present
+     * @see {@link #getReplyTo(com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion)}
      */
     public WSEndpointReference getReplyTo(AddressingVersion version) {
         if (replyTo!=null)
             return replyTo;
         Header h = getFirstHeader(version.replyToTag, true);
+        if (h != null) {
+            try {
+                replyTo = h.readAsEPR(version);
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
+            }
+        }
+
+        return replyTo;
+    }
+
+    /**
+     * Returns the value of first WS-Addressing ReplyTo header from
+     * {@link AddressingVersion} version. Caches the value for
+     * subsequent invocation. The header returned is in current role.
+     *
+     * @param version Version of WS-Addressing
+     * @return Value of WS-Addressing ReplyTo header, null if no header is present
+     */
+    public WSEndpointReference getReplyTo(AddressingVersion version, SOAPVersion soapVersion) {
+        if (replyTo!=null)
+            return replyTo;
+        Header h = getFirstHeader(version.replyToTag.getNamespaceURI(), version.replyToTag.getLocalPart(), true, soapVersion);
         if (h != null) {
             try {
                 replyTo = h.readAsEPR(version);
@@ -502,6 +527,17 @@ public final class HeaderList extends ArrayList<Header> {
             return null;
     }
 
+    private Header getFirstHeader(String nsUri, String localName, boolean markUnderstood, SOAPVersion soapVersion) {
+        Iterator<Header> iter = getHeaders(nsUri, localName, markUnderstood);
+        while (iter.hasNext()) {
+            Header h = iter.next();
+            if (h.getRole(soapVersion) == soapVersion.implicitRole)
+                return h;
+        }
+
+        return null;
+    }
+
     /**
      * Returns the value of first WS-Addressing FaultTo header from
      * {@link AddressingVersion} version. Caches the value for
@@ -515,6 +551,22 @@ public final class HeaderList extends ArrayList<Header> {
             return faultTo;
 
         Header h = getFirstHeader(version.faultToTag, true);
+        if (h != null) {
+            try {
+                faultTo = h.readAsEPR(version);
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
+            }
+        }
+
+        return faultTo;
+    }
+
+    public WSEndpointReference getFaultTo(AddressingVersion version, SOAPVersion soapVersion) {
+        if (faultTo != null)
+            return faultTo;
+
+        Header h = getFirstHeader(version.faultToTag.getNamespaceURI(), version.faultToTag.getLocalPart(), true, soapVersion);
         if (h != null) {
             try {
                 faultTo = h.readAsEPR(version);
@@ -545,35 +597,35 @@ public final class HeaderList extends ArrayList<Header> {
      * @param binding WSBinding
      */
     public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet) {
-//        AddressingVersion ver = binding.getAddressingVersion();
-//
-//        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
-//        // wsa:To
-//        StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
-//        add(h);
-//
-//        // wsa:Action
-//        // todo: abstract the algorithm of getting input action in getInputAction
-//        String action = wsaHelper.getInputAction(packet);
-//        if (wsaHelper.isInputActionDefault(packet) && (packet.soapAction != null && !packet.soapAction.equals(""))) {
-//            action = packet.soapAction;
-//        }
-//        if (action == null)
-//            action = "http://fake.input.action";
-//        packet.soapAction = action;
-//        h = new StringHeader(ver.actionTag, action);
-//        add(h);
-//
-//        // wsa:MessageId
-//        h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(binding));
-//        add(h);
-//
-//        // wsa:ReplyTo
-//        // null or "true" is equivalent to request/response MEP
-//        if (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort)) {
-//            WSEndpointReference epr = ver.anonymousEpr;
-//            add(epr.createHeader(ver.replyToTag));
-//        }
+        AddressingVersion ver = binding.getAddressingVersion();
+
+        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
+        // wsa:To
+        StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
+        add(h);
+
+        // wsa:Action
+        // todo: abstract the algorithm of getting input action in getInputAction
+        String action = wsaHelper.getInputAction(packet);
+        if (wsaHelper.isInputActionDefault(packet) && (packet.soapAction != null && !packet.soapAction.equals(""))) {
+            action = packet.soapAction;
+        }
+        if (action == null)
+            action = "http://fake.input.action";
+        packet.soapAction = action;
+        h = new StringHeader(ver.actionTag, action);
+        add(h);
+
+        // wsa:MessageId
+        h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(binding));
+        add(h);
+
+        // wsa:ReplyTo
+        // null or "true" is equivalent to request/response MEP
+        if (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort)) {
+            WSEndpointReference epr = ver.anonymousEpr;
+            add(epr.createHeader(ver.replyToTag));
+        }
     }
 
     /**
