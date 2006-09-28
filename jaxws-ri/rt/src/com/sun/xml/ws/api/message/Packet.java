@@ -547,6 +547,11 @@ public final class Packet extends DistributedPropertySet {
 
         HeaderList hl = r.getMessage().getHeaders();
 
+        // wsa:To
+        WSEndpointReference replyTo = message.getHeaders().getReplyTo(ver, binding.getSOAPVersion());
+        if (replyTo != null)
+            hl.add(new StringHeader(ver.toTag, replyTo.getAddress()));
+
         // wsa:Action
         hl.add(new StringHeader(ver.actionTag, wsaHelper.getOutputAction(this)));
 
@@ -565,10 +570,10 @@ public final class Packet extends DistributedPropertySet {
 
             // if FaultTo is null, then use ReplyTo
             if (refpEPR == null)
-                refpEPR = message.getHeaders().getReplyTo(ver);
+                refpEPR = replyTo;
         } else {
             // choose ReplyTo
-            refpEPR = message.getHeaders().getReplyTo(ver);
+            refpEPR = replyTo;
         }
         if (refpEPR != null) {
             refpEPR.addReferenceParameters(hl);
