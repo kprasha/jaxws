@@ -178,7 +178,7 @@ public final class WSEndpointReference {
         if(marks==null) {
             this.referenceParameters = EMPTY_ARRAY;
         } else {
-            this.referenceParameters = marks.toArray(new OutboundReferenceParameterHeader[marks.size()]);
+            this.referenceParameters = marks.toArray(new Header[marks.size()]);
         }
 
         if(address==null)
