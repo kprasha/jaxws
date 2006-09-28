@@ -491,16 +491,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         portTypeName = name;
     }
 
-    @NotNull
-    public QName getServiceQName(Class endpointImpl) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @NotNull
-    public QName getPortName(Class endpointImpl) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
     /**
      * This is the targetNamespace for the WSDL containing the PortType
      * definition
