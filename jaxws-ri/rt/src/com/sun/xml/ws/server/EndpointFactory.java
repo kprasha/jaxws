@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.SDDocument;
@@ -226,18 +225,15 @@ public class EndpointFactory {
 
     private static AbstractSEIModelImpl createSEIModel(
         SDDocumentSource primaryWsdl, List<SDDocumentSource> metadata,
-        Class<?> implType, QName serviceName, QName portName, WSBinding binding) {
+        Class<?> implType, @NotNull QName serviceName, @NotNull QName portName, WSBinding binding) {
 
+        RuntimeModeler rap;
         // Create runtime model for non Provider endpoints
 
         // wsdlURL will be null, means we will generate WSDL. Hence no need to apply
         // bindings or need to look in the WSDL
         if(primaryWsdl == null){
-            RuntimeModeler rap = new RuntimeModeler(implType,serviceName, binding.getBindingId());
-            if (portName != null) {
-                rap.setPortName(portName);
-            }
-            return rap.buildRuntimeModel();
+            rap = new RuntimeModeler(implType,serviceName, binding.getBindingId());
         }else {
             URL wsdlUrl = primaryWsdl.getSystemId();
             try {
@@ -245,47 +241,17 @@ public class EndpointFactory {
                 WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                     new Parser(primaryWsdl), new EntityResolverImpl(metadata),
                     ServiceFinder.find(WSDLParserExtension.class).toArray());
-                WSDLPortImpl wsdlPort = null;
-                if(serviceName == null)
-                    serviceName = RuntimeModeler.getServiceName(implType);
-                if(portName != null){
-                    wsdlPort = wsdlDoc.getService(serviceName).get(portName);
-                    if(wsdlPort == null)
-                        throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
-
-                    // set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
-                    // conflicts.
-                    applyEffectiveMtomSetting(wsdlPort.getBinding(), binding);
-                }else{
-                    WSDLService service = wsdlDoc.getService(serviceName);
-                    if(service == null)
-                        throw new ServerRtException("runtime.parser.wsdl.noservice", serviceName, wsdlUrl);
-
-                    BindingID bindingId = binding.getBindingId();
-
-                    // make sure there's one and only one port for the given binding
-                    boolean hasPort = false;
-                    for (WSDLPort p : service.getPorts()) {
-                        if(p.getBinding().getBindingId().equals(bindingId)) {
-                            if(hasPort)
-                                throw new ServerRtException("runtime.parser.wsdl.multiplebinding", bindingId, serviceName, wsdlUrl);
-
-                            //set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
-                            // conflicts.
-                            applyEffectiveMtomSetting(p.getBinding(), binding);
-                            hasPort = true;
-                        }
-                    }
-
-                    if(!hasPort)
-                        throw new ServerRtException("runtime.parser.wsdl.nobinding", bindingId, serviceName, wsdlUrl);
+                WSDLPortImpl wsdlPort = wsdlDoc.getService(serviceName).get(portName);
+                if (wsdlPort == null) {
+                    throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
                 }
+
+                // set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
+                // conflicts.
+                applyEffectiveMtomSetting(wsdlPort.getBinding(), binding);
+
                 //now we got the Binding so lets build the model
-                RuntimeModeler rap = new RuntimeModeler(implType, serviceName, wsdlPort);
-                if (portName != null) {
-                    rap.setPortName(portName);
-                }
-                return rap.buildRuntimeModel();
+                rap = new RuntimeModeler(implType, serviceName, wsdlPort);
             } catch (IOException e) {
                 throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
             } catch (XMLStreamException e) {
@@ -296,6 +262,8 @@ public class EndpointFactory {
                 throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
             }
         }
+        rap.setPortName(portName);
+        return rap.buildRuntimeModel();
     }
 
     /**
