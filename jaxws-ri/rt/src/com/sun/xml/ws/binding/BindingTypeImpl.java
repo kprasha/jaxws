@@ -85,4 +85,15 @@ public class BindingTypeImpl {
             return false;
         }
 
+        public static boolean hasMTOMFeature(WebServiceFeature[] wsfeatures) {
+            if(wsfeatures == null)
+                return false;
+            for(WebServiceFeature ftr:wsfeatures) {
+                if(ftr.getID().equals(MTOMFeature.ID) && ftr.isEnabled()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
 }
