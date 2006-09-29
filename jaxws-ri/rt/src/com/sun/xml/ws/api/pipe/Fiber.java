@@ -656,5 +656,5 @@ public final class Fiber implements Runnable {
     /**
      * Set to false to disable debug diagnostis (used for benchmark.)
      */
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 }
