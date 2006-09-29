@@ -22,10 +22,7 @@ package com.sun.xml.ws.binding;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.Feature;
-import javax.xml.ws.FeatureParameter;
+import javax.xml.ws.*;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
 import java.util.List;
@@ -75,6 +72,17 @@ public class BindingTypeImpl {
                 }
             }
             return wsfeatures == null ? null : wsfeatures.toArray(new WebServiceFeature[] {});
+        }
+
+        public static boolean hasRespectBindingFeature(WebServiceFeature[] wsfeatures) {
+            if(wsfeatures == null)
+                return false;
+            for(WebServiceFeature ftr:wsfeatures) {
+                if(ftr.getID().equals(RespectBindingFeature.ID) && ftr.isEnabled()) {
+                    return true;
+                }
+            }
+            return false;
         }
 
 }
