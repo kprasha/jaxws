@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -537,14 +538,28 @@ public final class Packet extends DistributedPropertySet {
     public Packet createServerResponse(Message msg, WSDLPort wsdlPort, WSBinding binding) {
         Packet r = createClientResponse(msg);
 
+        if (wsdlPort != null) {
+            if (wsdlPort.getBinding() != null) {
+                WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(message.getPayloadNamespaceURI(), message.getPayloadLocalPart());
+                if (wbo.getOperation().isOneWay())
+                    return r;
+            }
+        }
+
+        // populate WS-Addressing headers
+        return populateAddressingHeaders(binding, r, wsdlPort);
+    }
+
+    private Packet populateAddressingHeaders(WSBinding binding, Packet r, WSDLPort wsdlPort) {
         AddressingVersion ver = binding.getAddressingVersion();
         if (binding.getAddressingVersion() == null)
             return r;
 
-        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
+        // if one-way, then dont populate any WS-A headers
         if (r.getMessage() == null)
             return r;
 
+        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
         HeaderList hl = r.getMessage().getHeaders();
 
         // wsa:To
