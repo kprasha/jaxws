@@ -23,12 +23,17 @@ package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.soap.AddressingFeature;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -60,19 +65,30 @@ final class SEIPortInfo extends PortInfo {
      */
     @Override
     public BindingImpl createBinding() {
-        BindingImpl bindingImpl = super.createBinding();
-        if(bindingImpl instanceof SOAPBindingImpl) {
-            ((SOAPBindingImpl)bindingImpl).setPortKnownHeaders(model.getKnownHeaders());
-        }
-        return bindingImpl;
+        return createBinding(null);
     }
 
     public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures) {
-         BindingImpl bindingImpl = super.createBinding();
+         BindingImpl bindingImpl = super.createBinding(resolveFeatures(webServiceFeatures));
          if(bindingImpl instanceof SOAPBindingImpl) {
             ((SOAPBindingImpl)bindingImpl).setPortKnownHeaders(model.getKnownHeaders());
          }
          bindingImpl.setFeatures(webServiceFeatures);
          return bindingImpl;
+    }
+
+    protected void resolveAddressingFeature(List<WebServiceFeature> wsdlFeatures, Map<String, WebServiceFeature> featureMap) {
+        AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
+        addressingFeature = (addressingFeature == null) ? (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID): null;
+        RespectBindingFeature bindingFeature = (RespectBindingFeature) featureMap.get(RespectBindingFeature.ID);
+        if (addressingFeature != null) {
+            if (!addressingFeature.isEnabled())  {  //let's just be explicit
+                //if this is enabled just set it to required by spec rules
+                addressingFeature.setRequired(false);
+                bindingFeature = (bindingFeature == null)? new RespectBindingFeature(false): bindingFeature;
+                featureMap.put(RespectBindingFeature.ID, bindingFeature);
+            }
+            //explicitly set RespectBindingFeature
+        }
     }
 }

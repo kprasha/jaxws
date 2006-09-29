@@ -32,9 +32,12 @@ import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.SOAPBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,12 +131,19 @@ public class PortInfo {
     }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        //Todo:MTOMFeature
+
         List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
         Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
 
+        resolveAddressingFeature(wsdlFeatures, featureMap);
+        resolveMTOMFeature(featureMap);
+        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
+    }
+
+    protected void resolveAddressingFeature(List<WebServiceFeature> wsdlFeatures, Map<String, WebServiceFeature> featureMap) {
         if (wsdlFeatures != null) {
             for (WebServiceFeature wsdlFeature : wsdlFeatures) {
+
                 if (wsdlFeature.getID().equals(AddressingFeature.ID)) {
                     //look in webServiceFeatures
                     //look for RespectBindingFeature
@@ -153,7 +163,7 @@ public class PortInfo {
                             } else {
                                 //explicitly disable addressing version
                                 AddressingFeature disableAddressing = new AddressingFeature(false, false);
-                                featureMap.put(disableAddressing.getID(),disableAddressing);
+                                featureMap.put(disableAddressing.getID(), disableAddressing);
                                 //respect Bind feature disables - for dispatch we do not respect binding
                             }
                         } //respectBindingFeature is null don't respect wsdl
@@ -164,16 +174,48 @@ public class PortInfo {
             //case without wsdl
             //lets just see if the AddressingFeature is enabled
             AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
+
             if (addressingFeature == null)
                 addressingFeature = (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID);
-            if (addressingFeature != null && addressingFeature.isEnabled())
+            if (addressingFeature != null && addressingFeature.isEnabled()) {
                 //if this is enabled just set it to required by spec rules
                 addressingFeature.setRequired(true);
+                //explicitly set this just in case someone looks for both
+                RespectBindingFeature bindingFeature = (RespectBindingFeature) featureMap.get(RespectBindingFeature.ID);
+                bindingFeature = (bindingFeature == null) ? new RespectBindingFeature(true) : bindingFeature;
+            }
         }
-        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
     }
 
-    private static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
+    protected void resolveMTOMFeature(Map<String, WebServiceFeature> featureMap) {
+        if (featureMap.containsKey(MTOMFeature.ID)) {
+            MTOMFeature mtom = (MTOMFeature) featureMap.get(MTOMFeature.ID);
+            if (mtom.isEnabled()) {
+                if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
+                    throw new WebServiceException("Attempting to use the MTOMFeature with and HTTPBinding is an Error");
+                } else if (! (bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING)
+                        || bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING))) {  //where to write to - for now System.out
+                    //log here- conflict between feature and bindingID. MTOMFeature has higher priority and
+                    System.out.println("MTOMFeature is Enabled but the BindingID " + bindingId + " " + "is not a valid MTOM ID");
+                    System.out.println("Overiding the bindingId " + bindingId + " MTOM remains turned on.");
+                } else if (!mtom.isEnabled()) {
+                    System.out.println("MTOMFeature is Disabled but the BindingID is MTOM, " + bindingId + " .");
+                    System.out.println("Overiding the bindingId " + bindingId + " MTOM remains turned off.");
+                }
+            }
+        } else { //featureMap does not contain MTOMFeature
+            //is bindingId set
+            if (bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING)
+                    || bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
+                //explicitly set the MTOM feature
+                MTOMFeature mtomFeature = new MTOMFeature(true, 0);   //what is the default threshold?
+                featureMap.put(MTOMFeature.ID, mtomFeature);
+            }
+
+        }
+    }
+
+    protected static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
         HashMap<String, WebServiceFeature> featureMap = new HashMap<String, WebServiceFeature>(5);
         if (webServiceFeatures != null)
             for (int i = 0; i < webServiceFeatures.length; i++) {
