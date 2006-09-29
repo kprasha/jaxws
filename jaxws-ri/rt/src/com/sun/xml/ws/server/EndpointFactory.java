@@ -121,6 +121,14 @@ public class EndpointFactory {
         if(portName==null)
             portName = getDefaultPortName(serviceName,implType);
 
+        {// error check
+            String serviceNS = serviceName.getNamespaceURI();
+            String portNS = portName.getNamespaceURI();
+            if (!serviceNS.equals(portNS)) {
+                throw new ServerRtException("wrong.tns.for.port",portNS, serviceNS);
+            }
+        }
+
         // setting a default binding
         if (binding == null)
             binding = BindingImpl.create(BindingID.parse(implType));
@@ -143,6 +151,11 @@ public class EndpointFactory {
         InvokerPipe terminal;
         WSDLPort wsdlPort = null;
         AbstractSEIModelImpl seiModel = null;
+        // create WSDL model
+        if (primaryDoc != null) {
+            wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
+        }
+        WebServiceFeature[] wsfeatures = BindingTypeImpl.parseBindingType(implType);
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
@@ -156,51 +169,46 @@ public class EndpointFactory {
                 } else {
                     terminal =  new XMLProviderInvokerPipe(invoker, model);
                 }
+                //Provider case:
+                //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
+                if (wsdlPort != null && BindingTypeImpl.hasRespectBindingFeature(wsfeatures)) {
+                    if (((WSDLPortImpl) wsdlPort).isAddressingEnabled()) {
+                        WebServiceFeature[] addressingFeature = {new AddressingFeature(true)};
+                        binding.setFeatures(addressingFeature);
+                    }
+                }
             } else {
                 // Create runtime model for non Provider endpoints
-                seiModel = createSEIModel(primaryDoc, md, implType, serviceName, portName, binding);
-                wsdlPort = seiModel.getPort();
-
+                seiModel = createSEIModel(wsdlPort, implType, serviceName, portName, binding);
                 if(binding instanceof SOAPBindingImpl){
                     //set portKnownHeaders on Binding, so that they can be used for MU processing
                     ((SOAPBindingImpl)binding).setPortKnownHeaders(
                             ((SOAPSEIModel)seiModel).getKnownHeaders());
                 }
                 terminal= new SEIInvokerPipe(seiModel,invoker,binding);
+                //SEI case:
+                //         Enable Addressing from WSDL if it uses addressing
+                if (wsdlPort != null) {
+                    if (((WSDLPortImpl) wsdlPort).isAddressingEnabled()) {
+                        WebServiceFeature[] addressingFeature = {new AddressingFeature(true)};
+                        binding.setFeatures(addressingFeature);
+                    }
+                }
             }
             if (processHandlerAnnotation) {
                 //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
                 processHandlerAnnotation(binding, implType, serviceName, portName);
             }
+            //Set Features in @BindingType
+            binding.setFeatures(wsfeatures);
         }
-
-        if(wsdlPort != null ) {
-            if(((WSDLPortImpl)wsdlPort).isAddressingEnabled()){
-                WebServiceFeature[] addressingFeature = {new AddressingFeature(true)};
-                binding.setFeatures(addressingFeature);
-            }
-        }
-        WebServiceFeature[] wsfeatures = BindingTypeImpl.parseBindingType(implType);
-        binding.setFeatures(wsfeatures);
-
 
         // Generate WSDL for SEI endpoints(not for Provider endpoints)
         if (primaryDoc == null) {
             if (implType.getAnnotation(WebServiceProvider.class)==null) {
                 primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
-            }
-        }
-
-        // create WSDL model
-        if (wsdlPort == null && primaryDoc != null) {
-            wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
-        }
-
-        {// error check
-            String serviceNS = serviceName.getNamespaceURI();
-            String portNS = portName.getNamespaceURI();
-            if (!serviceNS.equals(portNS)) {
-                throw new ServerRtException("wrong.tns.for.port",portNS, serviceNS);
+                // create WSDL model
+                wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
             }
         }
 
@@ -223,44 +231,20 @@ public class EndpointFactory {
     }
 
 
-    private static AbstractSEIModelImpl createSEIModel(
-        SDDocumentSource primaryWsdl, List<SDDocumentSource> metadata,
+    private static AbstractSEIModelImpl createSEIModel(WSDLPort wsdlPort,
         Class<?> implType, @NotNull QName serviceName, @NotNull QName portName, WSBinding binding) {
 
         RuntimeModeler rap;
         // Create runtime model for non Provider endpoints
 
-        // wsdlURL will be null, means we will generate WSDL. Hence no need to apply
+        // wsdlPort will be null, means we will generate WSDL. Hence no need to apply
         // bindings or need to look in the WSDL
-        if(primaryWsdl == null){
+        if(wsdlPort == null){
             rap = new RuntimeModeler(implType,serviceName, binding.getBindingId());
-        }else {
-            URL wsdlUrl = primaryWsdl.getSystemId();
-            try {
-                // TODO: delegate to another entity resolver
-                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
-                    new Parser(primaryWsdl), new EntityResolverImpl(metadata),
-                    ServiceFinder.find(WSDLParserExtension.class).toArray());
-                WSDLPortImpl wsdlPort = wsdlDoc.getService(serviceName).get(portName);
-                if (wsdlPort == null) {
-                    throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
-                }
-
-                // set the mtom enable setting from wsdl model (mtom policy assertion) if DD has not already set it. Also check
-                // conflicts.
-                applyEffectiveMtomSetting(wsdlPort.getBinding(), binding);
-
-                //now we got the Binding so lets build the model
-                rap = new RuntimeModeler(implType, serviceName, wsdlPort);
-            } catch (IOException e) {
-                throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
-            } catch (XMLStreamException e) {
-                throw new ServerRtException("runtime.saxparser.exception", e.getMessage(), e.getLocation(), e);
-            } catch (SAXException e) {
-                throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
-            } catch (ServiceConfigurationError e) {
-                throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
-            }
+        } else {
+            applyEffectiveMtomSetting(wsdlPort.getBinding(), binding);
+            //now we got the Binding so lets build the model
+            rap = new RuntimeModeler(implType, serviceName, (WSDLPortImpl)wsdlPort);
         }
         rap.setPortName(portName);
         return rap.buildRuntimeModel();
@@ -450,7 +434,11 @@ public class EndpointFactory {
             WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                 new Parser(primaryWsdl), new EntityResolverImpl(metadata),
                 ServiceFinder.find(WSDLParserExtension.class).toArray());
-            return wsdlDoc.getService(serviceName).get(portName);
+            WSDLPort wsdlPort = wsdlDoc.getService(serviceName).get(portName);
+            if (wsdlPort == null) {
+                throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
+            }
+            return wsdlPort;
         } catch (IOException e) {
             throw new ServerRtException("runtime.parser.wsdl", wsdlUrl,e);
         } catch (XMLStreamException e) {

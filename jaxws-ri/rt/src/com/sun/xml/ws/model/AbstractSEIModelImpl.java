@@ -65,7 +65,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         if (jaxbContext != null)
             return;
         populateMaps();
-        populateAsyncExceptions();
         createJAXBContext();
     }
 
@@ -84,30 +83,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * Populate methodToJM and nameToJM maps.
      */
     abstract protected void populateMaps();
-
-    private void populateAsyncExceptions() {
-        for (JavaMethodImpl jm : getJavaMethods()) {
-            MEP mep = jm.getMEP();
-            if (mep.isAsync) {
-                String opName = jm.getOperationName();
-                Method m = jm.getMethod();
-                Class[] params = m.getParameterTypes();
-                if (mep == MEP.ASYNC_CALLBACK) {
-                    params = new Class[params.length-1];
-                    System.arraycopy(m.getParameterTypes(), 0, params, 0, m.getParameterTypes().length-1);
-                }
-                try {
-                    Method om = m.getDeclaringClass().getMethod(opName, params);
-                    JavaMethodImpl jm2 = getJavaMethod(om);
-                    for (CheckedExceptionImpl ce : jm2.getCheckedExceptions()) {
-                        jm.addException(ce);
-                    }
-                } catch (NoSuchMethodException ex) {
-                    throw new WebServiceException(ex);
-                }
-            }
-        }
-    }
 
     public Pool.Marshaller getMarshallerPool() {
         return marshallers;
