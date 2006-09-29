@@ -55,7 +55,7 @@ public class WsaClientPipe extends WsaPipe {
             return next.process(packet);
         }
 
-        packet = helper.writeClientOutboundHeaders(packet);
+//        packet = helper.writeClientOutboundHeaders(packet);
         packet = next.process(packet);
 //        packet = helper.readClientInboundHeaders(packet);
 

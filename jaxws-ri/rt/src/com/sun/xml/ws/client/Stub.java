@@ -118,8 +118,8 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
             packet.proxy = this;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
-//            if (binding.isAddressingEnabled())
-//                packet.getMessage().getHeaders().fillRequestAddressingHeaders(wsdlPort, binding, packet);
+            if (binding.isAddressingEnabled())
+                packet.getMessage().getHeaders().fillRequestAddressingHeaders(wsdlPort, binding, packet);
         }
 
         Packet reply;

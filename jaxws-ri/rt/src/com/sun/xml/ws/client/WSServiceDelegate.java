@@ -327,15 +327,15 @@ public class WSServiceDelegate extends WSService {
     /**
      * Creates a new pipeline for the given port name.
      */
-    private Tube createPipeline(PortInfo portInfo, WSBinding binding) {
+    private Pipe createPipeline(PortInfo portInfo, WSBinding binding) {
         BindingID bindingId = portInfo.bindingId;
 
-        TubelineAssembler assembler = TubelineAssemblerFactory.create(
+        PipelineAssembler assembler = PipelineAssemblerFactory.create(
                 Thread.currentThread().getContextClassLoader(), bindingId);
         if (assembler == null)
             throw new WebServiceException("Unable to process bindingID=" + bindingId);    // TODO: i18n
         return assembler.createClient(
-                new ClientTubeAssemblerContext(
+                new ClientPipeAssemblerContext(
                         portInfo.targetEndpoint,
                         portInfo.portModel,
                         this, binding, container));
@@ -474,7 +474,7 @@ public class WSServiceDelegate extends WSService {
      *
      * @return guaranteed to be non-null.
      */
-     WSDLPortImpl getPortModel(QName portName) {
+     public WSDLPortImpl getPortModel(QName portName) {
         WSDLPortImpl port = wsdlService.get(portName);
         if (port == null)
             throw new WebServiceException("Port \"" + portName + "\" not found in service \"" + serviceName + "\"");

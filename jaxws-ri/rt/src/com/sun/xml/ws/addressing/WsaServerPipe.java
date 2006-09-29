@@ -23,12 +23,19 @@
 package com.sun.xml.ws.addressing;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
-import com.sun.xml.ws.addressing.model.AddressingProperties;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.MessageContext;
+
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
@@ -50,28 +57,45 @@ public class WsaServerPipe extends WsaPipe {
         return new WsaServerPipe(this, cloner);
     }
 
-    public Packet process(Packet packet) {
+    public Packet process(Packet request) {
         // Dispatch w/o WSDL
         if (wsdlPort == null) {
-            return next.process(packet);
+            return next.process(request);
         }
 
-        Packet p = helper.readServerInboundHeaders(packet);
-
-        AddressingProperties inbound = (AddressingProperties) p.invocationProperties.get(AddressingConstants.SERVER_INBOUND);
+        Packet p = null;
+        try {
+            p = helper.validateServerInboundHeaders(request);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
 
         if (p.getMessage() != null && p.getMessage().isFault()) {
-            return processFault(p, inbound, false);
+            return processFault(p, false);
         }
+
+        HeaderList hl = request.getMessage().getHeaders();
+        if (hl == null)
+            return p;
 
         // TODO: Evaluate the impact of other pipes that might have
         // TODO: executed before WS-A pipe. So far RM always sends the
         // TODO: protocol response along with application response ONLY.
-        if (inbound != null && inbound.getReplyTo() != null) {
+        AddressingVersion av = binding.getAddressingVersion();
+        WSEndpointReference replyTo = hl.getReplyTo(av, binding.getSOAPVersion());
+        String replyToAddress = null;
+        if (replyTo != null)
+            replyToAddress = replyTo.getAddress();
+        WSEndpointReference faultTo = hl.getFaultTo(av);
+        String faultToAddress = null;
+        if (faultTo != null)
+            faultToAddress = faultTo.getAddress();
+        if (replyTo != null) {
             // none ReplyTo
-            if (helper.getAddress(inbound.getReplyTo()).equals(helper.getNoneURI()) &&
-                    ((inbound.getFaultTo() == null) ||
-                            (!helper.getAddress(inbound.getFaultTo()).equals(helper.getAnonymousURI())))) {
+            if (isOneWay(p) ||
+                    replyToAddress.equals(av.getNoneUri()) &&
+                    ((faultTo == null) ||
+                            (!faultToAddress.equals(av.getAnonymousUri())))) {
                 if (p.transportBackChannel != null) {
                     p.transportBackChannel.close();
                 }
@@ -79,62 +103,73 @@ public class WsaServerPipe extends WsaPipe {
             }
 
             // non-anonymous ReplyTo
-            if (!helper.getAddress(inbound.getReplyTo()).equals(helper.getAnonymousURI()) &&
-                    ((inbound.getFaultTo() == null) ||
-                            (!helper.getAddress(inbound.getFaultTo()).equals(helper.getAnonymousURI())))) {
-                return processNonAnonymousReply(p, helper.getAddress(inbound.getReplyTo()), true);
+            if (!replyToAddress.equals(av.getAnonymousUri()) &&
+                    ((faultTo == null) ||
+                            (!faultToAddress.equals(av.getAnonymousUri())))) {
+                return processNonAnonymousReply(p, replyToAddress, true);
             }
         }
 
         p = next.process(p);
-        p = helper.writeServerOutboundHeaders(p);
 
         if (p.getMessage() != null && p.getMessage().isFault()) {
-            return processFault(p, (AddressingProperties) p.invocationProperties.get(AddressingConstants.SERVER_INBOUND), false);
+            return processFault(p, false);
         }
 
         return p;
+    }
+
+    private boolean isOneWay(Packet p) {
+        return (wsdlPort != null && p.getMessage() != null && p.getMessage().isOneWay(wsdlPort));
     }
 
     /**
      * Process none and non-anonymous Fault endpoints
      *
      * @param p packet
-     * @param ap addressing properties
      * @param invokeEndpoint true if endpoint has been invoked, false otherwise
      * @return response packet received from endpoint
      */
-    private Packet processFault(Packet p, AddressingProperties ap, final boolean invokeEndpoint) {
-        if (ap == null)
+    private Packet processFault(Packet p, final boolean invokeEndpoint) {
+        if (p.getMessage() == null)
             return p;
 
-        if (ap.getFaultTo() == null) {
+        HeaderList hl = p.getMessage().getHeaders();
+        if (hl == null)
+            return p;
+
+        AddressingVersion av = binding.getAddressingVersion();
+        // todo: this is not request ReplyTo and FaultTo
+        String replyToAddress = hl.getReplyTo(av, binding.getSOAPVersion()) == null ? null : hl.getReplyTo(av, binding.getSOAPVersion()).getAddress();
+        String faultToAddress = hl.getFaultTo(av, binding.getSOAPVersion()) == null ? null : hl.getFaultTo(av, binding.getSOAPVersion()).getAddress();
+
+        if (hl.getFaultTo(av) == null) {
             // default FaultTo is ReplyTo
 
-            if (ap.getReplyTo() != null) {
+            if (hl.getReplyTo(av, binding.getSOAPVersion()) != null) {
                 // if none, then fault message is not sent back
-                if (helper.getAddress(ap.getReplyTo()).equals(helper.getNoneURI())) {
+                if (replyToAddress.equals(av.getNoneUri())) {
                     if (invokeEndpoint) {
-                        return p.createResponse(null);
+                        return p.createServerResponse(p.getMessage(), wsdlPort, binding);
                     }
                     p.transportBackChannel.close();
-                } else if (!helper.getAddress(ap.getReplyTo()).equals(helper.getAnonymousURI())) {
+                } else if (!replyToAddress.equals(av.getAnonymousUri())) {
                     // non-anonymous default FaultTo
-                    return processNonAnonymousReply(p, helper.getAddress(ap.getReplyTo()), invokeEndpoint);
+                    return processNonAnonymousReply(p, replyToAddress, invokeEndpoint);
                 }
             }
         } else {
             // explicit FaultTo
 
             // if none, then fault message is not sent back
-            if (helper.getAddress(ap.getFaultTo()).equals(helper.getNoneURI())) {
+            if (faultToAddress.equals(av.getNoneUri())) {
                 if (invokeEndpoint) {
-                    return p.createResponse(null);
+                    return p.createServerResponse(null, wsdlPort, binding);
                 }
                 p.transportBackChannel.close();
-            } else if (!helper.getAddress(ap.getFaultTo()).equals(helper.getAnonymousURI())) {
+            } else if (!faultToAddress.equals(av.getAnonymousUri())) {
                 // non-anonymous FaultTo
-                return processNonAnonymousReply(p, helper.getAddress(ap.getFaultTo()), invokeEndpoint);
+                return processNonAnonymousReply(p, faultToAddress, invokeEndpoint);
             }
         }
 
@@ -150,23 +185,29 @@ public class WsaServerPipe extends WsaPipe {
      * @return response received from the non-anonymous endpoint
      */
     private Packet processNonAnonymousReply(final Packet packet, final String uri, final boolean invokeEndpoint) {
-        if (packet.transportBackChannel != null)
+        if (packet.transportBackChannel != null) {
+            System.out.println("Sending 202 and processing non-anonymous response");
             packet.transportBackChannel.close();
+        }
         Packet response = packet;
         if (invokeEndpoint) {
             response = next.process(packet);
-            response = helper.writeServerOutboundHeaders(response);
         }
 
-//        AddressingProperties ap = (AddressingProperties)packet.invocationProperties.get(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_OUTBOUND);
-//        if (!ap.getReplyTo().getAddress().getURI().toString().equals(uri)) {
-//            throw new AddressingException("ReplyTo address has changed");
-//        }
+        AddressingVersion av = binding.getAddressingVersion();
+        HeaderList hl = packet.getMessage().getHeaders();
+        WSEndpointReference replyTo = hl.getReplyTo(av, binding.getSOAPVersion());
+        String replyToAddress = null;
+        if (replyTo != null)
+            replyToAddress = replyTo.getAddress();
+        WSEndpointReference faultTo = hl.getFaultTo(av);
+        String faultToAddress = null;
+        if (faultTo != null)
+            faultToAddress = faultTo.getAddress();
 
-        AddressingProperties ap = (AddressingProperties)packet.invocationProperties.get(AddressingConstants.SERVER_INBOUND);
         if ((response != null && response.getMessage() != null && response.getMessage().isFault() &&
-                ap.getFaultTo() != null && helper.getAddress(ap.getFaultTo()).equals(helper.getNoneURI())) ||
-                (ap.getReplyTo() != null && helper.getAddress(ap.getReplyTo()).equals(helper.getNoneURI()))) {
+                faultTo != null && faultToAddress.equals(av.getNoneUri())) ||
+                (replyTo != null && replyToAddress.equals(av.getNoneUri()))) {
             return packet;
         }
 
@@ -182,17 +223,18 @@ public class WsaServerPipe extends WsaPipe {
         response = tPipe.process(response);
 
         if (response != null) {
-//            if (response.httpResponseHeaders != null) {
-//                for (String headerKey : response.httpResponseHeaders.keySet()) {
-//                    System.out.printf(headerKey + ":");
-//                    for (String header : response.httpResponseHeaders.get(headerKey)) {
-//                        System.out.printf("[" + header + "]");
-//                    }
-//                    System.out.println();
-//                }
-//            } else {
-//                System.out.printf("%s: null response headers\n", uri.toString());
-//            }
+            Map<String, List<String>> reqHeaders = (Map<String, List<String>>) response.invocationProperties.get(MessageContext.HTTP_REQUEST_HEADERS);
+            if (reqHeaders != null) {
+                for (String key : reqHeaders.keySet()) {
+                    System.out.print("[" + key + "]: ");
+                    for (String value : reqHeaders.get(key)) {
+                        System.out.print(value + " ");
+                    }
+                    System.out.println();
+                }
+            } else {
+                System.out.printf("%s: null response headers\n", uri.toString());
+            }
         } else {
             System.out.printf("%s: null response\n", uri);
         }
