@@ -17,6 +17,7 @@ import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * Factory for well-known {@link Pipe} implementations
@@ -124,21 +125,24 @@ public final class ClientPipeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Pipe createWsaPipe(Pipe next) {
-        if (wsdlModel == null) {
-            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID)) //||
-                    //ToDO: AddreassingFeature check
-                    //binding.
+        if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) ||
+                binding.hasFeature(AddressingFeature.ID)) {
+                //kw todo: AddressingFeature
+             //  binding.hasFeature())
+            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
+                    binding.isFeatureEnabled(AddressingFeature.ID))
                 return new WsaClientPipe(wsdlModel, binding, next);
             else
                 return next;
         }
-        WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
-        if (impl.isAddressingEnabled())
-            return new WsaClientPipe(wsdlModel, binding, next);
-        else
-            return next;
+
+        if (wsdlModel != null) {
+            if (((WSDLPortImpl)wsdlModel).isAddressingEnabled())
+                return new WsaClientPipe(wsdlModel, binding, next);
+        }
+        return next;
     }
-    
+
     /**
      * Creates a transport pipe (for client), which becomes the terminal pipe.
      */
