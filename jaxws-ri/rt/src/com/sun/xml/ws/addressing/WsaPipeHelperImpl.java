@@ -22,29 +22,19 @@
 
 package com.sun.xml.ws.addressing;
 
-import javax.xml.XMLConstants;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlElementDecl;
-import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.ws.EndpointReference;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.*;
-import com.sun.xml.ws.addressing.model.AddressingProperties;
-import com.sun.xml.ws.addressing.model.Elements;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
-import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.Relationship;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
@@ -59,10 +49,7 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
 
     static {
         try {
-            jc = JAXBContext.newInstance(EndpointReferenceImpl.class,
-                                         ObjectFactory.class,
-                                         RelationshipImpl.class,
-                                         ProblemAction.class,
+            jc = JAXBContext.newInstance(ProblemAction.class,
                                          ProblemHeaderQName.class);
         } catch (JAXBException e) {
             throw new WebServiceException(e);
@@ -148,44 +135,6 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         } else {
             // cannot reach here
             throw new WebServiceException(AddressingMessages.INVALID_WSAW_ANONYMOUS(anon.toString()));
-        }
-    }
-
-    @XmlRegistry
-    final class ObjectFactory {
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="From")
-        final JAXBElement<EndpointReferenceImpl> createFrom(EndpointReferenceImpl u) {
-            return null;
-        }
-
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="Action")
-        final JAXBElement<String> createAction(String u) {
-            return null;
-        }
-
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="To")
-        final JAXBElement<String> createTo(String u) {
-            return null;
-        }
-
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="ReplyTo")
-        final JAXBElement<EndpointReferenceImpl> createReplyTo(EndpointReferenceImpl u) {
-            return null;
-        }
-
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="FaultTo")
-        final JAXBElement<EndpointReferenceImpl> createFaultTo(EndpointReferenceImpl u) {
-            return null;
-        }
-
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="MessageID")
-        final JAXBElement<String> createMessageID(String u) {
-            return null;
-        }
-
-        @XmlElementDecl(namespace=WSA_NAMESPACE_NAME,name="RelatesTo")
-        final JAXBElement<RelationshipImpl> createRelationship(RelationshipImpl u) {
-            return null;
         }
     }
 }

@@ -85,20 +85,10 @@ public abstract class WsaPipeHelper {
         }
 
         if (soapFault != null) {
-            HeaderList hl = packet.getMessage().getHeaders();
-//            WSEndpointReference requestReplyTo = hl.getReplyTo(binding.getAddressingVersion());
-//            WSEndpointReference requestFaultTo = hl.getFaultTo(binding.getAddressingVersion());
-
             Message m = Messages.create(soapFault);
             if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                 m.getHeaders().add(s11FaultDetailHeader);
             }
-
-            // todo: this correlation needs to happen in Packet.createServerResponse
-//            if (mid != null) {
-//                Relationship rel = newRelationship(mid.toString());
-//                writeRelatesTo(rel, m.getHeaders(), binding.getSOAPVersion());
-//            }
 
             Packet response = packet.createServerResponse(m, wsdlPort, binding);
             return response;

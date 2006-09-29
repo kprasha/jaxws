@@ -34,23 +34,36 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 
 /**
  * @author Arun Gupta
  */
-public class WsaServerPipe extends WsaPipe {
+public class WsaServerPipe extends AbstractFilterPipeImpl {
+    final WSDLPort wsdlPort;
+    final WSBinding binding;
+    final WsaPipeHelper helper;
+
     public WsaServerPipe(WSDLPort wsdlPort, WSBinding binding, Pipe next) {
-        super(wsdlPort, binding, next);
+        super(next);
+        this.wsdlPort = wsdlPort;
+        this.binding = binding;
+        helper = getPipeHelper();
     }
 
     public WsaServerPipe(WsaServerPipe that, PipeCloner cloner) {
         super(that, cloner);
+        this.wsdlPort = that.wsdlPort;
+        this.binding = that.binding;
+        this.helper = that.helper;
     }
 
     public WsaServerPipe copy(PipeCloner cloner) {
@@ -240,6 +253,21 @@ public class WsaServerPipe extends WsaPipe {
         }
 
         return response;
+    }
+
+    private WsaPipeHelper getPipeHelper() {
+        if (wsdlPort == null) {
+            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
+                return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+            else
+                return new WsaPipeHelperImpl(wsdlPort, binding);
+        }
+
+        String ns = wsdlPort.getBinding().getAddressingVersion();
+        if (ns != null && ns.equals(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME))
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+        else
+            return new WsaPipeHelperImpl(wsdlPort, binding);
     }
 
 }
