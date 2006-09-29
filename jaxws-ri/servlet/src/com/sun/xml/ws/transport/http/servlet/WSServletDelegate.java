@@ -246,24 +246,7 @@ final class WSServletDelegate {
         out.println("</html>");
     }
 
-    protected void writeInvalidMethodType(
-        Localizer localizer,
-        HttpServletResponse response,
-        String message)
-        throws IOException {
-        response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-        response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
-        out.println("<html>");
-        out.println("<head><title>");
-        out.println(WsservletMessages.SERVLET_HTML_TITLE());
-        out.println("</title></head>");
-        out.println("<body>");
-        out.println(WsservletMessages.SERVLET_HTML_METHOD());
-        out.println("</body>");
-        out.println("</html>");
 
-    }
 
     protected void warnMissingContextInformation() {
         logger.warning(WsservletMessages.SERVLET_WARNING_MISSING_CONTEXT_INFORMATION());
