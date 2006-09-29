@@ -21,6 +21,10 @@ public class Engine {
     public Engine() {
     }
 
+    public void setExecutor(Executor threadPool) {
+        this.threadPool = threadPool;
+    }
+
     void addRunnable(Fiber fiber) {
         if(threadPool==null) {
             synchronized(this) {

@@ -54,6 +54,8 @@ import java.util.logging.Logger;
  * @author Jitendra Kotamraju
  */
 public final class WSEndpointImpl<T> extends WSEndpoint<T> {
+    private final @NotNull QName serviceName;
+    private final @NotNull QName portName;
     private final WSBinding binding;
     private final SEIModel seiModel;
     private final @NotNull Container container;
@@ -74,8 +76,13 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     private final Class<T> implementationClass;
 
-
-    public WSEndpointImpl(WSBinding binding, Container container, SEIModel seiModel, WSDLPort port, Class<T> implementationClass, @Nullable ServiceDefinitionImpl serviceDef, InvokerPipe terminalPipe, boolean isSynchronous) {
+    WSEndpointImpl(@NotNull QName serviceName, @NotNull QName portName, WSBinding binding,
+                          Container container, SEIModel seiModel, WSDLPort port,
+                          Class<T> implementationClass,
+                          @Nullable ServiceDefinitionImpl serviceDef,
+                          InvokerPipe terminalPipe, boolean isSynchronous) {
+        this.serviceName = serviceName;
+        this.portName = portName;
         this.binding = binding;
         this.soapVersion = binding.getSOAPVersion();
         this.container = container;
@@ -130,13 +137,14 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     }
 
     public void setExecutor(Executor exec) {
-        // TODO
-        throw new UnsupportedOperationException();
+        engine.setExecutor(exec);
     }
 
     public void schedule(Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
-        // TODO
-        throw new UnsupportedOperationException();
+        Fiber fiber = engine.createFiber();
+        fiber.addInterceptor(interceptor);
+        Tube tube = TubeCloner.clone(masterTubeline);
+        fiber.start(tube, request, callback);
     }
 
     public @NotNull PipeHead createPipeHead() {
@@ -197,31 +205,12 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.endpoint");
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address) {
-        QName service = getServiceName();
-        QName portQN = getPortName(service);
         QName portType = getPortTypeName();
-
-        return EndpointReferenceUtil.getEndpointReference(clazz, address, service,
-                (portQN == null?null:portQN.getLocalPart()),portType, port != null);
+        return EndpointReferenceUtil.getEndpointReference(clazz, address, serviceName,
+                portName.getLocalPart(),portType, port != null);
     }
 
-    private QName getServiceName() {
-        if(port == null) {
-            // there is no WSDL model
-            return EndpointFactory.getDefaultServiceName(implementationClass);
-        }
-        return port.getOwner().getName();
-    }
-    private QName getPortName(QName service) {
-        if(port == null) {
-            // there is no WSDL model
-            return EndpointFactory.getDefaultPortName(service, implementationClass);
-        }
-        return port.getName();
-    }
     private QName getPortTypeName() {
-        if(port == null)
-            return null;
-        return port.getBinding().getPortTypeName();
+        return (port == null) ? null : port.getBinding().getPortTypeName();
     }
 }

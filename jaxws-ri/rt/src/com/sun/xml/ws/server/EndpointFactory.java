@@ -214,7 +214,7 @@ public class EndpointFactory {
 
         ServiceDefinitionImpl serviceDefiniton = (primaryDoc != null) ? new ServiceDefinitionImpl(docList, primaryDoc) : null;
 
-        return new WSEndpointImpl<T>(binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal, isTransportSynchronous);
+        return new WSEndpointImpl<T>(serviceName, portName, binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal, isTransportSynchronous);
     }
 
     private static <T> void processHandlerAnnotation(WSBinding binding, Class<T> implType, QName serviceName, QName portName) {
@@ -306,7 +306,7 @@ public class EndpointFactory {
         assert portName != null;
         return portName;
     }
-    
+
     /**
      * Returns the wsdl from @WebService, or @WebServiceProvider annotation using
      * wsdlLocation element.
