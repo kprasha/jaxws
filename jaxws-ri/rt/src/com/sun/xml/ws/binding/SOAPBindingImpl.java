@@ -39,6 +39,7 @@ import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.MTOMFeature;
 import java.util.*;
 
 
@@ -52,7 +53,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
     private static final String ROLE_NONE = SOAP12NamespaceConstants.ROLE_NONE;
     private Set<String> roles;
-    protected boolean enableMtom;
+    //protected boolean enableMtom;
     protected final SOAPVersion soapVersion;
 
     private Set<QName> portKnownHeaders = Collections.emptySet();
@@ -69,7 +70,12 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         //Is this still required? comment out for now
         //setupSystemHandlerDelegate(serviceName);
 
-        this.enableMtom = bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled();
+        //this.enableMtom = bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled();
+        if(bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled()) {
+            WebServiceFeature[] wsfeatures = {new MTOMFeature()};
+            setFeatures(wsfeatures);
+        }
+
     }
 
     /**
@@ -154,14 +160,15 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      * Used typically by the runtime to enable/disable Mtom optimization
      */
     public boolean isMTOMEnabled() {
-        return enableMtom;
+        return hasFeature(MTOMFeature.ID);
     }
 
     /**
      * Client application can override if the MTOM optimization should be enabled
      */
     public void setMTOMEnabled(boolean b) {
-        this.enableMtom = b;
+        WebServiceFeature[] wsfeatures = {new MTOMFeature()};
+        setFeatures(wsfeatures);
     }
 
     public SOAPFactory getSOAPFactory() {
