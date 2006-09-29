@@ -18,7 +18,7 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
         ClientPipeAssemblerContext ctxt = new ClientPipeAssemblerContext(
                     context.getAddress(), context.getWsdlModel(), context.getService(),
                     context.getBinding(), context.getContainer());
-        Tube head = PipeAdapter.adapt(ctxt.createTransportPipe());
+        Tube head = context.createTransportTube();
         if (dump) {
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
