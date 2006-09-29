@@ -42,4 +42,11 @@ public class MemberSubmissionAddressingFeature extends AddressingFeature {
         super(enabled);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getID() {
+        return ID;
+    }
 }
