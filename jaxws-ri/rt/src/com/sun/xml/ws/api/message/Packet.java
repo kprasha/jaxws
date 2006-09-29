@@ -538,13 +538,8 @@ public final class Packet extends DistributedPropertySet {
     public Packet createServerResponse(Message msg, WSDLPort wsdlPort, WSBinding binding) {
         Packet r = createClientResponse(msg);
 
-        if (wsdlPort != null) {
-            if (wsdlPort.getBinding() != null) {
-                WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(message.getPayloadNamespaceURI(), message.getPayloadLocalPart());
-                if (wbo.getOperation().isOneWay())
-                    return r;
-            }
-        }
+        if (message.isOneWay(wsdlPort))
+            return r;
 
         // populate WS-Addressing headers
         return populateAddressingHeaders(binding, r, wsdlPort);
