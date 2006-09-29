@@ -49,10 +49,13 @@ public abstract class TubelineAssemblerFactory {
             }
         }
 
-        // See if there is a PipelineAssembler out there and use it for compatibility. 
-        PipelineAssembler assembler = PipelineAssemblerFactory.create(classLoader, bindingId);
-        if (assembler != null) {
-            return new TubelineAssemblerAdapter(assembler);
+        // See if there is a PipelineAssembler out there and use it for compatibility.
+        for (PipelineAssemblerFactory factory : ServiceFinder.find(PipelineAssemblerFactory.class,classLoader)) {
+            PipelineAssembler assembler = factory.doCreate(bindingId);
+            if(assembler!=null) {
+                logger.fine(factory.getClass()+" successfully created "+assembler);
+                return new TubelineAssemblerAdapter(assembler);
+            }
         }
 
         // default binding IDs that are known
