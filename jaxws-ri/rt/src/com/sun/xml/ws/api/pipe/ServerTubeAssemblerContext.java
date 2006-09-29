@@ -15,6 +15,7 @@ import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * Factory for well-known server {@link Tube} implementations
@@ -142,20 +143,22 @@ public final class ServerTubeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Pipe createWsaPipe(Pipe next) {
-        if (wsdlModel == null) {
-            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) )//||
-                    //kw todo: AddressingFeature
-                 //  binding.hasFeature())
+        if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) ||
+                binding.hasFeature(AddressingFeature.ID)) {
+                //kw todo: AddressingFeature
+             //  binding.hasFeature())
+            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
+                    binding.isFeatureEnabled(AddressingFeature.ID))
                 return new WsaServerPipe(wsdlModel, binding, next);
             else
                 return next;
         }
 
-        WSDLPortImpl impl = (WSDLPortImpl)wsdlModel;
-        if (impl.isAddressingEnabled())
-            return new WsaServerPipe(wsdlModel, binding, next);
-        else
-            return next;
+        if (wsdlModel != null) {
+            if (((WSDLPortImpl)wsdlModel).isAddressingEnabled())
+                return new WsaServerPipe(wsdlModel, binding, next);
+        }
+        return next;
     }
 
 }
