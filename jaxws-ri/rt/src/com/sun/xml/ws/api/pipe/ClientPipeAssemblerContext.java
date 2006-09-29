@@ -1,23 +1,20 @@
 package com.sun.xml.ws.api.pipe;
 
+import javax.xml.ws.soap.SOAPBinding;
+
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.handler.*;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.handler.ClientLogicalHandlerPipe;
+import com.sun.xml.ws.handler.ClientSOAPHandlerPipe;
+import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.protocol.soap.ClientMUPipe;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
-import com.sun.xml.ws.util.pipe.DumpPipe;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
-import com.sun.xml.ws.addressing.WsaClientPipe;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
-
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.soap.AddressingFeature;
+import com.sun.xml.ws.util.pipe.DumpPipe;
 
 /**
  * Factory for well-known {@link Pipe} implementations
@@ -119,28 +116,6 @@ public final class ClientPipeAssemblerContext {
             next = soapHandlerPipe;
         }
         return new ClientLogicalHandlerPipe(binding, next, soapHandlerPipe);
-    }
-
-    /**
-     * Creates WS-Addressing pipe
-     */
-    public Pipe createWsaPipe(Pipe next) {
-        if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) ||
-                binding.hasFeature(AddressingFeature.ID)) {
-                //kw todo: AddressingFeature
-             //  binding.hasFeature())
-            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
-                    binding.isFeatureEnabled(AddressingFeature.ID))
-                return new WsaClientPipe(wsdlModel, binding, next);
-            else
-                return next;
-        }
-
-        if (wsdlModel != null) {
-            if (((WSDLPortImpl)wsdlModel).isAddressingEnabled())
-                return new WsaClientPipe(wsdlModel, binding, next);
-        }
-        return next;
     }
 
     /**
