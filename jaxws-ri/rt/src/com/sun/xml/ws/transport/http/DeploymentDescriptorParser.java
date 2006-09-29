@@ -49,8 +49,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceProvider;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.MTOMFeature;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -192,7 +194,9 @@ public class DeploymentDescriptorParser<A> {
                 portName = EndpointFactory.getDefaultPortName(serviceName, implementorClass);
 
             //get enable-mtom attribute value
-            String mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
+            String enable_mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
+            String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
+            boolean effectiveMtomValue = false;
 
             BindingID bindingId;
             {//set Binding using DD, annotation, or default one(in that order)
@@ -206,28 +210,24 @@ public class DeploymentDescriptorParser<A> {
                 }
             }
 
-            boolean effectiveMtomValue = false;
             if (bindingId.isMTOMEnabled() == null){
-                effectiveMtomValue = Boolean.valueOf(mtom);
-            } else if (Boolean.valueOf(mtom).compareTo(bindingId.isMTOMEnabled()) != 0) {
+                effectiveMtomValue = Boolean.valueOf(enable_mtom);
+            } else if (Boolean.valueOf(enable_mtom).compareTo(bindingId.isMTOMEnabled()) != 0) {
                 //TODO: throw error and fail
             } else{
                 effectiveMtomValue = bindingId.isMTOMEnabled();
             }
 
-            String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
-            if (mtomThreshold != null) {
-                int mtomThresholdValue = Integer.valueOf(mtomThreshold);
-                //rei.setMtomThreshold(mtomThresholdValue);
-                // TODO: still haven't figured out how to do this correctly
-                // with the new code
+            WSBinding binding = BindingImpl.create(bindingId);
+            if(effectiveMtomValue) {
+                MTOMFeature mtomFeature =  new MTOMFeature();
+                if (mtomThreshold != null) {
+                    mtomFeature.setThreshold(Integer.valueOf(mtomThreshold));
+                }
+                WebServiceFeature[] wsfeatures = {mtomFeature};
+                binding.setFeatures(wsfeatures);
             }
 
-
-            WSBinding binding = BindingImpl.create(bindingId);
-            binding.setMTOMEnabled(effectiveMtomValue);
-            //todo: AddressingFeature - kw
-            //binding.setFeatures(BindingID.features(implementorClass));
             String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
 
