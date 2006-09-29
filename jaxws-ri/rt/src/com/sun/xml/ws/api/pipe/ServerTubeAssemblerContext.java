@@ -143,22 +143,19 @@ public final class ServerTubeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Pipe createWsaPipe(Pipe next) {
-        if (binding.hasFeature(MemberSubmissionAddressingFeature.ID) ||
-                binding.hasFeature(AddressingFeature.ID)) {
-                //kw todo: AddressingFeature
-             //  binding.hasFeature())
-            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
-                    binding.isFeatureEnabled(AddressingFeature.ID))
-                return new WsaServerPipe(wsdlModel, binding, next);
-            else
-                return next;
-        }
+        if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
+                binding.isFeatureEnabled(AddressingFeature.ID))
+            return new WsaServerPipe(wsdlModel, binding, next);
+        else
+            return next;
 
+        /*
         if (wsdlModel != null) {
             if (((WSDLPortImpl)wsdlModel).isAddressingEnabled())
                 return new WsaServerPipe(wsdlModel, binding, next);
         }
         return next;
+        */
     }
 
 }

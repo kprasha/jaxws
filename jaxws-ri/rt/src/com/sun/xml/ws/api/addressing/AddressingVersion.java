@@ -283,10 +283,10 @@ public enum AddressingVersion {
      * @return addresing version
      */
     public static final AddressingVersion fromBinding(WSBinding binding) {
-        if (binding.hasFeature(AddressingFeature.ID))
+        if (binding.isFeatureEnabled(AddressingFeature.ID))
             return W3C;
 
-        if (binding.hasFeature(MemberSubmissionAddressingFeature.ID))
+        if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
             return MEMBER;
 
         return null;

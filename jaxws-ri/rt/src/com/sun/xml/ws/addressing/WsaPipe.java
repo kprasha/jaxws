@@ -54,7 +54,7 @@ public abstract class WsaPipe extends AbstractFilterPipeImpl {
 
     private WsaPipeHelper getPipeHelper() {
         if (wsdlPort == null) {
-            if (binding.hasFeature(MemberSubmissionAddressingFeature.ID))
+            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
                 return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
             else
                 return new WsaPipeHelperImpl(wsdlPort, binding);

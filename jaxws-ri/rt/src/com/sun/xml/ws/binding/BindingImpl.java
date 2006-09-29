@@ -53,7 +53,7 @@ import java.util.Map;
 public abstract class BindingImpl implements WSBinding {
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
-    // Features that are enabled on the binding
+    // Features that are set(enabled/disabled) on the binding
     private Map<String, WebServiceFeature> features;
     /**
      * Computed from {@link #features} by {@link #updateCache()}
@@ -148,7 +148,7 @@ public abstract class BindingImpl implements WSBinding {
         return bindingId.toString();
     }
 
-    public boolean hasFeature(String featureId) {
+    private boolean hasFeature(String featureId) {
         if (featureId == null || features == null)
             return false;
         return features.containsKey(featureId);
@@ -165,13 +165,6 @@ public abstract class BindingImpl implements WSBinding {
             return false;
 
         return features.get(featureId).isEnabled();
-    }
-    
-    private void disableFeature(WebServiceFeature feature) {
-        if (feature == null || features == null)
-            return;
-        features.remove(feature.getID());
-        updateCache();
     }
 
     private void updateCache() {
@@ -190,11 +183,6 @@ public abstract class BindingImpl implements WSBinding {
 
         if (features == null)
             features = new HashMap<String, WebServiceFeature>();
-
-        if (!feature.isEnabled()) {
-            disableFeature(feature);
-            return;
-        }
 
         features.put(feature.getID(), feature);
         updateCache();

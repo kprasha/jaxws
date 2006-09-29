@@ -121,12 +121,6 @@ public interface WSBinding extends Binding {
     void setFeatures(WebServiceFeature[] features);
 
     /**
-     * @param featureId
-     * @return true if the feature is enabled.
-     */
-    boolean hasFeature(String featureId);
-
-    /**
      * Called to find out if a particular {@link javax.xml.ws.Feature} is enabled or not
      * @param featureId
      * @return true if feature is enabled, false otherwise
