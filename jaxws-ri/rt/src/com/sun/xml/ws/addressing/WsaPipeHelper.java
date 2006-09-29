@@ -230,7 +230,7 @@ public abstract class WsaPipeHelper {
         } else {
             String role = header.getRole(binding.getSOAPVersion());
 
-            return !(role != null && role.equals(SOAPVersion.SOAP_12.implicitRole));
+            return (role != null && role.equals(SOAPVersion.SOAP_12.implicitRole));
         }
     }
 
