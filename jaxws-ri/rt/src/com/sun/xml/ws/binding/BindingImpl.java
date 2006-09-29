@@ -60,7 +60,7 @@ public abstract class BindingImpl implements WSBinding {
      * to make {@link #getAddressingVersion()} faster.
      * // TODO: remove this constant value after debugging
      */
-    private AddressingVersion addressingVersion = AddressingVersion.W3C;
+    private AddressingVersion addressingVersion = null;
 
     protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
@@ -168,7 +168,7 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     private void updateCache() {
-        addressingVersion = AddressingVersion.W3C;
+//        addressingVersion = AddressingVersion.W3C;
         if (hasFeature(AddressingFeature.ID))
             addressingVersion = AddressingVersion.W3C;
         else if (hasFeature(MemberSubmissionAddressingFeature.ID))
