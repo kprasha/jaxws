@@ -90,6 +90,10 @@ public enum AddressingVersion {
         /*package*/ Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName) {
             return new OutboundReferenceParameterHeader(mark,nsUri,localName);
         }
+
+        /*package*/ String getIsReferenceParameterLocalName() {
+            return "IsReferenceParameter";
+        }
     },
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing","member-anonymous-epr.xml","http://schemas.xmlsoap.org/ws/2004/08/addressing") {
         @Override
@@ -139,6 +143,10 @@ public enum AddressingVersion {
 
         /*package*/ Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName) {
             return new OutboundStreamHeader(mark,nsUri,localName);
+        }
+
+        /*package*/ String getIsReferenceParameterLocalName() {
+            return null;
         }
     };
 
@@ -239,6 +247,12 @@ public enum AddressingVersion {
      */
     public final QName fault_missingAddressInEpr;
 
+    /**
+     * Represents the QName of the reference parameter in a SOAP message. This is
+     * only valid for W3C WS-Addressing.
+     */
+    public final QName isReferenceParameterTag;
+
     private static final String EXTENDED_FAULT_NAMESPACE = "http://jax-ws.dev.java.net/addressing/fault";
 
     /**
@@ -270,6 +284,7 @@ public enum AddressingVersion {
         problemHeaderQNameTag = new QName(nsUri,"ProblemHeaderQName");
 
         fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
+        isReferenceParameterTag = new QName(nsUri,getIsReferenceParameterLocalName());
 
         // create stock anonymous EPR
         try {
@@ -420,4 +435,11 @@ public enum AddressingVersion {
      * Creates an outbound {@link Header} from a reference parameter.
      */
     /*package*/ abstract Header createReferenceParameterHeader(XMLStreamBuffer mark, String nsUri, String localName);
+
+    /**
+     * Gets the local name for wsa:IsReferenceParameter. This method will return a valid
+     * value only valid for W3C WS-Addressing. For Member Submission WS-Addressing, this method
+     * returns null.
+     */
+    /*package*/ abstract String getIsReferenceParameterLocalName();
 }
