@@ -41,32 +41,8 @@ public interface MemberSubmissionAddressingConstants {
     public static final String WSA_PORTTYPE_NAME = "PortType";
     public static final String WSA_PORTNAME_NAME = "PortName";
 
-    public static final String WSA_REFERENCEPROPERTIES_NAME = "ReferenceProperties";
-    public static final QName WSA_REFERENCEPROPERTIES_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_REFERENCEPROPERTIES_NAME);
-
-    public static final String WSA_REFERENCEPARAMETERS_NAME = "ReferenceParameters";
-    public static final QName WSA_REFERENCEPARAMETERS_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_REFERENCEPARAMETERS_NAME);
-
-    public static final String WSA_ISREFPARAM_NAME = "isReferenceParameter";
-    public static final QName WSA_ISREFPARAM_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_ISREFPARAM_NAME);
-
     public static final String WSA_ADDRESS_NAME = "Address";
     public static final QName WSA_ADDRESS_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_ADDRESS_NAME);
-
-    public static final String WSA_METADATA_NAME = WSA_REFERENCEPARAMETERS_NAME;
-    public static final QName WSA_METADATA_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_METADATA_NAME);
-
-    public static final QName WSA_FROM_QNAME = new QName(WSA_NAMESPACE_NAME, "From");
-    public static final QName WSA_TO_QNAME = new QName(WSA_NAMESPACE_NAME, "To");
-    public static final QName WSA_REPLYTO_QNAME = new QName(WSA_NAMESPACE_NAME, "ReplyTo");
-    public static final QName WSA_FAULTTO_QNAME = new QName(WSA_NAMESPACE_NAME, "FaultTo");
-    public static final QName WSA_ACTION_QNAME = new QName(WSA_NAMESPACE_NAME, "Action");
-    public static final QName WSA_MESSAGEID_QNAME = new QName(WSA_NAMESPACE_NAME, "MessageID");
-    public static final QName IS_REFERENCE_PARAMETER_QNAME = new QName(WSA_NAMESPACE_NAME, "IsReferenceParameter");
-
-    public static final String WSA_RELATIONSHIP_REPLY = WSA_NAMESPACE_NAME + "/reply";
-    public static final QName WSA_RELATESTO_QNAME = new QName(WSA_NAMESPACE_NAME, "RelatesTo");
-    public static final QName WSA_RELATIONSHIPTYPE_QNAME = new QName(WSA_NAMESPACE_NAME, "RelationshipType");
 
     public static final String WSA_ANONYMOUS_ADDRESS = WSA_NAMESPACE_NAME + "/role/anonymous";
     public static final String WSA_NONE_ADDRESS = "";
