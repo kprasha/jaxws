@@ -30,6 +30,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
@@ -47,10 +49,8 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
 
         QName ua = reader.getName();
         if (ua.equals(MemberSubmissionAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
-            impl.enableAddressing(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME);
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            impl.setAddressingRequired(Boolean.parseBoolean(required));
-
+            impl.setAddressingFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }
@@ -64,9 +64,8 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
 
         QName ua = reader.getName();
         if (ua.equals(MemberSubmissionAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
-            impl.enableAddressing();
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            impl.setAddressingRequired(Boolean.parseBoolean(required));
+            impl.setAddressingFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
 
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
@@ -124,6 +123,6 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
 
     @Override
     protected String getNamespaceURI() {
-        return MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME;
+        return AddressingVersion.MEMBER.nsUri;
     }
 }

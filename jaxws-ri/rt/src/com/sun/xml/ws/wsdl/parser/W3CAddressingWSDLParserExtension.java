@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -57,10 +58,8 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
 
         QName ua = reader.getName();
         if (ua.equals(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
-            impl.enableAddressing(W3CAddressingConstants.WSA_NAMESPACE_NAME);
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            impl.setAddressingRequired(Boolean.parseBoolean(required));
-
+            impl.setAddressingFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }
@@ -74,10 +73,8 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
 
         QName ua = reader.getName();
         if (ua.equals(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
-            impl.enableAddressing();
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            impl.setAddressingRequired(Boolean.parseBoolean(required));
-
+            impl.setAddressingFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }
@@ -186,20 +183,14 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     }
 
     private void patchUsingAddressing(WSDLBoundPortTypeImpl binding, WSDLPortImpl port) {
-        if (binding.isAddressingEnabled() == port.isAddressingEnabled() &&
-                binding.isAddressingRequired() == port.isAddressingRequired())
+        if (binding.getAddressingFeature() == port.getAddressingFeature())
             return;
 
-        // TODO: what if wsdl:required is in contradiction ?
-        if (binding.isAddressingEnabled() && !port.isAddressingEnabled()) {
-            port.enableAddressing();
-            port.setAddressingRequired(binding.isAddressingRequired());
-        }
+        if (binding.getAddressingFeature() == null && port.getAddressingFeature() != null)
+            binding.setAddressingFeature(port.getAddressingFeature());
 
-        if (!binding.isAddressingEnabled() && port.isAddressingEnabled()) {
-            binding.enableAddressing(getNamespaceURI());
-            binding.setAddressingRequired(binding.isAddressingRequired());
-        }
+        if (binding.getAddressingFeature() != null && port.getAddressingFeature() == null)
+            port.setAddressingFeature(binding.getAddressingFeature());
     }
 
     protected String getNamespaceURI() {
