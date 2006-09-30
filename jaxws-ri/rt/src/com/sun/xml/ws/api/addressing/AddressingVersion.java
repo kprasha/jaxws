@@ -41,7 +41,7 @@ import javax.xml.ws.soap.AddressingFeature;
  * @author Arun Gupta
  */
 public enum AddressingVersion {
-    W3C(W3CAddressingConstants.WSA_NAMESPACE_NAME,"w3c-anonymous-epr.xml") {
+    W3C("http://www.w3.org/2005/08/addressing","w3c-anonymous-epr.xml","http://www.w3.org/2006/05/addressing/wsdl") {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
@@ -91,7 +91,7 @@ public enum AddressingVersion {
             return new OutboundReferenceParameterHeader(mark,nsUri,localName);
         }
     },
-    MEMBER(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME,"member-anonymous-epr.xml") {
+    MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing","member-anonymous-epr.xml","http://schemas.xmlsoap.org/ws/2004/08/addressing") {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
@@ -142,7 +142,15 @@ public enum AddressingVersion {
         }
     };
 
+    /**
+     * Namespace URI
+     */
     public final String nsUri;
+
+    /**
+     * Namespace URI for the WSDL Binding
+     */
+    public final String wsdlNsUri;
 
     /**
      * Represents the anonymous EPR.
@@ -227,8 +235,9 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-    private AddressingVersion(String nsUri, String anonymousEprResourceName) {
+    private AddressingVersion(String nsUri, String anonymousEprResourceName, String wsdlNsUri) {
         this.nsUri = nsUri;
+        this.wsdlNsUri = wsdlNsUri;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
