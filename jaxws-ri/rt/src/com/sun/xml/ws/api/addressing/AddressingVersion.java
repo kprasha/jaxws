@@ -156,6 +156,7 @@ public enum AddressingVersion {
      * Represents the anonymous EPR.
      */
     public final WSEndpointReference anonymousEpr;
+
     /**
      * Represents the To QName for a specific WS-Addressing Version.
      */
@@ -196,7 +197,15 @@ public enum AddressingVersion {
      * WS-Addressing Message Addressing Property is not present.
      */
     public final QName mapRequiredTag;
+
+    /**
+     * Represents the QName of the fault code when Action is not supported at this endpoint.
+     */
     public final QName actionNotSupportedTag;
+
+    /**
+     * Represents the text of the fault when Action is not supported at this endpoint.
+     */
     public final String actionNotSupportedText;
 
     /**
@@ -210,6 +219,11 @@ public enum AddressingVersion {
      * WS-Addressing Message Addressing Property occurs greater than expected number.
      */
     public final QName invalidCardinalityTag;
+
+    /**
+     * Represents the QName of the element that conveys additional information
+     * on the pre-defined WS-Addressing faults.
+     */
     public final QName problemHeaderQNameTag;
 
     /**
