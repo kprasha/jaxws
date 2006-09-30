@@ -169,9 +169,9 @@ public abstract class BindingImpl implements WSBinding {
 
     private void updateCache() {
 //        addressingVersion = AddressingVersion.W3C;
-        if (hasFeature(AddressingFeature.ID))
+        if (isFeatureEnabled(AddressingFeature.ID))
             addressingVersion = AddressingVersion.W3C;
-        else if (hasFeature(MemberSubmissionAddressingFeature.ID))
+        else if (isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
             addressingVersion = AddressingVersion.MEMBER;
         else
             addressingVersion = null;
