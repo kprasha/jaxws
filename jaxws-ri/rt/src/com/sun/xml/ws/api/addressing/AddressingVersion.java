@@ -34,6 +34,7 @@ import com.sun.xml.ws.message.stream.OutboundStreamHeader;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  * 'Traits' object that absorbs differences of WS-Addressing versions.
@@ -442,4 +443,13 @@ public enum AddressingVersion {
      * returns null.
      */
     /*package*/ abstract String getIsReferenceParameterLocalName();
+
+    public static final AddressingVersion fromFeature(WebServiceFeature af) {
+        if (af instanceof AddressingFeature)
+            return W3C;
+        else if (af instanceof MemberSubmissionAddressingFeature)
+            return MEMBER;
+        else
+            return null;
+    }
 }
