@@ -106,7 +106,7 @@ public class PortInfo {
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
             WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-            if (wsdlPort.isAddressingEnabled()) {
+            if (wsdlPort.isAddressingRequired() ) {
                 //can only be W3CAddressFeature from WSDL?
                 wsdlAddressingFeature = new AddressingFeature(wsdlPort.isAddressingEnabled(), wsdlPort.isAddressingRequired());
                 wsdlFeatures.add(wsdlAddressingFeature);
