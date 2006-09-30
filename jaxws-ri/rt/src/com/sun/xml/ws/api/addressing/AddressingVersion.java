@@ -146,7 +146,7 @@ public enum AddressingVersion {
         }
 
         /*package*/ String getIsReferenceParameterLocalName() {
-            return null;
+            return "";
         }
     };
 
