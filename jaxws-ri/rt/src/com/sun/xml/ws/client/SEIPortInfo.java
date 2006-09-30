@@ -76,7 +76,18 @@ final class SEIPortInfo extends PortInfo {
          bindingImpl.setFeatures(webServiceFeatures);
          return bindingImpl;
     }
-
+    protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
+        // RespectBindingFeature is enabled, so enable all wsdlFeatures
+        Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
+        List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
+        for(WebServiceFeature ftr: wsdlFeatures) {
+            if(featureMap.get(ftr.getID()) == null) {
+                featureMap.put(ftr.getID(),ftr);
+            }
+        }
+        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
+    }
+/*
     protected void resolveAddressingFeature(List<WebServiceFeature> wsdlFeatures, Map<String, WebServiceFeature> featureMap) {
         AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
         addressingFeature = (addressingFeature == null) ? (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID): null;
@@ -91,4 +102,5 @@ final class SEIPortInfo extends PortInfo {
             //explicitly set RespectBindingFeature
         }
     }
+    */
 }

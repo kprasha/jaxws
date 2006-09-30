@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.BindingTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
@@ -105,7 +106,7 @@ public class PortInfo {
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
             WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-            if (wsdlPort.isAddressingRequired()) {
+            if (wsdlPort.isAddressingEnabled()) {
                 //can only be W3CAddressFeature from WSDL?
                 wsdlAddressingFeature = new AddressingFeature(wsdlPort.isAddressingEnabled(), wsdlPort.isAddressingRequired());
                 wsdlFeatures.add(wsdlAddressingFeature);
@@ -130,6 +131,21 @@ public class PortInfo {
         return null;
     }
 
+    protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
+        if(!BindingTypeImpl.hasRespectBindingFeature(webServiceFeatures)) {
+            return webServiceFeatures;
+        }
+        // RespectBindingFeature is enabled, so enable all wsdlFeatures
+        Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
+        List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
+        for(WebServiceFeature ftr: wsdlFeatures) {
+            if(featureMap.get(ftr.getID()) == null) {
+                featureMap.put(ftr.getID(),ftr);
+            }
+        }
+        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
+    }
+/*
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
 
         List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
@@ -214,7 +230,7 @@ public class PortInfo {
 
         }
     }
-
+  */
     protected static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
         HashMap<String, WebServiceFeature> featureMap = new HashMap<String, WebServiceFeature>(5);
         if (webServiceFeatures != null)
