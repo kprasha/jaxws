@@ -40,6 +40,12 @@ public interface W3CAddressingConstants {
     public static final String WSAW_INTERFACENAME_NAME = "InterfaceName";
     public static final String WSAW_ENDPOINTNAME_NAME = "EndpointName";
 
+    public static final String WSA_REFERENCEPROPERTIES_NAME = "ReferenceParameters";
+    public static final QName WSA_REFERENCEPROPERTIES_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_REFERENCEPROPERTIES_NAME);
+
+    public static final String WSA_REFERENCEPARAMETERS_NAME = "ReferenceParameters";
+    public static final QName WSA_REFERENCEPARAMETERS_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_REFERENCEPARAMETERS_NAME);
+
     public static final String WSA_METADATA_NAME = "Metadata";
     public static final QName WSA_METADATA_QNAME = new QName(WSA_NAMESPACE_NAME, WSA_METADATA_NAME);
 
