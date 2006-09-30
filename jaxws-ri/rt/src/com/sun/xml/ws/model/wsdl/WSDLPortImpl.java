@@ -23,10 +23,13 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * Implementation of {@link WSDLPort}
@@ -40,6 +43,7 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private final WSDLServiceImpl owner;
     private boolean addressingEnabled;
     private boolean isAddressingRequired;
+    private WebServiceFeature addressingFeature;
 
     /**
      * To be set after the WSDL parsing is complete.
@@ -76,20 +80,40 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
         this.address = address;
     }
 
+    @Deprecated
     public void enableAddressing() {
         addressingEnabled = true;
     }
 
+    @Deprecated
     public boolean isAddressingEnabled() {
         return addressingEnabled;
     }
 
+    @Deprecated
     public void setAddressingRequired(boolean required) {
         isAddressingRequired = required;
     }
 
+    @Deprecated
     public boolean isAddressingRequired() {
         return isAddressingRequired;
+    }
+
+    public void setAddressingFeature(WebServiceFeature af) {
+        if (!(af instanceof AddressingFeature && af instanceof MemberSubmissionAddressingFeature))
+            return;
+
+        this.addressingFeature = af;
+        addressingEnabled = af.isEnabled();
+        if (addressingFeature instanceof AddressingFeature)
+            isAddressingRequired = ((AddressingFeature)af).isRequired();
+        else if (addressingFeature instanceof MemberSubmissionAddressingFeature)
+            isAddressingRequired = ((MemberSubmissionAddressingFeature)af).isRequired();
+    }
+
+    public WebServiceFeature getAddressingFeature() {
+        return addressingFeature;
     }
 
     public WSDLBoundPortTypeImpl getBinding() {

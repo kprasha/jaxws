@@ -24,6 +24,8 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
@@ -33,6 +35,8 @@ import javax.jws.WebParam.Mode;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * Implementation of {@link WSDLBoundPortType}
@@ -48,6 +52,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
+    private WebServiceFeature addressingFeature;
     private boolean addressingEnabled;
     private boolean isAddressingRequired;
     private String addressingNamespace;
@@ -215,6 +220,23 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
 
     public boolean isAddressingRequired() {
         return isAddressingRequired;
+    }
+
+    public void setAddressingFeature(WebServiceFeature af) {
+        if (!(af instanceof AddressingFeature && af instanceof MemberSubmissionAddressingFeature))
+            return;
+
+        addressingFeature = af;
+        addressingEnabled = true;
+        if (addressingFeature instanceof AddressingFeature)
+            isAddressingRequired = ((AddressingFeature)af).isRequired();
+        else if (addressingFeature instanceof MemberSubmissionAddressingFeature)
+            isAddressingRequired = ((MemberSubmissionAddressingFeature)af).isRequired();
+        addressingNamespace = AddressingVersion.fromFeature(af).nsUri;
+    }
+
+    public WebServiceFeature getAddressingFeature() {
+        return addressingFeature;
     }
 
     public SOAPVersion getSOAPVersion(){
