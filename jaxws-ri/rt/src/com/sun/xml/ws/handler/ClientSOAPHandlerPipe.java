@@ -21,6 +21,8 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.TubeCloner;
@@ -30,14 +32,13 @@ import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.message.DataHandlerAttachment;
 
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceException;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
+import javax.activation.DataHandler;
+import java.util.*;
 
 /**
  *
@@ -165,8 +166,15 @@ public class ClientSOAPHandlerPipe extends HandlerPipe {
     boolean callHandlersOnRequest(MessageUpdatableContext context, boolean isOneWay) {
 
         boolean handlerResult;
-        try {
+        //Lets copy all the MessageContext.OUTBOUND_ATTACHMENT_PROPERTY to the message
+        Map<String, DataHandler> atts = (Map<String, DataHandler>) context.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
+        AttachmentSet attSet = packet.getMessage().getAttachments();
+        for(String cid : atts.keySet()){
+            Attachment att = new DataHandlerAttachment(cid, atts.get(cid));
+            attSet.add(att);
+        }
 
+        try {
             //CLIENT-SIDE
             handlerResult = processor.callHandlersRequest(HandlerProcessor.Direction.OUTBOUND, context, !isOneWay);
         } catch (WebServiceException wse) {
