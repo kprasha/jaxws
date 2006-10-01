@@ -22,13 +22,17 @@
 
 package com.sun.xml.ws.handler;
 
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.ReadOnlyPropertyException;
+
+import javax.activation.DataHandler;
+import javax.xml.ws.handler.MessageContext;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
-import javax.xml.ws.handler.MessageContext;
 
 /**
  *
@@ -36,7 +40,7 @@ import javax.xml.ws.handler.MessageContext;
  */
 
 class MessageContextImpl implements MessageContext {
-    
+
     private Map<String,Object> internalMap = new HashMap<String,Object>();
     private Set<String> handlerScopeProps;
     Packet packet;
@@ -60,16 +64,16 @@ class MessageContextImpl implements MessageContext {
     public void setScope(String name, Scope scope) {
         populateMap();
         if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
-        
+
         //TODO: check in intrenalMap
         if(scope == Scope.APPLICATION) {
             handlerScopeProps.remove(name);
         } else {
             handlerScopeProps.add(name);
-            
+
         }
     }
-    
+
     public Scope getScope(String name) {
         populateMap();
         if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
@@ -80,27 +84,27 @@ class MessageContextImpl implements MessageContext {
             return Scope.APPLICATION;
         }
     }
-    
+
     public int size() {
         populateMap();
         return internalMap.size();
     }
-    
+
     public boolean isEmpty() {
         populateMap();
         return internalMap.isEmpty();
     }
-    
+
     public boolean containsKey(Object key) {
         populateMap();
         return internalMap.containsKey(key);
     }
-    
+
     public boolean containsValue(Object value) {
         populateMap();
         return internalMap.containsValue(value);
     }
-    
+
     public Object put(String key, Object value) {
         populateMap();
         if(!keyExists(key)) {
@@ -110,10 +114,27 @@ class MessageContextImpl implements MessageContext {
         return internalMap.put(key,value);
     }
     public Object get(Object key) {
+        if(key == null)
+            return null;
+
         populateMap();
-        return internalMap.get(key);
+        Object value = internalMap.get(key);
+
+        //add the attachments from the Message to the corresponding attachment property
+        if(key.equals(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS) ||
+            key.equals(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)){
+            Map<String, DataHandler> atts = (Map<String, DataHandler>) value;
+            if(atts == null)
+                atts = new HashMap<String, DataHandler>();
+            AttachmentSet attSet = packet.getMessage().getAttachments();
+            for(Attachment att : attSet){
+                atts.put(att.getContentId(), att.asDataHandler());
+            }
+            return atts;
+        }
+        return value;
     }
-    
+
     public void putAll(Map<? extends String, ? extends Object> t) {
         populateMap();
         for(String key: t.keySet()) {
@@ -124,7 +145,7 @@ class MessageContextImpl implements MessageContext {
         }
         internalMap.putAll(t);
     }
-    
+
     public void clear() {
         populateMap();
         internalMap.clear();
@@ -150,7 +171,7 @@ class MessageContextImpl implements MessageContext {
     private boolean keyExists(String name){
         return keySet().contains(name);
     }
-    
+
     /**
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */

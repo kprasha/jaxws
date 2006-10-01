@@ -420,7 +420,10 @@ public class SAAJMessage extends Message {
                     return null;
                 attMap = createAttachmentMap();
             }
-            return attMap.get('<'+contentId+'>');
+            if(contentId.charAt(0) != '<'){
+                return attMap.get('<'+contentId+'>');
+            }
+            return attMap.get(contentId);
         }
 
         public boolean isEmpty() {

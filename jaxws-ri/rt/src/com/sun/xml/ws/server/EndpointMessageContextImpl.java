@@ -22,9 +22,13 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Attachment;
+
 import java.util.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceContext;
+import javax.activation.DataHandler;
 
 /**
  * Implements {@link WebServiceContext}'s {@link MessageContext} on top of {@link Packet}.
@@ -68,7 +72,21 @@ final class EndpointMessageContextImpl extends AbstractMap<String,Object> implem
         if (packet.getHandlerScopePropertyNames(true).contains(key)) {
             return null;            // no such application-scope property
         }
-        return packet.invocationProperties.get(key);
+        Object value =  packet.invocationProperties.get(key);
+
+        //add the attachments from the Message to the corresponding attachment property
+        if(key.equals(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS) ||
+                key.equals(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)){
+            Map<String, DataHandler> atts = (Map<String, DataHandler>) value;
+            if(atts == null)
+                atts = new HashMap<String, DataHandler>();
+            AttachmentSet attSet = packet.getMessage().getAttachments();
+            for(Attachment att : attSet){
+                atts.put(att.getContentId(), att.asDataHandler());
+            }
+            return atts;
+        }
+        return value;
     }
 
     @Override
