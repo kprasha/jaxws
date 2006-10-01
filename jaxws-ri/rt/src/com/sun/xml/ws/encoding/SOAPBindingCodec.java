@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.client.ContentNegotiation;
 
+import javax.xml.ws.soap.MTOMFeature;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
@@ -138,7 +139,7 @@ public class SOAPBindingCodec extends MimeCodec {
         fiSoapCodec = getFICodec(version);
         fiMimeType = (fiSoapCodec != null) ? fiSoapCodec.getMimeType() : "";
         
-        xmlMtomCodec = new MtomCodec(version, xmlSoapCodec);
+        xmlMtomCodec = new MtomCodec(version, xmlSoapCodec, binding.getFeature(MTOMFeature.ID));
         
         xmlSwaCodec = new SwACodec(version, xmlSoapCodec);
         

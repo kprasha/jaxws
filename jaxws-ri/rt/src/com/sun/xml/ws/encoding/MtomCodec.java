@@ -34,6 +34,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
+import com.sun.xml.bind.DatatypeConverterImpl;
 import org.jvnet.staxex.Base64Data;
 import org.jvnet.staxex.NamespaceContextEx;
 import org.jvnet.staxex.XMLStreamReaderEx;
@@ -46,15 +47,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -76,15 +75,20 @@ public class MtomCodec extends MimeCodec {
     private final String soapXopContentType;
     private String messageContentType;
     private UTF8OutputStreamWriter osWriter;
+    private final MTOMFeature mtomFeature;
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
     private final List<ByteArrayBuffer> mtomAttachmentStream = new ArrayList<ByteArrayBuffer>();
 
-    MtomCodec(SOAPVersion version, StreamSOAPCodec codec){
+    MtomCodec(SOAPVersion version, StreamSOAPCodec codec, WebServiceFeature mtomFeature){
         super(version);
         this.codec = codec;
         createConteTypeHeader();
         this.soapXopContentType = XOP_XML_MIME_TYPE +";charset=utf-8;type=\""+version.contentType+"\"";
+        if(mtomFeature == null)
+            this.mtomFeature = new MTOMFeature();
+        else
+            this.mtomFeature = (MTOMFeature) mtomFeature;
     }
 
     private void createConteTypeHeader(){
@@ -210,7 +214,7 @@ public class MtomCodec extends MimeCodec {
     }
 
     public MtomCodec copy() {
-        return new MtomCodec(version, codec.copy());
+        return new MtomCodec(version, codec.copy(), mtomFeature);
     }
 
     private String encodeCid(){
@@ -235,6 +239,12 @@ public class MtomCodec extends MimeCodec {
         }
 
         public void writeBinary(byte[] data, int start, int len, String contentType) throws XMLStreamException {
+            //check threshold and if less write as base64encoded value
+            if(mtomFeature.getThreshold() > (len-start)){
+                writeCharacters(DatatypeConverterImpl._printBase64Binary(data, start, len));
+                return;
+            }
+
             try {
                 ByteArrayBuffer bos = new ByteArrayBuffer(data, start, len, contentType);
                 mtomAttachmentStream.add(bos);
