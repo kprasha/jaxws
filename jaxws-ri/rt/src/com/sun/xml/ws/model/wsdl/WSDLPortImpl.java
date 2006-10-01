@@ -106,9 +106,9 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
 
         this.addressingFeature = af;
         addressingEnabled = af.isEnabled();
-        if (addressingFeature instanceof AddressingFeature)
+        if (addressingFeature.getID().equals(AddressingFeature.ID))
             isAddressingRequired = ((AddressingFeature)af).isRequired();
-        else if (addressingFeature instanceof MemberSubmissionAddressingFeature)
+        else if (addressingFeature.getID().equals(AddressingFeature.ID))
             isAddressingRequired = ((MemberSubmissionAddressingFeature)af).isRequired();
     }
 

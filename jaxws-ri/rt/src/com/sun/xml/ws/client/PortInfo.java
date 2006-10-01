@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.BindingTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.RespectBindingFeature;
@@ -106,10 +107,9 @@ public class PortInfo {
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
             WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-            if (wsdlPort.isAddressingRequired() ) {
-                //can only be W3CAddressFeature from WSDL?
-                wsdlAddressingFeature = new AddressingFeature(wsdlPort.isAddressingEnabled(), wsdlPort.isAddressingRequired());
-                wsdlFeatures.add(wsdlAddressingFeature);
+            WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
+            if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
+                wsdlFeatures.add(addressingFeature);
             }
             if (wsdlPort.getBinding().isMTOMEnabled()) {
                 wsdlMTOMFeature = new MTOMFeature(wsdlPort.getBinding().isMTOMEnabled());

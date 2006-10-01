@@ -445,9 +445,9 @@ public enum AddressingVersion {
     /*package*/ abstract String getIsReferenceParameterLocalName();
 
     public static final AddressingVersion fromFeature(WebServiceFeature af) {
-        if (af instanceof AddressingFeature)
+        if (af.getID().equals(AddressingFeature.ID))
             return W3C;
-        else if (af instanceof MemberSubmissionAddressingFeature)
+        else if (af.getID().equals(MemberSubmissionAddressingFeature.ID))
             return MEMBER;
         else
             return null;

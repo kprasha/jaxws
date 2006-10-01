@@ -223,7 +223,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public void setAddressingFeature(WebServiceFeature af) {
-        if (!(af instanceof AddressingFeature && af instanceof MemberSubmissionAddressingFeature))
+        if (!(af instanceof AddressingFeature || af instanceof MemberSubmissionAddressingFeature))
             return;
 
         addressingFeature = af;

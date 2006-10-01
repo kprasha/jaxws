@@ -27,6 +27,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.Container;
@@ -44,6 +45,7 @@ import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
@@ -172,9 +174,10 @@ public class EndpointFactory {
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null && BindingTypeImpl.hasRespectBindingFeature(wsfeatures)) {
-                    if (((WSDLPortImpl) wsdlPort).isAddressingEnabled()) {
-                        WebServiceFeature[] addressingFeature = {new AddressingFeature(true)};
-                        binding.setFeatures(addressingFeature);
+                    WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
+                    if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
+                        WebServiceFeature[] wsdlFeatures = {addressingFeature};
+                        binding.setFeatures(wsdlFeatures);
                     }
                 }
             } else {
@@ -189,9 +192,10 @@ public class EndpointFactory {
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null) {
-                    if (((WSDLPortImpl) wsdlPort).isAddressingEnabled()) {
-                        WebServiceFeature[] addressingFeature = {new AddressingFeature(true)};
-                        binding.setFeatures(addressingFeature);
+                    WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
+                    if(addressingFeature != null) {
+                        WebServiceFeature[] wsdlFeatures = {addressingFeature};
+                        binding.setFeatures(wsdlFeatures);
                     }
                 }
             }
