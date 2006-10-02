@@ -529,9 +529,12 @@ public final class Packet extends DistributedPropertySet {
 
     /**
      * Creates a server-side response {@link Packet} from a request
-     * packet ({@code this}).
+     * packet ({@code this}). If WS-Addressing is enabled, a default Action
+     * Message Addressing Property is used. For non-default Action, see
+     * {@link #createServerResponse(Message, com.sun.xml.ws.api.model.wsdl.WSDLPort, com.sun.xml.ws.api.WSBinding, String)}.
      *
      * @param msg The {@link Message} that represents a reply. Can be null.
+     * @param wsdlPort The response WSDL port
      * @param binding The response Binding
      * @return response packet
      */
@@ -542,10 +545,32 @@ public final class Packet extends DistributedPropertySet {
             return r;
 
         // populate WS-Addressing headers
-        return populateAddressingHeaders(binding, r, wsdlPort);
+        return populateAddressingHeaders(binding, r, wsdlPort, null);
     }
 
-    private Packet populateAddressingHeaders(WSBinding binding, Packet r, WSDLPort wsdlPort) {
+    /**
+     * Creates a server-side response {@link Packet} from a request
+     * packet ({@code this}). If WS-Addressing is enabled, <code>action</code>
+     * is used as Action Message Addressing Property. If <code>action</code>
+     * is null, then the default value is used.
+     *
+     * @param msg The {@link Message} that represents a reply. Can be null.
+     * @param wsdlPort The response WSDL port
+     * @param binding The response Binding
+     * @param action The response Action Message Addressing Property value. Can be null.
+     * @return response packet
+     */
+    public Packet createServerResponse(Message msg, WSDLPort wsdlPort, WSBinding binding, String action) {
+        Packet r = createClientResponse(msg);
+
+        if (message.isOneWay(wsdlPort))
+            return r;
+
+        // populate WS-Addressing headers
+        return populateAddressingHeaders(binding, r, wsdlPort, action);
+    }
+
+    private Packet populateAddressingHeaders(WSBinding binding, Packet r, WSDLPort wsdlPort, String action) {
         AddressingVersion ver = binding.getAddressingVersion();
         if (binding.getAddressingVersion() == null)
             return r;
@@ -563,7 +588,10 @@ public final class Packet extends DistributedPropertySet {
             hl.add(new StringHeader(ver.toTag, replyTo.getAddress()));
 
         // wsa:Action
-        hl.add(new StringHeader(ver.actionTag, wsaHelper.getOutputAction(this)));
+        if (action != null)
+            hl.add(new StringHeader(ver.actionTag, wsaHelper.getOutputAction(this)));
+        else
+            hl.add(new StringHeader(ver.actionTag, action));
 
         // wsa:MessageID
         hl.add(new StringHeader(ver.messageIDTag, message.getID(binding)));
