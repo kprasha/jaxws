@@ -24,6 +24,9 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.server.AsyncProviderCallback;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.server.InvokerPipe;
 
 import javax.xml.ws.Provider;
@@ -76,6 +79,75 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
             return request.createResponse(response.getResponse(returnValue));
         }
     }
+    
+    public NextAction processAsyncRequest(Packet request) {
+        SyncNextAction action = new SyncNextAction();
+        T param = parameter.getParameter(request.getMessage());
+        AsyncProviderCallback callback = new AsyncProviderCallbackImpl(request, action);
+        logger.fine("Invoking AsyncProvider Endpoint");
+        try {
+            // TODO WebServiceContext
+            getInvoker(request).invokeAsyncProvider(request, param, callback, null);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return doThrow(e);
+        }
+        // Suspend the Fiber. AsyncProviderCallback will resume the Fiber after
+        // it receives response. But make sure that the sequence happens orderly
+        return action.suspend();
+    }
+
+    private static final class SyncNextAction {
+        private Packet packet;
+        private boolean suspended;
+
+        synchronized NextAction suspend() {
+            NextAction na = new NextAction();
+            if (suspended) {
+                na.returnWith(packet);
+            } else {
+                na.suspend();
+                suspended = true;
+            }
+            return na;
+        }
+
+        synchronized void resume(Packet packet) {
+            this.packet = packet;
+            if (suspended) {
+                Fiber.current().resume(packet);
+            }
+        }
+    }
+
+    private class AsyncProviderCallbackImpl implements AsyncProviderCallback<T> {
+        private final Packet request;
+        private final SyncNextAction action;
+
+        public AsyncProviderCallbackImpl(Packet request, SyncNextAction action) {
+            this.request = request;
+            this.action = action;
+        }
+
+        public void send(T param) {
+            Message responseMessage = response.getResponse(param);
+            Packet packet = request.createResponse(responseMessage);
+            Fiber.current().resume(packet);
+        }
+
+        public void sendError(Throwable t) {
+            Exception e;
+            if (t instanceof RuntimeException) {
+                e = (RuntimeException)t;
+            } else {
+                e = new RuntimeException(t);
+            }
+            Message responseMessage = getResponseMessage(e);
+            Packet packet = request.createResponse(responseMessage);
+            action.resume(packet);
+        }
+    }
+
     
     /**
      * Binds {@link Message} to method invocation parameter

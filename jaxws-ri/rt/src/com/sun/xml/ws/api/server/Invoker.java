@@ -52,11 +52,29 @@ public abstract class Invoker {
         return (T)invoke(p,invokeMethod,arg);
     }
 
+    /**
+     * Invokes {@link AsyncProvider#invoke(Object, AsyncProviderCallback, WebServiceContext)}
+     */
+    public <T> void invokeAsyncProvider( @NotNull Packet p, T arg, AsyncProviderCallback cbak, WebServiceContext ctxt ) throws IllegalAccessException, InvocationTargetException {
+        // default slow implementation that delegates to the other invoke method.
+        invoke(p, asyncInvokeMethod, arg, cbak, ctxt);
+    }
+
     private static final Method invokeMethod;
 
     static {
         try {
             invokeMethod = Provider.class.getMethod("invoke",Object.class);
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static final Method asyncInvokeMethod;
+
+    static {
+        try {
+            asyncInvokeMethod = AsyncProvider.class.getMethod("invoke",Object.class, AsyncProviderCallback.class, WebServiceContext.class);
         } catch (NoSuchMethodException e) {
             throw new AssertionError(e);
         }
