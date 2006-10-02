@@ -77,7 +77,8 @@ final class SEIPortInfo extends PortInfo {
          if(bindingImpl instanceof SOAPBindingImpl) {
             ((SOAPBindingImpl)bindingImpl).setPortKnownHeaders(model.getKnownHeaders());
          }
-         bindingImpl.setFeatures(webServiceFeatures);
+         //Not needed as set above in super.createBinding() call  
+         //bindingImpl.setFeatures(webServiceFeatures);
          return bindingImpl;
     }
 
