@@ -529,11 +529,9 @@ public final class Packet extends DistributedPropertySet {
 
     /**
      * Creates a server-side response {@link Packet} from a request
-     * packet ({@code this}). If WS-Addressing is enabled, then wsa:To, a
-     * default wsa:Action, wsa:MessageID and wsa:RelatesTo headers are created.
-     * See
-     * {@link #createServerResponse(Message, com.sun.xml.ws.api.model.wsdl.WSDLPort, com.sun.xml.ws.api.WSBinding, String)}
-     * if non-default wsa:Action is required.
+     * packet ({@code this}). If WS-Addressing is enabled, a default Action
+     * Message Addressing Property is used. For non-default Action, see
+     * {@link #createServerResponse(Message, com.sun.xml.ws.api.model.wsdl.WSDLPort, com.sun.xml.ws.api.WSBinding, String)}.
      *
      * @param msg The {@link Message} that represents a reply. Can be null.
      * @param wsdlPort The response WSDL port
@@ -552,9 +550,9 @@ public final class Packet extends DistributedPropertySet {
 
     /**
      * Creates a server-side response {@link Packet} from a request
-     * packet ({@code this}). If WS-Addressing is enabled, then wsa:To, wsa:Action from
-     * <code>action</code>, wsa:MessageID and wsa:RelatesTo headers are created. If
-     * <code>action</code> is null, then the default value is used.
+     * packet ({@code this}). If WS-Addressing is enabled, <code>action</code>
+     * is used as Action Message Addressing Property. If <code>action</code>
+     * is null, then the default value is used.
      *
      * @param msg The {@link Message} that represents a reply. Can be null.
      * @param wsdlPort The response WSDL port
@@ -590,7 +588,7 @@ public final class Packet extends DistributedPropertySet {
             hl.add(new StringHeader(ver.toTag, replyTo.getAddress()));
 
         // wsa:Action
-        if (action != null)
+        if (action == null)
             hl.add(new StringHeader(ver.actionTag, wsaHelper.getOutputAction(this)));
         else
             hl.add(new StringHeader(ver.actionTag, action));
