@@ -181,7 +181,7 @@ public class DeploymentDescriptorParser<A> {
             String implementationName =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_IMPLEMENTATION);
             Class implementorClass = getImplementorClass(implementationName);
-            verifyImplementorClass(implementorClass);
+            EndpointFactory.verifyImplementorClass(implementorClass);
 
             SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
 
@@ -286,25 +286,6 @@ public class DeploymentDescriptorParser<A> {
      */
     public static interface AdapterFactory<A> {
         A createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint);
-    }
-
-    /**
-     * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider
-     * annotation
-     * @throws java.lang.IllegalArgumentException
-     *      If it doesn't have any one of @WebService or @WebServiceProvider
-     *      If it has both @WebService and @WebServiceProvider annotations
-     *
-     */
-    private void verifyImplementorClass(Class<?> implementorClass) {
-        WebServiceProvider wsProvider = implementorClass.getAnnotation(WebServiceProvider.class);
-        WebService ws = implementorClass.getAnnotation(WebService.class);
-        if (wsProvider == null && ws == null) {
-            throw new IllegalArgumentException(implementorClass+" has neither @WebSerivce nor @WebServiceProvider annotation");
-        }
-        if (wsProvider != null && ws != null) {
-            throw new IllegalArgumentException(implementorClass+" has both @WebSerivce and @WebServiceProvider annotations");
-        }
     }
 
     /**

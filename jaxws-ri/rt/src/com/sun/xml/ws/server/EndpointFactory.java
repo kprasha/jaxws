@@ -29,11 +29,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.server.SDDocument;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -103,6 +99,8 @@ public class EndpointFactory {
         if(invoker ==null || implType ==null)
             throw new IllegalArgumentException();
 
+        verifyImplementorClass(implType);
+
         List<SDDocumentSource> md = new ArrayList<SDDocumentSource>();
         if(metadata!=null)
             md.addAll(metadata);
@@ -157,9 +155,6 @@ public class EndpointFactory {
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
-                if (!Provider.class.isAssignableFrom(implType))
-                    throw new ServerRtException("not.implement.provider",implType);
-
                 ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
                 if (binding instanceof SOAPBinding) {
                     SOAPVersion soapVersion = binding.getSOAPVersion();
@@ -228,6 +223,35 @@ public class EndpointFactory {
             }
         }
 
+    }
+
+    /**
+     * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider
+     * annotation
+     *
+     * @return
+     *       true if it is a Provider or AsyncProvider endpoint
+     *       false otherwise
+     * @throws java.lang.IllegalArgumentException
+     *      If it doesn't have any one of @WebService or @WebServiceProvider
+     *      If it has both @WebService and @WebServiceProvider annotations
+     */
+    public static boolean verifyImplementorClass(Class<?> clz) {
+        WebServiceProvider wsProvider = clz.getAnnotation(WebServiceProvider.class);
+        WebService ws = clz.getAnnotation(WebService.class);
+        if (wsProvider == null && ws == null) {
+            throw new IllegalArgumentException(clz +" has neither @WebSerivce nor @WebServiceProvider annotation");
+        }
+        if (wsProvider != null && ws != null) {
+            throw new IllegalArgumentException(clz +" has both @WebSerivce and @WebServiceProvider annotations");
+        }
+        if (wsProvider != null) {
+            if (Provider.class.isAssignableFrom(clz) || AsyncProvider.class.isAssignableFrom(clz)) {
+                return true;
+            }
+            throw new IllegalArgumentException(clz +" doesn't implement Provider or AsyncProvider interface");
+        }
+        return false;
     }
 
 
