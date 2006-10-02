@@ -485,7 +485,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     @NotNull
     public QName getBoundPortTypeName() {
         assert portName != null;
-        return new QName(targetNamespace, portName.getLocalPart()+"Binding");
+        return new QName(portName.getNamespaceURI(), portName.getLocalPart()+"Binding");
     }
 
     /**
