@@ -592,17 +592,18 @@ public final class HeaderList extends ArrayList<Header> {
      * This method needs to be invoked right after such a Message is
      * created which is error prone but so far only MEX, RM and JAX-WS
      * creates a request so this ugliness is acceptable. If more components
-     * are identified using this, the we may revisit this.
+     * are identified using this, then we may revisit this. This method is used
+     * if default Action Message Addressing Property is to be used. See
+     * {@link #fillRequestAddressingHeaders(com.sun.xml.ws.api.model.wsdl.WSDLPort, com.sun.xml.ws.api.WSBinding, Packet, String)}
+     * if non-default Action is to be used.
      *
-     * @param binding WSBinding
+     * @param wsdlPort request WSDL port
+     * @param binding request WSBinding
+     * @param packet request packet
      */
     public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet) {
         AddressingVersion ver = binding.getAddressingVersion();
-
         WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
-        // wsa:To
-        StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
-        add(h);
 
         // wsa:Action
         // todo: abstract the algorithm of getting input action in getInputAction
@@ -612,6 +613,30 @@ public final class HeaderList extends ArrayList<Header> {
         }
         if (action == null)
             action = "http://fake.input.action";
+        fillRequestAddressingHeaders(wsdlPort, binding, packet, action);
+    }
+
+    /**
+     * Creates a set of outbound WS-Addressing headers on the client.
+     * This method needs to be invoked right after such a Message is
+     * created which is error prone but so far only MEX, RM and JAX-WS
+     * creates a request so this ugliness is acceptable. If more components
+     * are identified using this, then we may revisit this. This method is used
+     * if non-default Action Message Addressing Property is to be used.
+     *
+     * @param wsdlPort
+     * @param binding
+     * @param packet
+     * @param action
+     */
+    public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet, String action) {
+        AddressingVersion ver = binding.getAddressingVersion();
+
+        // wsa:To
+        StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
+        add(h);
+
+        // wsa:Action
         packet.soapAction = action;
         h = new StringHeader(ver.actionTag, action);
         add(h);
