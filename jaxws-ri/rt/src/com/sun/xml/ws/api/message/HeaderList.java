@@ -431,9 +431,10 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing To header from {@link AddressingVersion}
-     * version. Caches the value for subsequent invocation. The header returned is targeted at
-     * the current implicit role.
+     * Returns the value of WS-Addressing <code>To</code> header. The <code>version</code>
+     * identifies the WS-Addressing version and the header returned is targeted at
+     * the current implicit role. Caches the value for subsequent invocation.
+     * Duplicate <code>To</code> headers are detected earlier.
      *
      * @param version WS-Addressing version
      * @param soapVersion SOAP version
@@ -451,9 +452,10 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing Action header from {@link AddressingVersion}
-     * version. Caches the value for subsequent invocation. The header returned is targeted at
-     * the current implicit role.
+     * Returns the value of WS-Addressing <code>Action</code> header. The <code>version</code>
+     * identifies the WS-Addressing version and the header returned is targeted at
+     * the current implicit role. Caches the value for subsequent invocation.
+     * Duplicate <code>Action</code> headers are detected earlier.
      *
      * @param version WS-Addressing version
      * @param soapVersion SOAP version
@@ -471,9 +473,10 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing ReplyTo header from {@link AddressingVersion}
-     * version. Caches the value for subsequent invocation. The header returned is targeted at
-     * the current implicit role.
+     * Returns the value of WS-Addressing <code>ReplyTo</code> header. The <code>version</code>
+     * identifies the WS-Addressing version and the header returned is targeted at
+     * the current implicit role. Caches the value for subsequent invocation.
+     * Duplicate <code>ReplyTo</code> headers are detected earlier.
      *
      * @param version WS-Addressing version
      * @param soapVersion SOAP version
@@ -495,9 +498,10 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing FaultTo header from {@link AddressingVersion}
-     * version. Caches the value for subsequent invocation. The header returned is targeted at
-     * the current implicit role.
+     * Returns the value of WS-Addressing <code>FaultTo</code> header. The <code>version</code>
+     * identifies the WS-Addressing version and the header returned is targeted at
+     * the current implicit role. Caches the value for subsequent invocation.
+     * Duplicate <code>FaultTo</code> headers are detected earlier.
      *
      * @param version WS-Addressing version
      * @param soapVersion SOAP version
@@ -520,9 +524,10 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing MessageID header from {@link AddressingVersion}
-     * version. Caches the value for subsequent invocation. The header returned is targeted at
-     * the current implicit role.
+     * Returns the value of WS-Addressing <code>MessageID</code> header. The <code>version</code>
+     * identifies the WS-Addressing version and the header returned is targeted at
+     * the current implicit role. Caches the value for subsequent invocation.
+     * Duplicate <code>MessageID</code> headers are detected earlier.
      *
      * @param version WS-Addressing version
      * @param soapVersion SOAP version
@@ -541,12 +546,16 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Creates a set of outbound WS-Addressing headers on the client.
+     * Creates a set of outbound WS-Addressing headers on the client with the
+     * default Action Message Addressing Property.
+     * <p><p>
      * This method needs to be invoked right after such a Message is
      * created which is error prone but so far only MEX, RM and JAX-WS
      * creates a request so this ugliness is acceptable. If more components
-     * are identified using this, then we may revisit this. This method is used
-     * if default Action Message Addressing Property is to be used. See
+     * are identified using this, then we may revisit this.
+     * <p><p>
+     * This method is used if default Action Message Addressing Property is to
+     * be used. See
      * {@link #fillRequestAddressingHeaders(com.sun.xml.ws.api.model.wsdl.WSDLPort, com.sun.xml.ws.api.WSBinding, Packet, String)}
      * if non-default Action is to be used.
      *
@@ -570,12 +579,13 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Creates a set of outbound WS-Addressing headers on the client.
+     * Creates a set of outbound WS-Addressing headers on the client, with the
+     * specified Action Message Addressing Property.
+     * <p><p>
      * This method needs to be invoked right after such a Message is
      * created which is error prone but so far only MEX, RM and JAX-WS
      * creates a request so this ugliness is acceptable. If more components
-     * are identified using this, then we may revisit this. This method is used
-     * if non-default Action Message Addressing Property is to be used.
+     * are identified using this, then we may revisit this.
      *
      * @param wsdlPort request WSDL port
      * @param binding request WSBinding
