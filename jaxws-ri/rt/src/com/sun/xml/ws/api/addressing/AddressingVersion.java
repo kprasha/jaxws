@@ -292,7 +292,7 @@ public enum AddressingVersion {
         fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
         isReferenceParameterTag = new QName(nsUri,getIsReferenceParameterLocalName());
 
-        wsdlActionTag = new QName(nsUri,"Action");
+        wsdlActionTag = new QName(wsdlNsUri,"Action");
 
         // create stock anonymous EPR
         try {
