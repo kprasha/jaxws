@@ -27,7 +27,6 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.Container;
@@ -65,10 +64,7 @@ import org.xml.sax.SAXException;
 import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.Provider;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceProvider;
-import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.AddressingFeature;
 import java.io.IOException;
@@ -173,7 +169,7 @@ public class EndpointFactory {
                 }
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
-                if (wsdlPort != null && BindingTypeImpl.hasRespectBindingFeature(wsfeatures)) {
+                if (wsdlPort != null && BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
                     WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
                     if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
                         WebServiceFeature[] wsdlFeatures = {addressingFeature};

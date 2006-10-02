@@ -25,7 +25,6 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.BindingTypeImpl;
@@ -33,13 +32,10 @@ import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.RespectBindingFeature;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.http.HTTPBinding;
+import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
-import javax.xml.ws.soap.SOAPBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,7 +128,7 @@ public class PortInfo {
     }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        if(!BindingTypeImpl.hasRespectBindingFeature(webServiceFeatures)) {
+        if(!BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, webServiceFeatures)) {
             return webServiceFeatures;
         }
         // RespectBindingFeature is enabled, so enable all wsdlFeatures

@@ -74,22 +74,11 @@ public class BindingTypeImpl {
             return wsfeatures == null ? null : wsfeatures.toArray(new WebServiceFeature[] {});
         }
 
-        public static boolean hasRespectBindingFeature(WebServiceFeature[] wsfeatures) {
+        public static boolean isFeatureEnabled(@NotNull String featureID, WebServiceFeature[] wsfeatures) {
             if(wsfeatures == null)
                 return false;
             for(WebServiceFeature ftr:wsfeatures) {
-                if(ftr.getID().equals(RespectBindingFeature.ID) && ftr.isEnabled()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static boolean hasMTOMFeature(WebServiceFeature[] wsfeatures) {
-            if(wsfeatures == null)
-                return false;
-            for(WebServiceFeature ftr:wsfeatures) {
-                if(ftr.getID().equals(MTOMFeature.ID) && ftr.isEnabled()) {
+                if(ftr.getID().equals(featureID) && ftr.isEnabled()) {
                     return true;
                 }
             }
