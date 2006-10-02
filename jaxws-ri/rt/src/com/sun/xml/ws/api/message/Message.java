@@ -630,7 +630,7 @@ public abstract class Message {
         if (uuid == null) {
             AddressingVersion version = binding.getAddressingVersion();
             if (version != null) {
-                uuid = getHeaders().getMessageID(version);
+                uuid = getHeaders().getMessageID(version, binding.getSOAPVersion());
             }
             if (uuid == null) {
                 uuid = "uuid:" + UUID.randomUUID().toString();

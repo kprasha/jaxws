@@ -167,17 +167,17 @@ public enum AddressingVersion {
     public final WSEndpointReference anonymousEpr;
 
     /**
-     * Represents the To QName for a specific WS-Addressing Version.
+     * Represents the To QName in the SOAP message for a specific WS-Addressing Version.
      */
     public final QName toTag;
 
     /**
-     * Represents the From QName for a specific WS-Addressing Version.
+     * Represents the From QName in the SOAP message for a specific WS-Addressing Version.
      */
     public final QName fromTag;
 
     /**
-     * Represents the ReplyTo QName for a specific WS-Addressing Version.
+     * Represents the ReplyTo QName in the SOAP message for a specific WS-Addressing Version.
      */
     public final QName replyToTag;
 
@@ -187,17 +187,17 @@ public enum AddressingVersion {
     public final QName faultToTag;
 
     /**
-     * Represents the Action QName for a specific WS-Addressing Version.
+     * Represents the Action QName in the SOAP message for a specific WS-Addressing Version.
      */
     public final QName actionTag;
 
     /**
-     * Represents the MessageID QName for a specific WS-Addressing Version.
+     * Represents the MessageID QName in the SOAP message for a specific WS-Addressing Version.
      */
     public final QName messageIDTag;
 
     /**
-     * Represents the RelatesTo QName for a specific WS-Addressing Version.
+     * Represents the RelatesTo QName in the SOAP message for a specific WS-Addressing Version.
      */
     public final QName relatesToTag;
 
@@ -249,6 +249,11 @@ public enum AddressingVersion {
     public final QName fault_missingAddressInEpr;
 
     /**
+     * Represents the Action QName in the WSDL for a specific WS-Addressing Version.
+     */
+    public final QName wsdlActionTag;
+
+    /**
      * Represents the QName of the reference parameter in a SOAP message. This is
      * only valid for W3C WS-Addressing.
      */
@@ -286,6 +291,8 @@ public enum AddressingVersion {
 
         fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
         isReferenceParameterTag = new QName(nsUri,getIsReferenceParameterLocalName());
+
+        wsdlActionTag = new QName(nsUri,"Action");
 
         // create stock anonymous EPR
         try {

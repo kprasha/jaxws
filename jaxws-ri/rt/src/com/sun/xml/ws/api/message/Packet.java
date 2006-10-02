@@ -576,7 +576,7 @@ public final class Packet extends DistributedPropertySet {
         WSEndpointReference refpEPR;
         if (r.getMessage().isFault()) {
             // choose FaultTo
-            refpEPR = message.getHeaders().getFaultTo(ver);
+            refpEPR = message.getHeaders().getFaultTo(ver, binding.getSOAPVersion());
 
             // if FaultTo is null, then use ReplyTo
             if (refpEPR == null)

@@ -239,7 +239,7 @@ public abstract class WsaPipeHelper {
             return;
         }
 
-        String action = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion());
+        String action = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
         if (op.isOneWay()) {
             validateAction(packet, action);
             return;

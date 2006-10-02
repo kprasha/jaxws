@@ -409,126 +409,18 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing To header from
-     * {@link AddressingVersion} version. Caches the value for
-     * subsequent invocation.
+     * Gets the first {@link Header} of the specified name targeted at the
+     * current implicit role.
      *
-     * @param version Version of WS-Addressing
-     * @return Value of WS-Addressing To header, null if no header is present
-     */
-    public String getTo(AddressingVersion version) {
-        if (to != null)
-            return to;
-        Header h = getFirstHeader(version.toTag, true);
-        if (h != null) {
-            to = h.getStringContent();
-        }
-
-        return to;
-    }
-
-    /**
-     * Returns the value of first WS-Addressing Action header from
-     * {@link AddressingVersion} version. Caches the value for
-     * subsequent invocation.
-     *
-     * @param version Version of WS-Addressing
-     * @return Value of WS-Addressing Action header, null if no header is present
-     */
-    public String getAction(AddressingVersion version) {
-        if (action!= null)
-            return action;
-        Header h = getFirstHeader(version.actionTag, true);
-        if (h != null) {
-            action = h.getStringContent();
-        }
-
-        return action;
-    }
-
-    /**
-     * Add/replace WS-Addressing Action header with the given value.
-     *
-     * @param version Version of WS-Addressing
-     */
-    public void setAction(AddressingVersion version) {
-        Header h = getFirstHeader(version.actionTag, true);
-
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the value of first WS-Addressing ReplyTo header from
-     * {@link AddressingVersion} version. Caches the value for
-     * subsequent invocation. The header returned could be in a role not
-     * targeted at this node, for example "none".
-     *
-     * @param version Version of WS-Addressing
-     * @return Value of WS-Addressing ReplyTo header, null if no header is present
-     * @see {@link #getReplyTo(com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion)}
-     */
-    public WSEndpointReference getReplyTo(AddressingVersion version) {
-        if (replyTo!=null)
-            return replyTo;
-        Header h = getFirstHeader(version.replyToTag, true);
-        if (h != null) {
-            try {
-                replyTo = h.readAsEPR(version);
-            } catch (XMLStreamException e) {
-                throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
-            }
-        }
-
-        return replyTo;
-    }
-
-    /**
-     * Returns the value of first WS-Addressing ReplyTo header from
-     * {@link AddressingVersion} version. Caches the value for
-     * subsequent invocation. The header returned is in current role.
-     *
-     * @param version Version of WS-Addressing
-     * @return Value of WS-Addressing ReplyTo header, null if no header is present
-     */
-    public WSEndpointReference getReplyTo(AddressingVersion version, SOAPVersion soapVersion) {
-        if (replyTo!=null)
-            return replyTo;
-        Header h = getFirstHeader(version.replyToTag.getNamespaceURI(), version.replyToTag.getLocalPart(), true, soapVersion);
-        if (h != null) {
-            try {
-                replyTo = h.readAsEPR(version);
-            } catch (XMLStreamException e) {
-                throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
-            }
-        }
-
-        return replyTo;
-    }
-
-    /**
-     * Gets the first {@link Header} of the specified name.
-     *
-     * @param name QName of the header
+     * @param name name of the header
      * @param markUnderstood
      *      If this parameter is true, the returned headers will
      *      be marked as <a href="#MU">"understood"</a> when they are returned
      *      from {@link Iterator#next()}.
      * @return null if header not found
      */
-    private Header getFirstHeader(QName name, boolean markUnderstood) {
-        return getFirstHeader(name.getNamespaceURI(),name.getLocalPart(),markUnderstood);
-    }
-
-    private Header getFirstHeader(String nsUri, String localName, boolean markUnderstood) {
-        Iterator<Header> iter = getHeaders(nsUri, localName, markUnderstood);
-        if (iter.hasNext())
-            return iter.next();
-        else
-            return null;
-    }
-
-    private Header getFirstHeader(String nsUri, String localName, boolean markUnderstood, SOAPVersion soapVersion) {
-        Iterator<Header> iter = getHeaders(nsUri, localName, markUnderstood);
+    private Header getFirstHeader(QName name, boolean markUnderstood, SOAPVersion soapVersion) {
+        Iterator<Header> iter = getHeaders(name.getNamespaceURI(), name.getLocalPart(), markUnderstood);
         while (iter.hasNext()) {
             Header h = iter.next();
             if (h.getRole(soapVersion) == soapVersion.implicitRole)
@@ -539,34 +431,83 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
-     * Returns the value of first WS-Addressing FaultTo header from
-     * {@link AddressingVersion} version. Caches the value for
-     * subsequent invocation.
+     * Returns the value of first WS-Addressing To header from {@link AddressingVersion}
+     * version. Caches the value for subsequent invocation. The header returned is targeted at
+     * the current implicit role.
      *
-     * @param version Version of WS-Addressing
-     * @return Value of WS-Addressing FaultTo header, null if no header is present
+     * @param version WS-Addressing version
+     * @param soapVersion SOAP version
+     * @return Value of WS-Addressing To header, null if no header is present
      */
-    public WSEndpointReference getFaultTo(AddressingVersion version) {
-        if (faultTo != null)
-            return faultTo;
+    public String getTo(AddressingVersion version, SOAPVersion soapVersion) {
+        if (to != null)
+            return to;
+        Header h = getFirstHeader(version.toTag, true, soapVersion);
+        if (h != null) {
+            to = h.getStringContent();
+        }
 
-        Header h = getFirstHeader(version.faultToTag, true);
+        return to;
+    }
+
+    /**
+     * Returns the value of first WS-Addressing Action header from {@link AddressingVersion}
+     * version. Caches the value for subsequent invocation. The header returned is targeted at
+     * the current implicit role.
+     *
+     * @param version WS-Addressing version
+     * @param soapVersion SOAP version
+     * @return Value of WS-Addressing Action header, null if no header is present
+     */
+    public String getAction(AddressingVersion version, SOAPVersion soapVersion) {
+        if (action!= null)
+            return action;
+        Header h = getFirstHeader(version.actionTag, true, soapVersion);
+        if (h != null) {
+            action = h.getStringContent();
+        }
+
+        return action;
+    }
+
+    /**
+     * Returns the value of first WS-Addressing ReplyTo header from {@link AddressingVersion}
+     * version. Caches the value for subsequent invocation. The header returned is targeted at
+     * the current implicit role.
+     *
+     * @param version WS-Addressing version
+     * @param soapVersion SOAP version
+     * @return Value of WS-Addressing ReplyTo header, null if no header is present
+     */
+    public WSEndpointReference getReplyTo(AddressingVersion version, SOAPVersion soapVersion) {
+        if (replyTo!=null)
+            return replyTo;
+        Header h = getFirstHeader(version.replyToTag, true, soapVersion);
         if (h != null) {
             try {
-                faultTo = h.readAsEPR(version);
+                replyTo = h.readAsEPR(version);
             } catch (XMLStreamException e) {
-                throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
+                throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
             }
         }
 
-        return faultTo;
+        return replyTo;
     }
 
+    /**
+     * Returns the value of first WS-Addressing FaultTo header from {@link AddressingVersion}
+     * version. Caches the value for subsequent invocation. The header returned is targeted at
+     * the current implicit role.
+     *
+     * @param version WS-Addressing version
+     * @param soapVersion SOAP version
+     * @return Value of WS-Addressing FaultTo header, null if no header is present
+     */
     public WSEndpointReference getFaultTo(AddressingVersion version, SOAPVersion soapVersion) {
         if (faultTo != null)
             return faultTo;
 
-        Header h = getFirstHeader(version.faultToTag.getNamespaceURI(), version.faultToTag.getLocalPart(), true, soapVersion);
+        Header h = getFirstHeader(version.faultToTag, true, soapVersion);
         if (h != null) {
             try {
                 faultTo = h.readAsEPR(version);
@@ -578,9 +519,21 @@ public final class HeaderList extends ArrayList<Header> {
         return faultTo;
     }
 
-    public String getMessageID(AddressingVersion version) {
-        Header h = getFirstHeader(version.messageIDTag, true);
-        if (messageId != null && h != null) {
+    /**
+     * Returns the value of first WS-Addressing MessageID header from {@link AddressingVersion}
+     * version. Caches the value for subsequent invocation. The header returned is targeted at
+     * the current implicit role.
+     *
+     * @param version WS-Addressing version
+     * @param soapVersion SOAP version
+     * @return Value of WS-Addressing MessageID header, null if no header is present
+     */
+    public String getMessageID(AddressingVersion version, SOAPVersion soapVersion) {
+        if (messageId != null)
+            return messageId;
+
+        Header h = getFirstHeader(version.messageIDTag, true, soapVersion);
+        if (h != null) {
             messageId = h.getStringContent();
         }
 
@@ -624,10 +577,10 @@ public final class HeaderList extends ArrayList<Header> {
      * are identified using this, then we may revisit this. This method is used
      * if non-default Action Message Addressing Property is to be used.
      *
-     * @param wsdlPort
-     * @param binding
-     * @param packet
-     * @param action
+     * @param wsdlPort request WSDL port
+     * @param binding request WSBinding
+     * @param packet request packet
+     * @param action Action Message Addressing Property
      */
     public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet, String action) {
         AddressingVersion ver = binding.getAddressingVersion();

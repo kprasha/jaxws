@@ -99,7 +99,7 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
         String replyToAddress = null;
         if (replyTo != null)
             replyToAddress = replyTo.getAddress();
-        WSEndpointReference faultTo = hl.getFaultTo(av);
+        WSEndpointReference faultTo = hl.getFaultTo(av, binding.getSOAPVersion());
         String faultToAddress = null;
         if (faultTo != null)
             faultToAddress = faultTo.getAddress();
@@ -156,7 +156,7 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
         String replyToAddress = hl.getReplyTo(av, binding.getSOAPVersion()) == null ? null : hl.getReplyTo(av, binding.getSOAPVersion()).getAddress();
         String faultToAddress = hl.getFaultTo(av, binding.getSOAPVersion()) == null ? null : hl.getFaultTo(av, binding.getSOAPVersion()).getAddress();
 
-        if (hl.getFaultTo(av) == null) {
+        if (hl.getFaultTo(av, binding.getSOAPVersion()) == null) {
             // default FaultTo is ReplyTo
 
             if (hl.getReplyTo(av, binding.getSOAPVersion()) != null) {
@@ -213,7 +213,7 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
         String replyToAddress = null;
         if (replyTo != null)
             replyToAddress = replyTo.getAddress();
-        WSEndpointReference faultTo = hl.getFaultTo(av);
+        WSEndpointReference faultTo = hl.getFaultTo(av, binding.getSOAPVersion());
         String faultToAddress = null;
         if (faultTo != null)
             faultToAddress = faultTo.getAddress();
