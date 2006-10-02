@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
@@ -119,7 +120,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     public boolean portTypeOperationInput(WSDLOperation o, XMLStreamReader reader) {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
-        String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
+        String action = ParserUtil.getAttribute(reader, AddressingVersion.W3C.wsdlActionTag);
         if (action != null) {
             impl.getInput().setAction(action);
             impl.getInput().setDefaultAction(false);
@@ -132,7 +133,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     public boolean portTypeOperationOutput(WSDLOperation o, XMLStreamReader reader) {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
-        String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
+        String action = ParserUtil.getAttribute(reader, AddressingVersion.W3C.wsdlActionTag);
         if (action != null) {
             impl.getOutput().setAction(action);
         }
@@ -144,7 +145,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     public boolean portTypeOperationFault(WSDLOperation o, XMLStreamReader reader) {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
-        String action = ParserUtil.getAttribute(reader, W3CAddressingConstants.WSAW_ACTION_QNAME);
+        String action = ParserUtil.getAttribute(reader, AddressingVersion.W3C.wsdlActionTag);
         if (action != null) {
             String name = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
             impl.getFaultActionMap().put(name, action);
@@ -194,7 +195,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     }
 
     protected String getNamespaceURI() {
-        return W3CAddressingConstants.WSA_NAMESPACE_NAME;
+        return AddressingVersion.W3C.nsUri;
     }
 
     /**
