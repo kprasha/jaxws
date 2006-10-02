@@ -24,9 +24,9 @@ package com.sun.xml.ws.transport.http;
 
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -36,23 +36,22 @@ import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.WsservletMessages;
-import com.sun.xml.ws.util.PropertySet;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-
-import java.io.ByteArrayOutputStream;
+import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.EndpointReference;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * {@link Adapter} that receives messages in HTTP.
