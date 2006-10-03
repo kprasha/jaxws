@@ -49,6 +49,8 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
@@ -94,13 +96,21 @@ public class RuntimeWSDLParser {
 
     List<WSDLParserExtension> extensions;
 
-    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    /**
+     * Parses the WSDL and gives WSDLModel. If wsdl parameter is null, then wsdlLoc is used to get the WSDL. If the WSDL
+     * document could not be obtained then {@link MetadataResolverFactory} is tried to get the WSDL document, if not found
+     * then as last option, if the wsdlLoc has no '?wsdl' as query parameter then it is tried by appending '?wsdl'.
+     */
+    public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver!=null;
         errors.clear();
         RuntimeWSDLParser parser = new RuntimeWSDLParser(new EntityResolverWrapper(resolver),extensions);
         WebServiceException wsdlException = null;
         try{
-            parser.parseWSDL(wsdlLoc);
+            if(wsdl == null)
+                parser.parseWSDL(wsdlLoc);
+            else
+                parser.parseWSDL(wsdlLoc, wsdl);
         }catch(WebServiceException e){
             wsdlException = e;
         }
@@ -110,6 +120,8 @@ public class RuntimeWSDLParser {
             //try MEX
             MetaDataResolver mdResolver;
             ServiceDescriptor serviceDescriptor = null;
+
+            //Currently we try the first available MetadataResolverFactory that gives us a WSDL document
             for(MetadataResolverFactory resolverFactory: ServiceFinder.find(MetadataResolverFactory.class)){
                 mdResolver = resolverFactory.metadataResolver(resolver);
                 try {
@@ -157,6 +169,10 @@ public class RuntimeWSDLParser {
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.wsdlDoc);
         return parser.wsdlDoc;
+    }
+
+    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+        return parse(wsdlLoc, null, resolver, extensions);
     }
 
     public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
