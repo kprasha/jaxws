@@ -60,8 +60,7 @@ public final class NextAction {
      * and starts response processing.
      */
     public void returnWith( Packet response ) {
-        this.kind = RETURN;
-        this.packet = response;
+        set(RETURN, null, response, null);
     }
 
     /**
@@ -83,6 +82,6 @@ public final class NextAction {
      * Once {@link Fiber#resume(Packet) resumed}, return the response processing.
      */
     public void suspend() {
-        this.kind = SUSPEND;
+        set(SUSPEND, null, null, null);
     }
 }
