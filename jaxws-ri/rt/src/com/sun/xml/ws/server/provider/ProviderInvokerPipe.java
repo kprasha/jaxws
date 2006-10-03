@@ -21,12 +21,12 @@
  */
 package com.sun.xml.ws.server.provider;
 
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.server.AsyncProviderCallback;
-import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.server.AsyncProviderCallback;
+import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.server.InvokerPipe;
 
 import javax.xml.ws.Provider;
@@ -41,7 +41,7 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
-    
+
     protected Parameter<T> parameter;
     protected Response<T> response;
 
@@ -79,11 +79,10 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
             return request.createResponse(response.getResponse(returnValue));
         }
     }
-    
+
     public NextAction processAsyncRequest(Packet request) {
-        SyncNextAction action = new SyncNextAction();
         T param = parameter.getParameter(request.getMessage());
-        AsyncProviderCallback callback = new AsyncProviderCallbackImpl(request, action);
+        AsyncProviderCallback callback = new AsyncProviderCallbackImpl(request);
         logger.fine("Invoking AsyncProvider Endpoint");
         try {
             // TODO WebServiceContext
@@ -94,45 +93,22 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
         }
         // Suspend the Fiber. AsyncProviderCallback will resume the Fiber after
         // it receives response. But make sure that the sequence happens orderly
-        return action.suspend();
-    }
-
-    private static final class SyncNextAction {
-        private Packet packet;
-        private boolean suspended;
-
-        synchronized NextAction suspend() {
-            NextAction na = new NextAction();
-            if (suspended) {
-                na.returnWith(packet);
-            } else {
-                na.suspend();
-                suspended = true;
-            }
-            return na;
-        }
-
-        synchronized void resume(Packet packet) {
-            this.packet = packet;
-            if (suspended) {
-                Fiber.current().resume(packet);
-            }
-        }
+        return doSuspend();
     }
 
     private class AsyncProviderCallbackImpl implements AsyncProviderCallback<T> {
         private final Packet request;
-        private final SyncNextAction action;
+        private final Fiber fiber;
 
-        public AsyncProviderCallbackImpl(Packet request, SyncNextAction action) {
+        public AsyncProviderCallbackImpl(Packet request) {
             this.request = request;
-            this.action = action;
+            this.fiber = Fiber.current();
         }
 
         public void send(T param) {
             Message responseMessage = response.getResponse(param);
             Packet packet = request.createResponse(responseMessage);
-            Fiber.current().resume(packet);
+            fiber.resume(packet);
         }
 
         public void sendError(Throwable t) {
@@ -144,7 +120,7 @@ public abstract class ProviderInvokerPipe<T> extends InvokerPipe<Provider<T>> {
             }
             Message responseMessage = getResponseMessage(e);
             Packet packet = request.createResponse(responseMessage);
-            action.resume(packet);
+            fiber.resume(packet);
         }
     }
 
