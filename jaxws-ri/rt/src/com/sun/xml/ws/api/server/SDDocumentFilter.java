@@ -1,6 +1,8 @@
 package com.sun.xml.ws.api.server;
 
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
 
 /**
  * Provides a way to filter {@link SDDocument} infoset while writing it. These
@@ -24,5 +26,5 @@ public interface SDDocumentFilter {
      * @param w Original XMLStreamWriter
      * @return Filtering {@link XMLStreamWriter}
      */
-    XMLStreamWriter filter(SDDocument doc, XMLStreamWriter w);
+    XMLStreamWriter filter(SDDocument doc, XMLStreamWriter w) throws XMLStreamException, IOException;
 }
