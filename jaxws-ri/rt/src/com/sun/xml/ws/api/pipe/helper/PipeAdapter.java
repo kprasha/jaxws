@@ -40,7 +40,7 @@ public class PipeAdapter extends AbstractTubeImpl {
                     this.t = t;
                 }
 
-                public TubeAdapter(Pipe that, PipeCloner cloner) {
+                private TubeAdapter(TubeAdapter that, PipeCloner cloner) {
                     super(that, cloner);
                     this.t = cloner.copy(that.t);
                 }
