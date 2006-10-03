@@ -1,21 +1,20 @@
 package com.sun.xml.ws.api.pipe;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.addressing.WsaServerPipe;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
-import com.sun.xml.ws.addressing.WsaServerPipe;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.istack.Nullable;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.SOAPBinding;
 
 /**
  * Factory for well-known server {@link Tube} implementations
@@ -24,14 +23,15 @@ import javax.xml.ws.soap.AddressingFeature;
  *
  * @author Jitendra Kotamraju
  */
-public final class ServerTubeAssemblerContext {
+public class ServerTubeAssemblerContext {
 
-    private final SEIModel seiModel;
-    private final WSDLPort wsdlModel;
-    private final WSEndpoint endpoint;
-    private final WSBinding binding;
-    private final Tube terminal;
-    private final boolean isSynchronous;
+    // TODO: make them private when we get rid of ServerPipeAssemblerContext
+    final SEIModel seiModel;
+    final WSDLPort wsdlModel;
+    final WSEndpoint endpoint;
+    final WSBinding binding;
+    final Tube terminal;
+    final boolean isSynchronous;
 
     public ServerTubeAssemblerContext(@Nullable SEIModel seiModel,
                                       @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint endpoint,
@@ -73,21 +73,6 @@ public final class ServerTubeAssemblerContext {
      */
     public @NotNull WSEndpoint getEndpoint() {
         return endpoint;
-    }
-
-    /**
-     * The last {@link com.sun.xml.ws.api.pipe.Pipe} in the pipeline. The assembler is expected to put
-     * additional {@link com.sun.xml.ws.api.pipe.Pipe}s in front of it.
-     *
-     * <p>
-     * (Just to give you the idea how this is used, normally the terminal pipe
-     * is the one that invokes the user application or {@link javax.xml.ws.Provider}.)
-     *
-     * @return always non-null terminal pipe
-     */
-    public @NotNull Pipe getTerminalPipe() {
-        //TODO remove casting
-        return (Pipe)terminal;
     }
 
     /**

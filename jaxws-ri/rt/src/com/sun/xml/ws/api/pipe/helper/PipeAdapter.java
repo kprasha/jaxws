@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.pipe.helper;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
@@ -25,6 +26,35 @@ public class PipeAdapter extends AbstractTubeImpl {
             return (Tube) p;
         } else {
             return new PipeAdapter(p);
+        }
+    }
+
+    public static Pipe adapt(Tube p) {
+        if (p instanceof Pipe) {
+            return (Pipe) p;
+        } else {
+            class TubeAdapter extends AbstractPipeImpl {
+                private final Tube t;
+
+                public TubeAdapter(Tube t) {
+                    this.t = t;
+                }
+
+                public TubeAdapter(Pipe that, PipeCloner cloner) {
+                    super(that, cloner);
+                    this.t = cloner.copy(that.t);
+                }
+
+                public Packet process(Packet request) {
+                    return Fiber.current().runSync(t,request);
+                }
+
+                public Pipe copy(PipeCloner cloner) {
+                    return new TubeAdapter(this,cloner);
+                }
+            }
+
+            return new TubeAdapter(p);
         }
     }
 

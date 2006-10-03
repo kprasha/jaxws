@@ -22,8 +22,8 @@
 
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.soap.SOAPBinding;
 import java.util.logging.Logger;
@@ -48,6 +48,8 @@ import java.util.logging.Logger;
  * of WSDL. So this abstraction might need to be worked on.
  *
  * @author Kohsuke Kawaguchi
+ * @deprecated
+ *      Use {@link TubelineAssemblerFactory} instead.
  */
 public abstract class PipelineAssemblerFactory {
     /**

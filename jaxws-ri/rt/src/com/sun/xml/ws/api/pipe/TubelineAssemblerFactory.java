@@ -77,10 +77,7 @@ public abstract class TubelineAssemblerFactory {
         }
 
         public @NotNull Tube createServer(@NotNull ServerTubeAssemblerContext context) {
-            ServerPipeAssemblerContext ctxt = new ServerPipeAssemblerContext(
-                    context.getSEIModel(), context.getWsdlModel(), context.getEndpoint(),
-                    context.getTerminalPipe(), context.isSynchronous());
-            return PipeAdapter.adapt(assembler.createServer(ctxt));
+            return PipeAdapter.adapt(assembler.createServer((ServerPipeAssemblerContext) context));
         }
     }
 
