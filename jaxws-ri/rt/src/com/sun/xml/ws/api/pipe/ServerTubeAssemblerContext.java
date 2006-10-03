@@ -31,7 +31,7 @@ public class ServerTubeAssemblerContext {
     private final WSDLPort wsdlModel;
     private final WSEndpoint endpoint;
     private final WSBinding binding;
-    private final Tube terminal;
+    final Tube terminal;
     private final boolean isSynchronous;
 
     public ServerTubeAssemblerContext(@Nullable SEIModel seiModel,
