@@ -39,7 +39,8 @@ public class SOAPAsyncProviderInvokerPipe extends SOAPProviderInvokerPipe {
 
     @Override
     public NextAction processResponse(Packet response) {
-        throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
+        return doReturnWith(response);
+        //throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
     }
 
     @Override

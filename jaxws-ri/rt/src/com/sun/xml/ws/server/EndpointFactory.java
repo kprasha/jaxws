@@ -45,6 +45,7 @@ import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
 import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.SOAPAsyncProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
@@ -155,10 +156,14 @@ public class EndpointFactory {
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
-                ProviderEndpointModel model = new ProviderEndpointModel(implType.asSubclass(Provider.class), binding);
+                ProviderEndpointModel model = new ProviderEndpointModel(implType, binding);
                 if (binding instanceof SOAPBinding) {
                     SOAPVersion soapVersion = binding.getSOAPVersion();
-                    terminal =  new SOAPProviderInvokerPipe(invoker, model, soapVersion);
+                    if (model.isAsync()) {
+                        terminal =  new SOAPAsyncProviderInvokerPipe(invoker, model, soapVersion);
+                    } else {
+                        terminal =  new SOAPProviderInvokerPipe(invoker, model, soapVersion);
+                    }
                 } else {
                     terminal =  new XMLProviderInvokerPipe(invoker, model);
                 }

@@ -22,6 +22,7 @@
 package com.sun.xml.ws.util;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.handler.HandlerChainsModel;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -132,7 +133,7 @@ public class HandlerAnnotationProcessor {
     }
 
     static Class getSEI(Class<?> clazz) {
-        if (Provider.class.isAssignableFrom(clazz)) {
+        if (Provider.class.isAssignableFrom(clazz) || AsyncProvider.class.isAssignableFrom(clazz)) {
             //No SEI for Provider Implementation
             return null;
         }
