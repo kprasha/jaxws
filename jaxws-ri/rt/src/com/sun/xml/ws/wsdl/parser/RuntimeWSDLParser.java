@@ -133,20 +133,22 @@ public class RuntimeWSDLParser {
                 }
             }
 
-//            //TODO: try with MEX. Since mex is not here now so we try by appending ?wsdl to the URI to see if it works
-//            if(wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)){
-//                String urlString = wsdlLoc.toExternalForm();
-//                urlString += "?wsdl";
-//                wsdlLoc = new URL(urlString);
-//
-//                //clear the NOT_A_WSDL error bit
-//                errors.clear(NOT_A_WSDL);
-//                try{
-//                    parser.parseWSDL(wsdlLoc);
-//                }catch(WebServiceException e){
-//                    wsdlException = e;
-//                }
-//            }
+
+            //Incase that mex is not present or it couldn't get the metadata, try by appending ?wsdl and give
+            // it a last shot else fail
+            if(errors.get(NOT_A_WSDL) && wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)){
+                String urlString = wsdlLoc.toExternalForm();
+                urlString += "?wsdl";
+                wsdlLoc = new URL(urlString);
+
+                //clear the NOT_A_WSDL error bit
+                errors.clear(NOT_A_WSDL);
+                try{
+                    parser.parseWSDL(wsdlLoc);
+                }catch(WebServiceException e){
+                    wsdlException = e;
+                }
+            }
         }
         //currently we fail only if we dont find a WSDL
         if(errors.get(NOT_A_WSDL) && wsdlException != null)
@@ -190,7 +192,7 @@ public class RuntimeWSDLParser {
         if(parser==null) {
             parser = new Parser(wsdlLoc, createReader(wsdlLoc));
         }
-
+        importedWSDLs.clear();
         parseWSDL(parser);
     }
 
