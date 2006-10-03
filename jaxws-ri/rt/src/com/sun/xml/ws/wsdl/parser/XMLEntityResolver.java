@@ -28,10 +28,13 @@ import org.xml.sax.SAXException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Source;
 import java.io.IOException;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 
 /**
  * Resolves a reference to {@link XMLStreamReader}.
@@ -71,7 +74,6 @@ public interface XMLEntityResolver {
             this.systemId = doc.getSystemId();
             this.parser = doc.read(xif);
         }
-
         private static final XMLInputFactory xif = XMLInputFactory.newInstance();
     }
 }
