@@ -23,7 +23,8 @@ import com.sun.xml.ws.util.pipe.DumpTube;
  *
  * @author Jitendra Kotamraju
  */
-public final class ClientTubeAssemblerContext {
+public class ClientTubeAssemblerContext {
+
     private final @NotNull EndpointAddress address;
     private final @NotNull WSDLPort wsdlModel;
     private final @NotNull WSService rootOwner;

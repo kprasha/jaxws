@@ -4,10 +4,12 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.addressing.WsaServerPipe;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
@@ -25,13 +27,12 @@ import javax.xml.ws.soap.SOAPBinding;
  */
 public class ServerTubeAssemblerContext {
 
-    // TODO: make them private when we get rid of ServerPipeAssemblerContext
-    final SEIModel seiModel;
-    final WSDLPort wsdlModel;
-    final WSEndpoint endpoint;
-    final WSBinding binding;
-    final Tube terminal;
-    final boolean isSynchronous;
+    private final SEIModel seiModel;
+    private final WSDLPort wsdlModel;
+    private final WSEndpoint endpoint;
+    private final WSBinding binding;
+    private final Tube terminal;
+    private final boolean isSynchronous;
 
     public ServerTubeAssemblerContext(@Nullable SEIModel seiModel,
                                       @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint endpoint,
@@ -120,6 +121,31 @@ public class ServerTubeAssemblerContext {
             if (binding instanceof SOAPBinding) {
                 return new ServerSOAPHandlerPipe(binding, next, cousin);
             }
+        }
+        return next;
+    }
+
+    /**
+     * Creates a {@link Pipe} that does the monitoring of the invocation for a
+     * container
+     */
+    public @NotNull Tube createMonitoringTube(@NotNull Tube next) {
+        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
+        if (hook != null) {
+            ServerPipeAssemblerContext ctxt = new ServerPipeAssemblerContext(seiModel, wsdlModel, endpoint, terminal, isSynchronous);
+            return PipeAdapter.adapt(hook.createMonitoringPipe(ctxt, PipeAdapter.adapt(next)));
+        }
+        return next;
+    }
+
+    /**
+     * Creates a {@link Tube} that adds container specific security
+     */
+    public @NotNull Tube createSecurityTube(@NotNull Tube next) {
+        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
+        if (hook != null) {
+            ServerPipeAssemblerContext ctxt = new ServerPipeAssemblerContext(seiModel, wsdlModel, endpoint, terminal, isSynchronous);
+            return PipeAdapter.adapt(hook.createSecurityPipe(ctxt, PipeAdapter.adapt(next)));
         }
         return next;
     }

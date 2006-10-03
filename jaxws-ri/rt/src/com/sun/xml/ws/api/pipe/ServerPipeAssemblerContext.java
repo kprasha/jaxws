@@ -35,20 +35,14 @@ public final class ServerPipeAssemblerContext extends ServerTubeAssemblerContext
      * container
      */
     public @NotNull Pipe createMonitoringPipe(@NotNull Pipe next) {
-        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
-        if (hook != null)
-            return hook.createMonitoringPipe(this, next);
-        return next;
+        return PipeAdapter.adapt(super.createMonitoringTube(PipeAdapter.adapt(next)));
     }
 
     /**
      * Creates a {@link Pipe} that adds container specific security
      */
     public @NotNull Pipe createSecurityPipe(@NotNull Pipe next) {
-        ServerPipelineHook hook = endpoint.getContainer().getSPI(ServerPipelineHook.class);
-        if (hook != null)
-            return hook.createSecurityPipe(this, next);
-        return next;
+        return PipeAdapter.adapt(super.createSecurityTube(PipeAdapter.adapt(next)));
     }
 
     /**

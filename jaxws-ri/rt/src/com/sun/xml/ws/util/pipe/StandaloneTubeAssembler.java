@@ -33,8 +33,11 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
     public Tube createServer(ServerTubeAssemblerContext context) {
         Tube head = context.getTerminalTube();
         head = context.createHandlerTube(head);
+        head = context.createMonitoringTube(head);
         head = context.createServerMUTube(head);
-        head = PipeAdapter.adapt(context.createWsaPipe((Pipe)head));    // TODO cleanly
+        // TODO until wsa pipe becomes tube
+        head = PipeAdapter.adapt(context.createWsaPipe(PipeAdapter.adapt(head)));    
+        head = context.createSecurityTube(head);
         return head;
     }
 
