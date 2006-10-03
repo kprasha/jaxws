@@ -523,8 +523,13 @@ major-version=${release.impl.version}
     </zip>
   </target>
 
+    <target name="libs.src.zip">
+        <zip file="${build.home}/jaxws-libs.src.zip">
+            <fileset dir="${basedir}/lib" includes="*.zip"/>
+        </zip>
+    </target>
 
-  <target name="push-to-maven-prepare" depends="main"
+    <target name="push-to-maven-prepare" depends="main"
     description="prepare a repository iamge for the push-to-maven target">
     <taskdef resource="maven-repository-importer.properties">
       <classpath>
