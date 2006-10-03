@@ -1,7 +1,6 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.WSBinding;
 
 /**
  * Creates a tubeline.
@@ -77,6 +76,4 @@ public interface TubelineAssembler {
      *
      */
     @NotNull Tube createServer(@NotNull ServerTubeAssemblerContext context);
-
-    @NotNull Codec createCode(@NotNull WSBinding binding);
 }
