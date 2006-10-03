@@ -205,6 +205,11 @@ public final class Fiber implements Runnable {
      * then the execution will be resumed from the next tube's
      * {@link Tube#processResponse(Packet)} method with the specified response packet
      * as the parameter.
+     *
+     * <p>
+     * This method is implemented in a race-free way. Another thread can invoke
+     * this method even before this fiber goes into the suspension mode. So the caller
+     * need not worry about synchronizing {@link NextAction#suspend()} and this method. 
      */
     public synchronized void resume(@NotNull Packet response) {
         if(DEBUG)
