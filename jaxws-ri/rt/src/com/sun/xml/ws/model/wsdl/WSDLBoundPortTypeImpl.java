@@ -223,15 +223,11 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public void setAddressingFeature(WebServiceFeature af) {
-        if (!(af instanceof AddressingFeature || af instanceof MemberSubmissionAddressingFeature))
+        if (!(af instanceof AddressingFeature))
             return;
-
         addressingFeature = af;
         addressingEnabled = true;
-        if (addressingFeature instanceof AddressingFeature)
-            isAddressingRequired = ((AddressingFeature)af).isRequired();
-        else if (addressingFeature instanceof MemberSubmissionAddressingFeature)
-            isAddressingRequired = ((MemberSubmissionAddressingFeature)af).isRequired();
+        isAddressingRequired = ((AddressingFeature)af).isRequired();
         addressingNamespace = AddressingVersion.fromFeature(af).nsUri;
     }
 
