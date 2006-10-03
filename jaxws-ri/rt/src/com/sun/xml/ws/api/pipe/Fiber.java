@@ -516,8 +516,12 @@ public final class Fiber implements Runnable {
                         }
                     }
 
-                    packet = na.packet;
-                    throwable = na.throwable;
+                    // If resume is called before suspend, then make sure
+					// resume(Packet) is not lost
+                    if (na.kind != NextAction.SUSPEND) {
+                        packet = na.packet;
+                        throwable = na.throwable;
+                    }
 
                     switch(na.kind) {
                     case NextAction.INVOKE:
