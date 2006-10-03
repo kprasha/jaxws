@@ -103,7 +103,7 @@ public class PortInfo {
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
             WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-            WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
+            WebServiceFeature  addressingFeature = wsdlPort.getAddressingFeature();
             if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
                 wsdlFeatures.add(addressingFeature);
             }

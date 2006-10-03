@@ -170,7 +170,7 @@ public class EndpointFactory {
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null && BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
-                    WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
+                    WebServiceFeature  addressingFeature = ((WSDLPortImpl)wsdlPort).getAddressingFeature();
                     if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
                         WebServiceFeature[] wsdlFeatures = {addressingFeature};
                         binding.setFeatures(wsdlFeatures);
@@ -188,7 +188,7 @@ public class EndpointFactory {
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null) {
-                    WebServiceFeature  addressingFeature = ((WSDLBoundPortTypeImpl) wsdlPort.getBinding()).getAddressingFeature();
+                    WebServiceFeature  addressingFeature = ((WSDLPortImpl)wsdlPort).getAddressingFeature();
                     if(addressingFeature != null) {
                         WebServiceFeature[] wsdlFeatures = {addressingFeature};
                         binding.setFeatures(wsdlFeatures);

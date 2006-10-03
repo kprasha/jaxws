@@ -41,8 +41,6 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private EndpointAddress address;
     private final QName bindingName;
     private final WSDLServiceImpl owner;
-    private boolean addressingEnabled;
-    private boolean isAddressingRequired;
     private WebServiceFeature addressingFeature;
 
     /**
@@ -80,36 +78,17 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
         this.address = address;
     }
 
-    @Deprecated
-    public void enableAddressing() {
-        addressingEnabled = true;
-    }
-
-    @Deprecated
-    public boolean isAddressingEnabled() {
-        return addressingEnabled;
-    }
-
-    @Deprecated
-    public void setAddressingRequired(boolean required) {
-        isAddressingRequired = required;
-    }
-
-    @Deprecated
-    public boolean isAddressingRequired() {
-        return isAddressingRequired;
-    }
-
     public void setAddressingFeature(WebServiceFeature af) {
         if (!(af instanceof AddressingFeature))
             return;
         this.addressingFeature = af;
-        addressingEnabled = af.isEnabled();
-        isAddressingRequired = ((AddressingFeature)af).isRequired();
     }
 
     public WebServiceFeature getAddressingFeature() {
-        return addressingFeature;
+        if(addressingFeature != null)
+            return addressingFeature;
+        // See if it is set on Binding
+        return boundPortType.getAddressingFeature();
     }
 
     public WSDLBoundPortTypeImpl getBinding() {

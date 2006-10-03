@@ -53,9 +53,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
     private WebServiceFeature addressingFeature;
-    private boolean addressingEnabled;
-    private boolean isAddressingRequired;
-    private String addressingNamespace;
 
     /**
      * Operations keyed by the payload tag name.
@@ -202,33 +199,23 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public void enableAddressing(String namespace) {
-        addressingEnabled = true;
-        addressingNamespace = namespace;
+        if(AddressingFeature.ID.equals(namespace)) {
+            addressingFeature = new AddressingFeature();
+        } else if (MemberSubmissionAddressingFeature.ID.equals(namespace)) {
+            addressingFeature = new MemberSubmissionAddressingFeature(true);
+        } else
+            addressingFeature = null;
+
     }
 
     public String getAddressingVersion() {
-        return addressingNamespace;
-    }
-
-    public boolean isAddressingEnabled() {
-        return addressingEnabled;
-    }
-
-    public void setAddressingRequired(boolean required) {
-        isAddressingRequired = required;
-    }
-
-    public boolean isAddressingRequired() {
-        return isAddressingRequired;
+        return addressingFeature.getID();
     }
 
     public void setAddressingFeature(WebServiceFeature af) {
         if (!(af instanceof AddressingFeature))
             return;
         addressingFeature = af;
-        addressingEnabled = true;
-        isAddressingRequired = ((AddressingFeature)af).isRequired();
-        addressingNamespace = AddressingVersion.fromFeature(af).nsUri;
     }
 
     public WebServiceFeature getAddressingFeature() {

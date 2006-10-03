@@ -171,9 +171,12 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
                 WSDLPortImpl port = (WSDLPortImpl)wp;
                 WSDLBoundPortTypeImpl binding = port.getBinding();
 
+                /* Rama: This should not be called.
+                The runtime shoudl figure it out if it is set on port or binding
+
                 // patch the value of UsingAddressing in wsdl:port and wsdl:binding
                 patchUsingAddressing(binding, port);
-
+                */
                 // populate actions for the messages that do not have an explicit wsaw:Action
                 populateActions(binding);
 
@@ -182,7 +185,8 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
             }
         }
     }
-
+    /*
+    Because of this patching WSDLModel does n't reflect what the wsdl says.
     private void patchUsingAddressing(WSDLBoundPortTypeImpl binding, WSDLPortImpl port) {
         if (binding.getAddressingFeature() == port.getAddressingFeature())
             return;
@@ -193,11 +197,11 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         if (binding.getAddressingFeature() != null && port.getAddressingFeature() == null)
             port.setAddressingFeature(binding.getAddressingFeature());
     }
-
+    */
     protected String getNamespaceURI() {
         return AddressingVersion.W3C.nsUri;
     }
-
+    
     /**
      * Populate all the Actions
      *

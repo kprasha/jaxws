@@ -35,6 +35,7 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
@@ -120,7 +121,7 @@ public abstract class WsaPipeHelper {
 
         if (wsdlPort != null) {
             // no need to process if WS-A is optional and no WS-A headers are present
-            if (!impl.isAddressingRequired() && !hIter.hasNext())
+            if (!((AddressingFeature)impl.getAddressingFeature()).isRequired() && !hIter.hasNext())
                 return;
         }
 
@@ -193,7 +194,7 @@ public abstract class WsaPipeHelper {
         }
 
         // check for mandatory set of headers
-        if (impl != null && impl.isAddressingRequired()) {
+        if (impl != null && ((AddressingFeature)impl.getAddressingFeature()).isRequired()) {
             // if no wsa:Action header is found
             if (!foundAction)
                 throw new MapRequiredException(av.actionTag);
