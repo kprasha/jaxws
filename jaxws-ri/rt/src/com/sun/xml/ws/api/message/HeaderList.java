@@ -547,7 +547,7 @@ public final class HeaderList extends ArrayList<Header> {
 
     /**
      * Creates a set of outbound WS-Addressing headers on the client with the
-     * default Action Message Addressing Property.
+     * default Action Message Addressing Property value.
      * <p><p>
      * This method needs to be invoked right after such a Message is
      * created which is error prone but so far only MEX, RM and JAX-WS
@@ -556,8 +556,9 @@ public final class HeaderList extends ArrayList<Header> {
      * <p><p>
      * This method is used if default Action Message Addressing Property is to
      * be used. See
-     * {@link #fillRequestAddressingHeaders(com.sun.xml.ws.api.model.wsdl.WSDLPort, com.sun.xml.ws.api.WSBinding, Packet, String)}
-     * if non-default Action is to be used.
+     * {@link #fillRequestAddressingHeaders(Packet, com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion, boolean, String)}
+     * if non-default Action is to be used, for example when creating a protocol message not
+     * associated with {@link WSBinding} and {@link WSDLPort}.
      *
      * @param wsdlPort request WSDL port
      * @param binding request WSBinding
@@ -575,44 +576,46 @@ public final class HeaderList extends ArrayList<Header> {
         }
         if (action == null)
             action = "http://fake.input.action";
-        fillRequestAddressingHeaders(wsdlPort, binding, packet, action);
+
+        boolean oneway = (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
+        fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
     }
 
     /**
-     * Creates a set of outbound WS-Addressing headers on the client, with the
-     * specified Action Message Addressing Property.
+     * Creates a set of outbound WS-Addressing headers on the client with the
+     * specified Action Message Addressing Property value.
      * <p><p>
      * This method needs to be invoked right after such a Message is
      * created which is error prone but so far only MEX, RM and JAX-WS
-     * creates a request so this ugliness is acceptable. If more components
-     * are identified using this, then we may revisit this.
+     * creates a request so this ugliness is acceptable. This method is used
+     * to create protocol messages that are not associated with
+     * any {@link WSBinding} and {@link WSDLPort}.
      *
-     * @param wsdlPort request WSDL port
-     * @param binding request WSBinding
      * @param packet request packet
-     * @param action Action Message Addressing Property
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @param oneway Indicates if the message exchange pattern is oneway
+     * @param action Action Message Addressing Property value
      */
-    public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet, String action) {
-        AddressingVersion ver = binding.getAddressingVersion();
-
+    public void fillRequestAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, boolean oneway, String action) {
         // wsa:To
-        StringHeader h = new StringHeader(ver.toTag, packet.endpointAddress.toString());
+        StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
         add(h);
 
         // wsa:Action
         packet.soapAction = action;
-        h = new StringHeader(ver.actionTag, action);
+        h = new StringHeader(av.actionTag, action);
         add(h);
 
         // wsa:MessageId
-        h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(ver, binding.getSOAPVersion()));
+        h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
         add(h);
 
         // wsa:ReplyTo
         // null or "true" is equivalent to request/response MEP
-        if (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort)) {
-            WSEndpointReference epr = ver.anonymousEpr;
-            add(epr.createHeader(ver.replyToTag));
+        if (!oneway) {
+            WSEndpointReference epr = av.anonymousEpr;
+            add(epr.createHeader(av.replyToTag));
         }
     }
 
