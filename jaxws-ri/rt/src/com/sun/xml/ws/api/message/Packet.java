@@ -620,6 +620,9 @@ public final class Packet extends DistributedPropertySet {
     private Packet populateAddressingHeaders(WSBinding binding, Packet responsePacket, WSDLPort wsdlPort) {
         AddressingVersion addressingVersion = binding.getAddressingVersion();
 
+        if (addressingVersion == null)
+            return responsePacket;
+
         WsaPipeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
         String action = wsaHelper.getOutputAction(this);
 
