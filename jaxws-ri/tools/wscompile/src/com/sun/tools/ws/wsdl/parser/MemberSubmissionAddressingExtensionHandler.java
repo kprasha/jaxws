@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: MemberSubmissionAddressingExtensionHandler.java,v 1.1.2.4 2006-08-29 19:34:18 arungupta Exp $
+ $Id: MemberSubmissionAddressingExtensionHandler.java,v 1.1.2.5 2006-10-04 19:01:20 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -33,7 +33,7 @@ import javax.xml.namespace.QName;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import org.w3c.dom.Element;
 
 /**
@@ -50,15 +50,15 @@ public class MemberSubmissionAddressingExtensionHandler extends W3CAddressingExt
 
     @Override
     public String getNamespaceURI() {
-        return MemberSubmissionAddressingConstants.WSA_NAMESPACE_WSDL_NAME;
+        return AddressingVersion.MEMBER.wsdlNsUri;
     }
 
     protected QName getActionQName() {
-        return MemberSubmissionAddressingConstants.WSAW_ACTION_QNAME;
+        return AddressingVersion.MEMBER.wsdlActionTag;
     }
 
     protected QName getWSDLExtensionQName() {
-        return MemberSubmissionAddressingConstants.WSAW_USING_ADDRESSING_QNAME;
+        return AddressingVersion.MEMBER.wsdlExtensionTag;
     }
 
     @Override

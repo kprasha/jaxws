@@ -45,7 +45,6 @@ import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
 
 /**
  * W3C WS-Addressing Runtime WSDL parser extension
@@ -58,7 +57,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLBoundPortTypeImpl impl = (WSDLBoundPortTypeImpl)binding;
 
         QName ua = reader.getName();
-        if (ua.equals(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
+        if (ua.equals(AddressingVersion.W3C.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
             impl.setAddressingFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
@@ -73,7 +72,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLPortImpl impl = (WSDLPortImpl)port;
 
         QName ua = reader.getName();
-        if (ua.equals(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
+        if (ua.equals(AddressingVersion.W3C.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
             impl.setAddressingFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
@@ -88,7 +87,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
         WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)operation;
 
         QName anon = reader.getName();
-        if (anon.equals(W3CAddressingConstants.WSAW_ANONYMOUS_QNAME)) {
+        if (anon.equals(AddressingVersion.W3C.wsdlAnonymousTag)) {
             try {
                 String value = reader.getElementText();
                 if (value == null || value.trim().equals("")) {
@@ -201,7 +200,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     protected String getNamespaceURI() {
         return AddressingVersion.W3C.nsUri;
     }
-    
+
     /**
      * Populate all the Actions
      *

@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.9 2006-09-29 23:11:02 ramapulavarthi Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.10 2006-10-04 19:01:23 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,19 +26,19 @@
 
 package com.sun.xml.ws.wsdl.writer;
 
+import javax.xml.ws.Action;
+import javax.xml.ws.FaultAction;
+import javax.xml.ws.soap.AddressingFeature;
+
 import com.sun.istack.NotNull;
 import com.sun.xml.txw2.TypedXmlWriter;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.CheckedException;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-
-import javax.xml.ws.Action;
-import javax.xml.ws.FaultAction;
-import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * @author Arun Gupta
@@ -55,7 +55,7 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
             return;
         AddressingFeature ftr = (AddressingFeature)binding.getFeature(AddressingFeature.ID);
         required = ftr.isRequired();
-        root._namespace(W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME, W3CAddressingConstants.WSA_NAMESPACE_WSDL_PREFIX);
+        root._namespace(AddressingVersion.W3C.wsdlNsUri, AddressingVersion.W3C.getWsdlPrefix());
     }
 
     @Override
@@ -105,16 +105,16 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
     }
 
     private void addAttribute(TypedXmlWriter writer, String attrValue) {
-        writer._attribute(W3CAddressingConstants.WSAW_ACTION_QNAME, attrValue);
+        writer._attribute(AddressingVersion.W3C.wsdlActionTag, attrValue);
     }
 
     @Override
     public void addBindingExtension(TypedXmlWriter binding) {
         if (!enabled)
             return;
-        UsingAddressing ua = binding._element(W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME, UsingAddressing.class);
+        UsingAddressing ua = binding._element(AddressingVersion.W3C.wsdlExtensionTag, UsingAddressing.class);
         if(required) {
             ua.required(true);
-        }    
+        }
     }
 }

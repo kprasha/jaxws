@@ -24,6 +24,8 @@ package com.sun.xml.ws.addressing;
 
 import javax.xml.namespace.QName;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+
 /**
  * Constants for W3C WS-Addressing version
  *
@@ -33,9 +35,6 @@ public interface W3CAddressingConstants {
     public static final String WSA_NAMESPACE_NAME = "http://www.w3.org/2005/08/addressing";
     public static final String WSA_NAMESPACE_WSDL_NAME = "http://www.w3.org/2006/05/addressing/wsdl";
 
-    public static final String WSA_NAMESPACE_PREFIX = "wsa";
-
-    public static final String WSA_NAMESPACE_WSDL_PREFIX = "wsaw";
     public static final String WSAW_SERVICENAME_NAME = "ServiceName";
     public static final String WSAW_INTERFACENAME_NAME = "InterfaceName";
     public static final String WSAW_ENDPOINTNAME_NAME = "EndpointName";
@@ -57,13 +56,8 @@ public interface W3CAddressingConstants {
 
     public static final String WSA_DEFAULT_FAULT_ACTION = WSA_NAMESPACE_NAME + "/fault";
 
-    public static final String WSAW_ACTION_NAME = "Action";
-    public static final QName WSAW_ACTION_QNAME = new QName(WSA_NAMESPACE_WSDL_NAME, WSAW_ACTION_NAME);
-
     public static final String WSAW_USING_ADDRESSING_NAME = "UsingAddressing";
     public static final QName WSAW_USING_ADDRESSING_QNAME = new QName(WSA_NAMESPACE_WSDL_NAME, WSAW_USING_ADDRESSING_NAME);
-    public static final String WSAW_ANONYMOUS_NAME = "Anonymous";
-    public static final QName WSAW_ANONYMOUS_QNAME = new QName(WSA_NAMESPACE_WSDL_NAME, WSAW_ANONYMOUS_NAME);
 
     public static final QName INVALID_MAP_QNAME = new QName(WSA_NAMESPACE_NAME, "InvalidAddressingHeader");
     public static final QName MAP_REQUIRED_QNAME = new QName(WSA_NAMESPACE_NAME, "MessageAddressingHeaderRequired");
@@ -83,33 +77,33 @@ public interface W3CAddressingConstants {
 
     // Fault subsubcode when an invalid address is specified.
     public static final QName INVALID_ADDRESS_SUBCODE = new QName(WSA_NAMESPACE_NAME, "InvalidAddress",
-                                                                  WSA_NAMESPACE_PREFIX);
+                                                                  AddressingVersion.W3C.getPrefix());
 
     // Fault subsubcode when an invalid header was expected to be EndpointReference but was not valid.
-    public static final QName INVALID_EPR = new QName(WSA_NAMESPACE_NAME, "InvalidEPR", WSA_NAMESPACE_PREFIX);
+    public static final QName INVALID_EPR = new QName(WSA_NAMESPACE_NAME, "InvalidEPR", AddressingVersion.W3C.getPrefix());
 
     // Fault subsubcode when greater than expected number of the specified header is received.
     public static final QName INVALID_CARDINALITY = new QName(WSA_NAMESPACE_NAME, "InvalidCardinality",
-                                                              WSA_NAMESPACE_PREFIX);
+                                                              AddressingVersion.W3C.getPrefix());
 
     // Fault subsubcode when an invalid header was expected to be EndpointReference but did not contain address.
     public static final QName MISSING_ADDRESS_IN_EPR = new QName(WSA_NAMESPACE_NAME, "MissingAddressInEPR",
-                                                                 WSA_NAMESPACE_PREFIX);
+                                                                 AddressingVersion.W3C.getPrefix());
 
     // Fault subsubcode when a header contains a message id that was a duplicate of one already received.
     public static final QName DUPLICATE_MESSAGEID = new QName(WSA_NAMESPACE_NAME, "DuplicateMessageID",
-                                                              WSA_NAMESPACE_PREFIX);
+                                                              AddressingVersion.W3C.getPrefix());
 
     // Fault subsubcode when <code>Action</code> and <code>SOAPAction</code> for the mesage did not match.
     public static final QName ACTION_MISMATCH = new QName(WSA_NAMESPACE_NAME, "ActionMismatch",
-                                                          WSA_NAMESPACE_PREFIX);
+                                                          AddressingVersion.W3C.getPrefix());
 
     // Fault subsubcode when the only address supported is the anonymous address.
     public static final QName ONLY_ANONYMOUS_ADDRESS_SUPPORTED = new QName(WSA_NAMESPACE_NAME, "OnlyAnonymousAddressSupported",
-                                                          WSA_NAMESPACE_PREFIX);
+                                                                           AddressingVersion.W3C.getPrefix());
 
     //Fault subsubcode when anonymous address is not supported.
     public static final QName ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED = new QName(WSA_NAMESPACE_NAME, "OnlyNonAnonymousAddressSupported",
-                                                          WSA_NAMESPACE_PREFIX);
+                                                                               AddressingVersion.W3C.getPrefix());
 
 }

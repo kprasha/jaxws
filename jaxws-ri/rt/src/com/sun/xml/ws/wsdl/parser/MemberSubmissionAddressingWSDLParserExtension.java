@@ -25,13 +25,12 @@ package com.sun.xml.ws.wsdl.parser;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
 
-import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
@@ -48,7 +47,7 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
         WSDLBoundPortTypeImpl impl = (WSDLBoundPortTypeImpl)binding;
 
         QName ua = reader.getName();
-        if (ua.equals(MemberSubmissionAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
+        if (ua.equals(AddressingVersion.MEMBER.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
             impl.setAddressingFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
@@ -63,7 +62,7 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
         WSDLPortImpl impl = (WSDLPortImpl)port;
 
         QName ua = reader.getName();
-        if (ua.equals(MemberSubmissionAddressingConstants.WSAW_USING_ADDRESSING_QNAME)) {
+        if (ua.equals(AddressingVersion.MEMBER.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
             impl.setAddressingFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
 
@@ -83,7 +82,7 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
     public boolean portTypeOperationInput(WSDLOperation o, XMLStreamReader reader) {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
-        String action = ParserUtil.getAttribute(reader, MemberSubmissionAddressingConstants.WSAW_ACTION_QNAME);
+        String action = ParserUtil.getAttribute(reader, AddressingVersion.MEMBER.wsdlActionTag);
         if (action != null) {
             impl.getInput().setAction(action);
             impl.getInput().setDefaultAction(false);
@@ -96,7 +95,7 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
     public boolean portTypeOperationOutput(WSDLOperation o, XMLStreamReader reader) {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
-        String action = ParserUtil.getAttribute(reader, MemberSubmissionAddressingConstants.WSAW_ACTION_QNAME);
+        String action = ParserUtil.getAttribute(reader, AddressingVersion.MEMBER.wsdlActionTag);
         if (action != null) {
             impl.getOutput().setAction(action);
         }
@@ -108,7 +107,7 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
     public boolean portTypeOperationFault(WSDLOperation o, XMLStreamReader reader) {
         WSDLOperationImpl impl = (WSDLOperationImpl)o;
 
-        String action = ParserUtil.getAttribute(reader, MemberSubmissionAddressingConstants.WSAW_ACTION_QNAME);
+        String action = ParserUtil.getAttribute(reader, AddressingVersion.MEMBER.wsdlActionTag);
         if (action != null) {
             String name = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
             impl.getFaultActionMap().put(name, action);

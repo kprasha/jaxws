@@ -93,6 +93,22 @@ public enum AddressingVersion {
         /*package*/ String getIsReferenceParameterLocalName() {
             return "IsReferenceParameter";
         }
+
+        /* package */ String getWsdlExtensionLocalName() {
+            return "UsingAddressing";
+        }
+
+        /* package */ String getWsdlAnonymousLocalName() {
+            return "Anonymous";
+        }
+
+        public String getPrefix() {
+            return "wsa";
+        }
+
+        public String getWsdlPrefix() {
+            return "wsaw";
+        }
     },
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing","member-anonymous-epr.xml","http://schemas.xmlsoap.org/ws/2004/08/addressing") {
         @Override
@@ -146,6 +162,22 @@ public enum AddressingVersion {
 
         /*package*/ String getIsReferenceParameterLocalName() {
             return "";
+        }
+
+        /* package */ String getWsdlExtensionLocalName() {
+            return "";
+        }
+
+        /* package */ String getWsdlAnonymousLocalName() {
+            return "";
+        }
+
+        public String getPrefix() {
+            return "wsa";
+        }
+
+        public String getWsdlPrefix() {
+            return "wsaw";
         }
     };
 
@@ -252,6 +284,16 @@ public enum AddressingVersion {
     public final QName wsdlActionTag;
 
     /**
+     * Represents the WSDL extension QName for a specific WS-Addressing Version.
+     */
+    public final QName wsdlExtensionTag;
+
+    /**
+     * Represents the WSDL anonymous QName for a specific WS-Addressing Version.
+     */
+    public final QName wsdlAnonymousTag;
+
+    /**
      * Represents the QName of the reference parameter in a SOAP message. This is
      * only valid for W3C WS-Addressing.
      */
@@ -291,6 +333,8 @@ public enum AddressingVersion {
         isReferenceParameterTag = new QName(nsUri,getIsReferenceParameterLocalName());
 
         wsdlActionTag = new QName(wsdlNsUri,"Action");
+        wsdlExtensionTag = new QName(wsdlNsUri, getWsdlExtensionLocalName());
+        wsdlAnonymousTag = new QName(wsdlNsUri, getWsdlAnonymousLocalName());
 
         // create stock anonymous EPR
         try {
@@ -442,6 +486,14 @@ public enum AddressingVersion {
      * @return local name
      */
     /* package */ abstract String getInvalidCardinalityLocalName();
+
+    /* package */ abstract String getWsdlExtensionLocalName();
+
+    /* package */ abstract String getWsdlAnonymousLocalName();
+
+    public abstract String getPrefix();
+
+    public abstract String getWsdlPrefix();
 
     /**
      * Creates an outbound {@link Header} from a reference parameter.

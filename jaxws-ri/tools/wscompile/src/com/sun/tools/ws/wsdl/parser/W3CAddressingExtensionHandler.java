@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.5 2006-08-29 19:34:19 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.6 2006-10-04 19:01:20 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -38,7 +38,7 @@ import com.sun.tools.ws.util.xml.XmlUtil;
 import com.sun.tools.ws.wsdl.document.Fault;
 import com.sun.tools.ws.wsdl.document.Input;
 import com.sun.tools.ws.wsdl.document.Output;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import org.w3c.dom.Element;
 
 /**
@@ -58,15 +58,15 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
 
     @Override
     public String getNamespaceURI() {
-        return W3CAddressingConstants.WSA_NAMESPACE_WSDL_NAME;
+        return AddressingVersion.W3C.nsUri;
     }
 
     protected QName getActionQName() {
-        return W3CAddressingConstants.WSAW_ACTION_QNAME;
+        return AddressingVersion.W3C.wsdlActionTag;
     }
 
     protected QName getWSDLExtensionQName() {
-        return W3CAddressingConstants.WSAW_USING_ADDRESSING_QNAME;
+        return AddressingVersion.W3C.wsdlExtensionTag;
     }
 
     @Override
