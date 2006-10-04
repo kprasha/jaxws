@@ -109,6 +109,10 @@ public enum AddressingVersion {
         public String getWsdlPrefix() {
             return "wsaw";
         }
+
+        public String getFeatureID() {
+            return AddressingFeature.ID;
+        }
     },
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing","member-anonymous-epr.xml","http://schemas.xmlsoap.org/ws/2004/08/addressing") {
         @Override
@@ -178,6 +182,10 @@ public enum AddressingVersion {
 
         public String getWsdlPrefix() {
             return "wsaw";
+        }
+
+        public String getFeatureID() {
+            return MemberSubmissionAddressingFeature.ID;
         }
     };
 
@@ -494,6 +502,8 @@ public enum AddressingVersion {
     public abstract String getPrefix();
 
     public abstract String getWsdlPrefix();
+
+    public abstract String getFeatureID();
 
     /**
      * Creates an outbound {@link Header} from a reference parameter.
