@@ -627,10 +627,21 @@ public abstract class Message {
      * @return unique id for the message
      */
     public @NotNull String getID(@NotNull WSBinding binding) {
+        return getID(binding.getAddressingVersion(), binding.getSOAPVersion());
+    }
+
+    /**
+     * Retuns a unique id for the message.
+     * <p><p>
+     * @see {@link #getID(com.sun.xml.ws.api.WSBinding)} for detailed description.
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @return unique id for the message
+     */
+    public @NotNull String getID(AddressingVersion av, SOAPVersion sv) {
         if (uuid == null) {
-            AddressingVersion version = binding.getAddressingVersion();
-            if (version != null) {
-                uuid = getHeaders().getMessageID(version, binding.getSOAPVersion());
+            if (av != null) {
+                uuid = getHeaders().getMessageID(av, sv);
             }
             if (uuid == null) {
                 uuid = "uuid:" + UUID.randomUUID().toString();

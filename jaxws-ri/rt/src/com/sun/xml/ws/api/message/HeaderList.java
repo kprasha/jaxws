@@ -605,7 +605,7 @@ public final class HeaderList extends ArrayList<Header> {
         add(h);
 
         // wsa:MessageId
-        h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(binding));
+        h = new StringHeader(ver.messageIDTag, packet.getMessage().getID(ver, binding.getSOAPVersion()));
         add(h);
 
         // wsa:ReplyTo
