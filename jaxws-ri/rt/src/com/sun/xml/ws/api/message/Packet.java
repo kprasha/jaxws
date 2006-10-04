@@ -53,7 +53,6 @@ import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.util.DistributedPropertySet;
-import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
 
 /**
@@ -532,7 +531,11 @@ public final class Packet extends DistributedPropertySet {
      * Creates a server-side response {@link Packet} from a request
      * packet ({@code this}). If WS-Addressing is enabled, a default Action
      * Message Addressing Property is obtained using <code>wsdlPort</code> {@link WSDLPort}
-     * and <code>binding</code> {@link WSBinding}. For non-default Action, use
+     * and <code>binding</code> {@link WSBinding}.
+     * <p><p>
+     * This method should be called to create application response messages
+     * since they are associated with a {@link WSBinding} and {@link WSDLPort}.
+     * For creating protocol messages that require a non-default Action, use
      * {@link #createServerResponse(Message, com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion, String)}.
      *
      * @param responseMessage The {@link Message} that represents a reply. Cannot be null.
@@ -544,6 +547,7 @@ public final class Packet extends DistributedPropertySet {
         Packet r = createClientResponse(responseMessage);
 
         // if one-way, then dont populate any WS-A headers
+        // todo: do we need this check since we already check for packet.getMessage()==null later?
         if (message.isOneWay(wsdlPort))
             return r;
 
@@ -562,19 +566,23 @@ public final class Packet extends DistributedPropertySet {
      * and {@link SOAPVersion}.
      *
      * @param responseMessage The {@link Message} that represents a reply.
-     * @param av The WS-Addressing version.
+     * @param addressingVersion The WS-Addressing version of the response message.
+     * @param soapVersion The SOAP version of the response message.
      * @param action The response Action Message Addressing Property value.
      * @return response packet
      */
-    public Packet createServerResponse(@NotNull Message responseMessage, @NotNull AddressingVersion av, @NotNull SOAPVersion soapVersion, @NotNull String action) {
+    public Packet createServerResponse(@NotNull Message responseMessage, @NotNull AddressingVersion addressingVersion, @NotNull SOAPVersion soapVersion, @NotNull String action) {
         Packet responsePacket = createClientResponse(responseMessage);
 
-        return populateAddressingHeaders(responsePacket, av, soapVersion, action);
+        return populateAddressingHeaders(responsePacket,
+                                         addressingVersion,
+                                         soapVersion,
+                                         action);
     }
 
-    private Packet populateAddressingHeaders(Packet responsePacket, AddressingVersion addressingVersion, SOAPVersion soapVersion, String action) {
+    private Packet populateAddressingHeaders(Packet responsePacket, AddressingVersion av, SOAPVersion sv, String action) {
         // populate WS-A headers only if WS-A is enabled
-        if (addressingVersion == null)
+        if (av == null)
             return responsePacket;
 
         // if one-way, then dont populate any WS-A headers
@@ -584,26 +592,26 @@ public final class Packet extends DistributedPropertySet {
         HeaderList hl = responsePacket.getMessage().getHeaders();
 
         // wsa:To
-        WSEndpointReference replyTo = message.getHeaders().getReplyTo(addressingVersion, soapVersion);
+        WSEndpointReference replyTo = message.getHeaders().getReplyTo(av, sv);
         if (replyTo != null)
-            hl.add(new StringHeader(addressingVersion.toTag, replyTo.getAddress()));
+            hl.add(new StringHeader(av.toTag, replyTo.getAddress()));
 
         // wsa:Action
-        hl.add(new StringHeader(addressingVersion.actionTag, action));
+        hl.add(new StringHeader(av.actionTag, action));
 
         // wsa:MessageID
-        hl.add(new StringHeader(addressingVersion.messageIDTag, message.getID(addressingVersion, soapVersion)));
+        hl.add(new StringHeader(av.messageIDTag, message.getID(av, sv)));
 
         // wsa:RelatesTo
-        Header mid = message.getHeaders().get(addressingVersion.messageIDTag, true);
+        Header mid = message.getHeaders().get(av.messageIDTag, true);
         if (mid != null)
-            hl.add(new RelatesToHeader(addressingVersion.relatesToTag, mid.getStringContent()));
+            hl.add(new RelatesToHeader(av.relatesToTag, mid.getStringContent()));
 
         // populate reference parameters
         WSEndpointReference refpEPR;
         if (responsePacket.getMessage().isFault()) {
             // choose FaultTo
-            refpEPR = message.getHeaders().getFaultTo(addressingVersion, soapVersion);
+            refpEPR = message.getHeaders().getFaultTo(av, sv);
 
             // if FaultTo is null, then use ReplyTo
             if (refpEPR == null)
