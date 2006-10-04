@@ -209,6 +209,8 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public String getAddressingVersion() {
+        if (addressingFeature == null) 
+            return null;
         return addressingFeature.getID();
     }
 
