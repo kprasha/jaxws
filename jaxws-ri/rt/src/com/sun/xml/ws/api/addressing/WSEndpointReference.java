@@ -21,6 +21,7 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -30,8 +31,11 @@ import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.Dispatch;
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -112,6 +116,60 @@ public final class WSEndpointReference {
      */
     public @NotNull EndpointReference toSpec() {
         return ProviderImpl.INSTANCE.readEndpointReference(new XMLStreamBufferSource(infoset));
+    }
+
+    /**
+     * Creates a proxy that can be used to talk to this EPR.
+     *
+     * <p>
+     * All the normal WS-Addressing processing happens automatically,
+     * such as setting the endpoint address to {@link #getAddress() the address},
+     * and sending the reference parameters associated with this EPR as
+     * headers, etc.
+     */
+    public @NotNull <T> T getPort(@NotNull Service jaxwsService,
+                     @NotNull Class<T> serviceEndpointInterface,
+                     WebServiceFeature... features)     {
+        // TODO: implement it in a better way
+        return jaxwsService.getPort(toSpec(),serviceEndpointInterface,features);
+    }
+
+    /**
+     * Creates a {@link Dispatch} that can be used to talk to this EPR.
+     *
+     * <p>
+     * All the normal WS-Addressing processing happens automatically,
+     * such as setting the endpoint address to {@link #getAddress() the address},
+     * and sending the reference parameters associated with this EPR as
+     * headers, etc.
+     */
+    public @NotNull <T> Dispatch<T> createDispatch(
+        @NotNull Service jaxwsService,
+        @NotNull Class<T> type,
+        @NotNull Service.Mode mode,
+        WebServiceFeature... features) {
+
+        // TODO: implement it in a better way
+        return jaxwsService.createDispatch(toSpec(),type,mode,features);
+    }
+
+    /**
+     * Creates a {@link Dispatch} that can be used to talk to this EPR.
+     *
+     * <p>
+     * All the normal WS-Addressing processing happens automatically,
+     * such as setting the endpoint address to {@link #getAddress() the address},
+     * and sending the reference parameters associated with this EPR as
+     * headers, etc.
+     */
+    public @NotNull Dispatch<Object> createDispatch(
+        @NotNull Service jaxwsService,
+        @NotNull JAXBContext context,
+        @NotNull Service.Mode mode,
+        WebServiceFeature... features) {
+
+        // TODO: implement it in a better way
+        return jaxwsService.createDispatch(toSpec(),context,mode,features);
     }
 
     /**
