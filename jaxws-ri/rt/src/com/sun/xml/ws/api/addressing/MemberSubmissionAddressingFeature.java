@@ -18,28 +18,50 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.api.addressing;
+
 import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * Addressing Feature representing MemberSubmission Version.
- * 
+ *
  * @author Rama Pulavarthi
  */
 
 public class MemberSubmissionAddressingFeature extends AddressingFeature {
     /**
-     * Constant value identifying the AddressingFeature
+     * Constant value identifying the MemberSubmissionAddressingFeature
      */
     public static final String ID = "http://java.sun.com/xml/ns/jaxws/2004/08/addressing";
 
     /**
-     * Create an AddressingFeature
+     * Create an MemberSubmissionAddressingFeature
+     * The instance created will be enabled.
+     */
+    public MemberSubmissionAddressingFeature() {
+        super();
+    }
+
+    /**
+     * Create an MemberSubmissionAddressingFeature
      *
      * @param enabled specifies whether this feature should
-     * be enabled or not.
+     *                be enabled or not.
      */
     public MemberSubmissionAddressingFeature(boolean enabled) {
         super(enabled);
+    }
+
+    /**
+     * Create an <code>MemberSubmissionAddressingFeature</code>
+     *
+     * @param enabled specifies whether this feature should
+     * be enabled or not.
+     * @param required specifies the value that will be used
+     * for the <code>required</code> attribute on the
+     * <code>wsaw:UsingAddressing</code> element.
+     */
+    public MemberSubmissionAddressingFeature(boolean enabled, boolean required) {
+        super(enabled,required);
     }
 
     /**
