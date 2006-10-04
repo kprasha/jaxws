@@ -556,8 +556,10 @@ public final class Packet extends DistributedPropertySet {
      * packet ({@code this}). If WS-Addressing is enabled, <code>action</code>
      * is used as Action Message Addressing Property.
      * <p><p>
-     * This method should be called only for writing protocol messages
-     * that require a particular value of Action.
+     * This method should be called only for creating protocol response messages
+     * that require a particular value of Action since they are not associated
+     * with a {@link WSBinding} and {@link WSDLPort} but do know the {@link AddressingVersion}
+     * and {@link SOAPVersion}.
      *
      * @param responseMessage The {@link Message} that represents a reply.
      * @param av The WS-Addressing version.
