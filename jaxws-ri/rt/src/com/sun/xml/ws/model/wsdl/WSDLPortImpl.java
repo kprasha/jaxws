@@ -42,6 +42,7 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private final QName bindingName;
     private final WSDLServiceImpl owner;
     private WebServiceFeature addressingFeature;
+    private WebServiceFeature[] features;
 
     /**
      * To be set after the WSDL parsing is complete.
@@ -68,6 +69,10 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
 
     public WSDLServiceImpl getOwner() {
         return owner;
+    }
+
+    public void setFeatures(WebServiceFeature[] features) {
+        this.features = features;
     }
 
     /**

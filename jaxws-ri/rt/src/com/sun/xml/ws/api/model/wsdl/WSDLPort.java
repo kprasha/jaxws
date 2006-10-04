@@ -25,6 +25,7 @@ package com.sun.xml.ws.api.model.wsdl;
 import com.sun.xml.ws.api.EndpointAddress;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  * Abstracts wsdl:service/wsdl:port
@@ -65,4 +66,10 @@ public interface WSDLPort extends WSDLObject, WSDLExtensible {
      *      always non-null.
      */
     WSDLService getOwner();
+
+    /**
+     * Enables a list of {@link WebServiceFeature} based upon policy assertions on this port.
+     * This method would be called during WSDL parsing by WS-Policy code.
+     */
+    void setFeatures(WebServiceFeature[] features);
 }
