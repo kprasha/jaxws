@@ -153,20 +153,12 @@ public class ServerTubeAssemblerContext {
     /**
      * Creates WS-Addressing pipe
      */
-    public Pipe createWsaPipe(Pipe next) {
+    public Tube createWsaPipe(Tube next) {
         if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
                 binding.isFeatureEnabled(AddressingFeature.ID))
             return new WsaServerPipe(wsdlModel, binding, next);
         else
             return next;
-
-        /*
-        if (wsdlModel != null) {
-            if (((WSDLPortImpl)wsdlModel).isAddressingEnabled())
-                return new WsaServerPipe(wsdlModel, binding, next);
-        }
-        return next;
-        */
     }
 
 }

@@ -39,38 +39,106 @@ import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import com.sun.istack.NotNull;
 
 /**
  * @author Arun Gupta
  */
-public class WsaServerPipe extends AbstractFilterPipeImpl {
+public class WsaServerPipe extends AbstractFilterTubeImpl {
     final WSDLPort wsdlPort;
     final WSBinding binding;
     final WsaPipeHelper helper;
 
-    public WsaServerPipe(WSDLPort wsdlPort, WSBinding binding, Pipe next) {
+    public WsaServerPipe(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(next);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         helper = getPipeHelper();
     }
 
-    public WsaServerPipe(WsaServerPipe that, PipeCloner cloner) {
+    public WsaServerPipe(WsaServerPipe that, TubeCloner cloner) {
         super(that, cloner);
         this.wsdlPort = that.wsdlPort;
         this.binding = that.binding;
         this.helper = that.helper;
     }
 
-    public WsaServerPipe copy(PipeCloner cloner) {
+    public void preDestroy() {
+        //No resources to clean up
+    }
+
+    public WsaServerPipe copy(TubeCloner cloner) {
         return new WsaServerPipe(this, cloner);
     }
 
+    public @NotNull NextAction processRequest(Packet request) {
+        if(wsdlPort == null) {
+            // Addressing is not enabled
+            return doInvoke(next,request);
+        }
+
+        Packet p = null;
+        try {
+            p = helper.validateServerInboundHeaders(request);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
+
+        if (p.getMessage() != null && p.getMessage().isFault()) {
+            return doReturnWith(processFault(p, false));
+        }
+
+        HeaderList hl = request.getMessage().getHeaders();
+        if (hl == null)
+            return doReturnWith(p);
+
+        // TODO: Evaluate the impact of other pipes that might have
+        // TODO: executed before WS-A pipe. So far RM always sends the
+        // TODO: protocol response along with application response ONLY.
+        AddressingVersion av = binding.getAddressingVersion();
+        WSEndpointReference replyTo = hl.getReplyTo(av, binding.getSOAPVersion());
+        String replyToAddress = null;
+        if (replyTo != null)
+            replyToAddress = replyTo.getAddress();
+        WSEndpointReference faultTo = hl.getFaultTo(av, binding.getSOAPVersion());
+        String faultToAddress = null;
+        if (faultTo != null)
+            faultToAddress = faultTo.getAddress();
+        if (replyTo != null) {
+            // none ReplyTo
+            if (isOneWay(p) ||
+                    replyToAddress.equals(av.getNoneUri()) &&
+                    ((faultTo == null) ||
+                            (!faultToAddress.equals(av.getAnonymousUri())))) {
+                if (p.transportBackChannel != null) {
+                    p.transportBackChannel.close();
+                }
+                return doInvoke(next,p);
+            }
+
+            // non-anonymous ReplyTo
+            if (!replyToAddress.equals(av.getAnonymousUri()) &&
+                    ((faultTo == null) ||
+                            (!faultToAddress.equals(av.getAnonymousUri())))) {
+                return doReturnWith(processNonAnonymousReply(p, replyToAddress, true));
+            }
+        }
+
+        return doInvoke(next,p);
+    }
+
+    public @NotNull NextAction processResponse(Packet response) {
+        if (response.getMessage() != null && response.getMessage().isFault()) {
+            response = processFault(response, false);
+        }
+        return doReturnWith(response);
+    }
+    /*
     public Packet process(Packet request) {
         if(wsdlPort == null) {
             // Addressing is not enabled
@@ -132,7 +200,7 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
 
         return p;
     }
-
+    */
     private boolean isOneWay(Packet p) {
         return (wsdlPort != null && p.getMessage() != null && p.getMessage().isOneWay(wsdlPort));
     }
@@ -205,7 +273,8 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
         }
         Packet response = packet;
         if (invokeEndpoint) {
-            response = next.process(packet);
+            //TODO:
+            //response = next.process(packet);
         }
 
         AddressingVersion av = binding.getAddressingVersion();

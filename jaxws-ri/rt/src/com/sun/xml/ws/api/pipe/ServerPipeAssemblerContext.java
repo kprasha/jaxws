@@ -65,4 +65,11 @@ public final class ServerPipeAssemblerContext extends ServerTubeAssemblerContext
      public @NotNull Pipe getTerminalPipe() {
          return PipeAdapter.adapt(terminal);
     }
+
+     /**
+     * Creates WS-Addressing pipe
+     */
+    public Pipe createWsaPipe(Pipe next) {
+        return PipeAdapter.adapt(super.createWsaPipe(PipeAdapter.adapt(next)));
+    }
 }
