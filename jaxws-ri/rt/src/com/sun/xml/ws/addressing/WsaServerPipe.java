@@ -28,6 +28,7 @@ import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.handler.MessageContext;
 
 import com.sun.xml.ws.api.EndpointAddress;
@@ -71,8 +72,8 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
     }
 
     public Packet process(Packet request) {
-        // Dispatch w/o WSDL
-        if (wsdlPort == null) {
+        if(helper == null) {
+            // Addressing is not enabled
             return next.process(request);
         }
 
@@ -256,18 +257,13 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
     }
 
     private WsaPipeHelper getPipeHelper() {
-        if (wsdlPort == null) {
-            if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
-                return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
-            else
-                return new WsaPipeHelperImpl(wsdlPort, binding);
-        }
-
-        String ns = wsdlPort.getBinding().getAddressingVersion();
-        if (ns != null && ns.equals(MemberSubmissionAddressingConstants.WSA_NAMESPACE_NAME))
-            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
-        else
+        if(binding.isFeatureEnabled(AddressingFeature.ID)) {
             return new WsaPipeHelperImpl(wsdlPort, binding);
+        } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID)) {
+            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+        } else {
+            return null;
+        }
     }
 
 }
