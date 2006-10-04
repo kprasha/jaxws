@@ -53,6 +53,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
     private WebServiceFeature addressingFeature;
+    private WebServiceFeature[] features;
 
     /**
      * Operations keyed by the payload tag name.
@@ -209,9 +210,24 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     }
 
     public String getAddressingVersion() {
-        if (addressingFeature == null) 
+        if (addressingFeature == null)
             return null;
         return addressingFeature.getID();
+    }
+
+    public WebServiceFeature getFeature(String id) {
+        if (features != null) {
+            for (WebServiceFeature f : features) {
+                if (f.getID().equals(id))
+                    return f;
+            }
+        }
+
+        return null;
+    }
+
+    public void setFeatures(WebServiceFeature[] features) {
+        this.features = features;
     }
 
     public void setAddressingFeature(WebServiceFeature af) {

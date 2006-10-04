@@ -32,6 +32,7 @@ import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.WebServiceFeature;
 import javax.jws.WebParam.Mode;
 
 /**
@@ -110,18 +111,21 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      * Enables  Mtom as per mtom policy assertion. This method would be called during WSDL parsing to enable MTOM for a
      * WSDL operation.
      */
+    @Deprecated
     void enableMTOM();
 
     /**
      * Tells if MTOM is enabled for this WSDL operation.
      * @return by default returns false unless enabled by {@link #enableMTOM()}
      */
+    @Deprecated
     boolean isMTOMEnabled();
 
     /**
      * Enables WS-Addressing as per WS-A policy assertion. This method would be called during
      * WSDL parsing to enable WS-A for a wsdl:binding.
      */
+    @Deprecated
     void enableAddressing(String namespace);
 
     /**
@@ -129,5 +133,20 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
      *
      * @return by default returns false unless enabled by {@link #enableMTOM()}
      */
+    @Deprecated
     String getAddressingVersion();
+
+    /**
+     * Returns the {@link WebServiceFeature} that matches the <code>id</code>.
+     *
+     * @param id unique id of the feature
+     * @return WebServiceFeature matching the id
+     */
+    WebServiceFeature getFeature(String id);
+
+    /**
+     * Enables a list of {@link WebServiceFeature} based upon policy assertions. This
+     * method would be called during WSDL parsing by WS-Policy code.
+     */
+    void setFeatures(WebServiceFeature[] features);
 }
