@@ -22,19 +22,17 @@
 
 package com.sun.xml.ws.api.addressing;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
+
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
-import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.message.stream.OutboundStreamHeader;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.WebServiceFeature;
 
 /**
  * 'Traits' object that absorbs differences of WS-Addressing versions.
@@ -374,6 +372,12 @@ public enum AddressingVersion {
      */
     public abstract boolean isReferenceParameter(String localName);
 
+    /**
+     * Returns WsaPipeHelper for the WS-Addressing version identified by <code>binding</code>
+     * {@link WSBinding} and for the {@link WSDLPort} port.
+     *
+     * @return WS-A version specific helper
+     */
     public abstract WsaPipeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding);
 
     /**
