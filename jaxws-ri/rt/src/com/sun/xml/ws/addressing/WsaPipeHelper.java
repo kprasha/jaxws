@@ -121,7 +121,7 @@ public abstract class WsaPipeHelper {
 
         if (wsdlPort != null) {
             // no need to process if WS-A is optional and no WS-A headers are present
-            if (!((AddressingFeature)impl.getAddressingFeature()).isRequired() && !hIter.hasNext())
+            if (!((AddressingFeature)binding.getFeature(av.getFeatureID())).isRequired() && !hIter.hasNext())
                 return;
         }
 
@@ -194,7 +194,7 @@ public abstract class WsaPipeHelper {
         }
 
         // check for mandatory set of headers
-        if (impl != null && ((AddressingFeature)impl.getAddressingFeature()).isRequired()) {
+        if (impl != null && ((AddressingFeature)binding.getFeature(av.getFeatureID())).isRequired()) {
             // if no wsa:Action header is found
             if (!foundAction)
                 throw new MapRequiredException(av.actionTag);
