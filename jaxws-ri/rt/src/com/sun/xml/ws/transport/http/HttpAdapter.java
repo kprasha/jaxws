@@ -342,18 +342,19 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     private void dump(ByteArrayBuffer buf, String caption, Map<String, List<String>> headers) throws IOException {
         System.out.println("---["+caption +"]---");
-        for (Entry<String,List<String>> header : headers.entrySet()) {
-            if(header.getValue().isEmpty()) {
-                // I don't think this is legal, but let's just dump it,
-                // as the point of the dump is to uncover problems.
-                System.out.println(header.getValue());
-            } else {
-                for (String value : header.getValue()) {
-                    System.out.println(header.getKey()+": "+value);
+        if (headers != null) {
+            for (Entry<String, List<String>> header : headers.entrySet()) {
+                if (header.getValue().isEmpty()) {
+                    // I don't think this is legal, but let's just dump it,
+                    // as the point of the dump is to uncover problems.
+                    System.out.println(header.getValue());
+                } else {
+                    for (String value : header.getValue()) {
+                        System.out.println(header.getKey() + ": " + value);
+                    }
                 }
             }
         }
-
         buf.writeTo(System.out);
         System.out.println("--------------------");
     }
