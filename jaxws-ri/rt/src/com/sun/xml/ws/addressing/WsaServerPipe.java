@@ -72,7 +72,7 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
     }
 
     public Packet process(Packet request) {
-        if(helper == null) {
+        if(wsdlPort == null) {
             // Addressing is not enabled
             return next.process(request);
         }
@@ -262,7 +262,9 @@ public class WsaServerPipe extends AbstractFilterPipeImpl {
         } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID)) {
             return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
         } else {
-            return null;
+            // Addressing is not enabled, WsaServerPipe should not be included in the pipeline
+            throw new WebServiceException("Addressing is not enabled, " +
+                    "WsaServerPipe should not be included in the pipeline");
         }
     }
 
