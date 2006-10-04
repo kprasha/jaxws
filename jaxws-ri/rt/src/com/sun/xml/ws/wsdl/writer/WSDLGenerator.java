@@ -451,7 +451,7 @@ public class WSDLGenerator {
             // faults
             for (CheckedExceptionImpl exception : method.getCheckedExceptions()) {
                 QName messageName = new QName(model.getTargetNamespace(), exception.getMessageName());
-                FaultType paramType = operation.fault().name(exception.getMessageName()).message(messageName);
+                FaultType paramType = operation.fault().message(messageName).name(exception.getMessageName());
                 extension.addOperationFaultExtension(paramType, method, exception);
             }            
         }
