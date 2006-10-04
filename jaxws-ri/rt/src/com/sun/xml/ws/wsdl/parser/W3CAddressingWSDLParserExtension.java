@@ -198,7 +198,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     }
     */
     protected String getNamespaceURI() {
-        return AddressingVersion.W3C.nsUri;
+        return AddressingVersion.W3C.wsdlNsUri;
     }
 
     /**

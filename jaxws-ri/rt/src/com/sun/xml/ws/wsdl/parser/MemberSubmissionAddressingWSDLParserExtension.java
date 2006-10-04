@@ -122,6 +122,6 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
 
     @Override
     protected String getNamespaceURI() {
-        return AddressingVersion.MEMBER.nsUri;
+        return AddressingVersion.MEMBER.wsdlNsUri;
     }
 }

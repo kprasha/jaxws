@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.6 2006-10-04 19:01:20 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.7 2006-10-04 20:20:40 arungupta Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -58,7 +58,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
 
     @Override
     public String getNamespaceURI() {
-        return AddressingVersion.W3C.nsUri;
+        return AddressingVersion.W3C.wsdlNsUri;
     }
 
     protected QName getActionQName() {
