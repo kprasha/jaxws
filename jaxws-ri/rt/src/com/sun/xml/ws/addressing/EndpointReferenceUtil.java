@@ -70,7 +70,7 @@ public class EndpointReferenceUtil {
                 writer.writeNamespace(AddressingVersion.W3C.getPrefix(),
                         AddressingVersion.W3C.nsUri);
                 writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
-                        AddressingVersion.W3C.nsUri, AddressingVersion.W3C.nsUri);
+                        W3CAddressingConstants.WSA_ADDRESS_NAME, AddressingVersion.W3C.nsUri);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
                 writeW3CMetaData(writer, address, service, port, portType, hasWSDL);
@@ -80,7 +80,7 @@ public class EndpointReferenceUtil {
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
-            //System.out.println(bos.toString());
+            System.out.println(bos.toString());
             return (T) new W3CEndpointReference(new StreamSource(bos.newInputStream()));
         } else if (clazz.isAssignableFrom(MemberSubmissionEndpointReference.class)) {
             final ByteOutputStream bos = new ByteOutputStream();
@@ -256,7 +256,7 @@ public class EndpointReferenceUtil {
                     AddressingVersion.W3C.nsUri);
             //write wsa:Address
             writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
-                    AddressingVersion.W3C.nsUri, AddressingVersion.W3C.nsUri);
+                    W3CAddressingConstants.WSA_ADDRESS_NAME, AddressingVersion.W3C.nsUri);
             writer.writeCharacters(msEpr.addr.uri);
             writer.writeEndElement();
             //TODO: write extension attributes on wsa:Address
