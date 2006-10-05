@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.encoding;
 
+import com.sun.xml.bind.DatatypeConverterImpl;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
 import com.sun.xml.stream.writers.UTF8OutputStreamWriter;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -34,7 +35,6 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
-import com.sun.xml.bind.DatatypeConverterImpl;
 import org.jvnet.staxex.Base64Data;
 import org.jvnet.staxex.NamespaceContextEx;
 import org.jvnet.staxex.XMLStreamReaderEx;
@@ -49,7 +49,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.MTOMFeature;
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -264,7 +263,9 @@ public class MtomCodec extends MimeCodec {
         }
 
         public void writeBinary(DataHandler dataHandler) throws XMLStreamException {
-            throw new UnsupportedOperationException();
+            Base64Data data  = new Base64Data();
+            data.set(dataHandler);
+            writePCDATA(data);
         }
 
         public OutputStream writeBinary(String contentType) throws XMLStreamException {
