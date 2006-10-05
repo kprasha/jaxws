@@ -25,7 +25,7 @@ public final class ClientPipeAssemblerContext extends ClientTubeAssemblerContext
     public ClientPipeAssemblerContext(@NotNull EndpointAddress address, @NotNull WSDLPort wsdlModel,
                                       @NotNull WSService rootOwner, @NotNull WSBinding binding,
                                       @NotNull Container container) {
-        super(address, wsdlModel, rootOwner, binding, Container.NONE);
+        super(address, wsdlModel, rootOwner, binding, container);
     }
 
     /**
