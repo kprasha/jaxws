@@ -62,7 +62,7 @@ public final class ServerPipeAssemblerContext extends ServerTubeAssemblerContext
      * @return always non-null terminal pipe
      */
      public @NotNull Pipe getTerminalPipe() {
-         return PipeAdapter.adapt(terminal);
+         return PipeAdapter.adapt(super.getTerminalTube());
     }
 
      /**
