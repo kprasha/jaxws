@@ -20,6 +20,7 @@
 package com.sun.xml.ws.api.addressing;
 
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  * Addressing Feature representing MemberSubmission Version.
@@ -27,18 +28,18 @@ import javax.xml.ws.soap.AddressingFeature;
  * @author Rama Pulavarthi
  */
 
-public class MemberSubmissionAddressingFeature extends AddressingFeature {
+public class MemberSubmissionAddressingFeature extends WebServiceFeature {
     /**
      * Constant value identifying the MemberSubmissionAddressingFeature
      */
     public static final String ID = "http://java.sun.com/xml/ns/jaxws/2004/08/addressing";
+    private boolean required;
 
     /**
      * Create an MemberSubmissionAddressingFeature
      * The instance created will be enabled.
      */
     public MemberSubmissionAddressingFeature() {
-        super();
     }
 
     /**
@@ -48,7 +49,7 @@ public class MemberSubmissionAddressingFeature extends AddressingFeature {
      *                be enabled or not.
      */
     public MemberSubmissionAddressingFeature(boolean enabled) {
-        super(enabled);
+        this.enabled = enabled;
     }
 
     /**
@@ -61,14 +62,19 @@ public class MemberSubmissionAddressingFeature extends AddressingFeature {
      * <code>wsaw:UsingAddressing</code> element.
      */
     public MemberSubmissionAddressingFeature(boolean enabled, boolean required) {
-        super(enabled,required);
+        this.enabled = enabled;
+        this.required = required;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String getID() {
         return ID;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 }
