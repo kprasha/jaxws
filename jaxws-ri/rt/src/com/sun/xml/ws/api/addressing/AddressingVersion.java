@@ -22,17 +22,21 @@
 
 package com.sun.xml.ws.api.addressing;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.soap.AddressingFeature;
-
+import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.message.stream.OutboundStreamHeader;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
  * 'Traits' object that absorbs differences of WS-Addressing versions.
@@ -379,7 +383,7 @@ public enum AddressingVersion {
      * @param binding WSDL binding
      * @return addresing version
      */
-    public static final AddressingVersion fromBinding(WSBinding binding) {
+    public static AddressingVersion fromBinding(WSBinding binding) {
         if (binding.isFeatureEnabled(AddressingFeature.ID))
             return W3C;
 
@@ -395,7 +399,7 @@ public enum AddressingVersion {
      * @param port WSDL port
      * @return addresing version
      */
-    public static final AddressingVersion fromPort(WSDLPort port) {
+    public static AddressingVersion fromPort(WSDLPort port) {
         String ns = port.getBinding().getAddressingVersion();
         if (ns.equals(W3C.nsUri))
             return W3C;
@@ -518,12 +522,24 @@ public enum AddressingVersion {
      */
     /*package*/ abstract String getIsReferenceParameterLocalName();
 
-    public static final AddressingVersion fromFeature(WebServiceFeature af) {
+    public static AddressingVersion fromFeature(WebServiceFeature af) {
         if (af.getID().equals(AddressingFeature.ID))
             return W3C;
         else if (af.getID().equals(MemberSubmissionAddressingFeature.ID))
             return MEMBER;
         else
             return null;
+    }
+
+    /**
+     * Gets the corresponding {@link AddressingVersion} instance from the
+     * EPR class.
+     */
+    public static @NotNull AddressingVersion fromSpecClass(Class<? extends EndpointReference> eprClass) {
+        if(eprClass==W3CEndpointReference.class)
+            return W3C;
+        if(eprClass==MemberSubmissionEndpointReference.class)
+            return MEMBER;
+        throw new WebServiceException("Unsupported EPR type: "+eprClass);
     }
 }
