@@ -199,7 +199,6 @@ public class RuntimeWSDLParser {
         if (parser == null) {
             parser = new Parser(wsdlLoc, createReader(wsdlLoc));
         }
-        importedWSDLs.clear();
         parseWSDL(parser);
     }
 
