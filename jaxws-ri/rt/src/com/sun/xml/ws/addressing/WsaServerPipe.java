@@ -89,10 +89,17 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
             throw new WebServiceException(e);
         }
 
-        if (p.getMessage() != null && p.getMessage().isFault()) {
+        // if one-way message and WS-A header processing fault has occurred,
+        // then do no further processing
+        if (p.getMessage() == null)
+            return doReturnWith(p);
+
+        // if there is a header processing fault
+        if (p.getMessage().isFault()) {
             return doReturnWith(processFault(p, false));
         }
 
+        // can this condition occur ?
         HeaderList hl = request.getMessage().getHeaders();
         if (hl == null)
             return doReturnWith(p);

@@ -86,6 +86,11 @@ public abstract class WsaPipeHelper {
         }
 
         if (soapFault != null) {
+            // WS-A fault processing for one-way methods
+            if (packet.getMessage().isOneWay(wsdlPort)) {
+                return packet.createServerResponse(null, wsdlPort, binding);
+            }
+
             Message m = Messages.create(soapFault);
             if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                 m.getHeaders().add(s11FaultDetailHeader);
