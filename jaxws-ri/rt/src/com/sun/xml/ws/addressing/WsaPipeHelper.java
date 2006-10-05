@@ -386,7 +386,7 @@ public abstract class WsaPipeHelper {
     }
 
     public String getOutputAction(Packet packet) {
-        String action = "http://fake.output.action";
+        String action = AddressingVersion.UNSET_OUTPUT_ACTION;
 
         if (wsdlPort != null) {
             if (wsdlPort.getBinding() != null) {
