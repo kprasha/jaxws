@@ -49,5 +49,5 @@ public interface JAXWSProperties {
      * <p>
      * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
      */
-    public static final String HEADER_LIST_PROPERTY = "com.sun.xml.ws.api.message.HeaderList";
+    public static final String INBOUND_HEADER_LIST_PROPERTY = "com.sun.xml.ws.api.message.HeaderList";
 }

@@ -273,7 +273,7 @@ public final class Packet extends DistributedPropertySet {
      *      This method is for exposing header list through {@link PropertySet#get(Object)},
      *      for user applications, and should never be invoked directly from within the JAX-WS RI.
      */
-    @Property(JAXWSProperties.HEADER_LIST_PROPERTY)
+    @Property(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY)
     /*package*/ HeaderList getHeaderList() {
         if(message==null)   return null;
         return message.getHeaders();
