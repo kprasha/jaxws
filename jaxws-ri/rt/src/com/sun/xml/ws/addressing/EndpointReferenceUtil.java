@@ -80,7 +80,7 @@ public class EndpointReferenceUtil {
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
-            System.out.println(bos.toString());
+          //  System.out.println(bos.toString());
             return (T) new W3CEndpointReference(new StreamSource(bos.newInputStream()));
         } else if (clazz.isAssignableFrom(MemberSubmissionEndpointReference.class)) {
             final ByteOutputStream bos = new ByteOutputStream();
