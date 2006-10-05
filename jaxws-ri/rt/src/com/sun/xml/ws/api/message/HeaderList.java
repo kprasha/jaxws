@@ -577,7 +577,7 @@ public final class HeaderList extends ArrayList<Header> {
         if (action == null)
             action = "http://fake.input.action";
 
-        boolean oneway = (wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
+        boolean oneway = !(wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
         fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
     }
 
