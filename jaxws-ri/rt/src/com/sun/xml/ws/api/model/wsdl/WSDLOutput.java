@@ -43,4 +43,16 @@ public interface WSDLOutput extends WSDLObject, WSDLExtensible {
      * @return Always returns null when called from inside WSDL extensions.
      */
     WSDLMessage getMessage();
+
+    /**
+     * Gives the Action Message Addressing Property value for
+     * {@link this} message.
+     * <p/>
+     * This method provides the correct value irrespective of
+     * whether the Action is explicitly specified in the WSDL or
+     * implicitly derived using the rules defined in WS-Addressing. 
+     *
+     * @return Action
+     */
+    String getAction();
 }
