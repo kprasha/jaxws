@@ -134,6 +134,7 @@ public class PortInfo {
         // RespectBindingFeature is enabled, so enable all wsdlFeatures
         Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
         List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
+        //actually, the passed in WebServiceFeatures
         for(WebServiceFeature ftr: wsdlFeatures) {
             if(featureMap.get(ftr.getID()) == null) {
                 featureMap.put(ftr.getID(),ftr);
