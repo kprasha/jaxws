@@ -24,7 +24,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
@@ -49,13 +48,6 @@ public class ServerSOAPHandlerPipe extends HandlerPipe {
     private WSBinding binding;
     private List<SOAPHandler> soapHandlers;
     private Set<String> roles;
-
-    /**
-     * Creates a new instance of SOAPHandlerPipe
-     */
-    public ServerSOAPHandlerPipe(WSBinding binding, WSDLPort port, Pipe next) {
-        this(binding, port, PipeAdapter.adapt(next));
-    }
 
     /**
      * Creates a new instance of SOAPHandlerPipe

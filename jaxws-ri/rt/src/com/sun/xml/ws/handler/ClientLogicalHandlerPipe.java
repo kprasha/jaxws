@@ -22,7 +22,6 @@ package com.sun.xml.ws.handler;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
@@ -44,13 +43,6 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
 
     private WSBinding binding;
     private List<LogicalHandler> logicalHandlers;
-
-    /**
-     * Creates a new instance of LogicalHandlerPipe
-     */
-    public ClientLogicalHandlerPipe(WSBinding binding, WSDLPort port, Pipe next) {
-        this(binding, port, PipeAdapter.adapt(next));
-    }
 
     /**
      * Creates a new instance of LogicalHandlerPipe
