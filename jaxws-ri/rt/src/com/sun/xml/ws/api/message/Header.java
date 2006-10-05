@@ -315,11 +315,14 @@ public interface Header {
     /**
      * Used to obtain value XYZ from a header that looks like
      * "&lt;header&gt;XYZ&lt;/header&gt;". The primary use of this header
-     * for now is to access certain Addressing headers quickly. It will
-     * be an error to call this method if the header has more structures
-     * in it.
+     * for now is to access certain Addressing headers quickly.
      *
-     * @return String content value
+     * @throws WebServiceException
+     *      If the structure of the header is more complicated than
+     *      a simple string header.
+     *
+     * @return
+     *      Can be empty but always non-null.
      */
-    public String getStringContent();
+    public @NotNull String getStringContent();
 }
