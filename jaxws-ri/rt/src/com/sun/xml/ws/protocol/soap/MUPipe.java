@@ -21,34 +21,30 @@
  */
 package com.sun.xml.ws.protocol.soap;
 
-import static com.sun.xml.ws.api.SOAPVersion.SOAP_12;
-import static com.sun.xml.ws.api.SOAPVersion.SOAP_11;
 import com.sun.xml.ws.api.SOAPVersion;
+import static com.sun.xml.ws.api.SOAPVersion.SOAP_11;
+import static com.sun.xml.ws.api.SOAPVersion.SOAP_12;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.message.DOMHeader;
+import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.*;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import org.w3c.dom.Element;
 
 /**
  * @author Rama Pulavarthi
@@ -65,10 +61,6 @@ abstract class MUPipe extends AbstractFilterTubeImpl {
             "One or more mandatory SOAP header blocks not understood";
 
     private final SOAPVersion soapVersion;
-
-    protected MUPipe(WSBinding binding, Pipe next) {
-        this(binding, PipeAdapter.adapt(next));
-    }
     
     protected MUPipe(WSBinding binding, Tube next) {
         super(next);

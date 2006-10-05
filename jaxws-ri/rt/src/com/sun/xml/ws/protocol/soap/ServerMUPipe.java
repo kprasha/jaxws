@@ -24,7 +24,6 @@ package com.sun.xml.ws.protocol.soap;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
 import javax.xml.namespace.QName;
@@ -37,12 +36,6 @@ import java.util.Set;
 public class ServerMUPipe extends MUPipe {
     
     private HandlerConfiguration handlerConfig;
-
-    public ServerMUPipe(WSBinding binding, Pipe next) {
-        super(binding, next);
-        //On Server, HandlerConfiguration does n't change after publish.
-        handlerConfig = ((BindingImpl)binding).getHandlerConfig();
-    }
     
     public ServerMUPipe(WSBinding binding, Tube next) {
         super(binding, next);
