@@ -1,7 +1,6 @@
 package com.sun.xml.ws.util.pipe;
 
 import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.istack.NotNull;
 
 /**
@@ -35,7 +34,7 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
         head = context.createHandlerTube(head);
         head = context.createMonitoringTube(head);
         head = context.createServerMUTube(head);
-        head = context.createWsaPipe(head);    
+        head = context.createWsaTube(head);
         head = context.createSecurityTube(head);
         return head;
     }

@@ -5,7 +5,6 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.api.server.WSEndpoint;
 
 /**
@@ -70,6 +69,6 @@ public final class ServerPipeAssemblerContext extends ServerTubeAssemblerContext
      * Creates WS-Addressing pipe
      */
     public Pipe createWsaPipe(Pipe next) {
-        return PipeAdapter.adapt(super.createWsaPipe(PipeAdapter.adapt(next)));
+        return PipeAdapter.adapt(super.createWsaTube(PipeAdapter.adapt(next)));
     }
 }
