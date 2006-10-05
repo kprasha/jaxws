@@ -1,21 +1,12 @@
 package com.sun.xml.ws.api.pipe;
 
-import javax.xml.ws.soap.SOAPBinding;
-
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.handler.ClientLogicalHandlerPipe;
-import com.sun.xml.ws.handler.ClientSOAPHandlerPipe;
-import com.sun.xml.ws.handler.HandlerPipe;
-import com.sun.xml.ws.protocol.soap.ClientMUPipe;
-import com.sun.xml.ws.transport.DeferredTransportPipe;
-import com.sun.xml.ws.util.pipe.DumpPipe;
 
 /**
  * Factory for well-known {@link Pipe} implementations
