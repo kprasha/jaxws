@@ -27,6 +27,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import java.io.IOException;
@@ -132,7 +133,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
         return false;
     }
 
-    public String getEPRAddress(Packet request) {
+    public String getEPRAddress(Packet request, WSEndpoint endpoint) {
         return WSHttpHandler.getRequestAddress(httpExchange);
     }
 

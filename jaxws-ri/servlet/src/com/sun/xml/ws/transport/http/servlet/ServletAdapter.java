@@ -93,7 +93,7 @@ public final class ServletAdapter extends HttpAdapter {
      * that takes convenient parameters for servlet.
      */
     public void handle(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        WSHTTPConnection connection = new ServletConnectionImpl(context,request,response);
+        WSHTTPConnection connection = new ServletConnectionImpl(this,context,request,response);
         super.handle(connection);
     }
 
@@ -102,7 +102,7 @@ public final class ServletAdapter extends HttpAdapter {
      * that takes convenient parameters for servlet.
      */
     public void publishWSDL(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        WSHTTPConnection con = new ServletConnectionImpl(context,request,response);
+        WSHTTPConnection con = new ServletConnectionImpl(this,context,request,response);
         super.publishWSDL(con,getBaseAddress(request),request.getQueryString());
     }
 

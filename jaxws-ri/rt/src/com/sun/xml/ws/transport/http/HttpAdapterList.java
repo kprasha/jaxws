@@ -84,7 +84,7 @@ public abstract class HttpAdapterList<T extends HttpAdapter> extends AbstractLis
     /**
      * Creates a PortAddressResolver that maps portname to its address
      */
-    protected PortAddressResolver createPortAddressResolver(final String baseAddress) {
+    public PortAddressResolver createPortAddressResolver(final String baseAddress) {
         return new PortAddressResolver() {
             public String getAddressFor(@NotNull String portName) {
                 String urlPattern = addressMap.get(portName);

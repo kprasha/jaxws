@@ -24,8 +24,11 @@ package com.sun.xml.ws.transport.http.servlet;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -53,8 +56,10 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     private final ServletContext context;
     private int status;
     private Headers requestHeaders;
+    private final HttpAdapter adapter;
 
-    public ServletConnectionImpl(ServletContext context, HttpServletRequest request, HttpServletResponse response) {
+    public ServletConnectionImpl(HttpAdapter adapter, ServletContext context, HttpServletRequest request, HttpServletResponse response) {
+        this.adapter = adapter;
         this.context = context;
         this.request = request;
         this.response = response;
@@ -150,8 +155,10 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         return request.isUserInRole(role);
     }
 
-    public String getEPRAddress(Packet p) {
-        return ServletAdapter.getBaseAddress(request) + request.getServletPath();
+    public String getEPRAddress(Packet p, WSEndpoint endpoint) {
+        String baseAddress = ServletAdapter.getBaseAddress(request);
+        PortAddressResolver resolver = adapter.owner.createPortAddressResolver(baseAddress);
+        return resolver.getAddressFor(endpoint.getPortName().getLocalPart());
     }
 
     @Override

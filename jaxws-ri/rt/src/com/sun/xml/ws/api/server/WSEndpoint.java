@@ -37,7 +37,6 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import java.net.URL;
@@ -96,6 +95,20 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public abstract class WSEndpoint<T> {
+
+    /**
+     * Gets the application endpoint's serviceName. It could be got from DD or annotations
+     *
+     * @return same as wsdl:service QName if WSDL exists or generated
+     */
+    public abstract @NotNull QName getServiceName();
+
+    /**
+     * Gets the application endpoint's portName. It could be got from DD or annotations
+     *
+     * @return same as wsdl:port QName if WSDL exists or generated
+     */
+    public abstract @NotNull QName getPortName();
 
     /**
      * Gets the application endpoint {@link Class} that eventually serves the request.

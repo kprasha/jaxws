@@ -218,6 +218,14 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 portName.getLocalPart(),portType, port != null);
     }
 
+    public @NotNull QName getPortName() {
+        return portName;
+    }
+
+    public @NotNull QName getServiceName() {
+        return serviceName;
+    }
+
     private QName getPortTypeName() {
         return (port == null) ? null : port.getBinding().getPortTypeName();
     }

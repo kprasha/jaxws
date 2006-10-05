@@ -82,7 +82,8 @@ public interface WebServiceContextDelegate {
      * Gets the Base address from the request
      * @param request
      *      Always non-null.
+     * @param endpoint
      * @see WebServiceContext#getEndpointReference
      */
-    String getEPRAddress(Packet request);
+    String getEPRAddress(Packet request, WSEndpoint endpoint);
 }
