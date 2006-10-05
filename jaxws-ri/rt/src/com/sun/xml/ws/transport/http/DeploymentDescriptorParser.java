@@ -42,17 +42,15 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
-import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.SOAPBinding;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -490,11 +488,11 @@ public class DeploymentDescriptorParser<A> {
         } catch (InstantiationException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             throw new ServerRtException(
-                "error.implementorFactory.newInstanceFailed", cl.getName());
+                WsservletMessages.ERROR_IMPLEMENTOR_FACTORY_NEW_INSTANCE_FAILED(cl));
         } catch (IllegalAccessException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             throw new ServerRtException(
-                "error.implementorFactory.newInstanceFailed", cl.getName());
+                WsservletMessages.ERROR_IMPLEMENTOR_FACTORY_NEW_INSTANCE_FAILED(cl));
         }
     }
 
