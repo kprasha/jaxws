@@ -303,6 +303,11 @@ major-version=${release.impl.version}
       </javadoc>
     </target>
 
+  <target name="generate-code" description="Just run the code generators. Designed to be invoked from IDE while developing the RI">
+    <ant dir="${basedir}/rt"              target="generate-code" inheritrefs="true"/>
+    <ant dir="${basedir}/tools/wscompile" target="generate-code" inheritrefs="true"/>
+  </target>
+
   <target name="runtime-build" depends="runtime-compile">
     <!-- Copy resource files etc -->
     <copy todir="${basedir}/rt/build/classes">
