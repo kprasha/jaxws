@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.api.server;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 
@@ -63,27 +64,34 @@ public interface WebServiceContextDelegate {
      * for the given packet.
      *
      * @param request
-     *      Always non-null.
+     *      Always non-null. See class javadoc.
      * @see WebServiceContext#getUserPrincipal()
      */
-    Principal getUserPrincipal(Packet request);
+    Principal getUserPrincipal(@NotNull Packet request);
 
     /**
      * Implements {@link WebServiceContext#isUserInRole(String)}
      * for the given packet.
      *
      * @param request
-     *      Always non-null.
+     *      Always non-null. See class javadoc.
      * @see WebServiceContext#isUserInRole(String)
      */
-    boolean isUserInRole(Packet request,String role);
+    boolean isUserInRole(@NotNull Packet request,String role);
 
     /**
-     * Gets the Base address from the request
+     * Gets the address of the endpoint.
+     *
+     * <p>
+     * The "address" of endpoints is always affected by a particular
+     * client being served.
+     *
      * @param request
-     *      Always non-null.
+     *      Always non-null. See class javadoc.
      * @param endpoint
+     *      The endpoint whose address will be returned.
+     *
      * @see WebServiceContext#getEndpointReference
      */
-    String getEPRAddress(Packet request, WSEndpoint endpoint);
+    String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 }
