@@ -217,11 +217,11 @@ public abstract class WsaPipeHelper {
 
 
         if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
+            // Rama: Why not checking for SOAP 1.1?
             return true;
         } else {
             String role = header.getRole(binding.getSOAPVersion());
-
-            return (role != null && role.equals(SOAPVersion.SOAP_12.implicitRole));
+            return (role.equals(SOAPVersion.SOAP_12.implicitRole));
         }
     }
 
