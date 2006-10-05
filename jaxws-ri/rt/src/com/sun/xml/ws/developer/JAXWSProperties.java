@@ -21,10 +21,33 @@
  */
 package com.sun.xml.ws.developer;
 
+import com.sun.xml.ws.api.message.HeaderList;
+
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceContext;
+
 public interface JAXWSProperties {
     // Content negotiation property: values "none", "pessimistic" and "optimistic"
     @Deprecated
     public static final String CONTENT_NEGOTIATION_PROPERTY = "com.sun.xml.ws.client.ContentNegotiation";
     public static final String MTOM_THRESHOLOD_VALUE =  "com.sun.xml.ws.common.MtomThresholdValue";
     public static final String HTTP_EXCHANGE = "com.sun.xml.ws.http.exchange";
+
+    /**
+     * Acccess the list of SOAP headers in the SOAP message.
+     *
+     * <p>
+     * On {@link WebServiceContext}, this property returns a {@link HeaderList} object
+     * that represents SOAP headers in the request message that was received.
+     * On {@link BindingProvider#getResponseContext()}, this property returns a
+     * {@link HeaderList} object that represents SOAP headers in the response message from the server.
+     *
+     * <p>
+     * The property is read-only, and please do not modify the returned {@link HeaderList}
+     * as that may break the JAX-WS RI in some unexpected way.
+     *
+     * <p>
+     * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
+     */
+    public static final String HEADER_LIST_PROPERTY = "com.sun.xml.ws.api.message.HeaderList";
 }

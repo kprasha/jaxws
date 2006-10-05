@@ -21,28 +21,16 @@
  */
 package com.sun.xml.ws.api.message;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.LogicalMessageContext;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
-
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
@@ -50,10 +38,23 @@ import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.client.ResponseContext;
-import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.message.RelatesToHeader;
+import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.util.DistributedPropertySet;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.util.PropertySet;
+
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.LogicalMessageContext;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a container of a {@link Message}.
@@ -76,16 +77,14 @@ import com.sun.istack.NotNull;
  * <p>
  * Information frequently used inside the JAX-WS RI
  * is stored in the strongly-typed fields. Other information is stored
- * in terms of a generic {@link Map} (see {@link #otherProperties} and
+ * in terms of a generic {@link Map} (see
  * {@link #invocationProperties}.)
  *
  * <p>
  * Some properties need to be retained between request and response,
  * some don't. For strongly typed fields, this characteristic is
  * statically known for each of them, and propagation happens accordingly.
- * For generic information stored in {@link Map}, {@link #otherProperties}
- * stores per-message scope information (which don't carry over to
- * response {@link Packet}), and {@link #invocationProperties}
+ * For generic information stored in {@link Map}, {@link #invocationProperties}
  * stores per-invocation scope information (which carries over to
  * the response.)
  *
@@ -105,10 +104,9 @@ import com.sun.istack.NotNull;
  * <p>
  * Similarly, {@link BindingProvider#getResponseContext() response context}
  * is constructed from {@link Packet} (or rather it's just a view of {@link Packet}.)
- * by using properties from both
- * {@link #invocationProperties} and {@link #otherProperties},
+ * by using properties from {@link #invocationProperties},
  * modulo properties named explicitly in {@link #getHandlerScopePropertyNames(boolean)}.
- * IOW, properties added to {@link #invocationProperties} and {@link #otherProperties}
+ * IOW, properties added to {@link #invocationProperties}
  * are exposed to the response context by default.
  *
  *
@@ -205,7 +203,7 @@ public final class Packet extends DistributedPropertySet {
      * If a message originates from a proxy stub that implements
      * a port interface, this field is set to point to that object.
      *
-     * TODO: who's using this property? 
+     * TODO: who's using this property?
      */
     @Property(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
     public BindingProvider proxy;
@@ -245,9 +243,9 @@ public final class Packet extends DistributedPropertySet {
     }
 
     /**
-     * The value of {@link ContentNegotiation#PROPERTY} 
+     * The value of {@link ContentNegotiation#PROPERTY}
      * property.
-     * 
+     *
      * This property is used only on the client side.
      */
     public ContentNegotiation contentNegotiation;
@@ -271,16 +269,27 @@ public final class Packet extends DistributedPropertySet {
     }
 
     /**
+     * @deprecated
+     *      This method is for exposing header list through {@link PropertySet#get(Object)},
+     *      for user applications, and should never be invoked directly from within the JAX-WS RI.
+     */
+    @Property(JAXWSProperties.HEADER_LIST_PROPERTY)
+    /*package*/ HeaderList getHeaderList() {
+        if(message==null)   return null;
+        return message.getHeaders();
+    }
+
+    /**
      * The list of MIME types that are acceptable to a receiver
      * of an outbound message.
-     * 
+     *
      * This property is used only on the server side.
-     * 
-     * <p>The representation shall be that specified by the HTTP Accept 
+     *
+     * <p>The representation shall be that specified by the HTTP Accept
      * request-header field.
      *
      * <p>The list of content types will be obtained from the transport
-     * meta-data of a inbound message in a request/response message exchange. 
+     * meta-data of a inbound message in a request/response message exchange.
      * Hence this property will be set by the service-side transport pipe.
      *
      */
@@ -356,7 +365,7 @@ public final class Packet extends DistributedPropertySet {
      * <p>
      * This property is used on the client-side for
      * outbound messages, so that a pipeline
-     * can communicate to the terminal (or intermediate) {@link Pipe}s
+     * can communicate to the terminal (or intermediate) {@link Tube}s
      * about this knowledge.
      *
      * <p>
@@ -454,7 +463,7 @@ public final class Packet extends DistributedPropertySet {
      *
      * <p>
      * These properties will not be exposed to the response context.
-     * Consequently, if a {@link Pipe} wishes to hide a property
+     * Consequently, if a {@link Tube} wishes to hide a property
      * to {@link ResponseContext}, it needs to add the property name
      * to this set.
      *
@@ -497,7 +506,7 @@ public final class Packet extends DistributedPropertySet {
      * copied over from a request to a response, and this method handles it correctly.
      *
      * @deprecated
-     *      Use createClientResponse(Message) for client side and 
+     *      Use createClientResponse(Message) for client side and
      *      createServerResponse(Message, String) for server side response
      *      creation.
      *
