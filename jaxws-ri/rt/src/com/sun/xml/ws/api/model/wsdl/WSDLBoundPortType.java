@@ -137,16 +137,8 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
     String getAddressingVersion();
 
     /**
-     * Returns the {@link WebServiceFeature} that matches the <code>id</code>.
-     *
-     * @param id unique id of the feature
-     * @return WebServiceFeature matching the id
-     */
-    WebServiceFeature getFeature(String id);
-
-    /**
-     * Enables a list of {@link WebServiceFeature} based upon policy assertions. This
+     * Enables a {@link WebServiceFeature} based upon policy assertions. This
      * method would be called during WSDL parsing by WS-Policy code.
      */
-    void setFeatures(WebServiceFeature[] features);
+    void addFeature(WebServiceFeature feature);
 }

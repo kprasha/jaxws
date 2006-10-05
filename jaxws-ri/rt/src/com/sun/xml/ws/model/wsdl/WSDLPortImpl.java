@@ -21,6 +21,9 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
@@ -42,7 +45,7 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private final QName bindingName;
     private final WSDLServiceImpl owner;
     private WebServiceFeature addressingFeature;
-    private WebServiceFeature[] features;
+    private List<WebServiceFeature> features;
 
     /**
      * To be set after the WSDL parsing is complete.
@@ -71,8 +74,22 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
         return owner;
     }
 
-    public void setFeatures(WebServiceFeature[] features) {
-        this.features = features;
+    public WebServiceFeature getFeature(String id) {
+        if (features != null) {
+            for (WebServiceFeature f : features) {
+                if (f.getID().equals(id))
+                    return f;
+            }
+        }
+
+        return null;
+    }
+
+    public void addFeature(WebServiceFeature feature) {
+        if (features == null)
+            features = new ArrayList<WebServiceFeature>();
+
+        features.add(feature);
     }
 
     /**

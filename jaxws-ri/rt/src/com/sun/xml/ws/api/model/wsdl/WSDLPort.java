@@ -68,8 +68,16 @@ public interface WSDLPort extends WSDLObject, WSDLExtensible {
     WSDLService getOwner();
 
     /**
-     * Enables a list of {@link WebServiceFeature} based upon policy assertions on this port.
+     * Returns the {@link WebServiceFeature} that matches the <code>id</code>.
+     *
+     * @param id unique id of the feature
+     * @return WebServiceFeature matching the id
+     */
+    WebServiceFeature getFeature(String id);
+
+    /**
+     * Enables a {@link WebServiceFeature} based upon policy assertions on this port.
      * This method would be called during WSDL parsing by WS-Policy code.
      */
-    void setFeatures(WebServiceFeature[] features);
+    void addFeature(WebServiceFeature feature);
 }

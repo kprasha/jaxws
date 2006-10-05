@@ -21,6 +21,9 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -53,7 +56,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
     private WebServiceFeature addressingFeature;
-    private WebServiceFeature[] features;
+    private List<WebServiceFeature> features;
 
     /**
      * Operations keyed by the payload tag name.
@@ -215,6 +218,13 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return addressingFeature.getID();
     }
 
+    public void addFeature(WebServiceFeature feature) {
+        if (features == null)
+            features = new ArrayList<WebServiceFeature>();
+
+        features.add(feature);
+    }
+
     public WebServiceFeature getFeature(String id) {
         if (features != null) {
             for (WebServiceFeature f : features) {
@@ -224,10 +234,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         }
 
         return null;
-    }
-
-    public void setFeatures(WebServiceFeature[] features) {
-        this.features = features;
     }
 
     public void setAddressingFeature(WebServiceFeature af) {
