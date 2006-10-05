@@ -308,7 +308,7 @@ public enum AddressingVersion {
     public final QName isReferenceParameterTag;
 
     private static final String EXTENDED_FAULT_NAMESPACE = "http://jax-ws.dev.java.net/addressing/fault";
-    public static final String UNSET_OUTPUT_ACTION = "http://jax-ws.dev.java.net/addressing/output-action-not-set"
+    public static final String UNSET_OUTPUT_ACTION = "http://jax-ws.dev.java.net/addressing/output-action-not-set";
 
     /**
      * Fault sub-sub-code that represents duplicate &lt;Address> element in EPR.
