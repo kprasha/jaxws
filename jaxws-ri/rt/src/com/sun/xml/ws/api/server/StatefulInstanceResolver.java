@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,9 +50,56 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     private volatile @Nullable T fallback;
 
     /**
+     * Maintains the stateful service instance and its time-out timer.
+     */
+    private final class Instance {
+        final @NotNull T instance;
+        TimerTask task;
+
+        public Instance(T instance) {
+            this.instance = instance;
+        }
+
+        /**
+         * Resets the timer.
+         */
+        public synchronized void restartTimer() {
+            cancel();
+            if(timeoutMilliseconds==0)  return; // no timer
+
+            task = new TimerTask() {
+                public void run() {
+                    try {
+                        Callback<T> cb = timeoutCallback;
+                        if(cb!=null) {
+                            cb.onTimeout(instance,StatefulInstanceResolver.this);
+                            return;
+                        }
+                        // default operation is to unexport it.
+                        unexport(instance);
+                    } catch (Throwable e) {
+                        // don't let an error in the code kill the timer thread
+                        logger.log(Level.SEVERE, "time out handler failed", e);
+                    }
+                }
+            };
+            timer.schedule(task,timeoutMilliseconds);
+        }
+
+        /**
+         * Cancels the timer.
+         */
+        public synchronized void cancel() {
+            if(task!=null)
+                task.cancel();
+            task = null;
+        }
+    }
+
+    /**
      * Maps object ID to instances.
      */
-    private final Map<String,T> instances = Collections.synchronizedMap(new HashMap<String,T>());
+    private final Map<String,Instance> instances = Collections.synchronizedMap(new HashMap<String,Instance>());
     /**
      * Reverse look up for {@link #instances}.
      */
@@ -62,6 +111,10 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     private /*almost final*/ WSEndpoint owner;
     private final Method postConstructMethod;
     private final Method preDestroyMethod;
+
+    // time out control. 0=disabled
+    private volatile long timeoutMilliseconds = 0;
+    private volatile Callback<T> timeoutCallback;
 
     public StatefulInstanceResolver(Class<T> clazz) {
         this.clazz = clazz;
@@ -89,9 +142,11 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
         if(header!=null) {
             // find the instance
             id = header.getStringContent();
-            T o = instances.get(id);
-            if(o!=null)
-                return o;
+            Instance o = instances.get(id);
+            if(o!=null) {
+                o.restartTimer();
+                return o.instance;
+            }
 
             // huh? what is this ID?
             logger.log(Level.INFO,"Request had an unrecognized object ID "+id);
@@ -119,9 +174,11 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
 
     @Override
     public void dispose() {
+        reverseInstances.clear();
         synchronized(instances) {
-            for (T t : instances.values()) {
-                dispose(t);
+            for (Instance t : instances.values()) {
+                t.cancel();
+                dispose(t.instance);
             }
             instances.clear();
         }
@@ -169,8 +226,11 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
             if(o!=null)
                 prepare(o);
             key = UUID.randomUUID().toString();
-            instances.put(key,o);
+            Instance instance = new Instance(o);
+            instances.put(key, instance);
             reverseInstances.put(o,key);
+            if(timeoutMilliseconds!=0)
+                instance.restartTimer();
         }
 
         return createEPR(key,adrsVer,currentRequest);
@@ -223,9 +283,37 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
         this.fallback = o;
     }
 
+    public void setTimeout(long milliseconds, Callback<T> callback) {
+        if(milliseconds<0)
+            throw new IllegalArgumentException();
+        this.timeoutMilliseconds = milliseconds;
+        this.timeoutCallback = callback;
+        if(timeoutMilliseconds>0)
+            startTimer();
+    }
+
+    public void touch(T o) {
+        String key = reverseInstances.get(o);
+        if(key==null)   return; // already unexported.
+        Instance inst = instances.get(key);
+        if(inst==null)  return;
+        inst.restartTimer();
+    }
+
     private void dispose(T instance) {
         invokeMethod(preDestroyMethod,instance);
     }
+
+    /**
+     * Timer that controls the instance time out. Lazily created.
+     */
+    private static volatile Timer timer;
+
+    private static synchronized void startTimer() {
+        if(timer==null)
+            timer = new Timer("JAX-WS stateful web service timeout timer");
+    }
+
 
     private static final QName COOKIE_TAG = new QName("http://jax-ws.dev.java.net/xml/ns/","objectId","jaxws");
 

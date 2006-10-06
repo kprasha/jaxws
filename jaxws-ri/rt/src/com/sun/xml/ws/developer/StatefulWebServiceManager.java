@@ -86,7 +86,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * When you no longer need to tie an instance to the EPR,
  * use {@link #unexport(Object)} so that the object can be GC-ed
  * (or else you'll leak memory.) You may choose to do so explicitly,
- * or you can rely on the time out by using {@link #setTimeout(int)}.
+ * or you can rely on the time out by using {@link #setTimeout(long, Callback)}.
  *
  * <p>
  * {@link StatefulWebServiceManager} is thread-safe. It can be safely
@@ -100,7 +100,8 @@ public interface StatefulWebServiceManager<T> {
      *
      * <p>
      * This method works like {@link #export(Object)} except that
-     * you can obtain the EPR in your choice of addressing version.
+     * you can obtain the EPR in your choice of addressing version,
+     * by passing in the suitable <tt>epr</tt> parameter.
      *
      * @param epr
      *      Either {@link W3CEndpointReference} or {@link MemberSubmissionEndpointReference}.
@@ -217,21 +218,69 @@ public interface StatefulWebServiceManager<T> {
      */
     void setFallbackInstance(T o);
 
-    // TODO
-    ///**
-    // * Configures timeout for exported instances.
-    // *
-    // * <p>
-    // * When configured, the JAX-WS RI will internally use a timer
-    // * so that exported objects that have not received any request
-    // * for the given amount of minutes will be automatically unexported.
-    // *
-    // * <p>
-    // */
-    //void setTimeout(int minutes, Callback<T> callback);
-    //
-    //
-    //interface Callback<T> {
-    //    boolean onTimeout(T timedOutObject, @NotNull StatefulWebServiceManager manager);
-    //}
+    /**
+     * Configures timeout for exported instances.
+     *
+     * <p>
+     * When configured, the JAX-WS RI will internally use a timer
+     * so that exported objects that have not received any request
+     * for the given amount of minutes will be automatically unexported.
+     *
+     * <p>
+     * At some point after the time out has occurred for an instance,
+     * the JAX-WS RI will invoke the {@link Callback} to notify the application
+     * that the time out has reached. Application then has a choice of
+     * either let the object go unexported, or {@link #touch(Object) touch}
+     * let the object live for another round of timer interval.
+     *
+     * <p>
+     * If no callback is set, the expired object will automatically unexported.
+     *
+     * <p>
+     * When you call this method multiple times, its effect on existing
+     * instances are unspecified, although deterministic. 
+     *
+     * @param milliseconds
+     *      The time out interval. Specify 0 to cancel the timeout timer.
+     *      Note that this only guarantees that time out does not occur
+     *      at least until this amount of time has elapsed. It does not
+     *      guarantee that the time out will always happen right after
+     *      the timeout is reached.
+     * @param callback
+     *      application may choose to install a callback to control the
+     *      timeout behavior.
+     */
+    void setTimeout(long milliseconds, @Nullable Callback<T> callback);
+
+    /**
+     * Resets the time out timer for the given instance.
+     *
+     * <p>
+     * If the object is null, not exported, or already unexported, this
+     * method will be no-op.
+     */
+    void touch(T o);
+
+    /**
+     * Used by {@link StatefulWebServiceManager#setTimeout(long, Callback)}
+     * to determine what to do when the time out is reached.
+     */
+    interface Callback<T> {
+        /**
+         * Application has a chance to decide if the object should be unexported,
+         * or kept alive.
+         *
+         * <p>
+         * The application should either unexport the object, or touch the object
+         * from within this callback.
+         * If no action is taken, the object will remain exported until it is
+         * manually unexported.
+         *
+         * @param timedOutObject
+         *      The object that reached the time out.
+         * @param manager
+         *      The manager instance that you exported the object to.
+         */
+        void onTimeout(@NotNull T timedOutObject, @NotNull StatefulWebServiceManager manager);
+    }
 }
