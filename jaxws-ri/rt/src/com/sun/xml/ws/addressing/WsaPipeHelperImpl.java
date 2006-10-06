@@ -110,10 +110,10 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
         String replyToValue = null;
         String faultToValue = null;
 
-        if (replyToValue != null)
+        if (replyTo != null)
             replyToValue = replyTo.getAddress();
 
-        if (faultToValue != null)
+        if (faultTo != null)
             faultToValue = faultTo.getAddress();
 
         if (anon == WSDLBoundOperationImpl.ANONYMOUS.optional) {
