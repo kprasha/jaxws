@@ -82,7 +82,8 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
             }
         }
 
-        return null;
+        // if no feateures on wsdl:port, check wsdl:binding
+        return boundPortType.getFeature(id);
     }
 
     public void addFeature(WebServiceFeature feature) {
