@@ -45,7 +45,7 @@ final class SingletonResolver<T> extends AbstractInstanceResolver<T> {
         return singleton;
     }
 
-    public void start(WebServiceContext wsc, WSEndpoint endpoint) {
+    public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
         buildInjectionPlan(singleton.getClass(),WebServiceContext.class,false).inject(singleton,wsc);
         // notify that we are ready to serve
         invokeMethod(findAnnotatedMethod(singleton.getClass(),PostConstruct.class),singleton);

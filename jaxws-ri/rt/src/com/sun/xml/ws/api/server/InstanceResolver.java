@@ -89,14 +89,14 @@ public abstract class InstanceResolver<T> {
      *      The {@link WebServiceContext} instance to be injected
      *      to the user instances (assuming {@link InstanceResolver}
      */
-    public void start(@NotNull WebServiceContext wsc, @NotNull WSEndpoint endpoint) {
+    public void start(@NotNull WSWebServiceContext wsc, @NotNull WSEndpoint endpoint) {
         // backward compatibility
         start(wsc);
     }
 
     /**
      * @deprecated
-     *      Use {@link #start(WebServiceContext, WSEndpoint)}.
+     *      Use {@link #start(WSWebServiceContext,WSEndpoint)}.
      */
     public void start(@NotNull WebServiceContext wsc) {}
 
@@ -152,7 +152,7 @@ public abstract class InstanceResolver<T> {
     public @NotNull Invoker createInvoker() {
         return new Invoker() {
             @Override
-            public void start(@NotNull WebServiceContext wsc, @NotNull WSEndpoint endpoint) {
+            public void start(@NotNull WSWebServiceContext wsc, @NotNull WSEndpoint endpoint) {
                 InstanceResolver.this.start(wsc,endpoint);
             }
 

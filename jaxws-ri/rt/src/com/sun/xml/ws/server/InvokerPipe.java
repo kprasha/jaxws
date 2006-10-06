@@ -174,7 +174,7 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
     /**
      * The single {@link WebServiceContext} instance injected into application.
      */
-    private final WebServiceContext webServiceContext = new WSWebServiceContext() {
+    private final WSWebServiceContext webServiceContext = new WSWebServiceContext() {
 
         public MessageContext getMessageContext() {
             return new EndpointMessageContextImpl(getRequestPacket());

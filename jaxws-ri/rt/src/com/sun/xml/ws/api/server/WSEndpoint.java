@@ -37,7 +37,6 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import java.net.URL;
 import java.util.Collection;
@@ -88,7 +87,7 @@ import java.util.concurrent.Executor;
  *
  * <h3>Implementation Notes</h3>
  * <p>
- * {@link WSEndpoint} owns a {@link WebServiceContext} implementation.
+ * {@link WSEndpoint} owns a {@link WSWebServiceContext} implementation.
  * But a bulk of the work is delegated to {@link WebServiceContextDelegate},
  * which is passed in as a parameter to {@link PipeHead#process(Packet, WebServiceContextDelegate, TransportBackChannel)}.
  *

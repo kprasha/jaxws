@@ -26,16 +26,15 @@ public abstract class Invoker {
      *      The {@link WebServiceContext} instance that can be injected
      *      to the user instances.
      * @param endpoint
-     *      The endpoint that owns the pipeline that includes this invoker.
      */
-    public void start(@NotNull WebServiceContext wsc, @NotNull WSEndpoint endpoint) {
+    public void start(@NotNull WSWebServiceContext wsc, @NotNull WSEndpoint endpoint) {
         // backward compatibility
         start(wsc);
     }
 
     /**
      * @deprecated
-     *      Use {@link #start(WebServiceContext, WSEndpoint)}
+     *      Use {@link #start(WSWebServiceContext,WSEndpoint)}
      */
     public void start(@NotNull WebServiceContext wsc) {
         throw new IllegalStateException("deprecated version called");

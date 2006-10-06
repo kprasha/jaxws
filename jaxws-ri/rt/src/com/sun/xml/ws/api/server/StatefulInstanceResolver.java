@@ -109,7 +109,7 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     }
 
     @Override
-    public void start(WebServiceContext wsc, WSEndpoint endpoint) {
+    public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
         injectionPlan = buildInjectionPlan(clazz,WebServiceContext.class,false);
         this.webServiceContext = wsc;
         this.owner = endpoint;
