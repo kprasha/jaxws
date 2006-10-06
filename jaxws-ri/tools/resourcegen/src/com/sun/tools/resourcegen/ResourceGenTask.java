@@ -22,31 +22,30 @@
 
 package com.sun.tools.resourcegen;
 
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.DirectoryScanner;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JInvocation;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JPackage;
+import com.sun.xml.bind.api.impl.NameConverter;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
-import java.util.List;
-import java.util.ArrayList;
 import java.text.MessageFormat;
-
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JPackage;
-import com.sun.codemodel.JMod;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JExpr;
-import com.sun.codemodel.JFieldVar;
-import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JInvocation;
-import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.xml.bind.api.impl.NameConverter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Generate source files from resource bundles.
@@ -85,6 +84,9 @@ public class ResourceGenTask extends Task {
 
         for (String value : includedFiles) {
             File res = new File(baseDir, value);
+
+            if(res.getName().contains("_"))
+                continue;   // this is a localized bundle, so ignore.
 
             String className = getClassName(res);
 
