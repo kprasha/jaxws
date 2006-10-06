@@ -25,12 +25,10 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.util.pipe.StandalonePipeAssembler;
-import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
-import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.xml.ws.WebServiceException;
-import java.util.logging.Logger;
 
 /**
  * Factory for transport pipes that enables transport pluggability.
@@ -105,25 +103,11 @@ public abstract class TransportPipeFactory {
      *      used to locate {@code META-INF/servces} files.
      * @return
      *      Always non-null, since we fall back to our default {@link PipelineAssembler}.
+     *
+     * @deprecated
+     *      Use {@link TransportTubeFactory#create(ClassLoader, ClientTubeAssemblerContext)}
      */
     public static Pipe create(@Nullable ClassLoader classLoader, @NotNull ClientPipeAssemblerContext context) {
-        for (TransportPipeFactory factory : ServiceFinder.find(TransportPipeFactory.class,classLoader)) {
-            Pipe pipe = factory.doCreate(context);
-            if(pipe!=null) {
-                logger.fine(factory.getClass()+" successfully created "+pipe);
-                return pipe;
-            }
-        }
-
-        // default built-in trasnports
-        String scheme = context.getAddress().getURI().getScheme();
-        if (scheme != null) {
-            if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
-                return new HttpTransportPipe(context.getBinding());
-        }
-
-        throw new WebServiceException("Unsupported endpoint address: "+context.getAddress());    // TODO: i18n
+        return PipeAdapter.adapt(TransportTubeFactory.create(classLoader,context));
     }
-
-    private static final Logger logger = Logger.getLogger(TransportPipeFactory.class.getName());
 }
