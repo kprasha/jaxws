@@ -100,10 +100,6 @@ public enum AddressingVersion {
             return "IsReferenceParameter";
         }
 
-        /* package */ String getWsdlExtensionLocalName() {
-            return "UsingAddressing";
-        }
-
         /* package */ String getWsdlAnonymousLocalName() {
             return "Anonymous";
         }
@@ -173,10 +169,6 @@ public enum AddressingVersion {
         }
 
         /*package*/ String getIsReferenceParameterLocalName() {
-            return "";
-        }
-
-        /* package */ String getWsdlExtensionLocalName() {
             return "";
         }
 
@@ -350,7 +342,7 @@ public enum AddressingVersion {
         isReferenceParameterTag = new QName(nsUri,getIsReferenceParameterLocalName());
 
         wsdlActionTag = new QName(wsdlNsUri,"Action");
-        wsdlExtensionTag = new QName(wsdlNsUri, getWsdlExtensionLocalName());
+        wsdlExtensionTag = new QName(wsdlNsUri, "UsingAddressing");
         wsdlAnonymousTag = new QName(wsdlNsUri, getWsdlAnonymousLocalName());
 
         // create stock anonymous EPR
@@ -503,8 +495,6 @@ public enum AddressingVersion {
      * @return local name
      */
     /* package */ abstract String getInvalidCardinalityLocalName();
-
-    /* package */ abstract String getWsdlExtensionLocalName();
 
     /* package */ abstract String getWsdlAnonymousLocalName();
 
