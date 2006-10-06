@@ -7,10 +7,12 @@ import com.sun.xml.ws.util.localization.Localizable;
 
 import javax.annotation.Resource;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -29,28 +31,28 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
      * Encapsulates which field/method the injection is done,
      * and performs the injection.
      */
-    protected static interface InjectionPlan<T> {
-        void inject(T instance,WebServiceContext wsc);
+    protected static interface InjectionPlan<T,R> {
+        void inject(T instance,R resource);
     }
 
     /**
      * Injects to a field.
      */
-    private static class FieldInjectionPlan<T> implements InjectionPlan<T> {
+    private static class FieldInjectionPlan<T,R> implements InjectionPlan<T,R> {
         private final Field field;
 
         public FieldInjectionPlan(Field field) {
             this.field = field;
         }
 
-        public void inject(final T instance, final WebServiceContext wsc) {
+        public void inject(final T instance, final R resource) {
             AccessController.doPrivileged(new PrivilegedAction<Object>() {
                 public Object run() {
                     try {
                         if (!field.isAccessible()) {
                             field.setAccessible(true);
                         }
-                        field.set(instance,wsc);
+                        field.set(instance,resource);
                         return null;
                     } catch (IllegalAccessException e) {
                         throw new ServerRtException("server.rt.err",e);
@@ -63,31 +65,31 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
     /**
      * Injects to a method.
      */
-    private static class MethodInjectionPlan<T> implements InjectionPlan<T> {
+    private static class MethodInjectionPlan<T,R> implements InjectionPlan<T,R> {
         private final Method method;
 
         public MethodInjectionPlan(Method method) {
             this.method = method;
         }
 
-        public void inject(final T instance, final WebServiceContext wsc) {
-            invokeMethod(method, instance, wsc);
+        public void inject(T instance, R resource) {
+            invokeMethod(method, instance, resource);
         }
     }
 
     /**
      * Combines multiple {@link InjectionPlan}s into one.
      */
-    private static class Compositor<T> implements InjectionPlan<T> {
-        private final InjectionPlan<T>[] children;
+    private static class Compositor<T,R> implements InjectionPlan<T,R> {
+        private final InjectionPlan<T,R>[] children;
 
-        public Compositor(Collection<InjectionPlan<T>> children) {
+        public Compositor(Collection<InjectionPlan<T,R>> children) {
             this.children = children.toArray(new InjectionPlan[children.size()]);
         }
 
-        public void inject(T instance, WebServiceContext wsc) {
-            for (InjectionPlan<T> plan : children)
-                plan.inject(instance,wsc);
+        public void inject(T instance, R res) {
+            for (InjectionPlan<T,R> plan : children)
+                plan.inject(instance,res);
         }
     }
 
@@ -134,17 +136,25 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
     }
 
     /**
-     * Creates an {@link InjectionPlan} that injects {@link WebServiceContext} to the given class.
+     * Creates an {@link InjectionPlan} that injects the given resource type to the given class.
+     *
+     * @param isStatic
+     *      Only look for static field/method
+     *
      */
-    protected final InjectionPlan<T> buildInjectionPlan(Class clazz) {
-        List<InjectionPlan<T>> plan = new ArrayList<InjectionPlan<T>>();
+    protected final <R> InjectionPlan<T,R> buildInjectionPlan(Class clazz, Class<R> resourceType, boolean isStatic) {
+        List<InjectionPlan<T,R>> plan = new ArrayList<InjectionPlan<T,R>>();
 
         for(Field field: clazz.getDeclaredFields()) {
             Resource resource = field.getAnnotation(Resource.class);
             if (resource != null) {
-                if(isWebServiceContextInjectionPoint(resource, field.getType(),
-                    ServerMessages.localizableWRONG_FIELD_TYPE(field.getName()))) {
-                    plan.add(new FieldInjectionPlan<T>(field));
+                if(isInjectionPoint(resource, field.getType(),
+                    ServerMessages.localizableWRONG_FIELD_TYPE(field.getName()),resourceType)) {
+
+                    if(isStatic && !Modifier.isStatic(field.getModifiers()))
+                        throw new WebServiceException(ServerMessages.STATIC_RESOURCE_INJECTION_ONLY(resourceType,field));
+
+                    plan.add(new FieldInjectionPlan<T,R>(field));
                 }
             }
         }
@@ -155,28 +165,33 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
                 Class[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length != 1)
                     throw new ServerRtException(ServerMessages.WRONG_NO_PARAMETERS(method));
-                if(isWebServiceContextInjectionPoint(resource,paramTypes[0],
-                    ServerMessages.localizableWRONG_PARAMETER_TYPE(method.getName()))) {
-                    plan.add(new MethodInjectionPlan<T>(method));
+                if(isInjectionPoint(resource,paramTypes[0],
+                    ServerMessages.localizableWRONG_PARAMETER_TYPE(method.getName()),resourceType)) {
+
+                    if(isStatic && !Modifier.isStatic(method.getModifiers()))
+                        throw new WebServiceException(ServerMessages.STATIC_RESOURCE_INJECTION_ONLY(resourceType,method));
+
+                    plan.add(new MethodInjectionPlan<T,R>(method));
                 }
             }
         }
 
-        return new Compositor<T>(plan);
+        return new Compositor<T,R>(plan);
     }
 
     /**
      * Returns true if the combination of {@link Resource} and the field/method type
      * are consistent for {@link WebServiceContext} injection.
      */
-    private boolean isWebServiceContextInjectionPoint(Resource resource, Class fieldType, Localizable errorMessage ) {
-        Class resourceType = resource.type();
-        if (resourceType.equals(Object.class)) {
-            return fieldType.equals(WebServiceContext.class);
-        } else if (resourceType.equals(WebServiceContext.class)) {
-            if (fieldType.isAssignableFrom(WebServiceContext.class)) {
+    private boolean isInjectionPoint(Resource resource, Class fieldType, Localizable errorMessage, Class resourceType ) {
+        Class t = resource.type();
+        if (t.equals(Object.class)) {
+            return fieldType.equals(resourceType);
+        } else if (t.equals(resourceType)) {
+            if (fieldType.isAssignableFrom(resourceType)) {
                 return true;
             } else {
+                // type compatibility error
                 throw new ServerRtException(errorMessage);
             }
         }

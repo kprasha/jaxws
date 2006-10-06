@@ -31,7 +31,11 @@ import java.util.logging.Logger;
 
 /**
  * {@link InstanceResolver} that looks at JAX-WS cookie header to
- * determine the instance to which a message will be routed to.
+ * determine the instance to which a message will be routed.
+ *
+ * <p>
+ * See {@link StatefulWebServiceManager} for more about user-level semantics.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> implements StatefulWebServiceManager<T> {
@@ -53,7 +57,7 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     private final Map<T,String> reverseInstances = Collections.synchronizedMap(new HashMap<T,String>());
 
     // fields for resource injection.
-    private /*almost final*/ InjectionPlan<T> injectionPlan;
+    private /*almost final*/ InjectionPlan<T,WebServiceContext> injectionPlan;
     private /*almost final*/ WebServiceContext webServiceContext;
     private /*almost final*/ WSEndpoint owner;
     private final Method postConstructMethod;
@@ -106,9 +110,11 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
 
     @Override
     public void start(WebServiceContext wsc, WSEndpoint endpoint) {
-        injectionPlan = buildInjectionPlan(clazz);
+        injectionPlan = buildInjectionPlan(clazz,WebServiceContext.class,false);
         this.webServiceContext = wsc;
         this.owner = endpoint;
+
+        buildInjectionPlan(clazz,StatefulWebServiceManager.class,true).inject(null,this);
     }
 
     @Override
