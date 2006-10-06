@@ -25,7 +25,7 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.developer.StatefulWebServiceManager;
+import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.ServerRtException;
 
@@ -126,7 +126,7 @@ public abstract class InstanceResolver<T> {
      */
     public static <T> InstanceResolver<T> createDefault(Class<T> clazz) {
         assert clazz!=null;
-        if(AbstractInstanceResolver.buildInjectionPlan(clazz,StatefulWebServiceManager.class,true).count()>0)
+        if(clazz.getAnnotation(Stateful.class)!=null)
             return new StatefulInstanceResolver<T>(clazz);
         else
             return createSingleton(createNewInstance(clazz));

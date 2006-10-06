@@ -42,7 +42,7 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
     /**
      * Injects to a field.
      */
-    private static class FieldInjectionPlan<T,R> implements InjectionPlan<T,R> {
+    protected static class FieldInjectionPlan<T,R> implements InjectionPlan<T,R> {
         private final Field field;
 
         public FieldInjectionPlan(Field field) {
@@ -73,7 +73,7 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
     /**
      * Injects to a method.
      */
-    private static class MethodInjectionPlan<T,R> implements InjectionPlan<T,R> {
+    protected static class MethodInjectionPlan<T,R> implements InjectionPlan<T,R> {
         private final Method method;
 
         public MethodInjectionPlan(Method method) {

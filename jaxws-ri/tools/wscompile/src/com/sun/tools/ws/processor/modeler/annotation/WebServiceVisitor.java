@@ -46,6 +46,7 @@ import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
+import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.model.RuntimeModeler;
 
 import javax.jws.HandlerChain;
@@ -483,23 +484,26 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     
     
     protected boolean isLegalImplementation(WebService webService, ClassDeclaration classDecl) {
+
+        boolean isStateful = classDecl.getAnnotation(Stateful.class)!=null;
+
         Collection<Modifier> modifiers = classDecl.getModifiers();
         if (!modifiers.contains(Modifier.PUBLIC)){
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.not.public",
                 classDecl.getQualifiedName());
                     return false;
         }
-        if (modifiers.contains(Modifier.FINAL)) {
+        if (modifiers.contains(Modifier.FINAL) && !isStateful) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.is.final",
                 classDecl.getQualifiedName());
                     return false;
         }
-        if (modifiers.contains(Modifier.ABSTRACT)) {
+        if (modifiers.contains(Modifier.ABSTRACT) && !isStateful) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.is.abstract",
                 classDecl.getQualifiedName());
                     return false;
         }
-        if (classDecl.getDeclaringType() != null && !modifiers.contains(Modifier.STATIC)) {
+        if (classDecl.getDeclaringType() != null && !modifiers.contains(Modifier.STATIC) && !isStateful) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.class.is.innerclass.not.static",
                 classDecl.getQualifiedName());
                     return false;
@@ -512,7 +516,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
                 break;
             }
         }
-        if (!hasDefaultConstructor) {
+        if (!hasDefaultConstructor && !isStateful) {
             builder.onError(classDecl.getPosition(), "webserviceap.webservice.no.default.constructor",
                 classDecl.getQualifiedName());
                     return false;

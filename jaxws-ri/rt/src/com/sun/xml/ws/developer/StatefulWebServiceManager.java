@@ -21,10 +21,12 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * <h2>Usage</h2>
  * <p>
  * Application service implementation classes (or providers) who'd like
- * to use the stateful web service support must declare {@link Resource}
- * injection to a static field or a method as follows:
+ * to use the stateful web service support must declare {@link Stateful}
+ * annotation on a class. It should also have a <b>public static</b> method/field
+ * that takes {@link StatefulWebServiceManager}.
  *
  * <pre>
+ * &#64;{@link Stateful}
  * &#64;{@link WebService}
  * class BankAccount {
  *     protected final int id;
@@ -34,13 +36,13 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  *     &#64;{@link WebMethod}
  *     public synchronized void deposit(int amount) { balance+=amount; }
  *
- *     // either via a static field
+ *     // either via a public static field
  *     <font color=red>
- *     &#64;{@link Resource} static {@link StatefulWebServiceManager} manager;
+ *     public static {@link StatefulWebServiceManager}&lt;BankAccount> manager;
  *     </font>
- *     // ... or  via a static method (the method name could be anything)
+ *     // ... or  via a public static method (the method name could be anything)
  *     <font color=red>
- *     &#64;{@link Resource} static void setManager({@link StatefulWebServiceManager} manager) {
+ *     public static void setManager({@link StatefulWebServiceManager}&lt;BankAccount> manager) {
  *        ...
  *     }
  *     </font>
@@ -48,8 +50,8 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * </pre>
  *
  * <p>
- * After your service is deployed but before you receive a first request, this injection
- * occurs.
+ * After your service is deployed but before you receive a first request,
+ * the resource injection occurs on the field or the method.
  *
  * <p>
  * A stateful web service class does not need to have a default constructor.
@@ -93,6 +95,8 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * invoked from multiple threads concurrently.
  *
  * @author Kohsuke Kawaguchi
+ * @see Stateful
+ * @since 2.1
  */
 public interface StatefulWebServiceManager<T> {
     /**

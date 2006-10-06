@@ -21,7 +21,9 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -169,7 +171,27 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
         this.webServiceContext = wsc;
         this.owner = endpoint;
 
-        buildInjectionPlan(clazz,StatefulWebServiceManager.class,true).inject(null,this);
+        // inject StatefulWebServiceManager.
+        for(Field field: clazz.getDeclaredFields()) {
+            if(field.getType()==StatefulWebServiceManager.class) {
+                if(!Modifier.isStatic(field.getModifiers()))
+                    throw new WebServiceException(ServerMessages.STATIC_RESOURCE_INJECTION_ONLY(StatefulWebServiceManager.class,field));
+                new FieldInjectionPlan<T,StatefulWebServiceManager>(field).inject(null,this);
+            }
+        }
+
+        for(Method method : clazz.getDeclaredMethods()) {
+            Class[] paramTypes = method.getParameterTypes();
+            if (paramTypes.length != 1)
+                continue;   // not what we are looking for
+
+            if(paramTypes[0]==StatefulWebServiceManager.class) {
+                if(!Modifier.isStatic(method.getModifiers()))
+                    throw new WebServiceException(ServerMessages.STATIC_RESOURCE_INJECTION_ONLY(StatefulWebServiceManager.class,method));
+
+                new MethodInjectionPlan<T,StatefulWebServiceManager>(method).inject(null,this);
+            }
+        }
     }
 
     @Override

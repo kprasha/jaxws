@@ -33,6 +33,7 @@ import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.InterfaceType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.SourcePosition;
+import com.sun.tools.ws.ToolVersion;
 import com.sun.tools.ws.processor.ProcessorNotificationListener;
 import com.sun.tools.ws.processor.ProcessorOptions;
 import com.sun.tools.ws.processor.generator.GeneratorUtil;
@@ -45,13 +46,11 @@ import com.sun.tools.ws.processor.modeler.ModelerException;
 import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.util.ToolBase;
-import com.sun.tools.ws.ToolVersion;
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessage;
 
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceProvider;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashSet;
@@ -59,7 +58,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 
 
 /**
@@ -77,9 +75,6 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
     private File sourceDir;
 
-    // the model being build
-    private Model model;
-
     private TypeDeclaration remoteDecl;
     private TypeDeclaration remoteExceptionDecl;
     private TypeDeclaration exceptionDecl;
@@ -89,11 +84,9 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
     protected AnnotationProcessorContext context;
     private Set<TypeDeclaration> processedTypeDecls = new HashSet<TypeDeclaration>();
     protected Messager messager;
-    private ByteArrayOutputStream output;
     private ToolBase tool;
     private boolean doNotOverWrite = false;
-    private boolean wrapperGenerated = false;
-    /* 
+    /*
      * Is this invocation from APT or JavaC?
      */
     private boolean isAPTInvocation = false;
@@ -128,7 +121,7 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
         if (env == null) {
             Map<String, String> apOptions = apEnv.getOptions();
-            output = new ByteArrayOutputStream();
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
             String classDir = apOptions.get("-d");
             if (classDir == null)
                 classDir = ".";
@@ -254,7 +247,6 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
     public void setService(Service service) {
         this.service = service;
-        model.addService(service);
     }
 
     public void setPort(Port port) {
@@ -267,7 +259,6 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
     }
 
     public void setWrapperGenerated(boolean wrapperGenerated) {
-        this.wrapperGenerated = wrapperGenerated;
     }
 
     public TypeDeclaration getTypeDeclaration(String typeName) {
@@ -280,7 +271,7 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
     private void buildModel() {
         WebService webService;
-        WebServiceProvider webServiceProvider = null;
+        WebServiceProvider webServiceProvider;
         WebServiceVisitor wrapperGenerator = createWrapperGenerator();
         boolean processedEndpoint = false;
         for (TypeDeclaration typedecl: apEnv.getTypeDeclarations()) {
@@ -291,7 +282,7 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
             if (webServiceProvider != null) {
                 if (webService != null) {
                     onError("webserviceap.webservice.and.webserviceprovider",
-                            new Object[] {typedecl.getQualifiedName()});
+                        typedecl.getQualifiedName());
                 }
                 processedEndpoint = true;
             }
