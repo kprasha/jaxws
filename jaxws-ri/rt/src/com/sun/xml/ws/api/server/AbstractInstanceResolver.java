@@ -33,6 +33,10 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
      */
     protected static interface InjectionPlan<T,R> {
         void inject(T instance,R resource);
+        /**
+         * Gets the number of injections to be performed.
+         */
+        int count();
     }
 
     /**
@@ -60,6 +64,10 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
                 }
             });
         }
+
+        public int count() {
+            return 1;
+        }
     }
 
     /**
@@ -74,6 +82,10 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
 
         public void inject(T instance, R resource) {
             invokeMethod(method, instance, resource);
+        }
+
+        public int count() {
+            return 1;
         }
     }
 
@@ -90,6 +102,13 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
         public void inject(T instance, R res) {
             for (InjectionPlan<T,R> plan : children)
                 plan.inject(instance,res);
+        }
+
+        public int count() {
+            int r = 0;
+            for (InjectionPlan<T, R> plan : children)
+                r += plan.count();
+            return r;
         }
     }
 
@@ -142,7 +161,8 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
      *      Only look for static field/method
      *
      */
-    protected final <R> InjectionPlan<T,R> buildInjectionPlan(Class clazz, Class<R> resourceType, boolean isStatic) {
+    protected static <T,R>
+    InjectionPlan<T,R> buildInjectionPlan(Class<? extends T> clazz, Class<R> resourceType, boolean isStatic) {
         List<InjectionPlan<T,R>> plan = new ArrayList<InjectionPlan<T,R>>();
 
         for(Field field: clazz.getDeclaredFields()) {
@@ -183,7 +203,7 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
      * Returns true if the combination of {@link Resource} and the field/method type
      * are consistent for {@link WebServiceContext} injection.
      */
-    private boolean isInjectionPoint(Resource resource, Class fieldType, Localizable errorMessage, Class resourceType ) {
+    private static boolean isInjectionPoint(Resource resource, Class fieldType, Localizable errorMessage, Class resourceType ) {
         Class t = resource.type();
         if (t.equals(Object.class)) {
             return fieldType.equals(resourceType);

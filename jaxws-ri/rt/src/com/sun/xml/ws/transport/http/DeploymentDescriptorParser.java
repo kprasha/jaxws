@@ -236,7 +236,7 @@ public class DeploymentDescriptorParser<A> {
             ensureNoContent(reader);
             WSEndpoint<?> endpoint = WSEndpoint.create(
                     implementorClass, !handlersSetInDD,
-                    InstanceResolver.createSingleton(getImplementor(implementorClass)).createInvoker(),
+                    InstanceResolver.createDefault(implementorClass).createInvoker(),
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
             );
@@ -476,23 +476,6 @@ public class DeploymentDescriptorParser<A> {
             logger.log(Level.SEVERE, e.getMessage(), e);
             throw new ServerRtException(
                 "runtime.parser.classNotFound", name);
-        }
-    }
-
-    /*
-     * Instantiates endpoint implementation
-     */
-    protected Object getImplementor(Class cl) {
-        try {
-            return cl.newInstance();
-        } catch (InstantiationException e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
-            throw new ServerRtException(
-                WsservletMessages.ERROR_IMPLEMENTOR_FACTORY_NEW_INSTANCE_FAILED(cl));
-        } catch (IllegalAccessException e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
-            throw new ServerRtException(
-                WsservletMessages.ERROR_IMPLEMENTOR_FACTORY_NEW_INSTANCE_FAILED(cl));
         }
     }
 

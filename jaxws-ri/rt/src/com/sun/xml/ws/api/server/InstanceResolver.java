@@ -25,11 +25,16 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.developer.StatefulWebServiceManager;
+import com.sun.xml.ws.resources.WsservletMessages;
+import com.sun.xml.ws.server.ServerRtException;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Determines the instance that serves
@@ -117,6 +122,31 @@ public abstract class InstanceResolver<T> {
     }
 
     /**
+     * Creates a default {@link InstanceResolver} that serves the given class.
+     */
+    public static <T> InstanceResolver<T> createDefault(Class<T> clazz) {
+        assert clazz!=null;
+        if(AbstractInstanceResolver.buildInjectionPlan(clazz,StatefulWebServiceManager.class,true).count()>0)
+            return new StatefulInstanceResolver<T>(clazz);
+        else
+            return createSingleton(createNewInstance(clazz));
+    }
+
+    private static <T> T createNewInstance(Class<T> cl) {
+        try {
+            return cl.newInstance();
+        } catch (InstantiationException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            throw new ServerRtException(
+                WsservletMessages.ERROR_IMPLEMENTOR_FACTORY_NEW_INSTANCE_FAILED(cl));
+        } catch (IllegalAccessException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            throw new ServerRtException(
+                WsservletMessages.ERROR_IMPLEMENTOR_FACTORY_NEW_INSTANCE_FAILED(cl));
+        }
+    }
+
+    /**
      * Wraps this {@link InstanceResolver} into an {@link Invoker}.
      */
     public @NotNull Invoker createInvoker() {
@@ -146,4 +176,8 @@ public abstract class InstanceResolver<T> {
             }
         };
     }
+
+    private static final Logger logger =
+        Logger.getLogger(
+            com.sun.xml.ws.util.Constants.LoggingDomain + ".server");
 }
