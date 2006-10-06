@@ -44,7 +44,9 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * @author Arun Gupta
  */
 public enum AddressingVersion {
-    W3C("http://www.w3.org/2005/08/addressing","w3c-anonymous-epr.xml","http://www.w3.org/2006/05/addressing/wsdl") {
+    W3C("http://www.w3.org/2005/08/addressing",
+        "w3c-anonymous-epr.xml",
+        "http://www.w3.org/2006/05/addressing/wsdl") {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
@@ -118,7 +120,9 @@ public enum AddressingVersion {
             return AddressingFeature.ID;
         }
     },
-    MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing","member-anonymous-epr.xml","http://schemas.xmlsoap.org/ws/2004/08/addressing") {
+    MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing",
+           "member-anonymous-epr.xml",
+           "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing") {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
@@ -536,7 +540,7 @@ public enum AddressingVersion {
      * <code>enabled</code> and <code>required</code> are used to initialize
      * the value of the feature.
      *
-     * @param nsUri namespace URI
+     * @param nsUri namespace URI of the WS-Addressing WSDL Binding
      * @param enabled true if feature is to be enabled, false otherwise
      * @param required true if feature is required, false otherwise. Corresponds
      *          to wsdl:required on the extension/assertion.
@@ -544,9 +548,9 @@ public enum AddressingVersion {
      * @throws WebServiceException if an unsupported namespace URI is passed
      */
     public static @NotNull WebServiceFeature getFeature(String nsUri, boolean enabled, boolean required) {
-        if (nsUri == W3C.nsUri)
+        if (nsUri == W3C.wsdlNsUri)
             return new AddressingFeature(enabled, required);
-        else if (nsUri == MEMBER.nsUri)
+        else if (nsUri == MEMBER.wsdlNsUri)
             return new MemberSubmissionAddressingFeature(enabled, required);
         else
             throw new WebServiceException("Unsupported namespace URI: " + nsUri);
