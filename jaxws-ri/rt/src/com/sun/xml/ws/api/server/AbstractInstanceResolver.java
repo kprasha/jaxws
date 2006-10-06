@@ -122,14 +122,10 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
         Method r = null;
         for(Method method : clazz.getDeclaredMethods()) {
             if (method.getAnnotation(annType) != null) {
-                if (once) {
-                    // Err: Multiple methods have annType annotation
-                    throw new ServerRtException("annotation.only.once", annType );
-                }
-                if (method.getParameterTypes().length != 0) {
-                    throw new ServerRtException("not.zero.parameters",
-                        method.getName());
-                }
+                if (once)
+                    throw new ServerRtException(ServerMessages.ANNOTATION_ONLY_ONCE(annType));
+                if (method.getParameterTypes().length != 0)
+                    throw new ServerRtException(ServerMessages.NOT_ZERO_PARAMETERS(method));
                 r = method;
                 once = true;
             }
@@ -157,10 +153,8 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
             Resource resource = method.getAnnotation(Resource.class);
             if (resource != null) {
                 Class[] paramTypes = method.getParameterTypes();
-                if (paramTypes.length != 1) {
-                    throw new ServerRtException("wrong.no.parameters",
-                        method.getName());
-                }
+                if (paramTypes.length != 1)
+                    throw new ServerRtException(ServerMessages.WRONG_NO_PARAMETERS(method));
                 if(isWebServiceContextInjectionPoint(resource,paramTypes[0],
                     ServerMessages.localizableWRONG_PARAMETER_TYPE(method.getName()))) {
                     plan.add(new MethodInjectionPlan<T>(method));
