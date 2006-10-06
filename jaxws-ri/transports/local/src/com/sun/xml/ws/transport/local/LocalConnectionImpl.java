@@ -31,6 +31,7 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,8 +50,13 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
     private Map<String, List<String>> rspHeaders = null;
     protected int statusCode;
     private ByteArrayBuffer baos;
+    /**
+     * The address of the endpoint to which this message is sent.
+     */
+    private final URI baseURI;
 
-    LocalConnectionImpl(@NotNull Map<String, List<String>> reqHeaders) {
+    LocalConnectionImpl(URI baseURI, @NotNull Map<String, List<String>> reqHeaders) {
+        this.baseURI = baseURI;
         this.reqHeaders = reqHeaders;
     }
 
@@ -80,7 +86,7 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
     }
 
     public @NotNull String getEPRAddress(Packet request, WSEndpoint endpoint) {
-        throw new UnsupportedOperationException();
+        return baseURI.resolve("?"+endpoint.getPortName().getLocalPart()).toString();
     }
 
     public @NotNull String getRequestMethod() {

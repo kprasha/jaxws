@@ -40,6 +40,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,18 +69,24 @@ final class LocalTransportTube extends AbstractTubeImpl {
 
     private final Codec codec;
 
+    /**
+     * The address of the endpoint deployed in this tube.
+     */
+    private final URI baseURI;
+
     // per-pipe reusable resources.
     // we don't really have to reuse anything since this isn't designed for performance,
     // but nevertheless we do it as an experiement.
     private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
-    public LocalTransportTube(WSEndpoint endpoint, WSBinding binding) {
-        this(HttpAdapter.createAlone(endpoint),binding.createCodec());
+    public LocalTransportTube(URI baseURI, WSEndpoint endpoint, WSBinding binding) {
+        this(baseURI,HttpAdapter.createAlone(endpoint),binding.createCodec());
     }
 
-    private LocalTransportTube(HttpAdapter adapter, Codec codec) {
+    private LocalTransportTube(URI baseURI,HttpAdapter adapter, Codec codec) {
         this.adapter = adapter;
         this.codec = codec;
+        this.baseURI = baseURI;
         assert codec !=null && adapter!=null;
     }
 
@@ -87,7 +94,7 @@ final class LocalTransportTube extends AbstractTubeImpl {
      * Copy constructor for {@link Tube#copy(TubeCloner)}.
      */
     private LocalTransportTube(LocalTransportTube that, TubeCloner cloner) {
-        this(that.adapter, that.codec.copy());
+        this(that.baseURI, that.adapter, that.codec.copy());
         cloner.add(that,this);
     }
 
@@ -109,7 +116,7 @@ final class LocalTransportTube extends AbstractTubeImpl {
             }
 
 
-            LocalConnectionImpl con = new LocalConnectionImpl(reqHeaders);
+            LocalConnectionImpl con = new LocalConnectionImpl(baseURI,reqHeaders);
             // Calling getStaticContentType sets some internal state in the codec
             // TODO : need to fix this properly in Codec
             ContentType contentType = codec.getStaticContentType(request);
@@ -124,12 +131,12 @@ final class LocalTransportTube extends AbstractTubeImpl {
                 baos.writeTo(con.getOutput());
             }
             reqHeaders.put("Content-Type", Collections.singletonList(requestContentType));
-            
+
             String requestAccept = contentType.getAcceptHeader();
             if (contentType.getAcceptHeader() != null) {
                 reqHeaders.put("Accept", Collections.singletonList(requestAccept));
             }
-            
+
             if(dump)
                 dump(con,"request",reqHeaders);
 
@@ -146,9 +153,9 @@ final class LocalTransportTube extends AbstractTubeImpl {
 
             // TODO: check if returned MIME type is the same as that which was sent
             // or is acceptable if an Accept header was used
-            
+
             checkFIConnegIntegrity(request.contentNegotiation, requestContentType, requestAccept, responseContentType);
-            
+
             Packet reply = request.createClientResponse(null);
             codec.decode(con.getInput(), responseContentType, reply);
             return reply;
@@ -159,14 +166,14 @@ final class LocalTransportTube extends AbstractTubeImpl {
         }
     }
 
-    private void checkFIConnegIntegrity(ContentNegotiation conneg, 
-            String requestContentType, String requestAccept, String responseContentType) {
+    private void checkFIConnegIntegrity(ContentNegotiation conneg,
+                                        String requestContentType, String requestAccept, String responseContentType) {
         requestAccept = (requestAccept == null) ? "" : requestAccept;
         if (requestContentType.contains("fastinfoset")) {
             if (!responseContentType.contains("fastinfoset")) {
                 throw new RuntimeException(
-                        "Request is encoded using Fast Infoset but response (" + 
-                        responseContentType + 
+                        "Request is encoded using Fast Infoset but response (" +
+                        responseContentType +
                         ") is not");
             } else if (conneg == ContentNegotiation.none) {
                 throw new RuntimeException(
@@ -185,12 +192,12 @@ final class LocalTransportTube extends AbstractTubeImpl {
                     "Content negotitaion is set to pessimistic but Fast Infoset is not acceptable");
         } else if (conneg == ContentNegotiation.optimistic) {
             throw new RuntimeException(
-                    "Content negotitaion is set to optimistic but the request (" + 
-                    requestContentType + 
+                    "Content negotitaion is set to optimistic but the request (" +
+                    requestContentType +
                     ") is not encoded using Fast Infoset");
         }
     }
-    
+
     private String getResponseContentType(LocalConnectionImpl con) {
         Map<String, List<String>> rsph = con.getResponseHeaders();
         if(rsph!=null) {

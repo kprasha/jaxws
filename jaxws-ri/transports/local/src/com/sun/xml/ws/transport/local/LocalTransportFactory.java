@@ -59,7 +59,7 @@ public final class LocalTransportFactory extends TransportTubeFactory {
         if(!adrs.getScheme().equals("local"))
             return null;
 
-        return new LocalTransportTube(createServerService(adrs),context.getBinding());
+        return new LocalTransportTube(adrs,createServerService(adrs),context.getBinding());
     }
 
     /**
