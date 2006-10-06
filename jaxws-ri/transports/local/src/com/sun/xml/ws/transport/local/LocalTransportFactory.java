@@ -23,9 +23,10 @@
 package com.sun.xml.ws.transport.local;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.TransportPipeFactory;
+import com.sun.xml.ws.api.pipe.TransportTubeFactory;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
@@ -52,13 +53,13 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class LocalTransportFactory extends TransportPipeFactory {
-    public Pipe doCreate(@NotNull ClientPipeAssemblerContext context) {
+public final class LocalTransportFactory extends TransportTubeFactory {
+    public Tube doCreate(@NotNull ClientTubeAssemblerContext context) {
         URI adrs = context.getAddress().getURI();
         if(!adrs.getScheme().equals("local"))
             return null;
 
-        return new LocalTransportPipe(createServerService(adrs),context.getBinding());
+        return new LocalTransportTube(createServerService(adrs),context.getBinding());
     }
 
     /**

@@ -24,8 +24,8 @@ package com.sun.xml.ws.transport.local;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
@@ -79,8 +79,8 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         return false;   // not really supported
     }
 
-    public String getEPRAddress(Packet request, WSEndpoint endpoint) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public @NotNull String getEPRAddress(Packet request, WSEndpoint endpoint) {
+        throw new UnsupportedOperationException();
     }
 
     public @NotNull String getRequestMethod() {

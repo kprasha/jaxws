@@ -54,7 +54,7 @@ import java.util.Map.Entry;
  *
  * @author Jitendra Kotamraju
  */
-final class LocalTransportPipe extends AbstractTubeImpl {
+final class LocalTransportTube extends AbstractTubeImpl {
 
     /**
      * Represents the service running inside the local transport.
@@ -73,11 +73,11 @@ final class LocalTransportPipe extends AbstractTubeImpl {
     // but nevertheless we do it as an experiement.
     private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
-    public LocalTransportPipe(WSEndpoint endpoint, WSBinding binding) {
+    public LocalTransportTube(WSEndpoint endpoint, WSBinding binding) {
         this(HttpAdapter.createAlone(endpoint),binding.createCodec());
     }
 
-    private LocalTransportPipe(HttpAdapter adapter, Codec codec) {
+    private LocalTransportTube(HttpAdapter adapter, Codec codec) {
         this.adapter = adapter;
         this.codec = codec;
         assert codec !=null && adapter!=null;
@@ -86,7 +86,7 @@ final class LocalTransportPipe extends AbstractTubeImpl {
     /**
      * Copy constructor for {@link Tube#copy(TubeCloner)}.
      */
-    private LocalTransportPipe(LocalTransportPipe that, TubeCloner cloner) {
+    private LocalTransportTube(LocalTransportTube that, TubeCloner cloner) {
         this(that.adapter, that.codec.copy());
         cloner.add(that,this);
     }
@@ -214,8 +214,8 @@ final class LocalTransportPipe extends AbstractTubeImpl {
     public void preDestroy() {
     }
 
-    public LocalTransportPipe copy(TubeCloner cloner) {
-        return new LocalTransportPipe(this, cloner);
+    public LocalTransportTube copy(TubeCloner cloner) {
+        return new LocalTransportTube(this, cloner);
     }
 
     private void dump(LocalConnectionImpl con, String caption, Map<String,List<String>> headers) {
@@ -245,7 +245,7 @@ final class LocalTransportPipe extends AbstractTubeImpl {
     static {
         boolean b;
         try {
-            b = Boolean.getBoolean(LocalTransportPipe.class.getName()+".dump");
+            b = Boolean.getBoolean(LocalTransportTube.class.getName()+".dump");
         } catch( Throwable t ) {
             b = false;
         }
