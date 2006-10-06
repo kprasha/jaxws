@@ -53,7 +53,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.message.FaultDetailHeader;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.resources.AddressingMessages;
 import org.w3c.dom.Element;
 
@@ -69,7 +68,7 @@ public abstract class WsaPipeHelper {
         try {
             checkCardinality(packet);
 
-            checkAction(packet);
+            validateAction(packet);
 
             return packet;
         } catch (InvalidMapException e) {
@@ -120,13 +119,9 @@ public abstract class WsaPipeHelper {
         AddressingVersion av = binding.getAddressingVersion();
         java.util.Iterator<Header> hIter = message.getHeaders().getHeaders(av.nsUri, true);
 
-        WSDLPortImpl impl = (WSDLPortImpl)wsdlPort;
-
-        if (wsdlPort != null) {
-            // no need to process if WS-A is not required and no WS-A headers are present
-            if (!AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())) && !hIter.hasNext())
-                return;
-        }
+        // no need to process if WS-A is not required and no WS-A headers are present
+        if (!AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())) && !hIter.hasNext())
+            return;
 
         QName faultyHeader = null;
         WSEndpointReference replyTo = null;
@@ -196,8 +191,13 @@ public abstract class WsaPipeHelper {
             throw new InvalidMapException(faultyHeader, av.invalidCardinalityTag);
         }
 
-        // check for mandatory set of headers
-        if (impl != null && AddressingVersion.isRequired(binding.getFeature(av.getFeatureID()))) {
+        // WS-A is engaged only if wsa:Action header is found
+        boolean engaged = foundAction;
+
+        // check for mandatory set of headers only if:
+        // 1. WS-A is engaged or
+        // 2. wsdl:required=true
+        if (engaged || AddressingVersion.isRequired(binding.getFeature(av.getFeatureID()))) {
             // if no wsa:Action header is found
             if (!foundAction)
                 throw new MapRequiredException(av.actionTag);
@@ -228,7 +228,7 @@ public abstract class WsaPipeHelper {
         }
     }
 
-    private void checkAction(Packet packet) {
+    private void validateAction(Packet packet) {
         //There may not be a WSDL operation.  There may not even be a WSDL.
         //For instance this may be a RM CreateSequence message.
         WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
@@ -243,8 +243,25 @@ public abstract class WsaPipeHelper {
             return;
         }
 
-        String action = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
-        validateAction(packet, action);
+        String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+
+        // For now, validation happens only on server-side.
+        // todo: should it happen on client side as well ?
+        if (packet.proxy != null) {
+            return;
+        }
+
+        if (gotA == null)
+            throw new WebServiceException("null input action"); // TODO: i18n
+
+        String expected = getInputAction(packet);
+        String soapAction = getSOAPAction(packet);
+        if (isInputActionDefault(packet) && (soapAction != null && !soapAction.equals("")))
+            expected = soapAction;
+
+        if (expected != null && !gotA.equals(expected)) {
+            throw new ActionNotSupportedException(gotA);
+        }
     }
 
     private WSDLBoundOperation getWSDLBoundOperation(Packet packet) {
@@ -301,25 +318,6 @@ public abstract class WsaPipeHelper {
             return action;
         } catch (SOAPException e) {
             throw new WebServiceException(e);
-        }
-    }
-
-    private void validateAction(Packet packet, String gotA) {
-        // TODO: For now, validation happens only on server-side
-        if (packet.proxy != null) {
-            return;
-        }
-
-        if (gotA == null)
-            throw new WebServiceException("null input action"); // TODO: i18n
-
-        String expected = getInputAction(packet);
-        String soapAction = getSOAPAction(packet);
-        if (isInputActionDefault(packet) && (soapAction != null && !soapAction.equals("")))
-            expected = soapAction;
-
-        if (expected != null && !gotA.equals(expected)) {
-            throw new ActionNotSupportedException(gotA);
         }
     }
 
