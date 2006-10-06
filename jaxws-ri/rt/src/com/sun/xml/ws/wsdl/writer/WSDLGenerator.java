@@ -666,15 +666,10 @@ public class WSDLGenerator {
     }
 
     protected void generateBindingOperation(JavaMethodImpl method, Binding binding) {
-//        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         BindingOperationType operation = binding.operation().name(method.getOperationName());
         extension.addBindingOperationExtension(operation, method);
         String targetNamespace = model.getTargetNamespace();
-//        QName requestMessage = method.getOperation().getName();
-//        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
         QName requestMessage = new QName(targetNamespace, method.getOperationName());
-        QName responseMessage = new QName(targetNamespace, method.getResponseMessageName());
-
         List<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
         List<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
         splitParameters(bodyParams, headerParams, method.getRequestParameters());
@@ -755,6 +750,7 @@ public class WSDLGenerator {
                     }
                 }
                 body.parts(parts);
+                QName responseMessage = new QName(targetNamespace, method.getResponseMessageName());                
                 generateSOAPHeaders(output, headerParams, responseMessage);
             }
             if (isRpc) {
@@ -769,13 +765,9 @@ public class WSDLGenerator {
     }
 
     protected void generateSOAP12BindingOperation(JavaMethodImpl method, Binding binding) {
-//        BindingOperationType operation = binding.operation().name(method.getOperation().getLocalName());
         BindingOperationType operation = binding.operation().name(method.getOperationName());
         String targetNamespace = model.getTargetNamespace();
-//        QName requestMessage = method.getOperation().getName();
-//        QName responseMessage = new QName(targetNamespace, method.getOperation().getLocalName()+RESPONSE);
         QName requestMessage = new QName(targetNamespace, method.getOperationName());
-        QName responseMessage = new QName(targetNamespace, method.getOperationName()+RESPONSE);
 
         ArrayList<ParameterImpl> bodyParams = new ArrayList<ParameterImpl>();
         ArrayList<ParameterImpl> headerParams = new ArrayList<ParameterImpl>();
@@ -854,6 +846,7 @@ public class WSDLGenerator {
                 } else {
                     body.parts("");
                 }
+                QName responseMessage = new QName(targetNamespace, method.getResponseMessageName());
                 generateSOAP12Headers(output, headerParams, responseMessage);
             }
             if (isRpc) {
