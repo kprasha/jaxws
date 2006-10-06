@@ -54,7 +54,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * <p>
  * A stateful web service class does not need to have a default constructor.
  * In fact, most of the time you want to define a constructor that takes
- * some argument, so that each instance carries certain state (as illustrated
+ * some arguments, so that each instance carries certain state (as illustrated
  * in the above example.)
  *
  * <p>
@@ -77,7 +77,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * </pre>
  *
  * <p>
- * Typically you are then passing this EPR to remote systems. When they send
+ * Typically you then pass this EPR to remote systems. When they send
  * messages to this EPR, the JAX-WS RI makes sure that the particular exported
  * instance associated with that EPR will receive a service invocation.
  *
@@ -194,7 +194,6 @@ public interface StatefulWebServiceManager<T> {
      * use one instance at the get-go. The following code example
      * illustrates how to do this:
      *
-     * <pre>
      * <pre>
      * @{@link WebService}
      * class BankAccount {
