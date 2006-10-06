@@ -195,7 +195,7 @@ public interface StatefulWebServiceManager<T> {
      * illustrates how to do this:
      *
      * <pre>
-     * @{@link WebService}
+     * &#64;{@link WebService}
      * class BankAccount {
      *     ... continuting from the example in class javadoc ...
      *
