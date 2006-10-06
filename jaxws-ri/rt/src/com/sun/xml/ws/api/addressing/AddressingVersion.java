@@ -557,4 +557,22 @@ public enum AddressingVersion {
             return MEMBER;
         throw new WebServiceException("Unsupported EPR type: "+eprClass);
     }
+
+    /**
+     * Returns true if the WebServiceFeature is either a {@link AddressingFeature} or
+     * {@link MemberSubmissionAddressingFeature} and is required.
+     *
+     * @param wsf The WebServiceFeature encaps
+     * @throws WebServiceException if <code>wsf</code> does not contain either {@link AddressingFeature} or
+     * {@link MemberSubmissionAddressingFeature}
+     * @return true if <code>wsf</code> requires WS-Addressing
+     */
+    public static boolean isRequired(WebServiceFeature wsf) {
+        if (wsf.getID().equals(AddressingFeature.ID)) {
+            return ((AddressingFeature)wsf).isRequired();
+        } else if (wsf.getID().equals(MemberSubmissionAddressingFeature.ID)) {
+            return ((MemberSubmissionAddressingFeature)wsf).isRequired();
+        } else
+            throw new WebServiceException("WebServiceFeature not an Addressing feature: "+ wsf.getID());
+    }
 }
