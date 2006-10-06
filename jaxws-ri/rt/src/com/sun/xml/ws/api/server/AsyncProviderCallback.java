@@ -1,10 +1,39 @@
 package com.sun.xml.ws.api.server;
 
+import com.sun.istack.NotNull;
+
 /**
+ * Callback interface to signal JAX-WS RI that the processing of an asynchronous request is complete.
+ *
+ * <p>
+ * The application is responsible for invoking one of the two defined methods to
+ * indicate the result of the request processing.
+ *
+ * <p>
+ * Both methods will return immediately, and the JAX-WS RI will
+ * send out an actual response at some later point.
+ *
  * @author Jitendra Kotamraju
  * @author Kohsuke Kawaguchi
+ * @since 2.1
+ * @see AsyncProvider
  */
 public interface AsyncProviderCallback<T> {
-    void send(T response);
-    void sendError(Throwable t);
+    /**
+     * Indicates that a request was processed successfully.
+     *
+     * @param response
+     *      Represents an object to be sent back to the client
+     *      as a response.
+     */
+    void send(@NotNull T response);
+
+    /**
+     * Indicates that an error had occured while processing a request.
+     *
+     * @param t
+     *      The error is propagated to the client. For example, if this is
+     *      a SOAP-based web service, the server will send back a SOAP fault.
+     */
+    void sendError(@NotNull Throwable t);
 }
