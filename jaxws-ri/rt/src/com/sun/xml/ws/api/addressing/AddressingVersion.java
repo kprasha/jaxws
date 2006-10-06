@@ -46,6 +46,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 public enum AddressingVersion {
     W3C("http://www.w3.org/2005/08/addressing",
         "w3c-anonymous-epr.xml",
+        "http://www.w3.org/2006/05/addressing/wsdl",
         "http://www.w3.org/2006/05/addressing/wsdl") {
         @Override
         public boolean isReferenceParameter(String localName) {
@@ -118,6 +119,7 @@ public enum AddressingVersion {
     },
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "member-anonymous-epr.xml",
+           "http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "http://schemas.xmlsoap.org/ws/2004/09/policy/addressing") {
         @Override
         public boolean isReferenceParameter(String localName) {
@@ -198,6 +200,11 @@ public enum AddressingVersion {
      * Namespace URI for the WSDL Binding
      */
     public final String wsdlNsUri;
+
+    /**
+     * Namespace URI for the WSDL Binding
+     */
+    public final String policyNsUri;
 
     /**
      * Represents the anonymous EPR.
@@ -318,9 +325,10 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-    private AddressingVersion(String nsUri, String anonymousEprResourceName, String wsdlNsUri) {
+    private AddressingVersion(String nsUri, String anonymousEprResourceName, String wsdlNsUri, String policyNsUri) {
         this.nsUri = nsUri;
         this.wsdlNsUri = wsdlNsUri;
+        this.policyNsUri = policyNsUri;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
