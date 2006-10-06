@@ -4,11 +4,14 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.server.AsyncProvider;
+import com.sun.xml.ws.api.server.AsyncProviderCallback;
 
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
@@ -85,6 +88,9 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * (or else you'll leak memory.) You may choose to do so explicitly,
  * or you can rely on the time out by using {@link #setTimeout(int)}.
  *
+ * <p>
+ * {@link StatefulWebServiceManager} is thread-safe. It can be safely
+ * invoked from multiple threads concurrently.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -118,16 +124,39 @@ public interface StatefulWebServiceManager<T> {
      * {@link #unexport(Object) unexport} it when it's no longer needed.
      *
      * <p>
-     * Calling this method multiple times with the same object is going
-     * to return the same EPR, but the performance sensitive caller is
-     * discouraged from doing so, as this implementation does not cache
-     * {@link WSEndpointReference} instances.
+     * Notice that the obtained EPR contains the address of the service,
+     * which depends on the currently processed request. So invoking
+     * this method multiple times with the same object may return
+     * different EPRs, if such multiple invocations are done while
+     * servicing different requests. (Of course all such EPRs point
+     * to the same object, so messages sent to those EPRs will be
+     * served by the same instance.)
      *
      * @return
      *      {@link W3CEndpointReference} that identifies this exported
      *      object. Always non-null.
      */
     @NotNull W3CEndpointReference export(T o);
+
+    /**
+     * Exports an object (for {@link AsyncProvider asynchronous web services}.)
+     *
+     * <p>
+     * This method works like {@link #export(Class,Object)} but it
+     * takes an extra {@link WebServiceContext} that represents the request currently
+     * being processed by the caller (the JAX-WS RI remembers this when the service
+     * processing is synchronous, and that's why this parameter is only needed for
+     * asynchronous web services.)
+     *
+     * <h3>Why {@link WebServiceContext} is needed?</h3>
+     * <p>
+     * The obtained EPR contains address, such as host name. The server does not
+     * know what its own host name is (or there are more than one of them),
+     * so this value is determined by what the current client thinks the server name is.
+     * This is why we need to take {@link WebServiceContext}. Pass in the
+     * object given to {@link AsyncProvider#invoke(Object, AsyncProviderCallback,WebServiceContext)}.
+     */
+    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> epr, @NotNull WebServiceContext context, T o);
 
     /**
      * Unexports the given instance.

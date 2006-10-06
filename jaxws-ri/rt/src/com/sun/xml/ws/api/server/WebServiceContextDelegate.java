@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
 import java.security.Principal;
 
 /**
@@ -91,7 +92,9 @@ public interface WebServiceContextDelegate {
      * @param endpoint
      *      The endpoint whose address will be returned.
      *
+     * @throws WebServiceException
+     *      if this method could not compute the address for some reason.
      * @see WebServiceContext#getEndpointReference
      */
-    String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
+    @NotNull String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 }

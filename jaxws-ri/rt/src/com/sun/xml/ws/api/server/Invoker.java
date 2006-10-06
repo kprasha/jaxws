@@ -3,10 +3,10 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.Provider;
-import java.lang.reflect.Method;
+import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Hides the detail of calling into application endpoint implementation.
@@ -19,12 +19,23 @@ public abstract class Invoker {
      * Called by {@link WSEndpoint} when it's set up.
      *
      * <p>
-     * This is an opportunity for {@link InstanceResolver}
+     * This is an opportunity for {@link Invoker}
      * to do a endpoint-specific initialization process.
      *
      * @param wsc
-     *      The {@link WebServiceContext} instance to be injected
-     *      to the user instances (assuming {@link InstanceResolver}
+     *      The {@link WebServiceContext} instance that can be injected
+     *      to the user instances.
+     * @param endpoint
+     *      The endpoint that owns the pipeline that includes this invoker.
+     */
+    public void start(@NotNull WebServiceContext wsc, @NotNull WSEndpoint endpoint) {
+        // backward compatibility
+        start(wsc);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #start(WebServiceContext, WSEndpoint)}
      */
     public void start(@NotNull WebServiceContext wsc) {}
 

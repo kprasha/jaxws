@@ -10,6 +10,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.resources.ServerMessages;
+import com.sun.xml.ws.server.InvokerPipe;
 import com.sun.xml.ws.spi.ProviderImpl;
 
 import javax.annotation.PostConstruct;
@@ -54,6 +55,7 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     // fields for resource injection.
     private /*almost final*/ InjectionPlan<T> injectionPlan;
     private /*almost final*/ WebServiceContext webServiceContext;
+    private /*almost final*/ WSEndpoint owner;
     private final Method postConstructMethod;
     private final Method preDestroyMethod;
 
@@ -103,9 +105,10 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     }
 
     @Override
-    public void start(WebServiceContext wsc) {
+    public void start(WebServiceContext wsc, WSEndpoint endpoint) {
         injectionPlan = buildInjectionPlan(clazz);
         this.webServiceContext = wsc;
+        this.owner = endpoint;
     }
 
     @Override
@@ -127,16 +130,35 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
     }
 
     @NotNull
-    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, T o) {
+    public <EPR extends EndpointReference>EPR export(Class<EPR> epr, T o) {
+        return export(epr,o, InvokerPipe.getCurrentPacket() );
+    }
+
+    @NotNull
+    public <EPR extends EndpointReference>EPR export(Class<EPR> epr, WebServiceContext context, T o) {
+        if (context instanceof WSWebServiceContext) {
+            WSWebServiceContext wswsc = (WSWebServiceContext) context;
+            return export(epr,o, wswsc.getRequestPacket());
+        }
+
+        throw new WebServiceException(ServerMessages.STATEFUL_INVALID_WEBSERVICE_CONTEXT(context));
+    }
+
+    /**
+     * @param currentRequest
+     *      The request that we are currently processing. This is used to infer the address in EPR.
+     */
+    @NotNull
+    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, T o, Packet currentRequest) {
         String key = reverseInstances.get(o);
-        if(key!=null)   return createEPR(key,adrsVer);
+        if(key!=null)   return createEPR(key,adrsVer,currentRequest);
 
         // not exported yet.
         synchronized(this) {
             // double check now in the synchronization block to
             // really make sure that we can export.
             key = reverseInstances.get(o);
-            if(key!=null)   return createEPR(key,adrsVer);
+            if(key!=null)   return createEPR(key,adrsVer,currentRequest);
 
             if(o!=null)
                 prepare(o);
@@ -145,13 +167,13 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
             reverseInstances.put(o,key);
         }
 
-        return createEPR(key,adrsVer);
+        return createEPR(key,adrsVer,currentRequest);
     }
 
     /**
      * Creates an EPR that has the right key.
      */
-    private <EPR extends EndpointReference> EPR createEPR(String key, Class<EPR> eprClass) {
+    private <EPR extends EndpointReference> EPR createEPR(String key, Class<EPR> eprClass, Packet currentRequest) {
         AddressingVersion adrsVer = AddressingVersion.fromSpecClass(eprClass);
 
         try {
@@ -161,7 +183,9 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
             w.writeStartElement("wsa","EndpointReference", adrsVer.nsUri);
             w.writeNamespace("wsa",adrsVer.nsUri);
             w.writeStartElement("wsa","Address",adrsVer.nsUri);
-            w.writeCharacters("TODO"); // TODO
+            w.writeCharacters(
+                currentRequest.webServiceContextDelegate.getEPRAddress(currentRequest,owner)
+            );
             w.writeEndElement();
             w.writeStartElement("wsa","ReferenceParameters",adrsVer.nsUri);
             w.writeStartElement(COOKIE_TAG.getPrefix(), COOKIE_TAG.getLocalPart(), COOKIE_TAG.getNamespaceURI());

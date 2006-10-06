@@ -22,14 +22,14 @@
 
 package com.sun.xml.ws.api.server;
 
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.Provider;
-import java.lang.reflect.Method;
+import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Determines the instance that serves
@@ -84,6 +84,15 @@ public abstract class InstanceResolver<T> {
      *      The {@link WebServiceContext} instance to be injected
      *      to the user instances (assuming {@link InstanceResolver}
      */
+    public void start(@NotNull WebServiceContext wsc, @NotNull WSEndpoint endpoint) {
+        // backward compatibility
+        start(wsc);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #start(WebServiceContext, WSEndpoint)}.
+     */
     public void start(@NotNull WebServiceContext wsc) {}
 
     /**
@@ -113,8 +122,8 @@ public abstract class InstanceResolver<T> {
     public @NotNull Invoker createInvoker() {
         return new Invoker() {
             @Override
-            public void start(@NotNull WebServiceContext wsc) {
-                InstanceResolver.this.start(wsc);
+            public void start(@NotNull WebServiceContext wsc, @NotNull WSEndpoint endpoint) {
+                InstanceResolver.this.start(wsc,endpoint);
             }
 
             @Override

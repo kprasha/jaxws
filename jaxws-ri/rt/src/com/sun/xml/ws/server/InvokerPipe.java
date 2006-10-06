@@ -27,19 +27,23 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.AsyncProviderCallback;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.server.StatefulInstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.WSWebServiceContext;
 import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
+import org.w3c.dom.Element;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.Principal;
-
-import org.w3c.dom.Element;
 
 /**
  * Base code for {@link ProviderInvokerPipe} and {@link SEIInvokerPipe}.
@@ -57,11 +61,11 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
 
     protected InvokerPipe(Invoker invoker) {
         this.invoker = invoker;
-        invoker.start(webServiceContext);
     }
 
     public void setEndpoint(WSEndpoint endpoint) {
         this.endpoint = endpoint;
+        invoker.start(webServiceContext,endpoint);
     }
 
     /**
@@ -78,9 +82,7 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
      * Returns the {@link Invoker} object that serves the request.
      */
     public final @NotNull Invoker getInvoker(Packet request) {
-        // this allows WebServiceContext to find this packet
-        packets.set(request);
-        return invoker;
+        return wrapper;
     }
 
     /**
@@ -115,30 +117,82 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
      * Heart of {@link WebServiceContext}.
      * Remembers which thread is serving which packet.
      */
-    private final ThreadLocal<Packet> packets = new ThreadLocal<Packet>();
+    private static final ThreadLocal<Packet> packets = new ThreadLocal<Packet>();
+
+    /**
+     * This method can be called while the user service is servicing the request
+     * synchronously, to obtain the current request packet.
+     *
+     * <p>
+     * This is primarily designed for {@link StatefulInstanceResolver}. Use with care.
+     */
+    public static Packet getCurrentPacket() {
+        return packets.get();
+    }
+
+    /**
+     * {@link Invoker} filter that sets and restores the current packet.
+     */
+    private final Invoker wrapper = new Invoker() {
+        @Override
+        public Object invoke(Packet p, Method m, Object... args) throws InvocationTargetException, IllegalAccessException {
+            Packet old = set(p);
+            try {
+                return invoker.invoke(p, m, args);
+            } finally {
+                set(old);
+            }
+        }
+
+        @Override
+        public <T>T invokeProvider(Packet p, T arg) throws IllegalAccessException, InvocationTargetException {
+            Packet old = set(p);
+            try {
+                return invoker.invokeProvider(p, arg);
+            } finally {
+                set(old);
+            }
+        }
+
+        @Override
+        public <T>void invokeAsyncProvider(Packet p, T arg, AsyncProviderCallback cbak, WebServiceContext ctxt) throws IllegalAccessException, InvocationTargetException {
+            Packet old = set(p);
+            try {
+                invoker.invokeAsyncProvider(p, arg, cbak, ctxt);
+            } finally {
+                set(old);
+            }
+        }
+
+        private Packet set(Packet p) {
+            Packet old = packets.get();
+            packets.set(p);
+            return old;
+        }
+    };
 
     /**
      * The single {@link WebServiceContext} instance injected into application.
      */
-    private final WebServiceContext webServiceContext = new WebServiceContext() {
+    private final WebServiceContext webServiceContext = new WSWebServiceContext() {
 
         public MessageContext getMessageContext() {
-            return new EndpointMessageContextImpl(getCurrentPacket());
+            return new EndpointMessageContextImpl(getRequestPacket());
         }
 
         public Principal getUserPrincipal() {
-            Packet packet = getCurrentPacket();
+            Packet packet = getRequestPacket();
             return packet.webServiceContextDelegate.getUserPrincipal(packet);
         }
 
-        private Packet getCurrentPacket() {
+        public @NotNull Packet getRequestPacket() {
             Packet p = packets.get();
             assert p!=null; // invoker must set
             return p;
         }
 
         public boolean isUserInRole(String role) {
-            Packet packet = getCurrentPacket();
+            Packet packet = getRequestPacket();
             return packet.webServiceContextDelegate.isUserInRole(packet,role);
         }
 
@@ -147,7 +201,7 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
         }
 
         public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
-            Packet packet = getCurrentPacket();
+            Packet packet = getRequestPacket();
             String address = packet.webServiceContextDelegate.getEPRAddress(packet, endpoint);
             return (T) ((WSEndpointImpl)endpoint).getEndpointReference(clazz,address);
         }

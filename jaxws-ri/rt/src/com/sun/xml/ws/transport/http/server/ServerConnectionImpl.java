@@ -26,10 +26,11 @@ import com.sun.istack.NotNull;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
+import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,7 +39,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.xml.ws.handler.MessageContext;
 
 
 /**
@@ -133,7 +133,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
         return false;
     }
 
-    public String getEPRAddress(Packet request, WSEndpoint endpoint) {
+    public @NotNull String getEPRAddress(Packet request, WSEndpoint endpoint) {
         return WSHttpHandler.getRequestAddress(httpExchange);
     }
 

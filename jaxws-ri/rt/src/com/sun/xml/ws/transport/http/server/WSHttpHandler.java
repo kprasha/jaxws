@@ -28,13 +28,12 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
 import com.sun.xml.ws.resources.HttpserverMessages;
-import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -67,7 +66,7 @@ final class WSHttpHandler implements HttpHandler {
     /**
      * Called by HttpServer when there is a matching request for the context
      */
-    public void handle(HttpExchange msg) throws IOException {
+    public void handle(HttpExchange msg) {
         try {
             logger.fine("Received HTTP request:"+msg.getRequestURI());
             if (executor != null) {
@@ -137,7 +136,7 @@ final class WSHttpHandler implements HttpHandler {
      * @return
      *      a string like "http://foo.bar:1234/abc/def"
      */
-    static String getRequestAddress(HttpExchange msg) {
+    static @NotNull String getRequestAddress(HttpExchange msg) {
         StringBuilder strBuf = new StringBuilder();
         strBuf.append((msg instanceof HttpsExchange) ? "https" : "http");
         strBuf.append("://");
