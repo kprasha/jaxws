@@ -96,7 +96,6 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
     }
 
     public void preDestroy() {
-        //super.preDestroy();
         invoker.dispose();
     }
 

@@ -177,10 +177,6 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         }
     }
 
-    public void preDestroy() {
-        //TODO Call predestroy on all handlers.
-    }
-
     /**
      * Calls close on previously invoked handlers.
      * Also, Cleans up any state left over in the Tube instance from the current

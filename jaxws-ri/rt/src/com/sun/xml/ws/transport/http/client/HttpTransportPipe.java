@@ -170,6 +170,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     }
 
     public void preDestroy() {
+        // nothing to do. Intentionally left empty.
     }
 
     public HttpTransportPipe copy(TubeCloner cloner) {

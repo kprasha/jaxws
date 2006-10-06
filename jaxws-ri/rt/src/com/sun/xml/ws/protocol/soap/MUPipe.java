@@ -77,12 +77,6 @@ abstract class MUPipe extends AbstractFilterTubeImpl {
         soapVersion = that.soapVersion;
     }
 
-
-
-    public void preDestroy() {
-        // noop
-    }
-
     /**
      * @param headers      HeaderList that needs MU processing
      * @param roles        Roles configured on the Binding. Required Roles supposed to be assumbed a by a

@@ -68,10 +68,6 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         this.helper = that.helper;
     }
 
-    public void preDestroy() {
-        //No resources to clean up
-    }
-
     public WsaServerPipe copy(TubeCloner cloner) {
         return new WsaServerPipe(this, cloner);
     }

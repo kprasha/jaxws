@@ -219,6 +219,7 @@ final class LocalTransportTube extends AbstractTubeImpl {
     }
 
     public void preDestroy() {
+        // Nothing to do here. Intenionally left empty
     }
 
     public LocalTransportTube copy(TubeCloner cloner) {

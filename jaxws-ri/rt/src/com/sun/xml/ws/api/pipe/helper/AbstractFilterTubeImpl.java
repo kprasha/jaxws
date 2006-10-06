@@ -48,4 +48,8 @@ public abstract class AbstractFilterTubeImpl extends AbstractTubeImpl {
     public @NotNull NextAction processException(Throwable t) {
         return doThrow(t);
     }
+
+    public void preDestroy() {
+        next.preDestroy();
+    }
 }

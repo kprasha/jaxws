@@ -114,9 +114,5 @@ public class DumpTube extends AbstractFilterTubeImpl {
         return new DumpTube(this,cloner);
     }
 
-    public void preDestroy() {
-        // noop
-    }
-
     private static boolean warnStaxUtils;
 }
