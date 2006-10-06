@@ -54,7 +54,16 @@ public class BindingTypeImpl {
                                 }
                                 wsfeatures.add(addFeature);
                             } else if(f.value().equals(MemberSubmissionAddressingFeature.ID) ) {
-                                wsfeatures.add(new MemberSubmissionAddressingFeature(true));
+                                MemberSubmissionAddressingFeature msaf = new MemberSubmissionAddressingFeature(true);
+                                FeatureParameter[] params = f.parameters();
+                                if(params != null) {
+                                    for(FeatureParameter param: params) {
+                                        if(param.name().equals(MemberSubmissionAddressingFeature.IS_REQUIRED)) {
+                                            msaf.setRequired(Boolean.parseBoolean(param.value()));
+                                        }
+                                    }
+                                }
+                                wsfeatures.add(msaf);
                             } else if(f.value().equals(MTOMFeature.ID) ) {
                                 MTOMFeature mtomfeature =new MTOMFeature(true);
                                 FeatureParameter[] params = f.parameters();
