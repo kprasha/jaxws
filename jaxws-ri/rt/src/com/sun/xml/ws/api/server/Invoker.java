@@ -37,7 +37,9 @@ public abstract class Invoker {
      * @deprecated
      *      Use {@link #start(WebServiceContext, WSEndpoint)}
      */
-    public void start(@NotNull WebServiceContext wsc) {}
+    public void start(@NotNull WebServiceContext wsc) {
+        throw new IllegalStateException("deprecated version called");
+    }
 
     /**
      * Called by {@link WSEndpoint}
