@@ -532,6 +532,27 @@ public enum AddressingVersion {
     }
 
     /**
+     * Gets the {@link WebServiceFeature} corresponding to <code>nsUri</code>.
+     * <code>enabled</code> and <code>required</code> are used to initialize
+     * the value of the feature.
+     *
+     * @param nsUri namespace URI
+     * @param enabled true if feature is to be enabled, false otherwise
+     * @param required true if feature is required, false otherwise. Corresponds
+     *          to wsdl:required on the extension/assertion.
+     * @return WebServiceFeature corresponding to namespace URI
+     * @throws WebServiceException if an unsupported namespace URI is passed
+     */
+    public static @NotNull WebServiceFeature getFeature(String nsUri, boolean enabled, boolean required) {
+        if (nsUri == W3C.nsUri)
+            return new AddressingFeature(enabled, required);
+        else if (nsUri == MEMBER.nsUri)
+            return new MemberSubmissionAddressingFeature(enabled, required);
+        else
+            throw new WebServiceException("Unsupported namespace URI: " + nsUri);
+    }
+
+    /**
      * Gets the corresponding {@link AddressingVersion} instance from the
      * EPR class.
      */
