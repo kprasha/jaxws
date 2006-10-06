@@ -22,6 +22,7 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.addressing.WsaPipeHelper;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -547,17 +548,16 @@ public final class Packet extends DistributedPropertySet {
      * For creating protocol messages that require a non-default Action, use
      * {@link #createServerResponse(Message, com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion, String)}.
      *
-     * @param responseMessage The {@link Message} that represents a reply. Cannot be null.
+     * @param responseMessage The {@link Message} that represents a reply. Can be null.
      * @param wsdlPort The response WSDL port. Cannot be null.
      * @param binding The response Binding. Cannot be null.
      * @return response packet
      */
-    public Packet createServerResponse(@NotNull Message responseMessage, @NotNull WSDLPort wsdlPort, @NotNull WSBinding binding) {
+    public Packet createServerResponse(@Nullable Message responseMessage, @NotNull WSDLPort wsdlPort, @NotNull WSBinding binding) {
         Packet r = createClientResponse(responseMessage);
 
         // if one-way, then dont populate any WS-A headers
-        // todo: do we need this check since we already check for packet.getMessage()==null later?
-        if (message.isOneWay(wsdlPort))
+        if (message == null || (wsdlPort != null && message.isOneWay(wsdlPort)))
             return r;
 
         // otherwise populate WS-Addressing headers
@@ -574,13 +574,13 @@ public final class Packet extends DistributedPropertySet {
      * with a {@link WSBinding} and {@link WSDLPort} but do know the {@link AddressingVersion}
      * and {@link SOAPVersion}.
      *
-     * @param responseMessage The {@link Message} that represents a reply.
+     * @param responseMessage The {@link Message} that represents a reply. Can be null.
      * @param addressingVersion The WS-Addressing version of the response message.
      * @param soapVersion The SOAP version of the response message.
      * @param action The response Action Message Addressing Property value.
      * @return response packet
      */
-    public Packet createServerResponse(@NotNull Message responseMessage, @NotNull AddressingVersion addressingVersion, @NotNull SOAPVersion soapVersion, @NotNull String action) {
+    public Packet createServerResponse(@Nullable Message responseMessage, @NotNull AddressingVersion addressingVersion, @NotNull SOAPVersion soapVersion, @NotNull String action) {
         Packet responsePacket = createClientResponse(responseMessage);
 
         return populateAddressingHeaders(responsePacket,
