@@ -8,7 +8,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -32,8 +38,6 @@ import java.util.Map;
 public class MemberSubmissionEndpointReference extends EndpointReference implements MemberSubmissionAddressingConstants {
 
     private final static JAXBContext msjc = MemberSubmissionEndpointReference.getMSJaxbContext();
-    private Marshaller marshaller;
-    private Unmarshaller unmarshaller;
 
     public MemberSubmissionEndpointReference() {
     }
@@ -54,9 +58,8 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
             throw new WebServiceException("Source parameter can not be null on constructor");
 
         try {
-            if (unmarshaller == null)
-                unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
-            MemberSubmissionEndpointReference epr = (MemberSubmissionEndpointReference) unmarshaller.unmarshal(source);
+            Unmarshaller unmarshaller = MemberSubmissionEndpointReference.msjc.createUnmarshaller();
+            MemberSubmissionEndpointReference epr = unmarshaller.unmarshal(source,MemberSubmissionEndpointReference.class).getValue();
 
             this.addr = epr.addr;
             this.referenceProperties = epr.referenceProperties;
@@ -74,9 +77,8 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
 
     public void writeTo(Result result) {
         try {
-            if (marshaller == null)
-                marshaller = MemberSubmissionEndpointReference.msjc.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+            Marshaller marshaller = MemberSubmissionEndpointReference.msjc.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
             marshaller.marshal(this, result);
         } catch (JAXBException e) {
             throw new WebServiceException("Error marshalling W3CEndpointReference. ", e);
