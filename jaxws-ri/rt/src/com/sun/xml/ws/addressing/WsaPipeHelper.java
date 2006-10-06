@@ -35,8 +35,6 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
@@ -46,7 +44,6 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -247,13 +244,7 @@ public abstract class WsaPipeHelper {
         }
 
         String action = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
-        if (op.isOneWay()) {
-            validateAction(packet, action);
-            return;
-        }
-
-        if (action != null)
-            validateAction(packet, action);
+        validateAction(packet, action);
     }
 
     private WSDLBoundOperation getWSDLBoundOperation(Packet packet) {
@@ -341,7 +332,7 @@ public abstract class WsaPipeHelper {
                 if (wbo != null) {
                     WSDLOperation op = wbo.getOperation();
                     if (op != null) {
-                        action = ((WSDLOperationImpl)op).getInput().getAction();
+                        action = op.getInput().getAction();
                     }
                 }
             }
@@ -393,7 +384,7 @@ public abstract class WsaPipeHelper {
             if (wsdlPort.getBinding() != null) {
                 WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(packet.getMessage().getPayloadNamespaceURI(), packet.getMessage().getPayloadLocalPart());
                 if (wbo != null) {
-                    WSDLOperationImpl op = (WSDLOperationImpl)wbo.getOperation();
+                    WSDLOperation op = wbo.getOperation();
                     if (op != null) {
                         action = op.getOutput().getAction();
                     }
