@@ -27,10 +27,9 @@ import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.ExceptionType;
-import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.MEP;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
@@ -42,6 +41,7 @@ import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Holder;
@@ -49,7 +49,6 @@ import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.Response;
 import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebFault;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -432,9 +431,9 @@ public class RuntimeModeler {
      * @param webService the instance of the <code>WebService</code> annotation on the <code>portClass</code>
      */
     protected void processMethod(Method method, WebService webService) {
-        if (!Modifier.isPublic(method.getModifiers())) {
+        int mods = method.getModifiers();
+        if (!Modifier.isPublic(mods) || Modifier.isStatic(mods))
             return;
-        }
 
         WebMethod webMethod = getPrivMethodAnnotation(method, WebMethod.class);
         if (webMethod != null && webMethod.exclude())
