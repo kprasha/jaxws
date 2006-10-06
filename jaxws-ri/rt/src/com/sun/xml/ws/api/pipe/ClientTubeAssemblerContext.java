@@ -16,6 +16,8 @@ import com.sun.xml.ws.protocol.soap.ClientMUPipe;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
 
+import java.io.PrintStream;
+
 /**
  * Factory for well-known {@link Tube} implementations
  * that the {@link TubelineAssembler} needs to use
@@ -91,8 +93,8 @@ public class ClientTubeAssemblerContext {
     /**
      * creates a {@link Tube} that dumps messages that pass through.
      */
-    public Tube createDumpTube(Tube next) {
-        return new DumpTube("dump", System.out, next);
+    public Tube createDumpTube(String name, PrintStream out, Tube next) {
+        return new DumpTube(name, out, next);
     }
 
     /**

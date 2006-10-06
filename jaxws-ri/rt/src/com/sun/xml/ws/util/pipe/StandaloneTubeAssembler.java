@@ -18,7 +18,7 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
         if (dump) {
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
-            head = context.createDumpTube(head);
+            head = context.createDumpTube("client", System.out, head);
         }
         head = context.createClientMUTube(head);
         return context.createHandlerTube(head);

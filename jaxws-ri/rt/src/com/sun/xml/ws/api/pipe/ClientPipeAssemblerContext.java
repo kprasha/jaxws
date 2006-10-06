@@ -8,6 +8,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.Container;
 
+import java.io.PrintStream;
+
 /**
  * Factory for well-known {@link Pipe} implementations
  * that the {@link PipelineAssembler} needs to use
@@ -31,8 +33,8 @@ public final class ClientPipeAssemblerContext extends ClientTubeAssemblerContext
     /**
      * creates a {@link Pipe} that dumps messages that pass through.
      */
-    public Pipe createDumpPipe(Pipe next) {
-        return PipeAdapter.adapt(super.createDumpTube(PipeAdapter.adapt(next)));
+    public Pipe createDumpPipe(String name, PrintStream out, Pipe next) {
+        return PipeAdapter.adapt(super.createDumpTube(name, out, PipeAdapter.adapt(next)));
     }
 
     /**

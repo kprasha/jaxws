@@ -48,7 +48,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
         if (dump) {
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.
-            head = context.createDumpPipe(head);
+            head = context.createDumpPipe("client", System.out, head);
         }
         head = context.createClientMUPipe(head);
         return context.createHandlerPipe(head);

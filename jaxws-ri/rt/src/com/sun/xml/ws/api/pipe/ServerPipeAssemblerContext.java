@@ -7,6 +7,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
 
+import java.io.PrintStream;
+
 /**
  * Factory for well-known server {@link Pipe} implementations
  * that the {@link PipelineAssembler} needs to use
@@ -27,6 +29,13 @@ public final class ServerPipeAssemblerContext extends ServerTubeAssemblerContext
      */
     public @NotNull Pipe createServerMUPipe(@NotNull Pipe next) {
         return PipeAdapter.adapt(super.createServerMUTube(PipeAdapter.adapt(next)));
+    }
+
+    /**
+     * creates a {@link Pipe} that dumps messages that pass through.
+     */
+    public Pipe createDumpPipe(String name, PrintStream out, Pipe next) {
+        return PipeAdapter.adapt(super.createDumpTube(name, out, PipeAdapter.adapt(next)));
     }
 
     /**

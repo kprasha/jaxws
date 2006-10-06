@@ -14,9 +14,11 @@ import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
 import com.sun.xml.ws.protocol.soap.ServerMUPipe;
+import com.sun.xml.ws.util.pipe.DumpTube;
 
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.SOAPBinding;
+import java.io.PrintStream;
 
 /**
  * Factory for well-known server {@link Tube} implementations
@@ -148,6 +150,13 @@ public class ServerTubeAssemblerContext {
             return PipeAdapter.adapt(hook.createSecurityPipe(ctxt, PipeAdapter.adapt(next)));
         }
         return next;
+    }
+
+    /**
+     * creates a {@link Tube} that dumps messages that pass through.
+     */
+    public Tube createDumpTube(String name, PrintStream out, Tube next) {
+        return new DumpTube(name, out, next);
     }
 
     /**
