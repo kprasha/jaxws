@@ -21,21 +21,24 @@
  */
 package com.sun.xml.ws.transport.local;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
-import com.sun.istack.NotNull;
-
-import java.io.ByteArrayOutputStream;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,7 +47,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Transport {@link Pipe} that routes a message to a service that runs within it.
+ * Transport {@link Tube} that routes a message to a service that runs within it.
  *
  * <p>
  * This is useful to test the whole client-server in a single VM.
@@ -88,7 +91,7 @@ final class LocalTransportPipe extends AbstractTubeImpl {
         cloner.add(that,this);
     }
 
-    public NextAction processException(@NotNull Throwable t) {
+    public @NotNull NextAction processException(@NotNull Throwable t) {
         return doThrow(t);
     }
 
