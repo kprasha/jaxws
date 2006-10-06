@@ -43,6 +43,8 @@ import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
 
+import org.w3c.dom.Element;
+
 /**
  * The entry point to the JAX-WS RI from the JAX-WS API.
  *
@@ -91,6 +93,10 @@ public class ProviderImpl extends Provider {
         } catch (JAXBException e) {
             throw new WebServiceException("Error creating Marshaller or marshalling.", e);
         }
+    }
+
+    public <T extends EndpointReference> T createEndpointReference(Class<T> clazz, QName serviceName, QName portName, Source wsdlDocumentLocation, Element... referenceParameters) {
+        throw new UnsupportedOperationException();
     }
 
     //milestone 2
