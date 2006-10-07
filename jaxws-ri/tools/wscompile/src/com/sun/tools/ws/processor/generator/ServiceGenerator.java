@@ -22,24 +22,8 @@
 
 package com.sun.tools.ws.processor.generator;
 
-import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.codemodel.ClassType;
-import com.sun.codemodel.CodeWriter; 
-import com.sun.codemodel.JAnnotationUse;
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JCommentPart;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JDocComment;
-import com.sun.codemodel.JExpression;
-import com.sun.codemodel.JFieldVar;
-import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JMod;
-import com.sun.codemodel.JType;
 import com.sun.codemodel.*;
 import com.sun.codemodel.writer.ProgressCodeWriter;
-import java.util.Properties;
-
-import com.sun.tools.xjc.api.XJC;
 import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.config.WSDLModelInfo;
@@ -48,18 +32,18 @@ import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.model.java.JavaInterface;
 import com.sun.tools.ws.wscompile.WSCodeWriter;
+import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.JAXWSUtils;
-import com.sun.xml.ws.util.StringUtils;
-import com.sun.xml.bind.api.JAXBRIContext;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.MalformedURLException;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
-import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Properties;
 
 
 /**
@@ -110,7 +94,7 @@ public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
     
     protected void visitService(Service service) {
         try {
-            JavaInterface intf = (JavaInterface) service.getJavaInterface();
+            JavaInterface intf = service.getJavaInterface();
             String className = env.getNames().customJavaTypeClassName(intf);
             if (donotOverride && GeneratorUtil.classExists(env, className)) {
                 log("Class " + className + " exists. Not overriding.");
@@ -170,25 +154,13 @@ public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
             for (Port port: service.getPorts()) {
                 if (port.isProvider()) {
                     continue;  // No getXYZPort() for porvider based endpoint
-                }                
-                //@WebEndpoint
-                JMethod m = null;
-                JDocComment methodDoc = null;
-                JType retType = getClass(port.getJavaInterface().getName(), ClassType.INTERFACE);
-                m = cls.method(JMod.PUBLIC, retType, port.getPortGetter());
-                methodDoc = m.javadoc();
-                if(port.getJavaDoc() != null)
-                    methodDoc.add(port.getJavaDoc());
-                JCommentPart ret = methodDoc.addReturn();
-                ret.add("returns "+retType.name());
-                JBlock body = m.body();
-                StringBuffer statement = new StringBuffer("return (");
-                statement.append(retType.name());
-                statement.append(")super.getPort(new QName(\""+port.getName().getNamespaceURI()+"\", \""+ port.getName().getLocalPart()+"\"), ");
-                statement.append(retType.name());
-                statement.append(".class);");
-                body.directStatement(statement.toString());
-                writeWebEndpoint(port, m);
+                }
+
+                //write getXyzPort()
+                writeDefaultGetPort(port, cls);
+
+                //write getXyzPort(WebServicesFeature...)
+                writeGetPort(port, cls);
             }
             CodeWriter cw = new WSCodeWriter(sourceDir,env);
 
@@ -203,13 +175,56 @@ public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
         }
     }
 
+    private void writeGetPort(Port port, JDefinedClass cls) {
+        JType retType = getClass(port.getJavaInterface().getName(), ClassType.INTERFACE);
+        JMethod m = cls.method(JMod.PUBLIC, retType, port.getPortGetter());
+        JDocComment methodDoc = m.javadoc();
+        if(port.getJavaDoc() != null)
+            methodDoc.add(port.getJavaDoc());
+        JCommentPart ret = methodDoc.addReturn();
+        JCommentPart paramDoc = methodDoc.addParam("features");
+        paramDoc.append("A list of ");
+        paramDoc.append(getClass(WebServiceFeature.class.getName(), ClassType.CLASS));
+        paramDoc.append("to configure on the proxy.  Supported features not in the <code>features</code> parameter will have their default values.");
+        ret.add("returns "+retType.name());
+        m.varParam(WebServiceFeature.class, "features");
+        JBlock body = m.body();
+        StringBuffer statement = new StringBuffer("return (");
+        statement.append(retType.name());
+        statement.append(")super.getPort(new QName(\"").append(port.getName().getNamespaceURI()).append("\", \"").append(port.getName().getLocalPart()).append("\"), ");
+        statement.append(retType.name());
+        statement.append(".class, features);");
+        body.directStatement(statement.toString());
+        writeWebEndpoint(port, m);
+    }
+
+    private void writeDefaultGetPort(Port port, JDefinedClass cls) {
+        JType retType = getClass(port.getJavaInterface().getName(), ClassType.INTERFACE);
+        String portGetter = port.getPortGetter();
+        JMethod m = cls.method(JMod.PUBLIC, retType, portGetter);
+        JDocComment methodDoc = m.javadoc();
+        if(port.getJavaDoc() != null)
+            methodDoc.add(port.getJavaDoc());
+        JCommentPart ret = methodDoc.addReturn();
+        ret.add("returns "+retType.name());
+        JBlock body = m.body();
+        StringBuffer statement = new StringBuffer("return (");
+        statement.append(retType.name());
+        statement.append(")super.getPort(new QName(\"").append(port.getName().getNamespaceURI()).append("\", \"").append(port.getName().getLocalPart()).append("\"), ");
+        statement.append(retType.name());
+        statement.append(".class);");
+        body.directStatement(statement.toString());
+        writeWebEndpoint(port, m);
+    }
+
+
     protected JDefinedClass getClass(String className, ClassType type) {
-        JDefinedClass cls = null;
+        JDefinedClass cls;
         try {
             cls = cm._class(className, type);
         } catch (JClassAlreadyExistsException e){
             cls = cm._getClass(className);
-        }        
+        }
         return cls;
     }      
     
