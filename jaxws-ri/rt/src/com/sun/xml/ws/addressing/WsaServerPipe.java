@@ -186,7 +186,6 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
             return responsePacket;
 
         AddressingVersion av = binding.getAddressingVersion();
-//        // todo: this is not request ReplyTo and FaultTo
         String replyTo = (String)responsePacket.invocationProperties.get(REQUEST_REPLY_TO);
         String faultTo = (String)responsePacket.invocationProperties.get(REQUEST_FAULT_TO);
 
@@ -199,7 +198,6 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
                     if (endpointInvoked) {
                         return responsePacket.createServerResponse(responsePacket.getMessage(), wsdlPort, binding);
                     }
-//                    responsePacket.transportBackChannel.close();
                 } else if (!replyTo.equals(av.getAnonymousUri())) {
                     // non-anonymous default FaultTo
                     return processNonAnonymousReply(responsePacket, replyTo, endpointInvoked);
