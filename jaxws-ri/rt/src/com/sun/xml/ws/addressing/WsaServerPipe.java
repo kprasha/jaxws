@@ -40,10 +40,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
-import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.istack.NotNull;
 
 /**
@@ -68,6 +66,10 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         this.helper = that.helper;
     }
 
+    public void preDestroy() {
+        // No resources to clean up
+    }
+
     public WsaServerPipe copy(TubeCloner cloner) {
         return new WsaServerPipe(this, cloner);
     }
@@ -76,6 +78,53 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         if(wsdlPort == null) {
             // Addressing is not enabled
             return doInvoke(next,request);
+        }
+
+        // Store request ReplyTo and FaultTo in requestPacket.invocationProperties
+        // so that they can be used after responsePacket is received.
+        // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.
+        AddressingVersion av = binding.getAddressingVersion();
+        String replyTo = null;
+        String faultTo = null;
+        if (request.getMessage() != null) {
+            HeaderList hl = request.getMessage().getHeaders();
+            if (hl != null) {
+                WSEndpointReference epr = hl.getReplyTo(av, binding.getSOAPVersion());
+                if (epr != null)
+                    replyTo = epr.getAddress();
+                epr = hl.getFaultTo(av, binding.getSOAPVersion());
+                if (epr != null)
+                    faultTo = epr.getAddress();
+            }
+        }
+        request.invocationProperties.put(REQUEST_REPLY_TO, replyTo);
+        request.invocationProperties.put(REQUEST_FAULT_TO, faultTo);
+
+        // close the transportBackChannel if it cannot be used for sending
+        // back either normal or fault replies
+
+        // if there is no FaultTo
+        if (faultTo == null) {
+            // default to ReplyTo
+
+            // if ReplyTo is non-anonymous or None URI
+            if (replyTo != null && (!replyTo.equals(av.getAnonymousUri()) || replyTo.equals(av.getNoneUri()))) {
+                // close the transport back channel
+                if (request.transportBackChannel != null) {
+                    request.transportBackChannel.close();
+                }
+            }
+        } else {
+            // if both FaultTo and ReplyTo are non-anonymous
+            if ((!faultTo.equals(av.getAnonymousUri()) && replyTo != null && !replyTo.equals(av.getAnonymousUri())) ||
+
+                    // or if both FaultTo and ReplyTo are none
+                    (faultTo.equals(av.getNoneUri()) && replyTo != null && replyTo.equals(av.getNoneUri()))
+                    ) {
+                if (request.transportBackChannel != null) {
+                    request.transportBackChannel.close();
+                }
+            }
         }
 
         Packet p = null;
@@ -95,40 +144,19 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
             return doReturnWith(processFault(p, false));
         }
 
-        // can this condition occur ?
-        HeaderList hl = request.getMessage().getHeaders();
-        if (hl == null)
-            return doReturnWith(p);
-
-        // TODO: Evaluate the impact of other pipes that might have
-        // TODO: executed before WS-A pipe. So far RM always sends the
-        // TODO: protocol response along with application response ONLY.
-        AddressingVersion av = binding.getAddressingVersion();
-        WSEndpointReference replyTo = hl.getReplyTo(av, binding.getSOAPVersion());
-        String replyToAddress = null;
-        if (replyTo != null)
-            replyToAddress = replyTo.getAddress();
-        WSEndpointReference faultTo = hl.getFaultTo(av, binding.getSOAPVersion());
-        String faultToAddress = null;
-        if (faultTo != null)
-            faultToAddress = faultTo.getAddress();
         if (replyTo != null) {
             // none ReplyTo
-            if (isOneWay(p) ||
-                    replyToAddress.equals(av.getNoneUri()) &&
+            if (replyTo.equals(av.getNoneUri()) &&
                     ((faultTo == null) ||
-                            (!faultToAddress.equals(av.getAnonymousUri())))) {
-                if (p.transportBackChannel != null) {
-                    p.transportBackChannel.close();
-                }
+                            (!faultTo.equals(av.getAnonymousUri())))) {
                 return doInvoke(next,p);
             }
 
             // non-anonymous ReplyTo
-            if (!replyToAddress.equals(av.getAnonymousUri()) &&
+            if (!replyTo.equals(av.getAnonymousUri()) &&
                     ((faultTo == null) ||
-                            (!faultToAddress.equals(av.getAnonymousUri())))) {
-                return doReturnWith(processNonAnonymousReply(p, replyToAddress, true));
+                            (!faultTo.equals(av.getAnonymousUri())))) {
+                return doReturnWith(processNonAnonymousReply(p, replyTo, true));
             }
         }
 
@@ -141,124 +169,58 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         }
         return doReturnWith(response);
     }
-    /*
-    public Packet process(Packet request) {
-        if(wsdlPort == null) {
-            // Addressing is not enabled
-            return next.process(request);
-        }
-
-        Packet p = null;
-        try {
-            p = helper.validateServerInboundHeaders(request);
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
-        }
-
-        if (p.getMessage() != null && p.getMessage().isFault()) {
-            return processFault(p, false);
-        }
-
-        HeaderList hl = request.getMessage().getHeaders();
-        if (hl == null)
-            return p;
-
-        // TODO: Evaluate the impact of other pipes that might have
-        // TODO: executed before WS-A pipe. So far RM always sends the
-        // TODO: protocol response along with application response ONLY.
-        AddressingVersion av = binding.getAddressingVersion();
-        WSEndpointReference replyTo = hl.getReplyTo(av, binding.getSOAPVersion());
-        String replyToAddress = null;
-        if (replyTo != null)
-            replyToAddress = replyTo.getAddress();
-        WSEndpointReference faultTo = hl.getFaultTo(av, binding.getSOAPVersion());
-        String faultToAddress = null;
-        if (faultTo != null)
-            faultToAddress = faultTo.getAddress();
-        if (replyTo != null) {
-            // none ReplyTo
-            if (isOneWay(p) ||
-                    replyToAddress.equals(av.getNoneUri()) &&
-                    ((faultTo == null) ||
-                            (!faultToAddress.equals(av.getAnonymousUri())))) {
-                if (p.transportBackChannel != null) {
-                    p.transportBackChannel.close();
-                }
-                return next.process(p);
-            }
-
-            // non-anonymous ReplyTo
-            if (!replyToAddress.equals(av.getAnonymousUri()) &&
-                    ((faultTo == null) ||
-                            (!faultToAddress.equals(av.getAnonymousUri())))) {
-                return processNonAnonymousReply(p, replyToAddress, true);
-            }
-        }
-
-        p = next.process(p);
-
-        if (p.getMessage() != null && p.getMessage().isFault()) {
-            return processFault(p, false);
-        }
-
-        return p;
-    }
-    */
-    private boolean isOneWay(Packet p) {
-        return (wsdlPort != null && p.getMessage() != null && p.getMessage().isOneWay(wsdlPort));
-    }
 
     /**
      * Process none and non-anonymous Fault endpoints
      *
-     * @param p packet
-     * @param invokeEndpoint true if endpoint has been invoked, false otherwise
+     * @param responsePacket packet
+     * @param endpointInvoked true if endpoint has been invoked, false otherwise
      * @return response packet received from endpoint
      */
-    private Packet processFault(Packet p, final boolean invokeEndpoint) {
-        if (p.getMessage() == null)
-            return p;
+    private Packet processFault(Packet responsePacket, final boolean endpointInvoked) {
+        if (responsePacket.getMessage() == null)
+            return responsePacket;
 
-        HeaderList hl = p.getMessage().getHeaders();
+        HeaderList hl = responsePacket.getMessage().getHeaders();
         if (hl == null)
-            return p;
+            return responsePacket;
 
         AddressingVersion av = binding.getAddressingVersion();
-        // todo: this is not request ReplyTo and FaultTo
-        String replyToAddress = hl.getReplyTo(av, binding.getSOAPVersion()) == null ? null : hl.getReplyTo(av, binding.getSOAPVersion()).getAddress();
-        String faultToAddress = hl.getFaultTo(av, binding.getSOAPVersion()) == null ? null : hl.getFaultTo(av, binding.getSOAPVersion()).getAddress();
+//        // todo: this is not request ReplyTo and FaultTo
+        String replyTo = (String)responsePacket.invocationProperties.get(REQUEST_REPLY_TO);
+        String faultTo = (String)responsePacket.invocationProperties.get(REQUEST_FAULT_TO);
 
-        if (hl.getFaultTo(av, binding.getSOAPVersion()) == null) {
+        if (faultTo == null) {
             // default FaultTo is ReplyTo
 
-            if (hl.getReplyTo(av, binding.getSOAPVersion()) != null) {
+            if (replyTo != null) {
                 // if none, then fault message is not sent back
-                if (replyToAddress.equals(av.getNoneUri())) {
-                    if (invokeEndpoint) {
-                        return p.createServerResponse(p.getMessage(), wsdlPort, binding);
+                if (replyTo.equals(av.getNoneUri())) {
+                    if (endpointInvoked) {
+                        return responsePacket.createServerResponse(responsePacket.getMessage(), wsdlPort, binding);
                     }
-                    p.transportBackChannel.close();
-                } else if (!replyToAddress.equals(av.getAnonymousUri())) {
+//                    responsePacket.transportBackChannel.close();
+                } else if (!replyTo.equals(av.getAnonymousUri())) {
                     // non-anonymous default FaultTo
-                    return processNonAnonymousReply(p, replyToAddress, invokeEndpoint);
+                    return processNonAnonymousReply(responsePacket, replyTo, endpointInvoked);
                 }
             }
         } else {
             // explicit FaultTo
 
             // if none, then fault message is not sent back
-            if (faultToAddress.equals(av.getNoneUri())) {
-                if (invokeEndpoint) {
-                    return p.createServerResponse(null, wsdlPort, binding);
+            if (faultTo.equals(av.getNoneUri())) {
+                if (endpointInvoked) {
+                    responsePacket.setMessage(null);
+                    return responsePacket;
                 }
-                p.transportBackChannel.close();
-            } else if (!faultToAddress.equals(av.getAnonymousUri())) {
+            } else if (!faultTo.equals(av.getAnonymousUri())) {
                 // non-anonymous FaultTo
-                return processNonAnonymousReply(p, faultToAddress, invokeEndpoint);
+                return processNonAnonymousReply(responsePacket, faultTo, endpointInvoked);
             }
         }
 
-        return p;
+        return responsePacket;
     }
 
     /**
@@ -278,23 +240,6 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         if (invokeEndpoint) {
             //TODO:
             //response = next.process(packet);
-        }
-
-        AddressingVersion av = binding.getAddressingVersion();
-        HeaderList hl = packet.getMessage().getHeaders();
-        WSEndpointReference replyTo = hl.getReplyTo(av, binding.getSOAPVersion());
-        String replyToAddress = null;
-        if (replyTo != null)
-            replyToAddress = replyTo.getAddress();
-        WSEndpointReference faultTo = hl.getFaultTo(av, binding.getSOAPVersion());
-        String faultToAddress = null;
-        if (faultTo != null)
-            faultToAddress = faultTo.getAddress();
-
-        if ((response != null && response.getMessage() != null && response.getMessage().isFault() &&
-                faultTo != null && faultToAddress.equals(av.getNoneUri())) ||
-                (replyTo != null && replyToAddress.equals(av.getNoneUri()))) {
-            return packet;
         }
 
         // TODO: Use TransportFactory to create the appropriate Pipe ?
@@ -340,4 +285,6 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         }
     }
 
+    private static final String REQUEST_REPLY_TO = "request.replyTo";
+    private static final String REQUEST_FAULT_TO = "request.faultTo";
 }
