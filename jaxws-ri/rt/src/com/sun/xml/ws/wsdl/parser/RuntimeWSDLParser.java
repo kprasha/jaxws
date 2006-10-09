@@ -102,6 +102,8 @@ public class RuntimeWSDLParser {
      */
     private final WSDLParserExtension extensionFacade;
 
+    private final WSDLParserExtensionContextImpl context;
+
     List<WSDLParserExtension> extensions;
 
     /**
@@ -109,10 +111,10 @@ public class RuntimeWSDLParser {
      * document could not be obtained then {@link MetadataResolverFactory} is tried to get the WSDL document, if not found
      * then as last option, if the wsdlLoc has no '?wsdl' as query parameter then it is tried by appending '?wsdl'.
      */
-    public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         errors.clear();
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), context, extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), isClientSide, extensions);
         WebServiceException wsdlException = null;
         try {
             if (wsdl == null)
@@ -174,32 +176,31 @@ public class RuntimeWSDLParser {
             throw wsdlException;
 
         parser.wsdlDoc.freeze();
-        parser.extensionFacade.finished(context);
-        parser.extensionFacade.postFinished(context);
+        parser.extensionFacade.finished(parser.context);
+        parser.extensionFacade.postFinished(parser.context);
         return parser.wsdlDoc;
     }
 
-    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
-        return parse(wsdlLoc, null, resolver, context, extensions);
+    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+        return parse(wsdlLoc, null, resolver, isClientSide, extensions);
     }
 
-    public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
-        RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, context, extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, isClientSide, extensions);
         parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
-        parser.extensionFacade.finished(context);
-        parser.extensionFacade.postFinished(context);
+        parser.extensionFacade.finished(parser.context);
+        parser.extensionFacade.postFinished(parser.context);
         return parser.wsdlDoc;
     }
 
-    private RuntimeWSDLParser(URL sourceLocation, XMLEntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) {
+    private RuntimeWSDLParser(URL sourceLocation, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) {
         this.wsdlDoc = new WSDLModelImpl(sourceLocation);
         this.resolver = resolver;
 
         this.extensions = new ArrayList<WSDLParserExtension>();
-
-        context.setWSDLModel(wsdlDoc);
+        this.context = new WSDLParserExtensionContextImpl(wsdlDoc, isClientSide);
 
         // register handlers for default extensions
         register(new MemberSubmissionAddressingWSDLParserExtension());

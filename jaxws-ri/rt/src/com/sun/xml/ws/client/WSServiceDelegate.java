@@ -229,7 +229,7 @@ public class WSServiceDelegate extends WSService {
     private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
         try {
             return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver(),
-                WSDLParserExtensionContextImpl.clientWSDLParserExtnCtx, ServiceFinder.find(WSDLParserExtension.class).toArray());
+                true, ServiceFinder.find(WSDLParserExtension.class).toArray());
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {

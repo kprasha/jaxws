@@ -25,20 +25,20 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
 
 /**
- * {@link #setWSDLModel(WSDLModel)} must be called to set the {@link WSDLModel} before {@link com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension#start(com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext)}
- * is called.
- *
+ * Provides implementation of {@link WSDLParserExtensionContext}
+ * 
  * @author Vivek Pandey
  */
 public final class WSDLParserExtensionContextImpl implements WSDLParserExtensionContext {
     private final boolean isClientSide;
-    private WSDLModel wsdlModel;
+    private final WSDLModel wsdlModel;
 
     /**
      * Construct {@link WSDLParserExtensionContextImpl} with information that whether its on client side
      * or server side.
      */
-    protected WSDLParserExtensionContextImpl(boolean isClientSide) {
+    protected WSDLParserExtensionContextImpl(WSDLModel model, boolean isClientSide) {
+        this.wsdlModel = model;
         this.isClientSide = isClientSide;
     }
 
@@ -49,11 +49,4 @@ public final class WSDLParserExtensionContextImpl implements WSDLParserExtension
     public WSDLModel getWSDLModel() {
         return wsdlModel;
     }
-
-    public void setWSDLModel(WSDLModel wsdlModel){
-        this.wsdlModel = wsdlModel;
-    }
-
-    public static final WSDLParserExtensionContextImpl clientWSDLParserExtnCtx = new WSDLParserExtensionContextImpl(true);
-    public static final WSDLParserExtensionContextImpl serverWSDLParserExtnCtx = new WSDLParserExtensionContextImpl(false);
 }

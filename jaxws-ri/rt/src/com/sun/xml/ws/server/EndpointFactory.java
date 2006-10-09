@@ -462,7 +462,7 @@ public class EndpointFactory {
             // TODO: delegate to another entity resolver
             WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                 new Parser(primaryWsdl), new EntityResolverImpl(metadata),
-                    WSDLParserExtensionContextImpl.serverWSDLParserExtnCtx, ServiceFinder.find(WSDLParserExtension.class).toArray());
+                    false, ServiceFinder.find(WSDLParserExtension.class).toArray());
             WSDLPort wsdlPort = wsdlDoc.getService(serviceName).get(portName);
             if (wsdlPort == null) {
                 throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
