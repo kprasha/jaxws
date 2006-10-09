@@ -27,8 +27,12 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.*;
+import java.util.Set;
 
 /**
  * Request context implementation.
@@ -137,6 +141,10 @@ public final class RequestContext extends PropertySet {
 
     public void setEndpointAddress(@NotNull EndpointAddress epa) {
         this.endpointAddress = epa;
+    }
+
+    public @NotNull EndpointAddress getEndpointAddress() {
+        return endpointAddress;
     }
 
     /**
