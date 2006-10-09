@@ -194,38 +194,9 @@ public class DeploymentDescriptorParser<A> {
             //get enable-mtom attribute value
             String enable_mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
             String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
-            boolean effectiveMtomValue = false;
-
-            BindingID bindingId;
-            {//set Binding using DD, annotation, or default one(in that order)
-                String attr = getAttribute(attrs, ATTR_BINDING);
-                if (attr != null) {
-                    // Convert short-form tokens to API's binding ids
-                    attr = getBindingIdForToken(attr);
-                    bindingId = BindingID.parse(attr);
-                } else {
-                    bindingId = BindingID.parse(implementorClass);
-                }
-            }
-
-            if (bindingId.isMTOMEnabled() == null){
-                effectiveMtomValue = Boolean.valueOf(enable_mtom);
-            } else if (Boolean.valueOf(enable_mtom).compareTo(bindingId.isMTOMEnabled()) != 0) {
-                //TODO: throw error and fail
-            } else{
-                effectiveMtomValue = bindingId.isMTOMEnabled();
-            }
-
-            WSBinding binding = BindingImpl.create(bindingId);
-            if(effectiveMtomValue) {
-                MTOMFeature mtomFeature =  new MTOMFeature();
-                if (mtomThreshold != null) {
-                    mtomFeature.setThreshold(Integer.valueOf(mtomThreshold));
-                }
-                WebServiceFeature[] wsfeatures = {mtomFeature};
-                binding.setFeatures(wsfeatures);
-            }
-
+            String bindingId = getAttribute(attrs, ATTR_BINDING);
+            WSBinding binding = BindingImpl.create(bindingId,implementorClass,
+                    enable_mtom,mtomThreshold,null);
             String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
 
