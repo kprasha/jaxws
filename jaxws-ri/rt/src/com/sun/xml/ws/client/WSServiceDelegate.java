@@ -33,7 +33,11 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.Stubs;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubelineAssembler;
+import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
@@ -58,7 +62,14 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.*;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebEndpoint;
+import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
@@ -69,7 +80,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -469,7 +486,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     public URL getWSDLDocumentLocation() {
-        return wsdlContext.getWsdlLocation();
+        return wsdlContext.getWSDLModel().getSystemId();
     }
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {

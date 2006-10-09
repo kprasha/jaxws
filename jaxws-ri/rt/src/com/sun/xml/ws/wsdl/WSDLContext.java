@@ -51,7 +51,6 @@ import java.util.Set;
  * $author: JAXWS Development Team
  */
 public class WSDLContext {
-    private final URL orgWsdlLocation;
     private final WSDLModelImpl wsdlDoc;
 
     /**
@@ -64,7 +63,6 @@ public class WSDLContext {
         if (wsdlDocumentLocation == null)
             throw new WebServiceException("No WSDL location Information present, error");
 
-        orgWsdlLocation = wsdlDocumentLocation;
         try {
             wsdlDoc = RuntimeWSDLParser.parse(wsdlDocumentLocation, entityResolver,
                 ServiceFinder.find(WSDLParserExtension.class).toArray());
@@ -85,7 +83,6 @@ public class WSDLContext {
     public WSDLContext(URL loc, Source source, EntityResolver entityResolver) throws WebServiceException {
         //must get binding information
         assert entityResolver != null;
-        orgWsdlLocation = loc;
 
         try {
             wsdlDoc = RuntimeWSDLParser.parse(loc, source, entityResolver, ServiceFinder.find(WSDLParserExtension.class).toArray());
@@ -97,10 +94,6 @@ public class WSDLContext {
 
     public WSDLModelImpl getWSDLModel() {
         return wsdlDoc;
-    }
-
-    public URL getWsdlLocation() {
-        return orgWsdlLocation;
     }
 
     public QName getServiceQName() {
