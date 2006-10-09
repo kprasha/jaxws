@@ -22,16 +22,14 @@
 
 package com.sun.xml.ws.client.dispatch;
 
-import com.sun.xml.ws.addressing.EndpointReferenceUtil;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.PortInfo;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.client.ResponseImpl;
@@ -39,13 +37,11 @@ import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Dispatch;
-import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
@@ -75,7 +71,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     final Service.Mode mode;
     final QName portname;
     Class<T> clazz;
-    final WSServiceDelegate owner;
     final SOAPVersion soapVersion;
     static final long AWAIT_TERMINATION_TIME = 800L;
 
@@ -102,10 +97,9 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
     protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
-        super(pipe, binding, (owner.getWsdlService() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port));
+        super(owner, pipe, binding, (owner.getWsdlService() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port));
         this.portname = port;
         this.mode = mode;
-        this.owner = owner;
         this.soapVersion = binding.getSOAPVersion();
     }
 
@@ -253,6 +247,10 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             throw new WebServiceException("Can not create Dispatch<DataSource> of Service.Mode.PAYLOAD, Service.Mode.MESSAGE only");
     }
 
+    protected final @NotNull QName getPortName() {
+        return portname;
+    }
+
     /**
      * Calls {@link DispatchImpl#doInvoke(Object,RequestContext,ResponseContextReceiver)}.
      */
@@ -279,31 +277,5 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         void setReceiver(ResponseContextReceiver receiver) {
             this.receiver = receiver;
         }
-    }
-
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
-        if (endpointReference != null) {
-            return EndpointReferenceUtil.transform(clazz, endpointReference);
-        }
-
-        PortInfo port = owner.safeGetPort(portname);
-
-        QName portTypeName = null;
-
-        //Dispatch was created with WSDL. If created without WSDL then the portType name will be null.
-        if(port.portModel != null){
-            WSDLBoundPortType binding = port.portModel.getBinding();
-            if(binding != null){
-                portTypeName = binding.getPortTypeName();
-            }
-        }
-
-        endpointReference = EndpointReferenceUtil.getEndpointReference(clazz,
-                owner.getEndpointAddress(portname).toString(),
-                owner.getServiceName(),
-                portname.getLocalPart(),
-                portTypeName, port.portModel != null);
-        
-        return clazz.cast(endpointReference);
     }
 }

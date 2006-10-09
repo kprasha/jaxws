@@ -23,33 +23,25 @@
 package com.sun.xml.ws.client.sei;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.spi.ServiceDelegate;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
-
-import org.w3c.dom.Element;
 
 /**
  * {@link Stub} that handles method invocations
@@ -58,9 +50,8 @@ import org.w3c.dom.Element;
  * @author Kohsuke Kawaguchi
  */
 public final class SEIStub extends Stub implements InvocationHandler {
-    public SEIStub(ServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master) {
-        super(master, binding, seiModel.getPort(), seiModel.getPort().getAddress());
-        this.owner = owner;
+    public SEIStub(WSServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master) {
+        super(owner,master, binding, seiModel.getPort(), seiModel.getPort().getAddress());
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
 
@@ -96,10 +87,6 @@ public final class SEIStub extends Stub implements InvocationHandler {
 
     public final SOAPVersion soapVersion;
 
-    /**
-     * The {@link ServiceDelegate} object that owns us.
-     */
-    public final ServiceDelegate owner;
 
     /**
      * For each method on the port interface we have
@@ -107,7 +94,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
      */
     private final Map<Method, MethodHandler> methodHandlers = new HashMap<Method, MethodHandler>();
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws WebServiceException, Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         MethodHandler handler = methodHandlers.get(method);
         if (handler != null) {
             return handler.invoke(proxy, args);
@@ -130,42 +117,7 @@ public final class SEIStub extends Stub implements InvocationHandler {
         return super.process(request, rc, receiver);
     }
 
-    /**
-     * Gets the {@link Executor} to be used for asynchronous method invocations.
-     * <p/>
-     * <p/>
-     * Note that the value this method returns may different from invocations
-     * to invocations. The caller must not cache.
-     *
-     * @return always non-null.
-     */
-    protected final Executor getExecutor() {
-        return owner.getExecutor();
-    }
-
-
-
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
-        if (endpointReference != null) {
-            return EndpointReferenceUtil.transform(clazz, endpointReference);
-        }
-
-        WSDLPort port = seiModel.getPort();
-        assert port!= null;
-        endpointReference = EndpointReferenceUtil.getEndpointReference(clazz,
-                port.getAddress().toString(),
-                owner.getServiceName(),
-                getPortName(port).getLocalPart(),
-                getPortTypeName(port), true);
-
-        return (T) endpointReference;
-    }
-
-    private QName getPortName(@NotNull WSDLPort wsdlport) {
-        return wsdlport.getName();
-    }
-
-    private QName getPortTypeName(@NotNull WSDLPort wsdlport) {
-        return wsdlport.getBinding().getPortTypeName();
+    protected final @NotNull QName getPortName() {
+        return wsdlPort.getName();
     }
 }
