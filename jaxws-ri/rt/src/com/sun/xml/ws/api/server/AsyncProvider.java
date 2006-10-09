@@ -75,7 +75,7 @@ public interface AsyncProvider<T> {
     /**
      * Schedules an execution of a request.
      *
-     * @parma request
+     * @param request
      *      Represents the request message or payload.
      * @param callback
      *      Application must notify this callback interface when the processing
