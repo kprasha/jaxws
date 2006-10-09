@@ -33,7 +33,19 @@ import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
 import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.model.wsdl.*;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
+import com.sun.xml.ws.model.wsdl.WSDLInputImpl;
+import com.sun.xml.ws.model.wsdl.WSDLMessageImpl;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOutputImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartDescriptorImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
@@ -56,7 +68,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Parses WSDL and builds {@link WSDLModel}.
@@ -67,7 +84,7 @@ public class RuntimeWSDLParser {
 
     private final static BitSet errors = new BitSet();
     private static final int NOT_A_WSDL = 0;
-    private final WSDLModelImpl wsdlDoc = new WSDLModelImpl();
+    private final WSDLModelImpl wsdlDoc;
     /**
      * Target namespace URI of the WSDL that we are currently parsing.
      */
@@ -95,7 +112,7 @@ public class RuntimeWSDLParser {
     public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         errors.clear();
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(new EntityResolverWrapper(resolver), extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), extensions);
         WebServiceException wsdlException = null;
         try {
             if (wsdl == null)
@@ -126,7 +143,6 @@ public class RuntimeWSDLParser {
             }
             if (serviceDescriptor != null) {
                 List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
-                int i = 1;
                 for (Source src : wsdls) {
                     try {
                         errors.clear(NOT_A_WSDL);
@@ -169,7 +185,7 @@ public class RuntimeWSDLParser {
 
     public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(resolver, extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, extensions);
         parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.wsdlDoc);
@@ -177,7 +193,8 @@ public class RuntimeWSDLParser {
         return parser.wsdlDoc;
     }
 
-    private RuntimeWSDLParser(XMLEntityResolver resolver, WSDLParserExtension... extensions) {
+    private RuntimeWSDLParser(URL sourceLocation, XMLEntityResolver resolver, WSDLParserExtension... extensions) {
+        this.wsdlDoc = new WSDLModelImpl(sourceLocation);
         this.resolver = resolver;
 
         this.extensions = new ArrayList<WSDLParserExtension>();

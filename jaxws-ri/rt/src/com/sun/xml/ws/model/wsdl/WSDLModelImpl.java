@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.model.wsdl;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
@@ -30,10 +31,10 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.istack.NotNull;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,6 +47,11 @@ import java.util.Map;
  * @author Vivek Pandey
  */
 public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLModel {
+    /**
+     * Where was this WSDL loaded from?
+     */
+    private final URL systemId;
+
     private final Map<QName, WSDLMessageImpl> messages = new HashMap<QName, WSDLMessageImpl>();
     private final Map<QName, WSDLPortTypeImpl> portTypes = new HashMap<QName, WSDLPortTypeImpl>();
     private final Map<QName, WSDLBoundPortTypeImpl> bindings = new HashMap<QName, WSDLBoundPortTypeImpl>();
@@ -53,6 +59,20 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
 
     private final Map<QName,WSDLBoundPortType> unmBindings
         = Collections.<QName,WSDLBoundPortType>unmodifiableMap(bindings);
+
+
+    public WSDLModelImpl(URL sourceLocation) {
+        this.systemId = sourceLocation;
+    }
+
+    /**
+     * Gets the location where the WSDL was parsed from.
+     * This is meant to be used for diagnostic information.
+     * Resolving this URL does not guarantee that you get back the same infoset.
+     */
+    public @NotNull URL getSystemId() {
+        return systemId;
+    }
 
     public void addMessage(WSDLMessageImpl msg){
         messages.put(msg.getName(), msg);
