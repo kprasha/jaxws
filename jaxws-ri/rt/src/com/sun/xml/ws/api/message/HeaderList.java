@@ -37,10 +37,8 @@ import com.sun.xml.ws.protocol.soap.ServerMUPipe;
 import com.sun.xml.ws.resources.AddressingMessages;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.WebServiceException;
 import javax.xml.stream.XMLStreamException;
-
+import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
