@@ -159,7 +159,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * why it takes a {@link RequestContext} and {@link ResponseContextReceiver} as a parameter.
      */
     public final T doInvoke(T in, RequestContext rc, ResponseContextReceiver receiver){
-        Packet response = null;
+        Packet response;
         try {
             checkNullAllowed(in, rc, binding, mode);
 
@@ -209,11 +209,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     static boolean isXMLHttp(WSBinding binding) {
-        return  (binding.getBindingId().equals(BindingID.XML_HTTP)) ? true : false;
+        return binding.getBindingId().equals(BindingID.XML_HTTP);
     }
 
     static boolean isPAYLOADMode(Service.Mode mode) {
-           return  (mode == Service.Mode.PAYLOAD) ? true : false;
+           return mode == Service.Mode.PAYLOAD;
     }
 
     static void checkNullAllowed(Object in, RequestContext rc, WSBinding binding, Service.Mode mode) {
@@ -236,8 +236,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         String requestMethod = (String)rc.get(MessageContext.HTTP_REQUEST_METHOD);
         String request = (requestMethod == null)? "POST": requestMethod;
 
-        return  "POST".equalsIgnoreCase(request) ||
-             "PUT".equalsIgnoreCase(request)? true: false;
+        return "POST".equalsIgnoreCase(request) || "PUT".equalsIgnoreCase(request);
     }
 
     public static void checkValidSOAPMessageDispatch(WSBinding binding, Service.Mode mode) {
@@ -305,6 +304,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                 portname.getLocalPart(),
                 portTypeName, port.portModel != null);
         
-        return (T) endpointReference;
+        return clazz.cast(endpointReference);
     }
 }
