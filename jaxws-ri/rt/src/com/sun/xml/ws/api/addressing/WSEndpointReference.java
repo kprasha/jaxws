@@ -121,6 +121,9 @@ public final class WSEndpointReference {
 
     /**
      * Converts the EPR to the specified spec version.
+     *
+     * If the {@link #getVersion() the addressing version in use} and
+     * the given class is different, then this may involve version conversion. 
      */
     public @NotNull <T extends EndpointReference> T toSpec(Class<T> clazz) {
         return EndpointReferenceUtil.transform(clazz,toSpec());
