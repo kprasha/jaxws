@@ -7,6 +7,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
+import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -116,6 +117,13 @@ public final class WSEndpointReference {
      */
     public @NotNull EndpointReference toSpec() {
         return ProviderImpl.INSTANCE.readEndpointReference(new XMLStreamBufferSource(infoset));
+    }
+
+    /**
+     * Converts the EPR to the specified spec version.
+     */
+    public @NotNull <T extends EndpointReference> T toSpec(Class<T> clazz) {
+        return EndpointReferenceUtil.transform(clazz,toSpec());
     }
 
     /**
