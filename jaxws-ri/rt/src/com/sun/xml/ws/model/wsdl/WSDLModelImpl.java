@@ -65,11 +65,6 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
         this.systemId = sourceLocation;
     }
 
-    /**
-     * Gets the location where the WSDL was parsed from.
-     * This is meant to be used for diagnostic information.
-     * Resolving this URL does not guarantee that you get back the same infoset.
-     */
     public @NotNull URL getSystemId() {
         return systemId;
     }
