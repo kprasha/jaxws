@@ -52,7 +52,6 @@ import java.util.Set;
  */
 public class WSDLContext {
     private final URL orgWsdlLocation;
-    private String targetNamespace;
     private final WSDLModelImpl wsdlDoc;
 
     /**
@@ -89,7 +88,7 @@ public class WSDLContext {
         orgWsdlLocation = loc;
 
         try {
-            wsdlDoc = RuntimeWSDLParser.parse(loc, entityResolver, ServiceFinder.find(WSDLParserExtension.class).toArray());
+            wsdlDoc = RuntimeWSDLParser.parse(loc, source, entityResolver, ServiceFinder.find(WSDLParserExtension.class).toArray());
         } catch (Exception e) {
             throw new WebServiceException(e);
    }
@@ -102,10 +101,6 @@ public class WSDLContext {
 
     public URL getWsdlLocation() {
         return orgWsdlLocation;
-    }
-
-    public String getOrigURLPath() {
-        return orgWsdlLocation.getPath();
     }
 
     public QName getServiceQName() {
@@ -138,14 +133,6 @@ public class WSDLContext {
     //just get the first one for now
     public QName getPortName() {
         return wsdlDoc.getFirstPortName();
-    }
-
-    public String getTargetNamespace() {
-        return targetNamespace;
-    }
-
-    public void setTargetNamespace(String tns) {
-        targetNamespace = tns;
     }
 
     public Iterable<WSDLPortImpl> getPorts(QName serviceName){
