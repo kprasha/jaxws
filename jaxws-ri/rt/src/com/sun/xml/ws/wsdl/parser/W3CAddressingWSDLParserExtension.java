@@ -31,6 +31,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -161,10 +162,11 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
      * <li>Populate actions for the messages that do not have an explicit wsaw:Action</li>
      * <li>Patch the default value of wsaw:Anonymous=optional if none is specified</li>
      * </ul>
-     * @param model
+     * @param context
      */
     @Override
-    public void finished(WSDLModel model) {
+    public void finished(WSDLParserExtensionContext context) {
+        WSDLModel model = context.getWSDLModel();
         for (WSDLService service : model.getServices().values()) {
             for (WSDLPort wp : service.getPorts()) {
                 WSDLPortImpl port = (WSDLPortImpl)wp;

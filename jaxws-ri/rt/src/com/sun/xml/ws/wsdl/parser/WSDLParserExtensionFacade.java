@@ -28,9 +28,9 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
@@ -59,7 +59,13 @@ final class WSDLParserExtensionFacade extends WSDLParserExtension {
         assert extensions!=null;
         this.extensions = extensions;
     }
-    
+
+    public void start(WSDLParserExtensionContext context) {
+        for (WSDLParserExtension e : extensions) {
+            e.start(context);
+        }
+    }
+
     public boolean serviceElements(WSDLService service, XMLStreamReader reader) {
         for (WSDLParserExtension e : extensions) {
             if(e.serviceElements(service,reader))
@@ -295,15 +301,15 @@ final class WSDLParserExtensionFacade extends WSDLParserExtension {
         }
     }
 
-    public void finished(WSDLModel model) {
+    public void finished(WSDLParserExtensionContext context) {
         for (WSDLParserExtension e : extensions) {
-            e.finished(model);
+            e.finished(context);
         }
     }
 
-    public void postFinished(WSDLModel model) {
+    public void postFinished(WSDLParserExtensionContext context) {
         for (WSDLParserExtension e : extensions) {
-            e.postFinished(model);
+            e.postFinished(context);
         }
     }
 }

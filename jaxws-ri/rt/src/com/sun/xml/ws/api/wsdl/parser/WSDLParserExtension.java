@@ -101,7 +101,7 @@ import javax.xml.ws.WebServiceException;
  *
  * <p>
  * If {@link WSDLParserExtension} needs to query {@link WSDLModel},
- * defer that processing until {@link #finished(WSDLModel)}, when it's
+ * defer that processing until {@link #finished(WSDLParserExtensionContext)}, when it's
  * safe to use {@link WSDLModel} can be used safely.
  *
  * <p>
@@ -135,6 +135,9 @@ import javax.xml.ws.WebServiceException;
  * @author Kohsuke Kawaguchi
  */
 public abstract class WSDLParserExtension {
+    public void start(WSDLParserExtensionContext context){
+        // noop
+    }
     public void serviceAttributes(WSDLService service, XMLStreamReader reader) {
         // noop
     }
@@ -252,15 +255,13 @@ public abstract class WSDLParserExtension {
      * This is the opportunity to do any post-processing of the parsing
      * you've done.
      *
-     * @param model
-     *      The completely parsed {@link WSDLModel}. All the methods on
-     *      the model can be safely invoked, and expected to work.
+     * @param context  {@link WSDLParserExtensionContext} gives fully parsed {@link WSDLModel}.
      */
-    public void finished(WSDLModel model) {
+    public void finished(WSDLParserExtensionContext context) {
         // noop
     }
 
-    public void postFinished(WSDLModel model) {
+    public void postFinished(WSDLParserExtensionContext context) {
         // noop
     }
 }

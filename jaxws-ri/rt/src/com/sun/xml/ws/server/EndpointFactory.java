@@ -40,7 +40,6 @@ import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
@@ -53,6 +52,7 @@ import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import org.xml.sax.EntityResolver;
@@ -462,7 +462,7 @@ public class EndpointFactory {
             // TODO: delegate to another entity resolver
             WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                 new Parser(primaryWsdl), new EntityResolverImpl(metadata),
-                ServiceFinder.find(WSDLParserExtension.class).toArray());
+                    WSDLParserExtensionContextImpl.serverWSDLParserExtnCtx, ServiceFinder.find(WSDLParserExtension.class).toArray());
             WSDLPort wsdlPort = wsdlDoc.getService(serviceName).get(portName);
             if (wsdlPort == null) {
                 throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);

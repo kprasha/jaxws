@@ -57,6 +57,7 @@ import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
+import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -96,7 +97,7 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * <code>Service</code> objects provide the client view of a Web service.
- * 
+ *
  * <p><code>Service</code> acts as a factory of the following:
  * <ul>
  * <li>Proxies for a target service endpoint.
@@ -233,7 +234,7 @@ public class WSServiceDelegate extends WSService {
     private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
         try {
             return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver(),
-                ServiceFinder.find(WSDLParserExtension.class).toArray());
+                WSDLParserExtensionContextImpl.clientWSDLParserExtnCtx, ServiceFinder.find(WSDLParserExtension.class).toArray());
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {

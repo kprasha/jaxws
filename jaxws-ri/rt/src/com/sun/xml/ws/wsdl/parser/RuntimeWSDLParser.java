@@ -109,10 +109,10 @@ public class RuntimeWSDLParser {
      * document could not be obtained then {@link MetadataResolverFactory} is tried to get the WSDL document, if not found
      * then as last option, if the wsdlLoc has no '?wsdl' as query parameter then it is tried by appending '?wsdl'.
      */
-    public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         errors.clear();
-        RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), context, extensions);
         WebServiceException wsdlException = null;
         try {
             if (wsdl == null)
@@ -174,30 +174,32 @@ public class RuntimeWSDLParser {
             throw wsdlException;
 
         parser.wsdlDoc.freeze();
-        parser.extensionFacade.finished(parser.wsdlDoc);
-        parser.extensionFacade.postFinished(parser.wsdlDoc);
+        parser.extensionFacade.finished(context);
+        parser.extensionFacade.postFinished(context);
         return parser.wsdlDoc;
     }
 
-    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
-        return parse(wsdlLoc, null, resolver, extensions);
+    public static WSDLModelImpl parse(URL wsdlLoc, EntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+        return parse(wsdlLoc, null, resolver, context, extensions);
     }
 
-    public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
-        RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, extensions);
+        RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, context, extensions);
         parser.parseWSDL(wsdl);
         parser.wsdlDoc.freeze();
-        parser.extensionFacade.finished(parser.wsdlDoc);
-        parser.extensionFacade.postFinished(parser.wsdlDoc);
+        parser.extensionFacade.finished(context);
+        parser.extensionFacade.postFinished(context);
         return parser.wsdlDoc;
     }
 
-    private RuntimeWSDLParser(URL sourceLocation, XMLEntityResolver resolver, WSDLParserExtension... extensions) {
+    private RuntimeWSDLParser(URL sourceLocation, XMLEntityResolver resolver, WSDLParserExtensionContextImpl context, WSDLParserExtension... extensions) {
         this.wsdlDoc = new WSDLModelImpl(sourceLocation);
         this.resolver = resolver;
 
         this.extensions = new ArrayList<WSDLParserExtension>();
+
+        context.setWSDLModel(wsdlDoc);
 
         // register handlers for default extensions
         register(new MemberSubmissionAddressingWSDLParserExtension());
