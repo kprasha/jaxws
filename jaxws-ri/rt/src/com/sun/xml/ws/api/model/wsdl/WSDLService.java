@@ -22,7 +22,7 @@
 
 package com.sun.xml.ws.api.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 
@@ -32,6 +32,12 @@ import javax.xml.namespace.QName;
  * @author Vivek Pandey
  */
 public interface WSDLService extends WSDLObject, WSDLExtensible {
+    /**
+     * Gets the {@link WSDLModel} that owns this service.
+     */
+    @NotNull
+    WSDLModel getParent();
+
     /**
      * Gets the name of the wsdl:service@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.

@@ -276,7 +276,7 @@ public class RuntimeWSDLParser {
 
     private void parseService(XMLStreamReader reader) {
         String serviceName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-        WSDLServiceImpl service = new WSDLServiceImpl(new QName(targetNamespace, serviceName));
+        WSDLServiceImpl service = new WSDLServiceImpl(wsdlDoc,new QName(targetNamespace, serviceName));
         extensionFacade.serviceAttributes(service, reader);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();

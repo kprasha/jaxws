@@ -29,11 +29,10 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.BindingTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
 import java.util.ArrayList;
@@ -122,7 +121,7 @@ public class PortInfo {
     }
 
     private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
-        if (owner.getWSDLContext() != null)
+        if (owner.getWsdlService() != null)
             return owner.getPortModel(portName);
         return null;
     }

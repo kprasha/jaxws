@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
@@ -36,11 +37,17 @@ import java.util.Map;
 public final class WSDLServiceImpl extends AbstractExtensibleImpl implements WSDLService {
     private final QName name;
     private final Map<QName, WSDLPortImpl> ports;
+    private final WSDLModelImpl parent;
 
-    public WSDLServiceImpl(QName name) {
-        super();
+    public WSDLServiceImpl(WSDLModelImpl parent, QName name) {
+        this.parent = parent;
         this.name = name;
         ports = new LinkedHashMap<QName,WSDLPortImpl>();
+    }
+
+    public @NotNull
+    WSDLModelImpl getParent() {
+        return parent;
     }
 
     public QName getName() {
@@ -60,6 +67,19 @@ public final class WSDLServiceImpl extends AbstractExtensibleImpl implements WSD
 
     public Iterable<WSDLPortImpl> getPorts(){
         return ports.values();
+    }
+
+    /**
+    * gets the first port in this service which matches the portType
+    */
+    public WSDLPortImpl getMatchingPort(QName portTypeName){
+        for(WSDLPortImpl port : getPorts()){
+            QName ptName = port.getBinding().getPortTypeName();
+            assert (ptName != null);
+            if(ptName.equals(portTypeName))
+                return port;
+        }
+        return null;
     }
 
     /**

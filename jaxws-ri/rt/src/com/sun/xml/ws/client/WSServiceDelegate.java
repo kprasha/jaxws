@@ -39,21 +39,26 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.util.ServiceConfigurationError;
+import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
-import com.sun.xml.ws.wsdl.WSDLContext;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import javax.jws.HandlerChain;
 import javax.xml.bind.JAXBContext;
@@ -66,15 +71,13 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
-import javax.xml.ws.WebEndpoint;
-import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
-import java.lang.reflect.Method;
+import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -93,6 +96,7 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * <code>Service</code> objects provide the client view of a Web service.
+ * 
  * <p><code>Service</code> acts as a factory of the following:
  * <ul>
  * <li>Proxies for a target service endpoint.
@@ -100,15 +104,15 @@ import java.util.concurrent.ThreadFactory;
  * dynamic message-oriented invocation of a remote
  * operation.
  * </li>
- * <p/>
+ *
  * <p>The ports available on a service can be enumerated using the
  * <code>getPorts</code> method. Alternatively, you can pass a
  * service endpoint interface to the unary <code>getPort</code> method
  * and let the runtime select a compatible port.
- * <p/>
+ *
  * <p>Handler chains for all the objects created by a <code>Service</code>
  * can be set by means of the provided <code>HandlerRegistry</code>.
- * <p/>
+ *
  * <p>An <code>Executor</code> may be set on the service in order
  * to gain better control over the threads used to dispatch asynchronous
  * callbacks. For instance, thread pooling with certain parameters
@@ -120,33 +124,19 @@ import java.util.concurrent.ThreadFactory;
  * @since JAX-WS 2.0
  */
 public class WSServiceDelegate extends WSService {
-
-
     /**
      * All ports.
-     * <p/>
-     * <p/>
+     * <p>
      * This includes ports statically known to WSDL, as well as
      * ones that are dynamically added
      * through {@link #addPort(QName, String, String)}.
-     * <p/>
+     * <p>
      * For statically known ports we'll have {@link SEIPortInfo}.
      * For dynamically added ones we'll have {@link PortInfo}.
      */
     private final Map<QName, PortInfo> ports = new HashMap<QName, PortInfo>();
 
     private HandlerResolver handlerResolver;
-
-    /**
-     * Parsed WSDL.
-     * <p/>
-     * <p/>
-     * If a WSDL is given in the constructor, this field is set during the constructor.
-     * Sometimes the constructor doesn't give this information, and we may get this
-     * when {@link #getPort(QName, Class)} or {@link #getPort(Class)} is invoked.
-     * (Is such a case really called for in the spec?)
-     */
-    private WSDLContext wsdlContext;
 
     private final Class<? extends Service> serviceClass;
 
@@ -167,10 +157,8 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * The WSDL service that this {@link Service} object represents.
-     * <p/>
-     * <p/>
+     * <p>
      * This field is null iff no WSDL is given to {@link Service}.
-     * See {@link #wsdlContext} why this isn't final.
      * TODO: is this really a supported scenario?
      */
     private WSDLServiceImpl wsdlService;
@@ -222,54 +210,59 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * Parses the WSDL and builds {@link WSDLModel}.
-     * <p/>
-     * <p/>
+     * <p>
      * TODO: the only reason this method isn't a part of the constructor is because
      * the code was written such a way that {@link #getPort(Class)} can inject a WSDL
      * into a {@link Service} that was created without one. Is it really a valid scenario?
      */
     private void parseWSDL(URL wsdlDocumentLocation) {
-        wsdlContext = new WSDLContext(wsdlDocumentLocation, createDefaultCatalogResolver());
-        wsdlService = wsdlContext.getWSDLModel().getService(serviceName);
+        if (wsdlDocumentLocation == null)
+            throw new WebServiceException("No WSDL location Information present, error");
+
+        WSDLModelImpl model = parseWSDL(wsdlDocumentLocation,null);
+        wsdlService = model.getService(serviceName);
         if (wsdlService == null)
             throw new WebServiceException(
                     ClientMessages.INVALID_SERVICE_NAME(serviceName,
-                            buildNameList(wsdlContext.getWSDLModel().getServices().keySet())));
+                            buildNameList(model.getServices().keySet())));
     }
 
     /**
      * Parses the WSDL and builds {@link WSDLModel}.
-     * <p/>
-     * <p/>
-     * TODO: the only reason this method isn't a part of the constructor is because
-     * the code was written such a way that {@link #getPort(Class)} can inject a WSDL
-     * into a {@link Service} that was created without one. Is it really a valid scenario?
      */
-    private WSDLContext parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
-
-        WSDLContext eprWsdlContext =
-                new WSDLContext(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver());
-        return eprWsdlContext;
+    private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
+        try {
+            return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver(),
+                ServiceFinder.find(WSDLParserExtension.class).toArray());
+        } catch (IOException e) {
+            throw new WebServiceException(e);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        } catch (SAXException e) {
+            throw new WebServiceException(e);
+        } catch (ServiceConfigurationError e) {
+            throw new WebServiceException(e);
+        }
     }
 
-    private void validateEPR(WSDLContext eprWsdlContext, EndpointReferenceInfo eprInfo) {
+    private void validateEPR(WSDLModelImpl eprWsdlContext, EndpointReferenceInfo eprInfo) {
 
-        if (wsdlContext != null) {
+        if (wsdlService != null) {
             //do we have the same wsdl
-            if (!eprWsdlContext.getServiceQName().equals(wsdlContext.getServiceQName()))
+            if (!eprWsdlContext.getFirstServiceName().equals(serviceName))
                 throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n" + " The two Service QNames must match");
 
-            if (!(eprWsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname)) &&
-                    wsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname))))
+            QName portName = new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname);
+            if (eprWsdlContext.getBinding(eprInfo.sname,portName)==null ||
+                wsdlService.get(portName)==null)
                 throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
 
         } else {
-            wsdlContext = eprWsdlContext;
-            wsdlService = wsdlContext.getWSDLModel().getService(serviceName);
+            wsdlService = eprWsdlContext.getService(serviceName);
             if (wsdlService == null)
                 throw new WebServiceException(
                         ClientMessages.INVALID_SERVICE_NAME(serviceName,
-                                buildNameList(wsdlContext.getWSDLModel().getServices().keySet())));
+                                buildNameList(eprWsdlContext.getServices().keySet())));
 
             //if (!wsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname)))
             //    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
@@ -278,7 +271,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     private void populatePorts() {
-        if (wsdlContext != null) {
+        if (wsdlService != null) {
 
             /*
             //is this case needed as serviceName should not be null
@@ -288,9 +281,8 @@ public class WSServiceDelegate extends WSService {
             }
             */
             // fill in statically known ports
-            for (WSDLPortImpl port : wsdlContext.getPorts(serviceName)) {
+            for (WSDLPortImpl port : wsdlService.getPorts())
                 ports.put(port.getName(), new PortInfo(this, port));
-            }
         }
     }
 
@@ -336,7 +328,7 @@ public class WSServiceDelegate extends WSService {
     public <T> T getPort(Class<T> portInterface, WebServiceFeature... webServiceFeatures) {
         //get the first port corresponding to the SEI
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
-        QName portName = wsdlContext.getWSDLModel().getPortName(serviceName, portTypeName);
+        QName portName = wsdlService.getMatchingPort(portTypeName).getName();
         return getPort(portName, portInterface, webServiceFeatures);
     }
 
@@ -447,10 +439,10 @@ public class WSServiceDelegate extends WSService {
         return createDispatch(portName, context, mode, features);
     }
 
-    private WSDLContext processEndpointReference(EndpointReferenceInfo eprInfo) {
+    private WSDLModel processEndpointReference(EndpointReferenceInfo eprInfo) {
         eprInfo.setEndpointReferenceData();
 
-        WSDLContext eprWsdlCtx = null;
+        WSDLModelImpl eprWsdlCtx;
         try {
             eprWsdlCtx = this.parseWSDL(new URL(eprInfo.uri), eprInfo.source);
         } catch (MalformedURLException e) {
@@ -486,19 +478,16 @@ public class WSServiceDelegate extends WSService {
     }
 
     public URL getWSDLDocumentLocation() {
-        return wsdlContext.getWSDLModel().getSystemId();
-    }
-
-    private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface) throws WebServiceException {
-        return createEndpointIFBaseProxy(portName, portInterface, null);
+        if(wsdlService==null)   return null;
+        return wsdlService.getParent().getSystemId();
     }
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface, WebServiceFeature[] webServiceFeatures) {
         //fail if service doesnt have WSDL
-        if (wsdlContext == null)
+        if (wsdlService == null)
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NO_WSDL(serviceName));
 
-        if (!wsdlContext.contains(serviceName, portName)) {
+        if (wsdlService.get(portName)==null) {
             throw new WebServiceException("WSDLPort " + portName + "is not found in service " + serviceName);
         }
 
@@ -590,39 +579,6 @@ public class WSServiceDelegate extends WSService {
         return wsdlService;
     }
 
-    /**
-     * Try to obtain the port name of the given SEI by using
-     * {@link WebEndpoint} annotation on {@link #serviceClass}.
-     *
-     * @return return null if this method fails to detect the port name.
-     */
-    private QName guessPortName(Class<?> sei) {
-        if (serviceClass == null)
-            return null;
-
-        WebServiceClient wsClient = serviceClass.getAnnotation(WebServiceClient.class);
-        for (Method method : serviceClass.getMethods()) {
-            if (method.getDeclaringClass() != serviceClass) {
-                continue;
-            }
-            WebEndpoint webEndpoint = method.getAnnotation(WebEndpoint.class);
-            if (webEndpoint == null) {
-                continue;
-            }
-            if (method.getGenericReturnType() == sei) {
-                if (method.getName().startsWith("get")) {
-                    return new QName(wsClient.targetNamespace(), webEndpoint.name());
-                }
-            }
-        }
-        return null;
-    }
-
-    public WSDLContext getWSDLContext() {
-        return this.wsdlContext;
-    }
-
-
     static class EndpointReferenceInfo {
         private MemberSubmissionEndpointReference msepr;
         String uri;
@@ -677,7 +633,6 @@ public class WSServiceDelegate extends WSService {
             return daemonThread;
         }
     }
-
 }
 
 

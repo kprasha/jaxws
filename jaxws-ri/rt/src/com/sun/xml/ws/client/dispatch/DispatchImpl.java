@@ -29,24 +29,32 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.*;
+import com.sun.xml.ws.client.PortInfo;
+import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.ResponseContextReceiver;
+import com.sun.xml.ws.client.ResponseImpl;
+import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.ws.*;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import org.w3c.dom.Element;
 
 /**
  * TODO: update javadoc, use sandbox classes where can
@@ -94,7 +102,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
     protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
-        super(pipe, binding, (owner.getWSDLContext() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port));
+        super(pipe, binding, (owner.getWsdlService() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port));
         this.portname = port;
         this.mode = mode;
         this.owner = owner;
