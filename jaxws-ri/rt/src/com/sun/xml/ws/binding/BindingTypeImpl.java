@@ -94,4 +94,15 @@ public class BindingTypeImpl {
             return false;
         }
 
+        public static WebServiceFeature getFeature(@NotNull String featureID, WebServiceFeature[] wsfeatures) {
+            if(wsfeatures == null)
+                return null;
+            for(WebServiceFeature ftr:wsfeatures) {
+                if(ftr.getID().equals(featureID)) {
+                    return ftr;
+                }
+            }
+            return null;
+        }
+
 }

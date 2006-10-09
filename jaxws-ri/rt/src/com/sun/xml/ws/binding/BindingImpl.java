@@ -34,6 +34,7 @@ import com.sun.xml.ws.client.HandlerConfiguration;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.MTOMFeature;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -196,10 +197,67 @@ public abstract class BindingImpl implements WSBinding {
         }
     }
 
+    public void addFeature(@NotNull WebServiceFeature newFeature) {
+        enableFeature(newFeature);
+    }
 
     //what does this mean
     public boolean isAddressingEnabled() {
         return (addressingVersion == null ? false : true);
+    }
+
+    /**
+     * @param ddBindingId :binding id explicitlyspecified in the DeploymentDescriptor or parameter
+     * @param implClass : Endpoint Implementation class
+     * @param mtomEnabled : represents mtom-enabled attribute in DD
+     * @param mtomThreshold : threshold value specified in DD
+     * @param features  : WebServiceFeatures if any specified in DD
+     *                  Currently no way to specify features in DD, so ignore it
+     * @return WSBinding is returned resolving the various precendece rules
+     */
+    public static WSBinding create(String ddBindingId,Class implClass,
+                                          String mtomEnabled, String mtomThreshold,
+                                          WebServiceFeature[] features) {
+        // Features specified through annotaion
+        WebServiceFeature[] implFeatures = BindingTypeImpl.parseBindingType(implClass);
+        MTOMFeature mtomfeature = null;
+
+        BindingID bindingID;
+        if (ddBindingId != null) {
+            bindingID = BindingID.parse(ddBindingId);
+            if (bindingID.isMTOMEnabled() == null) {
+                if(mtomEnabled != null) {
+                    mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
+                            Integer.valueOf(mtomThreshold));
+                } else {
+                    mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
+                }
+            } else if (Boolean.valueOf(mtomEnabled).compareTo(bindingID.isMTOMEnabled()) != 0) {
+                //TODO: throw error and fail?
+            }
+        } else {
+            bindingID = BindingID.parse(implClass);
+            // Since bindingID is coming from implclass,
+            // mtom through Feature annotation or DD takes precendece
+            if(mtomEnabled != null) {
+                mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
+                            Integer.valueOf(mtomThreshold));
+            } else {
+                mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
+                //TODO: throw error and fail incase of conflict?
+            }
+
+
+        }
+        //If mtom is enabled thorugh bindingID, it will will be enabled on the binding
+        BindingImpl binding = create(bindingID,implFeatures);
+        if(mtomfeature != null) {
+            // this will be non-null incase,
+            // where mtom is controlled through higer precedence control
+            // so, override it
+            (binding).enableFeature(mtomfeature);
+        }
+        return binding;
     }
 
 }
