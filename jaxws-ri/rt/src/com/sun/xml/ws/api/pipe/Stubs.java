@@ -29,8 +29,8 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DataSourceDispatch;
-import com.sun.xml.ws.client.dispatch.JAXBDispatch;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
+import com.sun.xml.ws.client.dispatch.JAXBDispatch;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.model.SOAPSEIModel;
 
@@ -94,7 +94,7 @@ public abstract class Stubs {
      */
     public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
         DispatchImpl.checkValidSOAPMessageDispatch(binding, mode);
-        return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, SOAPMessage.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+        return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
     }
 
     /**
@@ -107,7 +107,7 @@ public abstract class Stubs {
      */
     public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
         DispatchImpl.checkValidDataSourceDispatch(binding, mode);
-        return new DataSourceDispatch(portName, DataSource.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+        return new DataSourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
     }
 
     /**
@@ -119,7 +119,7 @@ public abstract class Stubs {
      * </pre>
      */
     public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
-        return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, Source.class, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+        return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
     }
 
     /**
@@ -179,7 +179,7 @@ public abstract class Stubs {
                                            WSService owner,
                                            WSBinding binding,
                                            JAXBContext jaxbContext, Service.Mode mode, Tube next ) {
-        return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding);
+        return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
     }
 
     /**
@@ -201,7 +201,7 @@ public abstract class Stubs {
     public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
                                   Class<T> portInterface, Tube next ) {
 
-        SEIStub ps = new SEIStub(service,(BindingImpl)binding, (SOAPSEIModel)model,next);
+        SEIStub ps = new SEIStub((WSServiceDelegate)service,(BindingImpl)binding, (SOAPSEIModel)model,next, null);
         return portInterface.cast(
             Proxy.newProxyInstance( portInterface.getClassLoader(),
                 new Class[]{portInterface,BindingProvider.class}, ps ));

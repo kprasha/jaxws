@@ -22,9 +22,9 @@
 
 package com.sun.xml.ws.client.dispatch;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
@@ -36,12 +36,6 @@ import javax.activation.DataSource;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-
-import org.xml.sax.InputSource;
-
-import java.io.InputStream;
 
 /**
  *
@@ -50,8 +44,8 @@ import java.io.InputStream;
  */
 public class DataSourceDispatch extends DispatchImpl<DataSource> {
 
-    public DataSourceDispatch(QName port, Class<DataSource> clazz, Service.Mode mode, WSServiceDelegate service, Tube pipe, BindingImpl binding) {
-       super(port, clazz, mode, service, pipe, binding);
+    public DataSourceDispatch(QName port, Service.Mode mode, WSServiceDelegate service, Tube pipe, BindingImpl binding, WSEndpointReference epr) {
+       super(port, mode, service, pipe, binding, epr );
     }
 
     Packet createPacket(DataSource arg) {

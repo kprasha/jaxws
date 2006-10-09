@@ -22,20 +22,17 @@
 
 package com.sun.xml.ws.client.dispatch;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
-import com.sun.xml.ws.message.saaj.SAAJMessage;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
-import javax.xml.ws.Service;
+import javax.xml.ws.Service.Mode;
 import javax.xml.ws.WebServiceException;
 /**
  * TODO: Use sandbox classes, update javadoc
@@ -54,8 +51,8 @@ import javax.xml.ws.WebServiceException;
 
 public class SourceDispatch extends DispatchImpl<Source> {
 
-    public SourceDispatch(QName port, Class<Source> aClass, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
-        super(port, aClass, mode, owner, pipe, binding);
+    public SourceDispatch(QName port, Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding, WSEndpointReference epr) {
+        super(port, mode, owner, pipe, binding, epr);
     }
 
     Source toReturnValue(Packet response) {

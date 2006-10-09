@@ -23,25 +23,23 @@
 package com.sun.xml.ws.client.sei;
 
 //import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
+
 import com.sun.xml.ws.client.RequestContext;
-import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.ResponseContextReceiver;
+import com.sun.xml.ws.client.ResponseImpl;
+import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
+import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Holder;
 import javax.xml.ws.Response;
 import javax.xml.ws.WebServiceException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import com.sun.xml.ws.model.JavaMethodImpl;
-import javax.jws.soap.SOAPBinding.Style;
-import javax.jws.soap.SOAPBinding.Use;
 
 /**
  * Common part between {@link CallbackMethodHandler} and {@link PollingMethodHandler}.
@@ -134,7 +132,6 @@ abstract class AsyncMethodHandler extends MethodHandler {
             builders.add(new AsyncBuilder.Filler(single));
         } else {
             for( ParameterImpl param : rp ) {
-                ValueGetter setter = ValueGetter.get(param);
                 switch(param.getOutBinding().kind) {
                 case BODY:
                     if(param.isWrapperStyle()) {

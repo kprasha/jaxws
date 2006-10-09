@@ -54,7 +54,6 @@ import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
-import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -477,7 +476,7 @@ public class WSServiceDelegate extends WSService {
         SEIPortInfo eif = seiContext.get(portInterface);
 
         BindingImpl binding = eif.createBinding(webServiceFeatures);
-        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding));
+        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), null);
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
                 new Class[]{portInterface, BindingProvider.class, Closeable.class}, pis));

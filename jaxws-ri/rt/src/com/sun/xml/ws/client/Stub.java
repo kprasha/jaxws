@@ -82,8 +82,11 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      * When this field is non-null, its reference parameters are sent as out-bound headers.
      * This field can be null even when addressing is enabled, but if the addressing is
      * not enabled, this field must be null.
+     * <p>
+     * Unlike endpoint address, we are not letting users to change the EPR,
+     * as it contains references to services and so on that we don't want to change.
      */
-    protected @Nullable WSEndpointReference endpointReference;
+    protected final @Nullable WSEndpointReference endpointReference;
 
     protected final BindingImpl binding;
 
@@ -101,14 +104,19 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      *                               return this binding from {@link BindingProvider#getBinding()}.
      * @param defaultEndPointAddress The destination of the message. The actual destination
      *                               could be overridden by {@link RequestContext}.
+     * @param epr                    To create a stub that sends out reference parameters
+     *                               of a specific EPR, give that instance. Otherwise null.
+     *                               Its address field will not be used, and that should be given
+     *                               separately as the <tt>defaultEndPointAddress</tt>.
      */
-    protected Stub(WSServiceDelegate owner, Tube master, BindingImpl binding, WSDLPort wsdlPort, EndpointAddress defaultEndPointAddress) {
+    protected Stub(WSServiceDelegate owner, Tube master, BindingImpl binding, WSDLPort wsdlPort, EndpointAddress defaultEndPointAddress, @Nullable WSEndpointReference epr) {
         this.owner = owner;
         this.tubes = new PipePool(master);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         this.requestContext.setEndpointAddress(defaultEndPointAddress);
-        engine = new Engine();
+        this.engine = new Engine();
+        this.endpointReference = epr;
     }
 
     /**
@@ -134,14 +142,13 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     /**
      * Gets the {@link Executor} to be used for asynchronous method invocations.
-     * <p/>
-     * <p/>
+     * <p>
      * Note that the value this method returns may different from invocations
      * to invocations. The caller must not cache.
      *
      * @return always non-null.
      */
-    protected final Executor getExecutor() {
+    public final Executor getExecutor() {
         return owner.getExecutor();
     }
     
@@ -234,6 +241,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
 
     public final <T extends EndpointReference>
     T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
+        // we need to expand WSEndpointAddress class to be able to return EPR with arbitrary address.
         if (endpointReference != null) {
             return endpointReference.toSpec(clazz);
         }

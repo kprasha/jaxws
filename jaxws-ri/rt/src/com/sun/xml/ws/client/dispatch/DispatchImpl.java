@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -70,34 +71,19 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
     final Service.Mode mode;
     final QName portname;
-    Class<T> clazz;
     final SOAPVersion soapVersion;
     static final long AWAIT_TERMINATION_TIME = 800L;
 
     /**
      *
      * @param port    dispatch instance is asssociated with this wsdl port qName
-     * @param aClass  represents the class of the Message type associated with this Dispatch instance
      * @param mode    Service.mode associated with this Dispatch instance - Service.mode.MESSAGE or Service.mode.PAYLOAD
      * @param owner   Service that created the Dispatch
      * @param pipe    Master pipe for the pipeline
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
-    protected DispatchImpl(QName port, Class<T> aClass, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
-        this(port, mode, owner, pipe, binding);
-        this.clazz = aClass;
-    }
-
-    /**
-     *
-     * @param port    dispatch instance is asssociated with this wsdl port qName
-     * @param mode    Service.mode associated with this Dispatch instance - Service.mode.MESSAGE or Service.mode.PAYLOAD
-     * @param owner   Service that created the Dispatch
-     * @param pipe    Master pipe for the pipeline
-     * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
-     */
-    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding) {
-        super(owner, pipe, binding, (owner.getWsdlService() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port));
+    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding, WSEndpointReference epr) {
+        super(owner, pipe, binding, (owner.getWsdlService() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port), epr);
         this.portname = port;
         this.mode = mode;
         this.soapVersion = binding.getSOAPVersion();

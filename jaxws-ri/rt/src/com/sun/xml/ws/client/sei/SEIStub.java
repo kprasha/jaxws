@@ -24,6 +24,7 @@ package com.sun.xml.ws.client.sei;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -50,8 +51,8 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public final class SEIStub extends Stub implements InvocationHandler {
-    public SEIStub(WSServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master) {
-        super(owner,master, binding, seiModel.getPort(), seiModel.getPort().getAddress());
+    public SEIStub(WSServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master, WSEndpointReference epr) {
+        super(owner,master, binding, seiModel.getPort(), seiModel.getPort().getAddress(),epr);
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
 
