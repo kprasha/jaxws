@@ -83,6 +83,17 @@ public final class WSEndpointReference {
     }
 
     /**
+     * Creates from the spec version of {@link EndpointReference}.
+     *
+     * <p>
+     * This method performs the data conversion, so it's slow.
+     * Do not use this method in a performance critical path.
+     */
+    public WSEndpointReference(EndpointReference epr) throws XMLStreamException {
+        this(epr,AddressingVersion.fromSpecClass(epr.getClass()));
+    }
+
+    /**
      * Creates a {@link WSEndpointReference} that wraps a given infoset.
      */
     public WSEndpointReference(XMLStreamBuffer infoset, AddressingVersion version) throws XMLStreamException {
