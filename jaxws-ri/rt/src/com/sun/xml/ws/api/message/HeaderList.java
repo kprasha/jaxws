@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.addressing.OneWayReplyToFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -573,10 +574,18 @@ public final class HeaderList extends ArrayList<Header> {
             action = packet.soapAction;
         }
         if (action == null)
-            action = "http://fake.input.action";
+            action = AddressingVersion.UNSET_INPUT_ACTION;
 
         boolean oneway = !(wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
-        fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
+        OneWayReplyToFeature onewayFeature = null;
+        if (binding.getFeature(OneWayReplyToFeature.ID) != null)
+            onewayFeature = (OneWayReplyToFeature) binding.getFeature(OneWayReplyToFeature.ID);
+
+        if (onewayFeature == null)
+            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
+        else {
+            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature.getAddress(), action);
+        }
     }
 
     /**
@@ -596,6 +605,33 @@ public final class HeaderList extends ArrayList<Header> {
      * @param action Action Message Addressing Property value
      */
     public void fillRequestAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, boolean oneway, String action) {
+        fillCommonAddressingHeaders(packet, av, sv, action);
+
+        // wsa:ReplyTo
+        // null or "true" is equivalent to request/response MEP
+        if (!oneway) {
+            WSEndpointReference epr = av.anonymousEpr;
+            add(epr.createHeader(av.replyToTag));
+        }
+    }
+
+    private void fillRequestAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, String onewayReplyToAddress, String action) {
+        fillCommonAddressingHeaders(packet, av, sv, action);
+
+        WSEndpointReference epr = av.anonymousEpr;
+        // TODO: replace anonymous EPR with onewayReplyToAddress value
+        add(epr.createHeader(av.replyToTag));
+    }
+
+    /**
+     * Creates wsa:To, wsa:Action and wsa:MessageID header on the client
+     *
+     * @param packet request packet
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @param action Action Message Addressing Property value
+     */
+    private void fillCommonAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, String action) {
         // wsa:To
         StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
         add(h);
@@ -605,16 +641,9 @@ public final class HeaderList extends ArrayList<Header> {
         h = new StringHeader(av.actionTag, action);
         add(h);
 
-        // wsa:MessageId
+        // wsa:MessageID
         h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
         add(h);
-
-        // wsa:ReplyTo
-        // null or "true" is equivalent to request/response MEP
-        if (!oneway) {
-            WSEndpointReference epr = av.anonymousEpr;
-            add(epr.createHeader(av.replyToTag));
-        }
     }
 
     /**
