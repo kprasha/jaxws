@@ -33,17 +33,17 @@ import java.util.Set;
  * @author Rama Pulavarthi
  */
 
-public class ServerMUPipe extends MUPipe {
+public class ServerMUTube extends MUTube {
     
     private HandlerConfiguration handlerConfig;
     
-    public ServerMUPipe(WSBinding binding, Tube next) {
+    public ServerMUTube(WSBinding binding, Tube next) {
         super(binding, next);
         //On Server, HandlerConfiguration does n't change after publish.
         handlerConfig = ((BindingImpl)binding).getHandlerConfig();
     }
 
-    protected ServerMUPipe(ServerMUPipe that, TubeCloner cloner) {
+    protected ServerMUTube(ServerMUTube that, TubeCloner cloner) {
         super(that,cloner);
         handlerConfig = that.handlerConfig;
     }
@@ -66,8 +66,8 @@ public class ServerMUPipe extends MUPipe {
         return doReturnWith(request.createResponse(createMUSOAPFaultMessage(misUnderstoodHeaders)));
     }
 
-    public ServerMUPipe copy(TubeCloner cloner) {
-        return new ServerMUPipe(this,cloner);
+    public ServerMUTube copy(TubeCloner cloner) {
+        return new ServerMUTube(this,cloner);
     }
 
 }

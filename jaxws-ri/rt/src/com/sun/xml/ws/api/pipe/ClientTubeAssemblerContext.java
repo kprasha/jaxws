@@ -12,7 +12,7 @@ import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.handler.ClientLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ClientSOAPHandlerPipe;
 import com.sun.xml.ws.handler.HandlerPipe;
-import com.sun.xml.ws.protocol.soap.ClientMUPipe;
+import com.sun.xml.ws.protocol.soap.ClientMUTube;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
 
@@ -116,7 +116,7 @@ public class ClientTubeAssemblerContext {
      */
     public Tube createClientMUTube(Tube next) {
         if(binding instanceof SOAPBinding)
-            return new ClientMUPipe(binding,next);
+            return new ClientMUTube(binding,next);
         else
             return next;
     }

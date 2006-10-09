@@ -13,7 +13,7 @@ import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
-import com.sun.xml.ws.protocol.soap.ServerMUPipe;
+import com.sun.xml.ws.protocol.soap.ServerMUTube;
 import com.sun.xml.ws.util.pipe.DumpTube;
 
 import javax.xml.ws.soap.AddressingFeature;
@@ -108,7 +108,7 @@ public class ServerTubeAssemblerContext {
      */
     public @NotNull Tube createServerMUTube(@NotNull Tube next) {
         if (binding instanceof SOAPBinding)
-            return new ServerMUPipe(binding,next);
+            return new ServerMUTube(binding,next);
         else
             return next;
     }

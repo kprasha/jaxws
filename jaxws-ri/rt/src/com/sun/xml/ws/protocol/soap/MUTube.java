@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author Rama Pulavarthi
  */
 
-abstract class MUPipe extends AbstractFilterTubeImpl {
+abstract class MUTube extends AbstractFilterTubeImpl {
 
     private static final String MU_FAULT_DETAIL_LOCALPART = "NotUnderstood";
     private final static QName MU_HEADER_DETAIL = new QName(SOAPVersion.SOAP_12.nsUri, MU_FAULT_DETAIL_LOCALPART);
@@ -62,7 +62,7 @@ abstract class MUPipe extends AbstractFilterTubeImpl {
 
     private final SOAPVersion soapVersion;
     
-    protected MUPipe(WSBinding binding, Tube next) {
+    protected MUTube(WSBinding binding, Tube next) {
         super(next);
         // MUPipe should n't be used for bindings other than SOAP.
         if (!(binding instanceof SOAPBinding)) {
@@ -72,7 +72,7 @@ abstract class MUPipe extends AbstractFilterTubeImpl {
         this.soapVersion = binding.getSOAPVersion();
     }
 
-    protected MUPipe(MUPipe that, TubeCloner cloner) {
+    protected MUTube(MUTube that, TubeCloner cloner) {
         super(that, cloner);
         soapVersion = that.soapVersion;
     }

@@ -34,13 +34,13 @@ import java.util.Set;
  * @author Rama Pulavarthi
  */
 
-public class ClientMUPipe extends MUPipe {
+public class ClientMUTube extends MUTube {
     
-    public ClientMUPipe(WSBinding binding, Tube next) {
+    public ClientMUTube(WSBinding binding, Tube next) {
         super(binding, next);
     }
 
-    protected ClientMUPipe(ClientMUPipe that, TubeCloner cloner) {
+    protected ClientMUTube(ClientMUTube that, TubeCloner cloner) {
         super(that,cloner);
     }
 
@@ -68,8 +68,8 @@ public class ClientMUPipe extends MUPipe {
         throw createMUSOAPFaultException(misUnderstoodHeaders);
     }
 
-    public ClientMUPipe copy(TubeCloner cloner) {
-        return new ClientMUPipe(this,cloner);
+    public ClientMUTube copy(TubeCloner cloner) {
+        return new ClientMUTube(this,cloner);
     }
 
 }

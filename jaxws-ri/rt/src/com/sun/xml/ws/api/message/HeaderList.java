@@ -33,8 +33,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.message.StringHeader;
-import com.sun.xml.ws.protocol.soap.ClientMUPipe;
-import com.sun.xml.ws.protocol.soap.ServerMUPipe;
+import com.sun.xml.ws.protocol.soap.ClientMUTube;
+import com.sun.xml.ws.protocol.soap.ServerMUTube;
 import com.sun.xml.ws.resources.AddressingMessages;
 
 import javax.xml.namespace.QName;
@@ -103,7 +103,7 @@ import java.util.Set;
  * Intuitively speaking, at the end of the day, if a header is not
  * understood but {@link Header#isIgnorable(SOAPVersion, Set)} is false, a bad thing
  * will happen. The actual implementation of the checking is more complicated,
- * for that see {@link ClientMUPipe}/{@link ServerMUPipe}.
+ * for that see {@link ClientMUTube}/{@link ServerMUTube}.
  *
  * @see Message#getHeaders()
  */
