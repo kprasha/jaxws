@@ -159,6 +159,7 @@ public class RuntimeWSDLParser {
 
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.wsdlDoc);
+        parser.extensionFacade.postFinished(parser.wsdlDoc);
         return parser.wsdlDoc;
     }
 
