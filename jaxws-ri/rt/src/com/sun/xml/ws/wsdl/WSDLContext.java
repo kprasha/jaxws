@@ -24,32 +24,30 @@ package com.sun.xml.ws.wsdl;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
-import static com.sun.xml.ws.streaming.XMLStreamReaderFactory.createXMLStreamReader;
-import com.sun.xml.ws.streaming.XMLReader;
-import com.sun.org.apache.xerces.internal.util.EntityResolverWrapper;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceException;
 import javax.xml.transform.Source;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
 
 /**
+ * This class should be really merged into {@link WSServiceDelegate}.
+ * This class is serving no purpose - KK.
+ *
  * $author: JAXWS Development Team
  */
 public class WSDLContext {
@@ -83,19 +81,19 @@ public class WSDLContext {
     }
 
     /**
-        * Creates a {@link WSDLContext} by parsing the given wsdl file.
-        */
-       public WSDLContext(URL loc, Source source, EntityResolver entityResolver) throws WebServiceException {
-           //must get binding information
-           assert entityResolver != null;
-           orgWsdlLocation = loc;
+     * Creates a {@link WSDLContext} by parsing the given wsdl file.
+     */
+    public WSDLContext(URL loc, Source source, EntityResolver entityResolver) throws WebServiceException {
+        //must get binding information
+        assert entityResolver != null;
+        orgWsdlLocation = loc;
 
-           try {
-               wsdlDoc = RuntimeWSDLParser.parse(loc, entityResolver, ServiceFinder.find(WSDLParserExtension.class).toArray());
-           } catch (Exception e) {
-                throw new WebServiceException(e);
-           }
-       }
+        try {
+            wsdlDoc = RuntimeWSDLParser.parse(loc, entityResolver, ServiceFinder.find(WSDLParserExtension.class).toArray());
+        } catch (Exception e) {
+            throw new WebServiceException(e);
+   }
+}
 
 
     public WSDLModelImpl getWSDLModel() {
