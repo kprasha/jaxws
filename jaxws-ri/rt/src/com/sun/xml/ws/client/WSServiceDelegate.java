@@ -23,7 +23,6 @@
 package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
@@ -50,8 +49,6 @@ import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.resources.ClientMessages;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
@@ -65,9 +62,8 @@ import javax.jws.HandlerChain;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.EndpointReference;
@@ -77,7 +73,6 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -246,6 +241,7 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
+    // TODO: this method probably belong to EndpointReferenceInfo.
     private void validateEPR(WSDLModelImpl eprWsdlContext, EndpointReferenceInfo eprInfo) {
 
         if (wsdlService != null) {
@@ -371,7 +367,7 @@ public class WSServiceDelegate extends WSService {
     public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode, WebServiceFeature... features) {
         //assert endpointReference != null;  check javadocs
         EndpointReferenceInfo eprInfo = new EndpointReferenceInfo(endpointReference);
-        processEndpointReference(eprInfo);
+        eprInfo.parseModel();
         QName portName = addPort(eprInfo);
         return createDispatch(portName, type, mode, features);
 
@@ -435,23 +431,9 @@ public class WSServiceDelegate extends WSService {
     public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode, WebServiceFeature... features) {
         //assert(endpointReference != null);   check javadocs
         EndpointReferenceInfo eprInfo = new EndpointReferenceInfo(endpointReference);
-        processEndpointReference(eprInfo);
+        eprInfo.parseModel();
         QName portName = addPort(eprInfo);
         return createDispatch(portName, context, mode, features);
-    }
-
-    private WSDLModel processEndpointReference(EndpointReferenceInfo eprInfo) {
-        eprInfo.setEndpointReferenceData();
-
-        WSDLModelImpl eprWsdlCtx;
-        try {
-            eprWsdlCtx = this.parseWSDL(new URL(eprInfo.uri), eprInfo.source);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-        validateEPR(eprWsdlCtx, eprInfo);
-        return eprWsdlCtx;
     }
 
     public QName getServiceName() {
@@ -580,32 +562,26 @@ public class WSServiceDelegate extends WSService {
         return wsdlService;
     }
 
-    static class EndpointReferenceInfo {
-        private MemberSubmissionEndpointReference msepr;
-        String uri;
-        QName sname;
-        String pname;
-        Source source;
+    class EndpointReferenceInfo {
+        private final @NotNull MemberSubmissionEndpointReference msepr;
+        final String uri;
+        final QName sname;
+        final String pname;
 
         EndpointReferenceInfo(EndpointReference epr) {
-            if (epr.getClass().isAssignableFrom(W3CEndpointReference.class)) {
-                msepr = EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, epr);
-            } else if (epr.getClass().isAssignableFrom(MemberSubmissionEndpointReference.class)) {
+            if (epr.getClass().isAssignableFrom(MemberSubmissionEndpointReference.class)) {
                 msepr = (MemberSubmissionEndpointReference) epr;
+            } else {
+                msepr = EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, epr);
             }
-        }
 
-        void setEndpointReferenceData() {
-            assert msepr != null;
             uri = msepr.addr.uri;
             sname = msepr.serviceName.name;
             pname = msepr.serviceName.portName;
-            setWSDLSource();
         }
 
-        void setWSDLSource() {
-            assert msepr != null;
-            //getWSDLfrom epr inline or imported
+        private Source createSource() {
+            // get WSDL from WPR inline or imported
             Element wsdlElement = null;
             List<Element> elementz = msepr.elements;
             for (Element elem : elementz) {
@@ -615,15 +591,22 @@ public class WSServiceDelegate extends WSService {
                 }
             }
 
-            final ByteOutputStream bos = new ByteOutputStream();
-            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+            return new DOMSource(wsdlElement);
+        }
+
+        /**
+         * Parses {@link WSDLModel} from this EPR.
+         */
+        private WSDLModel parseModel() {
+            WSDLModelImpl eprWsdlCtx;
             try {
-                DOMUtil.serializeNode(wsdlElement, writer);
-            } catch (XMLStreamException e) {
+                eprWsdlCtx = parseWSDL(new URL(uri), createSource());
+            } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
 
-            source = new StreamSource(bos.newInputStream());
+            validateEPR(eprWsdlCtx,this);
+            return eprWsdlCtx;
         }
     }
 
