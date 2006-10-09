@@ -249,7 +249,7 @@ public class WSServiceDelegate extends WSService {
             if (!eprWsdlContext.getFirstServiceName().equals(serviceName))
                 throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n" + " The two Service QNames must match");
 
-            QName portName = new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname);
+            QName portName = eprInfo.pname;
             if (eprWsdlContext.getBinding(eprInfo.sname,portName)==null ||
                 wsdlService.get(portName)==null)
                 throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
@@ -343,7 +343,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     QName addPort(EndpointReferenceInfo eprinfo) throws WebServiceException {
-        QName portQName = new QName(this.serviceName.getNamespaceURI(), eprinfo.pname);
+        QName portQName = eprinfo.pname;
         PortInfo portInfo = new PortInfo(this, EndpointAddress.create(eprinfo.uri), portQName, getPortModel(portQName).getBinding().getBindingId());
         if (!ports.containsKey(portQName)) {
             ports.put(portQName, portInfo);
@@ -566,7 +566,7 @@ public class WSServiceDelegate extends WSService {
         private final @NotNull MemberSubmissionEndpointReference msepr;
         final String uri;
         final QName sname;
-        final String pname;
+        final QName pname;
 
         EndpointReferenceInfo(EndpointReference epr) {
             if (epr.getClass().isAssignableFrom(MemberSubmissionEndpointReference.class)) {
@@ -577,7 +577,7 @@ public class WSServiceDelegate extends WSService {
 
             uri = msepr.addr.uri;
             sname = msepr.serviceName.name;
-            pname = msepr.serviceName.portName;
+            pname = new QName(sname.getNamespaceURI(), msepr.serviceName.portName);
         }
 
         private Source createSource() {
