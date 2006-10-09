@@ -26,24 +26,21 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.ws.Dispatch;
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.EndpointReference;
-import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
-
-import org.w3c.dom.Element;
 
 /**
  * The entry point to the JAX-WS RI from the JAX-WS API.
@@ -99,12 +96,12 @@ public class ProviderImpl extends Provider {
         throw new UnsupportedOperationException();
     }
 
-    //milestone 2
     public <T> T getPort(EndpointReference endpointReference, Class<T> aClass, WebServiceFeature... webServiceFeatures) {
-        return null;
+        // TODO: implement this method later
+        throw new UnsupportedOperationException("To be done in M2");
     }
 
-    private final static JAXBContext getEPRJaxbContext() {
+    private static JAXBContext getEPRJaxbContext() {
         try {
             return JAXBContext.newInstance(MemberSubmissionEndpointReference.class, W3CEndpointReference.class);
         } catch (JAXBException e) {
