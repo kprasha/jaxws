@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.api.model.wsdl;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
 
 import javax.xml.namespace.QName;
@@ -49,6 +50,7 @@ public interface WSDLPort extends WSDLObject, WSDLExtensible {
     /**
      * Gets {@link WSDLBoundPortType} associated with the {@link WSDLPort}.
      */
+    @NotNull
     WSDLBoundPortType getBinding();
 
     /**
