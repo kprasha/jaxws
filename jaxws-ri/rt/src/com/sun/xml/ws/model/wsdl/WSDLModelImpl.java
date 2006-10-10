@@ -47,11 +47,6 @@ import java.util.Map;
  * @author Vivek Pandey
  */
 public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLModel {
-    /**
-     * Where was this WSDL loaded from?
-     */
-    private final URL systemId;
-
     private final Map<QName, WSDLMessageImpl> messages = new HashMap<QName, WSDLMessageImpl>();
     private final Map<QName, WSDLPortTypeImpl> portTypes = new HashMap<QName, WSDLPortTypeImpl>();
     private final Map<QName, WSDLBoundPortTypeImpl> bindings = new HashMap<QName, WSDLBoundPortTypeImpl>();
@@ -61,12 +56,8 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
         = Collections.<QName,WSDLBoundPortType>unmodifiableMap(bindings);
 
 
-    public WSDLModelImpl(URL sourceLocation) {
-        this.systemId = sourceLocation;
-    }
-
-    public @NotNull URL getSystemId() {
-        return systemId;
+    public WSDLModelImpl(URL systemId) {
+        super(systemId.toExternalForm(),-1);
     }
 
     public void addMessage(WSDLMessageImpl msg){

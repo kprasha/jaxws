@@ -21,18 +21,17 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of {@link WSDLPort}
@@ -52,7 +51,8 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
      */
     private WSDLBoundPortTypeImpl boundPortType;
 
-    public WSDLPortImpl(WSDLServiceImpl owner, QName name, QName binding) {
+    public WSDLPortImpl(XMLStreamReader xsr,WSDLServiceImpl owner, QName name, QName binding) {
+        super(xsr);
         this.owner = owner;
         this.name = name;
         this.bindingName = binding;

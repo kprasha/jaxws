@@ -21,15 +21,18 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.*;
-import com.sun.xml.ws.util.QNameMap;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
+import com.sun.xml.ws.util.QNameMap;
 
 import javax.xml.namespace.QName;
-import java.util.List;
+import javax.xml.stream.XMLStreamReader;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementaiton of {@link WSDLOperation}
@@ -47,7 +50,8 @@ public final class WSDLOperationImpl extends AbstractExtensibleImpl implements W
     private final WSDLPortType owner;
     private final Map<String,String> faultActionMap;
 
-    public WSDLOperationImpl(WSDLPortTypeImpl owner, QName name) {
+    public WSDLOperationImpl(XMLStreamReader xsr,WSDLPortTypeImpl owner, QName name) {
+        super(xsr);
         this.name = name;
         this.faults = new ArrayList<WSDLFaultImpl>();
         this.faultMap = new QNameMap<WSDLFaultImpl>();

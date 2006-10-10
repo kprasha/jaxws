@@ -26,11 +26,12 @@ import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * @author Vivek Pandey
  */
-public class WSDLInputImpl extends AbstractExtensibleImpl implements WSDLInput {
+public final class WSDLInputImpl extends AbstractExtensibleImpl implements WSDLInput {
     private String name;
     private QName messageName;
     private WSDLOperationImpl operation;
@@ -38,7 +39,8 @@ public class WSDLInputImpl extends AbstractExtensibleImpl implements WSDLInput {
     private String action;
     private boolean defaultAction;
 
-    public WSDLInputImpl(String name, QName messageName, WSDLOperationImpl operation) {
+    public WSDLInputImpl(XMLStreamReader xsr,String name, QName messageName, WSDLOperationImpl operation) {
+        super(xsr);
         this.name = name;
         this.messageName = messageName;
         this.operation = operation;

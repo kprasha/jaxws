@@ -21,17 +21,17 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.jws.WebParam.Mode;
-import javax.jws.soap.SOAPBinding.Style;
-import javax.xml.namespace.QName;
-
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+
+import javax.jws.WebParam.Mode;
+import javax.jws.soap.SOAPBinding.Style;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of {@link WSDLBoundOperation}
@@ -70,7 +70,8 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
      *
      * @param name wsdl:operation name qualified value
      */
-    public WSDLBoundOperationImpl(WSDLBoundPortTypeImpl owner, QName name) {
+    public WSDLBoundOperationImpl(XMLStreamReader xsr, WSDLBoundPortTypeImpl owner, QName name) {
+        super(xsr);
         this.name = name;
         inputParts = new HashMap<String, ParameterBinding>();
         outputParts = new HashMap<String, ParameterBinding>();

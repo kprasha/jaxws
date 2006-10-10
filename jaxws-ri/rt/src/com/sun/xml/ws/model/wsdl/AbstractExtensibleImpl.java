@@ -25,10 +25,11 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
 import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
 
-import java.util.Set;
+import javax.xml.stream.XMLStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * All the WSDL 1.1 elements that are extensible should subclass from this abstract implementation of
@@ -37,8 +38,16 @@ import java.util.ArrayList;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-abstract public class AbstractExtensibleImpl implements WSDLExtensible {
+abstract class AbstractExtensibleImpl extends AbstractObjectImpl implements WSDLExtensible {
     protected final Set<WSDLExtension> extensions = new HashSet<WSDLExtension>();
+
+    protected AbstractExtensibleImpl(XMLStreamReader xsr) {
+        super(xsr);
+    }
+
+    protected AbstractExtensibleImpl(String systemId, int lineNumber) {
+        super(systemId, lineNumber);
+    }
 
     public final Iterable<WSDLExtension> getExtensions() {
         return extensions;

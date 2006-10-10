@@ -22,22 +22,24 @@
 
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * @author Vivek Pandey
  */
-public class WSDLOutputImpl extends AbstractExtensibleImpl implements WSDLOutput {
+public final class WSDLOutputImpl extends AbstractExtensibleImpl implements WSDLOutput {
     private String name;
     private QName messageName;
     private WSDLOperationImpl operation;
     private WSDLMessageImpl message;
     private String action;
 
-    public WSDLOutputImpl(String name, QName messageName, WSDLOperationImpl operation) {
+    public WSDLOutputImpl(XMLStreamReader xsr,String name, QName messageName, WSDLOperationImpl operation) {
+        super(xsr);
         this.name = name;
         this.messageName = messageName;
         this.operation = operation;

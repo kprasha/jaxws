@@ -25,20 +25,21 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.api.model.wsdl.WSDLPartDescriptor;
 
-import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * Implementation of {@link WSDLPart}
  *
  * @author Vivek Pandey
  */
-public final class WSDLPartImpl implements WSDLPart {
+public final class WSDLPartImpl extends AbstractObjectImpl implements WSDLPart {
     private final String name;
     private ParameterBinding binding;
     private int index;
     private final WSDLPartDescriptor descriptor;
 
-    public WSDLPartImpl(String partName, int index, WSDLPartDescriptor descriptor) {
+    public WSDLPartImpl(XMLStreamReader xsr, String partName, int index, WSDLPartDescriptor descriptor) {
+        super(xsr);
         this.name = partName;
         this.binding = ParameterBinding.UNBOUND;
         this.index = index;

@@ -22,14 +22,9 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
-import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
-import com.sun.xml.ws.api.model.wsdl.WSDLPartDescriptor;
 
 import javax.xml.namespace.QName;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.LinkedHashSet;
-import java.util.List;
+import javax.xml.stream.XMLStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -43,7 +38,8 @@ public final class WSDLMessageImpl extends AbstractExtensibleImpl implements WSD
     /**
      * @param name wsdl:message name attribute value
      */
-    public WSDLMessageImpl(QName name) {
+    public WSDLMessageImpl(XMLStreamReader xsr,QName name) {
+        super(xsr);
         this.name = name;
         this.parts = new ArrayList<WSDLPartImpl>();
     }

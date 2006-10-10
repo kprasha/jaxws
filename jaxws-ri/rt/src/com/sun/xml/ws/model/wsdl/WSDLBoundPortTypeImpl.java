@@ -21,13 +21,9 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -38,8 +34,11 @@ import javax.jws.WebParam.Mode;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of {@link WSDLBoundPortType}
@@ -69,7 +68,8 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
 
 
 
-    public WSDLBoundPortTypeImpl(@NotNull WSDLModelImpl owner, QName name, QName portTypeName) {
+    public WSDLBoundPortTypeImpl(XMLStreamReader xsr,@NotNull WSDLModelImpl owner, QName name, QName portTypeName) {
+        super(xsr);
         this.owner = owner;
         this.name = name;
         this.portTypeName = portTypeName;

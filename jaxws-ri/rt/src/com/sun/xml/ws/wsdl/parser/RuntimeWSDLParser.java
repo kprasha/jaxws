@@ -279,7 +279,7 @@ public class RuntimeWSDLParser {
 
     private void parseService(XMLStreamReader reader) {
         String serviceName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-        WSDLServiceImpl service = new WSDLServiceImpl(wsdlDoc,new QName(targetNamespace, serviceName));
+        WSDLServiceImpl service = new WSDLServiceImpl(reader,wsdlDoc,new QName(targetNamespace, serviceName));
         extensionFacade.serviceAttributes(service, reader);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
@@ -301,7 +301,7 @@ public class RuntimeWSDLParser {
 
         QName bindingName = ParserUtil.getQName(reader, binding);
         QName portQName = new QName(service.getName().getNamespaceURI(), portName);
-        WSDLPortImpl port = new WSDLPortImpl(service, portQName, bindingName);
+        WSDLPortImpl port = new WSDLPortImpl(reader,service, portQName, bindingName);
 
         extensionFacade.portAttributes(port, reader);
 
@@ -336,7 +336,7 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        WSDLBoundPortTypeImpl binding = new WSDLBoundPortTypeImpl(wsdlDoc, new QName(targetNamespace, bindingName),
+        WSDLBoundPortTypeImpl binding = new WSDLBoundPortTypeImpl(reader,wsdlDoc, new QName(targetNamespace, bindingName),
                 ParserUtil.getQName(reader, portTypeName));
         extensionFacade.bindingAttributes(binding, reader);
 
@@ -380,7 +380,7 @@ public class RuntimeWSDLParser {
         }
 
         QName opName = new QName(binding.getPortTypeName().getNamespaceURI(), bindingOpName);
-        WSDLBoundOperationImpl bindingOp = new WSDLBoundOperationImpl(binding, opName);
+        WSDLBoundOperationImpl bindingOp = new WSDLBoundOperationImpl(reader,binding, opName);
         binding.put(opName, bindingOp);
         extensionFacade.bindingOperationAttributes(bindingOp, reader);
 
@@ -593,7 +593,7 @@ public class RuntimeWSDLParser {
             XMLStreamReaderUtil.skipElement(reader);
             return;
         }
-        WSDLPortTypeImpl portType = new WSDLPortTypeImpl(wsdlDoc, new QName(targetNamespace, portTypeName));
+        WSDLPortTypeImpl portType = new WSDLPortTypeImpl(reader,wsdlDoc, new QName(targetNamespace, portTypeName));
         extensionFacade.portTypeAttributes(portType, reader);
         wsdlDoc.addPortType(portType);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
@@ -617,7 +617,7 @@ public class RuntimeWSDLParser {
         }
 
         QName operationQName = new QName(portType.getName().getNamespaceURI(), operationName);
-        WSDLOperationImpl operation = new WSDLOperationImpl(portType, operationQName);
+        WSDLOperationImpl operation = new WSDLOperationImpl(reader,portType, operationQName);
         extensionFacade.portTypeOperationAttributes(operation, reader);
         String parameterOrder = ParserUtil.getAttribute(reader, "parameterOrder");
         operation.setParameterOrder(parameterOrder);
@@ -641,7 +641,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getMandatoryNonEmptyAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         String name = ParserUtil.getMandatoryNonEmptyAttribute(reader, "name");
-        WSDLFaultImpl fault = new WSDLFaultImpl(name, msgName);
+        WSDLFaultImpl fault = new WSDLFaultImpl(reader,name, msgName);
         operation.addFault(fault);
         extensionFacade.portTypeOperationFaultAttributes(fault, reader);
         extensionFacade.portTypeOperationFault(operation, reader);
@@ -654,7 +654,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getMandatoryNonEmptyAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         String name = ParserUtil.getAttribute(reader, "name");
-        WSDLInputImpl input = new WSDLInputImpl(name, msgName, operation);
+        WSDLInputImpl input = new WSDLInputImpl(reader, name, msgName, operation);
         operation.setInput(input);
         extensionFacade.portTypeOperationInputAttributes(input, reader);
         extensionFacade.portTypeOperationInput(operation, reader);
@@ -667,7 +667,7 @@ public class RuntimeWSDLParser {
         String msg = ParserUtil.getAttribute(reader, "message");
         QName msgName = ParserUtil.getQName(reader, msg);
         String name = ParserUtil.getAttribute(reader, "name");
-        WSDLOutputImpl output = new WSDLOutputImpl(name, msgName, operation);
+        WSDLOutputImpl output = new WSDLOutputImpl(reader,name, msgName, operation);
         operation.setOutput(output);
         extensionFacade.portTypeOperationOutputAttributes(output, reader);
         extensionFacade.portTypeOperationOutput(operation, reader);
@@ -678,7 +678,7 @@ public class RuntimeWSDLParser {
 
     private void parseMessage(XMLStreamReader reader) {
         String msgName = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_NAME);
-        WSDLMessageImpl msg = new WSDLMessageImpl(new QName(targetNamespace, msgName));
+        WSDLMessageImpl msg = new WSDLMessageImpl(reader,new QName(targetNamespace, msgName));
         extensionFacade.messageAttributes(msg, reader);
         int partIndex = 0;
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
@@ -703,7 +703,7 @@ public class RuntimeWSDLParser {
                 if (desc == null)
                     continue;
 
-                WSDLPartImpl wsdlPart = new WSDLPartImpl(part, partIndex, new WSDLPartDescriptorImpl(ParserUtil.getQName(reader, desc), kind));
+                WSDLPartImpl wsdlPart = new WSDLPartImpl(reader, part, partIndex, new WSDLPartDescriptorImpl(reader,ParserUtil.getQName(reader, desc), kind));
                 msg.add(wsdlPart);
                 if (reader.getEventType() != XMLStreamConstants.END_ELEMENT)
                     goToEnd(reader);

@@ -26,6 +26,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,7 +40,8 @@ public final class WSDLServiceImpl extends AbstractExtensibleImpl implements WSD
     private final Map<QName, WSDLPortImpl> ports;
     private final WSDLModelImpl parent;
 
-    public WSDLServiceImpl(WSDLModelImpl parent, QName name) {
+    public WSDLServiceImpl(XMLStreamReader xsr,WSDLModelImpl parent, QName name) {
+        super(xsr);
         this.parent = parent;
         this.name = name;
         ports = new LinkedHashMap<QName,WSDLPortImpl>();

@@ -23,19 +23,20 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * @author Vivek Pandey
  */
-public class WSDLFaultImpl extends AbstractExtensibleImpl implements WSDLFault {
+public final class WSDLFaultImpl extends AbstractExtensibleImpl implements WSDLFault {
     private final String name;
     private final QName messageName;
     private WSDLMessageImpl message;
 
-    public WSDLFaultImpl(String name, QName messageName) {
+    public WSDLFaultImpl(XMLStreamReader xsr,String name, QName messageName) {
+        super(xsr);
         this.name = name;
         this.messageName = messageName;
     }

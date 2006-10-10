@@ -21,12 +21,13 @@
  */
 package com.sun.xml.ws.model.wsdl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
 
 import javax.xml.namespace.QName;
-import java.util.Map;
+import javax.xml.stream.XMLStreamReader;
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Provides implementation of {@link WSDLPortType}
@@ -38,8 +39,8 @@ public final class WSDLPortTypeImpl  extends AbstractExtensibleImpl implements W
     private final Map<String, WSDLOperationImpl> portTypeOperations;
     private WSDLModelImpl owner;
 
-    public WSDLPortTypeImpl(WSDLModelImpl owner, QName name) {
-        super();
+    public WSDLPortTypeImpl(XMLStreamReader xsr,WSDLModelImpl owner, QName name) {
+        super(xsr);
         this.name = name;
         this.owner = owner;
         portTypeOperations = new Hashtable<String, WSDLOperationImpl>();
