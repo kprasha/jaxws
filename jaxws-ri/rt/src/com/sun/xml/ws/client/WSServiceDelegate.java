@@ -461,7 +461,11 @@ public class WSServiceDelegate extends WSService {
 
     public URL getWSDLDocumentLocation() {
         if(wsdlService==null)   return null;
-        return wsdlService.getParent().getSystemId();
+        try {
+            return new URL(wsdlService.getParent().getLocation().getSystemId());
+        } catch (MalformedURLException e) {
+            throw new AssertionError(e); // impossible
+        }
     }
 
     private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface, WebServiceFeature[] webServiceFeatures) {
