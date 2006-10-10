@@ -22,8 +22,10 @@
 
 package com.sun.xml.ws.api.pipe;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -78,6 +80,12 @@ import java.lang.reflect.Proxy;
  * This object represents a {@link Service} that owns the newly created stub.
  * For example, asynchronous method invocation will use {@link Service#getExecutor()}.
  *
+ * <h3>{@link WSEndpointReference} epr</h3>
+ * <p>
+ * If you want the created {@link Dispatch} to talk to the given EPR, specify the parameter.
+ * Otherwise leave it <tt>null</tt>. Note that the addressing needs to be enabled separately
+ * for this to take effect. 
+ *
  * @author Kohsuke Kawaguchi
  * @author Kathy Walsh
  */
@@ -92,9 +100,9 @@ public abstract class Stubs {
      * createDispatch(port,owner,binding,SOAPMessage.class,mode,next);
      * </pre>
      */
-    public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
+    public static Dispatch<SOAPMessage> createSAAJDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next, @Nullable WSEndpointReference epr) {
         DispatchImpl.checkValidSOAPMessageDispatch(binding, mode);
-        return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
+        return new com.sun.xml.ws.client.dispatch.SOAPMessageDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
     }
 
     /**
@@ -105,9 +113,9 @@ public abstract class Stubs {
      * createDispatch(port,owner,binding,DataSource.class,mode,next);
      * </pre>
      */
-    public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
+    public static Dispatch<DataSource> createDataSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next, @Nullable WSEndpointReference epr) {
         DispatchImpl.checkValidDataSourceDispatch(binding, mode);
-        return new DataSourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
+        return new DataSourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
     }
 
     /**
@@ -118,8 +126,8 @@ public abstract class Stubs {
      * createDispatch(port,owner,binding,Source.class,mode,next);
      * </pre>
      */
-    public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next) {
-        return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
+    public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next, @Nullable WSEndpointReference epr) {
+        return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
     }
 
     /**
@@ -139,19 +147,21 @@ public abstract class Stubs {
      *      See {@link Service#createDispatch(QName, Class, Service.Mode)}.
      * @param next
      *      see <a href="#param">common parameters</a>
-     *
+     * @param epr
+     *      see <a href="#param">common parameters</a>
      * TODO: are these parameters making sense?
      */
     public static <T> Dispatch<T> createDispatch(QName portName,
                                                  WSService owner,
                                                  WSBinding binding,
-                                                 Class<T> clazz, Service.Mode mode, Tube next) {
+                                                 Class<T> clazz, Service.Mode mode, Tube next,
+                                                 @Nullable WSEndpointReference epr) {
         if (clazz == SOAPMessage.class) {
-            return (Dispatch<T>) createSAAJDispatch(portName, owner, binding, mode, next);
+            return (Dispatch<T>) createSAAJDispatch(portName, owner, binding, mode, next, epr);
         } else if (clazz == Source.class) {
-            return (Dispatch<T>) createSourceDispatch(portName, owner, binding, mode, next);
+            return (Dispatch<T>) createSourceDispatch(portName, owner, binding, mode, next, epr);
         } else if (clazz == DataSource.class) {
-            return (Dispatch<T>) createDataSourceDispatch(portName, owner, binding, mode, next);
+            return (Dispatch<T>) createDataSourceDispatch(portName, owner, binding, mode, next, epr);
         } else
             throw new WebServiceException("Unknown class type " + clazz.getName());
     }
@@ -172,14 +182,16 @@ public abstract class Stubs {
      *      See {@link Service#createDispatch(QName, Class, Service.Mode)}.
      * @param next
      *      see <a href="#param">common parameters</a>
-     *
+     * @param epr
+     *      see <a href="#param">common parameters</a>
+     * 
      * TODO: are these parameters making sense?
      */
-    public static Dispatch<Object> createJAXBDispatch( QName portName,
-                                           WSService owner,
-                                           WSBinding binding,
-                                           JAXBContext jaxbContext, Service.Mode mode, Tube next ) {
-        return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, null);
+    public static Dispatch<Object> createJAXBDispatch(
+                                           QName portName, WSService owner, WSBinding binding,
+                                           JAXBContext jaxbContext, Service.Mode mode, Tube next,
+                                           @Nullable WSEndpointReference epr) {
+        return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
     }
 
     /**
@@ -197,11 +209,13 @@ public abstract class Stubs {
      *      The port interface that has operations as Java methods.
      * @param next
      *      see <a href="#param">common parameters</a>
+     * @param epr
+     *      see <a href="#param">common parameters</a>
      */
     public <T> T createPortProxy( WSService service, WSBinding binding, SEIModel model,
-                                  Class<T> portInterface, Tube next ) {
+                                  Class<T> portInterface, Tube next, @Nullable WSEndpointReference epr ) {
 
-        SEIStub ps = new SEIStub((WSServiceDelegate)service,(BindingImpl)binding, (SOAPSEIModel)model,next, null);
+        SEIStub ps = new SEIStub((WSServiceDelegate)service,(BindingImpl)binding, (SOAPSEIModel)model,next, epr);
         return portInterface.cast(
             Proxy.newProxyInstance( portInterface.getClassLoader(),
                 new Class[]{portInterface,BindingProvider.class}, ps ));

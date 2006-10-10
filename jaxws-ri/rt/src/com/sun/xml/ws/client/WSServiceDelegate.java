@@ -23,6 +23,7 @@
 package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
@@ -30,6 +31,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -308,24 +310,25 @@ public class WSServiceDelegate extends WSService {
     }
 
     //milestone 2
-    public <T> T getPort(QName portName, Class<T> portInterface, WebServiceFeature... webServiceFeatures) {
+    public <T> T getPort(QName portName, Class<T> portInterface, WebServiceFeature... features) {
         if (portName == null || portInterface == null)
             throw new IllegalArgumentException();
         addSEI(portName, portInterface);
-        return createEndpointIFBaseProxy(portName, portInterface, webServiceFeatures);
+        return createEndpointIFBaseProxy(null, portName, portInterface, features);
     }
 
 
-    public <T> T getPort(EndpointReference endpointReference, Class<T> serviceEndpointInterface, WebServiceFeature... features) {
-        throw new UnsupportedOperationException();
-    }
-
-    //milestone 2
-    public <T> T getPort(Class<T> portInterface, WebServiceFeature... webServiceFeatures) {
+    public <T> T getPort(EndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
         //get the first port corresponding to the SEI
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
         QName portName = wsdlService.getMatchingPort(portTypeName).getName();
-        return getPort(portName, portInterface, webServiceFeatures);
+
+        addSEI(portName, portInterface);
+        return createEndpointIFBaseProxy(epr,portName,portInterface,features);
+    }
+
+    public <T> T getPort(Class<T> portInterface, WebServiceFeature... features) {
+        return getPort((EndpointReference)null,portInterface,features);
     }
 
     public <T> T getPort(Class<T> portInterface) throws WebServiceException {
@@ -353,14 +356,17 @@ public class WSServiceDelegate extends WSService {
 
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T>  aClass, Service.Mode mode) throws WebServiceException {
-        return createDispatch(portName, aClass, mode, (WebServiceFeature[]) null);
+        return createDispatch(portName, aClass, mode, EMPTY_FEATURES);
     }
 
-    //milestone 2
-    public <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
+    private <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding(webServiceFeatures);
-        return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding));
+        BindingImpl binding = port.createBinding(features);
+        return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), WSEndpointReference.create(epr));
+    }
+
+    public <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature... features) {
+        return createDispatch(portName, aClass, mode, features, null);
     }
 
     public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode, WebServiceFeature... features) {
@@ -368,7 +374,7 @@ public class WSServiceDelegate extends WSService {
         EndpointReferenceInfo eprInfo = new EndpointReferenceInfo(endpointReference);
         eprInfo.parseModel();
         QName portName = addPort(eprInfo);
-        return createDispatch(portName, type, mode, features);
+        return createDispatch(portName, type, mode, features, endpointReference);
 
     }
 
@@ -416,15 +422,19 @@ public class WSServiceDelegate extends WSService {
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode) throws WebServiceException {
-        return createDispatch(portName, jaxbContext, mode, (WebServiceFeature[]) null);
+        return createDispatch(portName, jaxbContext, mode, EMPTY_FEATURES);
     }
 
-    //milestone 2.
-    public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
+    private Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding(webServiceFeatures);
-        return Stubs.createJAXBDispatch(portName, this, binding, jaxbContext, mode,
-                createPipeline(port, binding));
+        BindingImpl binding = port.createBinding(features);
+        return Stubs.createJAXBDispatch(
+                portName, this, binding, jaxbContext, mode,
+                createPipeline(port, binding), WSEndpointReference.create(epr));
+    }
+
+    public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
+        return createDispatch(portName, jaxbContext, mode, webServiceFeatures, null );
     }
 
     public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode, WebServiceFeature... features) {
@@ -432,7 +442,7 @@ public class WSServiceDelegate extends WSService {
         EndpointReferenceInfo eprInfo = new EndpointReferenceInfo(endpointReference);
         eprInfo.parseModel();
         QName portName = addPort(eprInfo);
-        return createDispatch(portName, context, mode, features);
+        return createDispatch(portName, context, mode, features, endpointReference );
     }
 
     public QName getServiceName() {
@@ -468,7 +478,7 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    private <T> T createEndpointIFBaseProxy(QName portName, Class<T> portInterface, WebServiceFeature[] webServiceFeatures) {
+    private <T> T createEndpointIFBaseProxy(@Nullable EndpointReference epr,QName portName, Class<T> portInterface, WebServiceFeature[] webServiceFeatures) {
         //fail if service doesnt have WSDL
         if (wsdlService == null)
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NO_WSDL(serviceName));
@@ -480,7 +490,7 @@ public class WSServiceDelegate extends WSService {
         SEIPortInfo eif = seiContext.get(portInterface);
 
         BindingImpl binding = eif.createBinding(webServiceFeatures);
-        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), null);
+        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), WSEndpointReference.create(epr));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
                 new Class[]{portInterface, BindingProvider.class, Closeable.class}, pis));
@@ -620,6 +630,8 @@ public class WSServiceDelegate extends WSService {
             return daemonThread;
         }
     }
+
+    private static final WebServiceFeature[] EMPTY_FEATURES = new WebServiceFeature[0];
 }
 
 

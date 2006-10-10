@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.addressing;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
@@ -13,6 +14,7 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.resources.AddressingMessages;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
@@ -116,6 +118,23 @@ public final class WSEndpointReference {
     public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException {
         this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
     }
+
+    /**
+     * Converts from {@link EndpointReference}.
+     * This handles null {@link EndpointReference} correctly.
+     */
+    public static  @Nullable
+    WSEndpointReference create(@Nullable EndpointReference epr) {
+        try {
+            if (epr != null)
+                return new WSEndpointReference(epr);
+            else
+                return null;
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(ClientMessages.FAILED_TO_PARSE_EPR(e.getMessage()),e);
+        }
+    }
+
 
     /**
      * Convert the EPR to the spec version. The actual type of
