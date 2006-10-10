@@ -26,10 +26,10 @@ import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
 
 /**
  * Provides implementation of {@link WSDLParserExtensionContext}
- * 
+ *
  * @author Vivek Pandey
  */
-public final class WSDLParserExtensionContextImpl implements WSDLParserExtensionContext {
+final class WSDLParserExtensionContextImpl implements WSDLParserExtensionContext {
     private final boolean isClientSide;
     private final WSDLModel wsdlModel;
 

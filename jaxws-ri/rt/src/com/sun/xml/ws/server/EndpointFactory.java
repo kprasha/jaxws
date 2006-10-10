@@ -52,7 +52,6 @@ import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver;
-import com.sun.xml.ws.wsdl.parser.WSDLParserExtensionContextImpl;
 import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import org.xml.sax.EntityResolver;
