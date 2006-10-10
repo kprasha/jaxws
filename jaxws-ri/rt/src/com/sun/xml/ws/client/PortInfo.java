@@ -106,7 +106,9 @@ public class PortInfo {
                 //try MS Addressing Version
                 wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
             }
-            if ((wsdlAddressingFeature != null)) {
+            //Set only if wsdl:required=true
+            if ((wsdlAddressingFeature != null) &&
+                    ((AddressingFeature)wsdlAddressingFeature).isRequired()) {
                 wsdlFeatures.add(wsdlAddressingFeature);
             }
 
