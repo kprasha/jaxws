@@ -83,27 +83,28 @@ final class SEIPortInfo extends PortInfo {
     }
 
     protected List<WebServiceFeature> extractWSDLFeatures() {
-            AddressingFeature wsdlAddressingFeature = null;
-            MTOMFeature wsdlMTOMFeature = null;
-            List<WebServiceFeature> wsdlFeatures = null;
-            if (portModel != null) {
-                wsdlFeatures = new ArrayList<WebServiceFeature>();
-                WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-                WebServiceFeature  addressingFeature = wsdlPort.getAddressingFeature();
-                if((addressingFeature != null)) {
-                    wsdlFeatures.add(addressingFeature);
-                }
-                if (wsdlPort.getBinding().isMTOMEnabled()) {
-                    wsdlMTOMFeature = new MTOMFeature(wsdlPort.getBinding().isMTOMEnabled());
-                    wsdlFeatures.add(wsdlMTOMFeature);
-                }
-                //these are the only features that jaxws pays attention portability wise.
+        List<WebServiceFeature> wsdlFeatures = null;
+        if (portModel != null) {
+            wsdlFeatures = new ArrayList<WebServiceFeature>();
+            WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
+            if (wsdlAddressingFeature == null) {
+                //try MS Addressing Version
+                wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
             }
-            return wsdlFeatures;
+            if ((wsdlAddressingFeature != null)) {
+                wsdlFeatures.add(wsdlAddressingFeature);
+            }
+
+            WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
+            if (wsdlMTOMFeature != null) {
+                wsdlFeatures.add(wsdlMTOMFeature);
+            }
+            //these are the only features that jaxws pays attention portability wise.
         }
+        return wsdlFeatures;
+    }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        // RespectBindingFeature is enabled, so enable all wsdlFeatures
         Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
         List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
         for(WebServiceFeature ftr: wsdlFeatures) {

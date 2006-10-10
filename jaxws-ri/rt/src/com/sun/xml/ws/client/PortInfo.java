@@ -25,6 +25,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.BindingTypeImpl;
@@ -96,18 +97,21 @@ public class PortInfo {
     }
 
     protected List<WebServiceFeature> extractWSDLFeatures() {
-        AddressingFeature wsdlAddressingFeature = null;
-        MTOMFeature wsdlMTOMFeature = null;
         List<WebServiceFeature> wsdlFeatures = null;
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
-            WSDLPortImpl wsdlPort = (WSDLPortImpl) portModel;
-            WebServiceFeature  addressingFeature = wsdlPort.getAddressingFeature();
-            if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
-                wsdlFeatures.add(addressingFeature);
+
+            WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
+            if (wsdlAddressingFeature == null) {
+                //try MS Addressing Version
+                wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
             }
-            if (wsdlPort.getBinding().isMTOMEnabled()) {
-                wsdlMTOMFeature = new MTOMFeature(wsdlPort.getBinding().isMTOMEnabled());
+            if ((wsdlAddressingFeature != null)) {
+                wsdlFeatures.add(wsdlAddressingFeature);
+            }
+
+            WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
+            if (wsdlMTOMFeature != null) {
                 wsdlFeatures.add(wsdlMTOMFeature);
             }
             //these are the only features that jaxws pays attention portability wise.
