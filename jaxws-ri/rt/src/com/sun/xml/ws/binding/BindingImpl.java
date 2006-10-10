@@ -30,8 +30,13 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import com.sun.xml.ws.server.ServerRtException;
+import com.sun.xml.ws.resources.ServerMessages;
+import com.sun.xml.ws.resources.ModelerMessages;
+import com.sun.xml.ws.model.RuntimeModelerException;
 
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
@@ -233,7 +238,7 @@ public abstract class BindingImpl implements WSBinding {
                     mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
                 }
             } else if (Boolean.valueOf(mtomEnabled).compareTo(bindingID.isMTOMEnabled()) != 0) {
-                //TODO: throw error and fail?
+                throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId,mtomEnabled));
             }
         } else {
             bindingID = BindingID.parse(implClass);
@@ -244,7 +249,12 @@ public abstract class BindingImpl implements WSBinding {
                             Integer.valueOf(mtomThreshold));
             } else {
                 mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
-                //TODO: throw error and fail incase of conflict?
+                if((bindingID.isMTOMEnabled() != null) && (mtomfeature != null)) {
+                    //if both are specified , make sure they don't conflict
+                    if(mtomfeature.isEnabled() != bindingID.isMTOMEnabled())
+                        throw new RuntimeModelerException(
+                                ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID,mtomfeature));
+                }
             }
 
 
