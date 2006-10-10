@@ -23,7 +23,6 @@
 package com.sun.xml.ws.transport.http;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.InstanceResolver;
@@ -47,9 +46,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -84,6 +81,7 @@ public class DeploymentDescriptorParser<A> {
     private final ResourceLoader loader;
     private final AdapterFactory<A> adapterFactory;
 
+    
     /**
      * Endpoint names that are declared.
      * Used to catch double definitions.
