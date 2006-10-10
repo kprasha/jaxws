@@ -145,15 +145,21 @@ public class RuntimeWSDLParser {
             }
             if (serviceDescriptor != null) {
                 List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
-                for (Source src : wsdls) {
-                    try {
-                        errors.clear(NOT_A_WSDL);
-                        parser.parseWSDL(wsdlLoc, src);
-                    } catch (WebServiceException e) {
+                parser = new RuntimeWSDLParser(wsdlLoc, new MexEntityResolver(wsdls), isClientSide, extensions);
+                errors.clear(NOT_A_WSDL);
+
+                //now parse the first WSDL in the list
+                if(wsdls.size() > 0){
+                    errors.clear(NOT_A_WSDL);
+                    try{
+                        String systemId = wsdls.get(0).getSystemId();
+                        Parser wsdlParser = parser.resolver.resolveEntity(null, systemId);
+                        if(wsdlParser != null)
+                            parser.parseWSDL(wsdlParser);
+                    }catch(WebServiceException e){
                         wsdlException = e;
                     }
                 }
-
             }
             //Incase that mex is not present or it couldn't get the metadata, try by appending ?wsdl and give
             // it a last shot else fail
