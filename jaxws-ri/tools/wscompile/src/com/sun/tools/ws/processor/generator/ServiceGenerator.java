@@ -184,7 +184,7 @@ public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
         JCommentPart ret = methodDoc.addReturn();
         JCommentPart paramDoc = methodDoc.addParam("features");
         paramDoc.append("A list of ");
-        paramDoc.append(getClass(WebServiceFeature.class.getName(), ClassType.CLASS));
+        paramDoc.append("{@link "+WebServiceFeature.class.getName()+"}");
         paramDoc.append("to configure on the proxy.  Supported features not in the <code>features</code> parameter will have their default values.");
         ret.add("returns "+retType.name());
         m.varParam(WebServiceFeature.class, "features");
