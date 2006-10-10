@@ -81,7 +81,6 @@ public class DeploymentDescriptorParser<A> {
     private final ResourceLoader loader;
     private final AdapterFactory<A> adapterFactory;
 
-    
     /**
      * Endpoint names that are declared.
      * Used to catch double definitions.
