@@ -24,6 +24,8 @@ package com.sun.xml.ws.model.wsdl;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
@@ -124,7 +126,9 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
 
     void freeze(WSDLModelImpl root) {
         boundPortType = root.getBinding(bindingName);
-        // TODO: error check needs to be done for boundPortType==null case.
-        // that's an error in WSDL which needs to be reported
+        if(boundPortType==null) {
+            throw new LocatableWebServiceException(
+                ClientMessages.UNDEFINED_BINDING(bindingName), getLocation());
+        }
     }
 }

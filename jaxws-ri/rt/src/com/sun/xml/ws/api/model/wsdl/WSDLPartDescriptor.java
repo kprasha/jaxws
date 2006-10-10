@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
  *
  * @author Vivek Pandey
  */
-public interface WSDLPartDescriptor {
+public interface WSDLPartDescriptor extends WSDLObject {
     /**
      * Gives Qualified name of the XML Schema element or type
      */

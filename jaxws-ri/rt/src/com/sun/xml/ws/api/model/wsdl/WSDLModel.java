@@ -26,7 +26,6 @@ package com.sun.xml.ws.api.model.wsdl;
 import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -34,18 +33,7 @@ import java.util.Map;
  *
  * @author Vivek Pandey
  */
-public interface WSDLModel extends WSDLObject, WSDLExtensible{
-    /**
-     * Gets the location where the WSDL was parsed from.
-     * This is meant to be used for diagnostic information.
-     * Resolving this URL does not guarantee that you get back the same infoset.
-     *
-     * @deprecated
-     *      Don't use it. We'll be removing this.
-     *      We should be defining Locator WSDLObject.getLocator()
-     */
-    @NotNull URL getSystemId();
-    
+public interface WSDLModel extends WSDLExtensible {
     /**
      * Gets {@link WSDLPortType} that models <code>wsdl:portType</code>
      *

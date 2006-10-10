@@ -22,9 +22,19 @@
 
 package com.sun.xml.ws.api.model.wsdl;
 
+import com.sun.istack.NotNull;
+import org.xml.sax.Locator;
+
 /**
  * Marker interface serves as base interface for the wsdl model
  * @author Vivek Pandey
  */
 public interface WSDLObject {
+    /**
+     * Gets the source location information in the parsed WSDL.
+     *
+     * This is useful when producing error messages.
+     */
+    @NotNull
+    Locator getLocation();
 }

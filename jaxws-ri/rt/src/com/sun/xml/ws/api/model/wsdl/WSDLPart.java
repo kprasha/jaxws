@@ -29,7 +29,7 @@ import com.sun.xml.ws.api.model.ParameterBinding;
  *
  * @author Vivek Pandey
  */
-public interface WSDLPart extends WSDLObject{
+public interface WSDLPart extends WSDLObject {
     /**
      * Gets wsdl:part@name attribute value.
      */
