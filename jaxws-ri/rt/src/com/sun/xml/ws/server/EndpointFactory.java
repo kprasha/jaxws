@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.*;
@@ -62,6 +63,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.MTOMFeature;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -162,11 +164,8 @@ public class EndpointFactory {
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null && BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
-                    WebServiceFeature  addressingFeature = ((WSDLPortImpl)wsdlPort).getAddressingFeature();
-                    if((addressingFeature != null) && ((AddressingFeature)addressingFeature).isRequired()) {
-                        WebServiceFeature[] wsdlFeatures = {addressingFeature};
-                        binding.setFeatures(wsdlFeatures);
-                    }
+                    WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding);
+                    binding.setFeatures(wsdlFeatures);
                 }
             } else {
                 // Create runtime model for non Provider endpoints
@@ -180,11 +179,8 @@ public class EndpointFactory {
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null) {
-                    WebServiceFeature  addressingFeature = ((WSDLPortImpl)wsdlPort).getAddressingFeature();
-                    if(addressingFeature != null) {
-                        WebServiceFeature[] wsdlFeatures = {addressingFeature};
-                        binding.setFeatures(wsdlFeatures);
-                    }
+                    WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding);
+                    binding.setFeatures(wsdlFeatures);
                 }
             }
             if (processHandlerAnnotation) {
@@ -222,6 +218,38 @@ public class EndpointFactory {
 
     }
 
+    /**
+     *
+     * @param wsdlPort WSDLPort model
+     * @param binding WSBinding for the corresponding port
+     * @return WebServiceFeature[] Extra features that are not already set on binding.
+     *         i.e, if a feature is set already on binding through someother API
+     *         the coresponding wsdlFeature is not set.
+     */
+    private static WebServiceFeature[] extractExtraWSDLFeatures(WSDLPort wsdlPort, WSBinding binding) {
+        List<WebServiceFeature> wsdlFeatures = null;
+        if (wsdlPort != null) {
+            wsdlFeatures = new ArrayList<WebServiceFeature>();
+
+            WebServiceFeature wsdlAddressingFeature = wsdlPort.getFeature(AddressingFeature.ID);
+            if (wsdlAddressingFeature == null) {
+                //try MS Addressing Version
+                wsdlAddressingFeature = wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
+            }
+            if ((wsdlAddressingFeature != null) &&
+                    binding.getFeature(wsdlAddressingFeature.getID()) == null) {
+                    wsdlFeatures.add(wsdlAddressingFeature);
+            }
+
+            WebServiceFeature wsdlMTOMFeature = wsdlPort.getFeature(MTOMFeature.ID);
+            if ((wsdlMTOMFeature != null) &&
+                   binding.getFeature(wsdlMTOMFeature.getID()) == null ) {
+                    wsdlFeatures.add(wsdlMTOMFeature);
+            }
+            //these are the only features that jaxws pays attention portability wise.
+        }
+        return wsdlFeatures.toArray(new WebServiceFeature[] {});
+    }
     /**
      * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider
      * annotation
