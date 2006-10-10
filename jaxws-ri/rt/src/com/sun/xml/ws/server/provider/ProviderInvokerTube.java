@@ -24,7 +24,7 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.server.InvokerPipe;
+import com.sun.xml.ws.server.InvokerTube;
 
 import javax.xml.ws.Provider;
 
@@ -33,7 +33,7 @@ import javax.xml.ws.Provider;
  *
  * @author Jitendra Kotamraju
  */
-public abstract class ProviderInvokerTube<T> extends InvokerPipe<Provider<T>> {
+public abstract class ProviderInvokerTube<T> extends InvokerTube<Provider<T>> {
 
     protected ProviderArgumentsBuilder<T> argsBuilder;
 

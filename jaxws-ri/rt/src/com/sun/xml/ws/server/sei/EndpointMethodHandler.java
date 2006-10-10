@@ -83,10 +83,10 @@ final class EndpointMethodHandler {
     private final EndpointResponseMessageBuilder bodyBuilder;
     private final MessageFiller[] outFillers;
 
-    private final SEIInvokerPipe owner;
+    private final SEIInvokerTube owner;
     private WSBinding binding;
 
-    public EndpointMethodHandler(SEIInvokerPipe owner, SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
+    public EndpointMethodHandler(SEIInvokerTube owner, SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
         this.owner = owner;
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();

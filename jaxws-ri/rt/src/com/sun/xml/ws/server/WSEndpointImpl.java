@@ -88,7 +88,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                           Container container, SEIModel seiModel, WSDLPort port,
                           Class<T> implementationClass,
                           @Nullable ServiceDefinitionImpl serviceDef,
-                          InvokerPipe terminalPipe, boolean isSynchronous) {
+                          InvokerTube terminalTube, boolean isSynchronous) {
         this.serviceName = serviceName;
         this.portName = portName;
         this.binding = binding;
@@ -106,9 +106,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 Thread.currentThread().getContextClassLoader(), binding.getBindingId());
         assert assembler!=null;
 
-        ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalPipe, isSynchronous);
+        ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalTube, isSynchronous);
         this.masterTubeline = assembler.createServer(context);
-        terminalPipe.setEndpoint(this);
+        terminalTube.setEndpoint(this);
         engine = new Engine();
     }
 

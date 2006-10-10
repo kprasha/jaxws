@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.AsyncProviderCallback;
 import com.sun.xml.ws.api.server.Invoker;
+import com.sun.istack.NotNull;
 
 import java.util.logging.Logger;
 
@@ -73,6 +74,14 @@ public class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
             Packet packet = request.createResponse(responseMessage);
             fiber.resume(packet);
         }
+    }
+
+    public NextAction processResponse(Packet response) {
+        return doReturnWith(response);
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
     }
 
 }

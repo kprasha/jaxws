@@ -10,7 +10,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.server.InvokerPipe;
+import com.sun.xml.ws.server.InvokerTube;
 import com.sun.xml.ws.spi.ProviderImpl;
 
 import javax.annotation.PostConstruct;
@@ -216,7 +216,7 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
 
     @NotNull
     public <EPR extends EndpointReference>EPR export(Class<EPR> epr, T o) {
-        return export(epr,o, InvokerPipe.getCurrentPacket() );
+        return export(epr,o, InvokerTube.getCurrentPacket() );
     }
 
     @NotNull

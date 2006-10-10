@@ -33,8 +33,9 @@ import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.server.InvokerPipe;
+import com.sun.xml.ws.server.InvokerTube;
 import com.sun.xml.ws.util.QNameMap;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 
@@ -43,7 +44,7 @@ import javax.xml.namespace.QName;
  *
  * @author Jitendra Kotamraju
  */
-public class SEIInvokerPipe extends InvokerPipe {
+public class SEIInvokerTube extends InvokerTube {
 
     /**
      * For each method on the port interface we have
@@ -56,7 +57,7 @@ public class SEIInvokerPipe extends InvokerPipe {
     private final WSBinding binding;
     private final AbstractSEIModelImpl model;
 
-    public SEIInvokerPipe(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
+    public SEIInvokerTube(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
         super(invoker);
         this.soapVersion = binding.getSOAPVersion();
         this.binding = binding;
@@ -101,6 +102,14 @@ public class SEIInvokerPipe extends InvokerPipe {
             res = handler.invoke(req);
         }
         return doReturnWith(res);
+    }
+
+    public NextAction processResponse(Packet response) {
+        throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
     }
 
 }

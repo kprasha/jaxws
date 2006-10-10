@@ -45,7 +45,7 @@ import com.sun.xml.ws.server.provider.ProviderEndpointModel;
 import com.sun.xml.ws.server.provider.ProviderArgumentsBuilder;
 import com.sun.xml.ws.server.provider.SyncProviderInvokerTube;
 import com.sun.xml.ws.server.provider.AsyncProviderInvokerTube;
-import com.sun.xml.ws.server.sei.SEIInvokerPipe;
+import com.sun.xml.ws.server.sei.SEIInvokerTube;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 import com.sun.xml.ws.util.ServiceConfigurationError;
@@ -145,7 +145,7 @@ public class EndpointFactory {
         // two concrete or abstract WSDLs
         SDDocumentImpl primaryDoc = findPrimary(docList);
 
-        InvokerPipe terminal;
+        InvokerTube terminal;
         WSDLPort wsdlPort = null;
         AbstractSEIModelImpl seiModel = null;
         // create WSDL model
@@ -175,7 +175,7 @@ public class EndpointFactory {
                     ((SOAPBindingImpl)binding).setPortKnownHeaders(
                             ((SOAPSEIModel)seiModel).getKnownHeaders());
                 }
-                terminal= new SEIInvokerPipe(seiModel,invoker,binding);
+                terminal= new SEIInvokerTube(seiModel,invoker,binding);
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null) {

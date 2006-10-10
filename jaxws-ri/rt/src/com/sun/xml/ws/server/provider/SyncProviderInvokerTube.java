@@ -4,6 +4,7 @@ import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.istack.NotNull;
 
 import java.util.logging.Logger;
 
@@ -50,6 +51,14 @@ public class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         } else {
             return doReturnWith(request.createResponse(argsBuilder.getResponse(returnValue)));
         }
+    }
+
+    public NextAction processResponse(Packet response) {
+        throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
+    }
+
+    public NextAction processException(@NotNull Throwable t) {
+        throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
     }
 
 }

@@ -24,7 +24,6 @@ package com.sun.xml.ws.server;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.AsyncProviderCallback;
@@ -34,7 +33,7 @@ import com.sun.xml.ws.api.server.StatefulInstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSWebServiceContext;
 import com.sun.xml.ws.server.provider.ProviderInvokerTube;
-import com.sun.xml.ws.server.sei.SEIInvokerPipe;
+import com.sun.xml.ws.server.sei.SEIInvokerTube;
 import org.w3c.dom.Element;
 
 import javax.xml.ws.EndpointReference;
@@ -46,7 +45,7 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 
 /**
- * Base code for {@link ProviderInvokerTube} and {@link SEIInvokerPipe}.
+ * Base code for {@link ProviderInvokerTube} and {@link SEIInvokerTube}.
  *
  * <p>
  * This hides {@link InstanceResolver} and performs a set up
@@ -54,12 +53,12 @@ import java.security.Principal;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class InvokerPipe<T> extends AbstractTubeImpl {
+public abstract class InvokerTube<T> extends AbstractTubeImpl {
 
     private final Invoker invoker;
     private WSEndpoint endpoint;
 
-    protected InvokerPipe(Invoker invoker) {
+    protected InvokerTube(Invoker invoker) {
         this.invoker = invoker;
     }
 
@@ -87,7 +86,7 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
 
     /**
      * processRequest() and processResponse() do not share any instance variables
-     * while processing the request. {@link InvokerPipe} is stateless and terminal,
+     * while processing the request. {@link InvokerTube} is stateless and terminal,
      * so no need to create copies.
      */
     public final AbstractTubeImpl copy(TubeCloner cloner) {
@@ -97,14 +96,6 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
 
     public void preDestroy() {
         invoker.dispose();
-    }
-
-    public NextAction processResponse(Packet response) {
-        throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
-    }
-
-    public NextAction processException(@NotNull Throwable t) {
-        throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
     }
 
     /**
