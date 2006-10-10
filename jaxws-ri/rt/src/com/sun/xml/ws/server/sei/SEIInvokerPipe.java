@@ -23,9 +23,9 @@ package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
@@ -75,7 +75,7 @@ public class SEIInvokerPipe extends InvokerPipe {
      * return value, and response Holder arguments are used to create a new {@link Message}
      * that traverses through the Pipeline to transport.
      */
-    public Packet process(Packet req) {
+    public NextAction processRequest(Packet req) {
         Message msg = req.getMessage();
         String localPart = msg.getPayloadLocalPart();
         String nsUri;
@@ -100,6 +100,7 @@ public class SEIInvokerPipe extends InvokerPipe {
         } else {
             res = handler.invoke(req);
         }
-        return res;
+        return doReturnWith(res);
     }
+
 }

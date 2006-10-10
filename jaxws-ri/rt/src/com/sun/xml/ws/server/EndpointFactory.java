@@ -25,7 +25,6 @@ package com.sun.xml.ws.server;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -42,9 +41,9 @@ import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderEndpointModel;
-import com.sun.xml.ws.server.provider.SOAPProviderInvokerPipe;
-import com.sun.xml.ws.server.provider.XMLProviderInvokerPipe;
-import com.sun.xml.ws.server.provider.SOAPAsyncProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.ProviderArgumentsBuilder;
+import com.sun.xml.ws.server.provider.SyncProviderInvokerTube;
+import com.sun.xml.ws.server.provider.AsyncProviderInvokerTube;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
@@ -156,16 +155,10 @@ public class EndpointFactory {
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
                 ProviderEndpointModel model = new ProviderEndpointModel(implType, binding);
-                if (binding instanceof SOAPBinding) {
-                    SOAPVersion soapVersion = binding.getSOAPVersion();
-                    if (model.isAsync()) {
-                        terminal =  new SOAPAsyncProviderInvokerPipe(invoker, model, soapVersion);
-                    } else {
-                        terminal =  new SOAPProviderInvokerPipe(invoker, model, soapVersion);
-                    }
-                } else {
-                    terminal =  new XMLProviderInvokerPipe(invoker, model);
-                }
+                ProviderArgumentsBuilder argsBuilder = ProviderArgumentsBuilder.create(model, binding);
+                terminal = model.isAsync() ? new AsyncProviderInvokerTube(invoker, argsBuilder)
+                        : new SyncProviderInvokerTube(invoker, argsBuilder);
+
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null && BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {

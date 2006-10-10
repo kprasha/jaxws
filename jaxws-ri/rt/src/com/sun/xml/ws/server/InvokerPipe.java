@@ -33,7 +33,7 @@ import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.StatefulInstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSWebServiceContext;
-import com.sun.xml.ws.server.provider.ProviderInvokerPipe;
+import com.sun.xml.ws.server.provider.ProviderInvokerTube;
 import com.sun.xml.ws.server.sei.SEIInvokerPipe;
 import org.w3c.dom.Element;
 
@@ -46,7 +46,7 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 
 /**
- * Base code for {@link ProviderInvokerPipe} and {@link SEIInvokerPipe}.
+ * Base code for {@link ProviderInvokerTube} and {@link SEIInvokerPipe}.
  *
  * <p>
  * This hides {@link InstanceResolver} and performs a set up
@@ -97,11 +97,6 @@ public abstract class InvokerPipe<T> extends AbstractTubeImpl {
 
     public void preDestroy() {
         invoker.dispose();
-    }
-
-    public NextAction processRequest(Packet request) {
-        Packet res = process(request);
-        return doReturnWith(res);
     }
 
     public NextAction processResponse(Packet response) {
