@@ -21,8 +21,8 @@
  */
 package com.sun.xml.ws.message.saaj;
 
-import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -30,9 +30,10 @@ import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
+import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -483,8 +484,7 @@ public class SAAJMessage extends Message {
             writer.writeEndDocument();
             writer.flush();
         } catch (SOAPException ex) {
-            ex.printStackTrace();
-            throw new XMLStreamException(ex);
+            throw new XMLStreamException2(ex);
             //for now. ask jaxws team what to do.
         }
 
