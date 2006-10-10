@@ -164,7 +164,7 @@ public class EndpointFactory {
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null && BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
-                    WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding);
+                    WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding, true);
                     binding.setFeatures(wsdlFeatures);
                 }
             } else {
@@ -179,7 +179,7 @@ public class EndpointFactory {
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null) {
-                    WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding);
+                    WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding,false);
                     binding.setFeatures(wsdlFeatures);
                 }
             }
@@ -222,22 +222,26 @@ public class EndpointFactory {
      *
      * @param wsdlPort WSDLPort model
      * @param binding WSBinding for the corresponding port
+     * @param honorWsdlRequired : If this is true add WSDL Feature only if wsd;Required=true
+     *          In SEI case, it should be false
+     *          In Provider case, it should be true
      * @return WebServiceFeature[] Extra features that are not already set on binding.
      *         i.e, if a feature is set already on binding through someother API
      *         the coresponding wsdlFeature is not set.
      */
-    private static WebServiceFeature[] extractExtraWSDLFeatures(WSDLPort wsdlPort, WSBinding binding) {
+    private static WebServiceFeature[] extractExtraWSDLFeatures(WSDLPort wsdlPort, WSBinding binding, boolean honorWsdlRequired) {
         List<WebServiceFeature> wsdlFeatures = null;
         if (wsdlPort != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
 
-            WebServiceFeature wsdlAddressingFeature = wsdlPort.getFeature(AddressingFeature.ID);
+            AddressingFeature wsdlAddressingFeature = (AddressingFeature) wsdlPort.getFeature(AddressingFeature.ID);
             if (wsdlAddressingFeature == null) {
                 //try MS Addressing Version
-                wsdlAddressingFeature = wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
+                wsdlAddressingFeature = (AddressingFeature) wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
             }
             if ((wsdlAddressingFeature != null) &&
-                    binding.getFeature(wsdlAddressingFeature.getID()) == null) {
+                    (binding.getFeature(wsdlAddressingFeature.getID()) == null)) {
+                if ((honorWsdlRequired ? wsdlAddressingFeature.isRequired() : true))
                     wsdlFeatures.add(wsdlAddressingFeature);
             }
 
