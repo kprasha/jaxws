@@ -1,11 +1,11 @@
 package com.sun.xml.ws.server.provider;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.ws.soap.SOAPBinding;
 
-public abstract class ProviderArgumentsBuilder<T> {
+abstract class ProviderArgumentsBuilder<T> {
 
     /**
      * Creates a fault {@link Message} from method invocation's exception
@@ -22,7 +22,7 @@ public abstract class ProviderArgumentsBuilder<T> {
      */
     protected abstract Message getResponse(T returnValue);
 
-    public static ProviderArgumentsBuilder create(ProviderEndpointModel model, WSBinding binding) {
+    public static ProviderArgumentsBuilder<?> create(ProviderEndpointModel model, WSBinding binding) {
         return (binding instanceof SOAPBinding) ? SOAPProviderArgumentBuilder.create(model, binding.getSOAPVersion())
                 : XMLProviderArgumentBuilder.create(model);
     }

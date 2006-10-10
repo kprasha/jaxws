@@ -46,6 +46,8 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.util.Pool;
+import com.sun.xml.ws.util.Pool.TubePool;
 
 import javax.annotation.PreDestroy;
 import javax.xml.namespace.QName;
@@ -73,6 +75,8 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final ServiceDefinitionImpl serviceDef;
     private final SOAPVersion soapVersion;
     private final Engine engine;
+
+    private final Pool<Tube> tubePool;
 
     /**
      * Set to true once we start shutting down this endpoint.
@@ -108,6 +112,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
         ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalTube, isSynchronous);
         this.masterTubeline = assembler.createServer(context);
+        tubePool = new TubePool(masterTubeline);
         terminalTube.setEndpoint(this);
         engine = new Engine();
     }
@@ -148,11 +153,23 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         engine.setExecutor(exec);
     }
 
-    public void schedule(Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
+    public void schedule(Packet request, final CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
         Fiber fiber = engine.createFiber();
         fiber.addInterceptor(interceptor);
-        Tube tube = TubeCloner.clone(masterTubeline);
-        fiber.start(tube, request, callback);
+        final Tube tube = tubePool.take();
+        fiber.start(tube, request, new CompletionCallback() {
+            public void onCompletion(@NotNull Packet response) {
+                tubePool.recycle(tube);
+                if(callback!=null)
+                    callback.onCompletion(response);
+            }
+
+            public void onCompletion(@NotNull Throwable error) {
+                // let's not reuse tubes as they might be in a wrong state
+                if(callback!=null)
+                    callback.onCompletion(error);
+            }
+        });
     }
 
     public @NotNull PipeHead createPipeHead() {

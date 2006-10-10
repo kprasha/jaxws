@@ -29,22 +29,24 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.*;
+import com.sun.xml.ws.api.server.AsyncProvider;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.server.SDDocument;
+import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.binding.BindingTypeImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.server.provider.ProviderEndpointModel;
-import com.sun.xml.ws.server.provider.ProviderArgumentsBuilder;
-import com.sun.xml.ws.server.provider.SyncProviderInvokerTube;
-import com.sun.xml.ws.server.provider.AsyncProviderInvokerTube;
+import com.sun.xml.ws.server.provider.ProviderInvokerTube;
 import com.sun.xml.ws.server.sei.SEIInvokerTube;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.HandlerAnnotationProcessor;
@@ -60,10 +62,14 @@ import org.xml.sax.SAXException;
 import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.*;
-import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.Provider;
+import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -156,10 +162,7 @@ public class EndpointFactory {
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
-                ProviderEndpointModel model = new ProviderEndpointModel(implType, binding);
-                ProviderArgumentsBuilder argsBuilder = ProviderArgumentsBuilder.create(model, binding);
-                terminal = model.isAsync() ? new AsyncProviderInvokerTube(invoker, argsBuilder)
-                        : new SyncProviderInvokerTube(invoker, argsBuilder);
+                terminal = ProviderInvokerTube.create(implType,binding,invoker);
 
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled

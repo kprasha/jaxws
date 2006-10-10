@@ -22,18 +22,18 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.AsyncProvider;
 
-import java.lang.reflect.ParameterizedType;
 import javax.activation.DataSource;
-import javax.xml.ws.Binding;
-import javax.xml.ws.Provider;
-import java.lang.reflect.Type;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
+import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
 import javax.xml.ws.ServiceMode;
 import javax.xml.ws.soap.SOAPBinding;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 
 /**
@@ -43,13 +43,13 @@ import javax.xml.ws.soap.SOAPBinding;
  * of endpoint class.
  * 
  */
-public class ProviderEndpointModel {
+final class ProviderEndpointModel<T> {
     
     private final boolean isSource;
     private final Service.Mode mode;
     private final boolean isAsync;
-    
-    public ProviderEndpointModel(Class implementorClass, Binding binding) {
+
+    ProviderEndpointModel(Class<T> implementorClass, WSBinding binding) {
         assert implementorClass != null;
         assert binding != null;
 

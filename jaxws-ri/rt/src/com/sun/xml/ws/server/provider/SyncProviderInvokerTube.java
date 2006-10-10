@@ -1,10 +1,10 @@
 package com.sun.xml.ws.server.provider;
 
-import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.server.Invoker;
 
 import java.util.logging.Logger;
 
@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author Jitendra Kotamraju
  */
-public class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
+class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SyncProviderInvokerTube");

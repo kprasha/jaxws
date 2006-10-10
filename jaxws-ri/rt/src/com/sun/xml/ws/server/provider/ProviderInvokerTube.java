@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.server.provider;
 
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.Invoker;
@@ -37,9 +38,18 @@ public abstract class ProviderInvokerTube<T> extends InvokerTube<Provider<T>> {
 
     protected ProviderArgumentsBuilder<T> argsBuilder;
 
-    public ProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
+    /*package*/ ProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
         super(invoker);
         this.argsBuilder = argsBuilder;
     }
 
+    public static <T> ProviderInvokerTube<T>
+    create(Class<T> implType, WSBinding binding, Invoker invoker) {
+
+        ProviderEndpointModel<T> model = new ProviderEndpointModel<T>(implType, binding);
+
+        ProviderArgumentsBuilder<?> argsBuilder = ProviderArgumentsBuilder.create(model, binding);
+        return model.isAsync() ? new AsyncProviderInvokerTube(invoker, argsBuilder)
+            : new SyncProviderInvokerTube(invoker, argsBuilder);
+    }
 }

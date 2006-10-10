@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server.provider;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
@@ -8,7 +9,6 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.AsyncProviderCallback;
 import com.sun.xml.ws.api.server.Invoker;
-import com.sun.istack.NotNull;
 
 import java.util.logging.Logger;
 
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author Jitendra Kotamraju
  */
-public class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
+class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");

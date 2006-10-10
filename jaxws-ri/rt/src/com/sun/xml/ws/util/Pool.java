@@ -22,9 +22,6 @@
 
 package com.sun.xml.ws.util;
 
-import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 
@@ -37,7 +34,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *
  * <p>
  * In many parts of the runtime, we need to pool instances of objects that
- * are expensive to create (such as JAXB objects, StAX parsers, {@link Pipe} instances.)
+ * are expensive to create (such as JAXB objects, StAX parsers, {@link Tube} instances.)
  *
  * <p>
  * This class provides a default implementation of such a pool.
@@ -127,27 +124,12 @@ public abstract class Pool<T> {
     }
 
     /**
-     * JAXB {@link com.sun.xml.bind.api.BridgeContext} pool.
+     * {@link Tube} pool.
      */
-    public static final class BridgeContext extends Pool<com.sun.xml.bind.api.BridgeContext> {
-        private final JAXBRIContext context;
-
-        public BridgeContext(JAXBRIContext context) {
-            this.context = context;
-        }
-
-        protected com.sun.xml.bind.api.BridgeContext create() {
-            return context.createBridgeContext();
-        }
-    }
-
-    /**
-     * {@link Pipe} pool.
-     */
-    public static final class PipePool extends Pool<Tube> {
+    public static final class TubePool extends Pool<Tube> {
         private final Tube master;
 
-        public PipePool(Tube master) {
+        public TubePool(Tube master) {
             this.master = master;
             recycle(master);    // we'll use master as a part of the pool, too.
         }

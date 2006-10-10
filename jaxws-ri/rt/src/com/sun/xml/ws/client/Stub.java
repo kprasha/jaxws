@@ -37,7 +37,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.util.Pool.PipePool;
+import com.sun.xml.ws.util.Pool.TubePool;
 import com.sun.xml.ws.util.RuntimeVersion;
 import org.w3c.dom.Element;
 
@@ -111,7 +111,7 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
      */
     protected Stub(WSServiceDelegate owner, Tube master, BindingImpl binding, WSDLPort wsdlPort, EndpointAddress defaultEndPointAddress, @Nullable WSEndpointReference epr) {
         this.owner = owner;
-        this.tubes = new PipePool(master);
+        this.tubes = new TubePool(master);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         this.requestContext.setEndpointAddress(defaultEndPointAddress);
