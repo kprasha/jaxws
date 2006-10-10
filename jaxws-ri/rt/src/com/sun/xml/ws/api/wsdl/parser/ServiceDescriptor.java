@@ -35,13 +35,15 @@ import java.util.List;
 public abstract class ServiceDescriptor {
     /**
      * Gives list of wsdls
-     * @return List of WSDL documents as {@link Source}
+     * @return List of WSDL documents as {@link Source}.
+     * {@link javax.xml.transform.Source#getSystemId()} must be Non-null
      */
     public abstract @NotNull List<? extends Source> getWSDLs();
 
     /**
-     * Gives list of schemas
-     * @return List of XML schema documents as {@link Source}
+     * Gives list of schemas.
+     * @return List of XML schema documents as {@link Source}. {@link javax.xml.transform.Source#getSystemId()} must be Non-null.
+     * 
      */
     public abstract @NotNull List<? extends Source> getSchemas();
 }
