@@ -22,6 +22,7 @@
 package com.sun.xml.ws.model.wsdl;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 
@@ -74,7 +75,8 @@ public final class WSDLServiceImpl extends AbstractExtensibleImpl implements WSD
     /**
     * gets the first port in this service which matches the portType
     */
-    public WSDLPortImpl getMatchingPort(QName portTypeName){
+    public @Nullable
+    WSDLPortImpl getMatchingPort(QName portTypeName){
         for(WSDLPortImpl port : getPorts()){
             QName ptName = port.getBinding().getPortTypeName();
             assert (ptName != null);
