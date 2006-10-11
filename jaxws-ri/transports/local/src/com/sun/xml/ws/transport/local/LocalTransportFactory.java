@@ -32,9 +32,7 @@ import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser.AdapterFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
@@ -100,10 +98,7 @@ public final class LocalTransportFactory extends TransportTubeFactory {
                     return endpoint;
                 }
             });
-        InputStream in = new FileInputStream(riFile);
-        List<WSEndpoint> endpoints = parser.parse(in);
-        in.close();
 
-        return endpoints;
+        return parser.parse(new File(riFile));
     }
 }

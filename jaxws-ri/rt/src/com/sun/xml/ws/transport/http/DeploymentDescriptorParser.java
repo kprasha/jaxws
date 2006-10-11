@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.handler.HandlerChainsModel;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
@@ -37,9 +38,9 @@ import com.sun.xml.ws.streaming.Attributes;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
+import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
@@ -48,6 +49,9 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -116,18 +120,28 @@ public class DeploymentDescriptorParser<A> {
     /**
      * Parses the {@code sun-jaxws.xml} file and configures
      * a set of {@link HttpAdapter}s.
-     *
-     * @return
-     *      can be empty but non-null.
      */
-    public List<A> parse(InputStream is) {
+    public @NotNull List<A> parse(String systemId, InputStream is) {
         try {
             XMLStreamReader reader =
-                XMLStreamReaderFactory.createFreshXMLStreamReader(new InputSource(is), true);
+                XMLStreamReaderFactory.createFreshXMLStreamReader(systemId,is);
             XMLStreamReaderUtil.nextElementContent(reader);
             return parseAdapters(reader);
         } catch (XMLStreamException e) {
             throw new ServerRtException("runtime.parser.xmlReader",e);
+        }
+    }
+
+    /**
+     * Parses the {@code sun-jaxws.xml} file and configures
+     * a set of {@link HttpAdapter}s.
+     */
+    public @NotNull List<A> parse(File f) throws IOException {
+        FileInputStream in = new FileInputStream(f);
+        try {
+            return parse(f.getPath(), in);
+        } finally {
+            in.close();
         }
     }
 
@@ -175,7 +189,7 @@ public class DeploymentDescriptorParser<A> {
 
             String implementationName =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_IMPLEMENTATION);
-            Class implementorClass = getImplementorClass(implementationName);
+            Class implementorClass = getImplementorClass(implementationName,reader);
             EndpointFactory.verifyImplementorClass(implementorClass);
 
             SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
@@ -434,16 +448,19 @@ public class DeploymentDescriptorParser<A> {
         }
     }
 
-    /*
-    * Gets endpoint implementation class
-    */
-    protected Class getImplementorClass(String name) {
+    /**
+     * Loads the class of the given name.
+     *
+     * @param xsr
+     *      Used to report the source location information if there's any error.
+     */
+    private Class getImplementorClass(String name, XMLStreamReader xsr) {
         try {
             return Class.forName(name, true, classLoader);
         } catch (ClassNotFoundException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
-            throw new ServerRtException(
-                "runtime.parser.classNotFound", name);
+            throw new LocatableWebServiceException(
+                ServerMessages.RUNTIME_PARSER_CLASS_NOT_FOUND(name), e, xsr );
         }
     }
 

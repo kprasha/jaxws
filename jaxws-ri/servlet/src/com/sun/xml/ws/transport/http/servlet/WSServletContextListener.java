@@ -21,18 +21,18 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
+
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.HttpAdapter;
-import com.sun.xml.ws.transport.http.servlet.ServletAdapterList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,8 +86,8 @@ public final class WSServletContextListener
             // Parse the descriptor file and build endpoint infos
             DeploymentDescriptorParser<ServletAdapter> parser = new DeploymentDescriptorParser<ServletAdapter>(
                 classLoader,new ServletResourceLoader(context), container, new ServletAdapterList());
-            InputStream is = context.getResourceAsStream(JAXWS_RI_RUNTIME);
-            List<ServletAdapter> adapters = parser.parse(is);
+            URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
+            List<ServletAdapter> adapters = parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
 
             delegate = new WSServletDelegate(adapters,context);
 
