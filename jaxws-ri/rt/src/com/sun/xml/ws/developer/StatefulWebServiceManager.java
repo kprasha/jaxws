@@ -10,7 +10,9 @@ import com.sun.xml.ws.api.server.AsyncProviderCallback;
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.ws.BindingType;
 import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Feature;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -26,8 +28,8 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * that takes {@link StatefulWebServiceManager}.
  *
  * <pre>
- * &#64;{@link Stateful}
  * &#64;{@link WebService}
+ * &#64;{@link BindingType}(features=@{@link Feature}({@link ServerFeatures#STATEFUL}))
  * class BankAccount {
  *     protected final int id;
  *     private int balance;
@@ -95,7 +97,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * invoked from multiple threads concurrently.
  *
  * @author Kohsuke Kawaguchi
- * @see Stateful
+ * @see ServerFeatures#STATEFUL
  * @since 2.1
  */
 public interface StatefulWebServiceManager<T> {

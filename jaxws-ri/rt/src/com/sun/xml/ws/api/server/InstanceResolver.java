@@ -25,10 +25,12 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.developer.Stateful;
+import com.sun.xml.ws.developer.ServerFeatures;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.ServerRtException;
 
+import javax.xml.ws.BindingType;
+import javax.xml.ws.Feature;
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.InvocationTargetException;
@@ -126,10 +128,19 @@ public abstract class InstanceResolver<T> {
      */
     public static <T> InstanceResolver<T> createDefault(Class<T> clazz) {
         assert clazz!=null;
-        if(clazz.getAnnotation(Stateful.class)!=null)
+        if(isStateful(clazz))
             return new StatefulInstanceResolver<T>(clazz);
         else
             return createSingleton(createNewInstance(clazz));
+    }
+
+    private static boolean isStateful(Class<?> classDecl) {
+        BindingType bt = classDecl.getAnnotation(BindingType.class);
+        for( Feature f : bt.features() ) {
+            if(f.value().equals(ServerFeatures.STATEFUL) && f.enabled())
+                return true;
+        }
+        return false;
     }
 
     private static <T> T createNewInstance(Class<T> cl) {
