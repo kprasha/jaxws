@@ -75,6 +75,8 @@ public class BindingTypeImpl {
                                     }
                                 }
                                 wsfeatures.add(mtomfeature);
+                            } else if(f.value().equals(RespectBindingFeature.ID) ) {
+                                wsfeatures.add(new RespectBindingFeature());
                             }
                         }
                     }
