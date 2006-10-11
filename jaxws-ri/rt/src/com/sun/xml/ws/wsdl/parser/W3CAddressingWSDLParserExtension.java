@@ -22,30 +22,30 @@
 
 package com.sun.xml.ws.wsdl.parser;
 
-import java.util.Map;
-
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.AddressingFeature;
-
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.WSDLFeaturedObject;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
+import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
+import java.util.Map;
 
 /**
  * W3C WS-Addressing Runtime WSDL parser extension
@@ -55,23 +55,19 @@ import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     @Override
     public boolean bindingElements(WSDLBoundPortType binding, XMLStreamReader reader) {
-        QName ua = reader.getName();
-        if (ua.equals(AddressingVersion.W3C.wsdlExtensionTag)) {
-            String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            binding.addFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
-            XMLStreamReaderUtil.skipElement(reader);
-            return true;        // UsingAddressing is consumed
-        }
-
-        return false;
+        return addressibleElement(reader, binding);
     }
 
     @Override
     public boolean portElements(WSDLPort port, XMLStreamReader reader) {
+        return addressibleElement(reader, port);
+    }
+
+    private boolean addressibleElement(XMLStreamReader reader, WSDLFeaturedObject binding) {
         QName ua = reader.getName();
         if (ua.equals(AddressingVersion.W3C.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            port.addFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
+            binding.addFeature(new AddressingFeature(true, Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }

@@ -26,14 +26,13 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceFeature;
 
 /**
  * Abstracts wsdl:service/wsdl:port
  *
  * @author Vivek Pandey
  */
-public interface WSDLPort extends WSDLObject, WSDLExtensible {
+public interface WSDLPort extends WSDLFeaturedObject, WSDLExtensible {
     /**
      * Gets wsdl:port@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
@@ -68,18 +67,4 @@ public interface WSDLPort extends WSDLObject, WSDLExtensible {
      *      always non-null.
      */
     WSDLService getOwner();
-
-    /**
-     * Returns the {@link WebServiceFeature} that matches the <code>id</code>.
-     *
-     * @param id unique id of the feature
-     * @return WebServiceFeature matching the id
-     */
-    WebServiceFeature getFeature(String id);
-
-    /**
-     * Enables a {@link WebServiceFeature} based upon policy assertions on this port.
-     * This method would be called during WSDL parsing by WS-Policy code.
-     */
-    void addFeature(WebServiceFeature feature);
 }

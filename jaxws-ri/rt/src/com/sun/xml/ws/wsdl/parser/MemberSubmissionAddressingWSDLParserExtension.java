@@ -22,19 +22,19 @@
 
 package com.sun.xml.ws.wsdl.parser;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamReader;
-
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLFeaturedObject;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * Member Submission WS-Addressing Runtime WSDL parser extension
@@ -44,23 +44,19 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressingWSDLParserExtension {
     @Override
     public boolean bindingElements(WSDLBoundPortType binding, XMLStreamReader reader) {
-        QName ua = reader.getName();
-        if (ua.equals(AddressingVersion.MEMBER.wsdlExtensionTag)) {
-            String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            binding.addFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
-            XMLStreamReaderUtil.skipElement(reader);
-            return true;        // UsingAddressing is consumed
-        }
-
-        return false;
+        return addressibleElement(reader, binding);
     }
 
     @Override
     public boolean portElements(WSDLPort port, XMLStreamReader reader) {
+        return addressibleElement(reader, port);
+    }
+
+    private boolean addressibleElement(XMLStreamReader reader, WSDLFeaturedObject binding) {
         QName ua = reader.getName();
         if (ua.equals(AddressingVersion.MEMBER.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            port.addFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
+            binding.addFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }

@@ -22,25 +22,20 @@
 
 package com.sun.xml.ws.api.model.wsdl;
 
-import com.sun.xml.ws.api.model.ParameterBinding;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.BindingID;
-import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.WebServiceFeature;
-import javax.jws.WebParam.Mode;
 
 /**
  * {@link WSDLPortType} bound with a specific binding.
  *
  * @author Vivek Pandey
  */
-public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
+public interface WSDLBoundPortType extends WSDLFeaturedObject, WSDLExtensible {
     /**
      * Gets the name of the wsdl:binding@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
