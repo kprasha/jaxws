@@ -67,7 +67,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
         public void send(T param) {
             Message responseMessage = argsBuilder.getResponse(param);
-            Packet packet = request.createResponse(responseMessage);
+            Packet packet = request.createServerResponse(responseMessage,null,binding);
             fiber.resume(packet);
         }
 
@@ -79,7 +79,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
                 e = new RuntimeException(t);
             }
             Message responseMessage = argsBuilder.getResponseMessage(e);
-            Packet packet = request.createResponse(responseMessage);
+            Packet packet = request.createServerResponse(responseMessage,null,binding);
             fiber.resume(packet);
         }
     }
