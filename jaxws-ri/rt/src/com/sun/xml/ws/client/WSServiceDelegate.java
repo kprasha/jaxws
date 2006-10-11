@@ -597,19 +597,6 @@ public class WSServiceDelegate extends WSService {
             pname = new QName(sname.getNamespaceURI(), msepr.serviceName.portName);
         }
 
-        private Source createSource() {
-            // get WSDL from WPR inline or imported
-            Element wsdlElement = null;
-            List<Element> elementz = msepr.elements;
-            for (Element elem : elementz) {
-                if (elem.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
-                        elem.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
-                    wsdlElement = elem;
-                }
-            }
-
-            return new DOMSource(wsdlElement);
-        }
 
         /**
          * Parses {@link WSDLModel} from this EPR.
@@ -617,7 +604,7 @@ public class WSServiceDelegate extends WSService {
         private WSDLModel parseModel() {
             WSDLModelImpl eprWsdlCtx;
             try {
-                eprWsdlCtx = parseWSDL(new URL(uri), createSource());
+                eprWsdlCtx = parseWSDL(new URL(uri), msepr.toWSDLSource());
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
