@@ -200,6 +200,10 @@ public class EndpointFactory {
                 primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
                 // create WSDL model
                 wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
+                // New Features might have been added in WSDL through Policy.
+                // This sets only the wsdl features that are not already set(enabled/disabled) 
+                WebServiceFeature[] extraWsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding,false);
+                binding.setFeatures(extraWsdlFeatures);
             }
         }
 
