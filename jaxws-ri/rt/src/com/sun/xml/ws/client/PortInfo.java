@@ -114,12 +114,7 @@ public class PortInfo {
                         ((MemberSubmissionAddressingFeature) wsdlAddressingFeature).isRequired())
                     wsdlFeatures.add(wsdlAddressingFeature);
             }
-            //Set only if wsdl:required=true
-            if ((wsdlAddressingFeature != null) &&
-                    ((AddressingFeature) wsdlAddressingFeature).isRequired()) {
-                wsdlFeatures.add(wsdlAddressingFeature);
-            }
-
+            
             WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
             if (wsdlMTOMFeature != null) {
                 wsdlFeatures.add(wsdlMTOMFeature);
