@@ -36,6 +36,7 @@ import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
 import com.sun.xml.ws.util.RuntimeVersion;
@@ -117,6 +118,9 @@ public abstract class Stub implements BindingProvider, ResponseContextReceiver, 
         this.requestContext.setEndpointAddress(defaultEndPointAddress);
         this.engine = new Engine();
         this.endpointReference = epr;
+
+        if(!binding.isAddressingEnabled() && epr!=null)
+            throw new WebServiceException(ClientMessages.EPR_WITHOUT_ADDRESSING_ON());
     }
 
     /**
