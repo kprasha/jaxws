@@ -24,18 +24,18 @@ package com.sun.xml.ws.streaming;
 
 import com.sun.xml.ws.util.xml.XmlUtil;
 
-import java.io.Reader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.stream.XMLStreamReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.reflect.Method;
+import java.net.URL;
 
 /**
  * @author Santiago.PericasGeertsen@sun.com
@@ -89,22 +89,22 @@ public class SourceReaderFactory {
                     // Wrap input stream in Reader if charset is specified
                     if (charsetName != null) {
                         return XMLStreamReaderFactory.createXMLStreamReader(
-                            new InputStreamReader(is, charsetName), rejectDTDs);                    
+                            source.getSystemId(), new InputStreamReader(is, charsetName), rejectDTDs);                    
                     }
                     else {
-                        return XMLStreamReaderFactory.createXMLStreamReader(is, 
-                            rejectDTDs);
+                        return XMLStreamReaderFactory.createXMLStreamReader(
+                            source.getSystemId(), is, rejectDTDs);
                     }
                 }
                 else {
                     Reader reader = streamSource.getReader();
                     if (reader != null) {
-                        return XMLStreamReaderFactory.createXMLStreamReader(reader, 
-                            rejectDTDs);
+                        return XMLStreamReaderFactory.createXMLStreamReader(
+                            source.getSystemId(), reader, rejectDTDs);
                     }
                     else {
-                        throw new XMLReaderException("sourceReader.invalidSource", 
-                            new Object[] { source.getClass().getName() });
+                        return XMLStreamReaderFactory.createXMLStreamReader(
+                            source.getSystemId(), new URL(source.getSystemId()).openStream(), rejectDTDs );
                     }
                 }
             }

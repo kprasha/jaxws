@@ -22,21 +22,15 @@
 
 package com.sun.xml.ws.streaming;
 
+import com.sun.xml.ws.util.FastInfosetReflection;
+import com.sun.xml.ws.util.SunStAXReflection;
 import org.xml.sax.InputSource;
 
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.MalformedURLException;
-
-import com.sun.xml.ws.util.SunStAXReflection;
-import com.sun.xml.ws.util.FastInfosetReflection;
 
 /**
  * <p>A factory to create XML and FI parsers.</p>
@@ -48,17 +42,17 @@ public class XMLStreamReaderFactory {
     /**
      * StAX input factory shared by all threads.
      */
-    static XMLInputFactory xmlInputFactory;
+    static final XMLInputFactory xmlInputFactory;
             
     /**
      * FI stream reader for each thread.
      */
-    static ThreadLocal fiStreamReader = new ThreadLocal();
+    static final ThreadLocal fiStreamReader = new ThreadLocal();
     
     /**
      * Zephyr's stream reader for each thread.
      */
-    static ThreadLocal xmlStreamReader = new ThreadLocal();
+    static final ThreadLocal<XMLStreamReader> xmlStreamReader = new ThreadLocal<XMLStreamReader>();
     
     static {
         // Use StAX pluggability layer to get factory instance
@@ -163,7 +157,7 @@ public class XMLStreamReaderFactory {
         try {
             // If using Zephyr, try re-using the last instance
             if (SunStAXReflection.XMLReaderImpl_setInputSource != null) {
-                Object xsr = xmlStreamReader.get();                
+                XMLStreamReader xsr = xmlStreamReader.get();
                 if (xsr == null) {
                     synchronized (xmlInputFactory) {
                         xmlStreamReader.set(
@@ -176,7 +170,7 @@ public class XMLStreamReaderFactory {
                     inputSource.setSystemId(systemId);
                     SunStAXReflection.XMLReaderImpl_setInputSource.invoke(xsr, inputSource);
                 }
-                return (XMLStreamReader) xsr;
+                return xsr;
             }
             else {
                 synchronized (xmlInputFactory) {
@@ -194,12 +188,11 @@ public class XMLStreamReaderFactory {
      *
      * TODO: Reject DTDs?
      */
-    public static XMLStreamReader createXMLStreamReader(Reader reader,
-        boolean rejectDTDs) {
+    public static XMLStreamReader createXMLStreamReader(String systemId, Reader reader, boolean rejectDTDs) {
         try {
             // If using Zephyr, try re-using the last instance
             if (SunStAXReflection.XMLReaderImpl_setInputSource != null) {
-                Object xsr = xmlStreamReader.get();                
+                XMLStreamReader xsr = xmlStreamReader.get();
                 if (xsr == null) {
                     synchronized (xmlInputFactory) {
                         xmlStreamReader.set(
@@ -208,9 +201,11 @@ public class XMLStreamReaderFactory {
                 }              
                 else {
                     SunStAXReflection.XMLReaderImpl_reset.invoke(xsr);
-                    SunStAXReflection.XMLReaderImpl_setInputSource.invoke(xsr, new InputSource(reader));
+                    InputSource in = new InputSource(reader);
+                    in.setSystemId(systemId);
+                    SunStAXReflection.XMLReaderImpl_setInputSource.invoke(xsr, in);
                 }                
-                return (XMLStreamReader) xsr;
+                return xsr;
             }
             else {
                 synchronized (xmlInputFactory) {
