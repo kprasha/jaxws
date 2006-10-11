@@ -82,8 +82,8 @@ import java.util.Set;
  */
 public class RuntimeWSDLParser {
 
-    private final static BitSet errors = new BitSet();
-    private static final int NOT_A_WSDL = 0;
+    private final BitSet errors = new BitSet();
+    private final int NOT_A_WSDL = 0;
     private final WSDLModelImpl wsdlDoc;
     /**
      * Target namespace URI of the WSDL that we are currently parsing.
