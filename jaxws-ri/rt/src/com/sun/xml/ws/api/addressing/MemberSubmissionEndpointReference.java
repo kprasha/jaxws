@@ -2,6 +2,7 @@ package com.sun.xml.ws.api.addressing;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 import java.util.List;
@@ -84,6 +86,25 @@ public class MemberSubmissionEndpointReference extends EndpointReference impleme
             throw new WebServiceException("Error marshalling W3CEndpointReference. ", e);
         }
     }
+
+    /**
+     * Constructs a Source containing the wsdl from the MemberSubmissionEndpointReference
+     *
+     * @return Source A source object containing the wsdl in the MemeberSubmissionEndpointReference, if present.
+     */
+    public Source toWSDLSource() {        
+        Element wsdlElement = null;
+
+        for (Element elem : elements) {
+            if (elem.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
+                    elem.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                wsdlElement = elem;
+            }
+        }
+
+        return new DOMSource(wsdlElement);
+    }
+
 
     private static JAXBContext getMSJaxbContext() {
         try {
