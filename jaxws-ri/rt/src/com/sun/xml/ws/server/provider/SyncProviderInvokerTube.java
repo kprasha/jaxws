@@ -5,6 +5,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.WSBinding;
 
 import java.util.logging.Logger;
 
@@ -18,8 +19,8 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SyncProviderInvokerTube");
 
-    public SyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
-        super(invoker, argsBuilder);
+    public SyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder, WSBinding binding) {
+        super(invoker, argsBuilder, binding);
     }
 
     /*
@@ -39,7 +40,7 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         } catch(Exception e) {
             e.printStackTrace();
             Message responseMessage = argsBuilder.getResponseMessage(e);
-            return doReturnWith(request.createResponse(responseMessage));
+            return doReturnWith(request.createServerResponse(responseMessage,null,binding));
         }
         if (returnValue == null) {
             // Oneway. Send response code immediately for transports(like HTTP)
@@ -47,9 +48,9 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
             if (request.transportBackChannel != null) {
                 request.transportBackChannel.close();
             }
-            return doReturnWith(request.createResponse(null));
+            return doReturnWith(request.createServerResponse(null, null, binding));
         } else {
-            return doReturnWith(request.createResponse(argsBuilder.getResponse(returnValue)));
+            return doReturnWith(request.createServerResponse(argsBuilder.getResponse(returnValue),null,binding));
         }
     }
 

@@ -7,6 +7,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.*;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.server.EndpointMessageContextImpl;
 import com.sun.xml.ws.server.WSEndpointImpl;
 
@@ -28,8 +29,8 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.AsyncProviderInvokerTube");
 
-    public AsyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
-        super(invoker, argsBuilder);
+    public AsyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder, WSBinding binding) {
+        super(invoker, argsBuilder, binding);
     }
 
    /*
