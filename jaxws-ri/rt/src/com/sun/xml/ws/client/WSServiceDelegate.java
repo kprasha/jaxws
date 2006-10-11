@@ -170,7 +170,11 @@ public class WSServiceDelegate extends WSService {
             serviceName,serviceClass);
     }
 
-    public WSServiceDelegate(Source wsdl, QName serviceName, final Class<? extends Service> serviceClass) {
+    /**
+     * @param serviceClass
+     *      Either {@link Service}.class or other generated service-derived classes. 
+     */
+    public WSServiceDelegate(@Nullable Source wsdl, @NotNull QName serviceName, @NotNull final Class<? extends Service> serviceClass) {
         //we cant create a Service without serviceName
         if (serviceName == null)
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NAME_NULL(serviceName));
