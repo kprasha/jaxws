@@ -102,13 +102,21 @@ public class PortInfo {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
 
             WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
-            if (wsdlAddressingFeature == null) {
+            if (wsdlAddressingFeature != null) {
+                //Set only if wsdl:required=true
+                if (((AddressingFeature) wsdlAddressingFeature).isRequired())
+                    wsdlFeatures.add(wsdlAddressingFeature);
+            } else {
                 //try MS Addressing Version
                 wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
+                //Set only if wsdl:required=true
+                if (wsdlAddressingFeature != null &&
+                        ((MemberSubmissionAddressingFeature) wsdlAddressingFeature).isRequired())
+                    wsdlFeatures.add(wsdlAddressingFeature);
             }
             //Set only if wsdl:required=true
             if ((wsdlAddressingFeature != null) &&
-                    ((AddressingFeature)wsdlAddressingFeature).isRequired()) {
+                    ((AddressingFeature) wsdlAddressingFeature).isRequired()) {
                 wsdlFeatures.add(wsdlAddressingFeature);
             }
 
@@ -133,16 +141,16 @@ public class PortInfo {
     }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        if(!BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, webServiceFeatures)) {
+        if (!BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, webServiceFeatures)) {
             return webServiceFeatures;
         }
         // RespectBindingFeature is enabled, so enable all wsdlFeatures
         Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
         List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
         //actually, the passed in WebServiceFeatures
-        for(WebServiceFeature ftr: wsdlFeatures) {
-            if(featureMap.get(ftr.getID()) == null) {
-                featureMap.put(ftr.getID(),ftr);
+        for (WebServiceFeature ftr : wsdlFeatures) {
+            if (featureMap.get(ftr.getID()) == null) {
+                featureMap.put(ftr.getID(), ftr);
             }
         }
         return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
@@ -233,6 +241,7 @@ public class PortInfo {
         }
     }
   */
+
     protected static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
         HashMap<String, WebServiceFeature> featureMap = new HashMap<String, WebServiceFeature>(5);
         if (webServiceFeatures != null)

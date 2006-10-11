@@ -201,7 +201,7 @@ public class EndpointFactory {
                 // create WSDL model
                 wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
                 // New Features might have been added in WSDL through Policy.
-                // This sets only the wsdl features that are not already set(enabled/disabled) 
+                // This sets only the wsdl features that are not already set(enabled/disabled)
                 WebServiceFeature[] extraWsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding,false);
                 binding.setFeatures(extraWsdlFeatures);
             }
@@ -241,25 +241,32 @@ public class EndpointFactory {
         if (wsdlPort != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
 
-            AddressingFeature wsdlAddressingFeature = (AddressingFeature) wsdlPort.getFeature(AddressingFeature.ID);
-            if (wsdlAddressingFeature == null) {
+            WebServiceFeature wsdlAddressingFeature = wsdlPort.getFeature(AddressingFeature.ID);
+            if (wsdlAddressingFeature != null) {
+                if (binding.getFeature(AddressingFeature.ID) == null) {
+                    AddressingFeature af = (AddressingFeature) wsdlAddressingFeature;
+                    if ((honorWsdlRequired ? af.isRequired() : true))
+                        wsdlFeatures.add(wsdlAddressingFeature);
+                }
+            } else {
                 //try MS Addressing Version
-                wsdlAddressingFeature = (AddressingFeature) wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
-            }
-            if ((wsdlAddressingFeature != null) &&
-                    (binding.getFeature(wsdlAddressingFeature.getID()) == null)) {
-                if ((honorWsdlRequired ? wsdlAddressingFeature.isRequired() : true))
-                    wsdlFeatures.add(wsdlAddressingFeature);
+                wsdlAddressingFeature = wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
+                if ((wsdlAddressingFeature != null) &&
+                        binding.getFeature(MemberSubmissionAddressingFeature.ID) == null) {
+                    MemberSubmissionAddressingFeature af = (MemberSubmissionAddressingFeature) wsdlAddressingFeature;
+                    if ((honorWsdlRequired ? af.isRequired() : true))
+                        wsdlFeatures.add(wsdlAddressingFeature);
+                }
             }
 
             WebServiceFeature wsdlMTOMFeature = wsdlPort.getFeature(MTOMFeature.ID);
             if ((wsdlMTOMFeature != null) &&
-                   binding.getFeature(wsdlMTOMFeature.getID()) == null ) {
-                    wsdlFeatures.add(wsdlMTOMFeature);
+                    binding.getFeature(wsdlMTOMFeature.getID()) == null) {
+                wsdlFeatures.add(wsdlMTOMFeature);
             }
             //these are the only features that jaxws pays attention portability wise.
         }
-        return wsdlFeatures.toArray(new WebServiceFeature[] {});
+        return wsdlFeatures.toArray(new WebServiceFeature[]{});
     }
     /**
      * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider

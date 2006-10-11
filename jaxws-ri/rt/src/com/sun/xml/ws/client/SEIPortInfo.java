@@ -87,12 +87,13 @@ final class SEIPortInfo extends PortInfo {
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
             WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
-            if (wsdlAddressingFeature == null) {
+            if (wsdlAddressingFeature != null) {
+                wsdlFeatures.add(wsdlAddressingFeature);
+            } else {
                 //try MS Addressing Version
                 wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
-            }
-            if ((wsdlAddressingFeature != null)) {
-                wsdlFeatures.add(wsdlAddressingFeature);
+                if (wsdlAddressingFeature != null)
+                    wsdlFeatures.add(wsdlAddressingFeature);
             }
 
             WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
