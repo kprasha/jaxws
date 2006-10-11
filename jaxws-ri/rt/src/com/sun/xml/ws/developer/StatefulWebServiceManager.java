@@ -288,6 +288,6 @@ public interface StatefulWebServiceManager<T> {
          * @param manager
          *      The manager instance that you exported the object to.
          */
-        void onTimeout(@NotNull T timedOutObject, @NotNull StatefulWebServiceManager manager);
+        void onTimeout(@NotNull T timedOutObject, @NotNull StatefulWebServiceManager<T> manager);
     }
 }
