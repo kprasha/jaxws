@@ -2,11 +2,11 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.util.ServiceFinder;
-import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
-import com.sun.xml.ws.util.pipe.StandaloneTubeAssembler;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
+import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
+import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.xml.ws.util.pipe.StandaloneTubeAssembler;
 
 import javax.xml.ws.WebServiceException;
 import java.util.logging.Logger;
@@ -61,7 +61,7 @@ public abstract class TransportTubeFactory {
      *      for this port (which causes the caller to search for other {@link TransportTubeFactory}s
      *      that can. Or non-null.
      *
-     * @throws javax.xml.ws.WebServiceException
+     * @throws WebServiceException
      *      if this factory is capable of creating a transport tube but some fatal
      *      error prevented it from doing so. This exception will be propagated
      *      back to the user application, and no further {@link TransportTubeFactory}s
