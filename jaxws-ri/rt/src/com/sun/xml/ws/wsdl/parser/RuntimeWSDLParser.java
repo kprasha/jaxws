@@ -113,7 +113,7 @@ public class RuntimeWSDLParser {
      */
     public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
-        errors.clear();
+
         RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), isClientSide, extensions);
         WebServiceException wsdlException = null;
         try {
@@ -126,7 +126,7 @@ public class RuntimeWSDLParser {
         }
 
         // Check to see if the obtained WSDL was a WSDL document. If not then try running with MEX else append with "?wsdl" if it doesn't end with one
-        if (errors.get(NOT_A_WSDL)) {
+        if (parser.errors.get(parser.NOT_A_WSDL)) {
             //try MEX
             MetaDataResolver mdResolver;
             ServiceDescriptor serviceDescriptor = null;
@@ -146,11 +146,11 @@ public class RuntimeWSDLParser {
             if (serviceDescriptor != null) {
                 List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
                 parser = new RuntimeWSDLParser(wsdlLoc, new MexEntityResolver(wsdls), isClientSide, extensions);
-                errors.clear(NOT_A_WSDL);
+                parser.errors.clear(parser.NOT_A_WSDL);
 
                 //now parse the first WSDL in the list
                 if(wsdls.size() > 0){
-                    errors.clear(NOT_A_WSDL);
+                    parser.errors.clear(parser.NOT_A_WSDL);
                     try{
                         String systemId = wsdls.get(0).getSystemId();
                         Parser wsdlParser = parser.resolver.resolveEntity(null, systemId);
@@ -163,13 +163,13 @@ public class RuntimeWSDLParser {
             }
             //Incase that mex is not present or it couldn't get the metadata, try by appending ?wsdl and give
             // it a last shot else fail
-            if (errors.get(NOT_A_WSDL) && wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)) {
+            if (parser.errors.get(parser.NOT_A_WSDL) && wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)) {
                 String urlString = wsdlLoc.toExternalForm();
                 urlString += "?wsdl";
                 wsdlLoc = new URL(urlString);
 
                 //clear the NOT_A_WSDL error bit
-                errors.clear(NOT_A_WSDL);
+                parser.errors.clear(parser.NOT_A_WSDL);
                 try {
                     parser.parseWSDL(wsdlLoc);
                 } catch (WebServiceException e) {
@@ -178,7 +178,7 @@ public class RuntimeWSDLParser {
             }
         }
         //currently we fail only if we dont find a WSDL
-        if (errors.get(NOT_A_WSDL) && wsdlException != null)
+        if (parser.errors.get(parser.NOT_A_WSDL) && wsdlException != null)
             throw wsdlException;
 
         parser.wsdlDoc.freeze();
