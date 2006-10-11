@@ -31,10 +31,12 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
+import com.sun.xml.ws.api.pipe.Engine;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -153,21 +155,49 @@ public abstract class WSEndpoint<T> {
     public abstract @Nullable WSDLPort getPort();
 
     /**
-     * TODO: javadoc
+     * Set this {@link Executor} to run asynchronous requests using this executor.
+     * This executor is set on {@link Engine} and must be set before
+     * calling {@link #schedule(Packet,CompletionCallback) } and
+     * {@link #schedule(Packet,CompletionCallback,FiberContextSwitchInterceptor)} methods.
+     *
+     * @param exec Executor to run async requests
      */
-    public abstract void setExecutor(Executor exec);
+    public abstract void setExecutor(@NotNull Executor exec);
 
     /**
-     * TODO: javadoc
+     * This method takes a {@link Packet} that represents
+     * a request, run it through a {@link Tube}line, eventually
+     * pass it to the user implementation code, which produces
+     * a reply, then run that through the tubeline again,
+     * and eventually return it as a return value through {@link CompletionCallback}.
+     *
+     * <p>
+     * If the transport is capable of asynchronous execution, use this
+     * instead of using {@link PipeHead#process}.
+     *
+     * <p>
+     * Before calling this method, set the executor using {@link #setExecutor}. The
+     * executor may used multiple times to run this request in a asynchronous fashion.
+     * The calling thread will be returned immediately, and the callback will be
+     * called in a different a thread.
+     * 
+     * @param request web service request
+     * @param callback callback to get response packet(exception if there is one)
      */
-    public final void schedule( Packet request, CompletionCallback callback ) {
+    public final void schedule(@NotNull Packet request, @NotNull CompletionCallback callback ) {
         schedule(request,callback,null);
     }
 
     /**
-     * TODO: javadoc
+     * Schedule invocation of web service asynchronously.
+     *
+     * @see {@link #schedule(Packet, CompletionCallback)}
+     *
+     * @param request web service request
+     * @param callback callback to get response packet(exception if there is one)
+     * @param interceptor caller's interceptor to impose a context of execution
      */
-    public abstract void schedule( Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor );
+    public abstract void schedule(@NotNull Packet request, @NotNull CompletionCallback callback, @Nullable FiberContextSwitchInterceptor interceptor );
 
     /**
      * Creates a new {@link PipeHead} to process

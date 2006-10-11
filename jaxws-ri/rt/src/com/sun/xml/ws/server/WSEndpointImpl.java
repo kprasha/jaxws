@@ -155,7 +155,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public void schedule(Packet request, final CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
         Fiber fiber = engine.createFiber();
-        fiber.addInterceptor(interceptor);
+        if (interceptor != null) {
+            fiber.addInterceptor(interceptor);
+        }
         final Tube tube = tubePool.take();
         fiber.start(tube, request, new CompletionCallback() {
             public void onCompletion(@NotNull Packet response) {
