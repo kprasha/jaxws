@@ -537,6 +537,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
 
     private boolean isStateful(ClassDeclaration classDecl) {
         BindingType bt = classDecl.getAnnotation(BindingType.class);
+        if(bt==null)    return false;
         for( Feature f : bt.features() ) {
             if(f.value().equals(ServerFeatures.STATEFUL) && f.enabled())
                 return true;
