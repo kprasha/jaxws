@@ -136,7 +136,7 @@ public abstract class InstanceResolver<T> {
 
     private static boolean isStateful(Class<?> classDecl) {
         BindingType bt = classDecl.getAnnotation(BindingType.class);
-        if(bt==null)    return null;
+        if(bt==null)    return false;
         for( Feature f : bt.features() ) {
             if(f.value().equals(ServerFeatures.STATEFUL) && f.enabled())
                 return true;
