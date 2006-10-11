@@ -147,9 +147,9 @@ public class WSServiceDelegate extends WSService {
     /**
      * Information about SEI, keyed by their interface type.
      */
-    private final Map<Class, SEIPortInfo> seiContext = new HashMap<Class, SEIPortInfo>();
+    private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
 
-    private final HashMap<QName, Set<String>> rolesMap = new HashMap<QName, Set<String>>();
+    private final HashMap<QName,Set<String>> rolesMap = new HashMap<QName,Set<String>>();
 
     private Executor executor;
 
@@ -307,7 +307,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     public <T> T getPort(QName portName, Class<T> portInterface) throws WebServiceException {
-        return getPort(portName, portInterface, (WebServiceFeature[]) null);
+        return getPort(portName, portInterface, EMPTY_FEATURES);
     }
 
     //milestone 2
@@ -336,7 +336,7 @@ public class WSServiceDelegate extends WSService {
     }
 
     public <T> T getPort(Class<T> portInterface) throws WebServiceException {
-        return getPort(portInterface, (WebServiceFeature[]) null);
+        return getPort(portInterface, EMPTY_FEATURES);
     }
 
     public void addPort(QName portName, String bindingId, String endpointAddress) throws WebServiceException {
@@ -505,7 +505,7 @@ public class WSServiceDelegate extends WSService {
      */
     protected BindingImpl createBinding(QName portName, BindingID bindingId) {
         //take out?
-        return createBinding(portName, bindingId, (WebServiceFeature[]) null);
+        return createBinding(portName, bindingId, EMPTY_FEATURES);
     }
 
 
