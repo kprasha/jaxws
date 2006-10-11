@@ -54,7 +54,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
-    private WebServiceFeature addressingFeature;
     private List<WebServiceFeature> features;
 
     /**
@@ -202,22 +201,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         return mtomEnabled;
     }
 
-    public void enableAddressing(String namespace) {
-        if(AddressingFeature.ID.equals(namespace)) {
-            addressingFeature = new AddressingFeature();
-        } else if (MemberSubmissionAddressingFeature.ID.equals(namespace)) {
-            addressingFeature = new MemberSubmissionAddressingFeature(true);
-        } else
-            addressingFeature = null;
-
-    }
-
-    public String getAddressingVersion() {
-        if (addressingFeature == null)
-            return null;
-        return addressingFeature.getID();
-    }
-
     public void addFeature(WebServiceFeature feature) {
         if (features == null)
             features = new ArrayList<WebServiceFeature>();
@@ -234,16 +217,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         }
 
         return null;
-    }
-
-    public void setAddressingFeature(WebServiceFeature af) {
-        if (!(af instanceof AddressingFeature))
-            return;
-        addressingFeature = af;
-    }
-
-    public WebServiceFeature getAddressingFeature() {
-        return addressingFeature;
     }
 
     public SOAPVersion getSOAPVersion(){

@@ -44,12 +44,10 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressingWSDLParserExtension {
     @Override
     public boolean bindingElements(WSDLBoundPortType binding, XMLStreamReader reader) {
-        WSDLBoundPortTypeImpl impl = (WSDLBoundPortTypeImpl)binding;
-
         QName ua = reader.getName();
         if (ua.equals(AddressingVersion.MEMBER.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            impl.setAddressingFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
+            binding.addFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }
@@ -59,13 +57,10 @@ public class MemberSubmissionAddressingWSDLParserExtension extends W3CAddressing
 
     @Override
     public boolean portElements(WSDLPort port, XMLStreamReader reader) {
-        WSDLPortImpl impl = (WSDLPortImpl)port;
-
         QName ua = reader.getName();
         if (ua.equals(AddressingVersion.MEMBER.wsdlExtensionTag)) {
             String required = reader.getAttributeValue(WSDLConstants.NS_WSDL, "required");
-            impl.setAddressingFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
-
+            port.addFeature(new MemberSubmissionAddressingFeature(Boolean.parseBoolean(required)));
             XMLStreamReaderUtil.skipElement(reader);
             return true;        // UsingAddressing is consumed
         }

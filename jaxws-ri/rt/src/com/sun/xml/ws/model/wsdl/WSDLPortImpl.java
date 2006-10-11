@@ -45,7 +45,6 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     private EndpointAddress address;
     private final QName bindingName;
     private final WSDLServiceImpl owner;
-    private WebServiceFeature addressingFeature;
     private List<WebServiceFeature> features;
 
     /**
@@ -101,19 +100,6 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     public void setAddress(EndpointAddress address) {
         assert address!=null;
         this.address = address;
-    }
-
-    public void setAddressingFeature(WebServiceFeature af) {
-        if (!(af instanceof AddressingFeature))
-            return;
-        this.addressingFeature = af;
-    }
-
-    public WebServiceFeature getAddressingFeature() {
-        if(addressingFeature != null)
-            return addressingFeature;
-        // See if it is set on Binding
-        return boundPortType.getAddressingFeature();
     }
 
     public WSDLBoundPortTypeImpl getBinding() {

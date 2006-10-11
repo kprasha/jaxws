@@ -405,14 +405,14 @@ public enum AddressingVersion {
      * @return addresing version
      */
     public static AddressingVersion fromPort(WSDLPort port) {
-        String ns = port.getBinding().getAddressingVersion();
-        if (ns.equals(W3C.nsUri))
-            return W3C;
+        WebServiceFeature wsf = port.getFeature(AddressingFeature.ID);
+        if (wsf == null) {
+            wsf = port.getFeature(MemberSubmissionAddressingFeature.ID);
+        }
+        if (wsf == null)
+            return null;
 
-        if (ns.equals(MEMBER.nsUri))
-            return MEMBER;
-
-        return null;
+        return fromFeature(wsf);
     }
 
     /**

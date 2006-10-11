@@ -122,21 +122,6 @@ public interface WSDLBoundPortType extends WSDLObject, WSDLExtensible {
     boolean isMTOMEnabled();
 
     /**
-     * Enables WS-Addressing as per WS-A policy assertion. This method would be called during
-     * WSDL parsing to enable WS-A for a wsdl:binding.
-     */
-    @Deprecated
-    void enableAddressing(String namespace);
-
-    /**
-     * Returns the WS-Addressing version
-     *
-     * @return by default returns false unless enabled by {@link #enableMTOM()}
-     */
-    @Deprecated
-    String getAddressingVersion();
-
-    /**
      * Enables a {@link WebServiceFeature} based upon policy assertions. This
      * method would be called during WSDL parsing by WS-Policy code.
      */
