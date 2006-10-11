@@ -65,6 +65,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.EndpointReference;
@@ -163,7 +164,13 @@ public class WSServiceDelegate extends WSService {
     private final Container container;
 
 
-    public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, final Class<? extends Service> serviceClass) {
+    public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class<? extends Service> serviceClass) {
+        this(
+            wsdlDocumentLocation==null ? null : new StreamSource(wsdlDocumentLocation.toExternalForm()),
+            serviceName,serviceClass);
+    }
+
+    public WSServiceDelegate(Source wsdl, QName serviceName, final Class<? extends Service> serviceClass) {
         //we cant create a Service without serviceName
         if (serviceName == null)
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NAME_NULL(serviceName));
@@ -171,8 +178,17 @@ public class WSServiceDelegate extends WSService {
         this.serviceClass = serviceClass;
         this.container = ContainerResolver.getInstance().getContainer();
 
-        if (wsdlDocumentLocation != null) {
-            parseWSDL(wsdlDocumentLocation);
+        if (wsdl != null) {
+            try {
+                WSDLModelImpl model = parseWSDL(new URL(wsdl.getSystemId()), wsdl);
+                wsdlService = model.getService(this.serviceName);
+                if (wsdlService == null)
+                        throw new WebServiceException(
+                                ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
+                                        buildNameList(model.getServices().keySet())));
+            } catch (MalformedURLException e) {
+                throw new WebServiceException(ClientMessages.INVALID_WSDL_URL(wsdl.getSystemId()));
+            }
             populatePorts();
         }
 
@@ -207,27 +223,8 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * Parses the WSDL and builds {@link WSDLModel}.
-     * <p>
-     * TODO: the only reason this method isn't a part of the constructor is because
-     * the code was written such a way that {@link #getPort(Class)} can inject a WSDL
-     * into a {@link Service} that was created without one. Is it really a valid scenario?
      */
-    private void parseWSDL(URL wsdlDocumentLocation) {
-        if (wsdlDocumentLocation == null)
-            throw new WebServiceException("No WSDL location Information present, error");
-
-        WSDLModelImpl model = parseWSDL(wsdlDocumentLocation,null);
-        wsdlService = model.getService(serviceName);
-        if (wsdlService == null)
-            throw new WebServiceException(
-                    ClientMessages.INVALID_SERVICE_NAME(serviceName,
-                            buildNameList(model.getServices().keySet())));
-    }
-
-    /**
-     * Parses the WSDL and builds {@link WSDLModel}.
-     */
-    private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
+    private WSDLModelImpl parseWSDL(@NotNull URL wsdlDocumentLocation, Source wsdl) {
         try {
             return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver(),
                 true, ServiceFinder.find(WSDLParserExtension.class).toArray());
