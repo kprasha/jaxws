@@ -136,16 +136,18 @@ public abstract class BindingID {
     /**
      * Returns tri state.
      *
-     * null - the mtom is not set explicitly using a deployment descriptor or annotations and this would mean the
-     * default value of mtom disabled or false.
+     * null - the mtom is not set explicitly using @BindingType annotation
      *
-     * true | false - The value is set explicitly using deployment descriptor or annotation
+     * true | false - The value is set explicitly using a @BindingType annotation
      *
      * <p>
      * Note that MTOM can be enabled/disabled at runtime through
      * {@link WSBinding}, so this value merely controls how things
      * are configured by default.
+     *
+     * @deprecated
      */
+
     public Boolean isMTOMEnabled() {
         return null;
     }
