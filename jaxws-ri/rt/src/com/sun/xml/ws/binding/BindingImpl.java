@@ -30,13 +30,12 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
-import com.sun.xml.ws.server.ServerRtException;
-import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.resources.ModelerMessages;
 import com.sun.xml.ws.model.RuntimeModelerException;
+import com.sun.xml.ws.resources.ModelerMessages;
+import com.sun.xml.ws.resources.ServerMessages;
+import com.sun.xml.ws.server.ServerRtException;
 
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
@@ -208,7 +207,7 @@ public abstract class BindingImpl implements WSBinding {
 
     //what does this mean
     public boolean isAddressingEnabled() {
-        return (addressingVersion == null ? false : true);
+        return addressingVersion != null;
     }
 
     /**
