@@ -6,11 +6,17 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.server.AsyncProvider;
-import com.sun.xml.ws.api.server.AsyncProviderCallback;
-import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.server.*;
+import com.sun.xml.ws.server.EndpointMessageContextImpl;
+import com.sun.xml.ws.server.WSEndpointImpl;
 
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.logging.Logger;
+import java.security.Principal;
+
+import org.w3c.dom.Element;
 
 /**
  * This {@link Tube} is used to invoke the {@link AsyncProvider} endpoints.
@@ -20,7 +26,7 @@ import java.util.logging.Logger;
 class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
     private static final Logger logger = Logger.getLogger(
-        com.sun.xml.ws.util.Constants.LoggingDomain + ".server.ProviderInvokerPipe");
+        com.sun.xml.ws.util.Constants.LoggingDomain + ".server.AsyncProviderInvokerTube");
 
     public AsyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
         super(invoker, argsBuilder);
@@ -35,10 +41,11 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     public NextAction processRequest(Packet request) {
         T param = argsBuilder.getParameter(request.getMessage());
         AsyncProviderCallback callback = new AsyncProviderInvokerTube.AsyncProviderCallbackImpl(request);
+        AsyncWebServiceContext ctxt = new AsyncWebServiceContext(getEndpoint(),request);
+
         AsyncProviderInvokerTube.logger.fine("Invoking AsyncProvider Endpoint");
         try {
-            // TODO WebServiceContext
-            getInvoker(request).invokeAsyncProvider(request, param, callback, null);
+            getInvoker(request).invokeAsyncProvider(request, param, callback, ctxt);
         } catch(Exception e) {
             e.printStackTrace();
             return doThrow(e);
@@ -76,12 +83,53 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         }
     }
 
+    /**
+     * The single {@link javax.xml.ws.WebServiceContext} instance injected into application.
+     */
+    private static final class AsyncWebServiceContext implements WSWebServiceContext {
+
+        final Packet packet;
+        final WSEndpoint endpoint;
+
+        AsyncWebServiceContext(WSEndpoint endpoint, Packet packet) {
+            this.packet = packet;
+            this.endpoint = endpoint;
+        }
+
+        public MessageContext getMessageContext() {
+            return new EndpointMessageContextImpl(getRequestPacket());
+        }
+
+        public Principal getUserPrincipal() {
+            return packet.webServiceContextDelegate.getUserPrincipal(packet);
+        }
+
+        public @NotNull Packet getRequestPacket() {
+            return packet;
+        }
+
+        public boolean isUserInRole(String role) {
+            Packet packet = getRequestPacket();
+            return packet.webServiceContextDelegate.isUserInRole(packet,role);
+        }
+
+        public EndpointReference getEndpointReference(Element...referenceParameters) {
+            return getEndpointReference(W3CEndpointReference.class, referenceParameters);
+        }
+
+        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
+            Packet packet = getRequestPacket();
+            String address = packet.webServiceContextDelegate.getEPRAddress(packet, endpoint);
+            return (T) ((WSEndpointImpl)endpoint).getEndpointReference(clazz,address);
+        }
+    }
+
     public NextAction processResponse(Packet response) {
         return doReturnWith(response);
     }
 
     public NextAction processException(@NotNull Throwable t) {
-        throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
+        throw new IllegalStateException("AsyncProviderInvokerTube's processException shouldn't be called.");
     }
 
 }

@@ -67,6 +67,10 @@ public abstract class InvokerTube<T> extends AbstractTubeImpl {
         invoker.start(webServiceContext,endpoint);
     }
 
+    protected WSEndpoint getEndpoint() {
+        return endpoint;
+    }
+
     /**
      * Returns the application object that serves the request.
      *

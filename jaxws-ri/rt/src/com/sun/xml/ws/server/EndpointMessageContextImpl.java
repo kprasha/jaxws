@@ -48,7 +48,7 @@ import javax.activation.DataHandler;
  * @author Jitendra Kotamraju
  */
 @SuppressWarnings({"SuspiciousMethodCalls"})
-final class EndpointMessageContextImpl extends AbstractMap<String,Object> implements MessageContext {
+public final class EndpointMessageContextImpl extends AbstractMap<String,Object> implements MessageContext {
 
     /**
      * Lazily computed.
