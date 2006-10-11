@@ -230,33 +230,37 @@ public abstract class BindingImpl implements WSBinding {
         if (ddBindingId != null) {
             bindingID = BindingID.parse(ddBindingId);
             if (bindingID.isMTOMEnabled() == null) {
-                if(mtomEnabled != null) {
-                    mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
-                            Integer.valueOf(mtomThreshold));
+                if (mtomEnabled != null) {
+                    if (mtomThreshold != null)
+                        mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
+                                Integer.valueOf(mtomThreshold));
+                    else
+                        mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
                 } else {
                     mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
                 }
             } else if (Boolean.valueOf(mtomEnabled).compareTo(bindingID.isMTOMEnabled()) != 0) {
-                throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId,mtomEnabled));
+                throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId, mtomEnabled));
             }
         } else {
             bindingID = BindingID.parse(implClass);
             // Since bindingID is coming from implclass,
             // mtom through Feature annotation or DD takes precendece
-            if(mtomEnabled != null) {
-                mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
+            if (mtomEnabled != null) {
+                if (mtomThreshold != null)
+                    mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
                             Integer.valueOf(mtomThreshold));
+                else
+                    mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
             } else {
                 mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
-                if((bindingID.isMTOMEnabled() != null) && (mtomfeature != null)) {
+                if ((bindingID.isMTOMEnabled() != null) && (mtomfeature != null)) {
                     //if both are specified , make sure they don't conflict
-                    if(mtomfeature.isEnabled() != bindingID.isMTOMEnabled())
+                    if (mtomfeature.isEnabled() != bindingID.isMTOMEnabled())
                         throw new RuntimeModelerException(
-                                ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID,mtomfeature));
+                                ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID, mtomfeature));
                 }
             }
-
-
         }
         //If mtom is enabled thorugh bindingID, it will will be enabled on the binding
         BindingImpl binding = create(bindingID,implFeatures);
