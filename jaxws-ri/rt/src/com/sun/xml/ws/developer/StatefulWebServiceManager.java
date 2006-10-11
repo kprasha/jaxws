@@ -15,6 +15,7 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Feature;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
@@ -29,7 +30,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  *
  * <pre>
  * &#64;{@link WebService}
- * &#64;{@link BindingType}(features=@{@link Feature}({@link ServerFeatures#STATEFUL}))
+ * &#64;{@link BindingType}(features={&#64;{@link Feature}({@link ServerFeatures#STATEFUL}),@Feature({@link AddressingFeature#ID})})
  * class BankAccount {
  *     protected final int id;
  *     private int balance;
