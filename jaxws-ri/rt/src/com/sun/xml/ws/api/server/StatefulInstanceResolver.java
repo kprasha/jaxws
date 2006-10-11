@@ -20,6 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -171,7 +172,11 @@ public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> imp
         this.webServiceContext = wsc;
         this.owner = endpoint;
 
-        // inject StatefulWebServiceManager.
+        if(endpoint.getBinding().getFeature(AddressingFeature.ID)==null)
+            // addressing is not enabled.
+            throw new WebServiceException(ServerMessages.STATEFUL_REQURES_ADDRESSING(clazz));
+
+            // inject StatefulWebServiceManager.
         for(Field field: clazz.getDeclaredFields()) {
             if(field.getType()==StatefulWebServiceManager.class) {
                 if(!Modifier.isStatic(field.getModifiers()))
