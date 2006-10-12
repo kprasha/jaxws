@@ -19,8 +19,8 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SyncProviderInvokerTube");
 
-    public SyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder, WSBinding binding) {
-        super(invoker, argsBuilder, binding);
+    public SyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
+        super(invoker, argsBuilder);
     }
 
     /*
@@ -40,7 +40,7 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         } catch(Exception e) {
             e.printStackTrace();
             Message responseMessage = argsBuilder.getResponseMessage(e);
-            return doReturnWith(request.createServerResponse(responseMessage,null,binding));
+            return doReturnWith(request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding()));
         }
         if (returnValue == null) {
             // Oneway. Send response code immediately for transports(like HTTP)
@@ -48,9 +48,9 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
             if (request.transportBackChannel != null) {
                 request.transportBackChannel.close();
             }
-            return doReturnWith(request.createServerResponse(null, null, binding));
+            return doReturnWith(request.createServerResponse(null,getEndpoint().getPort(),getEndpoint().getBinding()));
         } else {
-            return doReturnWith(request.createServerResponse(argsBuilder.getResponse(returnValue),null,binding));
+            return doReturnWith(request.createServerResponse(argsBuilder.getResponse(returnValue),getEndpoint().getPort(),getEndpoint().getBinding()));
         }
     }
 

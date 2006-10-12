@@ -29,8 +29,8 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.AsyncProviderInvokerTube");
 
-    public AsyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder, WSBinding binding) {
-        super(invoker, argsBuilder, binding);
+    public AsyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
+        super(invoker, argsBuilder);
     }
 
    /*
@@ -67,7 +67,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
         public void send(T param) {
             Message responseMessage = argsBuilder.getResponse(param);
-            Packet packet = request.createServerResponse(responseMessage,null,binding);
+            Packet packet = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
             fiber.resume(packet);
         }
 
@@ -79,7 +79,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
                 e = new RuntimeException(t);
             }
             Message responseMessage = argsBuilder.getResponseMessage(e);
-            Packet packet = request.createServerResponse(responseMessage,null,binding);
+            Packet packet = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
             fiber.resume(packet);
         }
     }

@@ -37,10 +37,9 @@ import javax.xml.ws.Provider;
 public abstract class ProviderInvokerTube<T> extends InvokerTube<Provider<T>> {
 
     protected ProviderArgumentsBuilder<T> argsBuilder;
-    protected final WSBinding binding;
-    /*package*/ ProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder, WSBinding binding) {
+
+    /*package*/ ProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
         super(invoker);
-        this.binding = binding;
         this.argsBuilder = argsBuilder;
     }
 
@@ -49,7 +48,7 @@ public abstract class ProviderInvokerTube<T> extends InvokerTube<Provider<T>> {
 
         ProviderEndpointModel<T> model = new ProviderEndpointModel<T>(implType, binding);
         ProviderArgumentsBuilder<?> argsBuilder = ProviderArgumentsBuilder.create(model, binding);
-        return model.isAsync() ? new AsyncProviderInvokerTube(invoker, argsBuilder, binding)
-            : new SyncProviderInvokerTube(invoker, argsBuilder,binding);
+        return model.isAsync() ? new AsyncProviderInvokerTube(invoker, argsBuilder)
+            : new SyncProviderInvokerTube(invoker, argsBuilder);
     }
 }
