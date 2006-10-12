@@ -137,9 +137,8 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * Name of the service for which this {@link WSServiceDelegate} is created for.
-     * Always non-null.
      */
-    private final QName serviceName;
+    private final @NotNull QName serviceName;
 
     /**
      * Information about SEI, keyed by their interface type.
@@ -154,9 +153,8 @@ public class WSServiceDelegate extends WSService {
      * The WSDL service that this {@link Service} object represents.
      * <p>
      * This field is null iff no WSDL is given to {@link Service}.
-     * TODO: is this really a supported scenario?
      */
-    private WSDLServiceImpl wsdlService;
+    private final @Nullable WSDLServiceImpl wsdlService;
 
     private final Container container;
 
@@ -179,12 +177,13 @@ public class WSServiceDelegate extends WSService {
         this.serviceClass = serviceClass;
         this.container = ContainerResolver.getInstance().getContainer();
 
+        WSDLServiceImpl service=null;
         if (wsdl != null) {
             try {
                 URL url = wsdl.getSystemId()==null ? null : new URL(wsdl.getSystemId());
                 WSDLModelImpl model = parseWSDL(url, wsdl);
-                wsdlService = model.getService(this.serviceName);
-                if (wsdlService == null)
+                service = model.getService(this.serviceName);
+                if (service == null)
                         throw new WebServiceException(
                                 ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
                                         buildNameList(model.getServices().keySet())));
@@ -193,6 +192,7 @@ public class WSServiceDelegate extends WSService {
             }
             populatePorts();
         }
+        this.wsdlService = service;
 
         if (serviceClass != Service.class) {
             /*
