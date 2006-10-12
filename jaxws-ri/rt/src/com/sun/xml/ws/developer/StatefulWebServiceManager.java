@@ -3,7 +3,6 @@ package com.sun.xml.ws.developer;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.AsyncProviderCallback;
 
@@ -114,7 +113,7 @@ public interface StatefulWebServiceManager<T> {
      *      Either {@link W3CEndpointReference} or {@link MemberSubmissionEndpointReference}.
      *      If other types are specified, this method throws an {@link WebServiceException}.
      * @return
-     *      {@link WSEndpointReference} that identifies this exported
+     *      {@link EndpointReference}-subclass that identifies this exported
      *      object.
      */
     @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> epr, T o);
