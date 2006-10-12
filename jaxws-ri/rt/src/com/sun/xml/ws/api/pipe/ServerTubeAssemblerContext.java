@@ -170,4 +170,13 @@ public class ServerTubeAssemblerContext {
             return next;
     }
 
+    public Codec getCodec() {
+        // TODO
+        return binding.createCodec();
+    }
+
+    public void setCodec(Codec codec) {
+        // TODO
+    }
+
 }

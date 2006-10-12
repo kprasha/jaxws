@@ -63,7 +63,7 @@ public class SOAPBindingCodec extends MimeCodec {
     private boolean _useFastInfosetForEncoding;
     
     // The XML SOAP codec
-    private final StreamSOAPCodec xmlSoapCodec;
+    private final Codec xmlSoapCodec;
     
     // The Fast Infoset SOAP codec
     private final Codec fiSoapCodec;
@@ -129,11 +129,15 @@ public class SOAPBindingCodec extends MimeCodec {
     }
     
     private AcceptContentType _adaptingContentType = new AcceptContentType();
-    
+
     public SOAPBindingCodec(WSBinding binding) {
+        this(binding, StreamSOAPCodec.create(binding.getSOAPVersion()));
+    }
+    
+    public SOAPBindingCodec(WSBinding binding, Codec xmlSoapCodec) {
         super(binding.getSOAPVersion());
         
-        xmlSoapCodec = StreamSOAPCodec.create(version);
+        this.xmlSoapCodec = xmlSoapCodec;
         xmlMimeType = xmlSoapCodec.getMimeType();
         
         fiSoapCodec = getFICodec(version);

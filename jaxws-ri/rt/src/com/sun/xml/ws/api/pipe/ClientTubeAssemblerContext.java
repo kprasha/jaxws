@@ -142,5 +142,14 @@ public class ClientTubeAssemblerContext {
         return TransportTubeFactory.create(cl, this);
     }
 
+    public Codec getCodec() {
+        // TODO
+        return binding.createCodec();
+    }
+
+    public void setCodec(Codec codec) {
+        // TODO
+    }
+
 
 }
