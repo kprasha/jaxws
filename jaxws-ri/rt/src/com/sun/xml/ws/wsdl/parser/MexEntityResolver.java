@@ -25,13 +25,18 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.resources.WsdlmodelMessages;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.ws.WebServiceException;
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +50,7 @@ import java.util.Map;
 public final class MexEntityResolver implements XMLEntityResolver {
     private final Map<String, SDDocumentSource> wsdls = new HashMap<String, SDDocumentSource>();
 
-    public MexEntityResolver(List<? extends Source> wsdls) throws IOException {
+    public MexEntityResolver(List<? extends Source> wsdls) throws IOException, XMLStreamException {
         Transformer transformer = XmlUtil.newTransformer();
         for (Source source : wsdls) {
             XMLStreamBufferResult xsbr = new XMLStreamBufferResult();
@@ -55,8 +60,12 @@ public final class MexEntityResolver implements XMLEntityResolver {
                 throw new WebServiceException(e);
             }
             String systemId = source.getSystemId();
-            SDDocumentSource doc = SDDocumentSource.create(JAXWSUtils.getFileOrURL(systemId), xsbr.getXMLStreamBuffer());
-            this.wsdls.put(systemId, doc);
+
+            //TODO: can we do anything if the given mex Source has no systemId?
+            if(systemId != null){
+                SDDocumentSource doc = SDDocumentSource.create(JAXWSUtils.getFileOrURL(systemId), xsbr.getXMLStreamBuffer());
+                this.wsdls.put(systemId, doc);
+            }
         }
     }
 
