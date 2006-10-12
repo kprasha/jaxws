@@ -47,7 +47,8 @@ public enum AddressingVersion {
     W3C("http://www.w3.org/2005/08/addressing",
         "w3c-anonymous-epr.xml",
         "http://www.w3.org/2006/05/addressing/wsdl",
-        "http://www.w3.org/2006/05/addressing/wsdl") {
+        "http://www.w3.org/2006/05/addressing/wsdl",
+        W3CEndpointReference.class) {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
@@ -120,7 +121,8 @@ public enum AddressingVersion {
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "member-anonymous-epr.xml",
            "http://schemas.xmlsoap.org/ws/2004/08/addressing",
-           "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy") {
+           "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy",
+            MemberSubmissionEndpointReference.class) {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
@@ -200,6 +202,11 @@ public enum AddressingVersion {
      * Namespace URI for the WSDL Binding
      */
     public final String wsdlNsUri;
+
+    /**
+     * Either {@link W3CEndpointReference} or {@link MemberSubmissionEndpointReference}.
+     */
+    public final Class<? extends EndpointReference> eprClass;
 
     /**
      * Namespace URI for the WSDL Binding
@@ -326,10 +333,11 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-    private AddressingVersion(String nsUri, String anonymousEprResourceName, String wsdlNsUri, String policyNsUri) {
+    private AddressingVersion(String nsUri, String anonymousEprResourceName, String wsdlNsUri, String policyNsUri, Class<? extends EndpointReference> eprClass ) {
         this.nsUri = nsUri;
         this.wsdlNsUri = wsdlNsUri;
         this.policyNsUri = policyNsUri;
+        this.eprClass = eprClass;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
