@@ -418,11 +418,14 @@ public final class HeaderList extends ArrayList<Header> {
      *      from {@link Iterator#next()}.
      * @return null if header not found
      */
-    private Header getFirstHeader(QName name, boolean markUnderstood, SOAPVersion soapVersion) {
+    private Header getFirstHeader(QName name, boolean markUnderstood, SOAPVersion sv) {
+        if (sv == null)
+            throw new WebServiceException(AddressingMessages.NULL_SOAP_VERSION());
+
         Iterator<Header> iter = getHeaders(name.getNamespaceURI(), name.getLocalPart(), markUnderstood);
         while (iter.hasNext()) {
             Header h = iter.next();
-            if (h.getRole(soapVersion) == soapVersion.implicitRole)
+            if (h.getRole(sv) == sv.implicitRole)
                 return h;
         }
 
@@ -435,14 +438,18 @@ public final class HeaderList extends ArrayList<Header> {
      * the current implicit role. Caches the value for subsequent invocation.
      * Duplicate <code>To</code> headers are detected earlier.
      *
-     * @param version WS-Addressing version
-     * @param soapVersion SOAP version
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing To header, null if no header is present
      */
-    public String getTo(AddressingVersion version, SOAPVersion soapVersion) {
+    public String getTo(AddressingVersion av, SOAPVersion sv) {
         if (to != null)
             return to;
-        Header h = getFirstHeader(version.toTag, true, soapVersion);
+        if (av == null)
+            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+
+        Header h = getFirstHeader(av.toTag, true, sv);
         if (h != null) {
             to = h.getStringContent();
         }
@@ -456,14 +463,18 @@ public final class HeaderList extends ArrayList<Header> {
      * the current implicit role. Caches the value for subsequent invocation.
      * Duplicate <code>Action</code> headers are detected earlier.
      *
-     * @param version WS-Addressing version
-     * @param soapVersion SOAP version
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing Action header, null if no header is present
      */
-    public String getAction(AddressingVersion version, SOAPVersion soapVersion) {
+    public String getAction(AddressingVersion av, SOAPVersion sv) {
         if (action!= null)
             return action;
-        Header h = getFirstHeader(version.actionTag, true, soapVersion);
+        if (av == null)
+            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+
+        Header h = getFirstHeader(av.actionTag, true, sv);
         if (h != null) {
             action = h.getStringContent();
         }
@@ -477,17 +488,21 @@ public final class HeaderList extends ArrayList<Header> {
      * the current implicit role. Caches the value for subsequent invocation.
      * Duplicate <code>ReplyTo</code> headers are detected earlier.
      *
-     * @param version WS-Addressing version
-     * @param soapVersion SOAP version
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing ReplyTo header, null if no header is present
      */
-    public WSEndpointReference getReplyTo(AddressingVersion version, SOAPVersion soapVersion) {
+    public WSEndpointReference getReplyTo(AddressingVersion av, SOAPVersion sv) {
         if (replyTo!=null)
             return replyTo;
-        Header h = getFirstHeader(version.replyToTag, true, soapVersion);
+        if (av == null)
+            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+
+        Header h = getFirstHeader(av.replyToTag, true, sv);
         if (h != null) {
             try {
-                replyTo = h.readAsEPR(version);
+                replyTo = h.readAsEPR(av);
             } catch (XMLStreamException e) {
                 throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
             }
@@ -502,18 +517,22 @@ public final class HeaderList extends ArrayList<Header> {
      * the current implicit role. Caches the value for subsequent invocation.
      * Duplicate <code>FaultTo</code> headers are detected earlier.
      *
-     * @param version WS-Addressing version
-     * @param soapVersion SOAP version
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing FaultTo header, null if no header is present
      */
-    public WSEndpointReference getFaultTo(AddressingVersion version, SOAPVersion soapVersion) {
+    public WSEndpointReference getFaultTo(AddressingVersion av, SOAPVersion sv) {
         if (faultTo != null)
             return faultTo;
 
-        Header h = getFirstHeader(version.faultToTag, true, soapVersion);
+        if (av == null)
+            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+
+        Header h = getFirstHeader(av.faultToTag, true, sv);
         if (h != null) {
             try {
-                faultTo = h.readAsEPR(version);
+                faultTo = h.readAsEPR(av);
             } catch (XMLStreamException e) {
                 throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
             }
@@ -528,15 +547,19 @@ public final class HeaderList extends ArrayList<Header> {
      * the current implicit role. Caches the value for subsequent invocation.
      * Duplicate <code>MessageID</code> headers are detected earlier.
      *
-     * @param version WS-Addressing version
-     * @param soapVersion SOAP version
+     * @param av WS-Addressing version
+     * @param sv SOAP version
+     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing MessageID header, null if no header is present
      */
-    public String getMessageID(AddressingVersion version, SOAPVersion soapVersion) {
+    public String getMessageID(AddressingVersion av, SOAPVersion sv) {
         if (messageId != null)
             return messageId;
 
-        Header h = getFirstHeader(version.messageIDTag, true, soapVersion);
+        if (av == null)
+            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+
+        Header h = getFirstHeader(av.messageIDTag, true, sv);
         if (h != null) {
             messageId = h.getStringContent();
         }
@@ -632,6 +655,12 @@ public final class HeaderList extends ArrayList<Header> {
      * @param action Action Message Addressing Property value
      */
     private void fillCommonAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, String action) {
+        if (av == null)
+            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+
+        if (sv == null)
+            throw new WebServiceException(AddressingMessages.NULL_SOAP_VERSION());
+
         // wsa:To
         StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
         add(h);
