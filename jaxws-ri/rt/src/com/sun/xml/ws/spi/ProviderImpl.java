@@ -23,9 +23,12 @@ package com.sun.xml.ws.spi;
 
 
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
+import com.sun.xml.ws.addressing.EndpointReferenceUtil;
+import com.sun.istack.NotNull;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
@@ -33,10 +36,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.*;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -93,12 +93,14 @@ public class ProviderImpl extends Provider {
     }
 
     public <T extends EndpointReference> T createEndpointReference(Class<T> clazz, QName serviceName, QName portName, Source wsdlDocumentLocation, Element... referenceParameters) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("To be done");
     }
 
-    public <T> T getPort(EndpointReference endpointReference, Class<T> aClass, WebServiceFeature... webServiceFeatures) {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException("To be done in M2");
+    public <T> T getPort(EndpointReference endpointReference, Class<T> clazz, WebServiceFeature... webServiceFeatures) {
+        final @NotNull MemberSubmissionEndpointReference msepr =
+                EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, endpointReference);
+        WSService service = new WSServiceDelegate(msepr.toWSDLSource(), msepr.serviceName.name, Service.class);
+        return service.getPort(msepr, clazz, webServiceFeatures);
     }
 
     private static JAXBContext getEPRJaxbContext() {
