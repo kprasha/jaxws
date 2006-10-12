@@ -110,8 +110,13 @@ public class RuntimeWSDLParser {
      * Parses the WSDL and gives WSDLModel. If wsdl parameter is null, then wsdlLoc is used to get the WSDL. If the WSDL
      * document could not be obtained then {@link MetadataResolverFactory} is tried to get the WSDL document, if not found
      * then as last option, if the wsdlLoc has no '?wsdl' as query parameter then it is tried by appending '?wsdl'.
+     *
+     * @param wsdlLoc
+     *      Either this or <tt>wsdl</tt> parameter must be given.
+     *      Null location means the system won't be able to resolve relative references in the WSDL,
+     *      So think twice before passing in null.
      */
-    public static WSDLModelImpl parse(@NotNull URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(@Nullable URL wsdlLoc, @Nullable Source wsdl, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
 
         RuntimeWSDLParser parser = new RuntimeWSDLParser(wsdlLoc,new EntityResolverWrapper(resolver), isClientSide, extensions);
@@ -201,8 +206,8 @@ public class RuntimeWSDLParser {
         return parser.wsdlDoc;
     }
 
-    private RuntimeWSDLParser(URL sourceLocation, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) {
-        this.wsdlDoc = new WSDLModelImpl(sourceLocation);
+    private RuntimeWSDLParser(@Nullable URL sourceLocation, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) {
+        this.wsdlDoc = sourceLocation!=null ? new WSDLModelImpl(sourceLocation) : new WSDLModelImpl();
         this.resolver = resolver;
 
         this.extensions = new ArrayList<WSDLParserExtension>();
@@ -218,7 +223,7 @@ public class RuntimeWSDLParser {
         this.extensionFacade = new WSDLParserExtensionFacade(this.extensions.toArray(new WSDLParserExtension[0]));
     }
 
-    private void parseWSDL(URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
+    private void parseWSDL(@NotNull URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
 
         String systemId = wsdlLoc.toExternalForm();
 
@@ -239,7 +244,8 @@ public class RuntimeWSDLParser {
 
     private void parseWSDL(Parser parser) throws XMLStreamException, IOException, SAXException {
         // avoid processing the same WSDL twice.
-        if (!importedWSDLs.add(parser.systemId.toExternalForm()))
+        // if no system ID is given, the check won't work
+        if (parser.systemId!=null && !importedWSDLs.add(parser.systemId.toExternalForm()))
             return;
 
 
@@ -249,8 +255,8 @@ public class RuntimeWSDLParser {
         //wsdl:definition
         if (!reader.getName().equals(WSDLConstants.QNAME_DEFINITIONS)) {
             errors.set(NOT_A_WSDL);
-            throw new WebServiceException(ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(parser.systemId.toExternalForm(),
-                    WSDLConstants.QNAME_DEFINITIONS.toString(), reader.getName().toString(), reader.getLocation()));
+            throw new WebServiceException(ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(parser.systemId,
+                    WSDLConstants.QNAME_DEFINITIONS, reader.getName(), reader.getLocation()));
         }
 
         //get the targetNamespace of the service
@@ -580,11 +586,15 @@ public class RuntimeWSDLParser {
         }
     }
 
-    protected void parseImport(URL baseURL, XMLStreamReader reader) throws IOException, SAXException, XMLStreamException {
+    protected void parseImport(@Nullable URL baseURL, XMLStreamReader reader) throws IOException, SAXException, XMLStreamException {
         // expand to the absolute URL of the imported WSDL.
         String importLocation =
                 ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_LOCATION);
-        URL importURL = new URL(baseURL, importLocation);
+        URL importURL;
+        if(baseURL!=null)
+            importURL = new URL(baseURL, importLocation);
+        else // no base URL. this better be absolute
+            importURL = new URL(importLocation);
         parseWSDL(importURL);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             XMLStreamReaderUtil.skipElement(reader);

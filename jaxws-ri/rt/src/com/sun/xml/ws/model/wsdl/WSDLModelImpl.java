@@ -60,6 +60,13 @@ public final class WSDLModelImpl extends AbstractExtensibleImpl implements WSDLM
         super(systemId.toExternalForm(),-1);
     }
 
+    /**
+     * To create {@link WSDLModelImpl} from WSDL that doesn't have a system ID.
+     */
+    public WSDLModelImpl() {
+        super(null,-1);
+    }
+
     public void addMessage(WSDLMessageImpl msg){
         messages.put(msg.getName(), msg);
     }

@@ -22,19 +22,15 @@
 
 package com.sun.xml.ws.wsdl.parser;
 
+import com.sun.xml.ws.api.server.SDDocumentSource;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Source;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.net.URL;
-import java.net.MalformedURLException;
-
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 
 /**
  * Resolves a reference to {@link XMLStreamReader}.
@@ -62,7 +58,7 @@ public interface XMLEntityResolver {
         public final XMLStreamReader parser;
 
         public Parser(URL systemId, XMLStreamReader parser) {
-            assert systemId!=null && parser!=null;
+            assert parser!=null;
             this.systemId = systemId;
             this.parser = parser;
         }

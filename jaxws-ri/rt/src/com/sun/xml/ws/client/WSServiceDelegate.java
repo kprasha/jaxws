@@ -55,8 +55,6 @@ import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.xml.ws.wsdl.parser.WSDLConstants;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.jws.HandlerChain;
@@ -64,7 +62,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
@@ -184,7 +181,8 @@ public class WSServiceDelegate extends WSService {
 
         if (wsdl != null) {
             try {
-                WSDLModelImpl model = parseWSDL(new URL(wsdl.getSystemId()), wsdl);
+                URL url = wsdl.getSystemId()==null ? null : new URL(wsdl.getSystemId());
+                WSDLModelImpl model = parseWSDL(url, wsdl);
                 wsdlService = model.getService(this.serviceName);
                 if (wsdlService == null)
                         throw new WebServiceException(
@@ -227,8 +225,12 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * Parses the WSDL and builds {@link WSDLModel}.
+     * @param wsdlDocumentLocation
+     *      Either this or <tt>wsdl</tt> parameter must be given.
+     *      Null location means the system won't be able to resolve relative references in the WSDL,
+     *      So think twice before passing in null.
      */
-    private WSDLModelImpl parseWSDL(@NotNull URL wsdlDocumentLocation, Source wsdl) {
+    private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
         try {
             return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver(),
                 true, ServiceFinder.find(WSDLParserExtension.class).toArray());
