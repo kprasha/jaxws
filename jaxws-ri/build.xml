@@ -700,60 +700,75 @@ major-version=${release.impl.version}
       </antcall>
       <delete file="${build.home}/jaxws-ri.zip" />
     </target>
-        
+
+
+    <patternset id="src-includes"
+                description="This pattern set defines which files will be in/excluded in the src bundle">
+        <include name="**/*.java"/>
+        <include name="**/*.properties"/>
+    </patternset>
+
     <target name="generate-weekly-source"
-        depends="prepare"
+        depends="dist"
         description="generate sources for java.net binary distribution">
       <tstamp/>
             
       <!-- create the zip file contents -->
       <property name="source.drop.dir" value="${build.home}/source-bundle"/>
+      <property name="source.dist.dir.name" value="jaxws-ri-${DSTAMP}"/>
+      <property name="src.installer.tmp" value="${build.home}/src-tmp" />
       <delete dir="${source.drop.dir}"/>
       <mkdir dir="${source.drop.dir}"/>
-      <mkdir dir="${source.drop.dir}/jaxws-si/lib"/>
-      <copy todir="${source.drop.dir}/jaxws-si/lib">
-        <fileset dir="${basedir}/lib">
-          <include name="*.jar"/>
-          <exclude name="ant*.*"/>
-          <exclude name="junit.jar"/>
-        </fileset>
-      </copy>
-      <copy todir="${source.drop.dir}/jaxws-si">
-        <fileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
-      </copy>
-<!--      <copy file="${basedir}/license.txt"
-          todir="${source.drop.dir}/jaxws-si"/> -->
-      <copy file="${basedir}/etc/src-bundle.xml"
-          tofile="${source.drop.dir}/jaxws-si/build.xml"/>
-      <mkdir dir="${source.drop.dir}/jaxws-si/bin"/>
-      <copy todir="${source.drop.dir}/jaxws-si/bin">
-        <fileset dir="${basedir}/tools/bin">
-          <include name="*.sh"/>
-          <include name="*.bat"/>
-        </fileset>
-      </copy>
-      <mkdir dir="${source.drop.dir}/jaxws-si/src"/>
-      <copy todir="${source.drop.dir}/jaxws-si/src">
-        <fileset dir="${basedir}">
-          <include name="rt/**/*.java"/>
-          <include name="rt/**/*.properties"/>
-          <include name="tools/**/*.java"/>
-          <include name="tools/**/*.properties"/>
-          <include name="servlet/**/*.java"/>
-          <include name="servlet/**/*.properties"/>
-          <include name="transports/**/*.java"/>
-          <include name="transports/**/*.properties"/>            
-        </fileset>
-      </copy>
-      <zip destfile="${source.drop.dir}/jaxws-src.zip">
-        <zipfileset dir="${source.drop.dir}"/>
-      </zip>
+      <mkdir dir="${source.drop.dir}/jaxws-ri/lib"/>
+
+        <zip destfile="${source.drop.dir}/jaxws-src.zip" duplicate="fail" whenempty="fail">
+            <zipfileset dir="rt/src" prefix="${source.dist.dir.name}/src" defaultexcludes="true">
+                <patternset refid="src-includes"/>
+            </zipfileset>
+            <zipfileset dir="rt/build/gen-src" prefix="${source.dist.dir.name}/src" defaultexcludes="true">
+                <patternset refid="src-includes"/>
+            </zipfileset>
+
+            <zipfileset dir="tools/wscompile/src" prefix="${source.dist.dir.name}/src" defaultexcludes="true">
+                <patternset refid="src-includes"/>
+            </zipfileset>
+            <zipfileset dir="tools/wscompile/build/gen-src" prefix="${source.dist.dir.name}/src" defaultexcludes="true">
+                <patternset refid="src-includes"/>
+            </zipfileset>
+            <zipfileset dir="servlet/src" prefix="${source.dist.dir.name}/src" defaultexcludes="true">
+                <patternset refid="src-includes"/>
+            </zipfileset>
+            <zipfileset dir="transports/local/src" prefix="${source.dist.dir.name}/src" defaultexcludes="true">
+                <patternset refid="src-includes"/>
+            </zipfileset>
+            <zipfileset dir="${basedir}/etc" includes="src-bundle.xml"
+                        fullpath="${source.dist.dir.name}/build.xml"/>
+
+            <!-- additional jar files -->
+            <zipfileset dir="${basedir}/build/lib" includes="*.jar" excludes="ant*.* junit.jar" prefix="${source.dist.dir.name}/lib"/>
+            <zipfileset dir="servlet/lib" includes="*.jar" prefix="${source.dist.dir.name}/lib"/>
+
+            <!-- license files -->
+            <zipfileset dir="." includes="JAXWSv2.0.THIRDPARTYLICENSEREADME.txt, license.txt, distributionREADME_WMforJava2.0.txt"
+                        prefix="${source.dist.dir.name}"/>
+
+        </zip>
+
+        <!-- test the generated source bundle -->
+        <delete dir="${src.installer.tmp}" failonerror="false" />
+        <mkdir dir="${src.installer.tmp}" />
+        <unzip dest="${src.installer.tmp}" src="${source.drop.dir}/jaxws-src.zip"/>
+        <ant dir="${src.installer.tmp}/${source.dist.dir.name}" inheritAll="false" inheritRefs="false"/>
+
+        <!-- delete the srctmp dir -->
+        <delete dir="${src.installer.tmp}"/>
+
       <!-- 1.X version opens to a zip file, so wrap our zip
           in another one to send to installer -->
       <zip destfile="${source.drop.dir}/jaxws-src-installer.zip">
         <zipfileset file="${source.drop.dir}/jaxws-src.zip"/>
       </zip>
-          
+
       <!-- generate the installer -->
       <installerBuilder classFile="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_source_${DSTAMP}.jar"
           licenseFile="${basedir}/license.txt"
