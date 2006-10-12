@@ -39,6 +39,7 @@ import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.resources.AddressingMessages;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -164,12 +165,6 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
                 WSDLPortImpl port = (WSDLPortImpl)wp;
                 WSDLBoundPortTypeImpl binding = port.getBinding();
 
-                /* Rama: This should not be called.
-                The runtime shoudl figure it out if it is set on port or binding
-
-                // patch the value of UsingAddressing in wsdl:port and wsdl:binding
-                patchUsingAddressing(binding, port);
-                */
                 // populate actions for the messages that do not have an explicit wsaw:Action
                 populateActions(binding);
 
@@ -178,19 +173,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
             }
         }
     }
-    /*
-    Because of this patching WSDLModel does n't reflect what the wsdl says.
-    private void patchUsingAddressing(WSDLBoundPortTypeImpl binding, WSDLPortImpl port) {
-        if (binding.getAddressingFeature() == port.getAddressingFeature())
-            return;
 
-        if (binding.getAddressingFeature() == null && port.getAddressingFeature() != null)
-            binding.setAddressingFeature(port.getAddressingFeature());
-
-        if (binding.getAddressingFeature() != null && port.getAddressingFeature() == null)
-            port.setAddressingFeature(binding.getAddressingFeature());
-    }
-    */
     protected String getNamespaceURI() {
         return AddressingVersion.W3C.wsdlNsUri;
     }
@@ -208,6 +191,8 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
             if (o.getInput().getAction() == null || o.getInput().getAction().equals("")) {
                 // explicit wsaw:Action is not specified
                 WSDLBoundOperationImpl wboi = binding.get(o.getName());
+                if (wboi == null)
+                    throw new WebServiceException(AddressingMessages.WSDL_BOUND_OPERATION_NOT_FOUND(o.getName()));
                 String soapAction = wboi.getSOAPAction();
                 if (soapAction != null && !soapAction.equals("")) {
                     // if soapAction is non-empty, use that
