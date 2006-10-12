@@ -11,6 +11,13 @@ import java.lang.reflect.Method;
 /**
  * Hides the detail of calling into application endpoint implementation.
  *
+ * <p>
+ * Typical host of the JAX-WS RI would want to use
+ * {@link InstanceResolver#createDefault(Class)} and then
+ * use <tt>{@link InstanceResolver#createInvoker()} to obtain
+ * the default invoker implementation.
+ *
+ *
  * @author Jitendra Kotamraju
  * @author Kohsuke Kawaguchi
  */
