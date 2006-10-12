@@ -25,6 +25,7 @@ package com.sun.xml.ws.encoding;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.client.ContentNegotiation;
@@ -177,7 +178,9 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
 
     @Override
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
-        if (isMultipartRelated(contentType)) {
+        if (contentType == null) {
+            xmlCodec.decode(in, contentType, packet);
+        } else if (isMultipartRelated(contentType)) {
             packet.setMessage(new XMLMultiPart(contentType, in));
         } else if(isFastInfoset(contentType)) {
             if (fiCodec == null) {
