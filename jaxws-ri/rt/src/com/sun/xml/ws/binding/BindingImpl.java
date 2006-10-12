@@ -193,7 +193,7 @@ public abstract class BindingImpl implements WSBinding {
         updateCache();
     }
 
-    public void setFeatures(WebServiceFeature[] newFeatures) {
+    public void setFeatures(WebServiceFeature... newFeatures) {
         if (newFeatures != null) {
             for (WebServiceFeature f : newFeatures) {
                 enableFeature(f);

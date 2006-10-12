@@ -72,8 +72,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
 
         //this.enableMtom = bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled();
         if(bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled()) {
-            WebServiceFeature[] wsfeatures = {new MTOMFeature()};
-            setFeatures(wsfeatures);
+            setFeatures(new MTOMFeature());
         }
 
     }
@@ -81,7 +80,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     /**
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
-    SOAPBindingImpl(BindingID bindingId, WebServiceFeature[] features) {
+    SOAPBindingImpl(BindingID bindingId, WebServiceFeature... features) {
         this(bindingId);
         setFeatures(features);
     }
@@ -167,8 +166,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      * Client application can override if the MTOM optimization should be enabled
      */
     public void setMTOMEnabled(boolean b) {
-        WebServiceFeature[] wsfeatures = {new MTOMFeature()};
-        setFeatures(wsfeatures);
+        setFeatures(new MTOMFeature());
     }
 
     public SOAPFactory getSOAPFactory() {
