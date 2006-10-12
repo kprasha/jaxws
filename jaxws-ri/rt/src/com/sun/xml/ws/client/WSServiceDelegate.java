@@ -259,8 +259,8 @@ public class WSServiceDelegate extends WSService {
                 throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
 
         } else {
-            wsdlService = eprWsdlContext.getService(serviceName);
-            if (wsdlService == null)
+            WSDLServiceImpl eprService = eprWsdlContext.getService(serviceName);
+            if (eprService==null)
                 throw new WebServiceException(
                         ClientMessages.INVALID_SERVICE_NAME(serviceName,
                                 buildNameList(eprWsdlContext.getServices().keySet())));
