@@ -116,9 +116,4 @@ public interface WSDLBoundPortType extends WSDLFeaturedObject, WSDLExtensible {
     @Deprecated
     boolean isMTOMEnabled();
 
-    /**
-     * Enables a {@link WebServiceFeature} based upon policy assertions. This
-     * method would be called during WSDL parsing by WS-Policy code.
-     */
-    void addFeature(WebServiceFeature feature);
 }
