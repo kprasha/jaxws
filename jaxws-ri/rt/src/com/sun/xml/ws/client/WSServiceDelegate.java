@@ -30,10 +30,8 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -74,8 +72,6 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.soap.AddressingFeature;
-
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -191,10 +187,12 @@ public class WSServiceDelegate extends WSService {
                         throw new WebServiceException(
                                 ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
                                         buildNameList(model.getServices().keySet())));
+                // fill in statically known ports
+                for (WSDLPortImpl port : service.getPorts())
+                    ports.put(port.getName(), new PortInfo(this, port));
             } catch (MalformedURLException e) {
                 throw new WebServiceException(ClientMessages.INVALID_WSDL_URL(wsdl.getSystemId()));
             }
-            populatePorts();
         }
         this.wsdlService = service;
 
@@ -272,22 +270,6 @@ public class WSServiceDelegate extends WSService {
             //if (!wsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname)))
             //    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
 
-        }
-    }
-
-    private void populatePorts() {
-        if (wsdlService != null) {
-
-            /*
-            //is this case needed as serviceName should not be null
-
-            if (serviceName == null) {
-                serviceName = wsdlContext.getFirstServiceName();
-            }
-            */
-            // fill in statically known ports
-            for (WSDLPortImpl port : wsdlService.getPorts())
-                ports.put(port.getName(), new PortInfo(this, port));
         }
     }
 
