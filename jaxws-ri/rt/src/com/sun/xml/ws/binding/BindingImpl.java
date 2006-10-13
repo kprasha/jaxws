@@ -239,7 +239,7 @@ public abstract class BindingImpl implements WSBinding {
                 } else {
                     mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
                 }
-            } else if (Boolean.valueOf(mtomEnabled).compareTo(bindingID.isMTOMEnabled()) != 0) {
+            } else if ((mtomEnabled != null) && !(Boolean.valueOf(mtomEnabled)== bindingID.isMTOMEnabled())) {
                 throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId, mtomEnabled));
             }
         } else {
