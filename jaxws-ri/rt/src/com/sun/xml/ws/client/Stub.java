@@ -240,12 +240,12 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         return RuntimeVersion.VERSION + ": Stub for " + getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
 
-    public final W3CEndpointReference getEndpointReference(Element...referenceParameters) {
-        return getEndpointReference(W3CEndpointReference.class, referenceParameters);
+    public final W3CEndpointReference getEndpointReference() {
+        return getEndpointReference(W3CEndpointReference.class);
     }
-
+    
     public final <T extends EndpointReference>
-    T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
+    T getEndpointReference(Class<T> clazz) {
         // we need to expand WSEndpointAddress class to be able to return EPR with arbitrary address.
         if (endpointReference != null) {
             return endpointReference.toSpec(clazz);

@@ -21,12 +21,19 @@ package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionAddressing;
+import com.sun.xml.ws.developer.Stateful;
+import com.sun.xml.ws.developer.StatefulFeature;
 
 import javax.xml.ws.*;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.Addressing;
+import javax.xml.ws.soap.MTOM;
 import java.util.List;
 import java.util.ArrayList;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Rama Pulavarthi
@@ -34,58 +41,38 @@ import java.util.ArrayList;
 
 public class BindingTypeImpl {
     public static WebServiceFeature[] parseBindingType(@NotNull Class<?> endpointClass) {
-            List<WebServiceFeature> wsfeatures = null;
-            BindingType bindingType = endpointClass.getAnnotation(BindingType.class);
-            if(bindingType != null) {
-                Feature[] features = bindingType.features();
-                if(features != null) {
-                    wsfeatures = new ArrayList<WebServiceFeature>();
-                    for(Feature f:features) {
-                        if(f.enabled()) {
-                            if(f.value().equals(AddressingFeature.ID) ) {
-                                AddressingFeature addFeature = new AddressingFeature(true);
-                                FeatureParameter[] params = f.parameters();
-                                if(params != null) {
-                                    for(FeatureParameter param: params) {
-                                        if(param.name().equals(AddressingFeature.IS_REQUIRED)) {
-                                            addFeature.setRequired(Boolean.valueOf(param.value()));
-                                        }
-                                    }
-                                }
-                                wsfeatures.add(addFeature);
-                            } else if(f.value().equals(MemberSubmissionAddressingFeature.ID) ) {
-                                MemberSubmissionAddressingFeature msaf = new MemberSubmissionAddressingFeature(true);
-                                FeatureParameter[] params = f.parameters();
-                                if(params != null) {
-                                    for(FeatureParameter param: params) {
-                                        if(param.name().equals(MemberSubmissionAddressingFeature.IS_REQUIRED)) {
-                                            msaf.setRequired(Boolean.parseBoolean(param.value()));
-                                        }
-                                    }
-                                }
-                                wsfeatures.add(msaf);
-                            } else if(f.value().equals(MTOMFeature.ID) ) {
-                                MTOMFeature mtomfeature =new MTOMFeature(true);
-                                FeatureParameter[] params = f.parameters();
-                                if(params != null) {
-                                    for(FeatureParameter param: params) {
-                                        if(param.name().equals(MTOMFeature.THRESHOLD)) {
-                                            mtomfeature.setThreshold(Integer.parseInt(param.value()));
-                                        }
-                                    }
-                                }
-                                wsfeatures.add(mtomfeature);
-                            } else if(f.value().equals(RespectBindingFeature.ID) ) {
-                                wsfeatures.add(new RespectBindingFeature());
-                            }
-                        }
-                    }
-                }
+        List<WebServiceFeature> wsfeatures = null;
+        Annotation[] anns = endpointClass.getAnnotations();
+        if (anns == null)
+            return null;
+        wsfeatures = new ArrayList<WebServiceFeature>();
+        for (Annotation a : anns) {
+            WebServiceFeature ftr = null;
+            if (!(a.annotationType().isAnnotationPresent(WebServiceFeatureAnnotation.class))) {
+                continue;
+            } else if (a instanceof Addressing) {
+                Addressing addAnn = (Addressing) a;
+                ftr = new AddressingFeature(addAnn.enabled(), addAnn.required());
+            } else if (a instanceof MemberSubmissionAddressing) {
+                MemberSubmissionAddressing addAnn = (MemberSubmissionAddressing) a;
+                ftr = new MemberSubmissionAddressingFeature(addAnn.enabled(), addAnn.required());
+            } else if (a instanceof MTOM) {
+                MTOM mtomAnn = (MTOM) a;
+                ftr = new MTOMFeature(mtomAnn.enabled(), mtomAnn.threshold());
+            } else if (a instanceof RespectBinding) {
+                RespectBinding rbAnn = (RespectBinding) a;
+                ftr = new RespectBindingFeature(rbAnn.enabled());
+            } else if (a instanceof Stateful) {
+                ftr = new StatefulFeature();
+            } else {
+                //TODO throw Exception
             }
-            return wsfeatures == null ? null : wsfeatures.toArray(new WebServiceFeature[] {});
+            wsfeatures.add(ftr);
         }
+        return wsfeatures.toArray(new WebServiceFeature[]{});
+    }
 
-        public static boolean isFeatureEnabled(@NotNull String featureID, WebServiceFeature[] wsfeatures) {
+    public static boolean isFeatureEnabled(@NotNull String featureID, WebServiceFeature[] wsfeatures) {
             if(wsfeatures == null)
                 return false;
             for(WebServiceFeature ftr:wsfeatures) {

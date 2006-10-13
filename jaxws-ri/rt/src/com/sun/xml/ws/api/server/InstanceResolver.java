@@ -25,12 +25,9 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.developer.ServerFeatures;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.ServerRtException;
-
-import javax.xml.ws.BindingType;
-import javax.xml.ws.Feature;
+import com.sun.xml.ws.developer.Stateful;
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.InvocationTargetException;
@@ -126,24 +123,22 @@ public abstract class InstanceResolver<T> {
     /**
      * Creates a default {@link InstanceResolver} that serves the given class.
      */
-    public static <T> InstanceResolver<T> createDefault(Class<T> clazz) {
+    public static <T> InstanceResolver<T> createDefault(Class<T> clazz, boolean stateful) {
         assert clazz!=null;
-        if(isStateful(clazz))
+        if(stateful)
             return new StatefulInstanceResolver<T>(clazz);
         else
             return createSingleton(createNewInstance(clazz));
     }
 
+    /*
+    //TODO remove this
     private static boolean isStateful(Class<?> classDecl) {
-        BindingType bt = classDecl.getAnnotation(BindingType.class);
-        if(bt==null)    return false;
-        for( Feature f : bt.features() ) {
-            if(f.value().equals(ServerFeatures.STATEFUL) && f.enabled())
-                return true;
-        }
+        Stateful statefulAnn = (Stateful) classDecl.getAnnotation(Stateful.class);
+        if(statefulAnn!=null)    return true;
         return false;
     }
-
+    */
     private static <T> T createNewInstance(Class<T> cl) {
         try {
             return cl.newInstance();

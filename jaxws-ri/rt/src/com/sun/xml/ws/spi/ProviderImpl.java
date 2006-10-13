@@ -41,6 +41,7 @@ import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
+import java.util.List;
 
 /**
  * The entry point to the JAX-WS RI from the JAX-WS API.
@@ -101,6 +102,11 @@ public class ProviderImpl extends Provider {
                 EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, endpointReference);
         WSService service = new WSServiceDelegate(msepr.toWSDLSource(), msepr.serviceName.name, Service.class);
         return service.getPort(msepr, clazz, webServiceFeatures);
+    }
+
+    //TODO:
+    public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
+        throw new UnsupportedOperationException();        
     }
 
     private static JAXBContext getEPRJaxbContext() {

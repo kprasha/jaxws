@@ -46,8 +46,8 @@ import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
-import com.sun.xml.ws.developer.ServerFeatures;
 import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.developer.Stateful;
 
 import javax.jws.HandlerChain;
 import javax.jws.Oneway;
@@ -57,8 +57,6 @@ import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.Feature;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -536,12 +534,8 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     }
 
     private boolean isStateful(ClassDeclaration classDecl) {
-        BindingType bt = classDecl.getAnnotation(BindingType.class);
-        if(bt==null)    return false;
-        for( Feature f : bt.features() ) {
-            if(f.value().equals(ServerFeatures.STATEFUL) && f.enabled())
-                return true;
-        }
+        Stateful statefulAnn = (Stateful) classDecl.getAnnotation(Stateful.class);
+        if(statefulAnn!=null)    return true;
         return false;
     }
 
