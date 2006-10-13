@@ -22,12 +22,12 @@
 
 package com.sun.xml.ws.api;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Decoder;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.pipe.Tube;
 
 import javax.xml.ws.Binding;
 import javax.xml.ws.WebServiceFeature;
@@ -61,7 +61,7 @@ public interface WSBinding extends Binding {
      *
      *      If the binding is not based on SOAP, this method
      *      returns null. See {@link Message} for how a non-SOAP
-     *      binding shall be handled by {@link Pipe}s.
+     *      binding shall be handled by {@link Tube}s.
      */
     SOAPVersion getSOAPVersion();
 
@@ -122,7 +122,7 @@ public interface WSBinding extends Binding {
     void setFeatures(WebServiceFeature... features);
 
     /**
-     * Called to find out if a particular {@link javax.xml.ws.Feature} is enabled or not
+     * Called to find out if a particular {@link WebServiceFeature} is enabled or not
      * @param featureId
      * @return true if feature is enabled, false otherwise
      */
