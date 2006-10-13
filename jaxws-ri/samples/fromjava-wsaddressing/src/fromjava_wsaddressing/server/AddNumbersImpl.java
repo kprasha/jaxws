@@ -24,13 +24,10 @@ package fromjava_wsaddressing.server;
 import javax.annotation.Resource;
 import javax.jws.WebService;
 import javax.xml.ws.*;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.Addressing;
 
+@Addressing
 @WebService
-@BindingType(value = SOAPBinding.SOAP11HTTP_BINDING,
-        features = {@Feature(value = AddressingFeature.ID)})
-
 public class AddNumbersImpl {
 
     @Resource
