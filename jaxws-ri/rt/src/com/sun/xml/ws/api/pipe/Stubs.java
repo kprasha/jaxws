@@ -25,6 +25,7 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -218,6 +219,6 @@ public abstract class Stubs {
         SEIStub ps = new SEIStub((WSServiceDelegate)service,(BindingImpl)binding, (SOAPSEIModel)model,next, epr);
         return portInterface.cast(
             Proxy.newProxyInstance( portInterface.getClassLoader(),
-                new Class[]{portInterface,BindingProvider.class}, ps ));
+                new Class[]{portInterface, WSBindingProvider.class}, ps ));
     }
 }

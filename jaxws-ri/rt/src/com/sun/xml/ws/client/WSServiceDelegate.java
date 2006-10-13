@@ -34,6 +34,7 @@ import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.client.WSBindingProvider;
+import com.sun.xml.ws.api.client.PortCreationCallback;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Stubs;
@@ -157,6 +158,7 @@ public class WSServiceDelegate extends WSService {
     private final @Nullable WSDLServiceImpl wsdlService;
 
     private final Container container;
+    private final @Nullable PortCreationCallback portCreationCallback;
 
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class<? extends Service> serviceClass) {
@@ -176,6 +178,7 @@ public class WSServiceDelegate extends WSService {
         this.serviceName = serviceName;
         this.serviceClass = serviceClass;
         this.container = ContainerResolver.getInstance().getContainer();
+        this.portCreationCallback = container.getSPI(PortCreationCallback.class);
 
         WSDLServiceImpl service=null;
         if (wsdl != null) {
@@ -367,7 +370,6 @@ public class WSServiceDelegate extends WSService {
         eprInfo.parseModel();
         QName portName = addPort(eprInfo);
         return createDispatch(portName, type, mode, features, endpointReference);
-
     }
 
     /**
@@ -484,8 +486,12 @@ public class WSServiceDelegate extends WSService {
         BindingImpl binding = eif.createBinding(webServiceFeatures);
         SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), WSEndpointReference.create(epr));
 
-        return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
+        T proxy = portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
                 new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis));
+        if (portCreationCallback != null) {
+            portCreationCallback.proxyCreated((WSBindingProvider)proxy, portInterface);
+        }
+        return proxy;
     }
 
     /**
