@@ -8,7 +8,9 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.sax.SAXBufferProcessor;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferProcessor;
+import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -67,7 +69,7 @@ public final class WSEndpointReference {
      * @see #parse()
      */
     private @NotNull Header[] referenceParameters;
-    private String address;
+    private @NotNull String address;
 
     /**
      * Creates from the spec version of {@link EndpointReference}.
@@ -117,6 +119,34 @@ public final class WSEndpointReference {
      */
     public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException {
         this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
+    }
+
+    /**
+     * Creates a {@link WSEndpointReference} that only has an address.
+     */
+    public WSEndpointReference(String address, AddressingVersion version) throws XMLStreamException {
+        this.infoset = createBufferFromAddress(address,version);
+        this.version = version;
+        this.address = address;
+        this.referenceParameters = EMPTY_ARRAY;
+    }
+
+    private static XMLStreamBuffer createBufferFromAddress(String address, AddressingVersion version) throws XMLStreamException {
+        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+        XMLStreamWriter w = new StreamWriterBufferCreator(xsb);
+        w.writeStartDocument();
+        w.writeStartElement(version.getPrefix(),
+                "EndpointReference", version.nsUri);
+        w.writeNamespace(version.getPrefix(),
+                version.nsUri);
+        w.writeStartElement(version.getPrefix(),
+                W3CAddressingConstants.WSA_ADDRESS_NAME, version.nsUri);
+        w.writeCharacters(address);
+        w.writeEndElement();
+        w.writeEndElement();
+        w.writeEndDocument();
+        w.close();
+        return xsb;
     }
 
     /**
