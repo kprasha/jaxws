@@ -46,8 +46,8 @@ import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
-import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.developer.Stateful;
+import com.sun.xml.ws.model.RuntimeModeler;
 
 import javax.jws.HandlerChain;
 import javax.jws.Oneway;
@@ -534,9 +534,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     }
 
     private boolean isStateful(ClassDeclaration classDecl) {
-        Stateful statefulAnn = (Stateful) classDecl.getAnnotation(Stateful.class);
-        if(statefulAnn!=null)    return true;
-        return false;
+        return classDecl.getAnnotation(Stateful.class)!=null;
     }
 
     protected boolean classImplementsSEI(ClassDeclaration classDecl,
