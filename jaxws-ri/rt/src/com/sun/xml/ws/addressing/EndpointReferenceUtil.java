@@ -21,11 +21,11 @@ package com.sun.xml.ws.addressing;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.messaging.saaj.util.ByteOutputStream;
+import com.sun.xml.stream.buffer.XMLStreamBufferSource;
+import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
-import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
@@ -36,9 +36,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -61,8 +59,7 @@ public class EndpointReferenceUtil {
                                                                        String port,
                                                                        QName portType, boolean hasWSDL) {
         if (clazz.isAssignableFrom(W3CEndpointReference.class)) {
-            final ByteOutputStream bos = new ByteOutputStream();
-            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+            StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
             try {
                 writer.writeStartDocument();
                 writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
@@ -80,11 +77,9 @@ public class EndpointReferenceUtil {
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
-          //  System.out.println(bos.toString());
-            return (T) new W3CEndpointReference(new StreamSource(bos.newInputStream()));
+            return (T) new W3CEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer()));
         } else if (clazz.isAssignableFrom(MemberSubmissionEndpointReference.class)) {
-            final ByteOutputStream bos = new ByteOutputStream();
-            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+            StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
             try {
                 writer.writeStartDocument();
                 writer.writeStartElement(AddressingVersion.MEMBER.getPrefix(),
@@ -96,7 +91,7 @@ public class EndpointReferenceUtil {
                         AddressingVersion.MEMBER.nsUri);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                writeMSMetaData(writer,address, service, port, portType, hasWSDL);
+                writeMSMetaData(writer, address, service, port, portType, hasWSDL);
                 //Inline the wsdl as extensibility element
                 //Should it go under wsp:Policy?
                 if (hasWSDL) {
@@ -108,14 +103,14 @@ public class EndpointReferenceUtil {
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
-//            System.out.println(bos.toString());
-            return (T) new MemberSubmissionEndpointReference(new StreamSource(bos.newInputStream()));
+
+            return (T) new MemberSubmissionEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer()));
         } else {
             throw new WebServiceException(clazz + "is not a recognizable EndpointReference");
         }
     }
 
-    private static void writeW3CMetaData(XMLStreamWriter writer, String eprAddress,
+    private static void writeW3CMetaData(StreamWriterBufferCreator writer, String eprAddress,
                                          QName service,
                                          String port,
                                          QName portType, boolean hasWSDL) throws XMLStreamException {
@@ -150,20 +145,22 @@ public class EndpointReferenceUtil {
                 //TODO check prefix again
                 servicePrefix = "wsns";
             }
-            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port);
             writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port);
             writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
             writer.writeEndElement();
         }
+
         //Inline the wsdl
         if (hasWSDL) {
             writeWsdl(writer, service, eprAddress);
         }
+
         writer.writeEndElement();
 
     }
 
-    private static void writeMSMetaData(XMLStreamWriter writer, String eprAddress,
+    private static void writeMSMetaData(StreamWriterBufferCreator writer, String eprAddress,
                                         QName service,
                                         String port,
                                         QName portType, boolean hasWSDL) throws XMLStreamException {
@@ -197,15 +194,15 @@ public class EndpointReferenceUtil {
                 //TODO check prefix again
                 servicePrefix = "wsns";
             }
+            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
             writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
                     port);
-            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
             writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
             writer.writeEndElement();
         }
     }
 
-    private static void writeWsdl(XMLStreamWriter writer, QName service, String eprAddress) throws XMLStreamException {
+    private static void writeWsdl(StreamWriterBufferCreator writer, QName service, String eprAddress) throws XMLStreamException {
         writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
                 WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
                 WSDLConstants.NS_WSDL);
@@ -245,8 +242,7 @@ public class EndpointReferenceUtil {
 
     //TODO: bit of redundency on writes of w3c epr, should modularize it
     private static W3CEndpointReference toW3CEpr(MemberSubmissionEndpointReference msEpr) {
-        final ByteOutputStream bos = new ByteOutputStream();
-        XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+        StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
         w3cMetadataWritten = false;
         try {
             writer.writeStartDocument();
@@ -323,13 +319,13 @@ public class EndpointReferenceUtil {
             if ((msEpr.elements != null) && (msEpr.elements.size() > 0)) {
                 for (Element e : msEpr.elements) {
                     if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
-                                e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
-                            wsdlElement = e;
-                     }
+                            e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                        wsdlElement = e;
+                    }
                 }
             }
             //write WSDL
-            if(wsdlElement != null) {
+            if (wsdlElement != null) {
                 DOMUtil.serializeNode(wsdlElement, writer);
             }
 
@@ -340,7 +336,7 @@ public class EndpointReferenceUtil {
             if ((msEpr.elements != null) && (msEpr.elements.size() > 0)) {
                 for (Element e : msEpr.elements) {
                     if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
-                                e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                            e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
                         // Don't write it as this is written already in Metadata
                     }
                     DOMUtil.serializeNode(e, writer);
@@ -356,12 +352,12 @@ public class EndpointReferenceUtil {
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
-        return new W3CEndpointReference(new StreamSource(bos.newInputStream()));
+        return new W3CEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer()));
     }
 
     private static boolean w3cMetadataWritten = false;
 
-    private static void writeW3CMetadata(XMLStreamWriter writer) throws XMLStreamException {
+    private static void writeW3CMetadata(StreamWriterBufferCreator writer) throws XMLStreamException {
         if (!w3cMetadataWritten) {
             writer.writeStartElement(AddressingVersion.W3C.getPrefix(), W3CAddressingConstants.WSA_METADATA_NAME, AddressingVersion.W3C.nsUri);
             w3cMetadataWritten = true;
