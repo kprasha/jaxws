@@ -19,17 +19,15 @@
  */
 package com.sun.xml.ws.developer;
 
+import javax.jws.WebService;
 import javax.xml.ws.WebServiceFeature;
-/**
- * @author Rama Pulavarthi
- */
 
 /**
- * Designates a stateful {@link javax.jws.WebService}.
+ * Designates a stateful {@link WebService}.
  * A service class that has this feature on will behave as a stateful web service.
- * See {@link StatefulWebServiceManager} for more details.
  *
  * @since 2.1
+ * @ses StatefulWebServiceManager
  */
 public class StatefulFeature extends WebServiceFeature {
     /**
@@ -48,6 +46,4 @@ public class StatefulFeature extends WebServiceFeature {
     public String getID() {
         return ID;
     }
-
-
 }
