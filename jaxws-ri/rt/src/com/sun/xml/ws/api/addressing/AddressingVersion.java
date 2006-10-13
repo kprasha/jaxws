@@ -413,6 +413,9 @@ public enum AddressingVersion {
      * @return addresing version
      */
     public static AddressingVersion fromPort(WSDLPort port) {
+        if (port == null)
+            return null;
+        
         WebServiceFeature wsf = port.getFeature(AddressingFeature.ID);
         if (wsf == null) {
             wsf = port.getFeature(MemberSubmissionAddressingFeature.ID);
