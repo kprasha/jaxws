@@ -469,7 +469,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing Action header, null if no header is present
      */
-    public String getAction(AddressingVersion av, SOAPVersion sv) {
+    public String getAction(@NotNull AddressingVersion av, @NotNull SOAPVersion sv) {
         if (action!= null)
             return action;
         if (av == null)
@@ -494,7 +494,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing ReplyTo header, null if no header is present
      */
-    public WSEndpointReference getReplyTo(AddressingVersion av, SOAPVersion sv) {
+    public WSEndpointReference getReplyTo(@NotNull AddressingVersion av, @NotNull SOAPVersion sv) {
         if (replyTo!=null)
             return replyTo;
         if (av == null)
@@ -523,7 +523,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing FaultTo header, null if no header is present
      */
-    public WSEndpointReference getFaultTo(AddressingVersion av, SOAPVersion sv) {
+    public WSEndpointReference getFaultTo(@NotNull AddressingVersion av, @NotNull SOAPVersion sv) {
         if (faultTo != null)
             return faultTo;
 
@@ -553,7 +553,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing MessageID header, null if no header is present
      */
-    public String getMessageID(AddressingVersion av, SOAPVersion sv) {
+    public String getMessageID(@NotNull AddressingVersion av, @NotNull SOAPVersion sv) {
         if (messageId != null)
             return messageId;
 
@@ -566,50 +566,6 @@ public final class HeaderList extends ArrayList<Header> {
         }
 
         return messageId;
-    }
-
-    /**
-     * Creates a set of outbound WS-Addressing headers on the client with the
-     * default Action Message Addressing Property value.
-     * <p><p>
-     * This method needs to be invoked right after such a Message is
-     * created which is error prone but so far only MEX, RM and JAX-WS
-     * creates a request so this ugliness is acceptable. If more components
-     * are identified using this, then we may revisit this.
-     * <p><p>
-     * This method is used if default Action Message Addressing Property is to
-     * be used. See
-     * {@link #fillRequestAddressingHeaders(Packet, com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion, boolean, String)}
-     * if non-default Action is to be used, for example when creating a protocol message not
-     * associated with {@link WSBinding} and {@link WSDLPort}.
-     *
-     * @param wsdlPort request WSDL port
-     * @param binding request WSBinding
-     * @param packet request packet
-     */
-    public void fillRequestAddressingHeaders(WSDLPort wsdlPort, WSBinding binding, Packet packet) {
-        AddressingVersion ver = binding.getAddressingVersion();
-        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
-
-        // wsa:Action
-        // todo: abstract the algorithm of getting input action in getInputAction
-        String action = wsaHelper.getInputAction(packet);
-        if (wsaHelper.isInputActionDefault(packet) && (packet.soapAction != null && !packet.soapAction.equals(""))) {
-            action = packet.soapAction;
-        }
-        if (action == null)
-            action = AddressingVersion.UNSET_INPUT_ACTION;
-
-        boolean oneway = !(wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
-        OneWayFeature onewayFeature = null;
-        if (binding.getFeature(OneWayFeature.ID) != null)
-            onewayFeature = (OneWayFeature) binding.getFeature(OneWayFeature.ID);
-
-        if (onewayFeature == null)
-            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
-        else {
-            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature, action);
-        }
     }
 
     /**
@@ -639,7 +595,57 @@ public final class HeaderList extends ArrayList<Header> {
         }
     }
 
-    private void fillRequestAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, OneWayFeature of, String action) {
+    /**
+     * Creates a set of outbound WS-Addressing headers on the client with the
+     * default Action Message Addressing Property value.
+     * <p><p>
+     * This method needs to be invoked right after such a Message is
+     * created which is error prone but so far only MEX, RM and JAX-WS
+     * creates a request so this ugliness is acceptable. If more components
+     * are identified using this, then we may revisit this.
+     * <p><p>
+     * This method is used if default Action Message Addressing Property is to
+     * be used. See
+     * {@link #fillRequestAddressingHeaders(Packet, com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion, boolean, String)}
+     * if non-default Action is to be used, for example when creating a protocol message not
+     * associated with {@link WSBinding} and {@link WSDLPort}.
+     *
+     * @param wsdlPort request WSDL port
+     * @param binding request WSBinding
+     * @param packet request packet
+     */
+    public void fillRequestAddressingHeaders(@NotNull WSDLPort wsdlPort, @NotNull WSBinding binding, Packet packet) {
+        if (wsdlPort == null)
+            throw new IllegalArgumentException(AddressingMessages.NULL_WSDL_PORT());
+
+        if (binding == null)
+            throw new IllegalArgumentException(AddressingMessages.NULL_BINDING());
+
+        AddressingVersion ver = binding.getAddressingVersion();
+        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
+
+        // wsa:Action
+        // todo: abstract the algorithm of getting input action in getInputAction
+        String action = wsaHelper.getInputAction(packet);
+        if (wsaHelper.isInputActionDefault(packet) && (packet.soapAction != null && !packet.soapAction.equals(""))) {
+            action = packet.soapAction;
+        }
+        if (action == null)
+            action = AddressingVersion.UNSET_INPUT_ACTION;
+
+        boolean oneway = !(wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
+        OneWayFeature onewayFeature = null;
+        if (binding.getFeature(OneWayFeature.ID) != null)
+            onewayFeature = (OneWayFeature) binding.getFeature(OneWayFeature.ID);
+
+        if (onewayFeature == null)
+            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
+        else {
+            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature, action);
+        }
+    }
+
+    private void fillRequestAddressingHeaders(@NotNull Packet packet, @NotNull AddressingVersion av, @NotNull SOAPVersion sv, @NotNull OneWayFeature of, @NotNull String action) {
         fillCommonAddressingHeaders(packet, av, sv, action);
 
         try {
@@ -666,13 +672,20 @@ public final class HeaderList extends ArrayList<Header> {
      * @param av WS-Addressing version
      * @param sv SOAP version
      * @param action Action Message Addressing Property value
+     * @throws IllegalArgumentException if any of the parameters is null.
      */
-    private void fillCommonAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, String action) {
+    private void fillCommonAddressingHeaders(Packet packet, @NotNull AddressingVersion av, @NotNull SOAPVersion sv, @NotNull String action) {
+        if (packet == null)
+            throw new IllegalArgumentException(AddressingMessages.NULL_PACKET());
+
         if (av == null)
             throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         if (sv == null)
             throw new IllegalArgumentException(AddressingMessages.NULL_SOAP_VERSION());
+
+        if (action == null)
+            throw new IllegalArgumentException(AddressingMessages.NULL_ACTION());
 
         // wsa:To
         StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
