@@ -40,7 +40,6 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.developer.StatefulFeature;
 import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
@@ -190,7 +189,7 @@ public class DeploymentDescriptorParser<A> {
 
             String implementationName =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_IMPLEMENTATION);
-            Class implementorClass = getImplementorClass(implementationName,reader);
+            Class<?> implementorClass = getImplementorClass(implementationName,reader);
             EndpointFactory.verifyImplementorClass(implementorClass);
 
             SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
@@ -222,7 +221,7 @@ public class DeploymentDescriptorParser<A> {
             ensureNoContent(reader);
             WSEndpoint<?> endpoint = WSEndpoint.create(
                     implementorClass, !handlersSetInDD,
-                    InstanceResolver.createDefault(implementorClass,binding.isFeatureEnabled(StatefulFeature.ID)).createInvoker(),
+                    InstanceResolver.createDefault(implementorClass).createInvoker(),
                     serviceName, portName, container, binding,
                     primaryWSDL, docs.values(), createEntityResolver()
             );

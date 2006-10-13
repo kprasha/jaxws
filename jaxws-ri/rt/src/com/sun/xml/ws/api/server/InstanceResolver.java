@@ -25,9 +25,10 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.ServerRtException;
-import com.sun.xml.ws.developer.Stateful;
+
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.InvocationTargetException;
@@ -123,22 +124,22 @@ public abstract class InstanceResolver<T> {
     /**
      * Creates a default {@link InstanceResolver} that serves the given class.
      */
-    public static <T> InstanceResolver<T> createDefault(Class<T> clazz, boolean stateful) {
-        assert clazz!=null;
-        if(stateful)
+    public static <T> InstanceResolver<T> createDefault(@NotNull Class<T> clazz) {
+        if(isStateful(clazz))
             return new StatefulInstanceResolver<T>(clazz);
         else
             return createSingleton(createNewInstance(clazz));
     }
 
-    /*
-    //TODO remove this
+    /**
+     * Stateful web service code needs to be written very differently from stateless
+     * web services. So there's no point in checking anything other than annotations.
+     * So only use the annotation to determine how it works.
+     */
     private static boolean isStateful(Class<?> classDecl) {
-        Stateful statefulAnn = (Stateful) classDecl.getAnnotation(Stateful.class);
-        if(statefulAnn!=null)    return true;
-        return false;
+        return classDecl.getAnnotation(Stateful.class)!=null;
     }
-    */
+
     private static <T> T createNewInstance(Class<T> cl) {
         try {
             return cl.newInstance();
