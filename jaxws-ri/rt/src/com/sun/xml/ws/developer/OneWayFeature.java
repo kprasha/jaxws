@@ -43,6 +43,7 @@ public class OneWayFeature extends WebServiceFeature {
 
     private String replyToAddress;
     private String faultToAddress;
+    private String relatesToID;
 
     /**
      * Create an {@link OneWayFeature}. The instance created will be enabled.
@@ -80,11 +81,13 @@ public class OneWayFeature extends WebServiceFeature {
      * be enabled or not.
      * @param replyTo specifies the address of wsa:ReplyTo header.
      * @param faultTo specifies the address of wsa:FaultTo header.
+     * @param relatesTo specifies the MessageID to be used for wsa:RelatesTo header.
      */
-    public OneWayFeature(boolean enabled, String replyTo, String faultTo) {
+    public OneWayFeature(boolean enabled, String replyTo, String faultTo, String relatesTo) {
         this.enabled = enabled;
         this.replyToAddress = replyTo;
         this.faultToAddress = faultTo;
+        this.relatesToID = relatesTo;
     }
 
     /**
@@ -113,7 +116,7 @@ public class OneWayFeature extends WebServiceFeature {
     }
 
     /**
-     * Getter for wsa:FaultTo header address
+     * Getter for wsa:FaultTo header address.
      *
      * @return address of the wsa:FaultTo header
      */
@@ -128,5 +131,23 @@ public class OneWayFeature extends WebServiceFeature {
      */
     public void setFaultToAddress(String address) {
         this.faultToAddress = address;
+    }
+
+    /**
+     * Getter for MessageID for wsa:RelatesTo header.
+     *
+     * @return address of the wsa:FaultTo header
+     */
+    public String getRelatesToID() {
+        return relatesToID;
+    }
+
+    /**
+     * Setter for MessageID for wsa:RelatesTo header.
+     *
+     * @param id
+     */
+    public void setRelatesToID(String id) {
+        this.relatesToID = id;
     }
 }

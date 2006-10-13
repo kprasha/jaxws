@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.protocol.soap.ClientMUTube;
 import com.sun.xml.ws.protocol.soap.ServerMUTube;
 import com.sun.xml.ws.resources.AddressingMessages;
@@ -641,9 +642,11 @@ public final class HeaderList extends ArrayList<Header> {
         if (binding.getFeature(OneWayFeature.ID) != null)
             onewayFeature = (OneWayFeature) binding.getFeature(OneWayFeature.ID);
 
-        if (onewayFeature == null)
+        if (onewayFeature == null) {
+            // standard oneway
             fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
-        else {
+        } else {
+            // custom oneway
             fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature, action);
         }
     }
@@ -666,6 +669,10 @@ public final class HeaderList extends ArrayList<Header> {
             if (of.getFaultToAddress() != null) {
                 WSEndpointReference epr = new WSEndpointReference(of.getFaultToAddress(), av);
                 add(epr.createHeader(av.faultToTag));
+            }
+
+            if (of.getRelatesToID() != null) {
+                add(new RelatesToHeader(av.relatesToTag, of.getRelatesToID()));
             }
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
