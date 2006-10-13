@@ -620,20 +620,6 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    /**
-     * TODO: Temporary work around for TRUST.
-     */
-    public AddressingVersion getAddressingVersion(QName portName) {
-        return AddressingVersion.fromPort(ports.get(portName).portModel);
-    }
-
-    /**
-     * TODO: Temporary work around for TRUST.
-     */
-    public SOAPVersion getSOAPVersion(QName serviceName, QName portName) {
-        return ports.get(portName).portModel.getBinding().getBindingId().getSOAPVersion();
-    }
-
      class DaemonThreadFactory implements ThreadFactory {
         public Thread newThread(Runnable r) {
             Thread daemonThread = new Thread(r);
