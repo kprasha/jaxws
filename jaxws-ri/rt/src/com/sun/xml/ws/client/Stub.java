@@ -28,6 +28,7 @@ import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
@@ -61,7 +62,7 @@ import java.util.concurrent.Executor;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Stub implements BindingProvider, ResponseContextReceiver, Closeable {
+public abstract class Stub implements WSBindingProvider, ResponseContextReceiver, Closeable {
 
     /**
      * Reuse pipelines as it's expensive to create.

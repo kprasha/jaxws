@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.ContainerResolver;
+import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Stubs;
@@ -485,7 +486,7 @@ public class WSServiceDelegate extends WSService {
         SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), WSEndpointReference.create(epr));
 
         return portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
-                new Class[]{portInterface, BindingProvider.class, Closeable.class}, pis));
+                new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis));
     }
 
     /**

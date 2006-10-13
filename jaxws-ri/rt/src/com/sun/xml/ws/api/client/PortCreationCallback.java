@@ -44,7 +44,7 @@ public abstract class PortCreationCallback {
      * @param bp created proxy instance
      * @param serviceEndpointInterface SEI of the endpoint
      */
-    public abstract void proxyCreated(BindingProvider bp, Class<?> serviceEndpointInterface);
+    public abstract void proxyCreated(WSBindingProvider bp, Class<?> serviceEndpointInterface);
 
     /**
      * A callback to notify that a {@link Dispatch} object is created. The callback
@@ -52,5 +52,5 @@ public abstract class PortCreationCallback {
      *
      * @param bp BindingProvider of dispatch object
      */
-    public abstract void dispatchCreated(BindingProvider bp);
+    public abstract void dispatchCreated(WSBindingProvider bp);
 }
