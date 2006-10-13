@@ -591,6 +591,10 @@ public final class HeaderList extends ArrayList<Header> {
         if (!oneway) {
             WSEndpointReference epr = av.anonymousEpr;
             add(epr.createHeader(av.replyToTag));
+
+            // wsa:MessageID
+            Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
+            add(h);
         }
     }
 
@@ -648,6 +652,10 @@ public final class HeaderList extends ArrayList<Header> {
         fillCommonAddressingHeaders(packet, av, sv, action);
 
         try {
+            // wsa:MessageID
+            Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
+            add(h);
+
             // TODO: check the source ReplyTo and FaultTo EPR
             // TODO: Replace creation of WSEndpointReference from the original source
             if (of.getReplyToAddress() != null) {
@@ -693,10 +701,6 @@ public final class HeaderList extends ArrayList<Header> {
         // wsa:Action
         packet.soapAction = action;
         h = new StringHeader(av.actionTag, action);
-        add(h);
-
-        // wsa:MessageID
-        h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
         add(h);
     }
 
