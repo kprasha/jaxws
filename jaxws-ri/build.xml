@@ -599,9 +599,9 @@ major-version=${release.impl.version}
          dest="lib/saaj-impl.jar" />
     <get src="http://kohsuke.sfbay/hudson/job/saaj-ri/lastSuccessfulBuild/artifact/zip-dist/saaj1.3.src.zip"
          dest="lib/saaj-impl.src.zip" />
-    <get src="http://kohsuke.sfbay/hudson/job/saaj-api/lastSuccessfulBuild/artifact/saaj-api/build/lib/saaj-api.jar"
+    <get src="http://kohsuke.sfbay/hudson/job/saaj-api/lastSuccessfulBuild/artifact/build/lib/saaj-api.jar"
          dest="lib/saaj-api.jar" />
-    <get src="http://kohsuke.sfbay/hudson/job/saaj-api/lastSuccessfulBuild/artifact/saaj-api/build/saaj-api-src.zip"
+    <get src="http://kohsuke.sfbay/hudson/job/saaj-api/lastSuccessfulBuild/artifact/build/saaj-api-src.zip"
          dest="lib/saaj-api-src.zip" />
   </target>
 
