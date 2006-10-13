@@ -118,6 +118,7 @@ public interface WSBinding extends Binding {
      *        A feature is disabled if isenabled() returns false;
      *
      */
+    @Deprecated
     void setFeatures(WebServiceFeature... features);
 
     /**
