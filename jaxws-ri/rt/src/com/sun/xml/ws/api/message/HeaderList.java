@@ -28,7 +28,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.addressing.OneWayReplyToFeature;
+import com.sun.xml.ws.api.addressing.OneWayFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.io.ByteArrayInputStream;
 
 /**
  * A list of {@link Header}s on a {@link Message}.
@@ -600,14 +601,14 @@ public final class HeaderList extends ArrayList<Header> {
             action = AddressingVersion.UNSET_INPUT_ACTION;
 
         boolean oneway = !(wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
-        OneWayReplyToFeature onewayFeature = null;
-        if (binding.getFeature(OneWayReplyToFeature.ID) != null)
-            onewayFeature = (OneWayReplyToFeature) binding.getFeature(OneWayReplyToFeature.ID);
+        OneWayFeature onewayFeature = null;
+        if (binding.getFeature(OneWayFeature.ID) != null)
+            onewayFeature = (OneWayFeature) binding.getFeature(OneWayFeature.ID);
 
         if (onewayFeature == null)
             fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
         else {
-            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature.getAddress(), action);
+            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature, action);
         }
     }
 
@@ -638,12 +639,24 @@ public final class HeaderList extends ArrayList<Header> {
         }
     }
 
-    private void fillRequestAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, String onewayReplyToAddress, String action) {
+    private void fillRequestAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, OneWayFeature of, String action) {
         fillCommonAddressingHeaders(packet, av, sv, action);
 
-        WSEndpointReference epr = av.anonymousEpr;
-        // TODO: replace anonymous EPR with onewayReplyToAddress value
-        add(epr.createHeader(av.replyToTag));
+        try {
+            // TODO: check the source ReplyTo and FaultTo EPR
+            // TODO: Replace creation of WSEndpointReference from the original source
+            if (of.getReplyToAddress() != null) {
+                WSEndpointReference epr = new WSEndpointReference(of.getReplyToAddress(), av);
+                add(epr.createHeader(av.replyToTag));
+            }
+
+            if (of.getFaultToAddress() != null) {
+                WSEndpointReference epr = new WSEndpointReference(of.getFaultToAddress(), av);
+                add(epr.createHeader(av.faultToTag));
+            }
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
     }
 
     /**
