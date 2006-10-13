@@ -29,6 +29,8 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.message.stream.OutboundStreamHeader;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;

@@ -17,7 +17,7 @@
  * own identifying information: Portions Copyright [yyyy]
  * [name of copyright owner]
  */
-package com.sun.xml.ws.api.addressing;
+package com.sun.xml.ws.developer;
 
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.WebServiceFeature;

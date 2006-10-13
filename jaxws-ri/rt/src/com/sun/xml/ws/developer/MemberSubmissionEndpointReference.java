@@ -1,4 +1,4 @@
-package com.sun.xml.ws.api.addressing;
+package com.sun.xml.ws.developer;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;

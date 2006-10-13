@@ -18,7 +18,6 @@
  * [name of copyright owner]
  */
 package com.sun.xml.ws.developer;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Target;

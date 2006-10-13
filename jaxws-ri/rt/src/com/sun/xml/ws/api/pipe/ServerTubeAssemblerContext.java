@@ -5,7 +5,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.addressing.WsaServerPipe;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;

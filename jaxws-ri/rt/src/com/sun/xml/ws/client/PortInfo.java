@@ -25,11 +25,10 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.BindingTypeImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.RespectBindingFeature;

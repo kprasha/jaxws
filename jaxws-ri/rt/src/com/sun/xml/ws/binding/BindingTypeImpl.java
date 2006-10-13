@@ -20,7 +20,7 @@
 package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.addressing.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
 import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.developer.StatefulFeature;

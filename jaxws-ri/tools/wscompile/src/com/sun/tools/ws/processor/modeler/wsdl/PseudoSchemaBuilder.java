@@ -75,10 +75,10 @@ public class PseudoSchemaBuilder {
             "  <bindings scd=\"x-schema::wsa\" if-exists=\"true\">\n" +
             "    <schemaBindings map=\"false\" />\n" +
             "    <bindings scd=\"wsa:EndpointReference\">\n" +
-            "      <class ref=\"com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference\"/>\n" +
+            "      <class ref=\"com.sun.xml.ws.developer.MemberSubmissionEndpointReference\"/>\n" +
             "    </bindings>\n" +
             "    <bindings scd=\"~wsa:EndpointReferenceType\">\n" +
-            "      <class ref=\"com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference\"/>\n" +
+            "      <class ref=\"com.sun.xml.ws.developer.MemberSubmissionEndpointReference\"/>\n" +
             "    </bindings>\n" +
             "  </bindings>\n" +
             "</bindings>";
