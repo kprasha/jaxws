@@ -96,45 +96,4 @@ public class WsaPipeHelperImpl extends WsaPipeHelper {
     public final void getMapRequiredDetail(QName name, Element element) {
         getInvalidMapDetail(name, element);
     }
-
-    @Override
-    protected final void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) throws XMLStreamException {
-        if (wbo == null)
-            return;
-
-        WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)wbo;
-        WSDLBoundOperationImpl.ANONYMOUS anon = impl.getAnonymous();
-
-        AddressingVersion av = binding.getAddressingVersion();
-
-        String replyToValue = null;
-        String faultToValue = null;
-
-        if (replyTo != null)
-            replyToValue = replyTo.getAddress();
-
-        if (faultTo != null)
-            faultToValue = faultTo.getAddress();
-
-        if (anon == WSDLBoundOperationImpl.ANONYMOUS.optional) {
-            // no check is required
-        } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.required) {
-            if (replyToValue != null && !replyToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
-
-            if (faultToValue != null && !faultToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
-
-        } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.prohibited) {
-            if (replyToValue != null && replyToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
-
-            if (faultToValue != null && faultToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.faultToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
-
-        } else {
-            // cannot reach here
-            throw new WebServiceException(AddressingMessages.INVALID_WSAW_ANONYMOUS(anon.toString()));
-        }
-    }
 }

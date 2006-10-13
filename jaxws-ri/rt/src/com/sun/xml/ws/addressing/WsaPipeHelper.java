@@ -39,6 +39,8 @@ import javax.xml.ws.WebServiceException;
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -53,6 +55,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.message.FaultDetailHeader;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.resources.AddressingMessages;
 import org.w3c.dom.Element;
 
@@ -66,7 +69,7 @@ public abstract class WsaPipeHelper {
         FaultDetailHeader s11FaultDetailHeader;
 
         try {
-            checkCardinality(packet);
+            HeaderValidator.checkCardinality(packet, binding, wsdlPort);
 
             validateAction(packet);
 
@@ -100,138 +103,10 @@ public abstract class WsaPipeHelper {
         return packet;
     }
 
-    private void checkCardinality(Packet packet) throws XMLStreamException {
-        Message message = packet.getMessage();
-
-        if (message == null)
-            return;
-
-        if (message.getHeaders() == null)
-            return;
-
-        boolean foundFrom = false;
-        boolean foundTo = false;
-        boolean foundReplyTo = false;
-        boolean foundFaultTo = false;
-        boolean foundAction = false;
-        boolean foundMessageId = false;
-
-        AddressingVersion av = binding.getAddressingVersion();
-        java.util.Iterator<Header> hIter = message.getHeaders().getHeaders(av.nsUri, true);
-
-        // no need to process if WS-A is not required and no WS-A headers are present
-        if (!AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())) && !hIter.hasNext())
-            return;
-
-        QName faultyHeader = null;
-        WSEndpointReference replyTo = null;
-        WSEndpointReference faultTo = null;
-
-        while (hIter.hasNext()) {
-            Header h = hIter.next();
-
-            // check if the Header is in current role
-            if (!isInCurrentRole(h)) {
-                continue;
-            }
-
-            String local = h.getLocalPart();
-            if (local.equals(av.fromTag.getLocalPart())) {
-                if (foundFrom) {
-                    faultyHeader = av.fromTag;
-                    break;
-                }
-                foundFrom = true;
-            } else if (local.equals(av.toTag.getLocalPart())) {
-                if (foundTo) {
-                    faultyHeader = av.toTag;
-                    break;
-                }
-                foundTo = true;
-            } else if (local.equals(av.replyToTag.getLocalPart())) {
-                if (foundReplyTo) {
-                    faultyHeader = av.replyToTag;
-                    break;
-                }
-                foundReplyTo = true;
-                replyTo = h.readAsEPR(binding.getAddressingVersion());
-            } else if (local.equals(av.faultToTag.getLocalPart())) {
-                if (foundFaultTo) {
-                    faultyHeader = av.faultToTag;
-                    break;
-                }
-                foundFaultTo = true;
-                faultTo = h.readAsEPR(binding.getAddressingVersion());
-            } else if (local.equals(av.actionTag.getLocalPart())) {
-                if (foundAction) {
-                    faultyHeader = av.actionTag;
-                    break;
-                }
-                foundAction = true;
-            } else if (local.equals(av.messageIDTag.getLocalPart())) {
-                if (foundMessageId) {
-                    faultyHeader = av.messageIDTag;
-                    break;
-                }
-                foundMessageId = true;
-            } else if (local.equals(av.relatesToTag.getLocalPart())) {
-                // no validation for RelatesTo
-                // since there can be many
-            } else if (local.equals(av.faultDetailTag.getLocalPart())) {
-                // TODO: should anything be done here ?
-                // TODO: fault detail element - only for SOAP 1.1
-            } else {
-                throw new WebServiceException(AddressingMessages.UNKNOWN_WSA_HEADER());
-            }
-        }
-
-        // check for invalid cardinality first before checking
-        // checking for mandatory headers
-        if (faultyHeader != null) {
-            throw new InvalidMapException(faultyHeader, av.invalidCardinalityTag);
-        }
-
-        // WS-A is engaged only if wsa:Action header is found
-        boolean engaged = foundAction;
-
-        // check for mandatory set of headers only if:
-        // 1. WS-A is engaged or
-        // 2. wsdl:required=true
-        if (engaged || AddressingVersion.isRequired(binding.getFeature(av.getFeatureID()))) {
-            // if no wsa:Action header is found
-            if (!foundAction)
-                throw new MapRequiredException(av.actionTag);
-
-            // if no wsa:To header is found
-            if (!foundTo)
-                throw new MapRequiredException(av.toTag);
-        }
-
-        WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
-        checkAnonymousSemantics(wbo, replyTo, faultTo);
-    }
-
-    private boolean isInCurrentRole(Header header) {
-        // TODO: binding will be null for protocol messages
-        // TODO: returning true assumes that protocol messages are
-        // TODO: always in current role, this may not to be fixed.
-        if (binding == null)
-            return true;
-
-
-        if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
-            // Rama: Why not checking for SOAP 1.1?
-            return true;
-        } else {
-            String role = header.getRole(binding.getSOAPVersion());
-            return (role.equals(SOAPVersion.SOAP_12.implicitRole));
-        }
-    }
-
     private void validateAction(Packet packet) {
         //There may not be a WSDL operation.  There may not even be a WSDL.
         //For instance this may be a RM CreateSequence message.
-        WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
+        WSDLBoundOperation wbo = HeaderValidator.getWSDLBoundOperation(wsdlPort, packet);
 
         WSDLOperation op = null;
 
@@ -262,14 +137,6 @@ public abstract class WsaPipeHelper {
         if (expected != null && !gotA.equals(expected)) {
             throw new ActionNotSupportedException(gotA);
         }
-    }
-
-    private WSDLBoundOperation getWSDLBoundOperation(Packet packet) {
-        WSDLBoundOperation wbo = null;
-        if (wsdlPort != null) {
-            wbo = packet.getMessage().getOperation(wsdlPort);
-        }
-        return wbo;
     }
 
     private String getFaultAction(Packet packet) {
@@ -477,9 +344,6 @@ public abstract class WsaPipeHelper {
         } catch (SOAPException se) {
             throw new WebServiceException(se);
         }
-    }
-
-    protected void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) throws XMLStreamException {
     }
 
     public abstract void getProblemActionDetail(String action, Element element);
