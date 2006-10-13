@@ -34,6 +34,7 @@ import com.sun.xml.ws.encoding.xml.XMLMessage;
 import com.sun.xml.ws.encoding.xml.XMLMessage.MessageDataSource;
 import com.sun.xml.ws.encoding.xml.XMLMessage.UnknownContent;
 import com.sun.xml.ws.encoding.xml.XMLMessage.XMLMultiPart;
+import com.sun.xml.ws.resources.StreamingMessages;
 
 import javax.activation.DataSource;
 import javax.xml.ws.WebServiceException;
@@ -184,8 +185,7 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
             packet.setMessage(new XMLMultiPart(contentType, in));
         } else if(isFastInfoset(contentType)) {
             if (fiCodec == null) {
-                // TODO: use correct error message
-                throw new RuntimeException("Fast Infoset Runtime not present");
+                throw new RuntimeException(StreamingMessages.FASTINFOSET_NO_IMPLEMENTATION());
             }
             
             _useFastInfosetForEncoding = true;
@@ -278,6 +278,11 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
     }    
     
     private void setRootCodec(Packet p) {
+        /**
+         * The following logic is only for outbound packets
+         * to be encoded by client.
+         * On the server the p.contentNegotiation == null.
+         */
         if (p.contentNegotiation == ContentNegotiation.none) {
             // The client may have changed the negotiation property from
             // pessismistic to none between invocations
