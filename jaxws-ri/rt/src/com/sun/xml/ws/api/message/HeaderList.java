@@ -421,7 +421,7 @@ public final class HeaderList extends ArrayList<Header> {
      */
     private Header getFirstHeader(QName name, boolean markUnderstood, SOAPVersion sv) {
         if (sv == null)
-            throw new WebServiceException(AddressingMessages.NULL_SOAP_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_SOAP_VERSION());
 
         Iterator<Header> iter = getHeaders(name.getNamespaceURI(), name.getLocalPart(), markUnderstood);
         while (iter.hasNext()) {
@@ -441,14 +441,14 @@ public final class HeaderList extends ArrayList<Header> {
      *
      * @param av WS-Addressing version
      * @param sv SOAP version
-     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
+     * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing To header, null if no header is present
      */
     public String getTo(AddressingVersion av, SOAPVersion sv) {
         if (to != null)
             return to;
         if (av == null)
-            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         Header h = getFirstHeader(av.toTag, true, sv);
         if (h != null) {
@@ -466,14 +466,14 @@ public final class HeaderList extends ArrayList<Header> {
      *
      * @param av WS-Addressing version
      * @param sv SOAP version
-     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
+     * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing Action header, null if no header is present
      */
     public String getAction(AddressingVersion av, SOAPVersion sv) {
         if (action!= null)
             return action;
         if (av == null)
-            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         Header h = getFirstHeader(av.actionTag, true, sv);
         if (h != null) {
@@ -491,14 +491,14 @@ public final class HeaderList extends ArrayList<Header> {
      *
      * @param av WS-Addressing version
      * @param sv SOAP version
-     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
+     * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing ReplyTo header, null if no header is present
      */
     public WSEndpointReference getReplyTo(AddressingVersion av, SOAPVersion sv) {
         if (replyTo!=null)
             return replyTo;
         if (av == null)
-            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         Header h = getFirstHeader(av.replyToTag, true, sv);
         if (h != null) {
@@ -520,7 +520,7 @@ public final class HeaderList extends ArrayList<Header> {
      *
      * @param av WS-Addressing version
      * @param sv SOAP version
-     * @throws WebServiceException if either <code>av</code> or <code>sv</code> is null.
+     * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
      * @return Value of WS-Addressing FaultTo header, null if no header is present
      */
     public WSEndpointReference getFaultTo(AddressingVersion av, SOAPVersion sv) {
@@ -528,7 +528,7 @@ public final class HeaderList extends ArrayList<Header> {
             return faultTo;
 
         if (av == null)
-            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         Header h = getFirstHeader(av.faultToTag, true, sv);
         if (h != null) {
@@ -558,7 +558,7 @@ public final class HeaderList extends ArrayList<Header> {
             return messageId;
 
         if (av == null)
-            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         Header h = getFirstHeader(av.messageIDTag, true, sv);
         if (h != null) {
@@ -669,10 +669,10 @@ public final class HeaderList extends ArrayList<Header> {
      */
     private void fillCommonAddressingHeaders(Packet packet, AddressingVersion av, SOAPVersion sv, String action) {
         if (av == null)
-            throw new WebServiceException(AddressingMessages.NULL_ADDRESSING_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_ADDRESSING_VERSION());
 
         if (sv == null)
-            throw new WebServiceException(AddressingMessages.NULL_SOAP_VERSION());
+            throw new IllegalArgumentException(AddressingMessages.NULL_SOAP_VERSION());
 
         // wsa:To
         StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
