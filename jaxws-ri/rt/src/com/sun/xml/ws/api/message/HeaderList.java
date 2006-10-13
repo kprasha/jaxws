@@ -28,7 +28,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.addressing.OneWayFeature;
+import com.sun.xml.ws.developer.OneWayFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
@@ -46,7 +46,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.io.ByteArrayInputStream;
 
 /**
  * A list of {@link Header}s on a {@link Message}.
