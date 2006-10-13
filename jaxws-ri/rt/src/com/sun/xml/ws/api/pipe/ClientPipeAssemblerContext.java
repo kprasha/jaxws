@@ -53,6 +53,13 @@ public final class ClientPipeAssemblerContext extends ClientTubeAssemblerContext
     }
 
     /**
+     * Creates a {@link Tube} that adds container specific security
+     */
+    public @NotNull Pipe createSecurityPipe(@NotNull Pipe next) {
+        return PipeAdapter.adapt(super.createSecurityTube(PipeAdapter.adapt(next)));
+    }
+
+    /**
      * Creates a transport pipe (for client), which becomes the terminal pipe.
      */
     public Pipe createTransportPipe() {

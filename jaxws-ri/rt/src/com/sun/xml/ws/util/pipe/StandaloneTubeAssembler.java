@@ -15,6 +15,7 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
     @NotNull
     public Tube createClient(ClientTubeAssemblerContext context) {
         Tube head = context.createTransportTube();
+        head = context.createSecurityTube(head);
         if (dump) {
             // for debugging inject a dump pipe. this is left in the production code,
             // as it would be very handy for a trouble-shooting at the production site.

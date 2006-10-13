@@ -44,6 +44,7 @@ public class StandalonePipeAssembler implements PipelineAssembler {
     @NotNull
     public Pipe createClient(ClientPipeAssemblerContext context) {
         Pipe head = context.createTransportPipe();
+        head = context.createSecurityPipe(head);
 
         if (dump) {
             // for debugging inject a dump pipe. this is left in the production code,

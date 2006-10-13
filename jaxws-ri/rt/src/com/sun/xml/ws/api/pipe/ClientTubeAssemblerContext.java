@@ -7,8 +7,12 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.client.ContainerResolver;
+import com.sun.xml.ws.api.client.ClientPipelineHook;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ServerPipelineHook;
 import com.sun.xml.ws.handler.ClientLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ClientSOAPHandlerPipe;
 import com.sun.xml.ws.handler.HandlerPipe;
@@ -95,6 +99,19 @@ public class ClientTubeAssemblerContext {
      */
     public Tube createDumpTube(String name, PrintStream out, Tube next) {
         return new DumpTube(name, out, next);
+    }
+
+    /**
+     * Creates a {@link Tube} that adds container specific security
+     */
+    public @NotNull Tube createSecurityTube(@NotNull Tube next) {
+        ClientPipelineHook hook = container.getSPI(ClientPipelineHook.class);
+        if (hook != null) {
+            ClientPipeAssemblerContext ctxt = new ClientPipeAssemblerContext(address, wsdlModel,
+                                      rootOwner, binding, container);
+            return PipeAdapter.adapt(hook.createSecurityPipe(ctxt, PipeAdapter.adapt(next)));
+        }
+        return next;
     }
 
     /**
