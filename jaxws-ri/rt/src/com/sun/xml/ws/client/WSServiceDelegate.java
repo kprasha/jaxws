@@ -30,8 +30,10 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -72,6 +74,8 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.AddressingFeature;
+
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -167,7 +171,7 @@ public class WSServiceDelegate extends WSService {
 
     /**
      * @param serviceClass
-     *      Either {@link Service}.class or other generated service-derived classes. 
+     *      Either {@link Service}.class or other generated service-derived classes.
      */
     public WSServiceDelegate(@Nullable Source wsdl, @NotNull QName serviceName, @NotNull final Class<? extends Service> serviceClass) {
         //we cant create a Service without serviceName
@@ -614,6 +618,20 @@ public class WSServiceDelegate extends WSService {
             validateEPR(eprWsdlCtx,this);
             return eprWsdlCtx;
         }
+    }
+
+    /**
+     * TODO: Temporary work around for TRUST.
+     */
+    public AddressingVersion getAddressingVersion(QName portName) {
+        return AddressingVersion.fromPort(ports.get(portName).portModel);
+    }
+
+    /**
+     * TODO: Temporary work around for TRUST.
+     */
+    public SOAPVersion getSOAPVersion(QName serviceName, QName portName) {
+        return ports.get(portName).portModel.getBinding().getBindingId().getSOAPVersion();
     }
 
      class DaemonThreadFactory implements ThreadFactory {
