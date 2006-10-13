@@ -206,6 +206,9 @@ public class DeploymentDescriptorParser<A> {
             String enable_mtom = getAttribute(attrs, ATTR_ENABLE_MTOM);
             String mtomThreshold = getAttribute(attrs, ATTR_MTOM_THRESHOLD_VALUE);
             String bindingId = getAttribute(attrs, ATTR_BINDING);
+            if (bindingId != null)
+                // Convert short-form tokens to API's binding ids
+                bindingId = getBindingIdForToken(bindingId);
             WSBinding binding = BindingImpl.create(bindingId,implementorClass,
                     enable_mtom,mtomThreshold,null);
             String urlPattern =
