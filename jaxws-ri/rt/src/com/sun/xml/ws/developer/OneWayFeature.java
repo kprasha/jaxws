@@ -24,13 +24,15 @@ package com.sun.xml.ws.developer;
 
 import javax.xml.ws.WebServiceFeature;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+
 /**
- * This feature allows ReplyTo and FaultTo Message Addressing Properties
+ * This feature allows ReplyTo, FaultTo and RelatesTo Message Addressing Properties
  * to be added for a one-way message. This feature should be used for one-way
  * operations only.
  * <p/><p/>
  * This feature is not meant to be used by a common Web service developer as there
- * is no need to send ReplyTo and/or FaultTo header for a one-way operation. But these
+ * is no need to send the above mentioned header for a one-way operation. But these
  * properties may need to be sent in certain middleware Web services.
  *
  * @author Arun Gupta
@@ -41,8 +43,8 @@ public class OneWayFeature extends WebServiceFeature {
      */
     public static final String ID = "http://java.sun.com/xml/ns/jaxws/addressing/oneway";
 
-    private String replyToAddress;
-    private String faultToAddress;
+    private WSEndpointReference replyTo;
+    private WSEndpointReference faultTo;
     private String relatesToID;
 
     /**
@@ -67,11 +69,11 @@ public class OneWayFeature extends WebServiceFeature {
      *
      * @param enabled specifies whether this feature should
      * be enabled or not.
-     * @param replyTo specifies the address of wsa:ReplyTo header.
+     * @param replyTo specifies the {@link WSEndpointReference} of wsa:ReplyTo header.
      */
-    public OneWayFeature(boolean enabled, String replyTo) {
+    public OneWayFeature(boolean enabled, WSEndpointReference replyTo) {
         this.enabled = enabled;
-        this.replyToAddress = replyTo;
+        this.replyTo = replyTo;
     }
 
     /**
@@ -79,14 +81,14 @@ public class OneWayFeature extends WebServiceFeature {
      *
      * @param enabled specifies whether this feature should
      * be enabled or not.
-     * @param replyTo specifies the address of wsa:ReplyTo header.
-     * @param faultTo specifies the address of wsa:FaultTo header.
+     * @param replyTo specifies the {@link WSEndpointReference} of wsa:ReplyTo header.
+     * @param faultTo specifies the {@link WSEndpointReference} of wsa:FaultTo header.
      * @param relatesTo specifies the MessageID to be used for wsa:RelatesTo header.
      */
-    public OneWayFeature(boolean enabled, String replyTo, String faultTo, String relatesTo) {
+    public OneWayFeature(boolean enabled, WSEndpointReference replyTo, WSEndpointReference faultTo, String relatesTo) {
         this.enabled = enabled;
-        this.replyToAddress = replyTo;
-        this.faultToAddress = faultTo;
+        this.replyTo = replyTo;
+        this.faultTo = faultTo;
         this.relatesToID = relatesTo;
     }
 
@@ -98,39 +100,39 @@ public class OneWayFeature extends WebServiceFeature {
     }
 
     /**
-     * Getter for wsa:ReplyTo header address
+     * Getter for wsa:ReplyTo header {@link WSEndpointReference} .
      *
      * @return address of the wsa:ReplyTo header
      */
-    public String getReplyToAddress() {
-        return replyToAddress;
+    public WSEndpointReference getReplyTo() {
+        return replyTo;
     }
 
     /**
-     * Setter for wsa:ReplyTo header address.
+     * Setter for wsa:ReplyTo header {@link WSEndpointReference}.
      *
      * @param address
      */
-    public void setReplyToAddress(String address) {
-        this.replyToAddress = address;
+    public void setReplyTo(WSEndpointReference address) {
+        this.replyTo = address;
     }
 
     /**
-     * Getter for wsa:FaultTo header address.
+     * Getter for wsa:FaultTo header {@link WSEndpointReference}.
      *
      * @return address of the wsa:FaultTo header
      */
-    public String getFaultToAddress() {
-        return faultToAddress;
+    public WSEndpointReference getFaultTo() {
+        return faultTo;
     }
 
     /**
-     * Setter for wsa:FaultTo header address.
+     * Setter for wsa:FaultTo header {@link WSEndpointReference}.
      *
      * @param address
      */
-    public void setFaultToAddress(String address) {
-        this.faultToAddress = address;
+    public void setFaultTo(WSEndpointReference address) {
+        this.faultTo = address;
     }
 
     /**

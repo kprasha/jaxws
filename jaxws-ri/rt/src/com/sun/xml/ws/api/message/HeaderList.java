@@ -654,28 +654,20 @@ public final class HeaderList extends ArrayList<Header> {
     private void fillRequestAddressingHeaders(@NotNull Packet packet, @NotNull AddressingVersion av, @NotNull SOAPVersion sv, @NotNull OneWayFeature of, @NotNull String action) {
         fillCommonAddressingHeaders(packet, av, sv, action);
 
-        try {
-            // wsa:MessageID
-            Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
-            add(h);
+        // wsa:MessageID
+        Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
+        add(h);
 
-            // TODO: check the source ReplyTo and FaultTo EPR
-            // TODO: Replace creation of WSEndpointReference from the original source
-            if (of.getReplyToAddress() != null) {
-                WSEndpointReference epr = new WSEndpointReference(of.getReplyToAddress(), av);
-                add(epr.createHeader(av.replyToTag));
-            }
+        if (of.getReplyTo() != null) {
+            add(of.getReplyTo().createHeader(av.replyToTag));
+        }
 
-            if (of.getFaultToAddress() != null) {
-                WSEndpointReference epr = new WSEndpointReference(of.getFaultToAddress(), av);
-                add(epr.createHeader(av.faultToTag));
-            }
+        if (of.getFaultTo() != null) {
+            add(of.getFaultTo().createHeader(av.faultToTag));
+        }
 
-            if (of.getRelatesToID() != null) {
-                add(new RelatesToHeader(av.relatesToTag, of.getRelatesToID()));
-            }
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
+        if (of.getRelatesToID() != null) {
+            add(new RelatesToHeader(av.relatesToTag, of.getRelatesToID()));
         }
     }
 
