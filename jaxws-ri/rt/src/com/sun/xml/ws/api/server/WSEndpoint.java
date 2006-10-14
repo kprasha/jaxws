@@ -37,7 +37,10 @@ import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
 import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.BindingID;
 
+import javax.xml.ws.BindingType;
+import javax.xml.ws.Binding;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import java.net.URL;
@@ -299,26 +302,40 @@ public abstract class WSEndpoint<T> {
 
 
     /**
-     * Used for "from-Java" deployment.
+     * Creates an endpoint from deployment or programmatic configuration
      *
      * <p>
      * This method works like the following:
      * <ol>
      * <li>{@link ServiceDefinition} is modeleed from the given SEI type.
-     * <li>{@link InstanceResolver} that always serves <tt>implementationObject</tt> will be used.
-     * <li>TODO: where does the binding come from?
+     * <li>{@link Invoker} that always serves <tt>implementationObject</tt> will be used.
      * </ol>
+     * @param implType
+     *      Endpoint class(not SEI). Enpoint class must have @WebService or @WebServiceProvider
+     *      annotation.
      * @param processHandlerAnnotation
-     *          Flag to control processing of @HandlerChain on Impl class
-     *          if true, processes @HandlerChain on Impl
-     *          if false, DD might have set HandlerChain no need to parse.
-     * @param resolver
-     *      Optional resolver used to de-reference resources referenced from
-     *      WSDL. Must be null if the {@code url} is null.
+     *      Flag to control processing of @HandlerChain on Impl class
+     *      if true, processes @HandlerChain on Impl
+     *      if false, DD might have set HandlerChain no need to parse.
+     * @param invoker
+     *      Pass an object to invoke the actual endpoint object. If it is null, a default
+     *      invoker is created using {@link InstanceResolver#createDefault}. Appservers
+     *      could create its own invoker to do additional functions like transactions,
+     *      invoking the endpoint through proxy etc.
      * @param serviceName
-     *      Optional service name to override the one given by the implementation class.
+     *      Optional service name(may be from DD) to override the one given by the
+     *      implementation class. If it is null, it will be derived from annotations.
      * @param portName
-     *      Optional port name to override the one given by the implementation class.
+     *      Optional port name(may be from DD) to override the one given by the
+     *      implementation class. If it is null, it will be derived from annotations.
+     * @param container
+     *      Allows technologies that are built on top of JAX-WS(such as WSIT) needs to
+     *      negotiate private contracts between them and the container
+     * @param binding
+     *      JAX-WS implementation of {@link Binding}. This object can be created by
+     *      {@link BindingID#createBinding()}. Usually the binding can be got from
+     *      DD, {@link javax.xml.ws.BindingType}.
+     *
      *
      * TODO: DD has a configuration for MTOM threshold.
      * Maybe we need something more generic so that other technologies
@@ -334,6 +351,9 @@ public abstract class WSEndpoint<T> {
      *      TODO: shouldn't the implementation find this from the metadata list?
      * @param metadata
      *      Other documents that become {@link SDDocument}s. Can be null.
+     * @param resolver
+     *      Optional resolver used to de-reference resources referenced from
+     *      WSDL. Must be null if the {@code url} is null.
      * @param isTransportSynchronous
      *      If the caller knows that the returned {@link WSEndpoint} is going to be
      *      used by a synchronous-only transport, then it may pass in <tt>true</tt>
@@ -348,11 +368,11 @@ public abstract class WSEndpoint<T> {
     public static <T> WSEndpoint<T> create(
         @NotNull Class<T> implType,
         boolean processHandlerAnnotation,
-        @NotNull Invoker invoker,
-        @NotNull QName serviceName,
-        @NotNull QName portName,
+        @Nullable Invoker invoker,
+        @Nullable QName serviceName,
+        @Nullable QName portName,
         @Nullable Container container,
-        @NotNull WSBinding binding,
+        @Nullable WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata,
         @Nullable EntityResolver resolver,
@@ -368,11 +388,11 @@ public abstract class WSEndpoint<T> {
     public static <T> WSEndpoint<T> create(
         @NotNull Class<T> implType,
         boolean processHandlerAnnotation,
-        @NotNull Invoker invoker,
-        @NotNull QName serviceName,
-        @NotNull QName portName,
+        @Nullable Invoker invoker,
+        @Nullable QName serviceName,
+        @Nullable QName portName,
         @Nullable Container container,
-        @NotNull WSBinding binding,
+        @Nullable WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata,
         @Nullable EntityResolver resolver) {
@@ -390,15 +410,15 @@ public abstract class WSEndpoint<T> {
      *      otherwise no resolution will be performed.
      */
     public static <T> WSEndpoint<T> create(
-        Class<T> implType,
+        @NotNull Class<T> implType,
         boolean processHandlerAnnotation,
-        Invoker invoker,
-        QName serviceName,
-        QName portName,
-        Container container,
-        WSBinding binding,
-        SDDocumentSource primaryWsdl,
-        Collection<? extends SDDocumentSource> metadata,
+        @Nullable Invoker invoker,
+        @Nullable QName serviceName,
+        @Nullable QName portName,
+        @Nullable Container container,
+        @Nullable WSBinding binding,
+        @Nullable SDDocumentSource primaryWsdl,
+        @Nullable Collection<? extends SDDocumentSource> metadata,
         @Nullable URL catalogUrl) {
         return create(
             implType,processHandlerAnnotation,invoker,serviceName,portName,container,binding,primaryWsdl,metadata,
@@ -415,7 +435,7 @@ public abstract class WSEndpoint<T> {
     /**
      * Gives the wsdl:service/wsdl:port default name computed from the endpoint implementaiton class
      */
-    public static @NotNull QName getDefaultPortName(QName serviceName, Class endpointClass){
+    public static @NotNull QName getDefaultPortName(@NotNull QName serviceName, Class endpointClass){
         return EndpointFactory.getDefaultPortName(serviceName, endpointClass);
     }
 

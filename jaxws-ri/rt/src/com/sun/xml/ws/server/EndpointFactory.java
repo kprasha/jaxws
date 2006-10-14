@@ -27,14 +27,10 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.developer.StatefulFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.AsyncProvider;
-import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.server.SDDocument;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -98,15 +94,20 @@ public class EndpointFactory {
      * Nobody else should be calling this method.
      */
     public static <T> WSEndpoint<T> createEndpoint(
-        Class<T> implType, boolean processHandlerAnnotation, Invoker invoker, QName serviceName, QName portName,
-        Container container, WSBinding binding,
+        Class<T> implType, boolean processHandlerAnnotation, @Nullable Invoker invoker,
+        @Nullable QName serviceName, @Nullable QName portName,
+        @Nullable Container container, @Nullable WSBinding binding,
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata, EntityResolver resolver, boolean isTransportSynchronous) {
 
-        if(invoker ==null || implType ==null)
+        if(implType ==null)
             throw new IllegalArgumentException();
 
         verifyImplementorClass(implType);
+
+        if (invoker == null) {
+            invoker = InstanceResolver.createDefault(implType).createInvoker();
+        }
 
         List<SDDocumentSource> md = new ArrayList<SDDocumentSource>();
         if(metadata!=null)
@@ -135,6 +136,8 @@ public class EndpointFactory {
         // setting a default binding
         if (binding == null)
             binding = BindingImpl.create(BindingID.parse(implType));
+
+
 
         if (primaryWsdl != null) {
             verifyPrimaryWSDL(primaryWsdl, serviceName);
