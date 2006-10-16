@@ -2,7 +2,6 @@ package com.sun.xml.ws.message;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.ASCIIUtility;
 
 import javax.activation.DataHandler;
@@ -12,7 +11,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
