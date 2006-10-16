@@ -96,6 +96,26 @@ public abstract class BindingID {
     }
 
     /**
+     * This method can be used for creating WSBinding with DeploymentDescriptor's information.
+     * (either it be 109 or sun-jaxws.xml). This method handles resolving the precedence rules
+     *  of various features set through multiple ways.
+     *
+     * @param ddBindingId :binding id explicitlyspecified in the DeploymentDescriptor or parameter
+     * @param implClass : Endpoint Implementation class
+     * @param mtomEnabled : represents mtom-enabled attribute in DD
+     * @param mtomThreshold : threshold value specified in DD
+     * @param features  : WebServiceFeatures if any specified in DD
+     *                  Currently no way to specify features in DD, so ignore it
+     * @return WSBinding is returned resolving the various precendece rules
+     */
+    public final static @NotNull WSBinding createBinding(String ddBindingId,Class implClass,
+                                          String mtomEnabled, String mtomThreshold,
+                                          WebServiceFeature[] features) {
+        return BindingImpl.create(ddBindingId, implClass, mtomEnabled,
+                mtomThreshold, features);
+    }
+
+    /**
      * Gets the SOAP version of this binding.
      *
      * TODO: clarify what to do with XML/HTTP binding

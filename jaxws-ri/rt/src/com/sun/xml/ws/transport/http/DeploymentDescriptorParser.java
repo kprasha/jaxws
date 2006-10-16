@@ -24,6 +24,7 @@ package com.sun.xml.ws.transport.http;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
@@ -209,7 +210,7 @@ public class DeploymentDescriptorParser<A> {
             if (bindingId != null)
                 // Convert short-form tokens to API's binding ids
                 bindingId = getBindingIdForToken(bindingId);
-            WSBinding binding = BindingImpl.create(bindingId,implementorClass,
+            WSBinding binding = BindingID.createBinding(bindingId,implementorClass,
                     enable_mtom,mtomThreshold,null);
             String urlPattern =
                     getMandatoryNonEmptyAttribute(reader, attrs, ATTR_URL_PATTERN);
