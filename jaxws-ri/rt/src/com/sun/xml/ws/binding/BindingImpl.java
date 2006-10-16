@@ -258,7 +258,7 @@ public abstract class BindingImpl implements WSBinding {
                     //if both are specified , make sure they don't conflict
                     if (mtomfeature.isEnabled() != bindingID.isMTOMEnabled())
                         throw new RuntimeModelerException(
-                                ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID, mtomfeature));
+                                ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID, mtomfeature.isEnabled()));
                 }
             }
         }
