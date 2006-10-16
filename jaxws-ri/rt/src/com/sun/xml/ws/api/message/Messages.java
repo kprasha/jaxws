@@ -24,11 +24,13 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.encoding.StreamSOAPCodec;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.DOMMessage;
 import com.sun.xml.ws.message.EmptyMessageImpl;
@@ -39,23 +41,21 @@ import com.sun.xml.ws.message.source.ProtocolSourceMessage;
 import com.sun.xml.ws.streaming.XMLStreamReaderException;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.bind.api.JAXBRIContext;
-import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.ProtocolException;
-import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Factory methods for various {@link Message} implementations.
@@ -67,7 +67,7 @@ import javax.xml.namespace.QName;
  *
  * <p>
  * This is a part of the JAX-WS RI internal API so that
- * {@link Pipe} implementations can reuse the implementations
+ * {@link Tube} implementations can reuse the implementations
  * done inside the JAX-WS.
  *
  * <p>
@@ -169,7 +169,7 @@ public abstract class Messages {
                 if(n.getNodeType()==Node.ELEMENT_NODE) {
                     if(headers==null)
                         headers = new HeaderList();
-                    headers.add(Headers.create(ver,(Element)n));
+                    headers.add(Headers.create((Element)n));
                 }
             }
         }
