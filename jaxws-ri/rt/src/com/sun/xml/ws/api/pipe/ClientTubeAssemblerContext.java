@@ -1,7 +1,6 @@
 package com.sun.xml.ws.api.pipe;
 
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -9,21 +8,18 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.client.ClientPipelineHook;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.server.ServerPipelineHook;
-import com.sun.xml.ws.handler.ClientLogicalHandlerPipe;
-import com.sun.xml.ws.handler.ClientSOAPHandlerPipe;
-import com.sun.xml.ws.handler.HandlerPipe;
+import com.sun.xml.ws.handler.ClientLogicalHandlerTube;
+import com.sun.xml.ws.handler.ClientSOAPHandlerTube;
+import com.sun.xml.ws.handler.HandlerTube;
 import com.sun.xml.ws.protocol.soap.ClientMUTube;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.addressing.WsaClientPipe;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 
 import java.io.PrintStream;
 
@@ -136,13 +132,13 @@ public class ClientTubeAssemblerContext {
      * Creates a {@link Tube} that invokes protocol and logical handlers.
      */
     public Tube createHandlerTube(Tube next) {
-        HandlerPipe soapHandlerPipe = null;
+        HandlerTube soapHandlerTube = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
         if (binding instanceof SOAPBinding) {
-            soapHandlerPipe = new ClientSOAPHandlerPipe(binding, wsdlModel, next);
-            next = soapHandlerPipe;
+            soapHandlerTube = new ClientSOAPHandlerTube(binding, wsdlModel, next);
+            next = soapHandlerTube;
         }
-        return new ClientLogicalHandlerPipe(binding, next, soapHandlerPipe);
+        return new ClientLogicalHandlerTube(binding, next, soapHandlerTube);
     }
 
     /**

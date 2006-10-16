@@ -21,71 +21,79 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.message.DataHandlerAttachment;
 
-import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceException;
-import java.util.List;
-import java.util.ArrayList;
+import javax.activation.DataHandler;
+import java.util.*;
 
 /**
  *
  * @author WS Development Team
  */
-public class ClientLogicalHandlerPipe extends HandlerPipe {
+public class ClientSOAPHandlerTube extends HandlerTube {
 
     private WSBinding binding;
-    private List<LogicalHandler> logicalHandlers;
+    private List<SOAPHandler> soapHandlers;
+    private Set<String> roles;
 
     /**
-     * Creates a new instance of LogicalHandlerPipe
+     * Creates a new instance of SOAPHandlerPipe
      */
-    public ClientLogicalHandlerPipe(WSBinding binding, WSDLPort port, Tube next) {
+    public ClientSOAPHandlerTube(WSBinding binding, WSDLPort port, Tube next) {
         super(next, port);
+        if (binding.getSOAPVersion() != null) {
+            // SOAPHandlerPipe should n't be used for bindings other than SOAP.
+            // TODO: throw Exception
+        }
         this.binding = binding;
     }
 
+    // Handle to LogicalHandlerPipe means its used on SERVER-SIDE
+
     /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
+     * This constructor is used on client-side where, LogicalHandlerPipe is created
+     * first and then a SOAPHandlerPipe is created with a handler to that
+     * LogicalHandlerPipe.
+     * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
      */
-    public ClientLogicalHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
-        this(binding, PipeAdapter.adapt(next), cousinPipe);
+    public ClientSOAPHandlerTube(WSBinding binding, Pipe next, HandlerTube cousinTube) {
+        this(binding, PipeAdapter.adapt(next), cousinTube);
     }
 
     /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
+     * This constructor is used on client-side where, LogicalHandlerPipe is created
+     * first and then a SOAPHandlerPipe is created with a handler to that
+     * LogicalHandlerPipe.
+     * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
      */
-    public ClientLogicalHandlerPipe(WSBinding binding, Tube next, HandlerPipe cousinPipe) {
-        super(next, cousinPipe);
+    public ClientSOAPHandlerTube(WSBinding binding, Tube next, HandlerTube cousinTube) {
+        super(next, cousinTube);
         this.binding = binding;
     }
 
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
-
-    private ClientLogicalHandlerPipe(ClientLogicalHandlerPipe that, TubeCloner cloner) {
+    private ClientSOAPHandlerTube(ClientSOAPHandlerTube that, TubeCloner cloner) {
         super(that, cloner);
         this.binding = that.binding;
     }
 
     boolean isHandlerChainEmpty() {
-        return logicalHandlers.isEmpty();
+        return soapHandlers.isEmpty();
     }
 
     /**
@@ -93,29 +101,19 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
      * Close LogicalHandlers first and then SOAPHandlers on Server
      */
     public void close(MessageContext msgContext) {
-        //assuming cousinPipe is called if requestProcessingSucessful is true
-        if (requestProcessingSucessful) {
-            //cousinPipe is null in XML/HTTP Binding
-            if (cousinPipe != null) {
-                // Close SOAPHandlerPipe
-                cousinPipe.closeCall(msgContext);
-            }
-        }
-        if (processor != null)
-            closeLogicalHandlers(msgContext);
 
     }
 
     /**
-     * This is called from cousinPipe.
+     * This is called from cousinTube.
      * Close this Pipes's handlers.
      */
     public void closeCall(MessageContext msgContext) {
-        closeLogicalHandlers(msgContext);
+        closeSOAPHandlers(msgContext);
     }
 
     //TODO:
-    private void closeLogicalHandlers(MessageContext msgContext) {
+    private void closeSOAPHandlers(MessageContext msgContext) {
         if (processor == null)
             return;
         if (remedyActionTaken) {
@@ -129,42 +127,46 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
             //Close all handlers in the chain
 
             //CLIENT-SIDE
-            processor.closeHandlers(msgContext, logicalHandlers.size() - 1, 0);
-
+            processor.closeHandlers(msgContext, soapHandlers.size() - 1, 0);
         }
     }
 
     public AbstractFilterTubeImpl copy(TubeCloner cloner) {
-        return new ClientLogicalHandlerPipe(this, cloner);
+        return new ClientSOAPHandlerTube(this, cloner);
     }
 
     void setUpProcessor() {
         // Take a snapshot, User may change chain after invocation, Same chain
         // should be used for the entire MEP
-        logicalHandlers = new ArrayList<LogicalHandler>();
-        List<LogicalHandler> logicalSnapShot= ((BindingImpl) binding).getHandlerConfig().getLogicalHandlers();
-        if (!logicalSnapShot.isEmpty()) {
-            logicalHandlers.addAll(logicalSnapShot);
-            if (binding.getSOAPVersion() == null) {
-                processor = new XMLHandlerProcessor(this, binding,
-                        logicalHandlers);
-            } else {
-                processor = new SOAPHandlerProcessor(true, this, binding,
-                        logicalHandlers);
-            }
+        soapHandlers = new ArrayList<SOAPHandler>();
+        HandlerConfiguration handlerConfig = ((BindingImpl) binding).getHandlerConfig();
+        List<SOAPHandler> soapSnapShot= handlerConfig.getSoapHandlers();
+        if (!soapSnapShot.isEmpty()) {
+            soapHandlers.addAll(soapSnapShot);
+            roles = new HashSet<String>();
+            roles.addAll(handlerConfig.getRoles());
+            processor = new SOAPHandlerProcessor(true, this, binding, soapHandlers);
         }
     }
 
-
     MessageUpdatableContext getContext(Packet packet) {
-        return new LogicalMessageContextImpl(binding, packet);
+        SOAPMessageContextImpl context = new SOAPMessageContextImpl(binding, packet);
+        context.setRoles(roles);
+        return context;
     }
 
     boolean callHandlersOnRequest(MessageUpdatableContext context, boolean isOneWay) {
 
         boolean handlerResult;
-        try {
+        //Lets copy all the MessageContext.OUTBOUND_ATTACHMENT_PROPERTY to the message
+        Map<String, DataHandler> atts = (Map<String, DataHandler>) context.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
+        AttachmentSet attSet = packet.getMessage().getAttachments();
+        for(String cid : atts.keySet()){
+            Attachment att = new DataHandlerAttachment(cid, atts.get(cid));
+            attSet.add(att);
+        }
 
+        try {
             //CLIENT-SIDE
             handlerResult = processor.callHandlersRequest(HandlerProcessor.Direction.OUTBOUND, context, !isOneWay);
         } catch (WebServiceException wse) {
@@ -193,9 +195,7 @@ public class ClientLogicalHandlerPipe extends HandlerPipe {
             //no rewrapping
             throw wse;
         } catch (RuntimeException re) {
-
             throw new WebServiceException(re);
-
         }
     }
 }

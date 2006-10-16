@@ -39,7 +39,7 @@ import java.util.ArrayList;
  *
  * @author WS Development Team
  */
-public class ServerLogicalHandlerPipe extends HandlerPipe {
+public class ClientLogicalHandlerTube extends HandlerTube {
 
     private WSBinding binding;
     private List<LogicalHandler> logicalHandlers;
@@ -47,10 +47,9 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
     /**
      * Creates a new instance of LogicalHandlerPipe
      */
-    public ServerLogicalHandlerPipe(WSBinding binding, WSDLPort port, Tube next) {
+    public ClientLogicalHandlerTube(WSBinding binding, WSDLPort port, Tube next) {
         super(next, port);
         this.binding = binding;
-        setUpProcessorOnce();
     }
 
     /**
@@ -60,31 +59,29 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
      * With this handle, LogicalHandlerPipe can call
      * SOAPHandlerPipe.closeHandlers()
      */
-    public ServerLogicalHandlerPipe(WSBinding binding, Tube next, HandlerPipe cousinPipe) {
-        super(next, cousinPipe);
+    public ClientLogicalHandlerTube(WSBinding binding, Pipe next, HandlerTube cousinTube) {
+        this(binding, PipeAdapter.adapt(next), cousinTube);
+    }
+
+    /**
+     * This constructor is used on client-side where, SOAPHandlerPipe is created
+     * first and then a LogicalHandlerPipe is created with a handler to that
+     * SOAPHandlerPipe.
+     * With this handle, LogicalHandlerPipe can call
+     * SOAPHandlerPipe.closeHandlers()
+     */
+    public ClientLogicalHandlerTube(WSBinding binding, Tube next, HandlerTube cousinTube) {
+        super(next, cousinTube);
         this.binding = binding;
-        setUpProcessorOnce();
-    }
-
-    /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
-     */
-    public ServerLogicalHandlerPipe(WSBinding binding, Pipe next, HandlerPipe cousinPipe) {
-        this(binding, PipeAdapter.adapt(next), cousinPipe);
     }
 
     /**
      * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
      */
 
-    private ServerLogicalHandlerPipe(ServerLogicalHandlerPipe that, TubeCloner cloner) {
+    private ClientLogicalHandlerTube(ClientLogicalHandlerTube that, TubeCloner cloner) {
         super(that, cloner);
         this.binding = that.binding;
-        setUpProcessorOnce();
     }
 
     boolean isHandlerChainEmpty() {
@@ -96,18 +93,21 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
      * Close LogicalHandlers first and then SOAPHandlers on Server
      */
     public void close(MessageContext msgContext) {
-
-        if (binding.getSOAPVersion() != null) {
-            //SOAPHandlerPipe will drive the closing of LogicalHandlerPipe
-        } else {
-            if (processor != null)
-                closeLogicalHandlers(msgContext);
+        //assuming cousinTube is called if requestProcessingSucessful is true
+        if (requestProcessingSucessful) {
+            //cousinTube is null in XML/HTTP Binding
+            if (cousinTube != null) {
+                // Close SOAPHandlerPipe
+                cousinTube.closeCall(msgContext);
+            }
         }
+        if (processor != null)
+            closeLogicalHandlers(msgContext);
 
     }
 
     /**
-     * This is called from cousinPipe.
+     * This is called from cousinTube.
      * Close this Pipes's handlers.
      */
     public void closeCall(MessageContext msgContext) {
@@ -120,24 +120,27 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
             return;
         if (remedyActionTaken) {
             //Close only invoked handlers in the chain
-            //SERVER-SIDE
-            processor.closeHandlers(msgContext, processor.getIndex(), logicalHandlers.size() - 1);
 
+            //CLIENT-SIDE
+            processor.closeHandlers(msgContext, processor.getIndex(), 0);
             //reset remedyActionTaken
             remedyActionTaken = false;
         } else {
             //Close all handlers in the chain
-            //SERVER-SIDE
-            processor.closeHandlers(msgContext, 0, logicalHandlers.size() - 1);
+
+            //CLIENT-SIDE
+            processor.closeHandlers(msgContext, logicalHandlers.size() - 1, 0);
 
         }
     }
 
     public AbstractFilterTubeImpl copy(TubeCloner cloner) {
-        return new ServerLogicalHandlerPipe(this, cloner);
+        return new ClientLogicalHandlerTube(this, cloner);
     }
 
-    private void setUpProcessorOnce() {
+    void setUpProcessor() {
+        // Take a snapshot, User may change chain after invocation, Same chain
+        // should be used for the entire MEP
         logicalHandlers = new ArrayList<LogicalHandler>();
         List<LogicalHandler> logicalSnapShot= ((BindingImpl) binding).getHandlerConfig().getLogicalHandlers();
         if (!logicalSnapShot.isEmpty()) {
@@ -146,15 +149,12 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
                 processor = new XMLHandlerProcessor(this, binding,
                         logicalHandlers);
             } else {
-                processor = new SOAPHandlerProcessor(false, this, binding,
+                processor = new SOAPHandlerProcessor(true, this, binding,
                         logicalHandlers);
             }
         }
     }
 
-    void setUpProcessor() {
-     // Do nothing, Processor is setup in the constructor.
-    }
 
     MessageUpdatableContext getContext(Packet packet) {
         return new LogicalMessageContextImpl(binding, packet);
@@ -164,16 +164,18 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
 
         boolean handlerResult;
         try {
-            //SERVER-SIDE
-            handlerResult = processor.callHandlersRequest(HandlerProcessor.Direction.INBOUND, context, !isOneWay);
 
+            //CLIENT-SIDE
+            handlerResult = processor.callHandlersRequest(HandlerProcessor.Direction.OUTBOUND, context, !isOneWay);
         } catch (WebServiceException wse) {
             remedyActionTaken = true;
             //no rewrapping
             throw wse;
         } catch (RuntimeException re) {
             remedyActionTaken = true;
-            throw re;
+
+            throw new WebServiceException(re);
+
         }
         if (!handlerResult) {
             remedyActionTaken = true;
@@ -183,14 +185,17 @@ public class ServerLogicalHandlerPipe extends HandlerPipe {
 
     void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault) {
         try {
-            //SERVER-SIDE
-            processor.callHandlersResponse(HandlerProcessor.Direction.OUTBOUND, context, handleFault);
+
+            //CLIENT-SIDE
+            processor.callHandlersResponse(HandlerProcessor.Direction.INBOUND, context, handleFault);
 
         } catch (WebServiceException wse) {
             //no rewrapping
             throw wse;
         } catch (RuntimeException re) {
-            throw re;
+
+            throw new WebServiceException(re);
+
         }
     }
 }

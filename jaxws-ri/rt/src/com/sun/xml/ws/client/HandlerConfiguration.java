@@ -38,7 +38,7 @@ import java.util.*;
  * SOAPBinding.setRoles()
  * During inovcation in Stub.process(), snapshot of the handler configuration is set in
  * Packet.handlerConfig
- * The information in the HandlerConfiguration is used by MUPipe and HandlerPipe
+ * The information in the HandlerConfiguration is used by MUPipe and HandlerTube
  * implementations.
  */
 public class HandlerConfiguration {

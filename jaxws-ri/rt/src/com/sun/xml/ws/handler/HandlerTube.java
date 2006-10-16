@@ -26,68 +26,52 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.handler.HandlerProcessor.Direction;
 
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 
 /**
  * @author WS Development team
  */
 
-public abstract class HandlerPipe extends AbstractFilterTubeImpl {
+public abstract class HandlerTube extends AbstractFilterTubeImpl {
     
     /**
-     * handle hold reference to other Pipe for inter-pipe communication
+     * handle hold reference to other Tube for inter-tube communication
      */
-    HandlerPipe cousinPipe;
+    HandlerTube cousinTube;
     HandlerProcessor processor;
     boolean remedyActionTaken = false;
     private final @Nullable WSDLPort port;
-    // flag used to decide whether to call close on cousinPipe
+    // flag used to decide whether to call close on cousinTube
     boolean requestProcessingSucessful = false;
 
     // TODO: For closing in Exceptions this is needed
     // This is used for creating MessageContext in #close
     Packet packet;
 
-    public HandlerPipe(Tube next, WSDLPort port) {
+    public HandlerTube(Tube next, WSDLPort port) {
         super(next);
         this.port = port;
     }
 
-    /*
-    public HandlerPipe(Pipe next, WSDLPort port) {
-        this(PipeAdapter.adapt(next), port);
-    }
-    */
-
-    public HandlerPipe(Tube next, HandlerPipe cousinPipe) {
+    public HandlerTube(Tube next, HandlerTube cousinTube) {
         super(next);
-        this.cousinPipe = cousinPipe;
-        if(cousinPipe != null) {
-            this.port = cousinPipe.port;
+        this.cousinTube = cousinTube;
+        if(cousinTube != null) {
+            this.port = cousinTube.port;
         } else {
             this.port = null;
         }
     }
 
-    /*
-    public HandlerPipe(Pipe next, HandlerPipe cousinPipe) {
-        this(PipeAdapter.adapt(next), cousinPipe);
-    }
-    */
-
     /**
      * Copy constructor for {@link Pipe#copy(PipeCloner)}.
      */
-    protected HandlerPipe(HandlerPipe that, TubeCloner cloner) {
+    protected HandlerTube(HandlerTube that, TubeCloner cloner) {
         super(that,cloner);
-        if(that.cousinPipe != null) {
-            this.cousinPipe = cloner.copy(that.cousinPipe);
+        if(that.cousinTube != null) {
+            this.cousinTube = cloner.copy(that.cousinTube);
         }
         this.port = that.port;        
     }
@@ -190,62 +174,6 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
         requestProcessingSucessful = false;
     }
 
-    /* public final Packet process( Packet packet) {
-        setupExchange();
-        // This check is done to cover handler returning false in Oneway request
-        if(isHandleFalse()){
-            // Cousin HandlerPipe returned false during Oneway Request processing.
-            // Don't call handlers and dispatch the message.
-            remedyActionTaken = true;
-            return next.process(packet);
-        }
-
-        // This is done here instead of the constructor, since User can change
-        // the roles and handlerchain after a stub/proxy is created.
-        setUpProcessor();
-
-        MessageUpdatableContext context = getContext(packet);
-        Packet reply;
-        try {
-            boolean isOneWay = checkOneWay(packet);
-            if(!isHandlerChainEmpty()) {
-                // Call handlers on Request
-                boolean handlerResult = callHandlersOnRequest(context, isOneWay);
-                //Update Packet with user modifications
-                context.updatePacket();
-                // the only case where no message is sent
-                if (!isOneWay && !handlerResult) {
-                    return packet;
-                }
-            }
-            requestProcessingSucessful = true;
-            // Call next Pipe.process() on msg
-            reply = next.process(packet);
-            context =  getContext(reply);
-            if (isHandleFalse() || (reply.getMessage() == null)) {
-                // Cousin HandlerPipe returned false during Response processing.
-                // or it is oneway request
-                // or handler chain is empty
-                // Don't call handlers.
-                return reply;
-            }
-            boolean isFault = isHandleFault(reply);
-            if( !isHandlerChainEmpty()) {
-                // Call handlers on Response
-                callHandlersOnResponse(context,isFault);
-            }
-        } finally {
-            // Clean up the exchange for next invocation.
-            exchange = null;
-            close(context.getMessageContext());
-            requestProcessingSucessful = false;
-        }
-        //Update Packet with user modifications
-        context.updatePacket();
-
-        return reply;
-    }
-    */
     abstract void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault);
 
     abstract boolean callHandlersOnRequest(MessageUpdatableContext context, boolean oneWay);
@@ -274,13 +202,13 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
     protected abstract void close(MessageContext msgContext);
     
     /**
-     * This is called from cousinPipe.
-     * Close this Pipes's handlers.
+     * This is called from cousinTube.
+     * Close this Tube's handlers.
      */
     protected abstract void closeCall(MessageContext msgContext);
 
     private boolean isHandleFault(Packet packet) {
-        if (cousinPipe != null) {
+        if (cousinTube != null) {
             return exchange.isHandleFault();
         } else {
             boolean isFault = packet.getMessage().isFault();
@@ -303,19 +231,19 @@ public abstract class HandlerPipe extends AbstractFilterTubeImpl {
 
     private void setupExchange() {
         if(exchange == null) {
-            exchange = new HandlerPipeExchange();
-            if(cousinPipe != null) {
-                cousinPipe.exchange = exchange;
+            exchange = new HandlerTubeExchange();
+            if(cousinTube != null) {
+                cousinTube.exchange = exchange;
             }
         }        
     }
-    private HandlerPipeExchange exchange;
+    private HandlerTubeExchange exchange;
 
     /**
      * This class is used primarily to exchange information or status between
-     * LogicalHandlerPipe and SOAPHandlerPipe
+     * LogicalHandlerTube and SOAPHandlerTube
      */
-    static final class HandlerPipeExchange {
+    static final class HandlerTubeExchange {
         private boolean handleFalse;
         private boolean handleFault;
 

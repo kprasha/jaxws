@@ -46,7 +46,7 @@ final class XMLHandlerProcessor<C extends MessageUpdatableContext> extends Handl
     /**
      * Creates a new instance of LogicalHandlerProcessor
      */
-    public XMLHandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain) {
+    public XMLHandlerProcessor(HandlerTube owner, WSBinding binding, List<? extends Handler> chain) {
         super(owner, binding, chain);
     }
     

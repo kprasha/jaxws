@@ -23,13 +23,11 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +51,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
 
     WSBinding binding;
     private int index = -1;
-    private HandlerPipe owner;
+    private HandlerTube owner;
 
     /**
      * The handlers that are passed in will be sorted into
@@ -64,7 +62,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
      * @param chain A list of handler objects, which can
      *              be protocol or logical handlers.
      */
-    protected HandlerProcessor(HandlerPipe owner, WSBinding binding, List<? extends Handler> chain) {
+    protected HandlerProcessor(HandlerTube owner, WSBinding binding, List<? extends Handler> chain) {
         this.owner = owner;
         if (chain == null) { // should only happen in testing
             chain = new ArrayList<Handler>();
@@ -129,7 +127,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
                 insertFaultMessage(context, pe);
                 // reverse direction
                 reverseDirection(direction, context);
-                //Set handleFault so that cousinPipe is aware of fault
+                //Set handleFault so that cousinTube is aware of fault
                 setHandleFaultProperty();
                 // call handle fault                
                 if (direction == Direction.OUTBOUND) {
@@ -155,9 +153,9 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
                     callHandleMessageReverse(context, getIndex() + 1, handlers.size() - 1);
                 }
             } else {
-                // Set handleFalse so that cousinPipe is aware of false processing
+                // Set handleFalse so that cousinTube is aware of false processing
                 // Oneway, dispatch the message
-                // cousinPipe should n't call handleMessage() anymore.
+                // cousinTube should n't call handleMessage() anymore.
                 setHandleFalseProperty();
             }
             return false;
@@ -312,7 +310,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         if (start > end) {
             while (i >= end) {
                 if (!handlers.get(i).handleMessage(context)) {
-                    // Set handleFalse so that cousinPipe is aware of false processing
+                    // Set handleFalse so that cousinTube is aware of false processing
                     setHandleFalseProperty();
                     return false;
                 }
@@ -321,7 +319,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
         } else {
             while (i <= end) {
                 if (!handlers.get(i).handleMessage(context)) {
-                    // Set handleFalse so that cousinPipe is aware of false processing
+                    // Set handleFalse so that cousinTube is aware of false processing
                     setHandleFalseProperty();
                     return false;
                 }
