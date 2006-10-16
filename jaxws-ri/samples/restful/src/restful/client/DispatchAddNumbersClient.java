@@ -84,10 +84,6 @@ public class DispatchAddNumbersClient {
         Source result = d.invoke(null);
         printSource(result);
 
-        //for this request the query string is not needed
-        requestContext.remove(MessageContext.QUERY_STRING);
-        //add path information - in this case additional pathinfo is added to original path
-        //requestContext.put(MessageContext.PATH_INFO, path + pathInfo);
         requestContext.put(MessageContext.PATH_INFO, pathInfo);
 
         System.out.println ("Invoking Restful GET Request with path info " + pathInfo);
