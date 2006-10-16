@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import static com.sun.xml.ws.api.SOAPVersion.SOAP_11;
 import static com.sun.xml.ws.api.SOAPVersion.SOAP_12;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -61,6 +62,7 @@ abstract class MUTube extends AbstractFilterTubeImpl {
             "One or more mandatory SOAP header blocks not understood";
 
     private final SOAPVersion soapVersion;
+    private final AddressingVersion addressingVersion;
     
     protected MUTube(WSBinding binding, Tube next) {
         super(next);
@@ -70,11 +72,13 @@ abstract class MUTube extends AbstractFilterTubeImpl {
                     "MUPipe should n't be used for bindings other than SOAP.");
         }
         this.soapVersion = binding.getSOAPVersion();
+        this.addressingVersion = binding.getAddressingVersion();
     }
 
     protected MUTube(MUTube that, TubeCloner cloner) {
         super(that, cloner);
         soapVersion = that.soapVersion;
+        addressingVersion = that.addressingVersion;
     }
 
     /**
@@ -87,6 +91,8 @@ abstract class MUTube extends AbstractFilterTubeImpl {
      */
     protected final Set<QName> getMisUnderstoodHeaders(HeaderList headers, Set<String> roles, Set<QName> knownHeaders) {
         Set<QName> notUnderstoodHeaders = null;
+
+        understandAddressingHeaders(knownHeaders);
 
         for (int i = 0; i < headers.size(); i++) {
             if (!headers.isUnderstood(i)) {
@@ -103,6 +109,23 @@ abstract class MUTube extends AbstractFilterTubeImpl {
             }
         }
         return notUnderstoodHeaders;
+    }
+
+    /**
+     * Understand WS-Addressing headers if WS-Addressing is enabled
+     *
+     * @param knownHeaders Set of headers that this binding understands
+     */
+    private void understandAddressingHeaders(Set<QName> knownHeaders) {
+        if (addressingVersion != null) {
+            knownHeaders.add(addressingVersion.actionTag);
+            knownHeaders.add(addressingVersion.faultToTag);
+            knownHeaders.add(addressingVersion.fromTag);
+            knownHeaders.add(addressingVersion.messageIDTag);
+            knownHeaders.add(addressingVersion.relatesToTag);
+            knownHeaders.add(addressingVersion.replyToTag);
+            knownHeaders.add(addressingVersion.toTag);
+        }
     }
 
     /**
