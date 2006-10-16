@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.developer;
+package com.sun.xml.ws.api.addressing;
 
 import javax.xml.ws.WebServiceFeature;
 
