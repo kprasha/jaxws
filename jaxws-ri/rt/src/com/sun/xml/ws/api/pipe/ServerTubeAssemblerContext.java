@@ -116,7 +116,7 @@ public class ServerTubeAssemblerContext {
     }
 
     /**
-     * Creates a {@link Pipe} that invokes protocol and logical handlers.
+     * Creates a {@link Tube} that invokes protocol and logical handlers.
      */
     public @NotNull Tube createHandlerTube(@NotNull Tube next) {
         if (!binding.getHandlerChain().isEmpty()) {
@@ -130,7 +130,7 @@ public class ServerTubeAssemblerContext {
     }
 
     /**
-     * Creates a {@link Pipe} that does the monitoring of the invocation for a
+     * Creates a {@link Tube} that does the monitoring of the invocation for a
      * container
      */
     public @NotNull Tube createMonitoringTube(@NotNull Tube next) {
