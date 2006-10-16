@@ -86,8 +86,7 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
         public final PipeHead head;
 
         public Toolkit() {
-            WSBinding binding = endpoint.getBinding();
-            this.codec = binding.createCodec();
+            this.codec = endpoint.getCodec();
             this.head = endpoint.createPipeHead();
         }
     }

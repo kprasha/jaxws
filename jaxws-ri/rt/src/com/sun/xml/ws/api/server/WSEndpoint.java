@@ -29,14 +29,10 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
-import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
-import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.BindingID;
 
 import javax.xml.ws.BindingType;
@@ -99,6 +95,13 @@ import java.util.concurrent.Executor;
  * @author Kohsuke Kawaguchi
  */
 public abstract class WSEndpoint<T> {
+
+    /**
+     * Gets the Endpoint's codec that is used to encode/decode {@link Message}s
+     *
+     * @return codec to encode/decode
+     */
+    public abstract @NotNull Codec getCodec();
 
     /**
      * Gets the application endpoint's serviceName. It could be got from DD or annotations

@@ -31,16 +31,8 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Engine;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
-import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
-import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.TubelineAssembler;
-import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
+import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -75,6 +67,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final ServiceDefinitionImpl serviceDef;
     private final SOAPVersion soapVersion;
     private final Engine engine;
+    private final Codec codec;
 
     private final Pool<Tube> tubePool;
 
@@ -112,6 +105,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
         ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalTube, isSynchronous);
         this.masterTubeline = assembler.createServer(context);
+        this.codec = context.getCodec();
         tubePool = new TubePool(masterTubeline);
         terminalTube.setEndpoint(this);
         engine = new Engine();
@@ -239,6 +233,11 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public @NotNull QName getPortName() {
         return portName;
+    }
+
+
+    public Codec getCodec() {
+        return codec;
     }
 
     public @NotNull QName getServiceName() {
