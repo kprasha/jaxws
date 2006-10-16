@@ -1,5 +1,8 @@
 package com.sun.xml.ws.developer;
 
+import com.sun.xml.ws.api.server.InstanceResolverAnnotation;
+import com.sun.xml.ws.server.StatefulInstanceResolver;
+
 import javax.jws.WebService;
 import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 import java.lang.annotation.Documented;
@@ -13,6 +16,7 @@ import java.lang.annotation.Target;
  *
  * <p>
  * A service class that has this feature on will behave as a stateful web service.
+ * See {@link StatefulWebServiceManager} for more about stateful web service.
  *
  * @since 2.1
  * @ses StatefulWebServiceManager
@@ -21,6 +25,6 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 @Documented
 @WebServiceFeatureAnnotation(id = StatefulFeature.ID, bean = StatefulFeature.class)
-public @interface Stateful {
-    
+@InstanceResolverAnnotation(StatefulInstanceResolver.class)
+public @interface Stateful {    
 }

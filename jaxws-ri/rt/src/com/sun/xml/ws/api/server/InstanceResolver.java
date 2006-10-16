@@ -25,14 +25,15 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.developer.Stateful;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.server.SingletonResolver;
-import com.sun.xml.ws.server.StatefulInstanceResolver;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -127,19 +128,29 @@ public abstract class InstanceResolver<T> {
      * Creates a default {@link InstanceResolver} that serves the given class.
      */
     public static <T> InstanceResolver<T> createDefault(@NotNull Class<T> clazz) {
-        if(isStateful(clazz))
-            return new StatefulInstanceResolver<T>(clazz);
-        else
-            return createSingleton(createNewInstance(clazz));
-    }
+        // check for InstanceResolverAnnotation
+        for( Annotation a : clazz.getAnnotations() ) {
+            InstanceResolverAnnotation ira = a.annotationType().getAnnotation(InstanceResolverAnnotation.class);
+            if(ira==null)   continue;
+            Class<? extends InstanceResolver> ir = ira.value();
+            try {
+                return ir.getConstructor(Class.class).newInstance(clazz);
+            } catch (InstantiationException e) {
+                throw new WebServiceException(ServerMessages.FAILED_TO_INSTANTIATE_INSTANCE_RESOLVER(
+                    ir.getName(),a.annotationType(),clazz.getName()));
+            } catch (IllegalAccessException e) {
+                throw new WebServiceException(ServerMessages.FAILED_TO_INSTANTIATE_INSTANCE_RESOLVER(
+                    ir.getName(),a.annotationType(),clazz.getName()));
+            } catch (InvocationTargetException e) {
+                throw new WebServiceException(ServerMessages.FAILED_TO_INSTANTIATE_INSTANCE_RESOLVER(
+                    ir.getName(),a.annotationType(),clazz.getName()));
+            } catch (NoSuchMethodException e) {
+                throw new WebServiceException(ServerMessages.FAILED_TO_INSTANTIATE_INSTANCE_RESOLVER(
+                    ir.getName(),a.annotationType(),clazz.getName()));
+            }
+        }
 
-    /**
-     * Stateful web service code needs to be written very differently from stateless
-     * web services. So there's no point in checking anything other than annotations.
-     * So only use the annotation to determine how it works.
-     */
-    private static boolean isStateful(Class<?> classDecl) {
-        return classDecl.getAnnotation(Stateful.class)!=null;
+        return createSingleton(createNewInstance(clazz));
     }
 
     protected static <T> T createNewInstance(Class<T> cl) {
