@@ -101,7 +101,7 @@ public abstract class Messages {
      *      Use {@link #create(JAXBRIContext, Object, SOAPVersion)}
      */
     public static Message create(Marshaller marshaller, Object jaxbObject, SOAPVersion soapVersion) {
-        return new JAXBMessage(((MarshallerImpl)marshaller).getContext(),jaxbObject,soapVersion);
+        return create(((MarshallerImpl)marshaller).getContext(),jaxbObject,soapVersion);
     }
 
     /**
