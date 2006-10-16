@@ -97,11 +97,13 @@ import java.util.concurrent.Executor;
 public abstract class WSEndpoint<T> {
 
     /**
-     * Gets the Endpoint's codec that is used to encode/decode {@link Message}s
+     * Gets the Endpoint's codec that is used to encode/decode {@link Message}s. This is a
+     * copy of the master codec and it shouldn't be shared across two requests running
+     * concurrently(unless it is stateless).
      *
      * @return codec to encode/decode
      */
-    public abstract @NotNull Codec getCodec();
+    public abstract @NotNull Codec createCodec();
 
     /**
      * Gets the application endpoint's serviceName. It could be got from DD or annotations

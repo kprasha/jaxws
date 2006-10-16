@@ -67,7 +67,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final ServiceDefinitionImpl serviceDef;
     private final SOAPVersion soapVersion;
     private final Engine engine;
-    private final Codec codec;
+    private final @NotNull Codec masterCodec;
 
     private final Pool<Tube> tubePool;
 
@@ -105,7 +105,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
         ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalTube, isSynchronous);
         this.masterTubeline = assembler.createServer(context);
-        this.codec = context.getCodec();
+        this.masterCodec = context.getCodec();
         tubePool = new TubePool(masterTubeline);
         terminalTube.setEndpoint(this);
         engine = new Engine();
@@ -236,8 +236,8 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     }
 
 
-    public Codec getCodec() {
-        return codec;
+    public @NotNull Codec createCodec() {
+        return masterCodec.copy();
     }
 
     public @NotNull QName getServiceName() {

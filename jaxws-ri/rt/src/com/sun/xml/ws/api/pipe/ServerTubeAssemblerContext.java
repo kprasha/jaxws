@@ -15,6 +15,7 @@ import com.sun.xml.ws.handler.ServerLogicalHandlerPipe;
 import com.sun.xml.ws.handler.ServerSOAPHandlerPipe;
 import com.sun.xml.ws.protocol.soap.ServerMUTube;
 import com.sun.xml.ws.util.pipe.DumpTube;
+import com.sun.xml.ws.binding.BindingImpl;
 
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.SOAPBinding;
@@ -35,7 +36,7 @@ public class ServerTubeAssemblerContext {
     private final WSBinding binding;
     private final Tube terminal;
     private final boolean isSynchronous;
-    private Codec codec;
+    private @NotNull Codec codec;
 
     public ServerTubeAssemblerContext(@Nullable SEIModel seiModel,
                                       @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint endpoint,
@@ -46,7 +47,7 @@ public class ServerTubeAssemblerContext {
         this.terminal = terminal;
         this.binding = endpoint.getBinding();
         this.isSynchronous = isSynchronous;
-        this.codec = binding.createCodec();
+        this.codec = ((BindingImpl)binding).createCodec();
     }
 
     /**
@@ -172,11 +173,29 @@ public class ServerTubeAssemblerContext {
             return next;
     }
 
-    public Codec getCodec() {
+    /**
+     * Gets the {@link Codec} that is set by {@link #setCodec} or the default codec
+     * based on the binding.
+     *
+     * @return codec to be used for web service requests
+     */
+    public @NotNull Codec getCodec() {
         return codec;
     }
 
-    public void setCodec(Codec codec) {
+    /**
+     * Interception point to change {@link Codec} during {@link Tube}line assembly. The
+     * new codec will be used by jax-ws server runtime for encoding/decoding web service
+     * request/response messages. {@link WSEndpoint#createCodec()} will return a copy
+     * of this new codec and will be used in the server runtime.
+     *
+     * <p>
+     * the codec should correctly implement {@link Codec#copy} since it is used while
+     * serving requests concurrently.
+     *
+     * @param codec codec to be used for web service requests
+     */
+    public void setCodec(@NotNull Codec codec) {
         this.codec = codec;
     }
 

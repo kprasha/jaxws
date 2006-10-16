@@ -86,7 +86,7 @@ public abstract class Adapter<TK extends Adapter.Toolkit> {
         public final PipeHead head;
 
         public Toolkit() {
-            this.codec = endpoint.getCodec();
+            this.codec = endpoint.createCodec();
             this.head = endpoint.createPipeHead();
         }
     }

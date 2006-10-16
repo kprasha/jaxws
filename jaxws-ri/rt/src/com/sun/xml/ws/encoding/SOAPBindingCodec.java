@@ -239,10 +239,9 @@ public class SOAPBindingCodec extends MimeCodec {
     }
     
     public SOAPBindingCodec copy() {
-        return new SOAPBindingCodec(binding);
+        return new SOAPBindingCodec(binding, xmlSoapCodec.copy());
     }
-    
-    
+
     @Override
     protected void decode(MimeMultipartParser mpp, Packet packet) throws IOException {
         // is this SwA or XOP?
