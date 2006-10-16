@@ -179,9 +179,9 @@ public abstract class SOAPFaultBuilder {
     private static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode, Node detail) {
         switch (soapVersion) {
             case SOAP_11:
-                return new JAXBMessage(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
+                return JAXBMessage.create(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
             case SOAP_12:
-                return new JAXBMessage(JAXB_CONTEXT, new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
+                return JAXBMessage.create(JAXB_CONTEXT, new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
             default:
                 throw new AssertionError();
         }
@@ -294,7 +294,7 @@ public abstract class SOAPFaultBuilder {
                 faultCode = getDefaultFaultCode(soapVersion);
             }
         }
-        return new JAXBMessage(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, faultActor, detailNode), soapVersion);
+        return JAXBMessage.create(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, faultActor, detailNode), soapVersion);
     }
 
     private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
@@ -365,7 +365,7 @@ public abstract class SOAPFaultBuilder {
         DetailType detailType = null;
         if(detailNode != null)
             detailType = new DetailType(detailNode);
-        return new JAXBMessage(JAXB_CONTEXT, new SOAP12Fault(code, reason, null, faultRole, detailType), soapVersion);
+        return JAXBMessage.create(JAXB_CONTEXT, new SOAP12Fault(code, reason, null, faultRole, detailType), soapVersion);
     }
 
     private static SubcodeType fillSubcodes(SubcodeType parent, QName value){
