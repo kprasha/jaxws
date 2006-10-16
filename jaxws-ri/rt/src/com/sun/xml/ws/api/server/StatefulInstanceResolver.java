@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  *
  * @author Kohsuke Kawaguchi
  */
-public class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> implements StatefulWebServiceManager<T> {
+final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> implements StatefulWebServiceManager<T> {
     private final Class<T> clazz;
 
     /**
