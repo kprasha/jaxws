@@ -23,11 +23,9 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
@@ -50,34 +48,24 @@ public class ClientSOAPHandlerTube extends HandlerTube {
     private Set<String> roles;
 
     /**
-     * Creates a new instance of SOAPHandlerPipe
+     * Creates a new instance of SOAPHandlerTube
      */
     public ClientSOAPHandlerTube(WSBinding binding, WSDLPort port, Tube next) {
         super(next, port);
         if (binding.getSOAPVersion() != null) {
-            // SOAPHandlerPipe should n't be used for bindings other than SOAP.
+            // SOAPHandlerTube should n't be used for bindings other than SOAP.
             // TODO: throw Exception
         }
         this.binding = binding;
     }
 
-    // Handle to LogicalHandlerPipe means its used on SERVER-SIDE
+    // Handle to LogicalHandlerTube means its used on SERVER-SIDE
 
     /**
-     * This constructor is used on client-side where, LogicalHandlerPipe is created
-     * first and then a SOAPHandlerPipe is created with a handler to that
-     * LogicalHandlerPipe.
-     * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
-     */
-    public ClientSOAPHandlerTube(WSBinding binding, Pipe next, HandlerTube cousinTube) {
-        this(binding, PipeAdapter.adapt(next), cousinTube);
-    }
-
-    /**
-     * This constructor is used on client-side where, LogicalHandlerPipe is created
-     * first and then a SOAPHandlerPipe is created with a handler to that
-     * LogicalHandlerPipe.
-     * With this handle, SOAPHandlerPipe can call LogicalHandlerPipe.closeHandlers()
+     * This constructor is used on client-side where, LogicalHandlerTube is created
+     * first and then a SOAPHandlerTube is created with a handler to that
+     * LogicalHandlerTube.
+     * With this handle, SOAPHandlerTube can call LogicalHandlerTube.closeHandlers()
      */
     public ClientSOAPHandlerTube(WSBinding binding, Tube next, HandlerTube cousinTube) {
         super(next, cousinTube);
@@ -85,7 +73,7 @@ public class ClientSOAPHandlerTube extends HandlerTube {
     }
 
     /**
-     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
+     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Tube#copy(com.sun.xml.ws.api.pipe.TubeCloner)}.
      */
     private ClientSOAPHandlerTube(ClientSOAPHandlerTube that, TubeCloner cloner) {
         super(that, cloner);
@@ -106,7 +94,7 @@ public class ClientSOAPHandlerTube extends HandlerTube {
 
     /**
      * This is called from cousinTube.
-     * Close this Pipes's handlers.
+     * Close this Tube's handlers.
      */
     public void closeCall(MessageContext msgContext) {
         closeSOAPHandlers(msgContext);

@@ -66,7 +66,7 @@ public abstract class HandlerTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     * Copy constructor for {@link Pipe#copy(PipeCloner)}.
+     * Copy constructor for {@link Tube#copy(TubeCloner)}.
      */
     protected HandlerTube(HandlerTube that, TubeCloner cloner) {
         super(that,cloner);
@@ -106,7 +106,7 @@ public abstract class HandlerTube extends AbstractFilterTubeImpl {
                 }
             }
             requestProcessingSucessful = true;
-            // Call next Pipe.process() on msg
+            // Call next Tube 
             return doInvoke(super.next, packet);
         } finally {
             if(!requestProcessingSucessful) {

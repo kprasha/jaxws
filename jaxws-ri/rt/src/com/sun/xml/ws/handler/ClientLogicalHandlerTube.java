@@ -21,11 +21,9 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 
@@ -45,7 +43,7 @@ public class ClientLogicalHandlerTube extends HandlerTube {
     private List<LogicalHandler> logicalHandlers;
 
     /**
-     * Creates a new instance of LogicalHandlerPipe
+     * Creates a new instance of LogicalHandlerTube
      */
     public ClientLogicalHandlerTube(WSBinding binding, WSDLPort port, Tube next) {
         super(next, port);
@@ -53,22 +51,11 @@ public class ClientLogicalHandlerTube extends HandlerTube {
     }
 
     /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
-     */
-    public ClientLogicalHandlerTube(WSBinding binding, Pipe next, HandlerTube cousinTube) {
-        this(binding, PipeAdapter.adapt(next), cousinTube);
-    }
-
-    /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
+     * This constructor is used on client-side where, SOAPHandlerTube is created
+     * first and then a LogicalHandlerTube is created with a handler to that
+     * SOAPHandlerTube.
+     * With this handle, LogicalHandlerTube can call
+     * SOAPHandlerTube.closeHandlers()
      */
     public ClientLogicalHandlerTube(WSBinding binding, Tube next, HandlerTube cousinTube) {
         super(next, cousinTube);
@@ -76,7 +63,7 @@ public class ClientLogicalHandlerTube extends HandlerTube {
     }
 
     /**
-     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
+     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Tube#copy(com.sun.xml.ws.api.pipe.TubeCloner)}.
      */
 
     private ClientLogicalHandlerTube(ClientLogicalHandlerTube that, TubeCloner cloner) {
@@ -97,7 +84,7 @@ public class ClientLogicalHandlerTube extends HandlerTube {
         if (requestProcessingSucessful) {
             //cousinTube is null in XML/HTTP Binding
             if (cousinTube != null) {
-                // Close SOAPHandlerPipe
+                // Close SOAPHandlerTube
                 cousinTube.closeCall(msgContext);
             }
         }
@@ -108,7 +95,7 @@ public class ClientLogicalHandlerTube extends HandlerTube {
 
     /**
      * This is called from cousinTube.
-     * Close this Pipes's handlers.
+     * Close this Tubes's handlers.
      */
     public void closeCall(MessageContext msgContext) {
         closeLogicalHandlers(msgContext);

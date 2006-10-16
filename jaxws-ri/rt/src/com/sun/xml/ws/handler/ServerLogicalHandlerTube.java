@@ -21,11 +21,9 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 
@@ -54,11 +52,11 @@ public class ServerLogicalHandlerTube extends HandlerTube {
     }
 
     /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
+     * This constructor is used on client-side where, SOAPHandlerTube is created
+     * first and then a LogicalHandlerTube is created with a handler to that
+     * SOAPHandlerTube.
+     * With this handle, LogicalHandlerTube can call
+     * SOAPHandlerTube.closeHandlers()
      */
     public ServerLogicalHandlerTube(WSBinding binding, Tube next, HandlerTube cousinTube) {
         super(next, cousinTube);
@@ -67,18 +65,7 @@ public class ServerLogicalHandlerTube extends HandlerTube {
     }
 
     /**
-     * This constructor is used on client-side where, SOAPHandlerPipe is created
-     * first and then a LogicalHandlerPipe is created with a handler to that
-     * SOAPHandlerPipe.
-     * With this handle, LogicalHandlerPipe can call
-     * SOAPHandlerPipe.closeHandlers()
-     */
-    public ServerLogicalHandlerTube(WSBinding binding, Pipe next, HandlerTube cousinTube) {
-        this(binding, PipeAdapter.adapt(next), cousinTube);
-    }
-
-    /**
-     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Pipe#copy(com.sun.xml.ws.api.pipe.PipeCloner)}.
+     * Copy constructor for {@link com.sun.xml.ws.api.pipe.Tube#copy(com.sun.xml.ws.api.pipe.TubeCloner)}.
      */
 
     private ServerLogicalHandlerTube(ServerLogicalHandlerTube that, TubeCloner cloner) {
@@ -98,7 +85,7 @@ public class ServerLogicalHandlerTube extends HandlerTube {
     public void close(MessageContext msgContext) {
 
         if (binding.getSOAPVersion() != null) {
-            //SOAPHandlerPipe will drive the closing of LogicalHandlerPipe
+            //SOAPHandlerTube will drive the closing of LogicalHandlerTube
         } else {
             if (processor != null)
                 closeLogicalHandlers(msgContext);
@@ -108,7 +95,7 @@ public class ServerLogicalHandlerTube extends HandlerTube {
 
     /**
      * This is called from cousinTube.
-     * Close this Pipes's handlers.
+     * Close this Tube's handlers.
      */
     public void closeCall(MessageContext msgContext) {
         closeLogicalHandlers(msgContext);
