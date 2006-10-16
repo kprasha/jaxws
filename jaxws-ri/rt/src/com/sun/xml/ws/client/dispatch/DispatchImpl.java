@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -41,17 +42,16 @@ import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.ws.AsyncHandler;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.Response;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
+import javax.xml.ws.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * TODO: update javadoc, use sandbox classes where can
@@ -144,6 +144,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             checkNullAllowed(in, rc, binding, mode);
 
             Packet message = createPacket(in);
+            resolveEndpointAddress(message, rc);
             setProperties(message,true);
             response = process(message,rc,receiver);
             Message msg = response.getMessage();
@@ -236,6 +237,68 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     protected final @NotNull QName getPortName() {
         return portname;
     }
+
+
+    void resolveEndpointAddress(Packet message, RequestContext requestContext) {
+        //resolve endpoint look for query parameters, pathInfo
+        String origEndpoint = (String) requestContext.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+
+        String pathInfo = null;
+        String queryString = null;
+        if (requestContext.get(MessageContext.PATH_INFO) != null) {
+            pathInfo = (String) requestContext.get(MessageContext.PATH_INFO);
+        }
+        if (requestContext.get(MessageContext.QUERY_STRING) != null) {
+            queryString = (String) requestContext.get(MessageContext.QUERY_STRING);
+        }
+
+        String resolvedEndpoint = null;
+        if (pathInfo != null || queryString != null) {
+            pathInfo = checkPath(pathInfo);
+            queryString = checkQuery(queryString);
+            if (origEndpoint != null) {
+                try {
+                    URI endpointURI = new URI(origEndpoint);
+                    resolvedEndpoint = resolveURI(endpointURI, pathInfo, queryString);
+                } catch (URISyntaxException e) {
+                    resolvedEndpoint = origEndpoint;
+                }
+            }
+
+            requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, resolvedEndpoint);
+            //message.endpointAddress = EndpointAddress.create(resolvedEndpoint);
+        }
+    }
+
+    protected String resolveURI(URI endpointURI, String pathInfo, String queryString) {
+        String query = null;
+        String fragment = null;
+        if (queryString != null) {
+            URI result = endpointURI.resolve(queryString);
+            query = result.getQuery();
+            fragment = result.getFragment();
+        }
+
+        String path = (pathInfo != null) ? pathInfo : endpointURI.getPath();
+        try {
+            URI temp = new URI(null, null, path, query, fragment);
+            return endpointURI.resolve(temp).toString();
+        } catch (URISyntaxException e) {
+            throw new WebServiceException("Unable to resolve endpoint address using the supplied path " + path);
+        }
+       // return endpointURI.toString();
+    }
+
+    private static String checkPath(String path) {
+        //does it begin with /
+        return (path == null || path.startsWith("/")) ? path : "/" + path;
+    }
+
+    private static String checkQuery(String query) {
+        //does it begin with ?
+        return (query == null || query.startsWith("?")) ? query : "?" + query;
+    }
+
 
     /**
      * Calls {@link DispatchImpl#doInvoke(Object,RequestContext,ResponseContextReceiver)}.

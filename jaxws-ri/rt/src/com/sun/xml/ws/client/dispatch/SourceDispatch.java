@@ -62,6 +62,8 @@ public class SourceDispatch extends DispatchImpl<Source> {
             case PAYLOAD:
                 return msg.readPayloadAsSource();
             case MESSAGE:
+                if (isXMLHttp(binding))
+                   return msg.readPayloadAsSource();
                 return msg.readEnvelopeAsSource();
             default:
                 throw new WebServiceException("Unrecognized dispatch mode");
