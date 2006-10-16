@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.AsyncProviderCallback;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.server.StatefulInstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSWebServiceContext;
 import com.sun.xml.ws.server.provider.ProviderInvokerTube;
