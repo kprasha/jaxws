@@ -597,4 +597,34 @@ public enum AddressingVersion {
         } else
             throw new WebServiceException("WebServiceFeature not an Addressing feature: "+ wsf.getID());
     }
+
+    /**
+     * Returns true if <code>binding</code> contains either a {@link AddressingFeature} or
+     * {@link MemberSubmissionAddressingFeature} and is required.
+     *
+     * @param binding The binding
+     * @return true if <code>binding</code> requires WS-Addressing
+     */
+    public static boolean isRequired(WSBinding binding) {
+        WebServiceFeature wsf = binding.getFeature(AddressingFeature.ID);
+        if (wsf == null)
+            wsf = binding.getFeature(MemberSubmissionAddressingFeature.ID);
+
+        if (wsf == null)
+            return false;
+        else
+            return isRequired(wsf);
+    }
+
+    /**
+     * Returns true if <code>binding</code> contains either a {@link AddressingFeature} or
+     * {@link MemberSubmissionAddressingFeature} and is enabled.
+     *
+     * @param binding The binding
+     * @return true if WS-Addressing is enabled for <code>binding</code>.
+     */
+    public static boolean isEnabled(WSBinding binding) {
+        return binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
+                binding.isFeatureEnabled(AddressingFeature.ID);
+    }
 }

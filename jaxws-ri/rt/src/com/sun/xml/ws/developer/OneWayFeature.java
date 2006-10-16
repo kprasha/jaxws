@@ -27,9 +27,10 @@ import javax.xml.ws.WebServiceFeature;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 
 /**
- * This feature allows ReplyTo, FaultTo and RelatesTo Message Addressing Properties
+ * This feature allows ReplyTo, From and RelatesTo Message Addressing Properties
  * to be added for a one-way message. This feature should be used for one-way
- * operations only.
+ * operations only. If a non-null ReplyTo is specified, then MessageID property is
+ * also added.
  * <p/><p/>
  * This feature is not meant to be used by a common Web service developer as there
  * is no need to send the above mentioned header for a one-way operation. But these
@@ -67,8 +68,7 @@ public class OneWayFeature extends WebServiceFeature {
     /**
      * Create an {@link OneWayFeature}
      *
-     * @param enabled specifies whether this feature should
-     * be enabled or not.
+     * @param enabled specifies whether this feature should be enabled or not.
      * @param replyTo specifies the {@link WSEndpointReference} of wsa:ReplyTo header.
      */
     public OneWayFeature(boolean enabled, WSEndpointReference replyTo) {
@@ -79,8 +79,7 @@ public class OneWayFeature extends WebServiceFeature {
     /**
      * Create an {@link OneWayFeature}
      *
-     * @param enabled specifies whether this feature should
-     * be enabled or not.
+     * @param enabled specifies whether this feature should be enabled or not.
      * @param replyTo specifies the {@link WSEndpointReference} of wsa:ReplyTo header.
      * @param from specifies the {@link WSEndpointReference} of wsa:From header.
      * @param relatesTo specifies the MessageID to be used for wsa:RelatesTo header.

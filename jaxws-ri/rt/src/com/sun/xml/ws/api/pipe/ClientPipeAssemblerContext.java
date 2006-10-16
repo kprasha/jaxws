@@ -38,6 +38,14 @@ public final class ClientPipeAssemblerContext extends ClientTubeAssemblerContext
     }
 
     /**
+     * Creates a {@link Pipe} that performs WS-Addressig processing.
+     * This pipe should be before {@link com.sun.xml.ws.protocol.soap.ClientMUTube}.
+     */
+    public Pipe createWsaPipe(Pipe next) {
+        return PipeAdapter.adapt(super.createClientMUTube(PipeAdapter.adapt(next)));
+    }
+
+    /**
      * Creates a {@link Pipe} that performs SOAP mustUnderstand processing.
      * This pipe should be before HandlerPipes.
      */

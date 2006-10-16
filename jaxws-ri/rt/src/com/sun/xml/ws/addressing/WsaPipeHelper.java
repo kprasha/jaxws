@@ -64,81 +64,6 @@ import org.w3c.dom.Element;
  */
 public abstract class WsaPipeHelper {
 
-    public final Packet validateServerInboundHeaders(Packet packet) throws XMLStreamException {
-        SOAPFault soapFault;
-        FaultDetailHeader s11FaultDetailHeader;
-
-        try {
-            HeaderValidator.checkCardinality(packet, binding, wsdlPort);
-
-            validateAction(packet);
-
-            return packet;
-        } catch (InvalidMapException e) {
-            soapFault = newInvalidMapFault(e, binding.getAddressingVersion());
-            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getMapQName());
-        } catch (MapRequiredException e) {
-            soapFault = newMapRequiredFault(e, binding.getAddressingVersion());
-            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getMapQName());
-        } catch (ActionNotSupportedException e) {
-            soapFault = newActionNotSupportedFault(e.getAction(), binding.getAddressingVersion());
-            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getAction());
-        }
-
-        if (soapFault != null) {
-            // WS-A fault processing for one-way methods
-            if (packet.getMessage().isOneWay(wsdlPort)) {
-                return packet.createServerResponse(null, wsdlPort, binding);
-            }
-
-            Message m = Messages.create(soapFault);
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
-                m.getHeaders().add(s11FaultDetailHeader);
-            }
-
-            Packet response = packet.createServerResponse(m, wsdlPort, binding);
-            return response;
-        }
-
-        return packet;
-    }
-
-    private void validateAction(Packet packet) {
-        //There may not be a WSDL operation.  There may not even be a WSDL.
-        //For instance this may be a RM CreateSequence message.
-        WSDLBoundOperation wbo = HeaderValidator.getWSDLBoundOperation(wsdlPort, packet);
-
-        WSDLOperation op = null;
-
-        if (wbo != null) {
-            op = wbo.getOperation();
-        }
-
-        if (wbo == null || op == null) {
-            return;
-        }
-
-        String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
-
-        // For now, validation happens only on server-side.
-        // todo: should it happen on client side as well ?
-        if (packet.proxy != null) {
-            return;
-        }
-
-        if (gotA == null)
-            throw new WebServiceException("null input action"); // TODO: i18n
-
-        String expected = getInputAction(packet);
-        String soapAction = getSOAPAction(packet);
-        if (isInputActionDefault(packet) && (soapAction != null && !soapAction.equals("")))
-            expected = soapAction;
-
-        if (expected != null && !gotA.equals(expected)) {
-            throw new ActionNotSupportedException(gotA);
-        }
-    }
-
     private String getFaultAction(Packet packet) {
         String action = binding.getAddressingVersion().getDefaultFaultAction();
 
@@ -224,7 +149,7 @@ public abstract class WsaPipeHelper {
         return ((WSDLOperationImpl)op).getInput().isDefaultAction();
     }
 
-    private String getSOAPAction(Packet packet) {
+    public String getSOAPAction(Packet packet) {
         String action = "";
 
         if (packet == null)
@@ -260,7 +185,7 @@ public abstract class WsaPipeHelper {
         return action;
     }
 
-    private SOAPFault newActionNotSupportedFault(String action, AddressingVersion av) {
+    public SOAPFault newActionNotSupportedFault(String action, AddressingVersion av) {
         QName subcode = av.actionNotSupportedTag;
         String faultstring = String.format(av.actionNotSupportedText, action);
 
@@ -287,7 +212,7 @@ public abstract class WsaPipeHelper {
         }
     }
 
-    private SOAPFault newInvalidMapFault(InvalidMapException e, AddressingVersion av) {
+    public SOAPFault newInvalidMapFault(InvalidMapException e, AddressingVersion av) {
         QName name = e.getMapQName();
         QName subsubcode = e.getSubsubcode();
         QName subcode = av.invalidMapTag;
@@ -317,7 +242,7 @@ public abstract class WsaPipeHelper {
         }
     }
 
-    private SOAPFault newMapRequiredFault(MapRequiredException e, AddressingVersion av) {
+    public SOAPFault newMapRequiredFault(MapRequiredException e, AddressingVersion av) {
         QName subcode = av.mapRequiredTag;
         QName subsubcode = av.mapRequiredTag;
         String faultstring = av.getMapRequiredText();

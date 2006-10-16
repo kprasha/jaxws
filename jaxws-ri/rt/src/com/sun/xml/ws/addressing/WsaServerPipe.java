@@ -26,48 +26,35 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.WebServiceException;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 
 /**
  * @author Arun Gupta
  */
-public class WsaServerPipe extends AbstractFilterTubeImpl {
-    final WSDLPort wsdlPort;
-    final WSBinding binding;
-    final WsaPipeHelper helper;
-
+public class WsaServerPipe extends WsaPipe {
     public WsaServerPipe(WSDLPort wsdlPort, WSBinding binding, Tube next) {
-        super(next);
-        this.wsdlPort = wsdlPort;
-        this.binding = binding;
-        helper = getPipeHelper();
+        super(wsdlPort, binding, next);
     }
 
     public WsaServerPipe(WsaServerPipe that, TubeCloner cloner) {
         super(that, cloner);
-        this.wsdlPort = that.wsdlPort;
-        this.binding = that.binding;
-        this.helper = that.helper;
-    }
-
-    public void preDestroy() {
-        // No resources to clean up
     }
 
     public WsaServerPipe copy(TubeCloner cloner) {
@@ -127,12 +114,7 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
             }
         }
 
-        Packet p = null;
-        try {
-            p = helper.validateServerInboundHeaders(request);
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(e);
-        }
+        Packet p = validateInboundHeaders(request);
 
         // if one-way message and WS-A header processing fault has occurred,
         // then do no further processing
@@ -271,15 +253,34 @@ public class WsaServerPipe extends AbstractFilterTubeImpl {
         return response;
     }
 
-    private WsaPipeHelper getPipeHelper() {
-        if(binding.isFeatureEnabled(AddressingFeature.ID)) {
-            return new WsaPipeHelperImpl(wsdlPort, binding);
-        } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID)) {
-            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
-        } else {
-            // Addressing is not enabled, WsaServerPipe should not be included in the pipeline
-            throw new WebServiceException("Addressing is not enabled, " +
-                    "WsaServerPipe should not be included in the pipeline");
+    @Override
+    public void validateAction(Packet packet) {
+        //There may not be a WSDL operation.  There may not even be a WSDL.
+        //For instance this may be a RM CreateSequence message.
+        WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
+
+        WSDLOperation op = null;
+
+        if (wbo != null) {
+            op = wbo.getOperation();
+        }
+
+        if (wbo == null || op == null) {
+            return;
+        }
+
+        String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+
+        if (gotA == null)
+            throw new WebServiceException("null input action"); // TODO: i18n
+
+        String expected = helper.getInputAction(packet);
+        String soapAction = helper.getSOAPAction(packet);
+        if (helper.isInputActionDefault(packet) && (soapAction != null && !soapAction.equals("")))
+            expected = soapAction;
+
+        if (expected != null && !gotA.equals(expected)) {
+            throw new ActionNotSupportedException(gotA);
         }
     }
 

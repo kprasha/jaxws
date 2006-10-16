@@ -52,7 +52,8 @@ public class StandalonePipeAssembler implements PipelineAssembler {
             head = context.createDumpPipe("client", System.out, head);
         }
         head = context.createClientMUPipe(head);
-        return context.createHandlerPipe(head);
+        head = context.createHandlerPipe(head);
+        return context.createWsaPipe(head);
     }
 
     /**

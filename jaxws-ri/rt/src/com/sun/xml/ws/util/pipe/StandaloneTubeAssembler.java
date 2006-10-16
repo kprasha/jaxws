@@ -22,7 +22,8 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
             head = context.createDumpTube("client", System.out, head);
         }
         head = context.createClientMUTube(head);
-        return context.createHandlerTube(head);
+        head = context.createHandlerTube(head);
+        return context.createWsaTube(head);
     }
 
     /**

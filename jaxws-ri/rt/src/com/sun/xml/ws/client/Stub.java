@@ -180,10 +180,8 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
             if (binding.isAddressingEnabled()) {
-                HeaderList headerList = packet.getMessage().getHeaders();
-                headerList.fillRequestAddressingHeaders(wsdlPort, binding, packet);
                 if(endpointReference!=null)
-                    endpointReference.addReferenceParameters(headerList);
+                    endpointReference.addReferenceParameters(packet.getMessage().getHeaders());
             }
         }
 
@@ -243,7 +241,7 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
     public final W3CEndpointReference getEndpointReference() {
         return getEndpointReference(W3CEndpointReference.class);
     }
-    
+
     public final <T extends EndpointReference>
     T getEndpointReference(Class<T> clazz) {
         // we need to expand WSEndpointAddress class to be able to return EPR with arbitrary address.

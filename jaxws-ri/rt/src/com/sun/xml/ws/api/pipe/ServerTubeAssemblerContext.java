@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.addressing.WsaServerPipe;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -166,8 +167,7 @@ public class ServerTubeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Tube createWsaTube(Tube next) {
-        if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
-                binding.isFeatureEnabled(AddressingFeature.ID))
+        if (binding instanceof SOAPBinding && AddressingVersion.isEnabled(binding))
             return new WsaServerPipe(wsdlModel, binding, next);
         else
             return next;

@@ -1,12 +1,14 @@
 package com.sun.xml.ws.api.pipe;
 
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.AddressingFeature;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.client.ClientPipelineHook;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
@@ -19,6 +21,8 @@ import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.protocol.soap.ClientMUTube;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
+import com.sun.xml.ws.addressing.WsaClientPipe;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 
 import java.io.PrintStream;
 
@@ -112,6 +116,16 @@ public class ClientTubeAssemblerContext {
             return PipeAdapter.adapt(hook.createSecurityPipe(ctxt, PipeAdapter.adapt(next)));
         }
         return next;
+    }
+
+    /**
+     * Creates a {@link Tube} that invokes protocol and logical handlers.
+     */
+    public Tube createWsaTube(Tube next) {
+        if (binding instanceof SOAPBinding && AddressingVersion.isEnabled(binding))
+            return new WsaClientPipe(wsdlModel, binding, next);
+        else
+            return next;
     }
 
     /**
