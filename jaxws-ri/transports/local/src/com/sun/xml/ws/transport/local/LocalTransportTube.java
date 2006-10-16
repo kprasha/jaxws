@@ -79,8 +79,8 @@ final class LocalTransportTube extends AbstractTubeImpl {
     // but nevertheless we do it as an experiement.
     private final Map<String, List<String>> reqHeaders = new HashMap<String, List<String>>();
 
-    public LocalTransportTube(URI baseURI, WSEndpoint endpoint, WSBinding binding) {
-        this(baseURI,HttpAdapter.createAlone(endpoint),binding.createCodec());
+    public LocalTransportTube(URI baseURI, WSEndpoint endpoint, Codec codec) {
+        this(baseURI,HttpAdapter.createAlone(endpoint),codec);
     }
 
     private LocalTransportTube(URI baseURI,HttpAdapter adapter, Codec codec) {

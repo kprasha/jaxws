@@ -48,11 +48,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
 
     private final Codec codec;
 
-    public HttpTransportPipe(WSBinding binding) {
-        this(binding.createCodec());
-    }
-
-    private HttpTransportPipe(Codec codec) {
+    public HttpTransportPipe(Codec codec) {
         this.codec = codec;
     }
 

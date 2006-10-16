@@ -32,6 +32,6 @@ public final class InVmTransportFactory extends TransportTubeFactory {
             throw new WebServiceException("No such port exists: "+adrs);
 
         // maybe I should be passing in my custom adapter
-        return new LocalTransportTube(adrs,endpoint,context.getBinding());
+        return new LocalTransportTube(adrs,endpoint,context.getCodec());
     }
 }

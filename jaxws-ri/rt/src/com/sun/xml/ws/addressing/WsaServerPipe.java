@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.binding.BindingImpl;
 
 /**
  * @author Arun Gupta
@@ -229,7 +230,8 @@ public class WsaServerPipe extends WsaPipe {
         }
 
         System.out.printf("Sending non-anonymous reply to %s\n", uri);
-        HttpTransportPipe tPipe = new HttpTransportPipe(binding);
+        //ToDO should we use ServierTubeAssemblerContext's codec ??
+        HttpTransportPipe tPipe = new HttpTransportPipe(((BindingImpl)binding).createCodec());
         response.endpointAddress = new EndpointAddress(URI.create(uri));
         response = tPipe.process(response);
 

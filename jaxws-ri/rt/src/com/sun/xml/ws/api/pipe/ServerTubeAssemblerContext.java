@@ -34,7 +34,7 @@ public class ServerTubeAssemblerContext {
     private final SEIModel seiModel;
     private final WSDLPort wsdlModel;
     private final WSEndpoint endpoint;
-    private final WSBinding binding;
+    private final BindingImpl binding;
     private final Tube terminal;
     private final boolean isSynchronous;
     private @NotNull Codec codec;
@@ -46,9 +46,10 @@ public class ServerTubeAssemblerContext {
         this.wsdlModel = wsdlModel;
         this.endpoint = endpoint;
         this.terminal = terminal;
-        this.binding = endpoint.getBinding();
+        // WSBinding is actually BindingImpl
+        this.binding = (BindingImpl)endpoint.getBinding();
         this.isSynchronous = isSynchronous;
-        this.codec = ((BindingImpl)binding).createCodec();
+        this.codec = this.binding.createCodec();
     }
 
     /**

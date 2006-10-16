@@ -21,6 +21,7 @@ import com.sun.xml.ws.handler.HandlerPipe;
 import com.sun.xml.ws.protocol.soap.ClientMUTube;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.addressing.WsaClientPipe;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 
@@ -40,6 +41,7 @@ public class ClientTubeAssemblerContext {
     private final @NotNull WSService rootOwner;
     private final @NotNull WSBinding binding;
     private final @NotNull Container container;
+    private @NotNull Codec codec;
 
     public ClientTubeAssemblerContext(@NotNull EndpointAddress address, @NotNull WSDLPort wsdlModel, @NotNull WSService rootOwner, @NotNull WSBinding binding) {
         this(address, wsdlModel, rootOwner, binding, Container.NONE);
@@ -53,6 +55,8 @@ public class ClientTubeAssemblerContext {
         this.rootOwner = rootOwner;
         this.binding = binding;
         this.container = container;
+        // WSBinding is actually BindingImpl
+        this.codec = ((BindingImpl)binding).createCodec();
     }
 
     /**
@@ -173,14 +177,29 @@ public class ClientTubeAssemblerContext {
         return TransportTubeFactory.create(cl, this);
     }
 
-    public Codec getCodec() {
-        // TODO
-        return binding.createCodec();
+    /**
+     * Gets the {@link Codec} that is set by {@link #setCodec} or the default codec
+     * based on the binding.
+     *
+     * @return codec to be used for web service requests
+     */
+    public @NotNull Codec getCodec() {
+        return codec;
     }
 
-    public void setCodec(Codec codec) {
-        // TODO
+    /**
+     * Interception point to change {@link Codec} during {@link Tube}line assembly. The
+     * new codec will be used by jax-ws client runtime for encoding/decoding web service
+     * request/response messages. The new codec should be used by the transport tubes.
+     *
+     * <p>
+     * the codec should correctly implement {@link Codec#copy} since it is used while
+     * serving requests concurrently.
+     *
+     * @param codec codec to be used for web service requests
+     */
+    public void setCodec(@NotNull Codec codec) {
+        this.codec = codec;
     }
-
 
 }

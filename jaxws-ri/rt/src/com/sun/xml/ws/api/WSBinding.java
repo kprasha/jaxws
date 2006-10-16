@@ -83,8 +83,9 @@ public interface WSBinding extends Binding {
      *
      * <p>
      * This is just a short-cut for {@code getBindingID().createCodec()}
-     */
+     *
     @NotNull Codec createCodec();
+    */
 
     /**
      * Gets the binding ID, which uniquely identifies the binding.
