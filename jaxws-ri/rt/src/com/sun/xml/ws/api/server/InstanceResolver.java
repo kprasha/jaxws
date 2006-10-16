@@ -142,7 +142,7 @@ public abstract class InstanceResolver<T> {
         return classDecl.getAnnotation(Stateful.class)!=null;
     }
 
-    private static <T> T createNewInstance(Class<T> cl) {
+    protected static <T> T createNewInstance(Class<T> cl) {
         try {
             return cl.newInstance();
         } catch (InstantiationException e) {

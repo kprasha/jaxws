@@ -15,8 +15,6 @@ import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.EndpointReference;
@@ -45,9 +43,7 @@ import java.util.logging.Logger;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> implements StatefulWebServiceManager<T> {
-    private final Class<T> clazz;
-
+public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceResolver<T> implements StatefulWebServiceManager<T> {
     /**
      * This instance is used for serving messages that have no cookie
      * or cookie value that the server doesn't recognize.
@@ -110,33 +106,12 @@ public final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<
      */
     private final Map<T,String> reverseInstances = Collections.synchronizedMap(new HashMap<T,String>());
 
-    // fields for resource injection.
-    private /*almost final*/ InjectionPlan<T,WebServiceContext> injectionPlan;
-    private /*almost final*/ WebServiceContext webServiceContext;
-    private /*almost final*/ WSEndpoint owner;
-    private final Method postConstructMethod;
-    private final Method preDestroyMethod;
-
     // time out control. 0=disabled
     private volatile long timeoutMilliseconds = 0;
     private volatile Callback<T> timeoutCallback;
 
     public StatefulInstanceResolver(Class<T> clazz) {
-        this.clazz = clazz;
-
-        postConstructMethod = findAnnotatedMethod(clazz, PostConstruct.class);
-        preDestroyMethod = findAnnotatedMethod(clazz, PreDestroy.class);
-    }
-
-    /**
-     * Perform resource injection on the given instance.
-     */
-    private void prepare(T t) {
-        // we can only start creating new instances after the start method is invoked.
-        assert webServiceContext!=null;
-
-        injectionPlan.inject(t,webServiceContext);
-        invokeMethod(postConstructMethod,t);
+        super(clazz);
     }
 
     @Override
@@ -170,9 +145,7 @@ public final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<
 
     @Override
     public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
-        injectionPlan = buildInjectionPlan(clazz,WebServiceContext.class,false);
-        this.webServiceContext = wsc;
-        this.owner = endpoint;
+        super.start(wsc,endpoint);
 
         if(endpoint.getBinding().getFeature(AddressingFeature.ID)==null)
             // addressing is not enabled.
@@ -327,10 +300,6 @@ public final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<
         Instance inst = instances.get(key);
         if(inst==null)  return;
         inst.restartTimer();
-    }
-
-    private void dispose(T instance) {
-        invokeMethod(preDestroyMethod,instance);
     }
 
     /**
