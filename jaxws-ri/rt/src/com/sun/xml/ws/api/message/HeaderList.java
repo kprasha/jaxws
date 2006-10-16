@@ -662,8 +662,8 @@ public final class HeaderList extends ArrayList<Header> {
             add(of.getReplyTo().createHeader(av.replyToTag));
         }
 
-        if (of.getFaultTo() != null) {
-            add(of.getFaultTo().createHeader(av.faultToTag));
+        if (of.getFrom() != null) {
+            add(of.getFrom().createHeader(av.faultToTag));
         }
 
         if (of.getRelatesToID() != null) {
@@ -764,5 +764,11 @@ public final class HeaderList extends ArrayList<Header> {
             return null;
         else
             return new HeaderList(original);
+    }
+
+    public void readResponseAddressingHeaders(WSDLPort wsdlPort, WSBinding binding) {
+        // read Action
+        String action = getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+        // TODO: validate client-inbound Action
     }
 }

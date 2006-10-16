@@ -44,7 +44,7 @@ public class OneWayFeature extends WebServiceFeature {
     public static final String ID = "http://java.sun.com/xml/ns/jaxws/addressing/oneway";
 
     private WSEndpointReference replyTo;
-    private WSEndpointReference faultTo;
+    private WSEndpointReference from;
     private String relatesToID;
 
     /**
@@ -82,13 +82,13 @@ public class OneWayFeature extends WebServiceFeature {
      * @param enabled specifies whether this feature should
      * be enabled or not.
      * @param replyTo specifies the {@link WSEndpointReference} of wsa:ReplyTo header.
-     * @param faultTo specifies the {@link WSEndpointReference} of wsa:FaultTo header.
+     * @param from specifies the {@link WSEndpointReference} of wsa:From header.
      * @param relatesTo specifies the MessageID to be used for wsa:RelatesTo header.
      */
-    public OneWayFeature(boolean enabled, WSEndpointReference replyTo, WSEndpointReference faultTo, String relatesTo) {
+    public OneWayFeature(boolean enabled, WSEndpointReference replyTo, WSEndpointReference from, String relatesTo) {
         this.enabled = enabled;
         this.replyTo = replyTo;
-        this.faultTo = faultTo;
+        this.from = from;
         this.relatesToID = relatesTo;
     }
 
@@ -118,21 +118,21 @@ public class OneWayFeature extends WebServiceFeature {
     }
 
     /**
-     * Getter for wsa:FaultTo header {@link WSEndpointReference}.
+     * Getter for wsa:From header {@link WSEndpointReference}.
      *
-     * @return address of the wsa:FaultTo header
+     * @return address of the wsa:From header
      */
-    public WSEndpointReference getFaultTo() {
-        return faultTo;
+    public WSEndpointReference getFrom() {
+        return from;
     }
 
     /**
-     * Setter for wsa:FaultTo header {@link WSEndpointReference}.
+     * Setter for wsa:From header {@link WSEndpointReference}.
      *
-     * @param address
+     * @param address of the wsa:From header
      */
-    public void setFaultTo(WSEndpointReference address) {
-        this.faultTo = address;
+    public void setFrom(WSEndpointReference address) {
+        this.from = address;
     }
 
     /**
