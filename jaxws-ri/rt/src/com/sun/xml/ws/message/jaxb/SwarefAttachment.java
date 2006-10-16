@@ -2,6 +2,7 @@ package com.sun.xml.ws.message.jaxb;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.util.ASCIIUtility;
 
 import javax.activation.DataHandler;
 import javax.xml.soap.AttachmentPart;
@@ -39,15 +40,14 @@ final class SwarefAttachment implements Attachment {
     }
 
     public byte[] asByteArray() {
-        ByteArrayOutputStreamEx baos = new ByteArrayOutputStreamEx(1024);
         try {
             InputStream is = dh.getDataSource().getInputStream();
-            baos.readFrom(is);
+            byte[] bytes = ASCIIUtility.getBytes(is);
             is.close();
+            return bytes;
         } catch (IOException e) {
             throw new WebServiceException(e);
         }
-        return baos.getBuffer();
     }
 
     public DataHandler asDataHandler() {

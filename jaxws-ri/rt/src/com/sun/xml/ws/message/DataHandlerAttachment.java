@@ -2,6 +2,8 @@ package com.sun.xml.ws.message;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.util.ASCIIUtility;
 
 import javax.activation.DataHandler;
 import javax.xml.soap.AttachmentPart;
@@ -45,15 +47,14 @@ public final class DataHandlerAttachment implements Attachment {
     }
 
     public byte[] asByteArray() {
-        ByteArrayOutputStreamEx baos = new ByteArrayOutputStreamEx(1024);
         try {
             InputStream is = dh.getDataSource().getInputStream();
-            baos.readFrom(is);
+            byte[] bytes = ASCIIUtility.getBytes(is);
             is.close();
+            return bytes;
         } catch (IOException e) {
             throw new WebServiceException(e);
         }
-        return baos.getBuffer();
     }
 
     public DataHandler asDataHandler() {
@@ -85,40 +86,5 @@ public final class DataHandlerAttachment implements Attachment {
         part.setDataHandler(dh);
         part.setContentId(contentId);
         saaj.addAttachmentPart(part);
-    }
-
-    //TODO: remove if its made public or protected from stax-ex
-    /**
-     * {@link ByteArrayOutputStream} with access to its raw buffer.
-     */
-    private final class ByteArrayOutputStreamEx extends ByteArrayOutputStream {
-        public ByteArrayOutputStreamEx() {
-        }
-
-        public ByteArrayOutputStreamEx(int size) {
-            super(size);
-        }
-
-        public byte[] getBuffer() {
-            return buf;
-        }
-
-        /**
-         * Reads the given {@link InputStream} completely into the buffer.
-         */
-        public void readFrom(InputStream is) throws IOException {
-            while(true) {
-                if(count==buf.length) {
-                    // realllocate
-                    byte[] data = new byte[buf.length*2];
-                    System.arraycopy(buf,0,data,0,buf.length);
-                    buf = data;
-                }
-
-                int sz = is.read(buf,count,buf.length-count);
-                if(sz<0)     return;
-                count += sz;
-            }
-        }
     }
 }
