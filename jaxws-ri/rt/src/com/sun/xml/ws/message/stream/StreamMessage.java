@@ -24,7 +24,6 @@ package com.sun.xml.ws.message.stream;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
@@ -33,7 +32,6 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
-import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
@@ -135,7 +133,7 @@ public final class StreamMessage extends AbstractMessageImpl {
      * and the complete infoset of the SOAP envelope.
      *
      * <p>
-     * See {@link #StreamMessage(HeaderList, XMLStreamReader, SOAPVersion)} for
+     * See {@link #StreamMessage(HeaderList, AttachmentSet, XMLStreamReader, SOAPVersion)} for
      * the description of the basic parameters.
      *
      * @param headerTag
