@@ -100,12 +100,21 @@ public class HeaderValidator {
 
     static final void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) throws XMLStreamException {
         Message message = packet.getMessage();
+        AddressingVersion av = binding.getAddressingVersion();
 
-        if (message == null)
-            return;
+        if (message == null) {
+            if (AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())))
+                throw new WebServiceException(AddressingMessages.NULL_MESSAGE());
+            else
+                return;
+        }
 
-        if (message.getHeaders() == null)
-            return;
+        if (message.getHeaders() == null) {
+            if (AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())))
+                throw new WebServiceException(AddressingMessages.NULL_HEADERS());
+            else
+                return;
+        }
 
         boolean foundFrom = false;
         boolean foundTo = false;
@@ -114,14 +123,20 @@ public class HeaderValidator {
         boolean foundAction = false;
         boolean foundMessageId = false;
 
-        AddressingVersion av = binding.getAddressingVersion();
         java.util.Iterator<Header> hIter = message.getHeaders().getHeaders(av.nsUri, true);
 
-        // no need to process if WS-A is not required and no WS-A headers are present
-        if (!AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())) && !hIter.hasNext())
-            return;
+        if (!hIter.hasNext()) {
+            // no WS-A headers are found
 
-        QName faultyHeader = null;
+            if (AddressingVersion.isRequired(binding.getFeature(av.getFeatureID())))
+                // if WS-A is required, then throw an exception looking for wsa:Action header
+                throw new InvalidMapException(av.actionTag, av.invalidCardinalityTag);
+            else
+                // else no need to process
+                return;
+        }
+
+        QName duplicateHeader = null;
         WSEndpointReference replyTo = null;
         WSEndpointReference faultTo = null;
 
@@ -136,39 +151,39 @@ public class HeaderValidator {
             String local = h.getLocalPart();
             if (local.equals(av.fromTag.getLocalPart())) {
                 if (foundFrom) {
-                    faultyHeader = av.fromTag;
+                    duplicateHeader = av.fromTag;
                     break;
                 }
                 foundFrom = true;
             } else if (local.equals(av.toTag.getLocalPart())) {
                 if (foundTo) {
-                    faultyHeader = av.toTag;
+                    duplicateHeader = av.toTag;
                     break;
                 }
                 foundTo = true;
             } else if (local.equals(av.replyToTag.getLocalPart())) {
                 if (foundReplyTo) {
-                    faultyHeader = av.replyToTag;
+                    duplicateHeader = av.replyToTag;
                     break;
                 }
                 foundReplyTo = true;
                 replyTo = h.readAsEPR(binding.getAddressingVersion());
             } else if (local.equals(av.faultToTag.getLocalPart())) {
                 if (foundFaultTo) {
-                    faultyHeader = av.faultToTag;
+                    duplicateHeader = av.faultToTag;
                     break;
                 }
                 foundFaultTo = true;
                 faultTo = h.readAsEPR(binding.getAddressingVersion());
             } else if (local.equals(av.actionTag.getLocalPart())) {
                 if (foundAction) {
-                    faultyHeader = av.actionTag;
+                    duplicateHeader = av.actionTag;
                     break;
                 }
                 foundAction = true;
             } else if (local.equals(av.messageIDTag.getLocalPart())) {
                 if (foundMessageId) {
-                    faultyHeader = av.messageIDTag;
+                    duplicateHeader = av.messageIDTag;
                     break;
                 }
                 foundMessageId = true;
@@ -183,10 +198,9 @@ public class HeaderValidator {
             }
         }
 
-        // check for invalid cardinality first before checking
-        // checking for mandatory headers
-        if (faultyHeader != null) {
-            throw new InvalidMapException(faultyHeader, av.invalidCardinalityTag);
+        // check for invalid cardinality first before checking for mandatory headers
+        if (duplicateHeader != null) {
+            throw new InvalidMapException(duplicateHeader, av.invalidCardinalityTag);
         }
 
         // WS-A is engaged only if wsa:Action header is found
