@@ -28,6 +28,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.ServerRtException;
+import com.sun.xml.ws.server.SingletonResolver;
+import com.sun.xml.ws.server.StatefulInstanceResolver;
 
 import javax.xml.ws.Provider;
 import javax.xml.ws.WebServiceContext;

@@ -1,8 +1,8 @@
-package com.sun.xml.ws.api.server;
+package com.sun.xml.ws.server;
 
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.util.localization.Localizable;
 
 import javax.annotation.Resource;

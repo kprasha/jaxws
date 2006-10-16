@@ -1,4 +1,4 @@
-package com.sun.xml.ws.api.server;
+package com.sun.xml.ws.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -8,9 +8,11 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.WSWebServiceContext;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.server.InvokerTube;
 import com.sun.xml.ws.spi.ProviderImpl;
 
 import javax.annotation.PostConstruct;
@@ -43,7 +45,7 @@ import java.util.logging.Logger;
  *
  * @author Kohsuke Kawaguchi
  */
-final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> implements StatefulWebServiceManager<T> {
+public final class StatefulInstanceResolver<T> extends AbstractInstanceResolver<T> implements StatefulWebServiceManager<T> {
     private final Class<T> clazz;
 
     /**
