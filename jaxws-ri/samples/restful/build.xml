@@ -124,20 +124,30 @@
         </java>
     </target>
 
-    <target name="run">
+    <target name="run-dispatch">
         <java fork="true" classname="${dispatch.client}">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
+            
+                         <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=true"/>
         </java>
+    </target>
+
+    <target name="run">
+<antcall description="Running Client sending GET URL request..." target="run-url"/>
+<antcall description="Running Client sending GET request using Dispatch..." target="run-dispatch"/>
     </target>
 
     <target name="help">
         <echo message="server:       Builds and deploy the service endpoint WAR"/>
         <echo message="client:       Builds the client"/>
-        <echo message="run:          Runs the Dispatch client"/>
+        <echo message="run:          Runs the Dispatch and proxy client"/>
+        <echo message="run-dispatch: Runs the Dispatch client"/>
         <echo message="run-url:      Runs the stub/proxy client"/>
     </target>
 

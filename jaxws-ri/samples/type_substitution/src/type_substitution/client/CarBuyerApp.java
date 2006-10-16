@@ -41,10 +41,10 @@ public class CarBuyerApp {
         Toyota newCar = (Toyota)dealer.tradeIn(oldCar);
 
         if(newCar != null &&
-                car.getMake().equals("Toyota") &&
-                car.getModel().equals("Avalon") &&
-                car.getYear().equals("2007") &&
-                car.getColor().equals("black")){
+                newCar.getMake().equals("Toyota") &&
+                newCar.getModel().equals("Avalon") &&
+                newCar.getYear().equals("2007") &&
+                newCar.getColor().equals("black")){
             System.out.println("Traded in Right Car!");
         }else{
             System.out.println("Failed to tradeIn!");

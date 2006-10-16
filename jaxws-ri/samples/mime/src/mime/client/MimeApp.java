@@ -1,5 +1,5 @@
 /**
- * $Id: MimeApp.java,v 1.4.2.2.2.1 2006-08-23 01:04:22 vivekp Exp $
+ * $Id: MimeApp.java,v 1.4.2.2.2.2 2006-10-16 04:18:13 vivekp Exp $
  */
 
 /*
@@ -25,6 +25,8 @@
  */
 package mime.client;
 
+import com.sun.xml.ws.util.ASCIIUtility;
+
 import javax.xml.ws.Holder;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.Source;
@@ -44,12 +46,12 @@ public class MimeApp {
             }
 
             //test wsdl mime without enableMIMEContent(default)
-            testEchoData ((Hello)port);
+//            testEchoData ((Hello)port);
 
             //test wsdl mime with enableMIMEContent
-            testEchoDataWithEnableMIMEContent((Hello)port);
+//            testEchoDataWithEnableMIMEContent((Hello)port);
 
-            testDetail((Hello)port);
+//            testDetail((Hello)port);
 
             //test swaref
             testSwaref ((Hello)port);
@@ -84,6 +86,7 @@ public class MimeApp {
         req.setName("XYZ corp");
         req.setAddress("1234 Some street");
         Source resp = port.detail(req);
+
         if(AttachmentHelper.compareStreamSource(new StreamSource(new ByteArrayInputStream(sampleXML.getBytes())), (StreamSource)resp))
             System.out.println ("testDetail() PASSED!");
         else

@@ -110,6 +110,7 @@
 
     <target name="client" depends="generate-client">
         <javac
+                debug="true"
                 fork="true"
                 srcdir="${basedir}/src"
                 destdir="${build.classes.home}"

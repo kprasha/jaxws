@@ -30,6 +30,6 @@
         service='{http://example.org/mime}HelloService'
         port='{http://example.org/mime}HelloPort'
         url-pattern="/hello"
-        enable-mtom="true"/>
+        enable-mtom="false"/>
 </endpoints>
 
