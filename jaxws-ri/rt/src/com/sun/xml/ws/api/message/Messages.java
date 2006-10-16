@@ -93,7 +93,7 @@ public abstract class Messages {
      *      The SOAP version of the message. Must not be null.
      */
     public static Message create(JAXBRIContext context, Object jaxbObject, SOAPVersion soapVersion) {
-        return new JAXBMessage(context,jaxbObject,soapVersion);
+        return JAXBMessage.create(context,jaxbObject,soapVersion);
     }
 
     /**

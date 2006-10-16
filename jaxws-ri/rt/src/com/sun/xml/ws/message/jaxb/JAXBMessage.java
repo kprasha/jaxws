@@ -25,6 +25,7 @@ import com.sun.istack.FragmentContentHandler;
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -34,12 +35,14 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
+import com.sun.xml.ws.message.stream.StreamMessage;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.util.JAXBResult;
@@ -88,10 +91,36 @@ public final class JAXBMessage extends AbstractMessageImpl {
      *      The JAXB object that represents the payload. must not be null. This object
      *      must be bound to an element (which means it either is a {@link JAXBElement} or
      *      an instanceof a class with {@link XmlRootElement}).
-     * @param soapVer
+     * @param soapVersion
      *      The SOAP version of the message. Must not be null.
      */
-    public JAXBMessage( JAXBRIContext context, Object jaxbObject, SOAPVersion soapVer ) {
+    public static Message create(JAXBRIContext context, Object jaxbObject, SOAPVersion soapVersion) {
+        if(!context.hasSwaRef()) {
+            return new JAXBMessage(context,jaxbObject,soapVersion);
+        }
+
+        // If we have swaRef, then that means we might have attachments.
+        // to comply with the packet API, we need to eagerly turn the JAXB object into infoset
+        // to correctly find out about attachments.
+
+        try {
+            MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+
+            Marshaller m = context.createMarshaller();
+            AttachmentSetImpl attachments = new AttachmentSetImpl();
+            m.setAttachmentMarshaller(new AttachmentMarshallerImpl(attachments));
+            m.marshal(jaxbObject,xsb.createFromXMLStreamWriter());
+
+            // any way to reuse this XMLStreamBuffer in StreamMessage?
+            return new StreamMessage(null,attachments,xsb.readAsXMLStreamReader(),soapVersion);
+        } catch (JAXBException e) {
+            throw new WebServiceException(e);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
+    }
+
+    private JAXBMessage( JAXBRIContext context, Object jaxbObject, SOAPVersion soapVer ) {
         super(soapVer);
         this.bridge = new MarshallerBridge(context);
         this.jaxbObject = jaxbObject;
