@@ -79,15 +79,6 @@ public interface WSBinding extends Binding {
     AddressingVersion getAddressingVersion();
 
     /**
-     * Creates a new {@link Codec} for this binding.
-     *
-     * <p>
-     * This is just a short-cut for {@code getBindingID().createCodec()}
-     *
-    @NotNull Codec createCodec();
-    */
-
-    /**
      * Gets the binding ID, which uniquely identifies the binding.
      *
      * <p>

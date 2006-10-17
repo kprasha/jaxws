@@ -173,9 +173,12 @@ public class ServerTubeAssemblerContext {
 
     /**
      * Gets the {@link Codec} that is set by {@link #setCodec} or the default codec
-     * based on the binding.
+     * based on the binding. The codec is a full codec that is responsible for
+     * encoding/decoding entire protocol message(for e.g: it is responsible to
+     * encode/decode entire MIME messages in SOAP binding)
      *
      * @return codec to be used for web service requests
+     * @see {@link Codecs}
      */
     public @NotNull Codec getCodec() {
         return codec;
@@ -188,10 +191,16 @@ public class ServerTubeAssemblerContext {
      * of this new codec and will be used in the server runtime.
      *
      * <p>
+     * The codec is a full codec that is responsible for
+     * encoding/decoding entire protocol message(for e.g: it is responsible to
+     * encode/decode entire MIME messages in SOAP binding)
+     *
+     * <p>
      * the codec should correctly implement {@link Codec#copy} since it is used while
      * serving requests concurrently.
      *
      * @param codec codec to be used for web service requests
+     * @see {@link Codecs}
      */
     public void setCodec(@NotNull Codec codec) {
         this.codec = codec;
