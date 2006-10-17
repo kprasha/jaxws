@@ -42,7 +42,7 @@ public final class ClientPipeAssemblerContext extends ClientTubeAssemblerContext
      * This pipe should be before {@link com.sun.xml.ws.protocol.soap.ClientMUTube}.
      */
     public Pipe createWsaPipe(Pipe next) {
-        return PipeAdapter.adapt(super.createClientMUTube(PipeAdapter.adapt(next)));
+        return PipeAdapter.adapt(super.createWsaTube(PipeAdapter.adapt(next)));
     }
 
     /**
