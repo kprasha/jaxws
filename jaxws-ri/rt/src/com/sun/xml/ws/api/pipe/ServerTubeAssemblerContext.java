@@ -2,7 +2,7 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.addressing.WsaServerPipe;
+import com.sun.xml.ws.addressing.WsaServerTube;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -166,7 +166,7 @@ public class ServerTubeAssemblerContext {
      */
     public Tube createWsaTube(Tube next) {
         if (binding instanceof SOAPBinding && AddressingVersion.isEnabled(binding))
-            return new WsaServerPipe(wsdlModel, binding, next);
+            return new WsaServerTube(wsdlModel, binding, next);
         else
             return next;
     }

@@ -42,17 +42,17 @@ import com.sun.xml.ws.resources.AddressingMessages;
 /**
  * @author Arun Gupta
  */
-public class WsaClientPipe extends WsaPipe {
-    public WsaClientPipe(WSDLPort wsdlPort, WSBinding binding, Tube next) {
+public class WsaClientTube extends WsaTube {
+    public WsaClientTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
 
-    public WsaClientPipe(WsaClientPipe that, TubeCloner cloner) {
+    public WsaClientTube(WsaClientTube that, TubeCloner cloner) {
         super(that, cloner);
     }
 
-    public WsaClientPipe copy(TubeCloner cloner) {
-        return new WsaClientPipe(this, cloner);
+    public WsaClientTube copy(TubeCloner cloner) {
+        return new WsaClientTube(this, cloner);
     }
 
     public @NotNull NextAction processRequest(Packet request) {

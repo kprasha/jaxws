@@ -23,7 +23,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.addressing.WsaPipeHelper;
+import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -642,7 +642,7 @@ public final class Packet extends DistributedPropertySet {
         if (addressingVersion == null)
             return responsePacket;
 
-        WsaPipeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
+        WsaTubeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
         String action = wsaHelper.getOutputAction(this);
 
         return populateAddressingHeaders(responsePacket, binding.getAddressingVersion(), binding.getSOAPVersion(), action);

@@ -56,19 +56,19 @@ import com.sun.istack.NotNull;
 /**
  * @author Arun Gupta
  */
-public abstract class WsaPipe extends AbstractFilterTubeImpl {
+public abstract class WsaTube extends AbstractFilterTubeImpl {
     protected final WSDLPort wsdlPort;
     protected final WSBinding binding;
-    final WsaPipeHelper helper;
+    final WsaTubeHelper helper;
 
-    public WsaPipe(WSDLPort wsdlPort, WSBinding binding, Tube next) {
+    public WsaTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(next);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
-        helper = getPipeHelper();
+        helper = getTubeHelper();
     }
 
-    public WsaPipe(WsaPipe that, TubeCloner cloner) {
+    public WsaTube(WsaTube that, TubeCloner cloner) {
         super(that, cloner);
         this.wsdlPort = that.wsdlPort;
         this.binding = that.binding;
@@ -86,13 +86,13 @@ public abstract class WsaPipe extends AbstractFilterTubeImpl {
         return super.processException(t);
     }
 
-    protected WsaPipeHelper getPipeHelper() {
+    protected WsaTubeHelper getTubeHelper() {
         if(binding.isFeatureEnabled(AddressingFeature.ID)) {
-            return new WsaPipeHelperImpl(wsdlPort, binding);
+            return new WsaTubeHelperImpl(wsdlPort, binding);
         } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID)) {
-            return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
+            return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, binding);
         } else {
-            // Addressing is not enabled, WsaPipe should not be included in the pipeline
+            // Addressing is not enabled, WsaTube should not be included in the pipeline
             throw new WebServiceException(AddressingMessages.ADDRESSING_NOT_ENABLED(this.getClass().getSimpleName()));
         }
     }

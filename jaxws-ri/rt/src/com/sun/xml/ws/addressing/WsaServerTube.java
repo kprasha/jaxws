@@ -51,17 +51,17 @@ import com.sun.xml.ws.binding.BindingImpl;
 /**
  * @author Arun Gupta
  */
-public class WsaServerPipe extends WsaPipe {
-    public WsaServerPipe(WSDLPort wsdlPort, WSBinding binding, Tube next) {
+public class WsaServerTube extends WsaTube {
+    public WsaServerTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
 
-    public WsaServerPipe(WsaServerPipe that, TubeCloner cloner) {
+    public WsaServerTube(WsaServerTube that, TubeCloner cloner) {
         super(that, cloner);
     }
 
-    public WsaServerPipe copy(TubeCloner cloner) {
-        return new WsaServerPipe(this, cloner);
+    public WsaServerTube copy(TubeCloner cloner) {
+        return new WsaServerTube(this, cloner);
     }
 
     public @NotNull NextAction processRequest(Packet request) {

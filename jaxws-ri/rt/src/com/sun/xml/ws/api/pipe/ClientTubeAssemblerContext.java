@@ -19,7 +19,7 @@ import com.sun.xml.ws.protocol.soap.ClientMUTube;
 import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.addressing.WsaClientPipe;
+import com.sun.xml.ws.addressing.WsaClientTube;
 
 import java.io.PrintStream;
 
@@ -123,7 +123,7 @@ public class ClientTubeAssemblerContext {
      */
     public Tube createWsaTube(Tube next) {
         if (binding instanceof SOAPBinding && AddressingVersion.isEnabled(binding))
-            return new WsaClientPipe(wsdlModel, binding, next);
+            return new WsaClientTube(wsdlModel, binding, next);
         else
             return next;
     }

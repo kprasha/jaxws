@@ -62,7 +62,7 @@ import org.w3c.dom.Element;
 /**
  * @author Arun Gupta
  */
-public abstract class WsaPipeHelper {
+public abstract class WsaTubeHelper {
 
     private String getFaultAction(Packet packet) {
         String action = binding.getAddressingVersion().getDefaultFaultAction();

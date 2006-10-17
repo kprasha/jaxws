@@ -23,7 +23,7 @@ package com.sun.xml.ws.api.message;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.addressing.WsaPipeHelper;
+import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -626,7 +626,7 @@ public final class HeaderList extends ArrayList<Header> {
             throw new IllegalArgumentException(AddressingMessages.NULL_BINDING());
 
         AddressingVersion ver = binding.getAddressingVersion();
-        WsaPipeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
+        WsaTubeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
 
         // wsa:Action
         // todo: abstract the algorithm of getting input action in getInputAction
