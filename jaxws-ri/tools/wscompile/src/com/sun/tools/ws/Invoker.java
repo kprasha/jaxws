@@ -52,11 +52,20 @@ final class Invoker {
     };
 
     /**
+     * CLI entry point.
      *
      * @return
      *      exit code
      */
     static int main(String toolName, String[] args) throws Throwable {
+        // use the platform default proxy if available.
+        // see sun.net.spi.DefaultProxySelector for details.
+        try {
+            System.setProperty("java.net.useSystemProxies","true");
+        } catch (SecurityException e) {
+            // failing to set this property isn't fatal
+        }
+
         ClassLoader oldcc = Thread.currentThread().getContextClassLoader();
         try {
             APTClassLoader cl = new APTClassLoader(Invoker.class.getClassLoader(),prefixes);
