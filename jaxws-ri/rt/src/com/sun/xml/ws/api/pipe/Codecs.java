@@ -40,7 +40,7 @@ public abstract class Codecs {
      * @param xmlEnvelopeCodec SOAP envelope codec
      * @return non null codec to parse entire SOAP message(including MIME parts)
      */
-    public @NotNull Codec createSOAPBindingCodec(WSBinding binding, Codec xmlEnvelopeCodec) {
+    public static @NotNull Codec createSOAPBindingCodec(WSBinding binding, Codec xmlEnvelopeCodec) {
         return new SOAPBindingCodec(binding, xmlEnvelopeCodec);
     }
 
@@ -52,7 +52,7 @@ public abstract class Codecs {
      * @param version SOAP version of the binding
      * @return non null default xml codec
      */
-    public @NotNull Codec createSOAPEnvelopeXmlCodec(@NotNull SOAPVersion version) {
+    public static @NotNull Codec createSOAPEnvelopeXmlCodec(@NotNull SOAPVersion version) {
         return StreamSOAPCodec.create(version);
     }
 }
