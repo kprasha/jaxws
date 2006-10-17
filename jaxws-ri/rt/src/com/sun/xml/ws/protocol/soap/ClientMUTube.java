@@ -61,12 +61,17 @@ public class ClientMUTube extends MUTube {
         }
         HandlerConfiguration handlerConfig = response.handlerConfig;
         Set<QName> knownHeaders;
-        if (handlerConfig != null)
+        Set<String> roles;
+        if (handlerConfig != null) {
             knownHeaders = handlerConfig.getKnownHeaders();
-        else
+            roles = handlerConfig.getRoles();
+        } else {
+            roles = new HashSet<String>();
+            roles.add(soapVersion.implicitRole);
             knownHeaders = new HashSet<QName>();
+        }
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(
-                response.getMessage().getHeaders(), handlerConfig.getRoles(),
+                response.getMessage().getHeaders(), roles,
                 knownHeaders);
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
             return super.processResponse(response);
