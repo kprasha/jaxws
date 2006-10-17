@@ -29,13 +29,14 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import javax.xml.namespace.QName;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * @author Rama Pulavarthi
  */
 
 public class ClientMUTube extends MUTube {
-    
+
     public ClientMUTube(WSBinding binding, Tube next) {
         super(binding, next);
     }
@@ -59,9 +60,14 @@ public class ClientMUTube extends MUTube {
             return super.processResponse(response);
         }
         HandlerConfiguration handlerConfig = response.handlerConfig;
+        Set<QName> knownHeaders;
+        if (handlerConfig != null)
+            knownHeaders = handlerConfig.getKnownHeaders();
+        else
+            knownHeaders = new HashSet<QName>();
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(
                 response.getMessage().getHeaders(), handlerConfig.getRoles(),
-                handlerConfig.getKnownHeaders());
+                knownHeaders);
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
             return super.processResponse(response);
         }
