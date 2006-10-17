@@ -2,6 +2,7 @@ package com.sun.xml.ws.message.jaxb;
 
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.message.AttachmentSetImpl;
+import com.sun.xml.ws.message.DataHandlerAttachment;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.attachment.AttachmentMarshaller;
@@ -38,7 +39,7 @@ final class AttachmentMarshallerImpl extends AttachmentMarshaller {
 
     public String addSwaRefAttachment(DataHandler data) {
         String cid = encodeCid(null);
-        Attachment att = new SwarefAttachment(cid, data);
+        Attachment att = new DataHandlerAttachment(cid, data);
         attachments.add(att);
         cid = "cid:" + cid;
         return cid;

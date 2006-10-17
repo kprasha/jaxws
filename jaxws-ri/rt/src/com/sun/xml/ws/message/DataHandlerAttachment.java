@@ -2,7 +2,7 @@ package com.sun.xml.ws.message;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.util.ASCIIUtility;
+import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.activation.DataHandler;
 import javax.xml.soap.AttachmentPart;
@@ -47,9 +47,12 @@ public final class DataHandlerAttachment implements Attachment {
     public byte[] asByteArray() {
         try {
             InputStream is = dh.getDataSource().getInputStream();
-            byte[] bytes = ASCIIUtility.getBytes(is);
+            //TODO: probably we should cache the ByteArrayBuffer, just incase some one needs
+            // to reuse it
+            ByteArrayBuffer buffer = new ByteArrayBuffer();
+            buffer.write(is);
             is.close();
-            return bytes;
+            return buffer.toByteArray();
         } catch (IOException e) {
             throw new WebServiceException(e);
         }
