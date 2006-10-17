@@ -70,8 +70,8 @@ public class WsaClientPipe extends WsaPipe {
 
     public @NotNull NextAction processResponse(Packet response) {
         // if one-way then, no validation
-//        if (response.getMessage() != null)
-//            response = validateInboundHeaders(response);
+        if (response.getMessage() != null)
+            response = validateInboundHeaders(response);
 
         return doReturnWith(response);
     }
