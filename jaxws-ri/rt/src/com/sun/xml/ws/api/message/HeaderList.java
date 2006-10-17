@@ -654,18 +654,21 @@ public final class HeaderList extends ArrayList<Header> {
     private void fillRequestAddressingHeaders(@NotNull Packet packet, @NotNull AddressingVersion av, @NotNull SOAPVersion sv, @NotNull OneWayFeature of, @NotNull String action) {
         fillCommonAddressingHeaders(packet, av, sv, action);
 
-        // wsa:MessageID
-        Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
-        add(h);
-
+        // wsa:ReplyTo
         if (of.getReplyTo() != null) {
             add(of.getReplyTo().createHeader(av.replyToTag));
+
+            // add wsa:MessageID only for non-null ReplyTo
+            Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
+            add(h);
         }
 
+        // wsa:From
         if (of.getFrom() != null) {
-            add(of.getFrom().createHeader(av.faultToTag));
+            add(of.getFrom().createHeader(av.fromTag));
         }
 
+        // wsa:RelatesTo
         if (of.getRelatesToID() != null) {
             add(new RelatesToHeader(av.relatesToTag, of.getRelatesToID()));
         }
