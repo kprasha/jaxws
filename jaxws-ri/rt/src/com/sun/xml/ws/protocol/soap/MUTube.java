@@ -61,7 +61,7 @@ abstract class MUTube extends AbstractFilterTubeImpl {
     private final static String MUST_UNDERSTAND_FAULT_MESSAGE_STRING =
             "One or more mandatory SOAP header blocks not understood";
 
-    private final SOAPVersion soapVersion;
+    protected final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
     
     protected MUTube(WSBinding binding, Tube next) {
