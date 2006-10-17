@@ -295,6 +295,7 @@ public class WsaServerTube extends WsaTube {
             throw new MapRequiredException(binding.getAddressingVersion().actionTag);
 
         // if no wsa:To header is found
+        // TODO: should we throw a fault for missing To since it's optional ?
         if (!foundTo)
             throw new MapRequiredException(binding.getAddressingVersion().toTag);
     }

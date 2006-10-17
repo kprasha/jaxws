@@ -111,5 +111,8 @@ public class WsaClientTube extends WsaTube {
         // if no wsa:Action header is found
         if (!foundAction)
             throw new MapRequiredException(binding.getAddressingVersion().actionTag);
+
+        // wsa:To is opional
+        // if not present, then anonymous value is assumed
     }
 }
