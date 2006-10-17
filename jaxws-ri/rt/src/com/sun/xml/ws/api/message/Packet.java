@@ -322,7 +322,7 @@ public final class Packet extends DistributedPropertySet {
      * This property is set from the parameter
      * of {@link WSEndpoint.PipeHead#process}.
      */
-    public TransportBackChannel transportBackChannel;
+    public @Nullable TransportBackChannel transportBackChannel;
 
     /**
      * The governing {@link WSEndpoint} in which this message is floating.

@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.BindingID;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Binding;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import java.net.URL;
 import java.util.Collection;
@@ -180,6 +181,11 @@ public abstract class WSEndpoint<T> {
      * and eventually return it as a return value through {@link CompletionCallback}.
      *
      * <p>
+     * This takes care of pooling of {@link Tube}lines and reuses
+     * tubeline for requests. Same instance of tubeline is not used concurrently
+     * for two requests.
+     *
+     * <p>
      * If the transport is capable of asynchronous execution, use this
      * instead of using {@link PipeHead#process}.
      *
@@ -188,6 +194,14 @@ public abstract class WSEndpoint<T> {
      * executor may used multiple times to run this request in a asynchronous fashion.
      * The calling thread will be returned immediately, and the callback will be
      * called in a different a thread.
+     *
+     * <p>
+     * {@link Packet#transportBackChannel} should have the correct value, so that
+     * one-way message processing happens correctly. {@link Packet#webServiceContextDelegate}
+     * should have the correct value, so that some {@link WebServiceContext} methods correctly.
+     *
+     * @see {@link Packet#transportBackChannel}
+     * @see {@link Packet#webServiceContextDelegate}
      * 
      * @param request web service request
      * @param callback callback to get response packet(exception if there is one)
