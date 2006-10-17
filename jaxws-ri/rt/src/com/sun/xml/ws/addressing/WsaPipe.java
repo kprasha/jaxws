@@ -158,7 +158,6 @@ public abstract class WsaPipe extends AbstractFilterTubeImpl {
         return true;
     }
 
-    protected abstract void validateAction(Packet packet);
     /**
      * Checks the cardinality of WS-Addressing headers on an inbound {@link Packet}. This method
      * checks for the cardinality if WS-Addressing is engaged (detected by the presence of wsa:Action
@@ -298,13 +297,7 @@ public abstract class WsaPipe extends AbstractFilterTubeImpl {
         // Both wsa:Action and wsa:To MUST be present on request (for oneway MEP) and
         // response messages (for oneway and request/response MEP only)
         if (engaged || AddressingVersion.isRequired(binding.getFeature(av.getFeatureID()))) {
-            // if no wsa:Action header is found
-            if (!foundAction)
-                throw new MapRequiredException(av.actionTag);
-
-            // if no wsa:To header is found
-            if (!foundTo)
-                throw new MapRequiredException(av.toTag);
+            checkMandatoryHeaders(foundAction, foundTo);
         }
 
         // wsaw:Anonymous validation only on the server-side
@@ -382,4 +375,7 @@ public abstract class WsaPipe extends AbstractFilterTubeImpl {
             throw new WebServiceException(AddressingMessages.INVALID_WSAW_ANONYMOUS(anon.toString()));
         }
     }
+
+    protected abstract void validateAction(Packet packet);
+    protected abstract void checkMandatoryHeaders(boolean foundAction, boolean foundTo);
 }

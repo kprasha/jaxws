@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.resources.AddressingMessages;
 import com.sun.xml.ws.binding.BindingImpl;
 
@@ -285,6 +286,17 @@ public class WsaServerPipe extends WsaPipe {
         if (expected != null && !gotA.equals(expected)) {
             throw new ActionNotSupportedException(gotA);
         }
+    }
+
+    @Override
+    protected void checkMandatoryHeaders(boolean foundAction, boolean foundTo) {
+        // if no wsa:Action header is found
+        if (!foundAction)
+            throw new MapRequiredException(binding.getAddressingVersion().actionTag);
+
+        // if no wsa:To header is found
+        if (!foundTo)
+            throw new MapRequiredException(binding.getAddressingVersion().toTag);
     }
 
     private static final String REQUEST_REPLY_TO = "request.replyTo";
