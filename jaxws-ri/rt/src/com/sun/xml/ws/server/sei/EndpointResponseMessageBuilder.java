@@ -28,10 +28,9 @@ import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.message.jaxb.JAXBMessage;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
@@ -82,9 +81,7 @@ abstract class EndpointResponseMessageBuilder {
         }
 
         final Message createMessage(Object[] methodArgs, Object returnValue) {
-            return new JAXBMessage(
-                bridge, build(methodArgs, returnValue),
-                soapVersion );
+            return JAXBMessage.create( bridge, build(methodArgs, returnValue), soapVersion );
         }
 
         /**
@@ -177,7 +174,7 @@ abstract class EndpointResponseMessageBuilder {
         /**
          * Creates a {@link EndpointResponseMessageBuilder} from a {@link WrapperParameter}.
          */
-        DocLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
+        DocLit(WrapperParameter wp, SOAPVersion soapVersion) {
             super(wp, soapVersion);
 
             wrapper = (Class)wp.getBridge().getTypeReference().type;
@@ -256,7 +253,7 @@ abstract class EndpointResponseMessageBuilder {
         /**
          * Creates a {@link EndpointResponseMessageBuilder} from a {@link WrapperParameter}.
          */
-        RpcLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
+        RpcLit(WrapperParameter wp, SOAPVersion soapVersion) {
             super(wp, soapVersion);
             // we'll use CompositeStructure to pack requests
             assert wp.getTypeReference().type==CompositeStructure.class;

@@ -82,9 +82,7 @@ abstract class BodyBuilder {
         }
 
         final Message createMessage(Object[] methodArgs) {
-            return new JAXBMessage(
-                bridge, build(methodArgs),
-                soapVersion );
+            return JAXBMessage.create( bridge, build(methodArgs), soapVersion );
         }
 
         /**

@@ -134,7 +134,31 @@ public final class JAXBMessage extends AbstractMessageImpl {
      *      Specify the payload tag name and how <tt>jaxbObject</tt> is bound.
      * @param jaxbObject
      */
-    public JAXBMessage(Bridge bridge, Object jaxbObject, SOAPVersion soapVer) {
+    public static Message create(Bridge bridge, Object jaxbObject, SOAPVersion soapVer) {
+        if(!bridge.getContext().hasSwaRef()) {
+            return new JAXBMessage(bridge,jaxbObject,soapVer);
+        }
+
+        // If we have swaRef, then that means we might have attachments.
+        // to comply with the packet API, we need to eagerly turn the JAXB object into infoset
+        // to correctly find out about attachments.
+
+        try {
+            MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+
+            AttachmentSetImpl attachments = new AttachmentSetImpl();
+            bridge.marshal(jaxbObject,xsb.createFromXMLStreamWriter(),new AttachmentMarshallerImpl(attachments));
+
+            // any way to reuse this XMLStreamBuffer in StreamMessage?
+            return new StreamMessage(null,attachments,xsb.readAsXMLStreamReader(),soapVer);
+        } catch (JAXBException e) {
+            throw new WebServiceException(e);
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
+    }
+
+    private JAXBMessage(Bridge bridge, Object jaxbObject, SOAPVersion soapVer) {
         super(soapVer);
         // TODO: think about a better way to handle BridgeContext
         this.bridge = bridge;

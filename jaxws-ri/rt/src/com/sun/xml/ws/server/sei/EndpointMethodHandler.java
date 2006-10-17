@@ -186,11 +186,11 @@ final class EndpointMethodHandler {
             case BODY:
                 if(param.isWrapperStyle()) {
                     if(param.getParent().getBinding().isRpcLit()) {
-                        bodyBuilder = new EndpointResponseMessageBuilder.RpcLit((WrapperParameter)param, seiModel,
-                                soapVersion);
+                        bodyBuilder = new EndpointResponseMessageBuilder.RpcLit((WrapperParameter)param,
+                            soapVersion);
                     } else {
-                        bodyBuilder = new EndpointResponseMessageBuilder.DocLit((WrapperParameter)param, seiModel,
-                                soapVersion);
+                        bodyBuilder = new EndpointResponseMessageBuilder.DocLit((WrapperParameter)param,
+                            soapVersion);
                     }
                 } else {
                     bodyBuilder = new EndpointResponseMessageBuilder.Bare(param, soapVersion);
