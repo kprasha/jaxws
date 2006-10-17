@@ -36,6 +36,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.resources.AddressingMessages;
 
 /**
  * @author Arun Gupta
@@ -95,7 +96,7 @@ public class WsaClientPipe extends WsaPipe {
         String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
 
         if (gotA == null)
-            throw new WebServiceException("null input action"); // TODO: i18n
+            throw new WebServiceException(AddressingMessages.VALIDATION_CLIENT_NULL_ACTION());
 
         String expected = helper.getOutputAction(packet);
 

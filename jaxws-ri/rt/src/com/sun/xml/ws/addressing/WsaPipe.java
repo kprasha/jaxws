@@ -92,9 +92,8 @@ public abstract class WsaPipe extends AbstractFilterTubeImpl {
         } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID)) {
             return new com.sun.xml.ws.addressing.v200408.WsaPipeHelperImpl(wsdlPort, binding);
         } else {
-            // Addressing is not enabled, WsaServerPipe should not be included in the pipeline
-            throw new WebServiceException("Addressing is not enabled, " +
-                    "WsaServerPipe should not be included in the pipeline");
+            // Addressing is not enabled, WsaPipe should not be included in the pipeline
+            throw new WebServiceException(AddressingMessages.ADDRESSING_NOT_ENABLED(this.getClass().getSimpleName()));
         }
     }
 

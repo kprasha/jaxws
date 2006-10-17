@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.transport.http.client.HttpTransportPipe;
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.resources.AddressingMessages;
 import com.sun.xml.ws.binding.BindingImpl;
 
 /**
@@ -214,7 +215,7 @@ public class WsaServerPipe extends WsaPipe {
      */
     private Packet processNonAnonymousReply(final Packet packet, final String uri, final boolean invokeEndpoint) {
         if (packet.transportBackChannel != null) {
-            System.out.println("Sending 202 and processing non-anonymous response");
+            System.out.println(AddressingMessages.NON_ANONYMOUS_RESPONSE());
             packet.transportBackChannel.close();
         }
         Packet response = packet;
@@ -225,11 +226,11 @@ public class WsaServerPipe extends WsaPipe {
 
         // TODO: Use TransportFactory to create the appropriate Pipe ?
         if (!uri.startsWith("http")) {
-            System.out.printf("Unknown protocol: \"%s\"\n", uri.substring(0, uri.indexOf("://")));
+            System.out.println(AddressingMessages.NON_ANONYMOUS_UNKNOWN_PROTOCOL(uri.substring(0, uri.indexOf("://"))));
             return packet;
         }
 
-        System.out.printf("Sending non-anonymous reply to %s\n", uri);
+        System.out.println(AddressingMessages.NON_ANONYMOUS_RESPONSE_SENDING(uri));
         //ToDO should we use ServierTubeAssemblerContext's codec ??
         HttpTransportPipe tPipe = new HttpTransportPipe(((BindingImpl)binding).createCodec());
         response.endpointAddress = new EndpointAddress(URI.create(uri));
@@ -246,10 +247,10 @@ public class WsaServerPipe extends WsaPipe {
                     System.out.println();
                 }
             } else {
-                System.out.printf("%s: null response headers\n", uri.toString());
+                System.out.println(AddressingMessages.NON_ANONYMOUS_RESPONSE_NULL_HEADERS(uri.toString()));
             }
         } else {
-            System.out.printf("%s: null response\n", uri);
+            System.out.printf(AddressingMessages.NON_ANONYMOUS_RESPONSE_NULL_MESSAGE(uri));
         }
 
         return response;
@@ -274,7 +275,7 @@ public class WsaServerPipe extends WsaPipe {
         String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
 
         if (gotA == null)
-            throw new WebServiceException("null input action"); // TODO: i18n
+            throw new WebServiceException(AddressingMessages.VALIDATION_SERVER_NULL_ACTION());
 
         String expected = helper.getInputAction(packet);
         String soapAction = helper.getSOAPAction(packet);
