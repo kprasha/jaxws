@@ -442,7 +442,7 @@ public final class HeaderList extends ArrayList<Header> {
      * @param av WS-Addressing version
      * @param sv SOAP version
      * @throws IllegalArgumentException if either <code>av</code> or <code>sv</code> is null.
-     * @return Value of WS-Addressing To header, null if no header is present
+     * @return Value of WS-Addressing To header, anonymous URI if no header is present
      */
     public String getTo(AddressingVersion av, SOAPVersion sv) {
         if (to != null)
@@ -453,6 +453,8 @@ public final class HeaderList extends ArrayList<Header> {
         Header h = getFirstHeader(av.toTag, true, sv);
         if (h != null) {
             to = h.getStringContent();
+        } else {
+            to = av.getAnonymousUri();
         }
 
         return to;
