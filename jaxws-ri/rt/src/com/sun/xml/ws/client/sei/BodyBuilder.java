@@ -29,10 +29,9 @@ import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.message.jaxb.JAXBMessage;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
@@ -74,13 +73,11 @@ abstract class BodyBuilder {
          * from {@link #build(Object[])}.
          */
         private final Bridge bridge;
-        private final SEIModel seiModel;
         private final SOAPVersion soapVersion;
 
-        protected JAXB(Bridge bridge, SEIModel seiModel, SOAPVersion soapVersion) {
+        protected JAXB(Bridge bridge, SOAPVersion soapVersion) {
             assert bridge!=null;
             this.bridge = bridge;
-            this.seiModel = seiModel;
             this.soapVersion = soapVersion;
         }
 
@@ -111,8 +108,8 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a bare parameter.
          */
-        Bare(ParameterImpl p, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(p.getBridge(), seiModel, soapVersion);
+        Bare(ParameterImpl p, SOAPVersion soapVersion) {
+            super(p.getBridge(), soapVersion);
             this.methodPos = p.getIndex();
             this.getter = ValueGetter.get(p);
         }
@@ -142,8 +139,8 @@ abstract class BodyBuilder {
          */
         protected final ValueGetter[] getters;
 
-        protected Wrapped(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(wp.getBridge(), seiModel, soapVersion);
+        protected Wrapped(WrapperParameter wp, SOAPVersion soapVersion) {
+            super(wp.getBridge(), soapVersion);
 
             List<ParameterImpl> children = wp.getWrapperChildren();
 
@@ -175,8 +172,8 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
-        DocLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(wp, seiModel, soapVersion);
+        DocLit(WrapperParameter wp, SOAPVersion soapVersion) {
+            super(wp, soapVersion);
 
             wrapper = (Class)wp.getBridge().getTypeReference().type;
 
@@ -251,8 +248,8 @@ abstract class BodyBuilder {
         /**
          * Creates a {@link BodyBuilder} from a {@link WrapperParameter}.
          */
-        RpcLit(WrapperParameter wp, SEIModel seiModel, SOAPVersion soapVersion) {
-            super(wp, seiModel, soapVersion);
+        RpcLit(WrapperParameter wp, SOAPVersion soapVersion) {
+            super(wp, soapVersion);
             // we'll use CompositeStructure to pack requests
             assert wp.getTypeReference().type==CompositeStructure.class;
 
