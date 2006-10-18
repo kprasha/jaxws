@@ -21,10 +21,12 @@ import com.sun.xml.ws.spi.ProviderImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
@@ -175,6 +177,41 @@ public final class WSEndpointReference {
             return null;
     }
 
+    /**
+     * Creates a new {@link WSEndpointReference} by replacing the address of this EPR
+     * to the new one.
+     */
+    public @NotNull WSEndpointReference createWithAddress(@NotNull final String newAddress) {
+        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+        XMLFilterImpl filter = new XMLFilterImpl() {
+            private boolean inAddress = false;
+            public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+                if(localName.equals("Address") && uri.equals(version.nsUri))
+                    inAddress = true;
+                super.startElement(uri,localName,qName,atts);
+            }
+
+            public void characters(char ch[], int start, int length) throws SAXException {
+                if(!inAddress)
+                    super.characters(ch, start, length);
+            }
+
+
+            public void endElement(String uri, String localName, String qName) throws SAXException {
+                if(inAddress)
+                    super.characters(newAddress.toCharArray(),0,newAddress.length());
+                super.endElement(uri, localName, qName);
+            }
+        };
+        filter.setContentHandler(xsb.createFromSAXBufferCreator());
+        try {
+            infoset.writeTo(filter);
+        } catch (SAXException e) {
+            throw new AssertionError(e); // impossible since we are writing from XSB to XSB.
+        }
+
+        return new WSEndpointReference(xsb,version);
+    }
 
     /**
      * Convert the EPR to the spec version. The actual type of
