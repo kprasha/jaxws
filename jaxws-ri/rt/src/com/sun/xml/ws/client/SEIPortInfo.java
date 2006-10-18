@@ -28,6 +28,7 @@ import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
 
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
@@ -97,6 +98,12 @@ final class SEIPortInfo extends PortInfo {
             if (wsdlMTOMFeature != null) {
                 wsdlFeatures.add(wsdlMTOMFeature);
             }
+            
+            WebServiceFeature wsdlFastInfosetFeature = portModel.getFeature(FastInfosetFeature.ID);
+            if (wsdlFastInfosetFeature != null) {
+                wsdlFeatures.add(wsdlFastInfosetFeature);
+            }
+            
             //these are the only features that jaxws pays attention portability wise.
         }
         return wsdlFeatures;

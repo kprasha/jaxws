@@ -26,8 +26,8 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.developer.StatefulFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.*;
@@ -265,9 +265,15 @@ public class EndpointFactory {
             }
 
             WebServiceFeature wsdlMTOMFeature = wsdlPort.getFeature(MTOMFeature.ID);
-            if ((wsdlMTOMFeature != null) &&
+            if (wsdlMTOMFeature != null &&
                     binding.getFeature(wsdlMTOMFeature.getID()) == null) {
                 wsdlFeatures.add(wsdlMTOMFeature);
+            }
+            
+            WebServiceFeature wsdlFastInfosetFeature = wsdlPort.getFeature(FastInfosetFeature.ID);
+            if (wsdlFastInfosetFeature != null &&
+                    binding.getFeature(FastInfosetFeature.ID) == null) {
+                wsdlFeatures.add(wsdlFastInfosetFeature);
             }
             //these are the only features that jaxws pays attention portability wise.
         }

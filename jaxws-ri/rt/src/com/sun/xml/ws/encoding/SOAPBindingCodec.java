@@ -164,7 +164,6 @@ public class SOAPBindingCodec extends MimeCodec {
 
         WebServiceFeature f = binding.getFeature(FastInfosetFeature.ID);
         isFastInfosetDisabled = (f != null && !f.isEnabled());
-        
         if (!isFastInfosetDisabled) {
             fiSoapCodec = getFICodec(version);
             if (fiSoapCodec != null) {
@@ -204,6 +203,13 @@ public class SOAPBindingCodec extends MimeCodec {
     }
     
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
+        /**
+         * Reset the encoding state when on the server side for each
+         * decode/encode step.
+         */
+        if (packet.contentNegotiation == null)
+            useFastInfosetForEncoding = false;
+        
         if(isMultipartRelated(contentType))
             // parse the multipart portion and then decide whether it's MTOM or SwA
             super.decode(in, contentType, packet);
@@ -222,6 +228,13 @@ public class SOAPBindingCodec extends MimeCodec {
     }
     
     public void decode(ReadableByteChannel in, String contentType, Packet packet) {
+        /**
+         * Reset the encoding state when on the server side for each
+         * decode/encode step.
+         */
+        if (packet.contentNegotiation == null)
+            useFastInfosetForEncoding = false;
+        
         if(isMultipartRelated(contentType))
             super.decode(in, contentType, packet);
         else if(isFastInfoset(contentType)) {
