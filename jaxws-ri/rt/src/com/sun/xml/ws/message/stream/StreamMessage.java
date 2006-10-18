@@ -65,9 +65,7 @@ public final class StreamMessage extends AbstractMessageImpl {
     private @NotNull XMLStreamReader reader;
 
     // lazily created
-    private @Nullable HeaderList headers;
-    
-    private final @NotNull AttachmentSet attachmentSet;
+    private @Nullable HeaderList headers;    
 
     private final String payloadLocalName;
 

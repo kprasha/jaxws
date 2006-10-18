@@ -52,6 +52,8 @@ import javax.activation.DataHandler;
 import javax.imageio.ImageIO;
 import javax.xml.transform.Source;
 import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 
 /**
  * Reads a request {@link Message}, disassembles it, and moves obtained Java values
@@ -552,7 +554,7 @@ abstract class EndpointArgumentsBuilder {
                     XMLStreamReaderUtil.skipElement(reader);
                     reader.nextTag();
                 } else {
-                    part.readRequest(args,reader);
+                    part.readRequest(args,reader, msg.getAttachments());
                 }
             }
 
@@ -579,8 +581,8 @@ abstract class EndpointArgumentsBuilder {
                 this.setter = setter;
             }
 
-            final void readRequest( Object[] args, XMLStreamReader r ) throws JAXBException {
-                Object obj = bridge.unmarshal(r);
+            final void readRequest( Object[] args, XMLStreamReader r, AttachmentSet att) throws JAXBException {
+                Object obj = bridge.unmarshal(r, (att != null)?new AttachmentUnmarshallerImpl(att):null);
                 setter.put(obj,args);
             }
         }

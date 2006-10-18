@@ -55,7 +55,6 @@ public final class AttachmentSetImpl implements AttachmentSet {
     }
 
     public Attachment get(String contentId) {
-        contentId = '<'+contentId+'>';
         for( int i=attList.size()-1; i>=0; i-- ) {
             Attachment a = attList.get(i);
             if(a.getContentId().equals(contentId))

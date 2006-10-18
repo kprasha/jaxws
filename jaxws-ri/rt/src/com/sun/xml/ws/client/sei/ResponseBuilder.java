@@ -28,10 +28,13 @@ import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
+
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
@@ -563,7 +566,7 @@ abstract class ResponseBuilder {
                     XMLStreamReaderUtil.skipElement(reader);
                     reader.nextTag();
                 } else {
-                    Object o = part.readResponse(args,reader);
+                    Object o = part.readResponse(args,reader, msg.getAttachments());
                     // there's only at most one ResponseBuilder that returns a value.
                     if(o!=null) {
                         assert retVal==null;
@@ -597,8 +600,8 @@ abstract class ResponseBuilder {
                 this.setter = setter;
             }
 
-            final Object readResponse(Object[] args, XMLStreamReader r) throws JAXBException {
-                Object obj = bridge.unmarshal(r);
+            final Object readResponse(Object[] args, XMLStreamReader r, AttachmentSet att) throws JAXBException {
+                Object obj = bridge.unmarshal(r, (att != null)?new AttachmentUnmarshallerImpl(att):null);
                 return setter.put(obj,args);
             }
 
