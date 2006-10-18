@@ -56,6 +56,12 @@ public final class JavaMethodImpl implements JavaMethod {
     /*package*/ final AbstractSEIModelImpl owner;
     private final Method seiMethod;
 
+    /**
+     * @param owner
+     * @param method : Implementation class method
+     * @param seiMethod : corresponding SEI Method.
+     *                  Is there is no SEI, it should be Implementation class method
+     */
     public JavaMethodImpl(AbstractSEIModelImpl owner, Method method, Method seiMethod) {
         this.owner = owner;
         this.method = method;
@@ -72,7 +78,7 @@ public final class JavaMethodImpl implements JavaMethod {
      * @return Returns the method. 
      */
     public Method getMethod() {
-        return method;
+        return seiMethod;
     }
     
     /**
