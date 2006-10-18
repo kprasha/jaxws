@@ -78,12 +78,16 @@ public final class WSEndpointReference {
      * This method performs the data conversion, so it's slow.
      * Do not use this method in a performance critical path.
      */
-    public WSEndpointReference(EndpointReference epr, AddressingVersion version) throws XMLStreamException {
-        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-        epr.writeTo(new XMLStreamBufferResult(xsb));
-        this.infoset = xsb;
-        this.version = version;
-        parse();
+    public WSEndpointReference(EndpointReference epr, AddressingVersion version) {
+        try {
+            MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+            epr.writeTo(new XMLStreamBufferResult(xsb));
+            this.infoset = xsb;
+            this.version = version;
+            parse();
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(ClientMessages.FAILED_TO_PARSE_EPR(epr),e);
+        }
     }
 
     /**
@@ -93,17 +97,22 @@ public final class WSEndpointReference {
      * This method performs the data conversion, so it's slow.
      * Do not use this method in a performance critical path.
      */
-    public WSEndpointReference(EndpointReference epr) throws XMLStreamException {
+    public WSEndpointReference(EndpointReference epr) {
         this(epr,AddressingVersion.fromSpecClass(epr.getClass()));
     }
 
     /**
      * Creates a {@link WSEndpointReference} that wraps a given infoset.
      */
-    public WSEndpointReference(XMLStreamBuffer infoset, AddressingVersion version) throws XMLStreamException {
-        this.infoset = infoset;
-        this.version = version;
-        parse();
+    public WSEndpointReference(XMLStreamBuffer infoset, AddressingVersion version) {
+        try {
+            this.infoset = infoset;
+            this.version = version;
+            parse();
+        } catch (XMLStreamException e) {
+            // this can never happen because XMLStreamBuffer never has underlying I/O error.
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -124,45 +133,46 @@ public final class WSEndpointReference {
     /**
      * Creates a {@link WSEndpointReference} that only has an address.
      */
-    public WSEndpointReference(String address, AddressingVersion version) throws XMLStreamException {
+    public WSEndpointReference(String address, AddressingVersion version) {
         this.infoset = createBufferFromAddress(address,version);
         this.version = version;
         this.address = address;
         this.referenceParameters = EMPTY_ARRAY;
     }
 
-    private static XMLStreamBuffer createBufferFromAddress(String address, AddressingVersion version) throws XMLStreamException {
-        MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-        XMLStreamWriter w = new StreamWriterBufferCreator(xsb);
-        w.writeStartDocument();
-        w.writeStartElement(version.getPrefix(),
+    private static XMLStreamBuffer createBufferFromAddress(String address, AddressingVersion version) {
+        try {
+            MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+            StreamWriterBufferCreator w = new StreamWriterBufferCreator(xsb);
+            w.writeStartDocument();
+            w.writeStartElement(version.getPrefix(),
                 "EndpointReference", version.nsUri);
-        w.writeNamespace(version.getPrefix(),
+            w.writeNamespace(version.getPrefix(),
                 version.nsUri);
-        w.writeStartElement(version.getPrefix(),
+            w.writeStartElement(version.getPrefix(),
                 W3CAddressingConstants.WSA_ADDRESS_NAME, version.nsUri);
-        w.writeCharacters(address);
-        w.writeEndElement();
-        w.writeEndElement();
-        w.writeEndDocument();
-        w.close();
-        return xsb;
+            w.writeCharacters(address);
+            w.writeEndElement();
+            w.writeEndElement();
+            w.writeEndDocument();
+            w.close();
+            return xsb;
+        } catch (XMLStreamException e) {
+            // can never happen because we are writing to XSB
+            throw new AssertionError(e);
+        }
     }
 
     /**
      * Converts from {@link EndpointReference}.
      * This handles null {@link EndpointReference} correctly.
      */
-    public static  @Nullable
+    public static @Nullable
     WSEndpointReference create(@Nullable EndpointReference epr) {
-        try {
-            if (epr != null)
-                return new WSEndpointReference(epr);
-            else
-                return null;
-        } catch (XMLStreamException e) {
-            throw new WebServiceException(ClientMessages.FAILED_TO_PARSE_EPR(e.getMessage()),e);
-        }
+        if (epr != null)
+            return new WSEndpointReference(epr);
+        else
+            return null;
     }
 
 
