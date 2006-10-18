@@ -200,6 +200,7 @@ public final class WSEndpointReference {
             public void endElement(String uri, String localName, String qName) throws SAXException {
                 if(inAddress)
                     super.characters(newAddress.toCharArray(),0,newAddress.length());
+                inAddress = false;
                 super.endElement(uri, localName, qName);
             }
         };
