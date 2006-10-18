@@ -13,7 +13,7 @@ then
   cvs update -Pd
   cd ..
 else
-  cvs "-d:pserver:kohsuke@kohsuke.sfbay.sun.com:/cvs" -z9 co -d jaxws-architecture-document-www jax-ws-architecture-document/www
+  cvs "-d:pserver:kohsuke@kohsuke.sfbay:/cvs" -z9 co -d jaxws-architecture-document-www jax-ws-architecture-document/www
 fi
 
 cd jaxws-architecture-document-www
