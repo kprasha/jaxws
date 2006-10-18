@@ -266,7 +266,7 @@ final class EndpointMethodHandler {
                 e.printStackTrace();
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
-            return req.createServerResponse(responseMessage, seiModel.getPort(), binding);
+            return req.createServerResponse(responseMessage, req.endpoint.getPort(), req.endpoint.getBinding());
         } finally {
             pool.recycle(m);
         }

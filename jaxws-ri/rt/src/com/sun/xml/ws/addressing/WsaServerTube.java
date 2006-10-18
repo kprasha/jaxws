@@ -181,7 +181,7 @@ public class WsaServerTube extends WsaTube {
                 // if none, then fault message is not sent back
                 if (replyTo.equals(av.getNoneUri())) {
                     if (endpointInvoked) {
-                        return responsePacket.createServerResponse(responsePacket.getMessage(), wsdlPort, binding);
+                        return responsePacket.createServerResponse(responsePacket.getMessage(), responsePacket.endpoint.getPort(), responsePacket.endpoint.getBinding());
                     }
                 } else if (!replyTo.equals(av.getAnonymousUri())) {
                     // non-anonymous default FaultTo

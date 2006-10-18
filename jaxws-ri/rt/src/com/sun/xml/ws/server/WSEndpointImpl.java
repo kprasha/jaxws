@@ -187,7 +187,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                     re.printStackTrace();
                     Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
                             soapVersion, null, re);
-                    response = request.createServerResponse(faultMsg, port, binding);
+                    response = request.createServerResponse(faultMsg, request.endpoint.getPort(), request.endpoint.getBinding());
                 }
                 return response;
             }
