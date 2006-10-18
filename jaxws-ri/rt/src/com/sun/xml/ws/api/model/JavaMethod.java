@@ -52,7 +52,7 @@ public interface JavaMethod {
      * <p>
      * {@link @WebService}(endpointInterface="I")
      * class A implements I { }
-     * In this case, it returns I's method
+     * In this case, it returns A's method
      *
      * <p>
      * {@link @WebService}
@@ -64,12 +64,13 @@ public interface JavaMethod {
     @NotNull Method getMethod();
     
     /**
+     * This should be used if you want to access annotations on WebMethod
      * Returns the SEI method if there is one.
      *
      * <p>
      * {@link @WebService}(endpointInterface="I")
      * class A { }
-     * In this case, it retuns I's method 
+     * In this case, it retuns I's method
      *
      * <p>
      * {@link @WebService}(endpointInterface="I")
@@ -80,7 +81,7 @@ public interface JavaMethod {
      * {@link @WebService}
      * class A { }
      * In this case, it returns A's method
-     *  
+     *
      * @return Returns the java {@link Method}
      */
     @NotNull Method getSEIMethod();

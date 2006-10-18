@@ -78,7 +78,7 @@ public final class JavaMethodImpl implements JavaMethod {
      * @return Returns the method. 
      */
     public Method getMethod() {
-        return seiMethod;
+        return method;
     }
     
     /**

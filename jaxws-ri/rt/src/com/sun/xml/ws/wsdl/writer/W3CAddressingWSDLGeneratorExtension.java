@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.10 2006-10-04 19:01:23 arungupta Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.11 2006-10-18 20:50:33 ramapulavarthi Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -63,7 +63,7 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
         if (!enabled)
             return;
 
-        Action a = method.getMethod().getAnnotation(Action.class);
+        Action a = method.getSEIMethod().getAnnotation(Action.class);
         if (a != null && !a.input().equals("")) {
             addAttribute(input, a.input());
         }
@@ -74,7 +74,7 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
         if (!enabled)
             return;
 
-        Action a = method.getMethod().getAnnotation(Action.class);
+        Action a = method.getSEIMethod().getAnnotation(Action.class);
         if (a != null && !a.output().equals("")) {
             addAttribute(output, a.output());
         }
@@ -85,8 +85,8 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
         if (!enabled)
             return;
 
-        Action a = method.getMethod().getAnnotation(Action.class);
-        Class[] exs = method.getMethod().getExceptionTypes();
+        Action a = method.getSEIMethod().getAnnotation(Action.class);
+        Class[] exs = method.getSEIMethod().getExceptionTypes();
 
         if (exs == null)
             return;
