@@ -643,7 +643,9 @@ public final class Packet extends DistributedPropertySet {
             return responsePacket;
 
         WsaTubeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
-        String action = wsaHelper.getOutputAction(this);
+        String action = responsePacket.message.isFault() ?
+                wsaHelper.getFaultAction(this, responsePacket) : 
+                wsaHelper.getOutputAction(this);
 
         return populateAddressingHeaders(responsePacket, binding.getAddressingVersion(), binding.getSOAPVersion(), action);
     }

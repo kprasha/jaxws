@@ -33,30 +33,19 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 
-import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.message.FaultDetailHeader;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.resources.AddressingMessages;
 import org.w3c.dom.Element;
 
 /**
@@ -64,14 +53,14 @@ import org.w3c.dom.Element;
  */
 public abstract class WsaTubeHelper {
 
-    private String getFaultAction(Packet packet) {
+    public String getFaultAction(Packet requestPacket, Packet responsePacket) {
         String action = binding.getAddressingVersion().getDefaultFaultAction();
 
         if (wsdlPort == null)
-            return null;
+            return action;
 
         try {
-            SOAPMessage sm = packet.getMessage().readAsSOAPMessage();
+            SOAPMessage sm = responsePacket.getMessage().readAsSOAPMessage();
             if (sm == null)
                 return action;
 
@@ -88,10 +77,10 @@ public abstract class WsaTubeHelper {
             String ns = detail.getFirstChild().getNamespaceURI();
             String name = detail.getFirstChild().getLocalName();
 
-            WSDLBoundOperation wbo = null;
-            if (wsdlPort != null)
-                wbo = packet.getMessage().getOperation(wsdlPort);
-
+            WSDLBoundOperation wbo = requestPacket.getMessage().getOperation(wsdlPort);
+            if (wbo == null)
+                return action;
+            
             WSDLOperation o = wbo.getOperation();
             if (o == null)
                 return action;
