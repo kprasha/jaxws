@@ -582,7 +582,9 @@ public final class Fiber implements Runnable {
         if(synchronous) {
             while(suspendedCount==1)
                 try {
-                    System.out.println(getName()+" is blocking thread "+Thread.currentThread().getName());
+                    if (DEBUG) {
+                        System.out.println(getName()+" is blocking thread "+Thread.currentThread().getName());
+                    }
                     wait();
                 } catch (InterruptedException e) {
                     // remember that we are interrupted, but don't respond to it
