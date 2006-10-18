@@ -26,6 +26,7 @@ import com.sun.xml.ws.developer.JAXWSProperties;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.transform.stream.StreamSource;
 import javax.activation.DataHandler;
 import java.io.File;
@@ -38,21 +39,16 @@ public class MtomApp {
 
     public static void main (String[] args){
         try {
-            Object port = new HelloService().getHelloPort ();
+            Hello port = new HelloService().getHelloPort(new MTOMFeature());
             if(port == null){
                 System.out.println ("TEST FAILURE: Couldnt get port!");
                 System.exit (-1);
             }
-
-            //get the binding and enable mtom
-            SOAPBinding binding = (SOAPBinding)((BindingProvider)port).getBinding ();
-            binding.setMTOMEnabled (true);
-
             //test mtom
-            testMtom ((Hello)port);
+            testMtom (port);
 
             //test echo
-            testEcho((Hello)port);
+            testEcho(port);
         } catch (Exception ex) {
             System.out.println ("SOAP 1.1 MtomApp FAILED!");
             ex.printStackTrace ();

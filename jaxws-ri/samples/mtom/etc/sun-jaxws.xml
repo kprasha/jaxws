@@ -29,7 +29,6 @@
         wsdl="WEB-INF/wsdl/hello.wsdl"
         service='{http://example.org/mtom}HelloService'
         port='{http://example.org/mtom}HelloPort'
-        url-pattern="/hello"
-        enable-mtom="true"/>
+        url-pattern="/hello"/>
 </endpoints>
 
