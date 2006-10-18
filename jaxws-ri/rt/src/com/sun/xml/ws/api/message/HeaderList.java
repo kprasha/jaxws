@@ -509,6 +509,8 @@ public final class HeaderList extends ArrayList<Header> {
             } catch (XMLStreamException e) {
                 throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
             }
+        } else {
+            replyTo = av.anonymousEpr;
         }
 
         return replyTo;
