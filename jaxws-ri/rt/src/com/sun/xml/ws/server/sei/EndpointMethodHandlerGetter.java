@@ -36,7 +36,11 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 
 /**
- * 
+ * Gets the {@link EndpointMethodHandler} from a {@link Packet}. Uses
+ * Action Message Addressing Property to get the handler. If no Action property
+ * is present or no handler is registered corresponding to that Action, then
+ * payload's QName is used to obtain the handler. 
+ *
  * @author Arun Gupta
  */
 public class EndpointMethodHandlerGetter {
@@ -59,6 +63,7 @@ public class EndpointMethodHandlerGetter {
             QName payloadName = model.getQNameForJM(m);     // TODO need a new method on JavaMethodImpl
             String action = null;
             if (m.getOperation() != null)
+                // todo: check when could it be null ?
                 action = m.getOperation().getOperation().getInput().getAction();
             if (action != null)
                 actionMethodHandlers.put(action, handler);
