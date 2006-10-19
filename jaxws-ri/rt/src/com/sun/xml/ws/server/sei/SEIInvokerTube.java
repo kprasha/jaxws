@@ -21,8 +21,6 @@
  */
 package com.sun.xml.ws.server.sei;
 
-import javax.xml.namespace.QName;
-
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -31,8 +29,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.client.sei.MethodHandler;
-import com.sun.xml.ws.encoding.soap.SOAP12Constants;
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.resources.ServerMessages;
@@ -74,11 +70,8 @@ public class SEIInvokerTube extends InvokerTube {
         if (handler == null) {
             // TODO optimize
             String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(methodHandlerGetter.getPayloadNamespaceURI(), methodHandlerGetter.getPayloadLocalPart());
-            QName faultCode = (soapVersion == SOAPVersion.SOAP_11)
-                ? SOAPConstants.FAULT_CODE_CLIENT
-                : SOAP12Constants.FAULT_CODE_CLIENT;
             Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
-                    soapVersion, faultString, faultCode);
+                    soapVersion, faultString, soapVersion.faultCodeClient);
             res = req.createServerResponse(faultMsg, model.getPort(), binding);
         } else {
             res = handler.invoke(req);

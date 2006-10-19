@@ -24,16 +24,16 @@ package com.sun.xml.ws.api;
 
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 
+import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.namespace.QName;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -71,6 +71,7 @@ public enum SOAPVersion {
             SOAPConstants.URI_SOAP_ACTOR_NEXT, "actor",
             javax.xml.soap.SOAPConstants.SOAP_1_1_PROTOCOL,
             new QName(com.sun.xml.ws.encoding.soap.SOAPConstants.URI_ENVELOPE, "MustUnderstand"),
+            "Client",
             Collections.singleton(SOAPConstants.URI_SOAP_ACTOR_NEXT)),
 
     SOAP_12(SOAPBinding.SOAP12HTTP_BINDING,
@@ -79,6 +80,7 @@ public enum SOAPVersion {
             SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER, "role",
             javax.xml.soap.SOAPConstants.SOAP_1_2_PROTOCOL,
             new QName(com.sun.xml.ws.encoding.soap.SOAP12Constants.URI_ENVELOPE, "MustUnderstand"),
+            "Sender",
             new HashSet<String>(Arrays.asList(SOAPConstants.URI_SOAP_1_2_ROLE_NEXT,SOAPConstants.URI_SOAP_1_2_ROLE_ULTIMATE_RECEIVER)));
 
     /**
@@ -130,8 +132,13 @@ public enum SOAPVersion {
      */
     public final String roleAttributeName;
 
+    /**
+     * "{nsUri}Client" or "{nsUri}Sender"
+     */
+    public final QName faultCodeClient;
+
     private SOAPVersion(String httpBindingId, String nsUri, String contentType, String implicitRole, String roleAttributeName,
-                        String saajFactoryString, QName faultCodeMustUnderstand, Set<String> requiredRoles) {
+                        String saajFactoryString, QName faultCodeMustUnderstand, String faultCodeClientLocalName, Set<String> requiredRoles) {
         this.httpBindingId = httpBindingId;
         this.nsUri = nsUri;
         this.contentType = contentType;
@@ -145,6 +152,7 @@ public enum SOAPVersion {
         }
         this.faultCodeMustUnderstand = faultCodeMustUnderstand;
         this.requiredRoles = requiredRoles;
+        this.faultCodeClient = new QName(nsUri,faultCodeClientLocalName);
     }
 
 
