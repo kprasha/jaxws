@@ -45,6 +45,8 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,6 +135,20 @@ public final class WSEndpointReference {
     }
 
     /**
+     * @see #WSEndpointReference(String, AddressingVersion)
+     */
+    public WSEndpointReference(URL address, AddressingVersion version) {
+        this(address.toExternalForm(), version);
+    }
+
+    /**
+     * @see #WSEndpointReference(String, AddressingVersion)
+     */
+    public WSEndpointReference(URI address, AddressingVersion version) {
+        this(address.toString(), version);
+    }
+
+    /**
      * Creates a {@link WSEndpointReference} that only has an address.
      */
     public WSEndpointReference(String address, AddressingVersion version) {
@@ -175,6 +191,20 @@ public final class WSEndpointReference {
             return new WSEndpointReference(epr);
         else
             return null;
+    }
+
+    /**
+     * @see #createWithAddress(String)
+     */
+    public @NotNull WSEndpointReference createWithAddress(@NotNull URI newAddress) {
+        return createWithAddress(newAddress.toString());
+    }
+
+    /**
+     * @see #createWithAddress(String)
+     */
+    public @NotNull WSEndpointReference createWithAddress(@NotNull URL newAddress) {
+        return createWithAddress(newAddress.toString());
     }
 
     /**
