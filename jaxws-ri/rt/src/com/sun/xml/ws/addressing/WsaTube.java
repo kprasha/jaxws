@@ -75,10 +75,6 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         this.helper = that.helper;
     }
 
-    public void preDestroy() {
-        next.preDestroy();
-    }
-
     @Override
     public
     @NotNull
