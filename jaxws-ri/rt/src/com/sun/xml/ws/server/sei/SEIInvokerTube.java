@@ -21,23 +21,22 @@
  */
 package com.sun.xml.ws.server.sei;
 
+import javax.xml.namespace.QName;
+
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 import com.sun.xml.ws.encoding.soap.SOAPConstants;
-import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.InvokerTube;
-import com.sun.xml.ws.util.QNameMap;
-import com.sun.istack.NotNull;
-
-import javax.xml.namespace.QName;
 
 /**
  * This pipe is used to invoke SEI based endpoints.
@@ -50,25 +49,17 @@ public class SEIInvokerTube extends InvokerTube {
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
      */
-    private final QNameMap<EndpointMethodHandler> methodHandlers;
-    private static final String EMPTY_PAYLOAD_LOCAL = "";
-    private static final String EMPTY_PAYLOAD_NSURI = "";
     private final SOAPVersion soapVersion;
     private final WSBinding binding;
     private final AbstractSEIModelImpl model;
+    private final EndpointMethodHandlerGetter methodHandlerGetter;
 
     public SEIInvokerTube(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
         super(invoker);
         this.soapVersion = binding.getSOAPVersion();
         this.binding = binding;
         this.model = model;
-        methodHandlers = new QNameMap<EndpointMethodHandler>();
-        // fill in methodHandlers.
-        for( JavaMethodImpl m : model.getJavaMethods() ) {
-            EndpointMethodHandler handler = new EndpointMethodHandler(this,model,m,binding);
-            QName payloadName = model.getQNameForJM(m);     // TODO need a new method on JavaMethodImpl
-            methodHandlers.put(payloadName.getNamespaceURI(), payloadName.getLocalPart(), handler);
-        }
+        methodHandlerGetter = new EndpointMethodHandlerGetter(model, binding, this);
     }
 
     /**
@@ -76,22 +67,13 @@ public class SEIInvokerTube extends InvokerTube {
      * return value, and response Holder arguments are used to create a new {@link Message}
      * that traverses through the Pipeline to transport.
      */
-    public NextAction processRequest(Packet req) {
-        Message msg = req.getMessage();
-        String localPart = msg.getPayloadLocalPart();
-        String nsUri;
-        if (localPart == null) {
-            localPart = EMPTY_PAYLOAD_LOCAL;
-            nsUri = EMPTY_PAYLOAD_NSURI;
-        } else {
-            nsUri = msg.getPayloadNamespaceURI();
-        }
-        EndpointMethodHandler handler = methodHandlers.get(nsUri, localPart);
+    public @NotNull NextAction processRequest(@NotNull Packet req) {
+        EndpointMethodHandler handler = methodHandlerGetter.getEndpointMethodHandler(req);
+
         Packet res;
         if (handler == null) {
             // TODO optimize
-            String faultString = "Cannot find dispatch method for "+
-                    "{"+nsUri+"}"+localPart;
+            String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(methodHandlerGetter.getPayloadNamespaceURI(), methodHandlerGetter.getPayloadLocalPart());
             QName faultCode = (soapVersion == SOAPVersion.SOAP_11)
                 ? SOAPConstants.FAULT_CODE_CLIENT
                 : SOAP12Constants.FAULT_CODE_CLIENT;
@@ -104,11 +86,11 @@ public class SEIInvokerTube extends InvokerTube {
         return doReturnWith(res);
     }
 
-    public NextAction processResponse(Packet response) {
+    public @NotNull NextAction processResponse(@NotNull Packet response) {
         throw new IllegalStateException("InovkerPipe's processResponse shouldn't be called.");
     }
 
-    public NextAction processException(@NotNull Throwable t) {
+    public @NotNull NextAction processException(@NotNull Throwable t) {
         throw new IllegalStateException("InovkerPipe's processException shouldn't be called.");
     }
 
