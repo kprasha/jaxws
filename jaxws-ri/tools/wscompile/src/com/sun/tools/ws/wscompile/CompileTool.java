@@ -54,7 +54,7 @@ import com.sun.xml.txw2.output.StreamSerializer;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
-import com.sun.xml.ws.binding.BindingTypeImpl;
+import com.sun.xml.ws.binding.WebServiceFeatureUtil;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.util.JAXWSUtils;
@@ -648,7 +648,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
             final File[] wsdlFileName = new File[1]; // used to capture the generated WSDL file.
             final Map<String,File> schemaFiles = new HashMap<String,File>();
-            WebServiceFeature[] wsfeatures = BindingTypeImpl.parseBindingType(endpointClass);
+            WebServiceFeature[] wsfeatures = WebServiceFeatureUtil.parseWebServiceFeatures(endpointClass);
             WSDLGenerator wsdlGenerator = new WSDLGenerator(rtModel,
                     new WSDLResolver() {
                         private File toFile(String suggestedFilename) {
