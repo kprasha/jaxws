@@ -95,10 +95,7 @@ final class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends Hand
 
         if (isClient) {
             // client case
-            if (soapVersion == SOAPVersion.SOAP_12) {
-                return SOAP12Constants.FAULT_CODE_CLIENT;
-            }
-            return SOAPConstants.FAULT_CODE_CLIENT;
+            return soapVersion.faultCodeClient;
         } else {            
             //server case
             if (soapVersion == SOAPVersion.SOAP_12) {
