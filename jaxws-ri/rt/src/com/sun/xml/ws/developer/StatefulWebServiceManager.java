@@ -175,6 +175,17 @@ public interface StatefulWebServiceManager<T> {
     void unexport(@Nullable T o);
 
     /**
+     * Checks if the given EPR represents an object that has been exported from this manager.
+     *
+     * <p>
+     * This method can be used to have two endpoints in the same application communicate
+     * locally.
+     *
+     * @return null if the EPR is not exported from this manager.
+     */
+    @Nullable T resolve(@NotNull EndpointReference epr);
+
+    /**
      * Sets the "fallback" instance.
      *
      * <p>

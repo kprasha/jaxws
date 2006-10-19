@@ -14,9 +14,13 @@ import com.sun.xml.ws.api.server.WSWebServiceContext;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.sax.SAXResult;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
@@ -277,6 +281,31 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
         String key = reverseInstances.get(o);
         if(key==null)   return; // already unexported
         instances.remove(key);
+    }
+
+    public T resolve(EndpointReference epr) {
+        class CookieSniffer extends DefaultHandler {
+            StringBuilder buf = new StringBuilder();
+            boolean inCookie = false;
+            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                if(localName.equals(COOKIE_TAG.getLocalPart()) && uri.equals(COOKIE_TAG.getNamespaceURI()))
+                    inCookie = true;
+            }
+            public void characters(char ch[], int start, int length) throws SAXException {
+                if(inCookie)
+                    buf.append(ch,start,length);
+            }
+            public void endElement(String uri, String localName, String qName) throws SAXException {
+                inCookie = false;
+            }
+        }
+        CookieSniffer sniffer = new CookieSniffer();
+        epr.writeTo(new SAXResult(sniffer));
+
+        Instance o = instances.get(sniffer.buf.toString());
+        if(o!=null)
+            return o.instance;
+        return null;
     }
 
     public void setFallbackInstance(T o) {
