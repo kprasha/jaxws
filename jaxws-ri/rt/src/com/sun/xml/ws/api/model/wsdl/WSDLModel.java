@@ -24,9 +24,17 @@ package com.sun.xml.ws.api.model.wsdl;
 
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.util.Map;
+import java.net.URL;
+import java.io.IOException;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.EntityResolver;
 
 /**
  * Provides abstraction of wsdl:definitions.
@@ -90,5 +98,26 @@ public interface WSDLModel extends WSDLExtensible {
      *
      * @return an empty Map if the wsdl document has no wsdl:service
      */
-    @NotNull Map<QName, ? extends WSDLService> getServices();    
+    @NotNull Map<QName, ? extends WSDLService> getServices();
+
+    /**
+     * Main purpose of this class is to expose parsing of a WSDL and get the {@link WSDLModel} from it.
+     */
+    public class Parser{
+       /**
+         * Parses WSDL from the given wsdlLoc and gives a {@link WSDLModel} built from it.
+         *
+         * @param wsdlLocation  Location of the WSDL
+         * @param resolver  {@link org.xml.sax.EntityResolver}
+         * @param isClientSide  true - its invoked on the client, false means its invoked on the server
+         * @param extensions var args of {@link com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension}s
+         * @return A {@link WSDLModel} built from the given wsdlLocation}
+         * @throws java.io.IOException
+         * @throws javax.xml.stream.XMLStreamException
+         * @throws org.xml.sax.SAXException
+         */
+        public static @NotNull WSDLModel parse(@NotNull URL wsdlLocation, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+            return RuntimeWSDLParser.parse(wsdlLocation, resolver, isClientSide, extensions);
+        }
+    }
 }
