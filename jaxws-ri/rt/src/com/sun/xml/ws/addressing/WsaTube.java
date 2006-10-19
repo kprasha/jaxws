@@ -76,7 +76,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
     }
 
     public void preDestroy() {
-        // No resources to clean up
+        next.preDestroy();
     }
 
     @Override
