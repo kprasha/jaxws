@@ -22,13 +22,25 @@
 
 package com.sun.xml.ws.api.wsdl.parser;
 
-import com.sun.xml.ws.api.model.wsdl.*;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLExtensible;
+import com.sun.xml.ws.api.model.wsdl.WSDLExtension;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.WSDLInput;
+import com.sun.xml.ws.api.model.wsdl.WSDLMessage;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -38,7 +50,7 @@ import javax.xml.ws.WebServiceException;
  * This interface is implemented by components that build on top of the JAX-WS RI,
  * to participate in the WSDL parsing process that happens in the runtime.
  * This allows such components to retrieve information from WSDL extension elements,
- * and use that later to, for example, configure {@link Pipe}s.
+ * and use that later to, for example, configure {@link Tube}s.
  *
  *
  *
