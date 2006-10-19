@@ -57,7 +57,9 @@ public class EndpointMethodHandlerGetter {
         for( JavaMethodImpl m : model.getJavaMethods() ) {
             EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,model,m,binding);
             QName payloadName = model.getQNameForJM(m);     // TODO need a new method on JavaMethodImpl
-            String action = m.getOperation().getOperation().getInput().getAction();
+            String action = null;
+            if (m.getOperation() != null)
+                action = m.getOperation().getOperation().getInput().getAction();
             if (action != null)
                 actionMethodHandlers.put(action, handler);
             methodHandlers.put(payloadName.getNamespaceURI(), payloadName.getLocalPart(), handler);
