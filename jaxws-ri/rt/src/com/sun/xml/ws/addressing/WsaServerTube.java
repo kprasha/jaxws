@@ -156,7 +156,7 @@ public class WsaServerTube extends WsaTube {
                 // reach here if endpoint was invoked with both replyTo and faultTo
                 // not equal to either non-anonymous or none
                 String uri = getResponseAddress(response, false);
-                if (!uri.equals(binding.getAddressingVersion().getAnonymousUri()))
+                if (!uri.equals(binding.getAddressingVersion().getAnonymousUri()) && !uri.equals(binding.getAddressingVersion().getNoneUri()))
                     response = processNonAnonymousReply(response, false, false);
             }
         }
