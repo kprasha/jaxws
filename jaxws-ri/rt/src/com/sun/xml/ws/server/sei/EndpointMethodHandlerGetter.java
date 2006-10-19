@@ -37,7 +37,7 @@ import com.sun.xml.ws.api.message.Message;
 
 /**
  * Gets the {@link EndpointMethodHandler} from a {@link Packet}. Uses
- * Action Message Addressing Property to get the handler. If no Action property
+ * Action Message Addressing Property first to get the handler. If no Action property
  * is present or no handler is registered corresponding to that Action, then
  * payload's QName is used to obtain the handler. 
  *
@@ -72,29 +72,41 @@ public class EndpointMethodHandlerGetter {
     }
 
     EndpointMethodHandler getEndpointMethodHandler(Packet request) {
-        Message msg = request.getMessage();
-        localPart = msg.getPayloadLocalPart();
-        if (localPart == null) {
-            localPart = EMPTY_PAYLOAD_LOCAL;
-            nsUri = EMPTY_PAYLOAD_NSURI;
-        } else {
-            nsUri = msg.getPayloadNamespaceURI();
-        }
+        // get Action-based handler
+        EndpointMethodHandler handler = getActionBasedHandler(request);
 
-        EndpointMethodHandler handler = null;
+        if (handler != null)
+            return handler;
 
+        // get message payload-based handler
+        return getPayloadBasedHandler(request);
+    }
+
+    private EndpointMethodHandler getActionBasedHandler(Packet request) {
         String action = null;
+        
         HeaderList hl = request.getMessage().getHeaders();
         if (hl != null) {
             if (binding.getAddressingVersion() != null)
                 action = hl.getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
         }
         if (action != null)
-            handler = actionMethodHandlers.get(action);
-        if (handler == null)
-            handler = methodHandlers.get(nsUri, localPart);
+            return actionMethodHandlers.get(action);
 
-        return handler;
+        return null;
+    }
+
+    private EndpointMethodHandler getPayloadBasedHandler(Packet request) {
+        Message message = request.getMessage();
+        localPart = message.getPayloadLocalPart();
+        if (localPart == null) {
+            localPart = EMPTY_PAYLOAD_LOCAL;
+            nsUri = EMPTY_PAYLOAD_NSURI;
+        } else {
+            nsUri = message.getPayloadNamespaceURI();
+        }
+
+        return methodHandlers.get(nsUri, localPart);
     }
 
     String getPayloadNamespaceURI() {
