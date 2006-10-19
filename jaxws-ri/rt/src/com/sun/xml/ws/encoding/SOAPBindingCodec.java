@@ -24,6 +24,7 @@ package com.sun.xml.ws.encoding;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.client.SelectOptimalEncodingFeature;
 import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
@@ -78,6 +79,14 @@ public class SOAPBindingCodec extends MimeCodec {
      * True if the Fast Infoset codec should be used for encoding.
      */
     private boolean useFastInfosetForEncoding;
+    
+    /**
+     * True if the content negotiation property should
+     * be ignored by the client. This will be used in
+     * the case of Fast Infoset being configured to be 
+     * disabled or automatically selected.
+     */
+    private boolean ignoreContentNegotiationProperty;
     
     // The XML SOAP codec
     private final StreamSOAPCodec xmlSoapCodec;
@@ -163,24 +172,41 @@ public class SOAPBindingCodec extends MimeCodec {
                 xmlMtomCodec.getMimeType() + ", " + 
                 BASE_ACCEPT_VALUE;
 
-        WebServiceFeature f = binding.getFeature(FastInfosetFeature.ID);
-        isFastInfosetDisabled = (f != null && !f.isEnabled());
+        WebServiceFeature fi = binding.getFeature(FastInfosetFeature.ID);
+        isFastInfosetDisabled = (fi != null && !fi.isEnabled());
         if (!isFastInfosetDisabled) {
             fiSoapCodec = getFICodec(version);
             if (fiSoapCodec != null) {
                 fiMimeType = fiSoapCodec.getMimeType();
                 fiSwaCodec = new SwACodec(version, fiSoapCodec);
                 connegXmlAccept = fiMimeType + ", " + xmlAccept;
+                
+                /**
+                 * This feature will only be present on the client side.
+                 *
+                 * Fast Infoset is enabled on the client iff the service
+                 * explicitly supports Fast Infoset.
+                 */
+                WebServiceFeature select = binding.getFeature(SelectOptimalEncodingFeature.ID);
+                if (select != null && select.isEnabled() && 
+                        fi != null && fi.isEnabled()) {
+                    useFastInfosetForEncoding = true;
+                    ignoreContentNegotiationProperty = true;
+                }
             } else {
+                // Fast Infoset could not be loaded by the runtime
                 isFastInfosetDisabled = true;
                 fiSwaCodec = null;
                 fiMimeType = "";
                 connegXmlAccept = xmlAccept;
-            }            
+                ignoreContentNegotiationProperty = true;
+            }
         } else {
+            // Fast Infoset is explicitly not supported by the service
             fiSoapCodec = fiSwaCodec = null;
             fiMimeType = "";
             connegXmlAccept = xmlAccept;
+            ignoreContentNegotiationProperty = true;
         }
         
         this.binding = (SOAPBindingImpl)binding;
@@ -324,14 +350,15 @@ public class SOAPBindingCodec extends MimeCodec {
          * to be encoded by a client.
          * For a server the p.contentNegotiation == null.
          */
-        if (p.contentNegotiation == ContentNegotiation.none) {
-            // The client may have changed the negotiation property from
-            // pessismistic to none between invocations
-            useFastInfosetForEncoding = false;
-        } else if (p.contentNegotiation == ContentNegotiation.optimistic 
-                && !isFastInfosetDisabled) {
-            // Always encode using Fast Infoset if in optimisitic mode
-            useFastInfosetForEncoding = true;
+        if (!ignoreContentNegotiationProperty) {
+            if (p.contentNegotiation == ContentNegotiation.none) {
+                // The client may have changed the negotiation property from
+                // pessismistic to none between invocations
+                useFastInfosetForEncoding = false;
+            } else if (p.contentNegotiation == ContentNegotiation.optimistic) {
+                // Always encode using Fast Infoset if in optimisitic mode
+                useFastInfosetForEncoding = true;
+            }
         }
         
         // Override the MTOM binding for now

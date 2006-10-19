@@ -25,6 +25,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.client.SelectOptimalEncodingFeature;
 import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -124,6 +125,12 @@ public class PortInfo {
             if (wsdlFastInfosetFeature != null) {
                 wsdlFeatures.add(wsdlFastInfosetFeature);
             }
+            
+            WebServiceFeature wsdlSelectEncodingFeature = portModel.getFeature(SelectOptimalEncodingFeature.ID);
+            if (wsdlSelectEncodingFeature != null) {
+                wsdlFeatures.add(wsdlSelectEncodingFeature);
+            }
+            
             //these are the only features that jaxws pays attention portability wise.
         }
         return wsdlFeatures;

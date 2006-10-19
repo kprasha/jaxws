@@ -21,6 +21,7 @@
  */
 package com.sun.xml.ws.client;
 
+import com.sun.xml.ws.api.client.SelectOptimalEncodingFeature;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
@@ -102,6 +103,11 @@ final class SEIPortInfo extends PortInfo {
             WebServiceFeature wsdlFastInfosetFeature = portModel.getFeature(FastInfosetFeature.ID);
             if (wsdlFastInfosetFeature != null) {
                 wsdlFeatures.add(wsdlFastInfosetFeature);
+            }
+            
+            WebServiceFeature wsdlSelectEncodingFeature = portModel.getFeature(SelectOptimalEncodingFeature.ID);
+            if (wsdlSelectEncodingFeature != null) {
+                wsdlFeatures.add(wsdlSelectEncodingFeature);
             }
             
             //these are the only features that jaxws pays attention portability wise.
