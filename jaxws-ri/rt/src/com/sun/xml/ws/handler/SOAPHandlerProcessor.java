@@ -92,17 +92,7 @@ final class SOAPHandlerProcessor<C extends MessageUpdatableContext> extends Hand
      * insertFaultMessage.
      */
     private QName determineFaultCode(SOAPVersion soapVersion) {
-
-        if (isClient) {
-            // client case
-            return soapVersion.faultCodeClient;
-        } else {            
-            //server case
-            if (soapVersion == SOAPVersion.SOAP_12) {
-                return SOAP12Constants.FAULT_CODE_SERVER;
-            }
-            return SOAPConstants.FAULT_CODE_SERVER;
-        }    
+        return isClient ? soapVersion.faultCodeClient : soapVersion.faultCodeServer;
     }
 
 }

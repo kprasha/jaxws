@@ -153,16 +153,16 @@ public abstract class SOAPFaultBuilder {
      * @param faultString must be non-null
      * @param faultCode   For SOAP 1.1, it must be one of
      *                    <ul>
-     *                    <li>{@link SOAPConstants#FAULT_CODE_CLIENT}
-     *                    <li>{@link SOAPConstants#FAULT_CODE_SERVER}
+     *                    <li>{@link SOAPVersion#faultCodeClient}
+     *                    <li>{@link SOAPVersion#faultCodeServer}
      *                    <li>{@link SOAPConstants#FAULT_CODE_MUST_UNDERSTAND}
      *                    <li>{@link SOAPConstants#FAULT_CODE_VERSION_MISMATCH}
      *                    </ul>
      *
      *                    For SOAP 1.2
      *                    <ul>
-     *                    <li>{@link SOAP12Constants#FAULT_CODE_CLIENT}
-     *                    <li>{@link SOAP12Constants#FAULT_CODE_SERVER}
+     *                    <li>{@link SOAPVersion#faultCodeClient}
+     *                    <li>{@link SOAPVersion#faultCodeServer}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_MUST_UNDERSTAND}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_VERSION_MISMATCH}
      *                    <li>{@link SOAP12Constants#FAULT_CODE_DATA_ENCODING_UNKNOWN}
@@ -375,13 +375,7 @@ public abstract class SOAPFaultBuilder {
     }
 
     private static QName getDefaultFaultCode(SOAPVersion soapVersion) {
-        switch (soapVersion) {
-            case SOAP_12:
-                return SOAP12Constants.FAULT_CODE_SERVER;
-            default:
-                return SOAPConstants.FAULT_CODE_SERVER;
-        }
-
+        return soapVersion.faultCodeServer;
     }
 
     /**

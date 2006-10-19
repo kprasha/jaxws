@@ -361,10 +361,6 @@ final class WSServletDelegate {
         }
     }
 
-    protected QName getFaultServerQName(){
-        return SOAPConstants.FAULT_CODE_SERVER;
-    }
-
     private void writeWebServicesHtmlPage(HttpServletRequest request,
                                           HttpServletResponse response) throws IOException {
 
