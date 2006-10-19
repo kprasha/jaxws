@@ -223,7 +223,7 @@ public abstract class BindingImpl implements WSBinding {
                                           String mtomEnabled, String mtomThreshold,
                                           WebServiceFeature[] features) {
         // Features specified through annotaion
-        WebServiceFeature[] implFeatures = BindingTypeImpl.parseBindingType(implClass);
+        WebServiceFeature[] implFeatures = WebServiceFeatureUtil.parseWebServiceFeatures(implClass);
         MTOMFeature mtomfeature = null;
 
         BindingID bindingID;
@@ -237,7 +237,7 @@ public abstract class BindingImpl implements WSBinding {
                     else
                         mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
                 } else {
-                    mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
+                    mtomfeature = (MTOMFeature) WebServiceFeatureUtil.getFeature(MTOMFeature.ID, implFeatures);
                 }
             } else if ((mtomEnabled != null) && !(Boolean.valueOf(mtomEnabled)== bindingID.isMTOMEnabled())) {
                 throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId, mtomEnabled));
@@ -253,7 +253,7 @@ public abstract class BindingImpl implements WSBinding {
                 else
                     mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
             } else {
-                mtomfeature = (MTOMFeature) BindingTypeImpl.getFeature(MTOMFeature.ID, implFeatures);
+                mtomfeature = (MTOMFeature) WebServiceFeatureUtil.getFeature(MTOMFeature.ID, implFeatures);
                 if ((bindingID.isMTOMEnabled() != null) && (mtomfeature != null)) {
                     //if both are specified , make sure they don't conflict
                     if (mtomfeature.isEnabled() != bindingID.isMTOMEnabled())

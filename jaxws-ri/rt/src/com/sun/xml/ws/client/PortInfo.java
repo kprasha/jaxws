@@ -30,7 +30,7 @@ import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.BindingTypeImpl;
+import com.sun.xml.ws.binding.WebServiceFeatureUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.RespectBindingFeature;
@@ -148,7 +148,7 @@ public class PortInfo {
     }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        if (!BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, webServiceFeatures)) {
+        if (!WebServiceFeatureUtil.isFeatureEnabled(RespectBindingFeature.ID, webServiceFeatures)) {
             return webServiceFeatures;
         }
         // RespectBindingFeature is enabled, so enable all wsdlFeatures

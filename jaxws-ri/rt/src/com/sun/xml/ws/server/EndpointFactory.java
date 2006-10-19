@@ -34,7 +34,7 @@ import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.BindingTypeImpl;
+import com.sun.xml.ws.binding.WebServiceFeatureUtil;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -161,7 +161,7 @@ public class EndpointFactory {
         if (primaryDoc != null) {
             wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
         }
-        WebServiceFeature[] wsfeatures = BindingTypeImpl.parseBindingType(implType);
+        WebServiceFeature[] wsfeatures = WebServiceFeatureUtil.parseWebServiceFeatures(implType);
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
@@ -169,7 +169,7 @@ public class EndpointFactory {
 
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
-                if (wsdlPort != null && BindingTypeImpl.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
+                if (wsdlPort != null && WebServiceFeatureUtil.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
                     WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding, true);
                     binding.setFeatures(wsdlFeatures);
                 }
