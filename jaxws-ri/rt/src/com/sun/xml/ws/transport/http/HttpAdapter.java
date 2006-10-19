@@ -28,6 +28,9 @@ import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.PortAddressResolver;
@@ -134,7 +137,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
     }
 
-
+/*
     final class HttpToolkit extends Adapter.Toolkit implements TransportBackChannel {
         private WSHTTPConnection con;
         private boolean closed;
@@ -225,6 +228,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             }
         }
     }
+    */
 
     protected HttpToolkit createToolkit() {
         return new HttpToolkit();
@@ -251,6 +255,130 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             tk.handle(connection);
         } finally {
             pool.recycle(tk);
+        }
+    }
+
+    public Packet decodePacket(@NotNull WSHTTPConnection con, Codec codec) throws IOException {
+        String ct = con.getRequestHeader("Content-Type");
+        InputStream in = con.getInput();
+        Packet packet = new Packet();
+        packet.acceptableMimeTypes = con.getRequestHeader("Accept");
+        packet.addSatellite(con);
+        packet.transportBackChannel = new Oneway(con);
+
+        if (dump) {
+            ByteArrayBuffer buf = new ByteArrayBuffer();
+            buf.write(in);
+            dump(buf, "HTTP request", con.getRequestHeaders());
+            in = buf.newInputStream();
+        }
+        if (codec == null) {
+            codec = endpoint.createCodec();
+        }
+        try {
+            codec.decode(in, ct, packet);
+        } catch(ExceptionHasMessage e) {
+            e.printStackTrace();
+            packet.setMessage(e.getFaultMessage());
+        }
+        return packet;
+    }
+
+    public void encodePacket(Packet packet, @NotNull WSHTTPConnection con, Codec codec) throws IOException {
+        if (con.isClosed()) {
+            return;                 // Connection is already closed
+        }
+        if (codec == null) {
+            codec = endpoint.createCodec();
+        }
+        Message responseMessage = packet.getMessage();
+        if (responseMessage == null) {
+            if (!con.isClosed()) {
+                // close the response channel now
+                con.setStatus(WSHTTPConnection.ONEWAY);
+                try {
+                    con.getOutput().close(); // no payload
+                } catch (IOException e) {
+                    throw new WebServiceException(e);
+                }
+            }
+        } else {
+            if (con.getStatus() == 0) {
+                // if the appliation didn't set the status code,
+                // set the default one.
+                con.setStatus(responseMessage.isFault()
+                        ? HttpURLConnection.HTTP_INTERNAL_ERROR
+                        : HttpURLConnection.HTTP_OK);
+            }
+
+            ContentType contentType = codec.getStaticContentType(packet);
+            if (contentType != null) {
+                con.setContentTypeResponseHeader(contentType.getContentType());
+                OutputStream os = con.getOutput();
+                if (dump) {
+                    ByteArrayBuffer buf = new ByteArrayBuffer();
+                    codec.encode(packet, buf);
+                    dump(buf, "HTTP response " + con.getStatus(), con.getResponseHeaders());
+                    buf.writeTo(os);
+                } else {
+                    codec.encode(packet, os);
+                }
+                os.close();
+            } else {
+                ByteArrayBuffer buf = new ByteArrayBuffer();
+                contentType = codec.encode(packet, buf);
+                con.setContentTypeResponseHeader(contentType.getContentType());
+                if (dump) {
+                    dump(buf, "HTTP response " + con.getStatus(), con.getResponseHeaders());
+                }
+                OutputStream os = con.getOutput();
+                buf.writeTo(os);
+                os.close();
+            }
+        }
+        con.close();
+    }
+
+    public void invokeAsync(Packet request, CompletionCallback callback) {
+        endpoint.schedule(request, callback);
+    }
+
+    final class Oneway implements TransportBackChannel {
+        WSHTTPConnection con;
+        Oneway(WSHTTPConnection con) {
+            this.con = con;
+        }
+        public void close() {
+            if(!con.isClosed()) {
+                // close the response channel now
+                con.setStatus(WSHTTPConnection.ONEWAY);
+                try {
+                    con.getOutput().close(); // no payload
+                } catch (IOException e) {
+                    throw new WebServiceException(e);
+                }
+                con.close();
+            }
+        }
+
+    }
+
+    final class HttpToolkit extends Adapter.Toolkit {
+        public void handle(WSHTTPConnection con) throws IOException {
+            Packet request = decodePacket(con, codec);
+            Packet response = null;
+            if (!request.getMessage().isFault()) {
+                try {
+                    response = head.process(request, con.getWebServiceContextDelegate(), request.transportBackChannel); // TODO
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (!con.isClosed()) {
+                        writeInternalServerError(con);
+                    }
+                    return;
+                }
+            }
+            encodePacket(response, con, codec);
         }
     }
 

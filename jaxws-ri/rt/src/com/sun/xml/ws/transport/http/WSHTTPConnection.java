@@ -24,6 +24,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.handler.MessageContext;
@@ -48,6 +49,8 @@ import java.net.HttpURLConnection;
  * This class extends {@link PropertySet} so that a transport can
  * expose its properties to the appliation and pipes. (This object
  * will be added to {@link Packet#addSatellite(PropertySet)}.)
+ *
+ * @author Jitendra Kotamraju
  */
 public abstract class WSHTTPConnection extends PropertySet {
 
@@ -160,7 +163,6 @@ public abstract class WSHTTPConnection extends PropertySet {
     /**
      * HTTP request method, such as "GET" or "POST".
      */
-    @Property(MessageContext.HTTP_REQUEST_METHOD)
     public abstract @NotNull String getRequestMethod();
 
     /**
@@ -174,14 +176,12 @@ public abstract class WSHTTPConnection extends PropertySet {
      * @return
      *      can be empty but never null.
      */
-    @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public abstract @NotNull Map<String,List<String>> getRequestHeaders();
 
     /**
      * @return
      *      HTTP response headers.
      */
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public abstract Map<String,List<String>> getResponseHeaders();
     /**
      * Gets an HTTP request header.
@@ -198,14 +198,26 @@ public abstract class WSHTTPConnection extends PropertySet {
     /**
      * HTTP Query string, such as "foo=bar", or null if none exists.
      */
-    @Property(MessageContext.QUERY_STRING)
     public abstract @Nullable String getQueryString();
 
     /**
-     * Requested path. A string like "/foo/bar/baz".
-     *
-     * @see javax.servlet.http.HttpServletRequest#getPathInfo()
+     * Requested path. A string like "/foo/bar/baz"
      */
-    @Property(MessageContext.PATH_INFO)
     public abstract @Nullable String getPathInfo();
+
+    private boolean closed;
+
+    /**
+     * Close the connection
+     */
+    public void close() {
+        this.closed = true;
+    }
+
+    /**
+     * Retuns whether connection is closed or not.
+     */
+    public boolean isClosed() {
+        return closed;
+    }
 }
