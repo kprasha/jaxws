@@ -180,6 +180,18 @@ public final class WSEndpointReference {
     /**
      * Creates a new {@link WSEndpointReference} by replacing the address of this EPR
      * to the new one.
+     *
+     * <p>
+     * The following example shows how you can use this to force an HTTPS EPR,
+     * when the endpoint can serve both HTTP and HTTPS requests. 
+     * <pre>
+     * if(epr.getAddress().startsWith("http:"))
+     *   epr = epr.createWithAddress("https:"+epr.getAddress().substring(5));
+     * </pre>
+     *
+     * @param newAddress
+     *      This is a complete URL to be written inside &lt;Adress> element of the EPR,
+     *      such as "http://foo.bar/abc/def"
      */
     public @NotNull WSEndpointReference createWithAddress(@NotNull final String newAddress) {
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
