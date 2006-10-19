@@ -37,9 +37,9 @@ import com.sun.xml.ws.api.message.Message;
 
 /**
  * Gets the {@link EndpointMethodHandler} from a {@link Packet}. Uses
- * Action Message Addressing Property first to get the handler. If no Action property
- * is present or no handler is registered corresponding to that Action, then
- * payload's QName is used to obtain the handler. 
+ * {@link Message} payload's QName to obtain the handler. If no handler is
+ * registered corresponding to that QName, then uses Action Message
+ * Addressing Property value to get the handler. 
  *
  * @author Arun Gupta
  */
@@ -72,14 +72,14 @@ public class EndpointMethodHandlerGetter {
     }
 
     EndpointMethodHandler getEndpointMethodHandler(Packet request) {
-        // get Action-based handler
-        EndpointMethodHandler handler = getActionBasedHandler(request);
+        // get Message payload-based handler
+        EndpointMethodHandler handler = getPayloadBasedHandler(request);
 
         if (handler != null)
             return handler;
 
-        // get message payload-based handler
-        return getPayloadBasedHandler(request);
+        // get Action-based handler
+        return getActionBasedHandler(request);
     }
 
     private EndpointMethodHandler getActionBasedHandler(Packet request) {
