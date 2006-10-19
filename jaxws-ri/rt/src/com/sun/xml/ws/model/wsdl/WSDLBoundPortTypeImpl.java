@@ -206,6 +206,12 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
         features.add(feature);
     }
 
+    @NotNull List<WebServiceFeature> getFeatures() {
+        if(features == null)
+            return new ArrayList<WebServiceFeature>();
+        return features;
+    }
+
     public WebServiceFeature getFeature(String id) {
         if (features != null) {
             for (WebServiceFeature f : features) {

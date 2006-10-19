@@ -21,22 +21,18 @@
  */
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.api.client.SelectOptimalEncodingFeature;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
+import com.sun.xml.ws.model.SOAPSEIModel;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.MTOMFeature;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 
 /**
@@ -81,7 +77,13 @@ final class SEIPortInfo extends PortInfo {
          return bindingImpl;
     }
 
-    protected List<WebServiceFeature> extractWSDLFeatures() {
+    protected @NotNull List<WebServiceFeature> extractWSDLFeatures() {
+        if (portModel != null) {
+            return ((WSDLPortImpl)portModel).getFeatures();
+        }
+        return new ArrayList<WebServiceFeature>();
+
+        /*
         List<WebServiceFeature> wsdlFeatures = null;
         if (portModel != null) {
             wsdlFeatures = new ArrayList<WebServiceFeature>();
@@ -113,6 +115,7 @@ final class SEIPortInfo extends PortInfo {
             //these are the only features that jaxws pays attention portability wise.
         }
         return wsdlFeatures;
+        */
     }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {

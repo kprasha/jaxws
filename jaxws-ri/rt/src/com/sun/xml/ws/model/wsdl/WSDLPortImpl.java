@@ -27,11 +27,11 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.soap.AddressingFeature;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +73,23 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
 
     public WSDLServiceImpl getOwner() {
         return owner;
+    }
+
+    /**
+     *
+     * @return All applicable features on this
+     *  port (inlcudes features set on WSDLBoundPortType)
+     */
+    public @NotNull List<WebServiceFeature> getFeatures() {
+        List<WebServiceFeature> bindingFeatures = boundPortType.getFeatures();
+        if(features == null) {
+            return bindingFeatures;
+        } else {
+            List<WebServiceFeature> effectiveFeatures = new ArrayList<WebServiceFeature>();
+            effectiveFeatures.addAll(features);
+            effectiveFeatures.addAll(bindingFeatures);
+            return effectiveFeatures;
+        }
     }
 
     public WebServiceFeature getFeature(String id) {

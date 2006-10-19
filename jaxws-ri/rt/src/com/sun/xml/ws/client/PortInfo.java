@@ -25,18 +25,17 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.client.SelectOptimalEncodingFeature;
-import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.WebServiceFeatureUtil;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.MTOMFeature;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,43 +96,67 @@ public class PortInfo {
         return owner.createBinding(portName, bindingId);
     }
 
-    protected List<WebServiceFeature> extractWSDLFeatures() {
-        List<WebServiceFeature> wsdlFeatures = null;
+    protected @NotNull List<WebServiceFeature> extractWSDLFeatures() {
+        List<WebServiceFeature> applicableWsdlFeatures = new ArrayList<WebServiceFeature>();
         if (portModel != null) {
-            wsdlFeatures = new ArrayList<WebServiceFeature>();
+            List<WebServiceFeature> wsdlFeatures = ((WSDLPortImpl) portModel).getFeatures();
+            for (WebServiceFeature ftr : wsdlFeatures) {
+                try {
+                    // if is WSDL Extension , it will have required attribute
+                    // Add only if isRequired returns true
+                    Method m = (ftr.getClass().getMethod("isRequired"));
+                    try {
+                        boolean required = (Boolean) m.invoke(ftr);
+                        if(required)
+                            applicableWsdlFeatures.add(ftr);
+                    } catch (IllegalAccessException e) {
+                        throw new WebServiceException(e);
+                    } catch (InvocationTargetException e) {
+                        throw new WebServiceException(e);
+                    }
+                } catch (NoSuchMethodException e) {
+                    // this ftr is not an WSDL extension, just add it
+                    applicableWsdlFeatures.add(ftr);
+                }
+            }
+        }
+        return applicableWsdlFeatures;
 
-            WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
-            if (wsdlAddressingFeature != null) {
-                //Set only if wsdl:required=true
-                if (((AddressingFeature) wsdlAddressingFeature).isRequired())
-                    wsdlFeatures.add(wsdlAddressingFeature);
-            } else {
-                //try MS Addressing Version
-                wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
-                //Set only if wsdl:required=true
-                if (wsdlAddressingFeature != null &&
-                        ((MemberSubmissionAddressingFeature) wsdlAddressingFeature).isRequired())
-                    wsdlFeatures.add(wsdlAddressingFeature);
-            }
-            
-            WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
-            if (wsdlMTOMFeature != null) {
-                wsdlFeatures.add(wsdlMTOMFeature);
-            }
-            
-            WebServiceFeature wsdlFastInfosetFeature = portModel.getFeature(FastInfosetFeature.ID);
-            if (wsdlFastInfosetFeature != null) {
-                wsdlFeatures.add(wsdlFastInfosetFeature);
-            }
-            
-            WebServiceFeature wsdlSelectEncodingFeature = portModel.getFeature(SelectOptimalEncodingFeature.ID);
-            if (wsdlSelectEncodingFeature != null) {
-                wsdlFeatures.add(wsdlSelectEncodingFeature);
-            }
-            
-            //these are the only features that jaxws pays attention portability wise.
+                /*
+                WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
+                if (wsdlAddressingFeature != null) {
+                    //Set only if wsdl:required=true
+                    if (((AddressingFeature) wsdlAddressingFeature).isRequired())
+                        wsdlFeatures.add(wsdlAddressingFeature);
+                } else {
+                    //try MS Addressing Version
+                    wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
+                    //Set only if wsdl:required=true
+                    if (wsdlAddressingFeature != null &&
+                            ((MemberSubmissionAddressingFeature) wsdlAddressingFeature).isRequired())
+                        wsdlFeatures.add(wsdlAddressingFeature);
+                }
+
+                WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
+                if (wsdlMTOMFeature != null) {
+                    wsdlFeatures.add(wsdlMTOMFeature);
+                }
+
+                WebServiceFeature wsdlFastInfosetFeature = portModel.getFeature(FastInfosetFeature.ID);
+                if (wsdlFastInfosetFeature != null) {
+                    wsdlFeatures.add(wsdlFastInfosetFeature);
+                }
+
+                WebServiceFeature wsdlSelectEncodingFeature = portModel.getFeature(SelectOptimalEncodingFeature.ID);
+                if (wsdlSelectEncodingFeature != null) {
+                    wsdlFeatures.add(wsdlSelectEncodingFeature);
+                }
+
+                //these are the only features that jaxws pays attention portability wise.
+
         }
         return wsdlFeatures;
+        */
     }
 
 
