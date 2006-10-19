@@ -31,7 +31,6 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
@@ -59,7 +58,7 @@ import java.util.Map;
  * @author Paul Sandoz
  */
 @SuppressWarnings({"StringEquality"})
-public abstract class StreamSOAPCodec implements Codec {
+public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamSOAPCodec {
 
     private static final String SOAP_ENVELOPE = "Envelope";
     private static final String SOAP_HEADER = "Header";

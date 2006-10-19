@@ -1,10 +1,31 @@
+/*
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License).  You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the license at
+ * https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * you own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+ */
+
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.encoding.SOAPBindingCodec;
-import com.sun.xml.ws.encoding.StreamSOAPCodec;
 
 /**
  * Factory methods for some of the {@link Codec} implementations.
@@ -40,7 +61,7 @@ public abstract class Codecs {
      * @param xmlEnvelopeCodec SOAP envelope codec
      * @return non null codec to parse entire SOAP message(including MIME parts)
      */
-    public static @NotNull Codec createSOAPBindingCodec(WSBinding binding, Codec xmlEnvelopeCodec) {
+    public static @NotNull Codec createSOAPBindingCodec(WSBinding binding, StreamSOAPCodec xmlEnvelopeCodec) {
         return new SOAPBindingCodec(binding, xmlEnvelopeCodec);
     }
 
@@ -52,7 +73,8 @@ public abstract class Codecs {
      * @param version SOAP version of the binding
      * @return non null default xml codec
      */
-    public static @NotNull Codec createSOAPEnvelopeXmlCodec(@NotNull SOAPVersion version) {
-        return StreamSOAPCodec.create(version);
+    public static @NotNull
+    StreamSOAPCodec createSOAPEnvelopeXmlCodec(@NotNull SOAPVersion version) {
+        return com.sun.xml.ws.encoding.StreamSOAPCodec.create(version);
     }
 }

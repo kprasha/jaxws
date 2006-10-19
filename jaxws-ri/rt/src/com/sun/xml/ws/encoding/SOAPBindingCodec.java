@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.resources.StreamingMessages;
@@ -79,7 +80,7 @@ public class SOAPBindingCodec extends MimeCodec {
     private boolean useFastInfosetForEncoding;
     
     // The XML SOAP codec
-    private final Codec xmlSoapCodec;
+    private final StreamSOAPCodec xmlSoapCodec;
     
     // The Fast Infoset SOAP codec
     private final Codec fiSoapCodec;
@@ -145,10 +146,10 @@ public class SOAPBindingCodec extends MimeCodec {
     private AcceptContentType _adaptingContentType = new AcceptContentType();
 
     public SOAPBindingCodec(WSBinding binding) {
-        this(binding, StreamSOAPCodec.create(binding.getSOAPVersion()));
+        this(binding, com.sun.xml.ws.encoding.StreamSOAPCodec.create(binding.getSOAPVersion()));
     }
     
-    public SOAPBindingCodec(WSBinding binding, Codec xmlSoapCodec) {
+    public SOAPBindingCodec(WSBinding binding, StreamSOAPCodec xmlSoapCodec) {
         super(binding.getSOAPVersion());
         
         this.xmlSoapCodec = xmlSoapCodec;
@@ -252,7 +253,7 @@ public class SOAPBindingCodec extends MimeCodec {
     }
     
     public SOAPBindingCodec copy() {
-        return new SOAPBindingCodec(binding, xmlSoapCodec.copy());
+        return new SOAPBindingCodec(binding, (StreamSOAPCodec)xmlSoapCodec.copy());
     }
 
     @Override

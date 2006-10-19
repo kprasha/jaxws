@@ -30,7 +30,7 @@ import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
@@ -68,7 +68,7 @@ import java.util.UUID;
 public class MtomCodec extends MimeCodec {
     public static final String XOP_XML_MIME_TYPE = "application/xop+xml";
     
-    private final Codec codec;
+    private final StreamSOAPCodec codec;
 
     // encoding related parameters
     private String boundary;
@@ -80,7 +80,7 @@ public class MtomCodec extends MimeCodec {
     //This is the mtom attachment stream, we should write it just after the root part for decoder
     private final List<ByteArrayBuffer> mtomAttachmentStream = new ArrayList<ByteArrayBuffer>();
 
-    MtomCodec(SOAPVersion version, Codec codec, WebServiceFeature mtomFeature){
+    MtomCodec(SOAPVersion version, StreamSOAPCodec codec, WebServiceFeature mtomFeature){
         super(version);
         this.codec = codec;
         createConteTypeHeader();
@@ -214,7 +214,7 @@ public class MtomCodec extends MimeCodec {
     }
 
     public MtomCodec copy() {
-        return new MtomCodec(version, codec.copy(), mtomFeature);
+        return new MtomCodec(version, (StreamSOAPCodec)codec.copy(), mtomFeature);
     }
 
     private String encodeCid(){
@@ -227,14 +227,10 @@ public class MtomCodec extends MimeCodec {
     protected void decode(MimeMultipartParser mpp, Packet packet) throws IOException {
         // we'd like to reuse those reader objects but unfortunately decoder may be reused
         // before the decoded message is completely used.
-        if (codec instanceof StreamSOAPCodec) {
-            packet.setMessage(((StreamSOAPCodec)codec).decode(new MtomXMLStreamReaderEx( mpp,
-                XMLStreamReaderFactory.createXMLStreamReader(mpp.getRootPart().asInputStream(), true)
-            )));
-        } else {
-            // primary part codec doesn't need to know about content-type
-            codec.decode(mpp.getRootPart().asInputStream(), null, packet);
-        }
+
+        packet.setMessage(codec.decode(new MtomXMLStreamReaderEx( mpp,
+            XMLStreamReaderFactory.createXMLStreamReader(mpp.getRootPart().asInputStream(), true)
+        )));
     }
 
     private class MtomStreamWriter extends XMLStreamWriterFilter implements XMLStreamWriterEx {
