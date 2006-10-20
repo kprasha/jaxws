@@ -30,6 +30,8 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.RequestContext;
@@ -39,17 +41,23 @@ import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.message.DataHandlerAttachment;
+import com.sun.xml.ws.message.AttachmentSetImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
+import javax.activation.DataHandler;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -298,6 +306,34 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         //does it begin with ?
         return (query == null || query.startsWith("?")) ? query : "?" + query;
     }
+
+
+    protected AttachmentSet setOutboundAttachments() {
+        HashMap<String, DataHandler> attachments = (HashMap<String, DataHandler>)
+                getRequestContext().get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
+
+        if (attachments != null) {
+            List<Attachment> alist = new ArrayList();
+            for (Map.Entry<String, DataHandler> att : attachments.entrySet()) {
+                DataHandlerAttachment dha = new DataHandlerAttachment(att.getKey(), att.getValue());
+                alist.add(dha);
+            }
+            return new AttachmentSetImpl(alist);
+        }
+        return null;
+    }
+
+   /* private void getInboundAttachments(Message msg) {
+        AttachmentSet attachments = msg.getAttachments();
+        if (!attachments.isEmpty()) {
+            Map<String, DataHandler> in = new HashMap<String, DataHandler>();
+            for (Attachment attachment : attachments)
+                in.put(attachment.getContentId(), attachment.asDataHandler());
+            getResponseContext().put(MessageContext.INBOUND_MESSAGE_ATTACHMENTS, in);
+        }
+
+    }
+    */
 
 
     /**

@@ -23,20 +23,28 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.encoding.xml.XMLMessage;
+import com.sun.xml.ws.message.AttachmentSetImpl;
+import com.sun.xml.ws.message.DataHandlerAttachment;
+import com.sun.xml.ws.message.source.PayloadSourceMessage;
 
+import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.Service.Mode;
 import javax.xml.ws.WebServiceException;
-/**
- * TODO: Use sandbox classes, update javadoc
- */
+import javax.xml.ws.handler.MessageContext;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * The <code>SourceDispatch</code> class provides support
@@ -58,12 +66,25 @@ public class SourceDispatch extends DispatchImpl<Source> {
     Source toReturnValue(Packet response) {
         Message msg = response.getMessage();
 
-        switch (mode){
+        switch (mode) {
             case PAYLOAD:
-                return msg.readPayloadAsSource();
+                if (isXMLHttp(binding)) {
+                    try {
+                        return new StreamSource(XMLMessage.getDataSource(msg).getInputStream());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else
+                    return msg.readPayloadAsSource();
+
             case MESSAGE:
-                if (isXMLHttp(binding))
-                   return msg.readPayloadAsSource();
+                if (isXMLHttp(binding)) {
+                     try {
+                        return new StreamSource(XMLMessage.getDataSource(msg).getInputStream());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 return msg.readEnvelopeAsSource();
             default:
                 throw new WebServiceException("Unrecognized dispatch mode");
@@ -76,11 +97,13 @@ public class SourceDispatch extends DispatchImpl<Source> {
 
         switch (mode) {
             case PAYLOAD:
-                message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
+                 message = (msg == null) ?
+                         Messages.createEmpty(soapVersion):new PayloadSourceMessage(null, msg, setOutboundAttachments(), soapVersion);
                 break;
             case MESSAGE:                
                 if (isXMLHttp(binding))
-                    message = (msg == null) ? Messages.createEmpty(soapVersion) : Messages.createUsingPayload(msg, soapVersion);
+                    message = (msg == null) ?
+                            Messages.createEmpty(soapVersion) : new PayloadSourceMessage(null, msg, setOutboundAttachments(), soapVersion);
                 else {
                     message = Messages.create(msg, soapVersion);
                 }
@@ -91,5 +114,6 @@ public class SourceDispatch extends DispatchImpl<Source> {
 
         return new Packet(message);
     }
-   
+
+
 }
