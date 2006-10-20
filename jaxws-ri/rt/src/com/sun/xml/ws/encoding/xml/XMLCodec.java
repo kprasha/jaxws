@@ -36,8 +36,10 @@ public final class XMLCodec implements Codec {
     public ContentType encode(Packet packet, OutputStream out) {
         XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
         try {
-            packet.getMessage().writePayloadTo(writer);
-            writer.flush();
+            if (packet.getMessage().hasPayload()){
+                packet.getMessage().writePayloadTo(writer);
+                writer.flush();
+            }
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
