@@ -57,8 +57,9 @@ enabled/disabled on the server-side.</P>
 <P>This section describes how WS-Addressing can be enabled/disabled if you
 develop an endpoint starting from a Java SEI.</P>
 <P>By default, WS-Addressing is disabled on an endpoint starting from Java. If
-that is the expected behavior, then nothing needs to be done. However in that
-case, any WS-Addressing headers received at the endpoint are ignored.</P>
+that is the expected behavior, then nothing else needs to be done. In that case
+any WS-Addressing headers received at the endpoint are ignored.</P>
+<h4><b>2.1.1 Addressing annotations</b></h4>
 <P>If WS-Addressing support needs to be enabled on an endpoint, then along with <code>javax.jws.WebService</code>
 annotation, <code>javax.xml.ws.soap.Addressing</code> annotation need to be
 specified for enabling W3C WS-Addressing. If Member Submission WS-Addressing
@@ -97,11 +98,27 @@ public class AddNumbersImpl {
   <li>Any response message sent back to the client contains the required
     WS-Addressing headers.&nbsp;</li>
 </ul>
+<p><b>Annotation parameters</b></p>
+<p>Both <code>javax.xml.ws.soap.Addressing</code> and <code>com.sun.xml.ws.developer.MemberSubmissionAddressing</code>
+annotations take two optional Boolean parameters, <code>enabled</code> (default
+true) and <code>required</code> (default false). If <code>required</code> is
+specified true, then WS-Addressing rules are enforced. Otherwise the inbound
+message is inspected to find out if WS-A is engaged and then the rules are
+enforced.&nbsp;</p>
+<p>In addition, for W3C only, <code>wsdl:required=&quot;true&quot;</code> is
+generated on the extensibility element.</p>
+<p>For example, to enforce Member Submission WS-Addressing rules on the server
+side, the above code sample will change to:</p>
+<pre>@com.sun.xml.ws.developer.MemberSubmissionAddressing<b>(enabled=true, required=true)</b>
+@javax.jws.WebService
+public class AddNumbersImpl {
+...
+}</pre>
 <h4>2.1.1 Implicit Action</h4>
 <p>In most common cases, an implicit Action association, as defined by <a href="http://www.w3.org/TR/2006/CR-ws-addr-wsdl-20060529/#defactionwsdl11">W3C
 WS-Addressing WSDL Binding</a> and <a href="http://www.w3.org/Submission/ws-addressing/#_Toc77464327">Member
 Submission</a>, will be sufficient. For such cases, only using the correct
-annotation to enable Addressing is sufficient. The client looking at such a WSDL
+annotation to enable Addressing is required. The client looking at such a WSDL
 will send the implicit <code>wsa:Action</code> header. If only Addressing is
 enabled by using the appropriate annotation at the SEI,&nbsp;</p>
 <h4>2.1.1 Explicit Action</h4>
@@ -131,10 +148,16 @@ public int addNumbers3(int number1, int number2) throws AddNumbersException {
   &lt;fault message="tns:AddNumbersException" name="AddNumbersException" <b>wsaw:Action=&quot;http://example.com/fault3&quot;</b>/&gt;
 &lt;/operation></pre>
 <P>where <code>wsaw</code> is bound to W3C WSDL Binding namespace or Member
-Submission namespace depending upon which annotation is used to enable
-Addressing. </P>
+Submission namespace depending upon the annotation used to enable Addressing. </P>
 <h3>2.2 Starting from WSDL</h3>
-<P>&nbsp;</P>
+<P>This section describes how WS-Addressing can be enabled/disabled if you
+develop an endpoint starting from a WSDL.</P>
+<P>For W3C only, if the WSDL contains the standard extensibility element <code>wsaw:UsingAddressing</code>
+then that is sufficient. The only way to enable Member Submission WS-Addressing
+is to use the <code>com.sun.xml.ws.developer.MemberSubmission</code> annotation
+described above. </P>
+<P>The annotation in the SEI takes precedence over the standard extensibility
+element in the WSDL.</P>
 <h2>3. On the client side</h2>
 <h3>3.1 Implicit behavior</h3>
 <h3>3.2 Explicit enabling</h3>
