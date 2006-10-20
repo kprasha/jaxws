@@ -41,16 +41,16 @@ import javax.xml.ws.handler.PortInfo;
  * necessary handler chain to set on a binding instance.
  *
  * @see WSServiceDelegate
- * @see HandlerResolverImpl
+ * @see com.sun.xml.ws.client.HandlerResolverImpl
  *
  * @author WS Development Team
  */
 public class PortInfoImpl implements PortInfo {
-    
+
     private BindingID bindingId;
     private QName portName;
     private QName serviceName;
-        
+
     /**
      * The class is constructed with the information needed to identify
      * a port. This information cannot be changed later.
@@ -85,7 +85,7 @@ public class PortInfoImpl implements PortInfo {
     public QName getServiceName() {
         return serviceName;
     }
-    
+
     /**
      * Object.equals is overridden here so that PortInfo objects
      * can be compared when using them as keys in the map in
@@ -99,7 +99,7 @@ public class PortInfoImpl implements PortInfo {
     public boolean equals(Object obj) {
         if (obj instanceof PortInfo) {
             PortInfo info = (PortInfo) obj;
-            if (bindingId.equals(info.getBindingID()) &&
+            if (bindingId.toString().equals(info.getBindingID()) &&
                 portName.equals(info.getPortName()) &&
                 serviceName.equals(info.getServiceName())) {
                 return true;
