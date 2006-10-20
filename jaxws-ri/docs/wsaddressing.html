@@ -148,21 +148,100 @@ public int addNumbers3(int number1, int number2) throws AddNumbersException {
   &lt;fault message="tns:AddNumbersException" name="AddNumbersException" <b>wsaw:Action=&quot;http://example.com/fault3&quot;</b>/&gt;
 &lt;/operation></pre>
 <P>where <code>wsaw</code> is bound to W3C WSDL Binding namespace or Member
-Submission namespace depending upon the annotation used to enable Addressing. </P>
+Submission namespace depending upon the annotation used to enable
+Addressing.&nbsp;</P>
 <h3>2.2 Starting from WSDL</h3>
 <P>This section describes how WS-Addressing can be enabled/disabled if you
 develop an endpoint starting from a WSDL.</P>
 <P>For W3C only, if the WSDL contains the standard extensibility element <code>wsaw:UsingAddressing</code>
 then that is sufficient. The only way to enable Member Submission WS-Addressing
 is to use the <code>com.sun.xml.ws.developer.MemberSubmission</code> annotation
-described above. </P>
-<P>The annotation in the SEI takes precedence over the standard extensibility
-element in the WSDL.</P>
+described above.&nbsp;</P>
 <h2>3. On the client side</h2>
+<P>This section describes how W3C and Member Submission WS-Addressing can be
+enabled/disabled on the server-side. JAX-WS 2.1 follows the standard
+extensibility elements to enable WS-Addressing support on the client side. In
+addition, it also allows the client to instruct JAX-WS RI to disable
+WS-Addressing processing. The assumption is that in this case the client has
+it's own WS-Addressing processing module. For example, a Dispatch-based client
+in MESSAGE mode may be used to perform non-anonymous ReplyTo/FaultTo processing.</P>
 <h3>3.1 Implicit behavior</h3>
+<p>As defined in Section 1.1, W3C defines a standard extensibility element, <code>wsaw:UsingAddressing</code>,
+to indicate that the endpoint conforms to W3C specification. If the WSDL
+contains this extensibility element, then JAX-WS RI:</p>
+<ul>
+  <li>Maps any <code>wsaw:Action</code> in the <code>input</code>, <code>output</code>
+    and <code>fault</code> elements of <code>wsdl:operation</code> to <code>javax.xml.ws.Action</code>
+    and <code>javax.xml.ws.FaultAction</code> annotation in the generated SEI.</li>
+  <li>Generates <code>Action</code>, <code>To</code>, <code>MessageID</code> and
+    anonymous <code>ReplyTo</code> headers on the outbound request.</li>
+  <li>Any WS-Addressing headers received on the client are understood.</li>
+</ul>
+<p>There is no standard extensibility element for Member Submission
+WS-Addressing and so there is no implicit behavior defined. It can only be
+explicitly enabled as described in the next section.&nbsp;</p>
 <h3>3.2 Explicit enabling</h3>
+<p>If a WSDL does not contain WS-Addressing standard extensibility element, then
+either W3C WS-Addressing or Member Submission WS-Addressing can be explicitly
+enabled using <code>createDispatch</code> and <code>getPort</code> methods on <code>javax.xml.ws.Service</code>.
+The following new APIs are added in JAX-WS 2.1:</p>
+<ul>
+  <li><code>&lt;T&gt; Dispatch&lt;T&gt; createDispatch(javax.xml.namespace.QName&nbsp;portName,
+    java.lang.Class&lt;T&gt;&nbsp;type, Service.Mode&nbsp;mode,
+    WebServiceFeature...&nbsp;features)</code></li>
+  <li><code>Dispatch&lt;java.lang.Object&gt;
+    createDispatch(javax.xml.namespace.QName&nbsp;portName,
+    javax.xml.bind.JAXBContext&nbsp;context, Service.Mode&nbsp;mode,
+    WebServiceFeature...&nbsp;features)</code></li>
+  <li><code>&lt;T&gt; T getPort(java.lang.Class&lt;T&gt;&nbsp;serviceEndpointInterface,
+    WebServiceFeature...&nbsp;features)</code></li>
+  <li><code>&lt;T&gt; T getPort(javax.xml.namespace.QName&nbsp;portName,
+    java.lang.Class&lt;T&gt;&nbsp;serviceEndpointInterface, WebServiceFeature...&nbsp;features)</code></li>
+</ul>
+<p>Each method is a variation of an already existing method in JAX-WS 2.0. The
+only addition is an extra var-arg <code>javax.xml.ws.WebServiceFeature</code>
+parameter. A <code>WebServiceFeature</code> is a new class introduced in JAX-WS
+2.1 specification used to represent a feature that can be enabled or disabled
+for a Web service.</p>
+<p>The JAX-WS 2.1 specification defines <code>javax.xml.ws.soap.AddressingFeature</code>
+to enable W3C WS-Addressing on the client side. In addition, the JAX-WS 2.1 RI
+also defines <code>com.sun.xml.ws.developer.MemberSubmissionAddressingFeature</code>
+to enable Member Submission WS-Addressing on the client side.</p>
+<p>For example in <code>fromjava-wsaddressing</code> example, in order to enable
+W3C WS-Addressing on a proxy, <code>wsimport</code> is used to generate the <code>AddNumbersImplService</code>
+class. Then a port can be obtained using the <code>getAddNumbersImplPort</code>
+method and passing an instance of <code>javax.xml.ws.AddressingFeature</code>.
+The code looks like:</p>
+<p><code>new AddNumbersImplService().getAddNumbersImplPort(new
+javax.xml.ws.AddressingFeature());</code></p>
+<p>Similarly, a Dispatch instance with Member Submission WS-Addressing can be
+created as:</p>
+<p><code>new AddNumbersImplService().createDispatch(<br>
+&nbsp;&nbsp;&nbsp; new QName(&quot;http://server.fromjava_wsaddressing/&quot;,
+&quot;AddNumbersImplPort&quot;),&nbsp;<br>
+&nbsp;&nbsp;&nbsp; SOAPMessage.class,&nbsp;<br>
+&nbsp;&nbsp;&nbsp; Service.Mode.MESSAGE,&nbsp;<br>
+&nbsp;&nbsp;&nbsp; new
+com.sun.xml.ws.developer.MemberSubmissionAddressingFeature());</code></p>
+<p><b>Feature Parameters</b></p>
+<p>Both <code>javax.xml.ws.soap.AddressingFeature</code> and <code>com.sun.xml.ws.developer.MemberSubmissionAddressingFeature</code>
+take two optional Boolean parameters, <code>enabled</code> (default true) and <code>required</code>
+(default false). If enabled, all WS-Addressing headers are generated for an
+outbound message. If <code>required</code> is specified true, then WS-Addressing
+rules are enforced for inbound message. Otherwise the inbound message is
+inspected to find out if WS-A is engaged and then the rules are enforced.&nbsp;</p>
+<p>For example, to enforce Member Submission WS-Addressing rules on the client
+side, the above code sample will change to:</p>
+<pre><code>new AddNumbersImplService().getAddNumbersImplPort(new javax.xml.ws.AddressingFeature(true, true));</code></pre>
 <h3>3.3 Explicit disabling</h3>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
+<p>A client may like to instruct JAX-WS RI to disable WS-Addressing processing.
+The assumption is that in this case the client has it's own WS-Addressing
+processing module. For example, a Dispatch-based client in MESSAGE mode may be
+used to perform non-anonymous ReplyTo/FaultTo processing.</p>
+<p>WS-Addressing processing can be explicitly disabled using one of new methods
+added to JAX-WS 2.1 specification as defined in Section 3.2. For example, W3C
+WS-Addressing processing can be disabled using the following code:</p>
+<p><code>new AddNumbersImplService().getAddNumbersImplPort(new
+javax.xml.ws.AddressingFeature(false));</code></p>
 </body>
 </html>
