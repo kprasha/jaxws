@@ -124,9 +124,9 @@ public final class JavaMethodImpl implements JavaMethod {
     /**
      * Returns the {@link WSDLBoundOperation} Operation associated with {@link this}
      * operation. This method will return <code>null</code> if no {@link WSDLBoundOperation}
-     * is associated. 
+     * is associated, for example for an SE-based endpoint with a null Metadata.
      *
-     * @return
+     * @return the WSDLBoundOperation for this JavaMethod
      */
     public WSDLBoundOperation getOperation() {
         return wsdlOperation;
