@@ -32,6 +32,8 @@ import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.resources.ModelerMessages;
+import com.sun.xml.ws.util.localization.Localizable;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -216,7 +218,7 @@ public class RuntimeModeler {
                 portClass.getCanonicalName());
         }
         if (webService.endpointInterface().length() > 0) {
-            clazz = getClass(webService.endpointInterface());
+            clazz = getClass(webService.endpointInterface(), ModelerMessages.localizableRUNTIME_MODELER_CLASS_NOT_FOUND(webService.endpointInterface()));
             WebService seiService = getPrivClassAnnotation(clazz, WebService.class);
             if (seiService == null) {
                 throw new RuntimeModelerException("runtime.modeler.endpoint.interface.no.webservice",
@@ -260,17 +262,18 @@ public class RuntimeModeler {
     /**
      * utility method to load classes
      * @param className the name of the class to load
+     * @param errorMessage
+     *      Error message to use when the resolution fails.
      * @return the class specified by <code>className</code>
      */
-    protected Class getClass(String className) {
+    private Class getClass(String className, Localizable errorMessage) {
         try {
             if (classLoader == null)
                 return Thread.currentThread().getContextClassLoader().loadClass(className);
             else
                 return classLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeModelerException("runtime.modeler.class.not.found",
-                className);
+            throw new RuntimeModelerException(errorMessage);
         }
     }
 
@@ -567,7 +570,7 @@ public class RuntimeModeler {
             responseClassName = beanPackage + capitalize(method.getName()) + RESPONSE;
         }
 
-        Class requestClass = getClass(requestClassName);
+        Class requestClass = getClass(requestClassName, ModelerMessages.localizableRUNTIME_MODELER_WRAPPER_NOT_FOUND(requestClassName));
 
         String reqName = operationName;
         String reqNamespace = targetNamespace;
@@ -583,7 +586,7 @@ public class RuntimeModeler {
         String resName = operationName+"Response";
         String resNamespace = targetNamespace;
         if (!isOneway) {
-            responseClass = getClass(responseClassName);
+            responseClass = getClass(responseClassName, ModelerMessages.localizableRUNTIME_MODELER_WRAPPER_NOT_FOUND(responseClassName));
             if (resWrapper != null) {
                 if (resWrapper.targetNamespace().length() > 0)
                     resNamespace = resWrapper.targetNamespace();
@@ -974,7 +977,7 @@ public class RuntimeModeler {
                     namespace = webFault.targetNamespace();
             }
             if (faultInfoMethod == null)  {
-                exceptionBean = getClass(className);
+                exceptionBean = getClass(className, ModelerMessages.localizableRUNTIME_MODELER_WRAPPER_NOT_FOUND(className));
                 exceptionType = ExceptionType.UserDefined;
                 anns = exceptionBean.getAnnotations();
             } else {
