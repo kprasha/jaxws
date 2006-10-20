@@ -1,0 +1,59 @@
+<html>
+
+<head caption="WSDL Customization">
+    <link rel="stylesheet" type="text/css" href="style/default.css"/>
+</head>
+
+<body>
+
+<H2>Contents</H2>
+
+<p>1. WS-Addressing in JAX-WS 2.1<br>
+&nbsp; 1.1 WSDL Description<br>
+&nbsp; 1.2 When is WS-A engaged ?<br>
+2. On the server side<br>
+&nbsp; 2.1 Implicit behavior<br>
+&nbsp; 2.2 Explicitly enabling<br>
+3.On the client side<br>
+&nbsp; 3.1 Implicit behavior<br>
+&nbsp; 3.2 Explicit enabling<br>
+&nbsp; 3.3 Explicit disabling</p>
+
+<H2><A NAME="1._Declaring_customizations_"></A>1. WS-Addressing in JAX-WS 2.1</H2>
+<P><a href="http://www.w3.org/2002/ws/addr/">Web Services Addressing</a>
+provides transport-neutral mechanisms to address Web services and messages.
+JAX-WS 2.1 specification requires support for W3C <a href="http://www.w3.org/TR/ws-addr-core">Core</a>,
+<a href="http://www.w3.org/TR/ws-addr-soap">SOAP Binding</a> and <a href="http://www.w3.org/TR/ws-addr-wsdl">WSDL
+Binding</a>. In addition to that, JAX-WS 2.1 RI also supports <a href="http://www.w3.org/Submission/ws-addressing/">Member
+Submission</a> version of WS-Addressing. This allows an application built using
+standard JAX-WS 2.1 APIs to enable/disable W3C WS-Addressing on the client and
+service endpoint. The member submission version is supported in an implementation
+specific way. The subsequent sections describe how the two WS-Addressing
+versions can be enabled/disabled on client and server side .</P>
+<h3>1.1 WSDL Description</h3>
+<P>W3C WS-Addressing WSDL Binding defines a new standard extensibility element, <a href="http://www.w3.org/TR/2006/CR-ws-addr-wsdl-20060529/#uaee">wsaw:UsingAddressing</a>,
+that can be used to indicate that an endpoint conforms to the WS-Addressing
+specification. JAX-WS 2.1 RI generates this extension element in the WSDL if W3C
+WS-Addressing is enabled on the server-side. On the client side, the RI
+recognizes this extension element and enforce the rules defined by the W3C
+specification.</P>
+<P>There is no standard mechanism to describe Member Submission version support
+in the WSDL.</P>
+<h3>1.2 When is WS-A engaged ?</h3>
+<P>W3C WS-Addressing SOAP Binding <a href="http://www.w3.org/TR/2006/REC-ws-addr-soap-20060509/#conformance">defines</a>
+that if a receiver processes a message containing a <code>wsa:Action</code>
+header, then SOAP Binding is engaged, and the rules of the specification are
+enforced. JAX-WS 2.1 RI follows same rule for Member Submission version as well.</P>
+<P>In effect, irrespective of whether an endpoint advertises WS-Addressing in
+the WSDL or not, if a client sends WS-A headers, including <code>wsa:Action,</code>
+then the endpoint will enforce all the rules of the specification. For example,
+if the value of <code>wsa:Action</code> header is not matching with the expected
+value, then a fault with appropriate code and sub-code is thrown back to the
+client.</P>
+<H2><A NAME="2._Standard_customizations"></A>2. On the server side</H2>
+<P>This section describes how W3C and Member Submission WS-Addressing
+enabled/disabled on the server-side.</P>
+<H3><A NAME="2.1_Global_bindings"></A>2.1 Implicit Behavior</H3>
+<P>WS-Addressing is turned OFF by default.</P>
+</body>
+</html>
