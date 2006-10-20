@@ -103,8 +103,8 @@
                 keep="${keep}"
                 extension="${extension}"
                 destdir="${build.classes.home}"
+                package="fromjava.client"
                 wsdl="${client.wsdl}">
-            <binding dir="${basedir}/etc" includes="${client.binding}"/>
         </wsimport>
     </target>
 
