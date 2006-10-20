@@ -121,8 +121,14 @@ public final class JavaMethodImpl implements JavaMethod {
         this.binding = binding;
     }
 
+    /**
+     * Returns the {@link WSDLBoundOperation} Operation associated with {@link this}
+     * operation. This method will return <code>null</code> if no {@link WSDLBoundOperation}
+     * is associated. 
+     *
+     * @return
+     */
     public WSDLBoundOperation getOperation() {
-        assert wsdlOperation!=null;
         return wsdlOperation;
     }
 
