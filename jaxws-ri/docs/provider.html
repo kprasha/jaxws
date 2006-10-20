@@ -29,7 +29,7 @@ endpoint</span></code>. All the provider endpoints start from a
 
 <p>For example:</p>
 <pre> @WebServiceProvider<br> public class ProviderImpl implements Provider&lt;Source&gt; {<br> public Source
-    invoke(Source source, Map&lt;String, Object&gt; context) {<br> // do request processing<br> Source response = ...;
+    invoke(Source source) {<br> // do request processing<br> Source response = ...;
     <br> return response;<br> }<br> }<br></pre>
 
 <h2><code>Provider&lt;SOAPMessage&gt;</code> and <code>MESSAGE</code></h2>
@@ -96,7 +96,7 @@ is SOAP1.1/HTTP.<br>
     annotation<br>
 </p>
 <pre> @ServiceMode(value=Service.Mode.MESSAGE)<br> @BindingType(value=HTTPBinding.HTTP_BINDING)<br> public class
-    ProviderImpl implements Provider&lt;Source&gt; {<br> public Source invoke(Source source, Map&lt;String) {<br> ...
+    ProviderImpl implements Provider&lt;Source&gt; {<br> public Source invoke(Source source) {<br> ...
     <br> }<br> }<br><br></pre>
 
 <p>For example: To specify XML/HTTP binding in sun-jaxws.xml<br>
