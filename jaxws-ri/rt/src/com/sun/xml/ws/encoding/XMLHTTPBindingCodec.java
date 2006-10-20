@@ -216,10 +216,11 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
     private boolean isApplicationXopXml(String contentType) {
         return compareStrings(contentType, MtomCodec.XOP_XML_MIME_TYPE);
     }
-    
+
     private boolean isXml(String contentType) {
-        return compareStrings(contentType, XMLCodec.XML_APPLICATION_MIME_TYPE) |
-                compareStrings(contentType, XMLCodec.XML_TEXT_MIME_TYPE);
+        return compareStrings(contentType, XMLCodec.XML_APPLICATION_MIME_TYPE)
+                || compareStrings(contentType, XMLCodec.XML_TEXT_MIME_TYPE)
+                || (compareStrings(contentType, "application/")&&(contentType.toLowerCase().indexOf("+xml") != -1));
     }
     
     private boolean isFastInfoset(String contentType) {
