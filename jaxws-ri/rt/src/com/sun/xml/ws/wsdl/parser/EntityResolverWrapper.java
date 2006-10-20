@@ -23,6 +23,7 @@
 package com.sun.xml.ws.wsdl.parser;
 
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -31,7 +32,7 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * Wraps {@link EntityResolver} into {@link XMLEntityResolver}.
+ * Wraps {@link EntityResolver} into {@link com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver}.
  *
  * @author Kohsuke Kawaguchi
  */

@@ -23,6 +23,7 @@ package com.sun.xml.ws.wsdl.parser;
 
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.server.SDDocumentSource;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.SAXException;

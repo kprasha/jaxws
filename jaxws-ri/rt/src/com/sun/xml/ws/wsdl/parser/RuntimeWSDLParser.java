@@ -29,10 +29,7 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
-import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
-import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.*;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
@@ -53,7 +50,7 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.wsdl.parser.XMLEntityResolver.Parser;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
@@ -196,7 +193,7 @@ public class RuntimeWSDLParser {
         return parse(wsdlLoc, null, resolver, isClientSide, extensions);
     }
 
-    public static WSDLModelImpl parse(Parser wsdl, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    public static WSDLModelImpl parse(XMLEntityResolver.Parser wsdl, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, isClientSide, extensions);
         parser.parseWSDL(wsdl);

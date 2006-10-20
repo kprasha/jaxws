@@ -20,7 +20,7 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.wsdl.parser;
+package com.sun.xml.ws.api.wsdl.parser;
 
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import org.xml.sax.EntityResolver;

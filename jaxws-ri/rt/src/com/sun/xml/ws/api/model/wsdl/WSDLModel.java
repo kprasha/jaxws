@@ -25,16 +25,14 @@ package com.sun.xml.ws.api.model.wsdl;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import java.util.Map;
-import java.net.URL;
 import java.io.IOException;
-
-import org.xml.sax.SAXException;
-import org.xml.sax.EntityResolver;
+import java.util.Map;
 
 /**
  * Provides abstraction of wsdl:definitions.
@@ -101,14 +99,14 @@ public interface WSDLModel extends WSDLExtensible {
     @NotNull Map<QName, ? extends WSDLService> getServices();
 
     /**
-     * Main purpose of this class is to expose parsing of a WSDL and get the {@link WSDLModel} from it.
+     * Main purpose of this class is to  parsing of a WSDL and get the {@link WSDLModel} from it.
      */
-    public class Parser{
+    public class WSDLParser{
        /**
          * Parses WSDL from the given wsdlLoc and gives a {@link WSDLModel} built from it.
          *
-         * @param wsdlLocation  Location of the WSDL
-         * @param resolver  {@link org.xml.sax.EntityResolver}
+         * @param wsdlEntityParser  Works like an entityResolver to resolve WSDLs
+         * @param resolver  {@link XMLEntityResolver}, works at XML infoset level
          * @param isClientSide  true - its invoked on the client, false means its invoked on the server
          * @param extensions var args of {@link com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension}s
          * @return A {@link WSDLModel} built from the given wsdlLocation}
@@ -116,8 +114,8 @@ public interface WSDLModel extends WSDLExtensible {
          * @throws javax.xml.stream.XMLStreamException
          * @throws org.xml.sax.SAXException
          */
-        public static @NotNull WSDLModel parse(@NotNull URL wsdlLocation, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
-            return RuntimeWSDLParser.parse(wsdlLocation, resolver, isClientSide, extensions);
+        public static @NotNull WSDLModel parse(XMLEntityResolver.Parser wsdlEntityParser, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+            return RuntimeWSDLParser.parse(wsdlEntityParser, resolver, isClientSide, extensions);
         }
     }
 }
