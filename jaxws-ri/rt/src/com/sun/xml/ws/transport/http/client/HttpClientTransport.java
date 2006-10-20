@@ -43,8 +43,12 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
+import java.util.Set;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.ws.http.HTTPBinding;
+import javax.xml.ws.handler.MessageContext;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 /**
@@ -88,7 +92,8 @@ final class HttpClientTransport {
             cookieJar = sendCookieAsNeeded();
 
             // how to incorporate redirect processing: message dispatcher does not seem to tbe right place
-            if (!httpConnection.getRequestMethod().equalsIgnoreCase("GET"))
+            //if (!httpConnection.getRequestMethod().equalsIgnoreCase("GET"))
+            if (requiresOutputStream())
                 outputStream = httpConnection.getOutputStream();
             //if use getOutputStream method set as "POST"
             //but for "Get" request no need to get outputStream
@@ -325,25 +330,29 @@ final class HttpClientTransport {
 
         httpConnection.setAllowUserInteraction(true);
         // enable input, output streams
+
+
         httpConnection.setDoOutput(true);
         httpConnection.setDoInput(true);
         // the soap message is always sent as a Http POST
         // HTTP Get is disallowed by BP 1.0
-        // needed for XML/HTTPBinding and SOAP12Binding
+        // *needed for XML/HTTPBinding and SOAP12Binding*
         // for xml/http binding other methods are allowed.
         // for Soap 1.2 "GET" is allowed.
         String method = "POST";
-        /*
-        String requestMethod = (String) context.get(MessageContext.HTTP_REQUEST_METHOD);
-        if (context.get(BindingProviderProperties.BINDING_ID_PROPERTY).equals(HTTPBinding.HTTP_BINDING)){
+
+        String requestMethod = (String) context.invocationProperties.get(MessageContext.HTTP_REQUEST_METHOD);
+        method = (requestMethod != null)?requestMethod:method;
+        httpConnection.setRequestMethod(method);
+
+        //this code or something similiar needs t be moved elsewhere for error checking
+        /*if (context.invocationProperties.get(BindingProviderProperties.BINDING_ID_PROPERTY).equals(HTTPBinding.HTTP_BINDING)){
             method = (requestMethod != null)?requestMethod:method;            
         } else if
-            (context.get(BindingProviderProperties.BINDING_ID_PROPERTY).equals(SOAPBinding.SOAP12HTTP_BINDING) &&
+            (context.invocationProperties.get(BindingProviderProperties.BINDING_ID_PROPERTY).equals(SOAPBinding.SOAP12HTTP_BINDING) &&
             "GET".equalsIgnoreCase(requestMethod)) {
-            method = (requestMethod != null)?requestMethod:method;
         }
-         */
-        httpConnection.setRequestMethod(method);
+       */     
 
         Integer reqTimeout = (Integer)context.invocationProperties.get(BindingProviderProperties.REQUEST_TIMEOUT);
         if (reqTimeout != null) {
@@ -396,6 +405,15 @@ final class HttpClientTransport {
                 reqHeaders.put("Authorization", Collections.singletonList("Basic "+creds));
             }
         }
+    }
+
+    private boolean requiresOutputStream() {
+        if (!(httpConnection.getRequestMethod().equalsIgnoreCase("GET") ||
+                httpConnection.getRequestMethod().equalsIgnoreCase("HEAD") ||
+                httpConnection.getRequestMethod().equalsIgnoreCase("DELETE"))) {
+            return true;
+        }
+        return false;
     }
 
     public HttpURLConnection getConnection() {
