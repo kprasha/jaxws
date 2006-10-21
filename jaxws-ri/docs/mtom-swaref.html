@@ -176,7 +176,7 @@ mapping in Table 9-1. Here is this table:<br>
     JAXWS 2.0</h3>
 <br><b>Enabling MTOM on Server: </b><br>
 <ul>
-    <li>Enable using @javax.xml.ws.soap.MTOM annotation on the endpoint implementation
+    <li>Enable using @javax.xml.ws.soap.MTOM annotation on the endpoint (SEI) implementation
         class
         <pre>
         <span style="color: rgb(153, 0, 0);">@javax.xml.ws.soap.MTOM</span>
@@ -184,9 +184,7 @@ mapping in Table 9-1. Here is this table:<br>
         public class HelloImpl implements Hello {
             ....
             ....
-        }
-        </pre>
-    </li>
+        }</pre></li>
 </ul>
 <ul>
     <li>MTOM can be also be enabled on an endpoint by specifying enable-mtom attribute
@@ -201,28 +199,43 @@ mapping in Table 9-1. Here is this table:<br>
             <span style="color: rgb(153, 0, 0);">enable-mtom="true"</span>/&gt;
             &lt;/endpoints&gt;</pre>
     </li></ul>
+<ul>
+    <li>Enable using @BindingType on the endpoint (SEI) implementation
+        class<ul>
+        <li><code>@BindingType(value=javax.xml.ws.SOAPBinding.SOAP11HTTP_MTOM_BINDING)</code> will
+            enable MTOM on the deployed endpoint for SOAP 1.1 binding</li>
+        <li><code>@BindingType(value=javax.xml.ws.SOAPBinding.SOAP12HTTP_MTOM_BINDING)</code> will
+            enable MTOM on the deployed endpoint for SOAP 1.2 binding</li>
+    </ul></li>
+</ul>
+
 <br><b>Enabling MTOM on Client: </b><br>
 <ul>
     <li>
 <p>
     To enable MTOM on client-side, pass javax.xml.ws.soap.MTOMFeature as WebServiceFeature parameter while crating the
    Proxy or Dispatch.
-    Here is the code snippet from the client <a
-        href="../samples/mtom/src/mtom/client/MtomApp.java">MtomApp.java</a>
-of the mtom sample:<br>
-<span style="color: rgb(153, 0, 0);"><pre>Hello port = new HelloService().getHelloPort(new MTOMFeature());</pre></span>
+    Here is the code snippet from the client <a href="../samples/mtom/src/mtom/client/MtomApp.java">MtomApp.java</a>
+of the mtom sample:
+    <ul><li>
+<span style="color: rgb(153, 0, 0);">Hello port = new HelloService().getHelloPort(new MTOMFeature());</span> gives a proxy with MTOM enabled</li>
+    <li>javax.xml.ws.Service.createDispatch(....,new javax.xml.ws.soap.MTOMFeature())
+	gives a Dispatch instance with MTOM enabled</li></ul>
 </p>
 </li>
 <li>
 
     JAXWS 2.0 specification has defined API to enable and to check if the
-    MTOM is enabled.<br>
-    javax.xml.ws.soap.SOAPBinding.isMTOMEnabled() - returns true if MTOM is enabled otherwise false.
+    MTOM is enabled.
+    <ul><li>javax.xml.ws.soap.SOAPBinding.setMTOMEnabled(boolean enable) - enable or disable MTOM.</li>
+    <li>javax.xml.ws.soap.SOAPBinding.isMTOMEnabled() - returns true if MTOM is enabled otherwise false.</li></ul>
     <pre>
     Hello port = new HelloService.getHelloPort();
     //get the binding and enable mtom
     SOAPBinding binding = (SOAPBinding)((BindingProvider)port).getBinding();
-    boolean mtomEnabled = <span style="color: rgb(153, 0, 0);">binding.isMTOMEnabled();</span></pre>
+    boolean mtomEnabled = <span style="color: rgb(153, 0, 0);">binding.isMTOMEnabled();</span>
+    <span style="color: rgb(153, 0, 0);">binding.setMTOMEnabled(true);</span>
+    </pre>
 </li>
 </ul>
 <h3><a name="2.3_Attach_vs_In-line"></a>2.4 Attach vs In-line</h3>
