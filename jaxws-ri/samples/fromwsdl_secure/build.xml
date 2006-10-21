@@ -81,8 +81,8 @@
                 keep="${keep}"
                 extension="${extension}"
                 destdir="${build.classes.home}"
+                package="fromwsdl_secure.server"
                 wsdl="${server.wsdl}">
-            <binding dir="${basedir}/etc" includes="${server.binding}"/>
         </wsimport>
         <javac
                 fork="true"
@@ -112,8 +112,8 @@
                 keep="${keep}"
                 extension="${extension}"
                 destdir="${build.classes.home}"
+                package="fromwsdl_secure.client"
                 wsdl="${client.wsdl}">
-            <binding dir="${basedir}/etc" includes="${client.binding}"/>
             <jvmarg value="-Djavax.net.ssl.trustStore=${basedir}/etc/certs/client.keystore"/>
             <jvmarg value="-Djavax.net.ssl.trustStorePassword=client" />
         </wsimport>
