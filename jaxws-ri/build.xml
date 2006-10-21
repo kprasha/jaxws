@@ -349,7 +349,7 @@ major-version=${release.impl.version}
 
       <taskdef name="htmlmacro" classname="com.sun.wts.tools.htmlmacro.HtmlMacroTask">
           <classpath>
-            <pathelement path="${lib.home}/htmlmacro.jar" />
+            <fileset dir="${lib.home}" />
           </classpath>
       </taskdef>
       <htmlmacro  destdir="${build.home}/docs">
