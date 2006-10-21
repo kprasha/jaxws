@@ -74,6 +74,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Entry point to the JAX-WS RI server-side runtime.
@@ -193,7 +195,7 @@ public class EndpointFactory {
                 //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
                 processHandlerAnnotation(binding, implType, serviceName, portName);
             }
-            
+
             //TODO: Remove this, it is not needed.
             //Set Features in @BindingType
             binding.setFeatures(wsfeatures);
@@ -243,42 +245,72 @@ public class EndpointFactory {
      *         the coresponding wsdlFeature is not set.
      */
     private static WebServiceFeature[] extractExtraWSDLFeatures(WSDLPort wsdlPort, WSBinding binding, boolean honorWsdlRequired) {
-        List<WebServiceFeature> wsdlFeatures = null;
+        List<WebServiceFeature> applicableWsdlFeatures = new ArrayList<WebServiceFeature>();
         if (wsdlPort != null) {
-            wsdlFeatures = new ArrayList<WebServiceFeature>();
-
-            WebServiceFeature wsdlAddressingFeature = wsdlPort.getFeature(AddressingFeature.ID);
-            if (wsdlAddressingFeature != null) {
-                if (binding.getFeature(AddressingFeature.ID) == null) {
-                    AddressingFeature af = (AddressingFeature) wsdlAddressingFeature;
-                    if ((honorWsdlRequired ? af.isRequired() : true))
-                        wsdlFeatures.add(wsdlAddressingFeature);
+            List<WebServiceFeature> wsdlFeatures = ((WSDLPortImpl) wsdlPort).getFeatures();
+            for (WebServiceFeature ftr : wsdlFeatures) {
+                //add this feature only if it not set already on binding.
+                // as features from wsdl should not override features set through DD or annotations
+                if (binding.getFeature(ftr.getID()) == null) {
+                    try {
+                        // if is WSDL Extension , it will have required attribute
+                        // Add only if isRequired returns true, when honorWsdlRequired is true
+                        Method m = (ftr.getClass().getMethod("isRequired"));
+                        try {
+                            boolean required = (Boolean) m.invoke(ftr);
+                            if ((honorWsdlRequired ? required : true))
+                                applicableWsdlFeatures.add(ftr);
+                        } catch (IllegalAccessException e) {
+                            throw new WebServiceException(e);
+                        } catch (InvocationTargetException e) {
+                            throw new WebServiceException(e);
+                        }
+                    } catch (NoSuchMethodException e) {
+                        // this ftr is not an WSDL extension, just add it
+                        applicableWsdlFeatures.add(ftr);
+                    }
                 }
-            } else {
-                //try MS Addressing Version
-                wsdlAddressingFeature = wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
-                if ((wsdlAddressingFeature != null) &&
-                        binding.getFeature(MemberSubmissionAddressingFeature.ID) == null) {
-                    MemberSubmissionAddressingFeature af = (MemberSubmissionAddressingFeature) wsdlAddressingFeature;
-                    if ((honorWsdlRequired ? af.isRequired() : true))
-                        wsdlFeatures.add(wsdlAddressingFeature);
-                }
             }
-
-            WebServiceFeature wsdlMTOMFeature = wsdlPort.getFeature(MTOMFeature.ID);
-            if (wsdlMTOMFeature != null &&
-                    binding.getFeature(wsdlMTOMFeature.getID()) == null) {
-                wsdlFeatures.add(wsdlMTOMFeature);
-            }
-            
-            WebServiceFeature wsdlFastInfosetFeature = wsdlPort.getFeature(FastInfosetFeature.ID);
-            if (wsdlFastInfosetFeature != null &&
-                    binding.getFeature(FastInfosetFeature.ID) == null) {
-                wsdlFeatures.add(wsdlFastInfosetFeature);
-            }
-            //these are the only features that jaxws pays attention portability wise.
         }
-        return wsdlFeatures.toArray(new WebServiceFeature[]{});
+        return applicableWsdlFeatures.toArray(new WebServiceFeature[]{});
+
+/*        List<WebServiceFeature> wsdlFeatures = null;
+if (wsdlPort != null) {
+    wsdlFeatures = new ArrayList<WebServiceFeature>();
+
+    WebServiceFeature wsdlAddressingFeature = wsdlPort.getFeature(AddressingFeature.ID);
+    if (wsdlAddressingFeature != null) {
+        if (binding.getFeature(AddressingFeature.ID) == null) {
+            AddressingFeature af = (AddressingFeature) wsdlAddressingFeature;
+            if ((honorWsdlRequired ? af.isRequired() : true))
+                wsdlFeatures.add(wsdlAddressingFeature);
+        }
+    } else {
+        //try MS Addressing Version
+        wsdlAddressingFeature = wsdlPort.getFeature(MemberSubmissionAddressingFeature.ID);
+        if ((wsdlAddressingFeature != null) &&
+                binding.getFeature(MemberSubmissionAddressingFeature.ID) == null) {
+            MemberSubmissionAddressingFeature af = (MemberSubmissionAddressingFeature) wsdlAddressingFeature;
+            if ((honorWsdlRequired ? af.isRequired() : true))
+                wsdlFeatures.add(wsdlAddressingFeature);
+        }
+    }
+
+    WebServiceFeature wsdlMTOMFeature = wsdlPort.getFeature(MTOMFeature.ID);
+    if (wsdlMTOMFeature != null &&
+            binding.getFeature(wsdlMTOMFeature.getID()) == null) {
+        wsdlFeatures.add(wsdlMTOMFeature);
+    }
+
+    WebServiceFeature wsdlFastInfosetFeature = wsdlPort.getFeature(FastInfosetFeature.ID);
+    if (wsdlFastInfosetFeature != null &&
+            binding.getFeature(FastInfosetFeature.ID) == null) {
+        wsdlFeatures.add(wsdlFastInfosetFeature);
+    }
+    //these are the only features that jaxws pays attention portability wise.
+}
+return wsdlFeatures.toArray(new WebServiceFeature[]{});
+*/
     }
     /**
      * Verifies if the endpoint implementor class has @WebService or @WebServiceProvider
@@ -311,7 +343,7 @@ public class EndpointFactory {
 
 
     private static AbstractSEIModelImpl createSEIModel(WSDLPort wsdlPort,
-        Class<?> implType, @NotNull QName serviceName, @NotNull QName portName, WSBinding binding) {
+                                                       Class<?> implType, @NotNull QName serviceName, @NotNull QName portName, WSBinding binding) {
 
         RuntimeModeler rap;
         // Create runtime model for non Provider endpoints
@@ -506,7 +538,7 @@ public class EndpointFactory {
      * @return non-null wsdl port object
      */
     private static @NotNull WSDLPortImpl getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
-            @NotNull QName serviceName, @NotNull QName portName) {
+                                                     @NotNull QName serviceName, @NotNull QName portName) {
         URL wsdlUrl = primaryWsdl.getSystemId();
         try {
             // TODO: delegate to another entity resolver
