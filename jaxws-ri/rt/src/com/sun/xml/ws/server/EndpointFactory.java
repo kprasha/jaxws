@@ -155,7 +155,7 @@ public class EndpointFactory {
         SDDocumentImpl primaryDoc = findPrimary(docList);
 
         InvokerTube terminal;
-        WSDLPort wsdlPort = null;
+        WSDLPortImpl wsdlPort = null;
         AbstractSEIModelImpl seiModel = null;
         // create WSDL model
         if (primaryDoc != null) {
@@ -205,6 +205,7 @@ public class EndpointFactory {
                 primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
                 // create WSDL model
                 wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
+                seiModel.freeze(wsdlPort);
                 // New Features might have been added in WSDL through Policy.
                 // This sets only the wsdl features that are not already set(enabled/disabled)
                 WebServiceFeature[] extraWsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding,false);
@@ -504,7 +505,7 @@ public class EndpointFactory {
      * @param portName port name in WSDL
      * @return non-null wsdl port object
      */
-    private static @NotNull WSDLPort getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
+    private static @NotNull WSDLPortImpl getWSDLPort(SDDocumentSource primaryWsdl, List<? extends SDDocumentSource> metadata,
             @NotNull QName serviceName, @NotNull QName portName) {
         URL wsdlUrl = primaryWsdl.getSystemId();
         try {
@@ -512,7 +513,7 @@ public class EndpointFactory {
             WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(
                 new Parser(primaryWsdl), new EntityResolverImpl(metadata),
                     false, ServiceFinder.find(WSDLParserExtension.class).toArray());
-            WSDLPort wsdlPort = wsdlDoc.getService(serviceName).get(portName);
+            WSDLPortImpl wsdlPort = wsdlDoc.getService(serviceName).get(portName);
             if (wsdlPort == null) {
                 throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
             }

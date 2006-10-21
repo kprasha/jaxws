@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.model.soap.SOAPBindingImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import java.lang.reflect.Method;
@@ -123,12 +124,12 @@ public final class JavaMethodImpl implements JavaMethod {
 
     /**
      * Returns the {@link WSDLBoundOperation} Operation associated with {@link this}
-     * operation. This method will return <code>null</code> if no {@link WSDLBoundOperation}
-     * is associated, for example for an SE-based endpoint with a null Metadata.
+     * operation.
      *
      * @return the WSDLBoundOperation for this JavaMethod
      */
-    public WSDLBoundOperation getOperation() {
+    public @NotNull WSDLBoundOperation getOperation() {
+        assert wsdlOperation != null;
         return wsdlOperation;
     }
 

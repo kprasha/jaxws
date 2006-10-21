@@ -72,7 +72,7 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * Link {@link SEIModel} to {@link WSDLModel}.
      * Merge it with {@link #postProcess()}.
      */
-    void freeze(WSDLPortImpl port) {
+    public void freeze(WSDLPortImpl port) {
         this.port = port;
         for (JavaMethodImpl m : javaMethods) {
             m.freeze(port);
