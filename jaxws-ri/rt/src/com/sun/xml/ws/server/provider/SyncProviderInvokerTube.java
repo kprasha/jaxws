@@ -6,11 +6,15 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
+import javax.xml.ws.http.HTTPException;
+import javax.xml.ws.handler.MessageContext;
 import java.util.logging.Logger;
+import javax.xml.ws.Provider;
 
 /**
- * This pipe is used to invoke the {@link javax.xml.ws.Provider} endpoints.
+ * This tube is used to invoke the {@link Provider} endpoints.
  *
  * @author Jitendra Kotamraju
  */
@@ -40,7 +44,9 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         } catch(Exception e) {
             e.printStackTrace();
             Message responseMessage = argsBuilder.getResponseMessage(e);
-            return doReturnWith(request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding()));
+            Packet response = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
+            argsBuilder.updateResponse(response, e);
+            return doReturnWith(response);
         }
         if (returnValue == null) {
             // Oneway. Send response code immediately for transports(like HTTP)

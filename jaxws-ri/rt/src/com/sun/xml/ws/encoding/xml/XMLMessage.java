@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.encoding.XMLHTTPBindingCodec;
 import com.sun.xml.ws.message.AbstractMessageImpl;
+import com.sun.xml.ws.message.EmptyMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -156,6 +157,10 @@ public final class XMLMessage {
         } catch(IOException ioe) {
             throw new WebServiceException(ioe);
         }
+    }
+
+    public static Message create(Exception e) {
+        return new FaultMessage(SOAPVersion.SOAP_11);
     }
 
     /**
@@ -420,6 +425,19 @@ public final class XMLMessage {
         }
 
     }
+
+    private static class FaultMessage extends EmptyMessageImpl {
+
+        public FaultMessage(SOAPVersion version) {
+            super(version);
+        }
+
+        @Override
+        public boolean isFault() {
+            return true;
+        }
+    }
+
     
     /**
      * Don't know about this content. It's conent-type is NOT the XML types

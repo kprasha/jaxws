@@ -3,6 +3,7 @@ package com.sun.xml.ws.server.provider;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import javax.xml.soap.SOAPException;
@@ -16,6 +17,10 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
 
     private SOAPProviderArgumentBuilder(SOAPVersion soapVersion) {
         this.soapVersion = soapVersion;
+    }
+
+    protected void updateResponse(Packet p, Exception e) {
+        // Nothing to do in SOAP binding
     }
 
     static SOAPProviderArgumentBuilder create(ProviderEndpointModel model, SOAPVersion soapVersion) {
@@ -42,6 +47,8 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
         public Message getResponseMessage(Exception e) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
+
+
     }
 
     private static final class MessageSource extends SOAPProviderArgumentBuilder<Source> {
