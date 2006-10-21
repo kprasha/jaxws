@@ -174,51 +174,57 @@ mapping in Table 9-1. Here is this table:<br>
 
 <h3><a name="2.2_How_to_enable_MTOM_in_JAXWS_2.0"></a>2.3 How to enable MTOM in
     JAXWS 2.0</h3>
+<br><b>Enabling MTOM on Server: </b><br>
 <ul>
-    <li>MTOM can be enabled on an endpoint by specifying enable-mtom attribute
+    <li>Enable using @javax.xml.ws.soap.MTOM annotation on the endpoint implementation
+        class
+        <pre>
+        <span style="color: rgb(153, 0, 0);">@javax.xml.ws.soap.MTOM</span>
+        @WebService (endpointInterface = "mtom.server.Hello")
+        public class HelloImpl implements Hello {
+            ....
+            ....
+        }
+        </pre>
+    </li>
+</ul>
+<ul>
+    <li>MTOM can be also be enabled on an endpoint by specifying enable-mtom attribute
         to true on an endpoint element in
-        <a
-                href="jaxws-war.html#The_sun-jaxws.xml_File">sun-jaxws.xml </a>deployment
-        descriptor.<br></li>
-</ul>
-<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime'
-    version='2.0'&gt;<br> &lt;endpoint<br> name="Mtom"<br> implementation="mtom.server.HelloImpl"<br>
-    wsdl="WEB-INF/wsdl/hello.wsdl"<br> service='{http://example.org/mtom}HelloService'<br>
-    port='{http://example.org/mtom}HelloPort'<br> url-pattern="/hello" <br>	 <span
-        style="color: rgb(153, 0, 0);">enable-mtom="true"</span>/&gt;<br>&lt;/endpoints&gt;<br></pre>
+        <a href="jaxws-war.html#The_sun-jaxws.xml_File">sun-jaxws.xml </a>deployment
+        descriptor.
+        <pre>
+            &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+            &lt;endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime' version='2.0'&gt;
+            &lt;endpoint name="Mtom" implementation="mtom.server.HelloImpl"
+            url-pattern="/hello"
+            <span style="color: rgb(153, 0, 0);">enable-mtom="true"</span>/&gt;
+            &lt;/endpoints&gt;</pre>
+    </li></ul>
+<br><b>Enabling MTOM on Client: </b><br>
 <ul>
-    <li>Enable using @BindingType or&nbsp; @Mtom annotation on the endpoint (SEI) implementation
-        class<ul>
-        <li><code>@BindingType(value=javax.xml.ws.SOAPBinding.SOAP11HTTP_MTOM_BINDING)</code> will
-            enable MTOM on the deployed endpoint for SOAP 1.1 binding</li>
-        <li><code>@BindingType(value=javax.xml.ws.SOAPBinding.SOAP12HTTP_MTOM_BINDING)</code> will
-            enable MTOM on the deployed endpoint for SOAP 1.2 binding</li>
-		<li>@MTOM on an endpoint interface or implementation class enables MTOM</li>
-    </ul></li>
-</ul>
-
+    <li>
 <p>
-    JAXWS 2.0 specification has defined API to enable and to check if the
-    MTOM is enabled.<br>
-</p>
-<ul>
-    <li>javax.xml.ws.soap.SOAPBinding.setMTOMEnabled(boolean enable) -
-        enable or disable MTOM.</li>
-    <li>javax.xml.ws.soap.SOAPBinding.isMTOMEnabled() - returns true of
-        enabled false if disabled.</li>
-	<li>javax.xml.ws.Service.getPort(javax.xml.ws.soap.MTOMFeature) gives a 
-	proxy with MTOM enabled</li>
-	<li>javax.xml.ws.Service.createDispatch(....,javax.xml.ws.soap.MTOMFeature) 
-	gives a Dispatch instance with MTOM enabled</li>
-</ul>Here is the code snippet from the client <a
+    To enable MTOM on client-side, pass javax.xml.ws.soap.MTOMFeature as WebServiceFeature parameter while crating the
+   Proxy or Dispatch.
+    Here is the code snippet from the client <a
         href="../samples/mtom/src/mtom/client/MtomApp.java">MtomApp.java</a>
 of the mtom sample:<br>
-<pre><br> //obtain the service from ServiceFactory<br> ServiceFactory serviceFactory = ServiceFactory.newInstance();<br>
-    HelloService service = (HelloService)serviceFactory.createService(null, HelloService.class);<br><br> //get the port
-    <br> Object port = service.getHelloPort();<br><br> //get the binding and enable mtom<br> SOAPBinding binding =
-    (SOAPBinding)((BindingProvider)port).getBinding();<br>            <span
-        style="color: rgb(153, 0, 0);">binding.setMTOMEnabled(true);</span><br></pre>
+<span style="color: rgb(153, 0, 0);"><pre>Hello port = new HelloService().getHelloPort(new MTOMFeature());</pre></span>
+</p>
+</li>
+<li>
 
+    JAXWS 2.0 specification has defined API to enable and to check if the
+    MTOM is enabled.<br>
+    javax.xml.ws.soap.SOAPBinding.isMTOMEnabled() - returns true if MTOM is enabled otherwise false.
+    <pre>
+    Hello port = new HelloService.getHelloPort();
+    //get the binding and enable mtom
+    SOAPBinding binding = (SOAPBinding)((BindingProvider)port).getBinding();
+    boolean mtomEnabled = <span style="color: rgb(153, 0, 0);">binding.isMTOMEnabled();</span></pre>
+</li>
+</ul>
 <h3><a name="2.3_Attach_vs_In-line"></a>2.4 Attach vs In-line</h3>
 As defined by JAXB 2.0 specification xs:base64Binary and xs:hexBinary
 mapping to java is byte[]. JAXWS implementation has set a threshold of
@@ -246,69 +252,22 @@ corresponding schema.<br>
 <h4><a name="2.4_MTOM_Samples"></a>2.4.1 How to specify MTOM data
     Threshold<br>
 </h4>
-<ul style="font-weight: bold;">
-    <li>Using property <code>com.sun.xml.ws.developer.JAXWSProperties.MTOM_THRESHOLD_VALUE</code></li>
-</ul>
-
-<div style="margin-left: 40px;">On the client side this property should
-    be set in the RequestContext with the threshold value. The threshold
-    value should be in byte and ofcourse MUST be a postive number.<br>
-</div>
-
-<h3 style="font-weight: normal;">
-    <code>//JAXWS will send any byte array
-        in the message as attachment and the
-        corresponding XML infoset will be <br>
-        //XOP encoded (will contain reference to this attachment)<br>
-        bindingProvider.getRequestContext().put(JAXWSProperties.MTOM_THRESHOLD_VALUE,
-        <span style="color: rgb(255, 0, 0);">0</span>);</code></h3>
-<code><span style="font-weight: bold;">// JAXWS will send any byte
-array in the message thats equal to or
-larger than 3KB as attachment </span><br style="font-weight: bold;">
-<span style="font-weight: bold;">// and the
+Default threshold value for MTOM feature is 0 bytes.  You can set a
+threshold value for MTOM by using @MTOM annotation on server-side or using MTOMFeature on client-side.
+Let's say you set MTOM threshold as 3000, this serves as hint to JAX-WS when to send binary dat as attachments.
+In this case, JAXWS will send any byte array in the message thats equal to or larger than 3KB as attachment and the
 corresponding XML infoset will be XOP encoded (will contain reference
-to this attachment)</span><br>
-    bindingProvider.getRequestContext().put(JAXWSProperties.MTOM_THRESHOLD_VALUE,
-    <span style="color: rgb(255, 0, 0);">3000</span>);</code><br>
+to this attachment)
+
 <br>
-On the server side, this property can be set either of the two ways:<br>
+
 <ul>
-    <li>Using property <code>com.sun.xml.ws.developer.JAXWSProperties.MTOM_THRESHOLD_VALUE
-    </code>in the MessageContext<br>
+    <li>On Server-side, <span style="color: rgb(153, 0, 0);">@MTOM(threshold=3000)</span>
+    </li>
+    <li>On Client-side, pass <span style="color: rgb(153, 0, 0);">MTOMFeature(3000)</span> as WebServiceFeature as mentioned in section 2.3, while creating the proxy/dispatch.
+
     </li>
 </ul>
-
-<div style="margin-left: 40px;"><code>@Resource <br>
-    private WebServiceContext wsContext;<br>
-    <br>
-    ...<br>
-    wsContext.getMessageContext().put(com.sun.xml.ws.developer.JAXWSProperties.MTOM_THRESHOLD_VALUE,
-    3000</code>);<br>
-    ...<br>
-</div>
-<ul>
-    <li>Using deployment descriptor <span style="font-weight: bold;">mtom-threshold-value</span>
-        on the jaxws-runtime:endpoint element.</li>
-</ul>
-<code>
-    &lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>
-    &lt;endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime'
-    version='2.0'&gt;<br>
-    &lt;endpoint<br>
-    name="Hello"<br>
-
-    implementation="xop.hello.server.HelloImpl"<br>
-
-    wsdl="WEB-INF/wsdl/hello.wsdl"<br>
-
-    service='{http://example.org/mtom}HelloService'<br>
-
-    port='{http://example.org/mtom}HelloPort'<br>
-    url-pattern="/hello"
-    <span style="font-weight: bold;">enable-mtom</span>="true" <span
-        style="color: rgb(204, 51, 204);">mtom-threshold-value="0"</span>/&gt;<br>
-    &lt;/endpoints&gt;<br>
-</code>
 
 <h3><a name="2.4_MTOM_Samples"></a>2.5 MTOM Samples</h3>
 There are 2 samples:<br>
