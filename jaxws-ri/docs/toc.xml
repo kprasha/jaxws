@@ -6,7 +6,7 @@
   </banner>
   <!-- this portion is excuted as the footer -->
   <footer>
-    $Revision: 1.1.4.4 $<br/>      $Date: 2006-10-21 00:07:20 $<br/>
+    $Revision: 1.1.4.5 $<br/>      $Date: 2006-10-21 06:59:44 $<br/>
     <a href="Copyright.html">Copyright&#169; 2006 Sun Microsystems, Inc. All rights reserved.</a>
   </footer>
     
@@ -22,6 +22,8 @@
                   url="UsersGuide.html"/>
         <document name="Provider"
                   url="provider.html"/>
+        <document name="AsyncProvider"
+                  url="asyncprovider.html"/>                  
         <document name="Dispatch"
                   url="dispatch.html"/>
         <document name="Asynchronous Client"

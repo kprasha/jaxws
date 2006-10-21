@@ -25,10 +25,8 @@
     <A HREF="#3.7%20javax.xml.ws.WebServiceClient%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.7 javax.xml.ws.WebServiceClient</FONT></FONT></A>
     <A HREF="#3.8%20javax.xml.ws.WebServiceProvider%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.8 javax.xml.ws.WebServiceProvider</FONT></FONT></A>
     <A HREF="#3.9%20javax.xml.ws.WebServiceRef%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.9 javax.xml.ws.WebServiceRef</FONT></FONT></A>
-    <A HREF="#3.10%20javax.xml.ws.Feature%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.10 javax.xml.ws.Feature</FONT></FONT></A>
-    <A HREF="#3.11%20javax.xml.ws.FeatureParameter%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.11 javax.xml.ws.FeatureParameter</FONT></FONT></A>
-    <A HREF="#3.12%20javax.xml.ws.Action%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.12 javax.xml.ws.Action</FONT></FONT></A>
-    <A HREF="#3.13%20javax.xml.ws.FaultAction%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.13 javax.xml.ws.FaultAction</FONT></FONT></A>
+    <A HREF="#3.12%20javax.xml.ws.Action%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.10 javax.xml.ws.Action</FONT></FONT></A>
+    <A HREF="#3.13%20javax.xml.ws.FaultAction%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">3.11 javax.xml.ws.FaultAction</FONT></FONT></A>
 <A HREF="#4.%20JSR%20222%20%28JAXB%29%20Annotations%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">4. JSR 222 (JAXB) Annotations</FONT></FONT></A>
     <A HREF="#4.1%20javax.xml.bind.annotation.XmlRootElement%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">4.1 javax.xml.bind.annotation.XmlRootElement </FONT></FONT></A>
     <A HREF="#4.2%20javax.xml.bind.annotation.XmlAccessorType%7Coutline"><FONT SIZE=3><FONT FACE="Thorndale, serif">4.2 javax.xml.bind.annotation.XmlAccessorType</FONT></FONT></A>
@@ -878,30 +876,7 @@ deployment descriptors, depending on the platform in use.
 			<P ALIGN=LEFT><FONT FACE="Cumberland, monospace">SOAP 1.1 / HTTP</FONT></P>
 		</TD>
 	</TR>
-    <TR>
-		<TD WIDTH=16% VALIGN=TOP BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>features</FONT></FONT></FONT></P>
-		</TD>
-		<TD WIDTH=54% VALIGN=TOP BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>
-                An array of Features to enable/disable on the specified binding.
-
-            <PRE>See the <code>SOAPBinding</code> for the definition of the standard feature identifiers.
-
-@see javax.xml.ws.RespectBindingFeature
-@see javax.xml.ws.soap.AddressingFeature
-@see javax.xml.ws.soap.MTOMFeature
-
-            </PRE></FONT></FONT></FONT></P>
-
-        </TD>
-		<TD WIDTH=30% VALIGN=TOP BGCOLOR="#ffffff">
-			<P ALIGN=LEFT><FONT FACE="Cumberland, monospace">If not specified, features will be enabled/disabled based
-       on their own rules. Refer to the documentation of the feature
-       to determine when it will be automatically enabled.</FONT></P>
-		</TD>
-	</TR>
-</TABLE>
+    </TABLE>
 <H4>Annotation Type Definition</H4>
 <PRE STYLE="margin-left: 0.49in">@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -958,19 +933,7 @@ public class AddNumbersImpl {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return number1 + number2;
 &nbsp;&nbsp;&nbsp;&nbsp; }
 </PRE><P>
-The deployed endpoint would use the SOAP1.2 over HTTP binding.</P><P>
- Example 2: Here is another sample use of the BindingType annotation that specifies
-   use of the SOAP1.1/HTTP binding, it enables both the AddressingFeature and the MTOMFeature and also sets the <code>threshold</code> feature parameter on the MTOMFeature. <pre>
-&nbsp;&nbsp; @WebService
-&nbsp;&nbsp; &#64;BindingType(value=SOAPBinding.SOAP11HTTP_BINDING,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; features={
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#64;Feature(AddressingFeature.ID),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#64;Feature(value=MTOMFeature.ID,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parameters={&#64;FeatureParameter(name=MTOMFeature.THRESHOLD, value="1000")})
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; })
-&nbsp; public class MyWebService { ... }
-&nbsp;<BR></pre>
-<H3><A NAME="3.2 javax.xml.ws.RequestWrapper|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.2
+The deployed endpoint would use the SOAP1.2 over HTTP binding.&nbsp;<BR></P><H3><A NAME="3.2 javax.xml.ws.RequestWrapper|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.2
 javax.xml.ws.RequestWrapper</FONT></FONT></H3><P>This annotation annotates methods in the Service Endpoint
 Interface with the request wrapper bean to be used at runtime.</P><P>When starting from Java this annotation is used resolve
 overloading conflicts in document literal mode. Only the className is
@@ -1643,140 +1606,6 @@ public @interface WebServiceRef {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
 &nbsp;&nbsp;&nbsp;&nbsp; String wsdlLocation() default &quot;&quot;;
 }</PRE><H3>
-<A NAME="3.10 javax.xml.ws.Feature|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.10
-javax.xml.ws.Feature</FONT></FONT></H3><P><FONT FACE="Thorndale, serif">The <code>Feature</code> annotation is used to
-   enable/disable a feature to use for a web service endpoint implementation class.
-        This annotation is used with @BindingType annotation.</FONT></P><TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>
-	<COL WIDTH=42*>
-	<COL WIDTH=139*>
-	<COL WIDTH=76*>
-	<TR VALIGN=TOP>
-		<TH WIDTH=16% BGCOLOR="#000000">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Property</B></I></FONT></FONT></FONT></P></TH><TH WIDTH=54% BGCOLOR="#000000">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Description</B></I></FONT></FONT></FONT></P></TH><TH WIDTH=30% BGCOLOR="#000000">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Default</B></I></FONT></FONT></FONT></P></TH></TR><TR VALIGN=TOP>
-		<TD WIDTH=16% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>value</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>
-			<PRE>The unique identifier of feature to enable or disable;
-@see javax.xml.ws.soap.AddressingFeature#ID
-@see javax.xml.ws.soap.MTOMFeature#ID</PRE></FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000">&ldquo;&rdquo;</FONT></P></TD></TR><TR VALIGN=TOP>
-		<TD WIDTH=16% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>enabled</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>
-			<PRE>Specifies if the features is enabled or disabled.
-@see javax.xml.ws.soap.AddressingFeature
-@see javax.xml.ws.soap.MTOMFeature&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</PRE></FONT></FONT></FONT></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000">true</FONT></P></TD></TR><TR VALIGN=TOP>
-		<TD WIDTH=16% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>parameters</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>
-			<PRE>Parameters for the specified feature.&nbsp; Each feature may take any number of parameters to customize the use of the feature.
-@see javax.xml.ws.soap.MTOMFeature
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</PRE></FONT></FONT></FONT></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000">{}</FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in">/**
- *&nbsp; The <code>Feature</code> annotation is used to
- *&nbsp; enable/disable a feature to use for a web service
- *&nbsp; endpoint implementation class.
- *
- *&nbsp; @since JAX-WS 2.1
- *
- **/
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Feature {
-&nbsp;&nbsp;&nbsp;&nbsp; /**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * The unique identifier of feature to enable or disable;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see javax.xml.ws.soap.AddressingFeature#ID
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see javax.xml.ws.soap.MTOMFeature#ID
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
-&nbsp;&nbsp;&nbsp;&nbsp; String value() default "";
-
-&nbsp;&nbsp;&nbsp;&nbsp; /**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * Specifies if the features is enabled or disabled.
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see javax.xml.ws.soap.AddressingFeature
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see javax.xml.ws.soap.MTOMFeature
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
-&nbsp;&nbsp;&nbsp;&nbsp; boolean enabled() default true;
-
-&nbsp;&nbsp;&nbsp;&nbsp; /**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * Parameters for the specified feature.&nbsp; Each feature
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * may take any number of parameters to customize the
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * use of the feature.
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see javax.xml.ws.soap.MTOMFeature
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
-&nbsp;&nbsp;&nbsp;&nbsp; FeatureParameter[] parameters() default {};
-}
-</PRE><H4>
-Example</H4><P>
- Here is a sample use of the BindingType annotation that specifies
-   use of the SOAP1.1/HTTP binding, it enables both the AddressingFeature and the MTOMFeature and also sets the <code>threshold</code> feature parameter on the MTOMFeature. <pre>
-&nbsp;&nbsp; &#64;BindingType(value=SOAPBinding.SOAP11HTTP_BINDING,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; features={
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#64;Feature(AddressingFeature.ID),
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#64;Feature(value=MTOMFeature.ID,
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parameters={&#64;FeatureParameter(name=MTOMFeature.THRESHOLD, value="1000")})
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; })
-&nbsp; public class MyWebService { ... }
-&nbsp;&nbsp;</pre><H3>
-<A NAME="3.11 javax.xml.ws.FeatureParameter|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.11 javax.xml.ws.FeatureParameter</FONT></FONT></H3><P><FONT FACE="Thorndale, serif">The <code>FeatureParameter</code> annotation is used to specify paramaters for a feature.
-This annotation is used with @Feature.</FONT></P><TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>
-	<COL WIDTH=42*>
-	<COL WIDTH=139*>
-	<COL WIDTH=76*>
-	<TR VALIGN=TOP>
-		<TH WIDTH=16% BGCOLOR="#000000">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Property</B></I></FONT></FONT></FONT></P></TH><TH WIDTH=54% BGCOLOR="#000000">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Description</B></I></FONT></FONT></FONT></P></TH><TH WIDTH=30% BGCOLOR="#000000">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#ffffff"><FONT FACE="Times, serif"><FONT SIZE=3><I><B>Default</B></I></FONT></FONT></FONT></P></TH></TR><TR VALIGN=TOP>
-		<TD WIDTH=16% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>name</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>
-			The name of the feature parameter.</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000">&ldquo;&rdquo;</FONT></P></TD></TR><TR VALIGN=TOP>
-		<TD WIDTH=16% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>value</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>
-			The value of parameter. </FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="text-decoration: none"><FONT COLOR="#000000">&ldquo;&rdquo;</FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in">/**
- *&nbsp; The <code>FeatureParameter</code> annotation is used to
- *&nbsp; specify paramaters for a feature.
- *
- *&nbsp; @since JAX-WS 2.1
- *
- **/
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface FeatureParameter {
-&nbsp;&nbsp;&nbsp;&nbsp; /**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * The name of the feature parameter;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @since JAX-WS 2.1
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
-&nbsp;&nbsp;&nbsp;&nbsp; String name() default "";
-
-&nbsp;&nbsp;&nbsp;&nbsp; /**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * The value of parameter.
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @since JAX-WS 2.1
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
-&nbsp;&nbsp;&nbsp;&nbsp; String value() default "";
-}
-</PRE><H4>
-Example</H4><P>
- See example for @Feature </P><H3>
 <A NAME="3.12 javax.xml.ws.Action|outline"></A><FONT FACE="Thorndale, serif"><FONT SIZE=4>3.12
 javax.xml.ws.Action</FONT></FONT></H3><P><FONT FACE="Thorndale, serif">The <code>Action</code> annotation allows explicit association of <code>Action</code> message addressing property with <code>input</code>, <code>output</code>, and <code>fault</code> messages of the mapped WSDL operation. <p>
  This annotation can be specified on each method of a service endpoint interface
@@ -1858,7 +1687,7 @@ Example</H4><P>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/operation&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;portType&gt;
 &nbsp;&nbsp;&nbsp; ...
-&nbsp;&nbsp;&nbsp; &lt;definitions&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </pre><p>
+&nbsp;&nbsp;&nbsp; &lt;definitions&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  </pre><p>
   Example 2: Specify explicit value for <code>Action</code> message addressing property
   for only the <code>input</code> message. The default values are used for the <code>output</code> message. <pre>
 &nbsp; &#64;javax.jws.WebService
@@ -2035,12 +1864,12 @@ element in the XML schema used by the WSDL of the web service.</P><TABLE WIDTH=1
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Defines
 			the local name of the XML element representing the annotated class</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
 			<PRE STYLE="font-style: normal; text-align: left; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot; &ndash; <FONT FACE="Thorndale, serif">the name is derived from the class </FONT></FONT></FONT></FONT>
+
 </PRE></TD></TR><TR VALIGN=TOP>
 		<TD WIDTH=16% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>namespace</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>Defines
-			the namespace of the XML element representing the annotated class</FONT></FONT></FONT></P></TD>
-      <TD WIDTH=30% BGCOLOR="#ffffff">
+			the namespace of the XML element representing the annotated class</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
 			<FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot; &ndash; <FONT FACE="Thorndale, serif">the namespace is derived from the package of the class </FONT></FONT></FONT></FONT>
 </TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in">@Retention(RUNTIME)
 @Target({TYPE})
@@ -2110,16 +1939,15 @@ whether fields or properties are serialized by default.</P><P STYLE="margin-bott
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Specifies
 			whether fields or properties are serialized by default. The value
 			can be <FONT FACE="Cumberland, monospace">XmlAccessType.FIELD</FONT> or <FONT FACE="Cumberland, monospace">XmlAccessType.PROPERTY or </FONT><FONT FACE="Cumberland, monospace">XmlAccessType.PUBLIC_MEMBER or </FONT><FONT FACE="Cumberland, monospace">XmlAccessType.NONE</FONT></FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>XmlAccessType.PROPERTY</FONT></FONT></FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4>
-  <PRE STYLE="margin-left: 0.49in"><FONT FACE="Cumberland, monospace">@Inherited @Retention(RUNTIME) @Target({PACKAGE, TYPE})
+			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>XmlAccessType.PROPERTY</FONT></FONT></FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.49in"><FONT FACE="Cumberland, monospace">@Inherited @Retention(RUNTIME) @Target({PACKAGE, TYPE})
 public @interface XmlAccessorType {
 
-    /**
-     * Specifies whether fields or properties are serialized.
-     *
-     * @see XmlAccessType
-     */
-    XmlAccessType value() default XmlAccessType.PUBLIC_MEMBER;
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Specifies whether fields or properties are serialized.
+&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp;&nbsp;&nbsp;&nbsp; * @see XmlAccessType
+&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; XmlAccessType value() default XmlAccessType.PUBLIC_MEMBER;
 }
 /**
  * Used by XmlAccessorType to control serialization of fields or
@@ -2128,37 +1956,38 @@ public @interface XmlAccessorType {
  */
 
 public enum XmlAccessType {
-    /**
-     * Every getter/setter pair in a JAXB-bound class will be automatically
-     * bound to XML, unless annotated by {@link XmlTransient}.
-     *
-     * Fields are bound to XML only when they are explicitly annotated
-     * by some of the JAXB annotations.
-     */
-    PROPERTY,
-    /**
-     * Every non static, non transient field in a JAXB-bound class will be automatically
-     * bound to XML, unless annotated by {@link XmlTransient}.
-     *
-     * Getter/setter pairs are bound to XML only when they are explicitly annotated
-     * by some of the JAXB annotations.
-     */
-    FIELD,
-    /**
-     * Every public getter/setter pair and every public field will be
-     * automatically bound to XML, unless annotated by {@link XmlTransient}.
-     *
-     * Fields or getter/setter pairs that are private, protected, or
-     * defaulted to package-only access are bound to XML only when they are
-     * explicitly annotated by the appropriate JAXB annotations.
-     */
-    PUBLIC_MEMBER,
-    /**
-     * None of the fields or properties is bound to XML unless they
-     * are specifically  annotated with some of the JAXB annotations.
-     */
-    NONE
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Every getter/setter pair in a JAXB-bound class will be automatically
+&nbsp;&nbsp;&nbsp;&nbsp; * bound to XML, unless annotated by {@link XmlTransient}.
+&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp;&nbsp;&nbsp;&nbsp; * Fields are bound to XML only when they are explicitly annotated
+&nbsp;&nbsp;&nbsp;&nbsp; * by some of the JAXB annotations.
+&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; PROPERTY,
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Every non static, non transient field in a JAXB-bound class will be automatically
+&nbsp;&nbsp;&nbsp;&nbsp; * bound to XML, unless annotated by {@link XmlTransient}.
+&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp;&nbsp;&nbsp;&nbsp; * Getter/setter pairs are bound to XML only when they are explicitly annotated
+&nbsp;&nbsp;&nbsp;&nbsp; * by some of the JAXB annotations.
+&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; FIELD,
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Every public getter/setter pair and every public field will be
+&nbsp;&nbsp;&nbsp;&nbsp; * automatically bound to XML, unless annotated by {@link XmlTransient}.
+&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp;&nbsp;&nbsp;&nbsp; * Fields or getter/setter pairs that are private, protected, or
+&nbsp;&nbsp;&nbsp;&nbsp; * defaulted to package-only access are bound to XML only when they are
+&nbsp;&nbsp;&nbsp;&nbsp; * explicitly annotated by the appropriate JAXB annotations.
+&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; PUBLIC_MEMBER,
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * None of the fields or properties is bound to XML unless they
+&nbsp;&nbsp;&nbsp;&nbsp; * are specifically&nbsp; annotated with some of the JAXB annotations.
+&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; NONE
 }
+&nbsp;
   </FONT></PRE><H4>
 Example</H4><PRE STYLE="margin-left: 0.49in">@XmlRootElement(name = &quot;addNumbers&quot;, namespace = &quot;http://server.fromjava/&quot;)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -2206,8 +2035,7 @@ represented by schema components within a schema type's content model
 		<TD WIDTH=16% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Times, serif"><FONT SIZE=3>name</FONT></FONT></FONT></P></TD><TD WIDTH=54% BGCOLOR="#ffffff">
 			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Thorndale, serif"><FONT SIZE=3>Defines
-			the local name of the XML type representing this class in the XML schema used by the WSDL of the web service</FONT></FONT></FONT></P></TD>
-      <TD WIDTH=30% BGCOLOR="#ffffff">
+			the local name of the XML type representing this class in the XML schema used by the WSDL of the web service</FONT></FONT></FONT></P></TD><TD WIDTH=30% BGCOLOR="#ffffff">
 			<FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>&quot;##default&quot;</FONT></FONT></FONT>
 		</TD>
 	</TR>
@@ -2234,19 +2062,18 @@ represented by schema components within a schema type's content model
 <FONT SIZE=3><FONT FACE="Thorndale, serif">By default, the JavaBean properties are ordered using a<SPAN STYLE="text-decoration: none"><FONT COLOR="#000000"> default order specified in the <A HREF="http://www.jcp.org/en/jsr/detail?id=222">JAXB 2.0 specification</A>.</FONT></SPAN></FONT></FONT>
 		</TD>
 		<TD WIDTH=30% BGCOLOR="#ffffff">
-			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>{&ldquo;&rdquo;}</FONT></FONT></FONT></P></TD></TR></TABLE>
-  <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.5in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({TYPE})
+			<P ALIGN=LEFT STYLE="font-style: normal; text-decoration: none"><FONT COLOR="#000000"><FONT FACE="Cumberland, monospace"><FONT SIZE=3>{&ldquo;&rdquo;}</FONT></FONT></FONT></P></TD></TR></TABLE><H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.5in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({TYPE})
 public @interface XmlType {
-    /**
-     * Name of the XML Schema type which the class is mapped.
-     */
-    String name() default "##default" ;
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Name of the XML Schema type which the class is mapped.
+&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; String name() default "##default" ;
 
-    /**
-     * Specifies the order for XML Schema elements when class is
-     * mapped to a XML Schema complex type.
-     *
-     * <p> Refer to the table for how the propOrder affects the
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Specifies the order for XML Schema elements when class is
+&nbsp;&nbsp;&nbsp;&nbsp; * mapped to a XML Schema complex type.
+&nbsp;&nbsp;&nbsp;&nbsp; *
+&nbsp;&nbsp;&nbsp;&nbsp; * <p> Refer to the table for how the propOrder affects the
      * mapping of class </p>
      *
      * <p> The propOrder is a list of names of JavaBean properties in
@@ -2378,9 +2205,9 @@ Schema complex type to which the containing class is mapped.</FONT></FONT></P><T
 </TABLE>
 <H4 STYLE="margin-left: 0.49in">Annotation Type Definition</H4><PRE STYLE="margin-left: 0.48in"><FONT FACE="Cumberland, monospace"><FONT SIZE=2>@Retention(RUNTIME) @Target({FIELD, METHOD})
 public @interface XmlElement {
-    /**
-     * Name of the XML Schema element.
-     * <p> If the value is "##default", then element name is derived from the
+&nbsp;&nbsp;&nbsp; /**
+&nbsp;&nbsp;&nbsp;&nbsp; * Name of the XML Schema element.
+&nbsp;&nbsp;&nbsp;&nbsp; * <p> If the value is "##default", then element name is derived from the
      * JavaBean property name.
      */
     String name() default "##default";

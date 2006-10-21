@@ -187,12 +187,13 @@ mapping in Table 9-1. Here is this table:<br>
     port='{http://example.org/mtom}HelloPort'<br> url-pattern="/hello" <br>	 <span
         style="color: rgb(153, 0, 0);">enable-mtom="true"</span>/&gt;<br>&lt;/endpoints&gt;<br></pre>
 <ul>
-    <li>Enable using @BindingType annotation on the endpoint (SEI) implementation
+    <li>Enable using @BindingType or&nbsp; @Mtom annotation on the endpoint (SEI) implementation
         class<ul>
         <li><code>@BindingType(value=javax.xml.ws.SOAPBinding.SOAP11HTTP_MTOM_BINDING)</code> will
             enable MTOM on the deployed endpoint for SOAP 1.1 binding</li>
         <li><code>@BindingType(value=javax.xml.ws.SOAPBinding.SOAP12HTTP_MTOM_BINDING)</code> will
             enable MTOM on the deployed endpoint for SOAP 1.2 binding</li>
+		<li>@MTOM on an endpoint interface or implementation class enables MTOM</li>
     </ul></li>
 </ul>
 
@@ -205,6 +206,10 @@ mapping in Table 9-1. Here is this table:<br>
         enable or disable MTOM.</li>
     <li>javax.xml.ws.soap.SOAPBinding.isMTOMEnabled() - returns true of
         enabled false if disabled.</li>
+	<li>javax.xml.ws.Service.getPort(javax.xml.ws.soap.MTOMFeature) gives a 
+	proxy with MTOM enabled</li>
+	<li>javax.xml.ws.Service.createDispatch(....,javax.xml.ws.soap.MTOMFeature) 
+	gives a Dispatch instance with MTOM enabled</li>
 </ul>Here is the code snippet from the client <a
         href="../samples/mtom/src/mtom/client/MtomApp.java">MtomApp.java</a>
 of the mtom sample:<br>

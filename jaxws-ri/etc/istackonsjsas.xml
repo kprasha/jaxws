@@ -28,7 +28,7 @@
     <property name="as.lib.home" value="${as.home}/lib"/>
     <property name="as.bin.home" value="${as.home}/bin"/>
     <property name="domain" value="domain1"/>
-    <property name="backup.dir" value="${as.home}/.jaxws20fcs"/>
+    <property name="backup.dir" value="${as.home}/.jaxws21ea2"/>
     <condition property="isNotWindows">
       <not>
         <os family="windows" />
@@ -37,7 +37,7 @@
 
     <condition property="notInstalled">
         <not>
-            <available file="${as.home}/.jaxws21"/>
+            <available file="${as.home}/.jaxws21ea2"/>
         </not>
     </condition>
 

@@ -31,11 +31,17 @@
 	<A HREF="#2.4_SOAP_1.2">2.4 SOAP 1.2</A>
 </div>
 <div style="margin-left:2em">
-	<A HREF="#2.5_XML/HTTP_Binding_">2.5 XML/HTTP Binding/A>
+	<A HREF="#2.5_XML/HTTP_Binding_">2.5 XML/HTTP Binding</A>
 </div>
+
 <div style="margin-left:2em">
 	<A HREF="#2.6_JAXB_2.0">2.6 JAXB 2.1</A>
 </div>
+
+<div style="margin-left:3em">
+<a href="#2.6.1_Type_Substitution">2.6.1 Type Substitution using @XmlSeeAlso </a>
+</div>
+
 <div style="margin-left:2em">
 	<A HREF="#2.7_WS-Addressing">2.7 WS-Addresssing</A>
 </div>
@@ -243,9 +249,25 @@ performance. This implementation was released as part of JAXWS 2.0.1 M1 release.
 
 <H4><a name="2.6_JAXB_2.0">2.6 JAXB 2.1</a></H4>
 
-<P>JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} uses of JAXB 2.1
+<P>JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} uses JAXB 2.1
     for data-binding between Java and XML which enables features such as 
 separate compilation, type substitution and other improvements. </P>
+
+<h5>
+<a name="2.6.1_Type_Substitution">2.6.1 Type Substitution using @XmlSeeAlso</a>
+</h5>
+
+JAXB 2.1 defines @XmlSeeAlso annotation which can be used to tell JAXB to use the classes mentioned 
+with this annotation. This allows type substitution to takes place. See the 
+<a href="../samples/type_substitution/src/type_substitution/server/CarDealer.java">sample
+</a>that demonstrates it.
+
+
+<p><code>wsimport</code> tool, generates @XmlSeeAlso with all the classes that are not 
+directly referenced by the WSDL operations. To capture all such classes wsimport 
+generates <code>@XmlSeeAlso(ObjectFactory.class)</code> on the generated Service Endpoint 
+Interface.</p>
+
 
 <H4><a name="2.7_WS-Addressing">2.7 WS-Addressing</a> </H4>
 <p>JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} brings in native support for 

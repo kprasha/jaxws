@@ -25,7 +25,8 @@ standard Java EE 5 deployment descriptor; please refer to the
 documentation/samples.
 
 <p>All these samples are tested to run on 
-<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone 1</a> build 
+<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone 
+2</a> build 
 and on Apache Tomcat 5.x.</p>
 
 <h2><a name="1.0"></a><font color="#280099">1.0 Directory Structure</font></h2>
@@ -45,15 +46,15 @@ and on Apache Tomcat 5.x.</p>
 
 <tr>
     <td>
-        <font color="#280099">fromjava-wsaddressing</font></td>
+        fromjava-wsaddressing</td>
     <td>
-        <font color="#280099">Starting from Java endpoint how to develop W3C WS-Addressing endpoint</font></td>
+        Starting from Java endpoint how to develop W3C WS-Addressing endpoint</td>
 </tr>
 <tr>
     <td>
-        <font color="#280099">fromwsdl-wsaddressing</font></td>
+        fromwsdl-wsaddressing</td>
     <td>
-        <font color="#280099">Starting from WSDL how to develop a WS-Addressing endpoint</font></td>
+        Starting from WSDL how to develop a WS-Addressing endpoint</td>
 </tr>
 
 <tr valign="top">
@@ -110,12 +111,20 @@ and on Apache Tomcat 5.x.</p>
         <p>Demonstrates how to dynamically invoke web service endpoints.</p>
     </td>
 </tr>
+<tr>
+    <td>
+        provider</td>
+    <td>
+        Demonstrates how to build, deploy, and invoke <code>javax.xml.ws.Provider</code>
+            based Web service endpoint.</td>
+</tr>
 <tr valign="top">
     <td>
-        <p>provider</p>
+        <p>asyncprovider</p>
     </td>
     <td>
-        <p>Demonstrates how to build, deploy, and invoke <code>javax.xml.ws.Provider</code>
+        <p>Demonstrates how to build, deploy, and invoke <code>a server side 
+		asynchronous Provider</code>
             based Web service endpoint.</p>
     </td>
 </tr>
@@ -242,6 +251,12 @@ and on Apache Tomcat 5.x.</p>
             uses an HTTP GET Request Method and uses the JAX-WS MessageContext
             properties PATH_INFO and QUERY_STRING. </p>
     </td>
+</tr>
+<tr>
+    <td>
+        stateful</td>
+    <td>
+        This sample shows the JAX-WS RI's stateful webservice support feature.</td>
 </tr>
 </tbody>
 </table>
@@ -388,14 +403,11 @@ and on Apache Tomcat 5.x.</p>
         the service and deploy the war to ${CATALINA_HOME}/webapps.</font></p>
 
 <p style="margin-left: 0.79in; margin-bottom: 0in;">
-    <font color="#000000">ant clean client -Dtomcat=true, this would
+    <font color="#000000">ant clean client, this would
         create client-side artifacts and compiles the files.</font></p>
 
 <p style="margin-left: 0.79in; margin-bottom: 0in;">
-    <font color="#000000">ant run -Dtomcat=true</font></p>
-
-<p style="margin-left: 0.79in; margin-bottom: 0in;">
-    <br>
+    <font color="#000000">ant run</font><br>
 </p>
 
 <p>We appreciate your feedback, please send it to

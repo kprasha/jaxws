@@ -12,8 +12,7 @@ is being done on the <b>mr-21 </b>branch in JAXWS CVS workspace.</p>
 <p>
 This release brings in the highly pluggable framework thru abstractions such as 
 Pipe and Message. Refer to the latest <span style="background-color: #FFFFFF">
-<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc-201/?jaxws/package-summary.html">
-architecture document</a></span>. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
+<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/?jaxws/package-summary.html">architecture document</a></span>. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
 has many bug fixes made for interoperability with .NET 3.0. This is made mostly 
 possible due to WSIT, which uses JAXWS plugabble architecture to plug in support 
 for WS-Metadata, WS-Policy, WS-ReliableMessaging, WS-Transaction, WS-SecureConversation 
@@ -58,7 +57,7 @@ here</a></span>.</p>
     </li>
     <li>
         <p>Tested to work with 
-		<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone1</a> and Apache Tomcat 5.x</p>
+		<a href="http://java.net/download/javaee5/promoted/WINNT/glassfish-installer-v2-b13.jar">Glassfish v2 Milestone2</a> and Apache Tomcat 5.x</p>
     </li>
 </ul>
 
@@ -72,18 +71,16 @@ Services ${SPEC_VERSION} Specification</a>.</p>
 </ul> -->
 <h2>Whats new in this release</h2>
 <ul>
-	<li>WS-Addressing implemented native to JAXWS runtime, see addressing sample
-	to see how you can enable ws-addressing on a POJO</li>
-	<li>JAXB 2.1 RI</li>
+	<li>Complete WS-Addressing W3C and Member Submission support</li>
+	<li>Type Substitution (supported using @XmlSeeAlso annotation)</li>
 	<li>Following JAXWS 2.1 APIs<ul>
-		<li>BindingProvider.getEndpointReference()</li>
-		<li>BindingProvider.getEndpointReference(Class)</li>
-		<li>Endpoint.getEndpointReference()</li>
-		<li>Endpoint.getEndpointReferene(Class)</li>
+		<li>EndpointReference.getPort(epr, sei, WebServiceFeature... features)</li>
+		<li>Service.createDispatch(epr, type,mode, WebServiceFeature... 
+		features)</li>
+		<li>Service.createDispatch(epr,jaxbContext, 
+		mode,WebServiceFeature... features) </li>
 	</ul>
 	</li>
-	<li>Direct support of Member Submission EPR thru 
-	MemberSubmissionEndpointReference class</li>
 	<li>
 	<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?issue_type=DEFECT&issue_type=ENHANCEMENT&component=jax-ws&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&resolution=FIXED&target_milestone=2.1&email1=&emailtype1=exact&emailassigned_to1=1&emai">Bug fixes</a></li>
 </ul>
@@ -121,22 +118,15 @@ directory.</p>
 <h2>Known Bugs/Issues</h2>
 <ul>
 	<li>
+        <span style="background-color: #FFFFFF">
+		<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?issue_type=DEFECT&component=jax-ws&issue_status=NEW&issue_status=STARTED&issue_status=REOPENED&target_milestone=2.1&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issuei">
+		Defects Submitted at IssueTracker</a></span></li>
+	<li>
         <span style="background-color: #FFFFFF">Propagation of 
 		W3CEndpointReference from client to the service endpoint doesn't work.</span></li>
 	<li>
-        Member Submission EPR schema type fails to get mapped to implementation 
-		specific MemberSubmissionEndpointReference class.</li>
-	<li>
         swaRef header types dont get marshalled/unmarshalled fails to get 
 		attachment</li>
-	<li>
-        MessageContext.INBOUND/OUTBOUND_ATTACHMENT_PROPERTY doesn't work.</li>
-	<li>
-        WSIT is not yet integrated with JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
-		and thus uses its own WS-Addressing implementation. WSIT M2 and JAXWS ${IMPL_VERSION} 
-		${IMPL_VERSION_SUFFIX} may not work togather because of certainl class 
-		conflicts. In the next release WSIT will integrate with JAXWS 2.1 and 
-		will fully use JAXWS 2.1 addressing implementation. </li>
 	<li>
         Although JAX-WS customizations are portable across implementations, the names of
         WSDL and schema files generated are not specified. Therefore each vendor may and
