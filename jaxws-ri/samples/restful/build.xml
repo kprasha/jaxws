@@ -5,9 +5,6 @@
 
     <property environment="env"/>
     <property file="etc/build.properties"/>
-    <property name="build.home" value="${basedir}/build"/>
-    <property name="build.classes.home" value="${build.home}/classes"/>
-    <property name="build.war.home" value="${build.home}/war"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
