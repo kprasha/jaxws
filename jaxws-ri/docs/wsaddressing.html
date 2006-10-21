@@ -236,7 +236,7 @@ rules are enforced for inbound message. Otherwise the inbound message is
 inspected to find out if WS-A is engaged and then the rules are enforced.&nbsp;</p>
 <p>For example, to enforce Member Submission WS-Addressing rules on the client
 side, the above code sample will change to:</p>
-<pre><code>new AddNumbersImplService().getAddNumbersImplPort(new javax.xml.ws.AddressingFeature(true, true));</code></pre>
+<pre><code>new AddNumbersImplService().getAddNumbersImplPort(new com.sun.xml.ws.developer.MemberSubmissionAddressingFeature(true, true));</code></pre>
 </section>
 <section title="Explicit disabling">
 <p>A client may like to instruct JAX-WS RI to disable WS-Addressing processing.
