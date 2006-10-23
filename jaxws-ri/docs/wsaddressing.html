@@ -24,7 +24,8 @@ that can be used to indicate that an endpoint conforms to the WS-Addressing
 specification. JAX-WS 2.1 RI generates this extension element in the WSDL if W3C
 WS-Addressing is enabled on the server-side. On the client side, the RI
 recognizes this extension element and enforce the rules defined by the W3C
-specification.</P>
+specification. This extensibility element may be augmented with <code><a href="http://www.w3.org/TR/wsdl#_language">wsdl:required</a></code>
+attribute to indicate whether WS-Addressing is required (true) or not (false).</P>
 <P>There is no standard mechanism to describe Member Submission version support
 in the WSDL.</P>
 </section>
@@ -33,12 +34,17 @@ in the WSDL.</P>
 <P>W3C WS-Addressing SOAP Binding <a href="http://www.w3.org/TR/2006/REC-ws-addr-soap-20060509/#conformance">defines</a>
 that if a receiver processes a message containing a <code>wsa:Action</code>
 header, then SOAP Binding is engaged, and the rules of the specification are
-enforced. JAX-WS 2.1 RI follows same rule for Member Submission version as well.</P>
-<P>In effect, irrespective of whether an endpoint advertises WS-Addressing in
-the WSDL or not, if a client sends WS-A headers, including <code>wsa:Action,</code>
+enforced. In JAX-WS 2.1 RI, if WS-Addressing is explicitly disabled then the RI
+does not follow the rules of engagement. However if WS-Addressing is either
+implicitly or explicitly enabled then JAX-WS 2.1 RI engages WS-Addressing based
+upon the presence of <code>wsa:Action</code> header. JAX-WS 2.1 RI follows same rule for Member Submission version as well.</P>
+<P>In effect, if an endpoint advertises WS-Addressing in
+the WSDL with <code>wsdl:required=&quot;false&quot;</code> and a client does not
+send any WS-Addressing header then no WS-Addressing fault is returned back to
+the client. However if the client send <code>wsa:Action</code>
+ header
 then the endpoint will enforce all the rules of the specification. For example,
-if the value of <code>wsa:Action</code> header is not matching with the expected
-value, then a fault with appropriate code and sub-code is thrown back to the
+if the <code>wsa:MessageID</code> header is missing for a request/response MEP then a fault with appropriate code and sub-code is thrown back to the
 client.</P>
 </section>
 </section>
@@ -129,8 +135,8 @@ Action with <code>input</code>, <code>output</code>, and <code>fault</code>
 messages of the mapped WSDL operation. For example, one of the methods in the <code>fromjava-wsaddressing</code>
 sample looks like:</p>
 <pre>@Action(
-  input = "http://example.com/input3",
-  output = "http://example.com/output3",
+  input = &quot;http://example.com/input3&quot;,
+  output = &quot;http://example.com/output3&quot;,
   fault = {
     @FaultAction(className = AddNumbersException.class, value = &quot;http://example.com/fault3&quot;)
   })
@@ -138,11 +144,11 @@ public int addNumbers3(int number1, int number2) throws AddNumbersException {
 ...
 }</pre>
 <p>The generated WSDL fragment looks like:</p>
-<pre>&lt;operation name="addNumbers3">
-  &lt;input <b>wsaw:Action="http://example.com/input3"</b> message="tns:addNumbers3"/>
-  &lt;output <b>wsaw:Action="http://example.com/output3"</b> message="tns:addNumbers3Response"/>
-  &lt;fault message="tns:AddNumbersException" name="AddNumbersException" <b>wsaw:Action=&quot;http://example.com/fault3&quot;</b>/&gt;
-&lt;/operation></pre>
+<pre>&lt;operation name=&quot;addNumbers3&quot;&gt;
+  &lt;input <b>wsaw:Action=&quot;http://example.com/input3&quot;</b> message=&quot;tns:addNumbers3&quot;/&gt;
+  &lt;output <b>wsaw:Action=&quot;http://example.com/output3&quot;</b> message=&quot;tns:addNumbers3Response&quot;/&gt;
+  &lt;fault message=&quot;tns:AddNumbersException&quot; name=&quot;AddNumbersException&quot; <b>wsaw:Action=&quot;http://example.com/fault3&quot;</b>/&gt;
+&lt;/operation&gt;</pre>
 <P>where <code>wsaw</code> is bound to W3C WSDL Binding namespace or Member
 Submission namespace depending upon the annotation used to enable
 Addressing.&nbsp;</P>
