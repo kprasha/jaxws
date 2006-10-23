@@ -52,7 +52,7 @@ import javax.xml.bind.JAXBException;
 public class PayloadSourceMessage extends AbstractMessageImpl {
     private final StreamMessage message;
 
-    public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, AttachmentSet attSet, @NotNull SOAPVersion soapVersion) {
+    public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, @NotNull AttachmentSet attSet, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
         XMLStreamReader reader = SourceReaderFactory.createSourceReader(payload, true);
         XMLStreamReaderUtil.next(reader);
