@@ -154,8 +154,10 @@ public class WSServiceDelegate extends WSService {
      * The WSDL service that this {@link Service} object represents.
      * <p>
      * This field is null iff no WSDL is given to {@link Service}.
+     * This fiels can be be null if the service is created without wsdl but later
+     * the epr supplies a wsdl that can be parsed.
      */
-    private final @Nullable WSDLServiceImpl wsdlService;
+    private  @Nullable WSDLServiceImpl wsdlService;
 
     private final Container container;
     private final @Nullable PortCreationCallback portCreationCallback;
@@ -250,31 +252,7 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    // TODO: this method probably belong to EndpointReferenceInfo.
-    private void validateEPR(WSDLModelImpl eprWsdlContext, EndpointReferenceInfo eprInfo) {
 
-        if (wsdlService != null) {
-            //do we have the same wsdl
-            if (!eprWsdlContext.getFirstServiceName().equals(serviceName))
-                throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n" + " The two Service QNames must match");
-
-            QName portName = eprInfo.pname;
-            if (eprWsdlContext.getBinding(eprInfo.sname,portName)==null ||
-                wsdlService.get(portName)==null)
-                throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
-
-        } else {
-            WSDLServiceImpl eprService = eprWsdlContext.getService(serviceName);
-            if (eprService==null)
-                throw new WebServiceException(
-                        ClientMessages.INVALID_SERVICE_NAME(serviceName,
-                                buildNameList(eprWsdlContext.getServices().keySet())));
-
-            //if (!wsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname)))
-            //    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
-
-        }
-    }
 
 
     public Executor getExecutor() {
@@ -357,7 +335,11 @@ public class WSServiceDelegate extends WSService {
     private <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding(features);
-        return Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), WSEndpointReference.create(epr));
+        Dispatch<T> dispatch = Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), WSEndpointReference.create(epr));
+         if (portCreationCallback != null)
+             portCreationCallback.dispatchCreated((WSBindingProvider) dispatch);
+         return dispatch;
+
     }
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature... features) {
@@ -367,7 +349,8 @@ public class WSServiceDelegate extends WSService {
     public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode, WebServiceFeature... features) {
         //assert endpointReference != null;  check javadocs
         EndpointReferenceInfo eprInfo = new EndpointReferenceInfo(endpointReference);
-        eprInfo.parseModel();
+        WSDLServiceImpl eprWsdlService = eprInfo.parseModel();
+        wsdlService = (wsdlService == null)? eprWsdlService : wsdlService;
         QName portName = addPort(eprInfo);
         return createDispatch(portName, type, mode, features, endpointReference);
     }
@@ -422,9 +405,13 @@ public class WSServiceDelegate extends WSService {
     private Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding(features);
-        return Stubs.createJAXBDispatch(
+        Dispatch<Object> dispatch = Stubs.createJAXBDispatch(
                 portName, this, binding, jaxbContext, mode,
                 createPipeline(port, binding), WSEndpointReference.create(epr));
+         if (portCreationCallback != null) {
+             portCreationCallback.dispatchCreated((WSBindingProvider)dispatch);
+         }
+         return dispatch;
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
@@ -434,7 +421,8 @@ public class WSServiceDelegate extends WSService {
     public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode, WebServiceFeature... features) {
         //assert(endpointReference != null);   check javadocs
         EndpointReferenceInfo eprInfo = new EndpointReferenceInfo(endpointReference);
-        eprInfo.parseModel();
+        WSDLServiceImpl eprWsdlService = eprInfo.parseModel();
+        wsdlService = (wsdlService == null)? eprWsdlService : wsdlService;
         QName portName = addPort(eprInfo);
         return createDispatch(portName, context, mode, features, endpointReference );
     }
@@ -580,31 +568,50 @@ public class WSServiceDelegate extends WSService {
         final QName pname;
 
         EndpointReferenceInfo(EndpointReference epr) {
-            if (epr.getClass().isAssignableFrom(MemberSubmissionEndpointReference.class)) {
-                msepr = (MemberSubmissionEndpointReference) epr;
-            } else {
-                msepr = EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, epr);
-            }
-
+            msepr = EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, epr);
             uri = msepr.addr.uri;
             sname = msepr.serviceName.name;
             pname = new QName(sname.getNamespaceURI(), msepr.serviceName.portName);
         }
 
-
         /**
-         * Parses {@link WSDLModel} from this EPR.
+         * Parses {@link com.sun.xml.ws.api.model.wsdl.WSDLService} from this EPR.
          */
-        private WSDLModel parseModel() {
-            WSDLModelImpl eprWsdlCtx;
+        private WSDLServiceImpl parseModel() {
+            WSDLModelImpl eprWsdlMdl;
             try {
-                eprWsdlCtx = parseWSDL(new URL(uri), msepr.toWSDLSource());
+                eprWsdlMdl = parseWSDL(new URL(uri), msepr.toWSDLSource());
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
 
-            validateEPR(eprWsdlCtx,this);
-            return eprWsdlCtx;
+            validate(eprWsdlMdl);
+            return eprWsdlMdl.getService(sname);
+        }
+
+        private void validate(WSDLModelImpl eprWsdlContext) {
+
+            if (wsdlService != null) {
+                //do we have the same wsdl
+                if (!eprWsdlContext.getFirstServiceName().equals(serviceName))
+                    throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n" + " The two Service QNames must match");
+
+                QName portName = pname;
+                if (eprWsdlContext.getBinding(sname, portName) == null ||
+                        wsdlService.get(portName) == null)
+                    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
+
+            } else {
+                WSDLServiceImpl eprService = eprWsdlContext.getService(serviceName);
+                if (eprService == null)
+                    throw new WebServiceException(
+                            ClientMessages.INVALID_SERVICE_NAME(serviceName,
+                                    buildNameList(eprWsdlContext.getServices().keySet())));
+
+                //if (!wsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname)))
+                //    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
+
+            }
         }
     }
 
