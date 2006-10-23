@@ -23,14 +23,15 @@
 package com.sun.xml.ws.api.addressing;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.message.stream.OutboundStreamHeader;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
+import com.sun.xml.ws.message.stream.OutboundStreamHeader;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -396,9 +397,13 @@ public enum AddressingVersion {
      * Gets the {@link AddressingVersion} from a {@link WSBinding}
      *
      * @param binding WSDL binding
-     * @return addresing version
+     * @return
+     *     addresing version enabled, or null if none is enabled.
      */
-    public static AddressingVersion fromBinding(WSBinding binding) {
+    public static @Nullable
+    AddressingVersion fromBinding(WSBinding binding) {
+        // TODO: who is responsible for reporting an error if both versions
+        // are on?
         if (binding.isFeatureEnabled(AddressingFeature.ID))
             return W3C;
 
