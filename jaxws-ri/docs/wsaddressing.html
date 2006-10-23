@@ -47,10 +47,33 @@ then the endpoint will enforce all the rules of the specification. For example,
 if the <code>wsa:MessageID</code> header is missing for a request/response MEP then a fault with appropriate code and sub-code is thrown back to the
 client.</P>
 </section>
+
+<section title="wsaw:Anonymous">
+<P>W3C WS-Addressing WSDL Binding defines
+<code><a href="http://www.w3.org/TR/2006/CR-ws-addr-wsdl-20060529/#anonelement">wsaw:Anonymous</a></code> element which when used in conjunction with <code>wsaw:UsingAddressing</code>
+define assertions regarding a requirement or a constraint in the use of
+anonymous URI in EPRs sent to the endpoint. The WSDL Binding defines three
+distinct values: <code>optional</code>, <code>required</code> and <code>prohibited</code>
+to express the assertion. The default value of <code>wsaw:Anonymous</code> (equivalent to not present) is <code>optional</code>.
+An operation with <code>required</code> <code>wsaw:Anonymous</code>
+value is shown below:</P>
+<pre><b>&lt;wsaw:UsingAddressing wsdl:required=&quot;true&quot;/&gt;</b>
+&lt;soap:binding transport=&quot;http://schemas.xmlsoap.org/soap/http&quot; style=&quot;document&quot;/&gt;
+  &lt;operation name=&quot;addNumbers&quot;&gt;
+    &lt;soap:operation soapAction=&quot;&quot;/&gt;
+    ...
+    <b>&lt;wsaw:Anonymous&gt;required&lt;/wsaw:Anonymous&gt;</b>
+  &lt;/operation&gt; 
+&lt;soap:binding&gt;</pre>
+<p>In this case, a message received at the endpoint, for this operation, with a non-anonymous ReplyTo
+or FaultTo EPR will result in a fault message returned back to the client with <code><a href="http://www.w3.org/TR/2006/REC-ws-addr-soap-20060509/#id2270777">wsa:OnlyAnonymousAddressSupported</a></code>
+fault code.</p>
+<p>There is no such equivalent feature in Member Submission WS-Addressing.
+</section>
 </section>
 
-
 <section title="On the server side">
+</p>
 <P>This section describes how W3C and Member Submission WS-Addressing can be
 enabled/disabled on the server-side.</P>
 <section title="Starting from Java">
