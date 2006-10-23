@@ -125,6 +125,16 @@ public abstract class InstanceResolver<T> {
     }
 
     /**
+     * @deprecated
+     *      This is added here because a Glassfish integration happened
+     *      with this signature. Please do not use this. Will be removed
+     *      after the next GF integration.
+     */
+    public static <T> InstanceResolver<T> createDefault(@NotNull Class<T> clazz, boolean bool) {
+        return createDefault(clazz);
+    }
+
+    /**
      * Creates a default {@link InstanceResolver} that serves the given class.
      */
     public static <T> InstanceResolver<T> createDefault(@NotNull Class<T> clazz) {
