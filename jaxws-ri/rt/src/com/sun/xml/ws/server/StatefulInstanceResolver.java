@@ -24,7 +24,6 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -151,7 +150,7 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
     public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
         super.start(wsc,endpoint);
 
-        if(endpoint.getBinding().getFeature(AddressingFeature.ID)==null)
+        if(AddressingVersion.fromBinding(endpoint.getBinding())!=null)
             // addressing is not enabled.
             throw new WebServiceException(ServerMessages.STATEFUL_REQURES_ADDRESSING(clazz));
 
