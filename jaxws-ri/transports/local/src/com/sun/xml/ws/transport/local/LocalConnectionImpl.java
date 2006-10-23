@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
+import javax.xml.ws.handler.MessageContext;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -89,18 +90,22 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         return baseURI.resolve("?"+endpoint.getPortName().getLocalPart()).toString();
     }
 
+    @Property(MessageContext.HTTP_REQUEST_METHOD)
     public @NotNull String getRequestMethod() {
         return "POST";   // not really supported
     }
 
+    @Property(MessageContext.QUERY_STRING)
     public String getQueryString() {
         return null;   // not really supported
     }
 
+    @Property(MessageContext.PATH_INFO)
     public String getPathInfo() {
         return null;   // not really supported
     }
 
+    @Property(MessageContext.HTTP_RESPONSE_CODE)
     public int getStatus () {
         return statusCode;
     }
@@ -110,10 +115,12 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
     }
 
     @Override
+    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public @Nullable Map<String, List<String>> getResponseHeaders() {
         return rspHeaders;
     }
 
+    @Property(MessageContext.HTTP_REQUEST_HEADERS)
     public @NotNull Map<String, List<String>> getRequestHeaders () {
         return reqHeaders;
     }
