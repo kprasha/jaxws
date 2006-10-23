@@ -24,8 +24,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * that takes {@link StatefulWebServiceManager}.
  *
  * <pre>
- * &#64;{@link WebService}
- * &#64;{@link Stateful}
+ * &#64;{@link Stateful} &#64;{@link WebService}
  * class BankAccount {
  *     protected final int id;
  *     private int balance;
