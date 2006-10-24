@@ -29,6 +29,7 @@ import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.message.DOMHeader;
+import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.message.jaxb.JAXBHeader;
 import com.sun.xml.ws.message.saaj.SAAJHeader;
 import com.sun.xml.ws.message.stream.StreamHeader11;
@@ -150,4 +151,15 @@ public abstract class Headers {
             throw new AssertionError();
         }
     }
+
+    /**
+     * Creates a new {@link Header} that that has a single text value in it
+     * (IOW, of the form &lt;foo>text&lt;/foo>.)
+     *
+     * @param name QName of the header element
+     * @param value text value of the header
+     */
+    public static Header create(QName name, String value) throws XMLStreamException {
+        return new StringHeader(name, value);
+    }    
 }
