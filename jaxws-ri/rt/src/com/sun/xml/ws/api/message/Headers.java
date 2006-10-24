@@ -159,7 +159,7 @@ public abstract class Headers {
      * @param name QName of the header element
      * @param value text value of the header
      */
-    public static Header create(QName name, String value) throws XMLStreamException {
+    public static Header create(QName name, String value) {
         return new StringHeader(name, value);
     }    
 }
