@@ -121,7 +121,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
             Packet packet = getRequestPacket();
             String address = packet.webServiceContextDelegate.getEPRAddress(packet, endpoint);
-            return (T) ((WSEndpointImpl)endpoint).getEndpointReference(clazz,address);
+            return clazz.cast(((WSEndpointImpl)endpoint).getEndpointReference(clazz,address,referenceParameters));
         }
     }
 

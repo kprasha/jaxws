@@ -36,6 +36,8 @@ import javax.xml.ws.EndpointReference;
 import java.util.concurrent.Executor;
 import java.io.IOException;
 
+import org.w3c.dom.Element;
+
 /**
  * Hides {@link HttpContext} so that {@link EndpointImpl}
  * may load even without {@link HttpContext}.
@@ -102,9 +104,9 @@ final class HttpEndpoint {
         context.setHandler(new WSHttpHandler(adapter, executor));
     }
 
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         WSEndpointImpl endpointImpl = (WSEndpointImpl) adapter.getEndpoint();
-        return (T) endpointImpl.getEndpointReference(clazz, getEPRAddress());
+        return clazz.cast(endpointImpl.getEndpointReference(clazz, getEPRAddress(),referenceParameters));
     }
 
 }

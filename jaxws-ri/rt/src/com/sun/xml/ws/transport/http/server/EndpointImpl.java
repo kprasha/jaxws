@@ -286,14 +286,14 @@ public class EndpointImpl extends Endpoint {
     }
 
     public EndpointReference getEndpointReference(Element...referenceParameters) {
-        return getEndpointReference(W3CEndpointReference.class);
+        return getEndpointReference(W3CEndpointReference.class, referenceParameters);
     }
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         if (!isPublished()) {
             throw new WebServiceException("Endpoint is not published yet");
         }
-        return ((HttpEndpoint)actualEndpoint).getEndpointReference(clazz);
+        return ((HttpEndpoint)actualEndpoint).getEndpointReference(clazz,referenceParameters);
     }
 }
 

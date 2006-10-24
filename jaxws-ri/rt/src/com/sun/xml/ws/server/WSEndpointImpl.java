@@ -48,6 +48,12 @@ import javax.xml.ws.handler.Handler;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
+import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+
+import org.w3c.dom.Element;
 
 /**
  * {@link WSEndpoint} implementation.
@@ -82,10 +88,10 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private final Class<T> implementationClass;
 
     WSEndpointImpl(@NotNull QName serviceName, @NotNull QName portName, WSBinding binding,
-                          Container container, SEIModel seiModel, WSDLPort port,
-                          Class<T> implementationClass,
-                          @Nullable ServiceDefinitionImpl serviceDef,
-                          InvokerTube terminalTube, boolean isSynchronous) {
+                   Container container, SEIModel seiModel, WSDLPort port,
+                   Class<T> implementationClass,
+                   @Nullable ServiceDefinitionImpl serviceDef,
+                   InvokerTube terminalTube, boolean isSynchronous) {
         this.serviceName = serviceName;
         this.portName = portName;
         this.binding = binding;
@@ -225,16 +231,19 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private static final Logger logger = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.endpoint");
 
-    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address) {
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address, Element...referenceParameters) {
         QName portType = null;
         String wsdlAddress = null;
         if(port != null) {
             portType = port.getBinding().getPortTypeName();
             wsdlAddress = address+"?wsdl";
-
+        }
+        List<Element> refParams = null;
+        if(referenceParameters != null) {
+            refParams = Arrays.asList(referenceParameters);
         }
         return EndpointReferenceUtil.getEndpointReference(clazz, address, serviceName,
-                portName,portType,null, wsdlAddress,null);
+                portName,portType,null, wsdlAddress,refParams);
     }
 
     public @NotNull QName getPortName() {
