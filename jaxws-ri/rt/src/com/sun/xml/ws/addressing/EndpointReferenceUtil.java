@@ -43,6 +43,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * @author Rama Pulavarthi
@@ -51,13 +52,17 @@ import java.util.Map;
 public class EndpointReferenceUtil {
 
     public static <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address) {
-        return getEndpointReference(clazz, address, null, null, null, true);
+        return getEndpointReference(clazz, address, null, null, null, null, null, null);
     }
 
-    public static <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address,
+    public static <T extends EndpointReference> T getEndpointReference(Class<T> clazz,
+                                                                       String address,
                                                                        QName service,
-                                                                       String port,
-                                                                       QName portType, boolean hasWSDL) {
+                                                                       QName port,
+                                                                       QName portType,
+                                                                       List<Element> metadata,
+                                                                       String wsdlAddress,
+                                                                       List<Element> referenceParameters) {
         if (clazz.isAssignableFrom(W3CEndpointReference.class)) {
             StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
             try {
@@ -70,7 +75,7 @@ public class EndpointReferenceUtil {
                         W3CAddressingConstants.WSA_ADDRESS_NAME, AddressingVersion.W3C.nsUri);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                writeW3CMetaData(writer, address, service, port, portType, hasWSDL);
+                writeW3CMetaData(writer, service, port, portType, metadata, wsdlAddress, referenceParameters);
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
@@ -91,11 +96,11 @@ public class EndpointReferenceUtil {
                         AddressingVersion.MEMBER.nsUri);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                writeMSMetaData(writer, address, service, port, portType, hasWSDL);
+                writeMSMetaData(writer, service, port, portType, metadata, referenceParameters);
                 //Inline the wsdl as extensibility element
                 //Should it go under wsp:Policy?
-                if (hasWSDL) {
-                    writeWsdl(writer, service, address);
+                if (wsdlAddress != null) {
+                    writeWsdl(writer, service, wsdlAddress);
                 }
                 writer.writeEndElement();
                 writer.writeEndDocument();
@@ -110,10 +115,11 @@ public class EndpointReferenceUtil {
         }
     }
 
-    private static void writeW3CMetaData(StreamWriterBufferCreator writer, String eprAddress,
+    private static void writeW3CMetaData(StreamWriterBufferCreator writer,
                                          QName service,
-                                         String port,
-                                         QName portType, boolean hasWSDL) throws XMLStreamException {
+                                         QName port,
+                                         QName portType, List<Element> metadata,
+                                         String wsdlAddress, List<Element> referenceParameters) throws XMLStreamException {
 
         writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
                 W3CAddressingConstants.WSA_METADATA_NAME, AddressingVersion.W3C.nsUri);
@@ -146,24 +152,23 @@ public class EndpointReferenceUtil {
                 servicePrefix = "wsns";
             }
             writer.writeNamespace(servicePrefix, service.getNamespaceURI());
-            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port);
+            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port.getLocalPart());
             writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
             writer.writeEndElement();
         }
 
         //Inline the wsdl
-        if (hasWSDL) {
-            writeWsdl(writer, service, eprAddress);
+        if (wsdlAddress != null) {
+            writeWsdl(writer, service, wsdlAddress);
         }
-
         writer.writeEndElement();
 
     }
 
-    private static void writeMSMetaData(StreamWriterBufferCreator writer, String eprAddress,
+    private static void writeMSMetaData(StreamWriterBufferCreator writer,
                                         QName service,
-                                        String port,
-                                        QName portType, boolean hasWSDL) throws XMLStreamException {
+                                        QName port,
+                                        QName portType, List<Element> metadata, List<Element> referenceParameters) throws XMLStreamException {
         // TODO: write ReferenceProperties
         //TODO: write ReferenceParameters
         if (portType != null) {
@@ -196,13 +201,13 @@ public class EndpointReferenceUtil {
             }
             writer.writeNamespace(servicePrefix, service.getNamespaceURI());
             writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
-                    port);
+                    port.getLocalPart());
             writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
             writer.writeEndElement();
         }
     }
 
-    private static void writeWsdl(StreamWriterBufferCreator writer, QName service, String eprAddress) throws XMLStreamException {
+    private static void writeWsdl(StreamWriterBufferCreator writer, QName service, String wsdlAddress) throws XMLStreamException {
         writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
                 WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
                 WSDLConstants.NS_WSDL);
@@ -211,7 +216,7 @@ public class EndpointReferenceUtil {
                 WSDLConstants.QNAME_IMPORT.getLocalPart(),
                 WSDLConstants.NS_WSDL);
         writer.writeAttribute("namespace", service.getNamespaceURI());
-        writer.writeAttribute("location", eprAddress + "?wsdl");
+        writer.writeAttribute("location", wsdlAddress);
         writer.writeEndElement();
         writer.writeEndElement();
     }
@@ -506,6 +511,10 @@ public class EndpointReferenceUtil {
     String fixNull(@Nullable String s) {
         if (s == null) return "";
         else return s;
+    }
+
+    public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
+        return null;
     }
 }
 

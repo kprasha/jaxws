@@ -226,9 +226,15 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.endpoint");
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, String address) {
-        QName portType = getPortTypeName();
+        QName portType = null;
+        String wsdlAddress = null;
+        if(port != null) {
+            portType = port.getBinding().getPortTypeName();
+            wsdlAddress = address+"?wsdl";
+
+        }
         return EndpointReferenceUtil.getEndpointReference(clazz, address, serviceName,
-                portName.getLocalPart(),portType, port != null);
+                portName,portType,null, wsdlAddress,null);
     }
 
     public @NotNull QName getPortName() {
@@ -242,9 +248,5 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public @NotNull QName getServiceName() {
         return serviceName;
-    }
-
-    private QName getPortTypeName() {
-        return (port == null) ? null : port.getBinding().getPortTypeName();
     }
 }

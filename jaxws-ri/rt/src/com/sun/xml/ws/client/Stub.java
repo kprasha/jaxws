@@ -248,16 +248,17 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         if (endpointReference != null) {
             return endpointReference.toSpec(clazz);
         }
-
+        String eprAddress = requestContext.getEndpointAddress().toString();
         QName portTypeName = null;
-
-        if(wsdlPort!=null)
+        String wsdlAddress = null;
+        if(wsdlPort!=null) {
             portTypeName = wsdlPort.getBinding().getPortTypeName();
-
+            wsdlAddress = eprAddress +"?wsdl";
+        }
         return clazz.cast(EndpointReferenceUtil.getEndpointReference(clazz,
-                requestContext.getEndpointAddress().toString(),
+                eprAddress,
                 getServiceName(),
-                getPortName().getLocalPart(),
-                portTypeName, wsdlPort!=null));
+                getPortName(),
+                portTypeName,null, wsdlAddress,null));
     }
 }
