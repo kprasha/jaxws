@@ -23,6 +23,7 @@
 package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -59,7 +60,8 @@ public abstract class BindingImpl implements WSBinding {
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
     // Features that are set(enabled/disabled) on the binding
-    private Map<String, WebServiceFeature> features;
+    private  Map<Class<? extends WebServiceFeature>, WebServiceFeature> features =
+            new HashMap<Class<? extends WebServiceFeature>, WebServiceFeature>();
     /**
      * Computed from {@link #features} by {@link #updateCache()}
      * to make {@link #getAddressingVersion()} faster.
@@ -153,43 +155,50 @@ public abstract class BindingImpl implements WSBinding {
         return bindingId.toString();
     }
 
-    private boolean hasFeature(String featureId) {
-        if (featureId == null || features == null)
-            return false;
-        return features.containsKey(featureId);
+    public WebServiceFeature getFeature(String featureId) {
+        if (featureId == null)
+            return null;
+        for(WebServiceFeature f: features.values()){
+            if(f.getID().equals(featureId))
+                return f;
+        }
+        return null;
     }
 
-    public WebServiceFeature getFeature(String featureId) {
-        if (featureId == null || features == null)
-            return null;
-        return features.get(featureId);
+    public @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType){
+        return featureType.cast(features.get(featureType));
     }
 
     public boolean isFeatureEnabled(String featureId) {
-        if (!hasFeature(featureId))
+        WebServiceFeature ftr = getFeature(featureId);
+        if(ftr == null) {
             return false;
+        }
+        return ftr.isEnabled();
+    }
 
-        return features.get(featureId).isEnabled();
+    public boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature){
+        WebServiceFeature ftr = getFeature(feature);
+        if(ftr == null) {
+            return false;
+        }
+        return ftr.isEnabled();
     }
 
     private void updateCache() {
 //        addressingVersion = AddressingVersion.W3C;
-        if (isFeatureEnabled(AddressingFeature.ID))
+        if (isFeatureEnabled(AddressingFeature.class))
             addressingVersion = AddressingVersion.W3C;
-        else if (isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
+        else if (isFeatureEnabled(MemberSubmissionAddressingFeature.class))
             addressingVersion = AddressingVersion.MEMBER;
         else
             addressingVersion = null;
     }
 
-    private void enableFeature(WebServiceFeature feature) {
+    private <F extends WebServiceFeature> void enableFeature(F feature) {
         if (feature == null)
             return;
-
-        if (features == null)
-            features = new HashMap<String, WebServiceFeature>();
-
-        features.put(feature.getID(), feature);
+        features.put(feature.getClass(), feature);
         updateCache();
     }
 
