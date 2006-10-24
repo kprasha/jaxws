@@ -320,7 +320,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             }
             return new AttachmentSetImpl(alist);
         }
-        return null;
+        return new AttachmentSetImpl();
     }
 
    /* private void getInboundAttachments(Message msg) {
