@@ -28,7 +28,6 @@ import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.server.Adapter;
@@ -90,6 +89,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      *
      * This is convenient for creating an {@link HttpAdapter} for an environment
      * where they don't know each other (such as JavaSE deployment.)
+     *
+     * @param endpoint web service endpoint
+     * @return singe adapter to process HTTP messages
      */
     public static HttpAdapter createAlone(WSEndpoint endpoint) {
         return new DummyList().createAdapter("","",endpoint);
@@ -137,99 +139,6 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
     }
 
-/*
-    final class HttpToolkit extends Adapter.Toolkit implements TransportBackChannel {
-        private WSHTTPConnection con;
-        private boolean closed;
-
-        public void handle(WSHTTPConnection con) throws IOException {
-            this.con = con;
-            this.closed = false;
-            String ct = con.getRequestHeader("Content-Type");
-            InputStream in = con.getInput();
-            Packet packet = new Packet();
-            packet.acceptableMimeTypes = con.getRequestHeader("Accept");
-            packet.addSatellite(con);
-            try {
-                if(dump) {
-                ByteArrayBuffer buf = new ByteArrayBuffer();
-                buf.write(in);
-                dump(buf, "HTTP request", con.getRequestHeaders());
-                in = buf.newInputStream();
-                }
-                codec.decode(in, ct, packet);
-                try {
-                    packet = head.process(packet,con.getWebServiceContextDelegate(),this);
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    if (!closed) {
-                        writeInternalServerError(con);
-                    }
-                    return;
-                }
-            } catch(ExceptionHasMessage e) {
-                e.printStackTrace();
-                packet.setMessage(e.getFaultMessage());
-            }
-
-            if (closed) {
-                return;                 // Connection is already closed
-            }
-
-            Message responseMessage = packet.getMessage();
-            if (responseMessage==null) {
-                close();
-            } else {
-                if(con.getStatus()==0) {
-                    // if the appliation didn't set the status code,
-                    // set the default one.
-                    con.setStatus( responseMessage.isFault()
-                        ? HttpURLConnection.HTTP_INTERNAL_ERROR
-                        : HttpURLConnection.HTTP_OK );
-                }
-
-                ContentType contentType = codec.getStaticContentType(packet);
-                if (contentType != null) {
-                    con.setContentTypeResponseHeader(contentType.getContentType());
-                    OutputStream os = con.getOutput();
-                    if(dump) {
-                        ByteArrayBuffer buf = new ByteArrayBuffer();
-                        codec.encode(packet, buf);
-                        dump(buf, "HTTP response "+con.getStatus(), con.getResponseHeaders());
-                        buf.writeTo(os);
-                    } else {
-                        codec.encode(packet, os);
-                    }
-                    os.close();
-                } else {
-                    ByteArrayBuffer buf = new ByteArrayBuffer();
-                    contentType = codec.encode(packet, buf);
-                    con.setContentTypeResponseHeader(contentType.getContentType());
-                    if(dump) {
-                        dump(buf, "HTTP response "+con.getStatus(), con.getResponseHeaders());
-                    }
-                    OutputStream os = con.getOutput();
-                    buf.writeTo(os);
-                    os.close();
-                }
-            }
-        }
-
-        public void close() {
-            if(!closed) {
-                closed = true;
-                // close the response channel now
-                con.setStatus(WSHTTPConnection.ONEWAY);
-                try {
-                    con.getOutput().close(); // no payload
-                } catch (IOException e) {
-                    throw new WebServiceException(e);
-                }
-            }
-        }
-    }
-    */
-
     protected HttpToolkit createToolkit() {
         return new HttpToolkit();
     }
@@ -248,6 +157,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * To populate a request {@link Packet} with more info,
      * define {@link PropertySet.Property properties} on
      * {@link WSHTTPConnection}.
+     *
+     * @param connection to receive/send HTTP messages for web service endpoints
+     * @throws IOException when I/O errors happen
      */
     public void handle(@NotNull WSHTTPConnection connection) throws IOException {
         HttpToolkit tk = pool.take();
@@ -258,22 +170,20 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
     }
 
-    public Packet decodePacket(@NotNull WSHTTPConnection con, Codec codec) throws IOException {
+    public Packet decodePacket(@NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
         String ct = con.getRequestHeader("Content-Type");
         InputStream in = con.getInput();
         Packet packet = new Packet();
         packet.acceptableMimeTypes = con.getRequestHeader("Accept");
         packet.addSatellite(con);
         packet.transportBackChannel = new Oneway(con);
+        packet.webServiceContextDelegate = con.getWebServiceContextDelegate();
 
         if (dump) {
             ByteArrayBuffer buf = new ByteArrayBuffer();
             buf.write(in);
             dump(buf, "HTTP request", con.getRequestHeaders());
             in = buf.newInputStream();
-        }
-        if (codec == null) {
-            codec = endpoint.createCodec();
         }
         try {
             codec.decode(in, ct, packet);
@@ -284,12 +194,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         return packet;
     }
 
-    public void encodePacket(Packet packet, @NotNull WSHTTPConnection con, Codec codec) throws IOException {
+    public void encodePacket(@NotNull Packet packet, @NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
         if (con.isClosed()) {
             return;                 // Connection is already closed
-        }
-        if (codec == null) {
-            codec = endpoint.createCodec();
         }
         Message responseMessage = packet.getMessage();
         if (responseMessage == null) {
@@ -339,8 +246,27 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         con.close();
     }
 
-    public void invokeAsync(Packet request, CompletionCallback callback) {
-        endpoint.schedule(request, callback);
+    public void invokeAsync(final WSHTTPConnection con) throws IOException {
+        final HttpToolkit tk = pool.take();
+        Packet request = decodePacket(con, tk.codec);
+        if (!request.getMessage().isFault()) {
+            endpoint.schedule(request, new CompletionCallback() {
+                public void onCompletion(@NotNull Packet response) {
+                    try {
+                        encodePacket(response, con, tk.codec);
+                    } catch(IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                    pool.recycle(tk);
+                }
+                public void onCompletion(@NotNull Throwable error) {
+                    error.printStackTrace();
+                    //if (!con.isClosed()) {
+                    //    writeInternalServerError(con);
+                    //}
+                }
+            });
+        }
     }
 
     final class Oneway implements TransportBackChannel {
@@ -360,7 +286,6 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 con.close();
             }
         }
-
     }
 
     final class HttpToolkit extends Adapter.Toolkit {
@@ -369,7 +294,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             Packet response = null;
             if (!request.getMessage().isFault()) {
                 try {
-                    response = head.process(request, con.getWebServiceContextDelegate(), request.transportBackChannel); // TODO
+                    response = head.process(request, con.getWebServiceContextDelegate(), request.transportBackChannel);
                 } catch (Exception e) {
                     e.printStackTrace();
                     if (!con.isClosed()) {
@@ -388,6 +313,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * @param query
      *      String like "xsd=1" or "perhaps=some&amp;unrelated=query".
      *      Can be null.
+     * @return true for metadata requests
+     *         false for web service requests
      */
     public final boolean isMetadataQuery(String query) {
         // we intentionally return true even if documents don't exist,
@@ -407,6 +334,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * @param queryString
      *      The query string given by the client (which indicates
      *      what document to serve.) Can be null (but it causes an 404 not found.)
+     *
+     * @throws IOException when I/O errors happen
      */
     public void publishWSDL(WSHTTPConnection con, final String baseAddress, String queryString) throws IOException {
         // Workaround for a bug in http server. Read and close InputStream
@@ -426,10 +355,10 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
         OutputStream os = con.getOutput();
         final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
-        final String address = portAddressResolver.getAddressFor(endpoint.getPort().getName().getLocalPart());
+        final String address = portAddressResolver.getAddressFor(endpoint.getPortName().getLocalPart());
         assert address != null;
         DocumentAddressResolver resolver = new DocumentAddressResolver() {
-            public String getRelativeAddressFor(SDDocument current, SDDocument referenced) {
+            public String getRelativeAddressFor(@NotNull SDDocument current, @NotNull SDDocument referenced) {
                 // the map on endpoint should account for all SDDocument
                 assert revWsdls.containsKey(referenced);
                 return address+'?'+ revWsdls.get(referenced);
