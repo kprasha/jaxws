@@ -1,0 +1,244 @@
+<html>
+
+<head caption="WS-Addressing in JAX-WS 2.1">
+    <link rel="stylesheet" type="text/css" href="style/default.css"/>
+    <title>Why WS-Addressing ?</title>
+</head>
+
+<body><content>
+
+<section title="What is WS-Addressing ?">
+<P><a href="http://www.w3.org/2002/ws/addr/">Web Services Addressing</a>
+provides transport-neutral mechanisms to address Web services and messages. The
+transport-neutrality is achieved by normalizing the information typically shared
+between transport protocols and messaging systems.&nbsp;</P>
+
+<P> For example a SOAP 1.2 message,
+without WS-Addressing, sent over HTTP transport looks like:</P>
+
+<table border="0" width="90%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="10%" valign="top"><code>&nbsp;</code></td>
+    <td width="90%" valign="top"><code>&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(001)</code></td>
+    <td width="90%" valign="top"><code>
+
+POST /fabrikam/Purchasing HTTP 1.1/POST</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(002)</code></td>
+    <td width="90%" valign="top"><code>
+Host: example.com</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(003)</code></td>
+    <td width="90%" valign="top"><code>SOAPAction: http://example.com/fabrikam/SubmitPO&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(004)</code></td>
+    <td width="90%" valign="top"></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(005)</code></td>
+    <td width="90%" valign="top"><code> &lt;S:Envelope xmlns:S=&quot;http://www.w3.org/2003/05/soap-envelope&quot;
+      xmlns:wombat=&quot;http://wombat.org/&quot;&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(006)</code></td>
+    <td width="90%" valign="top"><code>&nbsp; &lt;S:Header&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(007)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp; &lt;wombat:MessageID&gt;&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(008)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      uuid:e197db59-0982-4c9c-9702-4234d204f7f4</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(009)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp; &lt;/wombat:MessageID&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(010)</code></td>
+    <td width="90%" valign="top"><code>&nbsp; &lt;S:Header&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(011)</code></td>
+    <td width="90%" valign="top"><code>&nbsp; &lt;S:Body&gt;&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(012)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp; ...&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(013)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp; &lt;/S:Body&gt;&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(014)</code></td>
+    <td width="90%" valign="top"><code> &lt;/S:Envelope&gt;</code></td>
+  </tr>
+</table>
+<br>
+Line (001) - (003) shows the HTTP transport headers. Line (005) - (014) shows
+the SOAP message in HTTP body.&nbsp;
+<p>The host (<code>example.com</code>), the dispatch method (<code>POST</code>)
+and the URL to dispatch to (<code>/fabrikam/Purchasing</code>) are in the HTTP transport headers. The actual message
+to be dispatched and implied meaning (for example payload's <code> QName</code>
+or <code>SOAPAction</code>) is defined by the
+messaging system (SOAP) or transport protocol (HTTP). To be able to dispatch successfully on the
+service endpoint, a Web service stack has to gather the information from
+transport protocol and messaging system. Using an alternate transport would
+require the underlying Web services stack to understand reading the format used
+by the new transport.</p>
+<p>Also in the above message, there is no standard header to establish the
+identity of a message. In this case, <code>MessageID</code> header defined in
+the namespace URI bound to <code>wombat</code> prefix is used but is application
+specific and is thus not re-usable.</p>
+<p>WS-Addressing introduce Message Addressing Properties that collectively
+augment a message to normalize this information. A SOAP 1.2 message, with
+WS-Addressing, sent over HTTP transport looks like:</p>
+<table border="0" width="90%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="10%" valign="top"><code>&nbsp;</code></td>
+    <td width="90%" valign="top"><code>&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(001)</code></td>
+    <td width="90%" valign="top"><code>
+
+POST /fabrikam/Purchasing HTTP 1.1/POST</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(002)</code></td>
+    <td width="90%" valign="top"><code>
+Host: example.com</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(003)</code></td>
+    <td width="90%" valign="top"><code>SOAPAction: http://example.com/fabrikam/SubmitPO&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(004)</code></td>
+    <td width="90%" valign="top"></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(005)</code></td>
+    <td width="90%" valign="top"><code> &lt;S:Envelope xmlns:S=&quot;http://www.w3.org/2003/05/soap-envelope&quot;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>xmlns:wsa=&quot;http://www.w3.org/2005/08/addressing/&quot;</b>&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(006)</code></td>
+    <td width="90%" valign="top"><code>&nbsp; &lt;S:Header&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(007)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp; &lt;wsa:MessageID&gt;&nbsp;</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(008)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      uuid:e197db59-0982-4c9c-9702-4234d204f7f4</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(009)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp; &lt;/wsa:MessageID&gt;</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(010)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp; &lt;wsa:To&gt;&nbsp;</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(011)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://example.com/fabrikam/Purchasing</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(012)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp; &lt;/wsa:To&gt;</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(013)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp; &lt;wsa:Action&gt;&nbsp;</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(014)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://example.com/fabrikam/SubmitPO</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(015)</code></td>
+    <td width="90%" valign="top"><code><b>&nbsp;&nbsp;&nbsp; &lt;/wsa:Action&gt;</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(016)</code></td>
+    <td width="90%" valign="top"><code>&nbsp; &lt;S:Header&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(017)</code></td>
+    <td width="90%" valign="top"><code>&nbsp; &lt;S:Body&gt;&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(018)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp; ...&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(019)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp; &lt;/S:Body&gt;&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(020)</code></td>
+    <td width="90%" valign="top"><code> &lt;/S:Envelope&gt;</code></td>
+  </tr>
+</table>
+<p>In this message, Line (001) - (003) shows the HTTP transport headers. Line
+(005) - (020) shows the SOAP message in HTTP body. Line (007) - (015) shows a
+binding of Message Addressing Properties to SOAP message. For example, <code>wsa:MessageID</code>
+is an absolute URI that uniquely identifies the message, <code>wsa:To</code> is
+an absolute URI representing the address of the intended receiver of this
+message and <code>wsa:Action</code> is an absolute IRI that uniquely identifies
+the semantics implied by this message. All the information earlier shared
+between transport protocols and messaging systems is now normalized into
+messaging system.&nbsp;&nbsp;</p>
+<p>If the exactly same message is to be dispatched using a different transport
+on the service endpoint, for example SMTP, then the value of wsa:To header could
+be changed to <code>mailto:purchasing@example.com</code>. The updated <code>wsa:To</code>
+header looks like:</p>
+<table border="0" width="90%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="10%" valign="top"><code>&nbsp;</code></td>
+    <td width="90%" valign="top"><code>&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(010)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp; &lt;wsa:To&gt;&nbsp;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(011)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>mailto:purchasing@example.com</b></code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(012)</code></td>
+    <td width="90%" valign="top"><code>&nbsp;&nbsp;&nbsp; &lt;/wsa:To&gt;</code></td>
+  </tr>
+</table>
+</section>
+
+<section title="WS-Addressing Versions">
+<P> There are two
+prominent versions of WS-Addressing that are commonly used:&nbsp;</P>
+
+<ul>
+  <li>W3C WS-Addressing</li>
+  <li>Member Submission WS-Addressing</li>
+</ul>
+<p>Sun, IBM, BEA, Microsoft and SAP co-authored and submitted a WS-Addressing
+specification to W3C in August 2004. W3C chartered a new Working Group with a
+mission to produce a <a href="http://www.w3.org/2005/10/Process-20051014/tr.html#RecsW3C">W3C
+Recommendation</a> for WS-Addressing by refining the submitted
+specification.&nbsp;</p>
+</section>
+</body>
+</html>
