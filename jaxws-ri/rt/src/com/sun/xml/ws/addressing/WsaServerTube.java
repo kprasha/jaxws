@@ -236,10 +236,15 @@ public class WsaServerTube extends WsaTube {
             doInvoke(next, response);
         }
 
+        if (response.getMessage().isOneWay(wsdlPort)) {
+            System.out.println(AddressingMessages.NON_ANONYMOUS_RESPONSE_ONEWAY());
+            return response;
+        }
+
         // TODO: Use TransportFactory to create the appropriate Pipe ?
         if (!uri.startsWith("http")) {
             System.out.println(AddressingMessages.NON_ANONYMOUS_UNKNOWN_PROTOCOL(uri.substring(0, uri.indexOf("://"))));
-            return packet;
+            return response;
         }
 
         System.out.println(AddressingMessages.NON_ANONYMOUS_RESPONSE_SENDING(uri));
