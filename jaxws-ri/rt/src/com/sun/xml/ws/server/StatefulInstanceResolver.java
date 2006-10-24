@@ -217,7 +217,10 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
      *      The request that we are currently processing. This is used to infer the address in EPR.
      */
     @NotNull
-    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, T o, Packet currentRequest) {
+    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, T o, @NotNull Packet currentRequest) {
+        if(currentRequest==null)
+            throw new IllegalArgumentException("No current packet");
+        
         String key = reverseInstances.get(o);
         if(key!=null)   return createEPR(key,adrsVer,currentRequest);
 

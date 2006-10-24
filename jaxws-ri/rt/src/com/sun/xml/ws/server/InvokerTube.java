@@ -31,12 +31,14 @@ import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSWebServiceContext;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderInvokerTube;
 import com.sun.xml.ws.server.sei.SEIInvokerTube;
 import org.w3c.dom.Element;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.lang.reflect.InvocationTargetException;
@@ -114,8 +116,11 @@ public abstract class InvokerTube<T> extends AbstractTubeImpl {
      * <p>
      * This is primarily designed for {@link StatefulInstanceResolver}. Use with care.
      */
-    public static Packet getCurrentPacket() {
-        return packets.get();
+    public static @NotNull Packet getCurrentPacket() {
+        Packet packet = packets.get();
+        if(packet==null)
+            throw new WebServiceException(ServerMessages.NO_CURRENT_PACKET());
+        return packet;
     }
 
     /**
