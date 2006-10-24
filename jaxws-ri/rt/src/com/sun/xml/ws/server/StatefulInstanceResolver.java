@@ -199,21 +199,21 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
 
     @NotNull
     public <EPR extends EndpointReference>EPR export(Class<EPR> epr, T o) {
-        return export(epr,o, InvokerTube.getCurrentPacket() );
+        return export(epr, InvokerTube.getCurrentPacket(), o);
     }
 
     @NotNull
     public <EPR extends EndpointReference>EPR export(Class<EPR> epr, WebServiceContext context, T o) {
         if (context instanceof WSWebServiceContext) {
             WSWebServiceContext wswsc = (WSWebServiceContext) context;
-            return export(epr,o, wswsc.getRequestPacket());
+            return export(epr, wswsc.getRequestPacket(), o);
         }
 
         throw new WebServiceException(ServerMessages.STATEFUL_INVALID_WEBSERVICE_CONTEXT(context));
     }
 
     @NotNull
-    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, T o, @NotNull Packet currentRequest) {
+    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, @NotNull Packet currentRequest, T o) {
         if(currentRequest==null)
             throw new IllegalArgumentException("No current packet");
         

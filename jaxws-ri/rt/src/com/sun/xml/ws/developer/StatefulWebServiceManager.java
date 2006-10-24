@@ -171,9 +171,9 @@ public interface StatefulWebServiceManager<T> {
      *
      * @param currentRequest
      *      The request that we are currently processing. This is used to infer the address in EPR.
-     * @see #export(Class, WebServiceContext, Object) 
+     * @see #export(Class, WebServiceContext, Object)
      */
-    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> eprType, T o, @NotNull Packet currentRequest);
+    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> eprType, @NotNull Packet currentRequest, T o);
 
     /**
      * Unexports the given instance.
