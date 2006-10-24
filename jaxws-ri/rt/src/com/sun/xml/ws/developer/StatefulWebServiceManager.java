@@ -29,7 +29,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  *     protected final int id;
  *     private int balance;
  *
- *     Account(int id) { this.id = id; }
+ *     BankAccount(int id) { this.id = id; }
  *     &#64;{@link WebMethod}
  *     public synchronized void deposit(int amount) { balance+=amount; }
  *
