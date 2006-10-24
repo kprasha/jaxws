@@ -75,14 +75,23 @@ public class EndpointReferenceUtil {
                         W3CAddressingConstants.WSA_ADDRESS_NAME, AddressingVersion.W3C.nsUri);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                writeW3CMetaData(writer, service, port, portType, metadata, wsdlAddress, referenceParameters);
+                //Write ReferenceParameters
+                if(referenceParameters != null) {
+                    writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
+                            "ReferenceParameters", AddressingVersion.W3C.nsUri);
+                    for(Element e: referenceParameters) {
+                        DOMUtil.serializeNode(e,writer);
+                    }
+                    writer.writeEndElement();
+                }
+                writeW3CMetaData(writer, service, port, portType, metadata, wsdlAddress);
                 writer.writeEndElement();
                 writer.writeEndDocument();
                 writer.flush();
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
-            return (T) new W3CEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer()));
+            return clazz.cast(new W3CEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer())));
         } else if (clazz.isAssignableFrom(MemberSubmissionEndpointReference.class)) {
             StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
             try {
@@ -96,7 +105,16 @@ public class EndpointReferenceUtil {
                         AddressingVersion.MEMBER.nsUri);
                 writer.writeCharacters(address);
                 writer.writeEndElement();
-                writeMSMetaData(writer, service, port, portType, metadata, referenceParameters);
+                //Write ReferenceParameters
+                if(referenceParameters != null) {
+                    writer.writeStartElement(AddressingVersion.MEMBER.getPrefix(),
+                            "ReferenceParameters", AddressingVersion.MEMBER.nsUri);
+                    for(Element e: referenceParameters) {
+                        DOMUtil.serializeNode(e,writer);
+                    }
+                    writer.writeEndElement();
+                }
+                writeMSMetaData(writer, service, port, portType, metadata);
                 //Inline the wsdl as extensibility element
                 //Should it go under wsp:Policy?
                 if (wsdlAddress != null) {
@@ -109,7 +127,7 @@ public class EndpointReferenceUtil {
                 throw new WebServiceException(e);
             }
 
-            return (T) new MemberSubmissionEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer()));
+            return clazz.cast(new MemberSubmissionEndpointReference(new XMLStreamBufferSource(writer.getXMLStreamBuffer())));
         } else {
             throw new WebServiceException(clazz + "is not a recognizable EndpointReference");
         }
@@ -119,7 +137,7 @@ public class EndpointReferenceUtil {
                                          QName service,
                                          QName port,
                                          QName portType, List<Element> metadata,
-                                         String wsdlAddress, List<Element> referenceParameters) throws XMLStreamException {
+                                         String wsdlAddress) throws XMLStreamException {
 
         writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
                 W3CAddressingConstants.WSA_METADATA_NAME, AddressingVersion.W3C.nsUri);
@@ -161,6 +179,12 @@ public class EndpointReferenceUtil {
         if (wsdlAddress != null) {
             writeWsdl(writer, service, wsdlAddress);
         }
+        //Add the extra metadata Elements
+        if(metadata != null) {
+            for(Element e: metadata) {
+                DOMUtil.serializeNode(e,writer);
+            }
+        }
         writer.writeEndElement();
 
     }
@@ -168,7 +192,7 @@ public class EndpointReferenceUtil {
     private static void writeMSMetaData(StreamWriterBufferCreator writer,
                                         QName service,
                                         QName port,
-                                        QName portType, List<Element> metadata, List<Element> referenceParameters) throws XMLStreamException {
+                                        QName portType, List<Element> metadata) throws XMLStreamException {
         // TODO: write ReferenceProperties
         //TODO: write ReferenceParameters
         if (portType != null) {
@@ -513,8 +537,4 @@ public class EndpointReferenceUtil {
         else return s;
     }
 
-    public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
-        return null;
-    }
 }
-

@@ -104,9 +104,9 @@ public class ProviderImpl extends Provider {
         return service.getPort(msepr, clazz, webServiceFeatures);
     }
 
-    //TODO:
+    
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
-        throw new UnsupportedOperationException();        
+        return EndpointReferenceUtil.getEndpointReference(W3CEndpointReference.class,address,serviceName,portName,null,metadata,wsdlDocumentLocation,referenceParameters);
     }
 
     private static JAXBContext getEPRJaxbContext() {
