@@ -212,10 +212,6 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
         throw new WebServiceException(ServerMessages.STATEFUL_INVALID_WEBSERVICE_CONTEXT(context));
     }
 
-    /**
-     * @param currentRequest
-     *      The request that we are currently processing. This is used to infer the address in EPR.
-     */
     @NotNull
     public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, T o, @NotNull Packet currentRequest) {
         if(currentRequest==null)
