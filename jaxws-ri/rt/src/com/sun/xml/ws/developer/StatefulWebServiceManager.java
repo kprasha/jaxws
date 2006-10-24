@@ -2,6 +2,8 @@ package com.sun.xml.ws.developer;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.AsyncProviderCallback;
 
@@ -158,7 +160,20 @@ public interface StatefulWebServiceManager<T> {
      * This is why we need to take {@link WebServiceContext}. Pass in the
      * object given to {@link AsyncProvider#invoke(Object, AsyncProviderCallback,WebServiceContext)}.
      */
-    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> epr, @NotNull WebServiceContext context, T o);
+    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> eprType, @NotNull WebServiceContext context, T o);
+
+    /**
+     * Exports an object.
+     *
+     * <p>
+     * <b>This method is not meant for application code.</b>
+     * This is for {@link Tube}s that wish to use stateful web service support.
+     *
+     * @param currentRequest
+     *      The request that we are currently processing. This is used to infer the address in EPR.
+     * @see #export(Class, WebServiceContext, Object) 
+     */
+    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> eprType, T o, @NotNull Packet currentRequest);
 
     /**
      * Unexports the given instance.
