@@ -100,9 +100,9 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         try {
             checkCardinality(packet, binding, wsdlPort);
 
-            if (isAddressingEngagedOrRequired(packet, binding)) {
-                validateAction(packet);
-            }
+//            if (isAddressingEngagedOrRequired(packet, binding)) {
+//                validateAction(packet);
+//            }
 
             return packet;
         } catch (InvalidMapException e) {
@@ -111,9 +111,9 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         } catch (MapRequiredException e) {
             soapFault = helper.newMapRequiredFault(e, binding.getAddressingVersion());
             s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getMapQName());
-        } catch (ActionNotSupportedException e) {
-            soapFault = helper.newActionNotSupportedFault(e.getAction(), binding.getAddressingVersion());
-            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getAction());
+//        } catch (ActionNotSupportedException e) {
+//            soapFault = helper.newActionNotSupportedFault(e.getAction(), binding.getAddressingVersion());
+//            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getAction());
         }
 
         if (soapFault != null) {
