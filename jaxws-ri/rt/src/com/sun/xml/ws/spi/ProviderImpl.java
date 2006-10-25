@@ -22,13 +22,15 @@
 package com.sun.xml.ws.spi;
 
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
+import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
-import com.sun.xml.ws.addressing.EndpointReferenceUtil;
-import com.sun.istack.NotNull;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
@@ -36,7 +38,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.ws.*;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.EndpointReference;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -106,7 +112,9 @@ public class ProviderImpl extends Provider {
 
     
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
-        return EndpointReferenceUtil.getEndpointReference(W3CEndpointReference.class,address,serviceName,portName,null,metadata,wsdlDocumentLocation,referenceParameters);
+        return new WSEndpointReference(
+            AddressingVersion.fromSpecClass(W3CEndpointReference.class),
+            address, serviceName, portName, null, metadata, wsdlDocumentLocation, referenceParameters).toSpec(W3CEndpointReference.class);
     }
 
     private static JAXBContext getEPRJaxbContext() {

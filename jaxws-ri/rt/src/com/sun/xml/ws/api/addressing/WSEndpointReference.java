@@ -12,6 +12,7 @@ import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -19,8 +20,11 @@ import com.sun.xml.ws.resources.AddressingMessages;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.wsdl.parser.WSDLConstants;
+import org.w3c.dom.Element;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -180,6 +184,175 @@ public final class WSEndpointReference {
             throw new AssertionError(e);
         }
     }
+
+    /**
+     * Creates an EPR from individual components.
+     */
+    public WSEndpointReference(@NotNull AddressingVersion version,
+                               @NotNull String address,
+                               @NotNull QName service,
+                               @NotNull QName port,
+                               @Nullable QName portType,
+                               @NotNull List<Element> metadata,
+                               @Nullable String wsdlAddress,
+                               @NotNull List<Element> referenceParameters) {
+        this(
+            createBufferFromData(version, address, referenceParameters, service, port, portType, metadata, wsdlAddress),
+            version );
+    }
+
+    private static XMLStreamBuffer createBufferFromData(AddressingVersion version, String address, List<Element> referenceParameters, QName service, QName port, QName portType, List<Element> metadata, String wsdlAddress) {
+        StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
+
+        try {
+            writer.writeStartDocument();
+            writer.writeStartElement(version.getPrefix(),"EndpointReference", version.nsUri);
+            writer.writeNamespace(version.getPrefix(),version.nsUri);
+            writer.writeStartElement(version.getPrefix(),"Address", version.nsUri);
+            writer.writeCharacters(address);
+            writer.writeEndElement();
+            if(!referenceParameters.isEmpty()) {
+                writer.writeStartElement(version.getPrefix(),"ReferenceParameters", version.nsUri);
+                for (Element e : referenceParameters)
+                    DOMUtil.serializeNode(e, writer);
+                writer.writeEndElement();
+            }
+
+            switch(version) {
+            case W3C:
+                writeW3CMetaData(writer, service, port, portType, metadata, wsdlAddress);
+                break;
+
+            case MEMBER:
+                writeMSMetaData(writer, service, port, portType, metadata);
+                //Inline the wsdl as extensibility element
+                //Should it go under wsp:Policy?
+                if (wsdlAddress != null) {
+                    writeWsdl(writer, service, wsdlAddress);
+                }
+                break;
+             }
+            writer.writeEndElement();
+            writer.writeEndDocument();
+            writer.flush();
+
+            return writer.getXMLStreamBuffer();
+        } catch (XMLStreamException e) {
+            throw new WebServiceException(e);
+        }
+    }
+
+    private static void writeW3CMetaData(StreamWriterBufferCreator writer,
+                                         QName service,
+                                         QName port,
+                                         QName portType, List<Element> metadata,
+                                         String wsdlAddress) throws XMLStreamException {
+
+        writer.writeStartElement(AddressingVersion.W3C.getPrefix(),
+                W3CAddressingConstants.WSA_METADATA_NAME, AddressingVersion.W3C.nsUri);
+        writer.writeNamespace(AddressingVersion.W3C.getWsdlPrefix(),
+                AddressingVersion.W3C.wsdlNsUri);
+
+        //Write Interface info
+        if (portType != null) {
+            writer.writeStartElement(AddressingVersion.W3C.getWsdlPrefix(),
+                    W3CAddressingConstants.WSAW_INTERFACENAME_NAME,
+                    AddressingVersion.W3C.wsdlNsUri);
+            String portTypePrefix = portType.getPrefix();
+            if (portTypePrefix == null || portTypePrefix.equals("")) {
+                //TODO check prefix again
+                portTypePrefix = "wsns";
+            }
+            writer.writeNamespace(portTypePrefix, portType.getNamespaceURI());
+            writer.writeCharacters(portTypePrefix + ":" + portType.getLocalPart());
+            writer.writeEndElement();
+        }
+
+        //Write service and Port info
+        if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
+            writer.writeStartElement(AddressingVersion.W3C.getWsdlPrefix(),
+                    W3CAddressingConstants.WSAW_SERVICENAME_NAME,
+                    AddressingVersion.W3C.wsdlNsUri);
+            String servicePrefix = service.getPrefix();
+            if (servicePrefix == null || servicePrefix.equals("")) {
+                //TODO check prefix again
+                servicePrefix = "wsns";
+            }
+            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port.getLocalPart());
+            writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+            writer.writeEndElement();
+        }
+
+        //Inline the wsdl
+        if (wsdlAddress != null) {
+            writeWsdl(writer, service, wsdlAddress);
+        }
+        //Add the extra metadata Elements
+        for(Element e: metadata) {
+            DOMUtil.serializeNode(e,writer);
+        }
+        writer.writeEndElement();
+
+    }
+
+    private static void writeMSMetaData(StreamWriterBufferCreator writer,
+                                        QName service,
+                                        QName port,
+                                        QName portType, List<Element> metadata) throws XMLStreamException {
+        // TODO: write ReferenceProperties
+        //TODO: write ReferenceParameters
+        if (portType != null) {
+            //Write Interface info
+            writer.writeStartElement(AddressingVersion.MEMBER.getPrefix(),
+                    MemberSubmissionAddressingConstants.WSA_PORTTYPE_NAME,
+                    AddressingVersion.MEMBER.nsUri);
+
+
+            String portTypePrefix = portType.getPrefix();
+            if (portTypePrefix == null || portTypePrefix.equals("")) {
+                //TODO check prefix again
+                portTypePrefix = "wsns";
+            }
+            writer.writeNamespace(portTypePrefix, portType.getNamespaceURI());
+            writer.writeCharacters(portTypePrefix + ":" + portType.getLocalPart());
+            writer.writeEndElement();
+        }
+
+        assert service != null;
+        //Write service and Port info
+        if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
+            writer.writeStartElement(AddressingVersion.MEMBER.getPrefix(),
+                    MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
+                    AddressingVersion.MEMBER.nsUri);
+            String servicePrefix = service.getPrefix();
+            if (servicePrefix == null || servicePrefix.equals("")) {
+                //TODO check prefix again
+                servicePrefix = "wsns";
+            }
+            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+            writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
+                    port.getLocalPart());
+            writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+            writer.writeEndElement();
+        }
+    }
+
+    private static void writeWsdl(StreamWriterBufferCreator writer, QName service, String wsdlAddress) throws XMLStreamException {
+        writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
+                WSDLConstants.NS_WSDL);
+        writer.writeNamespace(WSDLConstants.PREFIX_NS_WSDL, WSDLConstants.NS_WSDL);
+        writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                WSDLConstants.QNAME_IMPORT.getLocalPart(),
+                WSDLConstants.NS_WSDL);
+        writer.writeAttribute("namespace", service.getNamespaceURI());
+        writer.writeAttribute("location", wsdlAddress);
+        writer.writeEndElement();
+        writer.writeEndElement();
+    }
+
+
 
     /**
      * Converts from {@link EndpointReference}.

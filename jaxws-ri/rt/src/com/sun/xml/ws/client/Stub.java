@@ -25,9 +25,9 @@ package com.sun.xml.ws.client;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.Closeable;
-import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.message.Packet;
@@ -253,10 +253,8 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
             portTypeName = wsdlPort.getBinding().getPortTypeName();
             wsdlAddress = eprAddress +"?wsdl";
         }
-        return EndpointReferenceUtil.getEndpointReference(clazz,
-                eprAddress,
-                getServiceName(),
-                getPortName(),
-                portTypeName,null, wsdlAddress,null);
+        return new WSEndpointReference(
+            AddressingVersion.fromSpecClass(clazz),
+            eprAddress, getServiceName(), getPortName(), portTypeName, null, wsdlAddress, null).toSpec(clazz);
     }
 }

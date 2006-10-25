@@ -24,15 +24,25 @@ package com.sun.xml.ws.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
+import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
+import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.TubelineAssembler;
+import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -40,20 +50,17 @@ import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
+import org.w3c.dom.Element;
 
 import javax.annotation.PreDestroy;
 import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.handler.Handler;
 import java.lang.reflect.Method;
-import java.util.concurrent.Executor;
-import java.util.logging.Logger;
-import java.util.Collections;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
-
-import org.w3c.dom.Element;
+import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 /**
  * {@link WSEndpoint} implementation.
@@ -242,8 +249,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         if(referenceParameters != null) {
             refParams = Arrays.asList(referenceParameters);
         }
-        return EndpointReferenceUtil.getEndpointReference(clazz, address, serviceName,
-                portName,portType,null, wsdlAddress,refParams);
+        return new WSEndpointReference(
+            AddressingVersion.fromSpecClass(clazz),
+            address, serviceName, portName, portType, null, wsdlAddress, refParams).toSpec(clazz);
     }
 
     public @NotNull QName getPortName() {
