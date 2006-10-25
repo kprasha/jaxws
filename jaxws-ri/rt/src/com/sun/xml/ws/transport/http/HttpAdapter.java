@@ -24,19 +24,14 @@ package com.sun.xml.ws.transport.http;
 
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
-import com.sun.xml.ws.api.server.Adapter;
-import com.sun.xml.ws.api.server.DocumentAddressResolver;
-import com.sun.xml.ws.api.server.PortAddressResolver;
-import com.sun.xml.ws.api.server.SDDocument;
-import com.sun.xml.ws.api.server.ServiceDefinition;
-import com.sun.xml.ws.api.server.TransportBackChannel;
-import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.PropertySet;
@@ -266,6 +261,37 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                     //}
                 }
             });
+        }
+    }
+
+    final class AsyncTransport extends AbstractServerAsyncTransport<WSHTTPConnection> {
+
+        public AsyncTransport() {
+            super(endpoint);
+        }
+
+        public void handleAsync(WSHTTPConnection con) throws IOException {
+            super.handle(con);
+        }
+
+        protected void encodePacket(WSHTTPConnection con, @NotNull Packet packet, @NotNull Codec codec) throws IOException {
+            HttpAdapter.this.encodePacket(packet, con, codec);
+        }
+
+        protected @Nullable String getAcceptableMimeTypes(WSHTTPConnection con) {
+            return null;
+        }
+
+        protected @Nullable TransportBackChannel getTransportBackChannel(WSHTTPConnection con) {
+            return new Oneway(con);
+        }
+
+        protected @NotNull PropertySet getPropertySet(WSHTTPConnection con) {
+            return con;
+        }
+
+        protected @NotNull WebServiceContextDelegate getWebServiceContextDelegate(WSHTTPConnection con) {
+            return con.getWebServiceContextDelegate();
         }
     }
 
