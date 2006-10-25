@@ -47,7 +47,8 @@ final class EPRHeader extends AbstractHeaderImpl {
     @Nullable
     public String getAttribute(@NotNull String nsUri, @NotNull String localName) {
         // TODO
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
+        return null;
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
