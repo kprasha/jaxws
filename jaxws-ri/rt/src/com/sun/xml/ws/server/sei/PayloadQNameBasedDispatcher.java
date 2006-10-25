@@ -32,6 +32,14 @@ import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.util.QNameMap;
 
 /**
+ * An {@link com.sun.xml.ws.server.sei.EndpointMethodDispatcher} that uses
+ * SOAP payload first child's QName as the key for dispatching.
+ * <p/>
+ * A map of all payload QNames on the port and the corresponding {@link EndpointMethodHandler}
+ * is initialized in the constructor. The payload QName is extracted from the
+ * request {@link Packet} and used as the key to return the correct
+ * handler.
+ *
  * @author Arun Gupta
  */
 public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
@@ -48,7 +56,7 @@ public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
             methodHandlers.put(payloadName.getNamespaceURI(), payloadName.getLocalPart(), handler);
         }
     }
-    
+
     public EndpointMethodHandler getEndpointMethodHandler(Packet request) {
         Message message = request.getMessage();
         String localPart = message.getPayloadLocalPart();

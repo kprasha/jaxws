@@ -32,6 +32,15 @@ import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 
 /**
+ * An {@link com.sun.xml.ws.server.sei.EndpointMethodDispatcher} that uses
+ * WS-Addressing Action Message Addressing Property, <code>wsa:Action</code>,
+ * as the key for dispatching.
+ * <p/>
+ * A map of all wsa:Actions on the port and the corresponding {@link EndpointMethodHandler}
+ * is initialized in the constructor. The wsa:Action value is extracted from
+ * the request {@link Packet} and used as the key to return the correct
+ * handler.
+ *
  * @author Arun Gupta
  */
 public class ActionBasedDispatcher implements EndpointMethodDispatcher {

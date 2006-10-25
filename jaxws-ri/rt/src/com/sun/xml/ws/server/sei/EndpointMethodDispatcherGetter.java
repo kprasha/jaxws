@@ -31,7 +31,11 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 
 /**
- * Gets the {@link EndpointMethodHandler} from a {@link Packet}. Uses
+ * Gets the list of {@link EndpointMethodDispatcher}s for {@link SEIInvokerTube}.
+ * a request {@link Packet}. If WS-Addressing is enabled on the endpoint, then
+ * only {@link ActionBasedDispatcher} is added to the list. Otherwise,
+ * {@link PayloadQNameBasedDispatcher} is added to the list.
+ * 
  * {@link Message} payload's QName to obtain the handler. If no handler is
  * registered corresponding to that QName, then uses Action Message
  * Addressing Property value to get the handler. 
