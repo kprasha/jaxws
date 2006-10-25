@@ -1,15 +1,15 @@
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.util.PropertySet;
-import com.sun.xml.ws.client.ResponseContext;
-import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.PropertySet;
+import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.client.ResponseContext;
 
 import javax.xml.ws.handler.MessageContext;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
 
 /**
  * Properties exposed from {@link HttpTransportPipe} for {@link ResponseContext}.

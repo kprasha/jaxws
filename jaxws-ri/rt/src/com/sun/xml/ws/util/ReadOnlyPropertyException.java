@@ -1,5 +1,7 @@
 package com.sun.xml.ws.util;
 
+import com.sun.xml.ws.api.PropertySet;
+
 /**
  * Used to indicate that {@link PropertySet#put(String, Object)} failed
  * because a property is read-only.

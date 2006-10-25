@@ -2,12 +2,12 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.PropertySet;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.util.Pool;
-import com.sun.xml.ws.util.PropertySet;
-import com.sun.xml.ws.api.message.Message;
 
 import java.io.IOException;
 

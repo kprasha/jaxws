@@ -20,20 +20,19 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.transport.http;
+
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.api.server.TransportBackChannel;
-import com.sun.xml.ws.util.PropertySet;
 
-import javax.xml.ws.handler.MessageContext;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
-import java.net.HttpURLConnection;
 
 
 /**

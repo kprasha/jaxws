@@ -1,4 +1,4 @@
-package com.sun.xml.ws.util;
+package com.sun.xml.ws.api;
 
 import com.sun.istack.FinalArrayList;
 import com.sun.istack.NotNull;

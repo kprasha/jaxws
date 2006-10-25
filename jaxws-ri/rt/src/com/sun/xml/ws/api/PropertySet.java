@@ -20,29 +20,30 @@
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
-package com.sun.xml.ws.util;
+package com.sun.xml.ws.api;
 
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.util.ReadOnlyPropertyException;
 
 import javax.xml.ws.handler.MessageContext;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.HashSet;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * A set of "properties" that can be accessed via strongly-typed fields
@@ -50,7 +51,7 @@ import java.security.PrivilegedAction;
  *
  * @author Kohsuke Kawaguchi
  */
-@SuppressWarnings({"SuspiciousMethodCalls"})
+@SuppressWarnings("SuspiciousMethodCalls")
 public abstract class PropertySet {
 
     /**

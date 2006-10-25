@@ -23,8 +23,8 @@ package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.util.PropertySet;
 
 import javax.xml.ws.BindingProvider;
 import java.util.Collection;
