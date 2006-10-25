@@ -60,8 +60,7 @@ public abstract class BindingImpl implements WSBinding {
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
     // Features that are set(enabled/disabled) on the binding
-    private  Map<Class<? extends WebServiceFeature>, WebServiceFeature> features =
-            new HashMap<Class<? extends WebServiceFeature>, WebServiceFeature>();
+    private  WebServiceFeatureList features = new WebServiceFeatureList();
     /**
      * Computed from {@link #features} by {@link #updateCache()}
      * to make {@link #getAddressingVersion()} faster.
@@ -158,31 +157,19 @@ public abstract class BindingImpl implements WSBinding {
     public WebServiceFeature getFeature(String featureId) {
         if (featureId == null)
             return null;
-        for(WebServiceFeature f: features.values()){
-            if(f.getID().equals(featureId))
-                return f;
-        }
-        return null;
+        return features.getFeature(featureId);
     }
 
     public @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType){
-        return featureType.cast(features.get(featureType));
+        return features.getFeature(featureType);
     }
 
     public boolean isFeatureEnabled(String featureId) {
-        WebServiceFeature ftr = getFeature(featureId);
-        if(ftr == null) {
-            return false;
-        }
-        return ftr.isEnabled();
+        return features.isFeatureEnabled(featureId);
     }
 
     public boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature){
-        WebServiceFeature ftr = getFeature(feature);
-        if(ftr == null) {
-            return false;
-        }
-        return ftr.isEnabled();
+        return features.isFeatureEnabled(feature);
     }
 
     private void updateCache() {
@@ -198,7 +185,7 @@ public abstract class BindingImpl implements WSBinding {
     private <F extends WebServiceFeature> void enableFeature(F feature) {
         if (feature == null)
             return;
-        features.put(feature.getClass(), feature);
+        features.addFeature(feature);
         updateCache();
     }
 
