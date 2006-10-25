@@ -271,31 +271,34 @@ public final class WSEndpointReference {
             writer.writeCharacters(portTypePrefix + ":" + portType.getLocalPart());
             writer.writeEndElement();
         }
-        
-        //Write service and Port info
-        if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
-            writer.writeStartElement(AddressingVersion.W3C.getWsdlPrefix(),
-                    W3CAddressingConstants.WSAW_SERVICENAME_NAME,
-                    AddressingVersion.W3C.wsdlNsUri);
-            String servicePrefix = service.getPrefix();
-            if (servicePrefix == null || servicePrefix.equals("")) {
-                //TODO check prefix again
-                servicePrefix = "wsns";
+        if (service != null) {
+            //Write service and Port info
+            if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
+                writer.writeStartElement(AddressingVersion.W3C.getWsdlPrefix(),
+                        W3CAddressingConstants.WSAW_SERVICENAME_NAME,
+                        AddressingVersion.W3C.wsdlNsUri);
+                String servicePrefix = service.getPrefix();
+                if (servicePrefix == null || servicePrefix.equals("")) {
+                    //TODO check prefix again
+                    servicePrefix = "wsns";
+                }
+                writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+                if (port != null) {
+                    writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port.getLocalPart());
+                }
+                writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+                writer.writeEndElement();
             }
-            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
-            writer.writeAttribute(W3CAddressingConstants.WSAW_ENDPOINTNAME_NAME, port.getLocalPart());
-            writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
-            writer.writeEndElement();
         }
-
         //Inline the wsdl
         if (wsdlAddress != null) {
             writeWsdl(writer, service, wsdlAddress);
         }
         //Add the extra metadata Elements
-        for(Element e: metadata) {
-            DOMUtil.serializeNode(e,writer);
-        }
+        if (metadata != null)
+            for (Element e : metadata) {
+                DOMUtil.serializeNode(e, writer);
+            }
         writer.writeEndElement();
 
     }
@@ -322,23 +325,25 @@ public final class WSEndpointReference {
             writer.writeCharacters(portTypePrefix + ":" + portType.getLocalPart());
             writer.writeEndElement();
         }
-
-        assert service != null;
         //Write service and Port info
-        if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
-            writer.writeStartElement(AddressingVersion.MEMBER.getPrefix(),
-                    MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
-                    AddressingVersion.MEMBER.nsUri);
-            String servicePrefix = service.getPrefix();
-            if (servicePrefix == null || servicePrefix.equals("")) {
-                //TODO check prefix again
-                servicePrefix = "wsns";
+        if (service != null) {
+            if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
+                writer.writeStartElement(AddressingVersion.MEMBER.getPrefix(),
+                        MemberSubmissionAddressingConstants.WSA_SERVICENAME_NAME,
+                        AddressingVersion.MEMBER.nsUri);
+                String servicePrefix = service.getPrefix();
+                if (servicePrefix == null || servicePrefix.equals("")) {
+                    //TODO check prefix again
+                    servicePrefix = "wsns";
+                }
+                writer.writeNamespace(servicePrefix, service.getNamespaceURI());
+                if (port != null) {
+                    writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
+                            port.getLocalPart());
+                }
+                writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
+                writer.writeEndElement();
             }
-            writer.writeNamespace(servicePrefix, service.getNamespaceURI());
-            writer.writeAttribute(MemberSubmissionAddressingConstants.WSA_PORTNAME_NAME,
-                    port.getLocalPart());
-            writer.writeCharacters(servicePrefix + ":" + service.getLocalPart());
-            writer.writeEndElement();
         }
     }
 
