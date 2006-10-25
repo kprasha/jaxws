@@ -176,6 +176,18 @@ public interface StatefulWebServiceManager<T> {
     @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> eprType, @NotNull Packet currentRequest, T o);
 
     /**
+     * Exports an object.
+     *
+     * @deprecated
+     *      This method is provided as a temporary workaround, and we'll eventually try to remove it.
+     *
+     * @param endpointAddress
+     *      The endpoint address URL. Normally, this information is determined by other inputs,
+     *      like {@link Packet} or {@link WebServiceContext}.
+     */
+    @NotNull <EPR extends EndpointReference> EPR export(Class<EPR> eprType, String endpointAddress, T o);
+
+    /**
      * Unexports the given instance.
      *
      * <p>

@@ -214,18 +214,24 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
 
     @NotNull
     public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, @NotNull Packet currentRequest, T o) {
-        if(currentRequest==null)
-            throw new IllegalArgumentException("No current packet");
-        
+        return export(adrsVer, currentRequest.webServiceContextDelegate.getEPRAddress(currentRequest,owner), o);
+    }
+
+    @NotNull
+    public <EPR extends EndpointReference> EPR export(Class<EPR> adrsVer, String endpointAddress, T o) {
+        if(endpointAddress==null)
+            throw new IllegalArgumentException("No address available");
+
         String key = reverseInstances.get(o);
-        if(key!=null)   return createEPR(key,adrsVer,currentRequest);
+
+        if(key!=null) return createEPR(key, adrsVer, endpointAddress);
 
         // not exported yet.
         synchronized(this) {
             // double check now in the synchronization block to
             // really make sure that we can export.
             key = reverseInstances.get(o);
-            if(key!=null)   return createEPR(key,adrsVer,currentRequest);
+            if(key!=null) return createEPR(key, adrsVer, endpointAddress);
 
             if(o!=null)
                 prepare(o);
@@ -237,13 +243,13 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
                 instance.restartTimer();
         }
 
-        return createEPR(key,adrsVer,currentRequest);
+        return createEPR(key, adrsVer, endpointAddress);
     }
 
     /**
      * Creates an EPR that has the right key.
      */
-    private <EPR extends EndpointReference> EPR createEPR(String key, Class<EPR> eprClass, Packet currentRequest) {
+    private <EPR extends EndpointReference> EPR createEPR(String key, Class<EPR> eprClass, String address) {
         AddressingVersion adrsVer = AddressingVersion.fromSpecClass(eprClass);
 
         try {
@@ -253,9 +259,7 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
             w.writeStartElement("wsa","EndpointReference", adrsVer.nsUri);
             w.writeNamespace("wsa",adrsVer.nsUri);
             w.writeStartElement("wsa","Address",adrsVer.nsUri);
-            w.writeCharacters(
-                currentRequest.webServiceContextDelegate.getEPRAddress(currentRequest,owner)
-            );
+            w.writeCharacters(address);
             w.writeEndElement();
             w.writeStartElement("wsa","ReferenceParameters",adrsVer.nsUri);
             w.writeStartElement(COOKIE_TAG.getPrefix(), COOKIE_TAG.getLocalPart(), COOKIE_TAG.getNamespaceURI());
