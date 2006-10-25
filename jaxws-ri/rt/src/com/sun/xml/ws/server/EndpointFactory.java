@@ -163,14 +163,15 @@ public class EndpointFactory {
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
-                terminal = ProviderInvokerTube.create(implType,binding,invoker);
-
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null && wsfeatures.isFeatureEnabled(RespectBindingFeature.ID)) {
                     WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding, true);
                     binding.setFeatures(wsdlFeatures);
                 }
+                
+                terminal = ProviderInvokerTube.create(implType,binding,invoker);
+
             } else {
                 // Create runtime model for non Provider endpoints
                 seiModel = createSEIModel(wsdlPort, implType, serviceName, portName, binding);
@@ -179,13 +180,13 @@ public class EndpointFactory {
                     ((SOAPBindingImpl)binding).setPortKnownHeaders(
                             ((SOAPSEIModel)seiModel).getKnownHeaders());
                 }
-                terminal= new SEIInvokerTube(seiModel,invoker,binding);
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null) {
                     WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding,false);
                     binding.setFeatures(wsdlFeatures);
                 }
+                terminal= new SEIInvokerTube(seiModel,invoker,binding);
             }
             if (processHandlerAnnotation) {
                 //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
