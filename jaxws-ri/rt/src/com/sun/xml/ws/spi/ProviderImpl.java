@@ -112,6 +112,9 @@ public class ProviderImpl extends Provider {
 
     
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
+        if(address == null) {
+            throw new WebServiceException("Address in an EPR cannot be null");
+        }
         return new WSEndpointReference(
             AddressingVersion.fromSpecClass(W3CEndpointReference.class),
             address, serviceName, portName, null, metadata, wsdlDocumentLocation, referenceParameters).toSpec(W3CEndpointReference.class);
