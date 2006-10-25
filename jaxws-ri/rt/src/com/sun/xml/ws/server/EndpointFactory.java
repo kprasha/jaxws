@@ -192,10 +192,6 @@ public class EndpointFactory {
                 //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
                 processHandlerAnnotation(binding, implType, serviceName, portName);
             }
-
-            //TODO: Remove this, it is not needed.
-            //Set Features in @BindingType
-            binding.setFeatures(wsfeatures.getFeatures());
         }
 
         // Generate WSDL for SEI endpoints(not for Provider endpoints)
