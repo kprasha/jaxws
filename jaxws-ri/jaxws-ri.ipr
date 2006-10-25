@@ -23,13 +23,6 @@
       <maximumHeapSize value="128" />
       <properties />
     </buildFile>
-    <buildFile url="file://$PROJECT_DIR$/../test-rearch/testutil/build.xml">
-      <additionalClassPath />
-      <antReference projectDefault="true" />
-      <customJdkName value="" />
-      <maximumHeapSize value="128" />
-      <properties />
-    </buildFile>
   </component>
   <component name="BSFConsole">
     <sendcommandbycontrolenter>false</sendcommandbycontrolenter>
@@ -129,7 +122,7 @@
     <option name="OUTPUT_DIRECTORY" />
   </component>
   <component name="GUI Designer component loader factory" />
-  <component name="IdProvider" IDEtalkID="4431946D882A8E31EECBBF0933A30F1B" />
+  <component name="IdProvider" IDEtalkID="DD2ED0A6E5A2694C894DF4AB18CF8555" />
   <component name="InspectionProjectProfileManager">
     <option name="PROJECT_PROFILE" value="Project Default" />
     <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
@@ -156,41 +149,6 @@
             <option name="myVal" value="100" />
           </server>
         </used_levels>
-        <inspection_tool class="InstanceofChain" level="WARNING" enabled="true" />
-        <inspection_tool class="InfiniteLoopStatement" level="WARNING" enabled="false" />
-        <inspection_tool class="EmptyCatchBlock" level="WARNING" enabled="false">
-          <option name="m_includeComments" value="true" />
-          <option name="m_ignoreTestCases" value="true" />
-        </inspection_tool>
-        <inspection_tool class="JavaDoc" level="WARNING" enabled="false">
-          <option name="TOP_LEVEL_CLASS_OPTIONS">
-            <value>
-              <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-              <option name="REQUIRED_TAGS" value="" />
-            </value>
-          </option>
-          <option name="INNER_CLASS_OPTIONS">
-            <value>
-              <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-              <option name="REQUIRED_TAGS" value="" />
-            </value>
-          </option>
-          <option name="METHOD_OPTIONS">
-            <value>
-              <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-              <option name="REQUIRED_TAGS" value="" />
-            </value>
-          </option>
-          <option name="FIELD_OPTIONS">
-            <value>
-              <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-              <option name="REQUIRED_TAGS" value="" />
-            </value>
-          </option>
-          <option name="IGNORE_DEPRECATED" value="false" />
-          <option name="IGNORE_JAVADOC_PERIOD" value="true" />
-          <option name="myAdditionalJavadocTags" value="" />
-        </inspection_tool>
       </profile>
     </profiles>
   </component>
@@ -357,11 +315,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/javadoc/javadoc.iml" filepath="$PROJECT_DIR$/javadoc/javadoc.iml" />
       <module fileurl="file://$PROJECT_DIR$/jaxws-ri.iml" filepath="$PROJECT_DIR$/jaxws-ri.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../jaxws-unit/jaxws-unit.iml" filepath="$PROJECT_DIR$/../jaxws-unit/jaxws-unit.iml" />
       <module fileurl="file://$PROJECT_DIR$/transports/local/local.iml" filepath="$PROJECT_DIR$/transports/local/local.iml" group="transports" />
       <module fileurl="file://$PROJECT_DIR$/tools/resourcegen/resourcegen.iml" filepath="$PROJECT_DIR$/tools/resourcegen/resourcegen.iml" />
       <module fileurl="file://$PROJECT_DIR$/rt/rt.iml" filepath="$PROJECT_DIR$/rt/rt.iml" />
       <module fileurl="file://$PROJECT_DIR$/rt-fi/rt-fi.iml" filepath="$PROJECT_DIR$/rt-fi/rt-fi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" group="transports" />
       <module fileurl="file://$PROJECT_DIR$/../test-rearch/test/test.iml" filepath="$PROJECT_DIR$/../test-rearch/test/test.iml" />
       <module fileurl="file://$PROJECT_DIR$/../test-rearch/testutil/testutil.iml" filepath="$PROJECT_DIR$/../test-rearch/testutil/testutil.iml" />
@@ -386,17 +344,7 @@
       </value>
     </option>
   </component>
-  <component name="libraryTable">
-    <library name="junit">
-      <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/junit.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES>
-        <root url="jar://$PROJECT_DIR$/lib/junit-src.zip!/" />
-      </SOURCES>
-    </library>
-  </component>
+  <component name="libraryTable" />
   <component name="uidesigner-configuration">
     <option name="INSTRUMENT_CLASSES" value="true" />
     <option name="COPY_FORMS_RUNTIME_TO_OUTPUT" value="true" />

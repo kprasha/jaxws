@@ -1,9 +1,12 @@
 package annotations.client;
 
+import javax.xml.ws.BindingProvider;
+
 public class AddNumbersClient {
     public static void main(String[] args) {
         try {
             AddNumbers port = new AddNumbersImplService().getAddNumbersImplPort();
+            log(port);
 
             int number1 = 10;
             int number2 = 20;
@@ -19,6 +22,14 @@ public class AddNumbersClient {
 
         } catch (AddNumbersException_Exception ex) {
                 System.out.printf("Caught AddNumbersException_Exception: %s\n", ex.getFaultInfo().getFaultInfo());
+        }
+    }
+
+    private static final void log(AddNumbers port) {
+        if (Boolean.getBoolean("wsmonitor")) {
+            String address = (String)((BindingProvider)port).getRequestContext().get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+            address = address.replaceFirst("8080", "4040");
+            ((BindingProvider)port).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, address);
         }
     }
 }

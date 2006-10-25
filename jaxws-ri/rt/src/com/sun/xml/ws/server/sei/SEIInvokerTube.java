@@ -21,6 +21,8 @@
  */
 package com.sun.xml.ws.server.sei;
 
+import java.util.List;
+
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -48,14 +50,14 @@ public class SEIInvokerTube extends InvokerTube {
     private final SOAPVersion soapVersion;
     private final WSBinding binding;
     private final AbstractSEIModelImpl model;
-    private final EndpointMethodHandlerGetter methodHandlerGetter;
+    private final EndpointMethodDispatcherGetter methodDispatcherGetter;
 
     public SEIInvokerTube(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
         super(invoker);
         this.soapVersion = binding.getSOAPVersion();
         this.binding = binding;
         this.model = model;
-        methodHandlerGetter = new EndpointMethodHandlerGetter(model, binding, this);
+        methodDispatcherGetter = new EndpointMethodDispatcherGetter(model, binding, this);
     }
 
     /**
@@ -64,18 +66,24 @@ public class SEIInvokerTube extends InvokerTube {
      * that traverses through the Pipeline to transport.
      */
     public @NotNull NextAction processRequest(@NotNull Packet req) {
-        EndpointMethodHandler handler = methodHandlerGetter.getEndpointMethodHandler(req);
+        List<EndpointMethodDispatcher> dispatcherList = methodDispatcherGetter.getDispatcherList();
 
-        Packet res;
-        if (handler == null) {
-            // TODO optimize
-            String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(methodHandlerGetter.getPayloadNamespaceURI(), methodHandlerGetter.getPayloadLocalPart());
-            Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
-                    soapVersion, faultString, soapVersion.faultCodeClient);
-            res = req.createServerResponse(faultMsg, model.getPort(), binding);
-        } else {
-            res = handler.invoke(req);
+        Packet res = null;
+
+        for (EndpointMethodDispatcher dispatcher : dispatcherList) {
+            EndpointMethodHandler handler = dispatcher.getEndpointMethodHandler(req);
+            // TODO: iterate over the list
+            if (handler == null) {
+                String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(dispatcher.getDispatchKey(), dispatcher.getName());
+                Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
+                        soapVersion, faultString, soapVersion.faultCodeClient);
+                res = req.createServerResponse(faultMsg, model.getPort(), binding);
+            } else {
+                res = handler.invoke(req);
+                break;
+            }
         }
+
         return doReturnWith(res);
     }
 

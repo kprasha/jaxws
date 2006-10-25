@@ -37,7 +37,7 @@ public class AddNumbersImpl {
     int impl(int number1, int number2) throws AddNumbersException {
         if (number1 < 0 || number2 < 0) {
             throw new AddNumbersException("Negative numbers can't be added!",
-                    "Numbers: " + number1 + ", " + number2);
+                                          "Numbers: " + number1 + ", " + number2);
         }
         return number1 + number2;
     }
