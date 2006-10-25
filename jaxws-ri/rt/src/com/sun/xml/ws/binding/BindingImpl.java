@@ -182,11 +182,13 @@ public abstract class BindingImpl implements WSBinding {
             addressingVersion = null;
     }
 
-    private <F extends WebServiceFeature> void enableFeature(F feature) {
-        if (feature == null)
-            return;
+    /**
+     * Make sure updateCache() is called after a feature is enabled
+     *  
+     * @param feature
+     */
+    private <F extends WebServiceFeature> void enableFeature(@NotNull F feature) {
         features.addFeature(feature);
-        updateCache();
     }
 
     public void setFeatures(WebServiceFeature... newFeatures) {
@@ -195,10 +197,12 @@ public abstract class BindingImpl implements WSBinding {
                 enableFeature(f);
             }
         }
+        updateCache();
     }
 
     public void addFeature(@NotNull WebServiceFeature newFeature) {
         enableFeature(newFeature);
+        updateCache();
     }
 
     //what does this mean
