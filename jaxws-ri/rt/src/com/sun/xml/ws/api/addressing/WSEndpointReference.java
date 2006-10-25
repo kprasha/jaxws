@@ -187,6 +187,10 @@ public final class WSEndpointReference {
 
     /**
      * Creates an EPR from individual components.
+     *
+     * <p>
+     * This version takes various information about metadata, and creates an EPR that has
+     * the necessary embedded WSDL. 
      */
     public WSEndpointReference(@NotNull AddressingVersion version,
                                @NotNull String address,
