@@ -26,15 +26,13 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.WebServiceFeatureUtil;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -63,8 +61,6 @@ import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.WebServiceProvider;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.URL;
@@ -163,7 +159,7 @@ public class EndpointFactory {
         if (primaryDoc != null) {
             wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
         }
-        WebServiceFeature[] wsfeatures = WebServiceFeatureUtil.parseWebServiceFeatures(implType);
+        WebServiceFeatureList wsfeatures = new WebServiceFeatureList(implType);
 
         {// create terminal pipe that invokes the application
             if (implType.getAnnotation(WebServiceProvider.class)!=null) {
@@ -171,7 +167,7 @@ public class EndpointFactory {
 
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
-                if (wsdlPort != null && WebServiceFeatureUtil.isFeatureEnabled(RespectBindingFeature.ID, wsfeatures)) {
+                if (wsdlPort != null && wsfeatures.isFeatureEnabled(RespectBindingFeature.ID)) {
                     WebServiceFeature[] wsdlFeatures = extractExtraWSDLFeatures(wsdlPort,binding, true);
                     binding.setFeatures(wsdlFeatures);
                 }
@@ -198,7 +194,7 @@ public class EndpointFactory {
 
             //TODO: Remove this, it is not needed.
             //Set Features in @BindingType
-            binding.setFeatures(wsfeatures);
+            binding.setFeatures(wsfeatures.getFeatures());
         }
 
         // Generate WSDL for SEI endpoints(not for Provider endpoints)

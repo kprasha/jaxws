@@ -20,6 +20,7 @@
 package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
 import com.sun.xml.ws.developer.Stateful;
@@ -33,19 +34,29 @@ import javax.xml.ws.soap.Addressing;
 import javax.xml.ws.soap.MTOM;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.lang.annotation.Annotation;
 
 /**
+ * Represents a list of WebServiceFeatures that has bunch of utility methods
+ * pertaining to web service features.
+ *
  * @author Rama Pulavarthi
  */
 
-public class WebServiceFeatureUtil {
-    public static WebServiceFeature[] parseWebServiceFeatures(@NotNull Class<?> endpointClass) {
-        List<WebServiceFeature> wsfeatures = null;
+public class WebServiceFeatureList {
+    private  Map<Class<? extends WebServiceFeature>, WebServiceFeature> wsfeatures =
+            new HashMap<Class<? extends WebServiceFeature>, WebServiceFeature>();
+
+    public WebServiceFeatureList(@NotNull WebServiceFeature... features) {
+        if(features != null)
+            for(WebServiceFeature f: features) {
+                wsfeatures.put(f.getClass(),f);
+            }
+    }
+    public WebServiceFeatureList(@NotNull Class<?> endpointClass) {
         Annotation[] anns = endpointClass.getAnnotations();
-        if (anns == null)
-            return null;
-        wsfeatures = new ArrayList<WebServiceFeature>();
         for (Annotation a : anns) {
             WebServiceFeature ftr = null;
             if (!(a.annotationType().isAnnotationPresent(WebServiceFeatureAnnotation.class))) {
@@ -67,31 +78,44 @@ public class WebServiceFeatureUtil {
             } else {
                 //TODO throw Exception
             }
-            wsfeatures.add(ftr);
+            wsfeatures.put(ftr.getClass(),ftr);
         }
-        return wsfeatures.toArray(new WebServiceFeature[]{});
     }
 
-    public static boolean isFeatureEnabled(@NotNull String featureID, WebServiceFeature[] wsfeatures) {
-            if(wsfeatures == null)
-                return false;
-            for(WebServiceFeature ftr:wsfeatures) {
-                if(ftr.getID().equals(featureID) && ftr.isEnabled()) {
-                    return true;
-                }
-            }
+    public @NotNull WebServiceFeature[] getFeatures() {
+        return wsfeatures.values().toArray(new WebServiceFeature[]{});
+    }
+    public boolean isFeatureEnabled(String featureId) {
+        WebServiceFeature ftr = getFeature(featureId);
+        if(ftr == null) {
             return false;
         }
+        return ftr.isEnabled();
+    }
 
-        public static WebServiceFeature getFeature(@NotNull String featureID, WebServiceFeature[] wsfeatures) {
-            if(wsfeatures == null)
-                return null;
-            for(WebServiceFeature ftr:wsfeatures) {
-                if(ftr.getID().equals(featureID)) {
-                    return ftr;
-                }
-            }
-            return null;
+    public boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature){
+        WebServiceFeature ftr = getFeature(feature);
+        if(ftr == null) {
+            return false;
         }
+        return ftr.isEnabled();
+    }
 
+    public @Nullable WebServiceFeature getFeature(String featureId) {
+        if (featureId == null)
+            return null;
+        for(WebServiceFeature f: wsfeatures.values()){
+            if(f.getID().equals(featureId))
+                return f;
+        }
+        return null;
+    }
+
+    public @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType){
+        return featureType.cast(wsfeatures.get(featureType));
+    }
+
+    <F extends WebServiceFeature> void addFeature(@NotNull F f) {
+        wsfeatures.put(f.getClass(), f);
+    }
 }

@@ -232,7 +232,7 @@ public abstract class BindingImpl implements WSBinding {
                                           String mtomEnabled, String mtomThreshold,
                                           WebServiceFeature[] features) {
         // Features specified through annotaion
-        WebServiceFeature[] implFeatures = WebServiceFeatureUtil.parseWebServiceFeatures(implClass);
+        WebServiceFeatureList implFeatures = new WebServiceFeatureList(implClass);
         MTOMFeature mtomfeature = null;
 
         BindingID bindingID;
@@ -246,7 +246,7 @@ public abstract class BindingImpl implements WSBinding {
                     else
                         mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
                 } else {
-                    mtomfeature = (MTOMFeature) WebServiceFeatureUtil.getFeature(MTOMFeature.ID, implFeatures);
+                    mtomfeature = (MTOMFeature) implFeatures.getFeature(MTOMFeature.ID);
                 }
             } else if ((mtomEnabled != null) && !(Boolean.valueOf(mtomEnabled)== bindingID.isMTOMEnabled())) {
                 throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId, mtomEnabled));
@@ -262,7 +262,7 @@ public abstract class BindingImpl implements WSBinding {
                 else
                     mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
             } else {
-                mtomfeature = (MTOMFeature) WebServiceFeatureUtil.getFeature(MTOMFeature.ID, implFeatures);
+                mtomfeature = (MTOMFeature) implFeatures.getFeature(MTOMFeature.ID);
                 if ((bindingID.isMTOMEnabled() != null) && (mtomfeature != null)) {
                     //if both are specified , make sure they don't conflict
                     if (mtomfeature.isEnabled() != bindingID.isMTOMEnabled())
@@ -272,7 +272,7 @@ public abstract class BindingImpl implements WSBinding {
             }
         }
         //If mtom is enabled thorugh bindingID, it will will be enabled on the binding
-        BindingImpl binding = create(bindingID,implFeatures);
+        BindingImpl binding = create(bindingID,implFeatures.getFeatures());
         if(mtomfeature != null) {
             // this will be non-null incase,
             // where mtom is controlled through higer precedence control

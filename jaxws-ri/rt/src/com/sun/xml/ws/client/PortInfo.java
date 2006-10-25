@@ -27,7 +27,7 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.WebServiceFeatureUtil;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
@@ -171,7 +171,8 @@ public class PortInfo {
     }
 
     protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        if (!WebServiceFeatureUtil.isFeatureEnabled(RespectBindingFeature.ID, webServiceFeatures)) {
+        WebServiceFeatureList ftrList = new WebServiceFeatureList(webServiceFeatures);
+        if (!ftrList.isFeatureEnabled(RespectBindingFeature.ID)) {
             return webServiceFeatures;
         }
         // RespectBindingFeature is enabled, so enable all wsdlFeatures
