@@ -44,18 +44,22 @@ import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.util.DistributedPropertySet;
 import com.sun.xml.ws.util.PropertySet;
+import com.sun.xml.ws.util.DOMUtil;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.bind.marshaller.SAX2DOMEx;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * Represents a container of a {@link Message}.
@@ -267,6 +271,42 @@ public final class Packet extends DistributedPropertySet {
                 contentNegotiation = ContentNegotiation.none;
             }
         }
+    }
+
+    /**
+     * Gives a list of Reference Parameters in the Message
+     * <p>
+     * Headers which have attribute wsa:IsReferenceParameter="true"
+     * This is not cached as one may reset the Message.
+     *<p>
+     */
+    @Property(MessageContext.REFERENCE_PARAMETERS)
+    public @NotNull List<Element> getReferenceParameters() {
+        List<Element> refParams =  new ArrayList<Element>();
+        HeaderList hl = message.getHeaders();
+        Document d = DOMUtil.createDom();
+        for(Header h :hl) {
+            if(Boolean.valueOf(h.getAttribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter"))) {
+                SAX2DOMEx s2d = new SAX2DOMEx(d);
+                try {
+                    h.writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
+                    refParams.add((Element) d.getLastChild());
+                } catch (SAXException e) {
+                    throw new WebServiceException(e);
+                }
+                /*
+                DOMResult result = new DOMResult(d);
+                XMLDOMWriterImpl domwriter = new XMLDOMWriterImpl(result);
+                try {
+                    h.writeTo(domwriter);
+                    refParams.add((Element) result.getNode().getLastChild());
+                } catch (XMLStreamException e) {
+                    throw new WebServiceException(e);
+                }
+                */
+            }
+        }
+        return refParams;
     }
 
     /**
@@ -644,7 +684,7 @@ public final class Packet extends DistributedPropertySet {
 
         WsaTubeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
         String action = responsePacket.message.isFault() ?
-                wsaHelper.getFaultAction(this, responsePacket) : 
+                wsaHelper.getFaultAction(this, responsePacket) :
                 wsaHelper.getOutputAction(this);
 
         return populateAddressingHeaders(responsePacket, binding.getAddressingVersion(), binding.getSOAPVersion(), action);
