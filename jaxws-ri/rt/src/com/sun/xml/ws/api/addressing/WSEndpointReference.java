@@ -194,12 +194,12 @@ public final class WSEndpointReference {
      */
     public WSEndpointReference(@NotNull AddressingVersion version,
                                @NotNull String address,
-                               @NotNull QName service,
-                               @NotNull QName port,
+                               @Nullable QName service,
+                               @Nullable QName port,
                                @Nullable QName portType,
-                               @NotNull List<Element> metadata,
+                               @Nullable List<Element> metadata,
                                @Nullable String wsdlAddress,
-                               @NotNull List<Element> referenceParameters) {
+                               @Nullable List<Element> referenceParameters) {
         this(
             createBufferFromData(version, address, referenceParameters, service, port, portType, metadata, wsdlAddress),
             version );
@@ -215,7 +215,7 @@ public final class WSEndpointReference {
             writer.writeStartElement(version.getPrefix(),"Address", version.nsUri);
             writer.writeCharacters(address);
             writer.writeEndElement();
-            if(!referenceParameters.isEmpty()) {
+            if(referenceParameters != null) {
                 writer.writeStartElement(version.getPrefix(),"ReferenceParameters", version.nsUri);
                 for (Element e : referenceParameters)
                     DOMUtil.serializeNode(e, writer);
@@ -271,7 +271,7 @@ public final class WSEndpointReference {
             writer.writeCharacters(portTypePrefix + ":" + portType.getLocalPart());
             writer.writeEndElement();
         }
-
+        
         //Write service and Port info
         if (!(service.getNamespaceURI().equals("") || service.getLocalPart().equals(""))) {
             writer.writeStartElement(AddressingVersion.W3C.getWsdlPrefix(),
