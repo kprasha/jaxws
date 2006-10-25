@@ -444,7 +444,7 @@ public abstract class WSEndpoint<T> {
         @Nullable URL catalogUrl) {
         return create(
             implType,processHandlerAnnotation,invoker,serviceName,portName,container,binding,primaryWsdl,metadata,
-            XmlUtil.createEntityResolver(catalogUrl));
+            XmlUtil.createEntityResolver(catalogUrl),false);
     }
 
     /**
