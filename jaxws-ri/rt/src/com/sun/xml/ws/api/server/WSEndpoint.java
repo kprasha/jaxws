@@ -24,20 +24,23 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
+import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
-import com.sun.xml.ws.api.pipe.*;
-import com.sun.xml.ws.api.BindingID;
 
-import javax.xml.ws.BindingType;
-import javax.xml.ws.Binding;
 import javax.xml.namespace.QName;
+import javax.xml.ws.Binding;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
 import java.net.URL;
@@ -247,7 +250,7 @@ public abstract class WSEndpoint<T> {
          *
          * <p>
          * This method takes a {@link Packet} that represents
-         * a request, run it through a {@link Pipe}line, eventually
+         * a request, run it through a {@link Tube}line, eventually
          * pass it to the user implementation code, which produces
          * a reply, then run that through the pipeline again,
          * and eventually return it as a return value.
@@ -378,7 +381,7 @@ public abstract class WSEndpoint<T> {
      *      used by a synchronous-only transport, then it may pass in <tt>true</tt>
      *      to allow the callee to perform an optimization based on that knowledge
      *      (since often synchronous version is cheaper than an asynchronous version.)
-     *      This value is visible from {@link ServerPipeAssemblerContext#isSynchronous()}.
+     *      This value is visible from {@link ServerTubeAssemblerContext#isSynchronous()}.
      *
      * @return newly constructed {@link WSEndpoint}.
      * @throws WebServiceException
