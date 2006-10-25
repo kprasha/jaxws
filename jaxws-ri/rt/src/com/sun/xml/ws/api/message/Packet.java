@@ -285,7 +285,7 @@ public final class Packet extends DistributedPropertySet {
      * This is not cached as one may reset the Message.
      *<p>
      */
-    @Property(MessageContext.REFERENCE_PARAMETERS)
+    //@Property(MessageContext.REFERENCE_PARAMETERS)
     public @NotNull List<Element> getReferenceParameters() {
         List<Element> refParams =  new ArrayList<Element>();
         HeaderList hl = message.getHeaders();
