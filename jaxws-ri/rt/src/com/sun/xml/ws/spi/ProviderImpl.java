@@ -112,8 +112,20 @@ public class ProviderImpl extends Provider {
 
     
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
-        if(address == null) {
-            throw new WebServiceException("Address in an EPR cannot be null");
+        if (address == null) {
+            if (serviceName == null || portName == null) {
+                throw new IllegalStateException("Address in an EPR cannot be null, when serviceName or portName is null");
+            } else {
+                //TODO create SPI to get if from JavaEE Container
+                //address = getMeAddress(serviceName,portName);
+
+                //address is still null? may be its not run in a JavaEE Container
+                if(address == null)
+                    throw new IllegalStateException("Address in an EPR cannot be null");
+            }
+        }
+        if((serviceName==null) && (portName != null)) {
+            throw new IllegalStateException("serviceName can't be null when portName is specified");
         }
         return new WSEndpointReference(
             AddressingVersion.fromSpecClass(W3CEndpointReference.class),
