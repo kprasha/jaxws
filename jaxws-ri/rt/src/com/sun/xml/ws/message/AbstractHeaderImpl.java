@@ -35,6 +35,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.util.Set;
 
 /**
@@ -122,7 +123,9 @@ public abstract class AbstractHeaderImpl implements Header {
 
     public String getStringContent() {
         try {
-            return readHeader().getElementText();
+            XMLStreamReader xsr = readHeader();
+            xsr.nextTag();
+            return xsr.getElementText();
         } catch (XMLStreamException e) {
             return null;
         }
