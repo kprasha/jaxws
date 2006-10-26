@@ -404,10 +404,10 @@ public enum AddressingVersion {
     AddressingVersion fromBinding(WSBinding binding) {
         // TODO: who is responsible for reporting an error if both versions
         // are on?
-        if (binding.isFeatureEnabled(AddressingFeature.ID))
+        if (binding.isFeatureEnabled(AddressingFeature.class))
             return W3C;
 
-        if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID))
+        if (binding.isFeatureEnabled(MemberSubmissionAddressingFeature.class))
             return MEMBER;
 
         return null;
@@ -565,9 +565,9 @@ public enum AddressingVersion {
      * @throws WebServiceException if an unsupported namespace URI is passed
      */
     public static @NotNull WebServiceFeature getFeature(String nsUri, boolean enabled, boolean required) {
-        if (nsUri == W3C.policyNsUri)
+        if (nsUri.equals(W3C.policyNsUri))
             return new AddressingFeature(enabled, required);
-        else if (nsUri == MEMBER.policyNsUri)
+        else if (nsUri.equals(MEMBER.policyNsUri))
             return new MemberSubmissionAddressingFeature(enabled, required);
         else
             throw new WebServiceException("Unsupported namespace URI: " + nsUri);
@@ -611,9 +611,9 @@ public enum AddressingVersion {
      * @return true if <code>binding</code> requires WS-Addressing
      */
     public static boolean isRequired(WSBinding binding) {
-        WebServiceFeature wsf = binding.getFeature(AddressingFeature.ID);
+        WebServiceFeature wsf = binding.getFeature(AddressingFeature.class);
         if (wsf == null)
-            wsf = binding.getFeature(MemberSubmissionAddressingFeature.ID);
+            wsf = binding.getFeature(MemberSubmissionAddressingFeature.class);
 
         if (wsf == null)
             return false;
@@ -629,7 +629,7 @@ public enum AddressingVersion {
      * @return true if WS-Addressing is enabled for <code>binding</code>.
      */
     public static boolean isEnabled(WSBinding binding) {
-        return binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID) ||
-                binding.isFeatureEnabled(AddressingFeature.ID);
+        return binding.isFeatureEnabled(MemberSubmissionAddressingFeature.class) ||
+                binding.isFeatureEnabled(AddressingFeature.class);
     }
 }

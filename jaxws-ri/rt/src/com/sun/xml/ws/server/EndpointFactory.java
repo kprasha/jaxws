@@ -244,7 +244,7 @@ public class EndpointFactory {
             for (WebServiceFeature ftr : wsdlFeatures) {
                 //add this feature only if it not set already on binding.
                 // as features from wsdl should not override features set through DD or annotations
-                if (binding.getFeature(ftr.getID()) == null) {
+                if (binding.getFeature(ftr.getClass()) == null) {
                     try {
                         // if is WSDL Extension , it will have required attribute
                         // Add only if isRequired returns true, when honorWsdlRequired is true

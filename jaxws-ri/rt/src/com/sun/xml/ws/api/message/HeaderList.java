@@ -426,7 +426,7 @@ public final class HeaderList extends ArrayList<Header> {
         Iterator<Header> iter = getHeaders(name.getNamespaceURI(), name.getLocalPart(), markUnderstood);
         while (iter.hasNext()) {
             Header h = iter.next();
-            if (h.getRole(sv) == sv.implicitRole)
+            if (h.getRole(sv).equals(sv.implicitRole))
                 return h;
         }
 
@@ -643,8 +643,8 @@ public final class HeaderList extends ArrayList<Header> {
 
         boolean oneway = !(wsdlPort != null && !packet.getMessage().isOneWay(wsdlPort));
         OneWayFeature onewayFeature = null;
-        if (binding.getFeature(OneWayFeature.ID) != null)
-            onewayFeature = (OneWayFeature) binding.getFeature(OneWayFeature.ID);
+        if (binding.getFeature(OneWayFeature.class) != null)
+            onewayFeature = binding.getFeature(OneWayFeature.class);
 
         if (onewayFeature == null) {
             // standard oneway

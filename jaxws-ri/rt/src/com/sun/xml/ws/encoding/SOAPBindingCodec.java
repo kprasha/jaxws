@@ -164,7 +164,7 @@ public class SOAPBindingCodec extends MimeCodec {
         this.xmlSoapCodec = xmlSoapCodec;
         xmlMimeType = xmlSoapCodec.getMimeType();
         
-        xmlMtomCodec = new MtomCodec(version, xmlSoapCodec, binding.getFeature(MTOMFeature.ID));
+        xmlMtomCodec = new MtomCodec(version, xmlSoapCodec, binding.getFeature(MTOMFeature.class));
         
         xmlSwaCodec = new SwACodec(version, xmlSoapCodec);
         
@@ -172,7 +172,7 @@ public class SOAPBindingCodec extends MimeCodec {
                 xmlMtomCodec.getMimeType() + ", " + 
                 BASE_ACCEPT_VALUE;
 
-        WebServiceFeature fi = binding.getFeature(FastInfosetFeature.ID);
+        WebServiceFeature fi = binding.getFeature(FastInfosetFeature.class);
         isFastInfosetDisabled = (fi != null && !fi.isEnabled());
         if (!isFastInfosetDisabled) {
             fiSoapCodec = getFICodec(version);
@@ -187,7 +187,7 @@ public class SOAPBindingCodec extends MimeCodec {
                  * Fast Infoset is enabled on the client iff the service
                  * explicitly supports Fast Infoset.
                  */
-                WebServiceFeature select = binding.getFeature(SelectOptimalEncodingFeature.ID);
+                WebServiceFeature select = binding.getFeature(SelectOptimalEncodingFeature.class);
                 if (select != null && select.isEnabled() && 
                         fi != null && fi.isEnabled()) {
                     useFastInfosetForEncoding = true;

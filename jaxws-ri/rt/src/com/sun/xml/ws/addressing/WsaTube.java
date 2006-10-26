@@ -83,9 +83,9 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
     }
 
     protected WsaTubeHelper getTubeHelper() {
-        if(binding.isFeatureEnabled(AddressingFeature.ID)) {
+        if(binding.isFeatureEnabled(AddressingFeature.class)) {
             return new WsaTubeHelperImpl(wsdlPort, binding);
-        } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.ID)) {
+        } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.class)) {
             return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, binding);
         } else {
             // Addressing is not enabled, WsaTube should not be included in the pipeline

@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.11 2006-10-18 20:50:33 ramapulavarthi Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.12 2006-10-26 18:31:23 ramapulavarthi Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -50,10 +50,10 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
     @Override
     public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
 
-        enabled = binding.isFeatureEnabled(AddressingFeature.ID);
+        enabled = binding.isFeatureEnabled(AddressingFeature.class);
         if (!enabled)
             return;
-        AddressingFeature ftr = (AddressingFeature)binding.getFeature(AddressingFeature.ID);
+        AddressingFeature ftr = binding.getFeature(AddressingFeature.class);
         required = ftr.isRequired();
         root._namespace(AddressingVersion.W3C.wsdlNsUri, AddressingVersion.W3C.getWsdlPrefix());
     }

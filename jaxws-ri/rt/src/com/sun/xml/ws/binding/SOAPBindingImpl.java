@@ -159,7 +159,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      * Used typically by the runtime to enable/disable Mtom optimization
      */
     public boolean isMTOMEnabled() {
-        return isFeatureEnabled(MTOMFeature.ID);
+        return isFeatureEnabled(MTOMFeature.class);
     }
 
     /**
