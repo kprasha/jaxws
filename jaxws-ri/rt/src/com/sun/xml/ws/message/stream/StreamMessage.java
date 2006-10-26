@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
@@ -45,6 +46,7 @@ import org.xml.sax.SAXParseException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -91,7 +93,7 @@ public final class StreamMessage extends AbstractMessageImpl {
      *      if null, it means no headers. if non-null,
      *      it will be owned by this message.
      * @param reader
-     *      points at the start element of the payload (or the end element of the &lt;s:Body>
+     *      points at the start element/document of the payload (or the end element of the &lt;s:Body>
      *      if there's no payload)
      */
     public StreamMessage(@Nullable HeaderList headers, @NotNull AttachmentSet attachmentSet, @NotNull XMLStreamReader reader, @NotNull SOAPVersion soapVersion) {
@@ -99,10 +101,13 @@ public final class StreamMessage extends AbstractMessageImpl {
         this.headers = headers;
         this.attachmentSet = attachmentSet;
         this.reader = reader;
-        
+
+        if(reader.getEventType()== XMLStreamConstants.START_DOCUMENT)
+            XMLStreamReaderUtil.nextElementContent(reader);
+
         //if the reader is pointing to the end element </soapenv:Body> then its empty message
         // or no payload
-        if(reader.getEventType() == javax.xml.stream.XMLStreamConstants.END_ELEMENT){
+        if(reader.getEventType() == XMLStreamConstants.END_ELEMENT){
             String body = reader.getLocalName();
             String nsUri = reader.getNamespaceURI();
             assert body != null;

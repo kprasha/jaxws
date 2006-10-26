@@ -32,17 +32,16 @@ import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.JAXBException;
 
 /**
  * {@link Message} backed by {@link Source}
@@ -55,7 +54,6 @@ public class PayloadSourceMessage extends AbstractMessageImpl {
     public PayloadSourceMessage(@Nullable HeaderList headers, @NotNull Source payload, @NotNull AttachmentSet attSet, @NotNull SOAPVersion soapVersion) {
         super(soapVersion);
         XMLStreamReader reader = SourceReaderFactory.createSourceReader(payload, true);
-        XMLStreamReaderUtil.next(reader);
         message = new StreamMessage(headers, attSet, reader, soapVersion);
     }
 
