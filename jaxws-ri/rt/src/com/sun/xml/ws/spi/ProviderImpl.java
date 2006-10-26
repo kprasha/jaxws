@@ -26,19 +26,19 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
-import com.sun.xml.ws.transport.http.server.EndpointImpl;
-import com.sun.xml.ws.resources.ProviderApiMessages;
 import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
-import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.resources.ProviderApiMessages;
+import com.sun.xml.ws.transport.http.server.EndpointImpl;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.w3c.dom.Element;
 import org.xml.sax.EntityResolver;
 
@@ -47,11 +47,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.ws.Endpoint;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.*;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -94,10 +90,6 @@ public class ProviderImpl extends Provider {
         return endpoint;
     }
 
-    public Endpoint createEndpoint(String bindingId, String[] features, Object implementor) {
-        return null;
-    }
-
     public EndpointReference readEndpointReference(Source eprInfoset) {
         Unmarshaller unmarshaller;
         try {
@@ -106,10 +98,6 @@ public class ProviderImpl extends Provider {
         } catch (JAXBException e) {
             throw new WebServiceException("Error creating Marshaller or marshalling.", e);
         }
-    }
-
-    public <T extends EndpointReference> T createEndpointReference(Class<T> clazz, QName serviceName, QName portName, Source wsdlDocumentLocation, Element... referenceParameters) {
-        throw new UnsupportedOperationException("To be done");
     }
 
     public <T> T getPort(EndpointReference endpointReference, Class<T> clazz, WebServiceFeature... webServiceFeatures) {
