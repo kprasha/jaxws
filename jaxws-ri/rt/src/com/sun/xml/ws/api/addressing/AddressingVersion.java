@@ -22,10 +22,14 @@
 
 package com.sun.xml.ws.api.addressing;
 
+import java.io.ByteArrayInputStream;
+
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.addressing.WsaTubeHelper;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -47,8 +51,9 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * @author Arun Gupta
  */
 public enum AddressingVersion {
+
     W3C("http://www.w3.org/2005/08/addressing",
-        "w3c-anonymous-epr.xml",
+        W3CAddressingConstants.ANONYMOUS_EPR,
         "http://www.w3.org/2006/05/addressing/wsdl",
         "http://www.w3.org/2006/05/addressing/wsdl",
         W3CEndpointReference.class) {
@@ -122,7 +127,7 @@ public enum AddressingVersion {
         }
     },
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing",
-           "member-anonymous-epr.xml",
+           MemberSubmissionAddressingConstants.ANONYMOUS_EPR,
            "http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy",
             MemberSubmissionEndpointReference.class) {
@@ -336,7 +341,7 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-    private AddressingVersion(String nsUri, String anonymousEprResourceName, String wsdlNsUri, String policyNsUri, Class<? extends EndpointReference> eprClass ) {
+    private AddressingVersion(String nsUri, String anonymousEprString, String wsdlNsUri, String policyNsUri, Class<? extends EndpointReference> eprClass ) {
         this.nsUri = nsUri;
         this.wsdlNsUri = wsdlNsUri;
         this.policyNsUri = policyNsUri;
@@ -367,7 +372,7 @@ public enum AddressingVersion {
 
         // create stock anonymous EPR
         try {
-            this.anonymousEpr = new WSEndpointReference(getClass().getResourceAsStream(anonymousEprResourceName),this);
+            this.anonymousEpr = new WSEndpointReference(new ByteArrayInputStream(anonymousEprString.getBytes()),this);
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
         }

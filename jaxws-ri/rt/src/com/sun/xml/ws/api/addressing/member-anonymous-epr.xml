@@ -1,3 +1,0 @@
-<EndpointReference xmlns="http://schemas.xmlsoap.org/ws/2004/08/addressing">
-    <Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</Address>
-</EndpointReference>

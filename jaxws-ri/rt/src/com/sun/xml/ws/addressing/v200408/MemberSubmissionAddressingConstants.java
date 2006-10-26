@@ -61,4 +61,9 @@ public interface MemberSubmissionAddressingConstants {
     public static final QName PROBLEM_ACTION_QNAME = new QName(WSA_NAMESPACE_NAME, "ProblemAction");
     public static final QName PROBLEM_HEADER_QNAME_QNAME = new QName(WSA_NAMESPACE_NAME, "ProblemHeaderQName");
     public static final QName FAULT_DETAIL_QNAME = new QName(WSA_NAMESPACE_NAME, "FaultDetail");
+
+    public
+    static final String ANONYMOUS_EPR = "<EndpointReference xmlns=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\">\n"+
+        "    <Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</Address>\n"+
+        "</EndpointReference>";
 }

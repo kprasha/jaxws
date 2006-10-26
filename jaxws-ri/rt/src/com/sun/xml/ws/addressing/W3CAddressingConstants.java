@@ -106,4 +106,7 @@ public interface W3CAddressingConstants {
     public static final QName ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED = new QName(WSA_NAMESPACE_NAME, "OnlyNonAnonymousAddressSupported",
                                                                                AddressingVersion.W3C.getPrefix());
 
+    public static final String ANONYMOUS_EPR = "<EndpointReference xmlns=\"http://www.w3.org/2005/08/addressing\">\n" +
+            "    <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>\n" +
+            "</EndpointReference>";
 }
