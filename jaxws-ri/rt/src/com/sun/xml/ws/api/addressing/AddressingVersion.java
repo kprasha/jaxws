@@ -117,8 +117,8 @@ public enum AddressingVersion {
             return "wsaw";
         }
 
-        public String getFeatureID() {
-            return AddressingFeature.ID;
+        public Class<? extends WebServiceFeature> getFeatureClass() {
+            return AddressingFeature.class;
         }
     },
     MEMBER("http://schemas.xmlsoap.org/ws/2004/08/addressing",
@@ -191,8 +191,8 @@ public enum AddressingVersion {
             return "wsaw";
         }
 
-        public String getFeatureID() {
-            return MemberSubmissionAddressingFeature.ID;
+        public Class<? extends WebServiceFeature> getFeatureClass() {
+            return MemberSubmissionAddressingFeature.class;
         }
     };
 
@@ -529,8 +529,7 @@ public enum AddressingVersion {
 
     public abstract String getWsdlPrefix();
 
-    public abstract String getFeatureID();
-
+    public abstract Class<? extends WebServiceFeature> getFeatureClass();
     /**
      * Creates an outbound {@link Header} from a reference parameter.
      */
