@@ -32,8 +32,6 @@ import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.Addressing;
 import javax.xml.ws.soap.MTOM;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.annotation.Annotation;
@@ -58,7 +56,7 @@ public class WebServiceFeatureList {
     public WebServiceFeatureList(@NotNull Class<?> endpointClass) {
         Annotation[] anns = endpointClass.getAnnotations();
         for (Annotation a : anns) {
-            WebServiceFeature ftr = null;
+            WebServiceFeature ftr;
             if (!(a.annotationType().isAnnotationPresent(WebServiceFeatureAnnotation.class))) {
                 continue;
             } else if (a instanceof Addressing) {
@@ -76,7 +74,7 @@ public class WebServiceFeatureList {
             } else if (a instanceof Stateful) {
                 ftr = new StatefulFeature();
             } else {
-                //TODO throw Exception
+                throw new WebServiceException("Unrecognized annotation:" + a);
             }
             wsfeatures.put(ftr.getClass(),ftr);
         }
