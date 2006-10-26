@@ -181,7 +181,11 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     public Source readPayloadAsSource() {
-        return new StAXSource(reader, true);
+        assert unconsumed();
+        if(hasPayload())
+            return new StAXSource(reader, true);
+        else
+            return null;
     }
 
     public Object readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
