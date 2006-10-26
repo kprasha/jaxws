@@ -26,13 +26,21 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
 import com.sun.xml.ws.resources.ProviderApiMessages;
+import com.sun.xml.ws.model.wsdl.WSDLModelImpl;
+import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -111,7 +119,6 @@ public class ProviderImpl extends Provider {
         return service.getPort(msepr, clazz, webServiceFeatures);
     }
 
-    
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
         if (address == null) {
             if (serviceName == null || portName == null) {
@@ -127,6 +134,33 @@ public class ProviderImpl extends Provider {
         }
         if((serviceName==null) && (portName != null)) {
             throw new IllegalStateException(ProviderApiMessages.NULL_SERVICE());
+        }
+        //Validate Service and Port in WSDL
+        if (wsdlDocumentLocation != null) {
+            try {
+                EntityResolver er = null;
+                //TODO get catalog resolver from Container
+                if (er == null) {
+                    er = XmlUtil.createDefaultCatalogResolver();
+                }
+                URL wsdlLoc = new URL(wsdlDocumentLocation);
+                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(wsdlLoc, null, er,
+                        false, ServiceFinder.find(WSDLParserExtension.class).toArray());
+                if (serviceName != null) {
+                    WSDLService wsdlService = wsdlDoc.getService(serviceName);
+                    if (wsdlService == null)
+                        throw new IllegalStateException(ProviderApiMessages.NOTFOUND_SERVICE_IN_WSDL(
+                                serviceName,wsdlDocumentLocation));
+                    if (portName != null) {
+                        WSDLPort wsdlPort = wsdlService.get(portName);
+                        if (wsdlPort == null)
+                            throw new IllegalStateException(ProviderApiMessages.NOTFOUND_PORT_IN_WSDL(
+                                    portName,serviceName,wsdlDocumentLocation));
+                    }
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException(ProviderApiMessages.ERROR_WSDL(wsdlDocumentLocation),e);
+            }
         }
         return new WSEndpointReference(
             AddressingVersion.fromSpecClass(W3CEndpointReference.class),
