@@ -175,16 +175,16 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
     public final void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
         Message message = packet.getMessage();
         AddressingVersion av = binding.getAddressingVersion();
-
+        boolean addressingRequired = AddressingVersion.isRequired(binding);
         if (message == null) {
-            if (AddressingVersion.isRequired(binding.getFeature(av.getFeatureClass())))
+            if (addressingRequired)
                 throw new WebServiceException(AddressingMessages.NULL_MESSAGE());
             else
                 return;
         }
 
         if (message.getHeaders() == null) {
-            if (AddressingVersion.isRequired(binding.getFeature(av.getFeatureClass())))
+            if (addressingRequired)
                 throw new WebServiceException(AddressingMessages.NULL_HEADERS());
             else
                 return;
@@ -194,8 +194,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
 
         if (!hIter.hasNext()) {
             // no WS-A headers are found
-
-            if (AddressingVersion.isRequired(binding.getFeature(av.getFeatureClass())))
+            if (addressingRequired)
                 // if WS-A is required, then throw an exception looking for wsa:Action header
                 throw new InvalidMapException(av.actionTag, av.invalidCardinalityTag);
             else
@@ -292,7 +291,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         // 2. wsdl:required=true
         // Both wsa:Action and wsa:To MUST be present on request (for oneway MEP) and
         // response messages (for oneway and request/response MEP only)
-        if (engaged || AddressingVersion.isRequired(binding.getFeature(av.getFeatureClass()))) {
+        if (engaged || addressingRequired) {
             checkMandatoryHeaders(foundAction, foundTo);
         }
 

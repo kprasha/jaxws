@@ -610,14 +610,14 @@ public enum AddressingVersion {
      * @return true if <code>binding</code> requires WS-Addressing
      */
     public static boolean isRequired(WSBinding binding) {
-        WebServiceFeature wsf = binding.getFeature(AddressingFeature.class);
-        if (wsf == null)
-            wsf = binding.getFeature(MemberSubmissionAddressingFeature.class);
-
-        if (wsf == null)
-            return false;
-        else
-            return isRequired(wsf);
+        AddressingFeature af = binding.getFeature(AddressingFeature.class);
+        if (af != null)
+            return af.isRequired();
+        MemberSubmissionAddressingFeature msaf = binding.getFeature(MemberSubmissionAddressingFeature.class);
+        if(msaf != null)
+            return msaf.isRequired();
+        
+        return false;
     }
 
     /**
