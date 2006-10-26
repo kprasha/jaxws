@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.transport.http.server.EndpointImpl;
+import com.sun.xml.ws.resources.ProviderApiMessages;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
@@ -114,18 +115,18 @@ public class ProviderImpl extends Provider {
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
         if (address == null) {
             if (serviceName == null || portName == null) {
-                throw new IllegalStateException("Address in an EPR cannot be null, when serviceName or portName is null");
+                throw new IllegalStateException(ProviderApiMessages.NULL_ADDRESS_SERVICE_ENDPOINT());
             } else {
                 //TODO create SPI to get if from JavaEE Container
                 //address = getMeAddress(serviceName,portName);
 
                 //address is still null? may be its not run in a JavaEE Container
                 if(address == null)
-                    throw new IllegalStateException("Address in an EPR cannot be null");
+                    throw new IllegalStateException(ProviderApiMessages.NULL_ADDRESS());
             }
         }
         if((serviceName==null) && (portName != null)) {
-            throw new IllegalStateException("serviceName can't be null when portName is specified");
+            throw new IllegalStateException(ProviderApiMessages.NULL_SERVICE());
         }
         return new WSEndpointReference(
             AddressingVersion.fromSpecClass(W3CEndpointReference.class),
