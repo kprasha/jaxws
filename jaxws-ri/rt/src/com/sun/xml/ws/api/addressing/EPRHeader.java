@@ -11,6 +11,7 @@ import org.xml.sax.SAXException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -46,9 +47,16 @@ final class EPRHeader extends AbstractHeaderImpl {
 
     @Nullable
     public String getAttribute(@NotNull String nsUri, @NotNull String localName) {
-        // TODO
-        //throw new UnsupportedOperationException();
-        return null;
+        try {
+            XMLStreamReader sr = epr.read("EndpointReference"/*doesn't matter*/);
+            while(sr.getEventType()!= XMLStreamConstants.START_ELEMENT)
+                sr.next();
+
+            return sr.getAttributeValue(nsUri,localName);
+        } catch (XMLStreamException e) {
+            // since we are reading from buffer, this can't happen.
+            throw new AssertionError(e);
+        }
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
