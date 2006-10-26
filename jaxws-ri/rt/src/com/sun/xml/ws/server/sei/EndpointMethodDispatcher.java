@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: EndpointMethodDispatcher.java,v 1.1.2.2 2006-10-25 22:03:58 arungupta Exp $
+ $Id: EndpointMethodDispatcher.java,v 1.1.2.3 2006-10-26 23:40:46 kohsuke Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -31,7 +31,7 @@ import com.sun.xml.ws.api.message.Packet;
 /**
  * This interface needs to be implemented if a new dispatching
  * mechanism needs to be plugged in. The dispatcher is plugged in the
- * constructor of {@link com.sun.xml.ws.server.sei.EndpointMethodDispatcherGetter}.
+ * constructor of {@link EndpointMethodDispatcherGetter}.
  *
  * @author Arun Gupta
  * @see EndpointMethodDispatcherGetter

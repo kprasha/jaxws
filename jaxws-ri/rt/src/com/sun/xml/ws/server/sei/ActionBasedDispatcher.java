@@ -22,17 +22,17 @@
 
 package com.sun.xml.ws.server.sei;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * An {@link com.sun.xml.ws.server.sei.EndpointMethodDispatcher} that uses
+ * An {@link EndpointMethodDispatcher} that uses
  * WS-Addressing Action Message Addressing Property, <code>wsa:Action</code>,
  * as the key for dispatching.
  * <p/>
