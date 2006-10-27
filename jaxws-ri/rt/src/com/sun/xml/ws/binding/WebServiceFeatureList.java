@@ -21,28 +21,30 @@ package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.developer.StatefulFeature;
 
-import javax.xml.ws.*;
-import javax.xml.ws.spi.WebServiceFeatureAnnotation;
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.RespectBinding;
+import javax.xml.ws.RespectBindingFeature;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.Addressing;
+import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOM;
-import java.util.Map;
-import java.util.HashMap;
+import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Represents a list of WebServiceFeatures that has bunch of utility methods
+ * Represents a list of {@link WebServiceFeature}s that has bunch of utility methods
  * pertaining to web service features.
  *
  * @author Rama Pulavarthi
  */
-
 public class WebServiceFeatureList {
     private  Map<Class<? extends WebServiceFeature>, WebServiceFeature> wsfeatures =
             new HashMap<Class<? extends WebServiceFeature>, WebServiceFeature>();
@@ -53,9 +55,13 @@ public class WebServiceFeatureList {
                 wsfeatures.put(f.getClass(),f);
             }
     }
+
+    /**
+     * Creates a list by reading featuers from the annotation on a class.
+     */
     public WebServiceFeatureList(@NotNull Class<?> endpointClass) {
-        Annotation[] anns = endpointClass.getAnnotations();
-        for (Annotation a : anns) {
+        for (Annotation a : endpointClass.getAnnotations()) {
+            // TODO: this really needs generalization
             WebServiceFeature ftr;
             if (!(a.annotationType().isAnnotationPresent(WebServiceFeatureAnnotation.class))) {
                 continue;
@@ -83,6 +89,7 @@ public class WebServiceFeatureList {
     public @NotNull WebServiceFeature[] getFeatures() {
         return wsfeatures.values().toArray(new WebServiceFeature[]{});
     }
+    
     public boolean isFeatureEnabled(String featureId) {
         WebServiceFeature ftr = getFeature(featureId);
         if(ftr == null) {
@@ -113,7 +120,7 @@ public class WebServiceFeatureList {
         return featureType.cast(wsfeatures.get(featureType));
     }
 
-    <F extends WebServiceFeature> void addFeature(@NotNull F f) {
+    void addFeature(@NotNull WebServiceFeature f) {
         wsfeatures.put(f.getClass(), f);
     }
 }
