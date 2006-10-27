@@ -58,7 +58,7 @@ public abstract class BindingImpl implements WSBinding {
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
     // Features that are set(enabled/disabled) on the binding
-    private  WebServiceFeatureList features = new WebServiceFeatureList();
+    private final WebServiceFeatureList features = new WebServiceFeatureList();
     /**
      * Computed from {@link #features} by {@link #updateCache()}
      * to make {@link #getAddressingVersion()} faster.
@@ -170,6 +170,11 @@ public abstract class BindingImpl implements WSBinding {
         return features.isFeatureEnabled(feature);
     }
 
+    @NotNull
+    public WebServiceFeatureList getFeatures() {
+        return features;
+    }
+
     private void updateCache() {
 //        addressingVersion = AddressingVersion.W3C;
         if (isFeatureEnabled(AddressingFeature.class))
@@ -209,17 +214,25 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     /**
-     * @param ddBindingId :binding id explicitlyspecified in the DeploymentDescriptor or parameter
-     * @param implClass : Endpoint Implementation class
-     * @param mtomEnabled : represents mtom-enabled attribute in DD
-     * @param mtomThreshold : threshold value specified in DD
-     * @param features  : WebServiceFeatures if any specified in DD
-     *                  Currently no way to specify features in DD, so ignore it
-     * @return WSBinding is returned resolving the various precendece rules
+     * @param ddBindingId
+     *      binding id explicitlyspecified in the DeploymentDescriptor or parameter
+     * @param implClass
+     *      Endpoint Implementation class
+     * @param mtomEnabled
+     *      represents mtom-enabled attribute in DD
+     * @param mtomThreshold
+     *      threshold value specified in DD
+     * @param features
+     *      WebServiceFeatures if any specified in DD
+     *      Currently no way to specify features in DD, so ignore it
+     * @return
+            is returned resolving the various precendece rules
      */
     public static WSBinding create(String ddBindingId,Class implClass,
                                           String mtomEnabled, String mtomThreshold,
                                           WebServiceFeature[] features) {
+        assert features.length==0;
+
         // Features specified through annotaion
         WebServiceFeatureList implFeatures = new WebServiceFeatureList(implClass);
         MTOMFeature mtomfeature = null;
@@ -261,7 +274,7 @@ public abstract class BindingImpl implements WSBinding {
             }
         }
         //If mtom is enabled thorugh bindingID, it will will be enabled on the binding
-        BindingImpl binding = create(bindingID,implFeatures.getFeatures());
+        BindingImpl binding = create(bindingID,implFeatures.toArray());
         if(mtomfeature != null) {
             // this will be non-null incase,
             // where mtom is controlled through higer precedence control

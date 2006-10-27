@@ -71,10 +71,23 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Holder;
-import javax.xml.ws.WebServiceFeature;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  *    This is the real implementation class for both WsGen and WsImport.
@@ -684,7 +697,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
                             return getSchemaOutput(namespace, filename.value);
                         }
                         // TODO pass correct impl's class name
-                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures.getFeatures()), container, endpointClass, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures.toArray()), container, endpointClass, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(wsgenReport!=null)

@@ -154,4 +154,9 @@ public interface WSBinding extends Binding {
      *      Otherwise null.
      */
     @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType);
+
+    /**
+     * Returns a list of features associated with {@link WSBinding}.
+     */
+    @NotNull WSFeatureList getFeatures();
 }

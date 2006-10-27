@@ -27,25 +27,20 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
-import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceFeature;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementation of {@link WSDLPort}
  *
  * @author Vivek Pandey
  */
-public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPort {
+public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WSDLPort {
     private final QName name;
     private EndpointAddress address;
     private final QName bindingName;
     private final WSDLServiceImpl owner;
-    private List<WebServiceFeature> features;
 
     /**
      * To be set after the WSDL parsing is complete.
@@ -76,42 +71,6 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
     }
 
     /**
-     *
-     * @return All applicable features on this
-     *  port (inlcudes features set on WSDLBoundPortType)
-     */
-    public @NotNull List<WebServiceFeature> getFeatures() {
-        List<WebServiceFeature> bindingFeatures = boundPortType.getFeatures();
-        if(features == null) {
-            return bindingFeatures;
-        } else {
-            List<WebServiceFeature> effectiveFeatures = new ArrayList<WebServiceFeature>();
-            effectiveFeatures.addAll(features);
-            effectiveFeatures.addAll(bindingFeatures);
-            return effectiveFeatures;
-        }
-    }
-
-    public WebServiceFeature getFeature(String id) {
-        if (features != null) {
-            for (WebServiceFeature f : features) {
-                if (f.getID().equals(id))
-                    return f;
-            }
-        }
-
-        // if no feateures on wsdl:port, check wsdl:binding
-        return boundPortType.getFeature(id);
-    }
-
-    public void addFeature(WebServiceFeature feature) {
-        if (features == null)
-            features = new ArrayList<WebServiceFeature>();
-
-        features.add(feature);
-    }
-
-    /**
      * Only meant for {@link RuntimeWSDLParser} to call.
      */
     public void setAddress(EndpointAddress address) {
@@ -133,5 +92,8 @@ public final class WSDLPortImpl extends AbstractExtensibleImpl implements WSDLPo
             throw new LocatableWebServiceException(
                 ClientMessages.UNDEFINED_BINDING(bindingName), getLocation());
         }
+
+        if(features != null)
+            features.addFeatures(boundPortType.getFeatures());
     }
 }

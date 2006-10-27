@@ -26,8 +26,8 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.encoding.SOAPBindingCodec;
 import com.sun.xml.ws.encoding.XMLHTTPBindingCodec;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -38,11 +38,11 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Map;
 import java.util.HashMap;
-import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * Parsed binding ID string.
@@ -108,7 +108,7 @@ public abstract class BindingID {
      *                  Currently no way to specify features in DD, so ignore it
      * @return WSBinding is returned resolving the various precendece rules
      */
-    public final static @NotNull WSBinding createBinding(String ddBindingId,Class implClass,
+    public static @NotNull WSBinding createBinding(String ddBindingId,Class implClass,
                                           String mtomEnabled, String mtomThreshold,
                                           WebServiceFeature[] features) {
         return BindingImpl.create(ddBindingId, implClass, mtomEnabled,

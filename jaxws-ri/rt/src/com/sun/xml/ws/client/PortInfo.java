@@ -28,18 +28,9 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.RespectBindingFeature;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Information about a port.
@@ -92,76 +83,8 @@ public class PortInfo {
         this.portModel = port;
     }
 
-    public BindingImpl createBinding() {
-        return owner.createBinding(portName, bindingId);
-    }
-
-    protected @NotNull List<WebServiceFeature> extractWSDLFeatures() {
-        List<WebServiceFeature> applicableWsdlFeatures = new ArrayList<WebServiceFeature>();
-        if (portModel != null) {
-            List<WebServiceFeature> wsdlFeatures = ((WSDLPortImpl) portModel).getFeatures();
-            for (WebServiceFeature ftr : wsdlFeatures) {
-                try {
-                    // if is WSDL Extension , it will have required attribute
-                    // Add only if isRequired returns true
-                    Method m = (ftr.getClass().getMethod("isRequired"));
-                    try {
-                        boolean required = (Boolean) m.invoke(ftr);
-                        if(required)
-                            applicableWsdlFeatures.add(ftr);
-                    } catch (IllegalAccessException e) {
-                        throw new WebServiceException(e);
-                    } catch (InvocationTargetException e) {
-                        throw new WebServiceException(e);
-                    }
-                } catch (NoSuchMethodException e) {
-                    // this ftr is not an WSDL extension, just add it
-                    applicableWsdlFeatures.add(ftr);
-                }
-            }
-        }
-        return applicableWsdlFeatures;
-
-                /*
-                WebServiceFeature wsdlAddressingFeature = portModel.getFeature(AddressingFeature.ID);
-                if (wsdlAddressingFeature != null) {
-                    //Set only if wsdl:required=true
-                    if (((AddressingFeature) wsdlAddressingFeature).isRequired())
-                        wsdlFeatures.add(wsdlAddressingFeature);
-                } else {
-                    //try MS Addressing Version
-                    wsdlAddressingFeature = portModel.getFeature(MemberSubmissionAddressingFeature.ID);
-                    //Set only if wsdl:required=true
-                    if (wsdlAddressingFeature != null &&
-                            ((MemberSubmissionAddressingFeature) wsdlAddressingFeature).isRequired())
-                        wsdlFeatures.add(wsdlAddressingFeature);
-                }
-
-                WebServiceFeature wsdlMTOMFeature = portModel.getFeature(MTOMFeature.ID);
-                if (wsdlMTOMFeature != null) {
-                    wsdlFeatures.add(wsdlMTOMFeature);
-                }
-
-                WebServiceFeature wsdlFastInfosetFeature = portModel.getFeature(FastInfosetFeature.ID);
-                if (wsdlFastInfosetFeature != null) {
-                    wsdlFeatures.add(wsdlFastInfosetFeature);
-                }
-
-                WebServiceFeature wsdlSelectEncodingFeature = portModel.getFeature(SelectOptimalEncodingFeature.ID);
-                if (wsdlSelectEncodingFeature != null) {
-                    wsdlFeatures.add(wsdlSelectEncodingFeature);
-                }
-
-                //these are the only features that jaxws pays attention portability wise.
-
-        }
-        return wsdlFeatures;
-        */
-    }
-
-
-    public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures) {
-        return owner.createBinding(portName, bindingId, resolveFeatures(webServiceFeatures));
+    public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
+        return owner.createBinding(portName, bindingId, resolveFeatures(webServiceFeatures, isDispatch));
     }
 
     private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
@@ -170,116 +93,11 @@ public class PortInfo {
         return null;
     }
 
-    protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-        WebServiceFeatureList ftrList = new WebServiceFeatureList(webServiceFeatures);
-        if (!ftrList.isFeatureEnabled(RespectBindingFeature.ID)) {
-            return webServiceFeatures;
-        }
-        // RespectBindingFeature is enabled, so enable all wsdlFeatures
-        Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
-        List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
-        //actually, the passed in WebServiceFeatures
-        for (WebServiceFeature ftr : wsdlFeatures) {
-            if (featureMap.get(ftr.getID()) == null) {
-                featureMap.put(ftr.getID(), ftr);
-            }
-        }
-        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
-    }
-/*
-    protected WebServiceFeature[] resolveFeatures(WebServiceFeature[] webServiceFeatures) {
-
-        List<WebServiceFeature> wsdlFeatures = extractWSDLFeatures();
-        Map<String, WebServiceFeature> featureMap = fillMap(webServiceFeatures);
-
-        resolveAddressingFeature(wsdlFeatures, featureMap);
-        resolveMTOMFeature(featureMap);
-        return featureMap.values().toArray(new WebServiceFeature[featureMap.size()]);
-    }
-
-    protected void resolveAddressingFeature(List<WebServiceFeature> wsdlFeatures, Map<String, WebServiceFeature> featureMap) {
-        if (wsdlFeatures != null) {
-            for (WebServiceFeature wsdlFeature : wsdlFeatures) {
-
-                if (wsdlFeature.getID().equals(AddressingFeature.ID)) {
-                    //look in webServiceFeatures
-                    //look for RespectBindingFeature
-                    RespectBindingFeature respectBindingFeature = (RespectBindingFeature) featureMap.get(RespectBindingFeature.ID);
-                    // look for AddressingFeature
-                    AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
-                    if (addressingFeature == null)
-                        addressingFeature = (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID);
-
-                    if (addressingFeature == null) {
-                        if (((AddressingFeature) wsdlFeature).isRequired() && (respectBindingFeature != null)) {
-                            if (respectBindingFeature.isEnabled()) {
-                                //add the AddressingFeature to
-                                // the WebServiceFeatures
-                                ((AddressingFeature) wsdlFeature).setRequired(true);
-                                featureMap.put(wsdlFeature.getID(), wsdlFeature);
-                            } else {
-                                //explicitly disable addressing version
-                                AddressingFeature disableAddressing = new AddressingFeature(false, false);
-                                featureMap.put(disableAddressing.getID(), disableAddressing);
-                                //respect Bind feature disables - for dispatch we do not respect binding
-                            }
-                        } //respectBindingFeature is null don't respect wsdl
-                    }
-                }
-            }
-        } else {
-            //case without wsdl
-            //lets just see if the AddressingFeature is enabled
-            AddressingFeature addressingFeature = (AddressingFeature) featureMap.get(AddressingFeature.ID);
-
-            if (addressingFeature == null)
-                addressingFeature = (AddressingFeature) featureMap.get(MemberSubmissionAddressingFeature.ID);
-            if (addressingFeature != null && addressingFeature.isEnabled()) {
-                //if this is enabled just set it to required by spec rules
-                addressingFeature.setRequired(true);
-                //explicitly set this just in case someone looks for both
-                RespectBindingFeature bindingFeature = (RespectBindingFeature) featureMap.get(RespectBindingFeature.ID);
-                bindingFeature = (bindingFeature == null) ? new RespectBindingFeature(true) : bindingFeature;
-            }
-        }
-    }
-
-    protected void resolveMTOMFeature(Map<String, WebServiceFeature> featureMap) {
-        if (featureMap.containsKey(MTOMFeature.ID)) {
-            MTOMFeature mtom = (MTOMFeature) featureMap.get(MTOMFeature.ID);
-            if (mtom.isEnabled()) {
-                if (bindingId.equals(HTTPBinding.HTTP_BINDING)) {
-                    throw new WebServiceException("Attempting to use the MTOMFeature with and HTTPBinding is an Error");
-                } else if (! (bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING)
-                        || bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING))) {  //where to write to - for now System.out
-                    //log here- conflict between feature and bindingID. MTOMFeature has higher priority and
-                    System.out.println("MTOMFeature is Enabled but the BindingID " + bindingId + " " + "is not a valid MTOM ID");
-                    System.out.println("Overiding the bindingId " + bindingId + " MTOM remains turned on.");
-                } else if (!mtom.isEnabled()) {
-                    System.out.println("MTOMFeature is Disabled but the BindingID is MTOM, " + bindingId + " .");
-                    System.out.println("Overiding the bindingId " + bindingId + " MTOM remains turned off.");
-                }
-            }
-        } else { //featureMap does not contain MTOMFeature
-            //is bindingId set
-            if (bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING)
-                    || bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
-                //explicitly set the MTOM feature
-                MTOMFeature mtomFeature = new MTOMFeature(true, 0);   //what is the default threshold?
-                featureMap.put(MTOMFeature.ID, mtomFeature);
-            }
-
-        }
-    }
-  */
-
-    protected static Map<String, WebServiceFeature> fillMap(WebServiceFeature[] webServiceFeatures) {
-        HashMap<String, WebServiceFeature> featureMap = new HashMap<String, WebServiceFeature>(5);
-        if (webServiceFeatures != null)
-            for (int i = 0; i < webServiceFeatures.length; i++) {
-                featureMap.put(webServiceFeatures[i].getID(), webServiceFeatures[i]);
-            }
-        return featureMap;
+    protected WebServiceFeatureList resolveFeatures(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
+        WebServiceFeatureList r = new WebServiceFeatureList(webServiceFeatures);
+        if (portModel != null)
+            r.mergeFeatures(portModel,isDispatch);
+        return r;
     }
 }
 

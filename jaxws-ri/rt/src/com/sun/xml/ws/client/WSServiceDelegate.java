@@ -30,11 +30,10 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.ContainerResolver;
-import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.client.PortCreationCallback;
+import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Stubs;
@@ -44,7 +43,9 @@ import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.client.sei.SEIStub;
+import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
@@ -334,7 +335,7 @@ public class WSServiceDelegate extends WSService {
 
     private <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding(features);
+        BindingImpl binding = port.createBinding(features,true);
         Dispatch<T> dispatch = Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), WSEndpointReference.create(epr));
          if (portCreationCallback != null)
              portCreationCallback.dispatchCreated((WSBindingProvider) dispatch);
@@ -404,7 +405,7 @@ public class WSServiceDelegate extends WSService {
 
     private Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding(features);
+        BindingImpl binding = port.createBinding(features,true);
         Dispatch<Object> dispatch = Stubs.createJAXBDispatch(
                 portName, this, binding, jaxbContext, mode,
                 createPipeline(port, binding), WSEndpointReference.create(epr));
@@ -471,7 +472,7 @@ public class WSServiceDelegate extends WSService {
 
         SEIPortInfo eif = seiContext.get(portInterface);
 
-        BindingImpl binding = eif.createBinding(webServiceFeatures);
+        BindingImpl binding = eif.createBinding(webServiceFeatures,false);
         SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), WSEndpointReference.create(epr));
 
         T proxy = portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
@@ -485,16 +486,7 @@ public class WSServiceDelegate extends WSService {
     /**
      * Determines the binding of the given port.
      */
-    protected BindingImpl createBinding(QName portName, BindingID bindingId) {
-        //take out?
-        return createBinding(portName, bindingId, EMPTY_FEATURES);
-    }
-
-
-    /**
-     * Determines the binding of the given port.
-     */
-    protected BindingImpl createBinding(QName portName, BindingID bindingId, WebServiceFeature... webServiceFeatures) {
+    protected BindingImpl createBinding(QName portName, BindingID bindingId, WebServiceFeatureList webServiceFeatures) {
 
         // get handler chain
         List<Handler> handlerChain;
@@ -506,7 +498,7 @@ public class WSServiceDelegate extends WSService {
         }
 
         // create binding
-        BindingImpl bindingImpl = BindingImpl.create(bindingId, webServiceFeatures);
+        BindingImpl bindingImpl = BindingImpl.create(bindingId, webServiceFeatures.toArray());
         PortInfo portInfo = ports.get(portName);
         if (portInfo.portModel != null && portInfo.portModel.getBinding().isMTOMEnabled()) {
             bindingImpl.setMTOMEnabled(true);

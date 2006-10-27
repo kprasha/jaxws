@@ -21,10 +21,13 @@ package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.WSFeatureList;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.developer.StatefulFeature;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.ws.RespectBinding;
 import javax.xml.ws.RespectBindingFeature;
@@ -36,7 +39,10 @@ import javax.xml.ws.soap.MTOM;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -45,9 +51,12 @@ import java.util.Map;
  *
  * @author Rama Pulavarthi
  */
-public class WebServiceFeatureList {
+public final class WebServiceFeatureList implements WSFeatureList {
     private  Map<Class<? extends WebServiceFeature>, WebServiceFeature> wsfeatures =
             new HashMap<Class<? extends WebServiceFeature>, WebServiceFeature>();
+
+    public WebServiceFeatureList() {
+    }
 
     public WebServiceFeatureList(@NotNull WebServiceFeature... features) {
         if(features != null)
@@ -60,6 +69,14 @@ public class WebServiceFeatureList {
      * Creates a list by reading featuers from the annotation on a class.
      */
     public WebServiceFeatureList(@NotNull Class<?> endpointClass) {
+        parseAnnotations(endpointClass);
+    }
+
+    /**
+     * Reads {@link WebServiceFeatureAnnotation feature annotations} on a class
+     * and adds them to the list.
+     */
+    public void parseAnnotations(Class<?> endpointClass) {
         for (Annotation a : endpointClass.getAnnotations()) {
             // TODO: this really needs generalization
             WebServiceFeature ftr;
@@ -82,11 +99,15 @@ public class WebServiceFeatureList {
             } else {
                 throw new WebServiceException("Unrecognized annotation:" + a);
             }
-            wsfeatures.put(ftr.getClass(),ftr);
+            addFeature(ftr);
         }
     }
 
-    public @NotNull WebServiceFeature[] getFeatures() {
+    public Iterator<WebServiceFeature> iterator() {
+        return wsfeatures.values().iterator();
+    }
+
+    public @NotNull WebServiceFeature[] toArray() {
         return wsfeatures.values().toArray(new WebServiceFeature[]{});
     }
     
@@ -120,7 +141,59 @@ public class WebServiceFeatureList {
         return featureType.cast(wsfeatures.get(featureType));
     }
 
-    void addFeature(@NotNull WebServiceFeature f) {
-        wsfeatures.put(f.getClass(), f);
+    /**
+     * Adds a feature to the list if it's not already added.
+     */
+    public void addFeature(@NotNull WebServiceFeature f) {
+        if(!wsfeatures.containsKey(f.getClass()))
+            wsfeatures.put(f.getClass(), f);
+    }
+
+    /**
+     * Adds features to the list if it's not already added.
+     */
+    public void addFeatures(@NotNull WSFeatureList list) {
+        for (WebServiceFeature f : list)
+            addFeature(f);
+    }
+
+    /**
+     * Extracts features from {@link WSDLPortImpl#getFeatures()}.
+     *
+     * @param wsdlPort WSDLPort model
+     * @param honorWsdlRequired : If this is true add WSDL Feature only if wsd:Required=true
+     *          In SEI case, it should be false
+     *          In Provider case, it should be true
+     * @return Extra features that are not already set on binding.
+     *         i.e, if a feature is set already on binding through someother API
+     *         the coresponding wsdlFeature is not set.
+     */
+    public void mergeFeatures(@NotNull WSDLPort wsdlPort, boolean honorWsdlRequired) {
+        if(honorWsdlRequired && !isFeatureEnabled(RespectBindingFeature.class))
+            return;
+
+        for (WebServiceFeature ftr : wsdlPort.getFeatures()) {
+            //add this feature only if it not set already on binding.
+            // as features from wsdl should not override features set through DD or annotations
+            if (getFeature(ftr.getClass()) == null) {
+                try {
+                    // if is WSDL Extension , it will have required attribute
+                    // Add only if isRequired returns true, when honorWsdlRequired is true
+                    Method m = (ftr.getClass().getMethod("isRequired"));
+                    try {
+                        boolean required = (Boolean) m.invoke(ftr);
+                        if (!honorWsdlRequired || required)
+                            addFeature(ftr);
+                    } catch (IllegalAccessException e) {
+                        throw new WebServiceException(e);
+                    } catch (InvocationTargetException e) {
+                        throw new WebServiceException(e);
+                    }
+                } catch (NoSuchMethodException e) {
+                    // this ftr is not an WSDL extension, just add it
+                    addFeature(ftr);
+                }
+            }
+        }
     }
 }

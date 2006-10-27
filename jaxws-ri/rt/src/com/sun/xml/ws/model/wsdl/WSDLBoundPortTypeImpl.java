@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.util.QNameMap;
 
 import javax.jws.WebParam.Mode;
@@ -34,16 +35,13 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceFeature;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementation of {@link WSDLBoundPortType}
  *
  * @author Vivek Pandey
  */
-public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implements WSDLBoundPortType {
+public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl implements WSDLBoundPortType {
     private final QName name;
     private final QName portTypeName;
     private WSDLPortTypeImpl portType;
@@ -52,7 +50,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
-    private List<WebServiceFeature> features;
+    private WebServiceFeatureList features;
 
     /**
      * Operations keyed by the payload tag name.
@@ -197,30 +195,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractExtensibleImpl implemen
 
     public boolean isMTOMEnabled() {
         return mtomEnabled;
-    }
-
-    public void addFeature(WebServiceFeature feature) {
-        if (features == null)
-            features = new ArrayList<WebServiceFeature>();
-
-        features.add(feature);
-    }
-
-    @NotNull List<WebServiceFeature> getFeatures() {
-        if(features == null)
-            return new ArrayList<WebServiceFeature>();
-        return features;
-    }
-
-    public WebServiceFeature getFeature(String id) {
-        if (features != null) {
-            for (WebServiceFeature f : features) {
-                if (f.getID().equals(id))
-                    return f;
-            }
-        }
-
-        return null;
     }
 
     public SOAPVersion getSOAPVersion(){
