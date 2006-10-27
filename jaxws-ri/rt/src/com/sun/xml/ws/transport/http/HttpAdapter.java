@@ -261,9 +261,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                         ioe.printStackTrace();
                     }
                     pool.recycle(tk);
+                    con.close();
                 }
                 public void onCompletion(@NotNull Throwable error) {
                     error.printStackTrace();
+                    con.close();
                     //if (!con.isClosed()) {
                     //    writeInternalServerError(con);
                     //}
