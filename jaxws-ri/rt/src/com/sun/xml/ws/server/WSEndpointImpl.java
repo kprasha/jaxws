@@ -161,6 +161,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     }
 
     public void schedule(Packet request, final CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
+        request.endpoint = WSEndpointImpl.this;
         Fiber fiber = engine.createFiber();
         if (interceptor != null) {
             fiber.addInterceptor(interceptor);

@@ -55,10 +55,17 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
      * The address of the endpoint to which this message is sent.
      */
     private final URI baseURI;
+    private final ClosedCallback callback;
 
     LocalConnectionImpl(URI baseURI, @NotNull Map<String, List<String>> reqHeaders) {
+        this(baseURI, reqHeaders, null);
+    }
+
+    LocalConnectionImpl(URI baseURI, @NotNull Map<String, List<String>> reqHeaders,
+                        @Nullable ClosedCallback callback) {
         this.baseURI = baseURI;
         this.reqHeaders = reqHeaders;
+        this.callback = callback;
     }
 
     public @NotNull InputStream getInput() {
@@ -144,7 +151,13 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         rspHeaders.put("Content-Type", Collections.singletonList(value));
     }
 
-
+    @Override
+    public void close() {
+        super.close();
+        if (callback != null) {
+            callback.onClosed();
+        }
+    }
 
     protected PropertyMap getPropertyMap() {
         return model;
