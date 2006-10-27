@@ -56,7 +56,15 @@ public enum AddressingVersion {
         W3CAddressingConstants.ANONYMOUS_EPR,
         "http://www.w3.org/2006/05/addressing/wsdl",
         "http://www.w3.org/2006/05/addressing/wsdl",
-        W3CEndpointReference.class) {
+            new EPR(W3CEndpointReference.class,
+                    "Address",
+                    "ServiceName",
+                    "EndpointName",
+                    "InterfaceName",
+                    "Metadata",
+                    "ReferenceParameters",
+                    null,
+                    W3CAddressingConstants.ANONYMOUS_EPR)) {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
@@ -130,7 +138,15 @@ public enum AddressingVersion {
            MemberSubmissionAddressingConstants.ANONYMOUS_EPR,
            "http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy",
-            MemberSubmissionEndpointReference.class) {
+            new EPR(MemberSubmissionEndpointReference.class,
+                    "Address",
+                    "ServiceName",
+                    "PortName",
+                    "PortType",
+                    "Metadata",
+                    "ReferenceParameters",
+                    "ReferenceProperties",
+                    MemberSubmissionAddressingConstants.ANONYMOUS_EPR)) {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
@@ -212,9 +228,10 @@ public enum AddressingVersion {
     public final String wsdlNsUri;
 
     /**
-     * Either {@link W3CEndpointReference} or {@link MemberSubmissionEndpointReference}.
+     * Representing either {@link W3CEndpointReference} or
+     * {@link MemberSubmissionEndpointReference}.
      */
-    public final Class<? extends EndpointReference> eprClass;
+    public final EPR eprType;
 
     /**
      * Namespace URI for the WSDL Binding
@@ -341,11 +358,10 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-    private AddressingVersion(String nsUri, String anonymousEprString, String wsdlNsUri, String policyNsUri, Class<? extends EndpointReference> eprClass ) {
+    private AddressingVersion(String nsUri, String anonymousEprString, String wsdlNsUri, String policyNsUri, EPR eprType ) {
         this.nsUri = nsUri;
         this.wsdlNsUri = wsdlNsUri;
         this.policyNsUri = policyNsUri;
-        this.eprClass = eprClass;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
@@ -376,6 +392,7 @@ public enum AddressingVersion {
         } catch (XMLStreamException e) {
             throw new Error(e); // bug in our code as EPR should parse.
         }
+        this.eprType = eprType;
     }
 
     /**
@@ -427,7 +444,7 @@ public enum AddressingVersion {
     public static AddressingVersion fromPort(WSDLPort port) {
         if (port == null)
             return null;
-        
+
         WebServiceFeature wsf = port.getFeature(AddressingFeature.ID);
         if (wsf == null) {
             wsf = port.getFeature(MemberSubmissionAddressingFeature.ID);
@@ -621,7 +638,7 @@ public enum AddressingVersion {
         MemberSubmissionAddressingFeature msaf = binding.getFeature(MemberSubmissionAddressingFeature.class);
         if(msaf != null)
             return msaf.isRequired();
-        
+
         return false;
     }
 
@@ -636,4 +653,40 @@ public enum AddressingVersion {
         return binding.isFeatureEnabled(MemberSubmissionAddressingFeature.class) ||
                 binding.isFeatureEnabled(AddressingFeature.class);
     }
+
+    public final static class EPR {
+        public final Class<? extends EndpointReference> eprClass;
+        public final String address;
+        public final String serviceName;
+        public final String portName;
+        public final String portTypeName;
+        public final String referenceParameters;
+        public final String metadata;
+        public final String referenceProperties;
+        /**
+         * Represents the anonymous EPR.
+         */
+        public final WSEndpointReference anonymousEpr;
+
+        public EPR(Class<? extends EndpointReference> eprClass, String address, String serviceName, String portName,
+                    String portTypeName, String metadata,
+                    String referenceParameters, String referenceProperties,String anonymousEprString) {
+            this.eprClass = eprClass;
+            this.address = address;
+            this.serviceName = serviceName;
+            this.portName = portName;
+            this.portTypeName = portTypeName;
+            this.referenceParameters = referenceParameters;
+            this.referenceProperties = referenceProperties;
+            this.metadata = metadata;
+            // create stock anonymous EPR
+            try {
+                this.anonymousEpr = new WSEndpointReference(new ByteArrayInputStream(anonymousEprString.getBytes()),W3C);
+            } catch (XMLStreamException e) {
+                throw new Error(e); // bug in our code as EPR should parse.
+            }
+
+        }
+    }
+
 }
