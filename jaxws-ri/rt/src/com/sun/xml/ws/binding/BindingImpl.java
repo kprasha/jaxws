@@ -28,9 +28,9 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.model.RuntimeModelerException;
 import com.sun.xml.ws.resources.ModelerMessages;
 import com.sun.xml.ws.resources.ServerMessages;
@@ -41,9 +41,7 @@ import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.MTOMFeature;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Instances are created by the service, which then
@@ -187,7 +185,7 @@ public abstract class BindingImpl implements WSBinding {
      *  
      * @param feature
      */
-    private <F extends WebServiceFeature> void enableFeature(@NotNull F feature) {
+    private void enableFeature(@NotNull WebServiceFeature feature) {
         features.addFeature(feature);
     }
 
