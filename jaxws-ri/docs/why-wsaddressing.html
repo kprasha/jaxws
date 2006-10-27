@@ -242,9 +242,21 @@ SOAP message and then dispatch it correctly.
 </section>
 
 <section title="Stateful Web service">
-<p>Fill in the contents here </section>
-
-<section title="Simple and Complex Message Patterns">
+<p>Web services are usually stateless, i.e. the service endpoint receives a
+request and responds back without saving
+any processing state in between different requests. However making Web services
+stateful enables to share multiple instances of service endpoints. For example,
+consider a stateful Bank Web service. The client (say bank customer) can obtain
+a bank EPR, with relevant state information stored as reference parameters, and
+invoke a method on that EPR to do a series of banking operations. On the service
+endpoint, whenever a request is received, the reference parameters from the EPR
+are available as first-class SOAP headers allowing the endpoint to restore the
+state.
+</p>
+<p>JAX-WS 2.1 RI enables stateful Web services&nbsp;to be annotated with <code>com.sun.xml.ws.developer.Stateful</code>
+annotation.
+</section>
+<section title="Simple and Complex MEPs">
 </p>
 <p>WS-Addressing defines standard <a href="http://www.w3.org/TR/2006/REC-ws-addr-core-20060509/#abstractmaps"> Message Addressing Properties</a>
 (MAPs) to support simple
