@@ -159,30 +159,31 @@ public final class WebServiceFeatureList implements WSFeatureList {
 
     /**
      * Extracts features from {@link WSDLPortImpl#getFeatures()}.
-     *
+     * Extra features that are not already set on binding.
+     * i.e, if a feature is set already on binding through someother API
+     * the coresponding wsdlFeature is not set.
      * @param wsdlPort WSDLPort model
      * @param honorWsdlRequired : If this is true add WSDL Feature only if wsd:Required=true
      *          In SEI case, it should be false
      *          In Provider case, it should be true
-     * @return Extra features that are not already set on binding.
-     *         i.e, if a feature is set already on binding through someother API
-     *         the coresponding wsdlFeature is not set.
+     *
      */
     public void mergeFeatures(@NotNull WSDLPort wsdlPort, boolean honorWsdlRequired) {
         if(honorWsdlRequired && !isFeatureEnabled(RespectBindingFeature.class))
             return;
-
+        if(!honorWsdlRequired) {
+            addFeatures(wsdlPort.getFeatures());
+            return;
+        }
+        // Add only if isRequired returns true, when honorWsdlRequired is true
         for (WebServiceFeature ftr : wsdlPort.getFeatures()) {
-            //add this feature only if it not set already on binding.
-            // as features from wsdl should not override features set through DD or annotations
             if (getFeature(ftr.getClass()) == null) {
                 try {
-                    // if is WSDL Extension , it will have required attribute
-                    // Add only if isRequired returns true, when honorWsdlRequired is true
+                    // if it is a WSDL Extension , it will have required attribute
                     Method m = (ftr.getClass().getMethod("isRequired"));
                     try {
                         boolean required = (Boolean) m.invoke(ftr);
-                        if (!honorWsdlRequired || required)
+                        if (required)
                             addFeature(ftr);
                     } catch (IllegalAccessException e) {
                         throw new WebServiceException(e);
