@@ -63,8 +63,7 @@ public enum AddressingVersion {
                     "InterfaceName",
                     "Metadata",
                     "ReferenceParameters",
-                    null,
-                    W3CAddressingConstants.ANONYMOUS_EPR)) {
+                    null )) {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
@@ -145,8 +144,7 @@ public enum AddressingVersion {
                     "PortType",
                     "Metadata",
                     "ReferenceParameters",
-                    "ReferenceProperties",
-                    MemberSubmissionAddressingConstants.ANONYMOUS_EPR)) {
+                    "ReferenceProperties")) {
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
@@ -663,14 +661,10 @@ public enum AddressingVersion {
         public final String referenceParameters;
         public final String metadata;
         public final String referenceProperties;
-        /**
-         * Represents the anonymous EPR.
-         */
-        public final WSEndpointReference anonymousEpr;
 
         public EPR(Class<? extends EndpointReference> eprClass, String address, String serviceName, String portName,
                     String portTypeName, String metadata,
-                    String referenceParameters, String referenceProperties,String anonymousEprString) {
+                    String referenceParameters, String referenceProperties) {
             this.eprClass = eprClass;
             this.address = address;
             this.serviceName = serviceName;
@@ -679,12 +673,6 @@ public enum AddressingVersion {
             this.referenceParameters = referenceParameters;
             this.referenceProperties = referenceProperties;
             this.metadata = metadata;
-            // create stock anonymous EPR
-            try {
-                this.anonymousEpr = new WSEndpointReference(new ByteArrayInputStream(anonymousEprString.getBytes()),W3C);
-            } catch (XMLStreamException e) {
-                throw new Error(e); // bug in our code as EPR should parse.
-            }
 
         }
     }
