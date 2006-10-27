@@ -253,7 +253,7 @@ endpoint, whenever a request is received, the reference parameters from the EPR
 are available as first-class SOAP headers allowing the endpoint to restore the
 state.
 </p>
-<p>JAX-WS 2.1 RI enables stateful Web services&nbsp;to be annotated with <code>com.sun.xml.ws.developer.Stateful</code>
+<p>JAX-WS 2.1 RI enables <a href="https://jax-ws.dev.java.net/nonav/jax-ws-21-ea2/docs/statefulWebservice.html"> stateful Web services</a>&nbsp;to be annotated with <code>com.sun.xml.ws.developer.Stateful</code>
 annotation.
 </section>
 <section title="Simple and Complex MEPs">
@@ -430,9 +430,24 @@ with metadata looks like:</P>
   </tr>
   <tr>
     <td width="10%" valign="top"><code>(011)&nbsp;</code></td>
+    <td width="90%"><code>&nbsp; ...</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(012)&nbsp;</code></td>
+    <td width="90%"><code>&nbsp; &lt;s11:Body /&gt;</code></td>
+  </tr>
+  <tr>
+    <td width="10%" valign="top"><code>(013)&nbsp;</code></td>
     <td width="90%"><code>&lt;/s11:Envelope&gt;</code></td>
   </tr>
 </table>
+
+
+<p>In this message, Line (003) - (008) shows the standard WS-Addressing MAPs
+used to convey the semantics (<code>wsa:Action</code>) of the response message
+and relationship (<code>wsa:RelatesTo</code>) to the request message. Line (010)
+- (012) shows abbreviated SOAP Body for simplicity which otherwise would contain
+the MEX response.</p>
 
 
 <p><a href="http://en.wikipedia.org/wiki/WS-ReliableMessaging">WS-Reliable
@@ -496,12 +511,13 @@ element, <code>wsrm:AcksTo</code> (of the type Endpoint Reference), that
 specifies the endpoint reference to which <code>&lt;SequenceAcknowledgement&gt;</code>
 messages and faults related to sequence creation are sent.&nbsp;</P>
 <P>WS-Secure Conversation, WS-Trust, WS-Policy and other similar specifications
-use the constructs defined by WS-Addressing as building blocks.</P>
-end of section
+use the constructs defined by WS-Addressing as building blocks.
 </section>
 </section>
 
 <section title="WS-Addressing Versions">
+
+</P>
 
 <P> There are two
 prominent versions of WS-Addressing that are commonly used:&nbsp;</P>
