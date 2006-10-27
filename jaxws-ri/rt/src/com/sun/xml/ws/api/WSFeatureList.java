@@ -14,9 +14,9 @@ public interface WSFeatureList extends Iterable<WebServiceFeature> {
      * @param featureId
      * @return true if feature is enabled, false otherwise
      * @deprecated
-     *      Use {@link #isFeatureEnabled(Class)}
+     *      Use {@link #isEnabled(Class)}
      */
-    boolean isFeatureEnabled(String featureId);
+    boolean isEnabled(String featureId);
 
     /**
      * Checks if a particular {@link WebServiceFeature} is enabled.
@@ -24,7 +24,7 @@ public interface WSFeatureList extends Iterable<WebServiceFeature> {
      * @return
      *      true if enabled.
      */
-    boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature);
+    boolean isEnabled(@NotNull Class<? extends WebServiceFeature> feature);
 
 
     /**
@@ -32,9 +32,9 @@ public interface WSFeatureList extends Iterable<WebServiceFeature> {
      * @return WebServiceFeature if the feature is enabled.
      *         null if is is not enabled, or not present.
      * @deprecated
-     *      Use {@link #getFeature(Class)}
+     *      Use {@link #get(Class)}
      */
-    @Nullable WebServiceFeature getFeature(String featureId);
+    @Nullable WebServiceFeature get(String featureId);
 
     /**
      * Gets a {@link WebServiceFeature} of the specific type.
@@ -45,5 +45,5 @@ public interface WSFeatureList extends Iterable<WebServiceFeature> {
      *      If the feature is present and enabled, return a non-null instance.
      *      Otherwise null.
      */
-    @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType);
+    @Nullable <F extends WebServiceFeature> F get(@NotNull Class<F> featureType);
 }

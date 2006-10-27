@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.encoding.SOAPBindingCodec;
 import com.sun.xml.ws.encoding.XMLHTTPBindingCodec;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -37,6 +38,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.http.HTTPBinding;
+import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -134,6 +136,19 @@ public abstract class BindingID {
     public abstract String toString();
 
     /**
+     * Returna a new {@link WebServiceFeatureList} instance
+     * that represents the features that are built into this binding ID.
+     *
+     * <p>
+     * For example, {@link BindingID} for
+     * <tt>"{@value SOAPBinding#SOAP11HTTP_MTOM_BINDING}"</tt>
+     * would always return a list that has {@link MTOMFeature} enabled.
+     */
+    public WebServiceFeatureList createBuiltinFeatureList() {
+        return new WebServiceFeatureList();
+    }
+
+    /**
      * Returns tri state.
      *
      * null - the mtom is not set explicitly using @BindingType annotation
@@ -146,8 +161,8 @@ public abstract class BindingID {
      * are configured by default.
      *
      * @deprecated
+     *      Use {@link WSBinding#isMTOMEnabled()}.
      */
-
     public Boolean isMTOMEnabled() {
         return null;
     }
@@ -394,6 +409,13 @@ public abstract class BindingID {
         public Boolean isMTOMEnabled() {
             String mtom = parameters.get(MTOM_PARAM);
             return mtom==null?null:Boolean.valueOf(mtom);
+        }
+
+        public WebServiceFeatureList createBuiltinFeatureList() {
+            WebServiceFeatureList r=super.createBuiltinFeatureList();
+            if(mtomSetting!=null)
+                r.add(new MTOMFeature(mtomSetting));
+            return r;
         }
 
         public String getParameter(String parameterName, String defaultValue) {

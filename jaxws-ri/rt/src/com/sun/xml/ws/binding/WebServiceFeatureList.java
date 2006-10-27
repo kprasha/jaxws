@@ -21,13 +21,16 @@ package com.sun.xml.ws.binding;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSFeatureList;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.developer.StatefulFeature;
+import com.sun.xml.ws.model.RuntimeModelerException;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.resources.ModelerMessages;
 
 import javax.xml.ws.RespectBinding;
 import javax.xml.ws.RespectBindingFeature;
@@ -91,6 +94,15 @@ public final class WebServiceFeatureList implements WSFeatureList {
             } else if (a instanceof MTOM) {
                 MTOM mtomAnn = (MTOM) a;
                 ftr = new MTOMFeature(mtomAnn.enabled(), mtomAnn.threshold());
+
+                // check conflict with @BindingType
+                BindingID bindingID=BindingID.parse(endpointClass);
+                MTOMFeature bindingMtomSetting=bindingID.createBuiltinFeatureList().get(MTOMFeature.class);
+                if(bindingMtomSetting!=null && bindingMtomSetting.isEnabled()^ftr.isEnabled()) {
+                    throw new RuntimeModelerException(
+                        ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID, ftr.isEnabled()));
+                }
+
             } else if (a instanceof RespectBinding) {
                 RespectBinding rbAnn = (RespectBinding) a;
                 ftr = new RespectBindingFeature(rbAnn.enabled());
@@ -99,7 +111,7 @@ public final class WebServiceFeatureList implements WSFeatureList {
             } else {
                 throw new WebServiceException("Unrecognized annotation:" + a);
             }
-            addFeature(ftr);
+            add(ftr);
         }
     }
 
@@ -111,23 +123,23 @@ public final class WebServiceFeatureList implements WSFeatureList {
         return wsfeatures.values().toArray(new WebServiceFeature[]{});
     }
     
-    public boolean isFeatureEnabled(String featureId) {
-        WebServiceFeature ftr = getFeature(featureId);
+    public boolean isEnabled(String featureId) {
+        WebServiceFeature ftr = get(featureId);
         if(ftr == null) {
             return false;
         }
         return ftr.isEnabled();
     }
 
-    public boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature){
-        WebServiceFeature ftr = getFeature(feature);
+    public boolean isEnabled(@NotNull Class<? extends WebServiceFeature> feature){
+        WebServiceFeature ftr = get(feature);
         if(ftr == null) {
             return false;
         }
         return ftr.isEnabled();
     }
 
-    public @Nullable WebServiceFeature getFeature(String featureId) {
+    public @Nullable WebServiceFeature get(String featureId) {
         if (featureId == null)
             return null;
         for(WebServiceFeature f: wsfeatures.values()){
@@ -137,14 +149,14 @@ public final class WebServiceFeatureList implements WSFeatureList {
         return null;
     }
 
-    public @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType){
+    public @Nullable <F extends WebServiceFeature> F get(@NotNull Class<F> featureType){
         return featureType.cast(wsfeatures.get(featureType));
     }
 
     /**
      * Adds a feature to the list if it's not already added.
      */
-    public void addFeature(@NotNull WebServiceFeature f) {
+    public void add(@NotNull WebServiceFeature f) {
         if(!wsfeatures.containsKey(f.getClass()))
             wsfeatures.put(f.getClass(), f);
     }
@@ -152,9 +164,9 @@ public final class WebServiceFeatureList implements WSFeatureList {
     /**
      * Adds features to the list if it's not already added.
      */
-    public void addFeatures(@NotNull WSFeatureList list) {
+    public void addAll(@NotNull WSFeatureList list) {
         for (WebServiceFeature f : list)
-            addFeature(f);
+            add(f);
     }
 
     /**
@@ -169,22 +181,22 @@ public final class WebServiceFeatureList implements WSFeatureList {
      *
      */
     public void mergeFeatures(@NotNull WSDLPort wsdlPort, boolean honorWsdlRequired) {
-        if(honorWsdlRequired && !isFeatureEnabled(RespectBindingFeature.class))
+        if(honorWsdlRequired && !isEnabled(RespectBindingFeature.class))
             return;
         if(!honorWsdlRequired) {
-            addFeatures(wsdlPort.getFeatures());
+            addAll(wsdlPort.getFeatures());
             return;
         }
         // Add only if isRequired returns true, when honorWsdlRequired is true
         for (WebServiceFeature ftr : wsdlPort.getFeatures()) {
-            if (getFeature(ftr.getClass()) == null) {
+            if (get(ftr.getClass()) == null) {
                 try {
                     // if it is a WSDL Extension , it will have required attribute
                     Method m = (ftr.getClass().getMethod("isRequired"));
                     try {
                         boolean required = (Boolean) m.invoke(ftr);
                         if (required)
-                            addFeature(ftr);
+                            add(ftr);
                     } catch (IllegalAccessException e) {
                         throw new WebServiceException(e);
                     } catch (InvocationTargetException e) {
@@ -192,7 +204,7 @@ public final class WebServiceFeatureList implements WSFeatureList {
                     }
                 } catch (NoSuchMethodException e) {
                     // this ftr is not an WSDL extension, just add it
-                    addFeature(ftr);
+                    add(ftr);
                 }
             }
         }

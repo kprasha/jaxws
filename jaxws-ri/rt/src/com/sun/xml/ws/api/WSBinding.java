@@ -33,6 +33,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import javax.xml.ws.Binding;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.MTOMFeature;
 import java.util.List;
 
 /**
@@ -95,13 +96,16 @@ public interface WSBinding extends Binding {
     @NotNull List<Handler> getHandlerChain();
 
     /**
-     * Tells whether mtom is enabled or disabled
+     * Tells whether MTOM is enabled or disabled.
+     *
+     * @deprecated
+     *      Use {@link #isFeatureEnabled(Class)} with {@link MTOMFeature}.
      */
     boolean isMTOMEnabled();
 
 
     /**
-     * Call it to enabled/disable mtom
+     * Call it to enabled/disable MTOM.
      */
     void setMTOMEnabled(boolean value);
 

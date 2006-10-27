@@ -23,7 +23,7 @@ abstract class AbstractFeaturedObjectImpl extends AbstractExtensibleImpl impleme
         if (features == null)
             features = new WebServiceFeatureList();
 
-        features.addFeature(feature);
+        features.add(feature);
     }
 
     public @NotNull WebServiceFeatureList getFeatures() {
@@ -48,6 +48,6 @@ abstract class AbstractFeaturedObjectImpl extends AbstractExtensibleImpl impleme
         if(features==null)
             return null;
         else
-            return features.getFeature(featureType);
+            return features.get(featureType);
     }
 }

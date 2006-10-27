@@ -23,18 +23,16 @@
 package com.sun.xml.ws.transport.http;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.handler.HandlerChainsModel;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.resources.WsservletMessages;
-import com.sun.xml.ws.resources.ModelerMessages;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.streaming.Attributes;
@@ -43,7 +41,6 @@ import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.model.RuntimeModelerException;
 import org.xml.sax.EntityResolver;
 
 import javax.xml.namespace.QName;
@@ -51,10 +48,9 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -242,62 +238,57 @@ public class DeploymentDescriptorParser<A> {
     }
 
     /**
-         * @param ddBindingId
-         *      binding id explicitlyspecified in the DeploymentDescriptor or parameter
-         * @param implClass
-         *      Endpoint Implementation class
-         * @param mtomEnabled
-         *      represents mtom-enabled attribute in DD
-         * @param mtomThreshold
-         *      threshold value specified in DD
-         * @return
-                is returned with only MTOMFeature set resolving the various precendece rules
-    */
+     * @param ddBindingId
+     *      binding id explicitlyspecified in the DeploymentDescriptor or parameter
+     * @param implClass
+     *      Endpoint Implementation class
+     * @param mtomEnabled
+     *      represents mtom-enabled attribute in DD
+     * @param mtomThreshold
+     *      threshold value specified in DD
+     * @return
+     *      is returned with only MTOMFeature set resolving the various precendece rules
+     */
     private static WSBinding createBinding(String ddBindingId,Class implClass,
                                           String mtomEnabled, String mtomThreshold) {
         // Features specified through DD
-        WebServiceFeatureList ddFeatures = new WebServiceFeatureList();
-        WebServiceFeatureList implFeatures = new WebServiceFeatureList(implClass);
+        WebServiceFeatureList features;
+
         MTOMFeature mtomfeature = null;
+        if (mtomEnabled != null) {
+            if (mtomThreshold != null)
+                mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
+                        Integer.valueOf(mtomThreshold));
+            else
+                mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
+        }
+
 
         BindingID bindingID;
         if (ddBindingId != null) {
             bindingID = BindingID.parse(ddBindingId);
-            if (bindingID.isMTOMEnabled() == null) {
-                if (mtomEnabled != null) {
-                    if (mtomThreshold != null)
-                        mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
-                                Integer.valueOf(mtomThreshold));
-                    else
-                        mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
-                }
-            } else if ((mtomEnabled != null) && !(Boolean.valueOf(mtomEnabled)== bindingID.isMTOMEnabled())) {
+            features = bindingID.createBuiltinFeatureList();
+
+            if(checkMtomConflict(features.get(MTOMFeature.class),mtomfeature)) {
                 throw new ServerRtException(ServerMessages.DD_MTOM_CONFLICT(ddBindingId, mtomEnabled));
             }
         } else {
             bindingID = BindingID.parse(implClass);
             // Since bindingID is coming from implclass,
             // mtom through Feature annotation or DD takes precendece
-            if (mtomEnabled != null) {
-                if (mtomThreshold != null)
-                    mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled),
-                            Integer.valueOf(mtomThreshold));
-                else
-                    mtomfeature = new MTOMFeature(Boolean.valueOf(mtomEnabled));
-            } else {
-                mtomfeature = (MTOMFeature) implFeatures.getFeature(MTOMFeature.ID);
-                if ((bindingID.isMTOMEnabled() != null) && (mtomfeature != null)) {
-                    //if both are specified , make sure they don't conflict
-                    if (mtomfeature.isEnabled() != bindingID.isMTOMEnabled())
-                        throw new RuntimeModelerException(
-                                ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(bindingID, mtomfeature.isEnabled()));
-                }
-            }
+
+            features = new WebServiceFeatureList();
+            features.add(mtomfeature); // this wins over MTOM setting in bindingID
+            features.addAll(bindingID.createBuiltinFeatureList());
         }
-        if(mtomfeature != null)
-                ddFeatures.addFeature(mtomfeature);
-        WSBinding binding = bindingID.createBinding(ddFeatures.toArray());
+        
+        WSBinding binding = bindingID.createBinding(features.toArray());
         return binding;
+    }
+
+    private static boolean checkMtomConflict(MTOMFeature lhs, MTOMFeature rhs) {
+        if(lhs==null || rhs==null)  return false;
+        return lhs.isEnabled() ^ rhs.isEnabled();
     }
 
     /**

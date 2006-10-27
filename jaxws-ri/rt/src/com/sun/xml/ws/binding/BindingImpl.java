@@ -31,15 +31,10 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.model.RuntimeModelerException;
-import com.sun.xml.ws.resources.ModelerMessages;
-import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.server.ServerRtException;
 
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.soap.MTOMFeature;
 import java.util.Collections;
 import java.util.List;
 
@@ -155,19 +150,19 @@ public abstract class BindingImpl implements WSBinding {
     public WebServiceFeature getFeature(String featureId) {
         if (featureId == null)
             return null;
-        return features.getFeature(featureId);
+        return features.get(featureId);
     }
 
     public @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType){
-        return features.getFeature(featureType);
+        return features.get(featureType);
     }
 
     public boolean isFeatureEnabled(String featureId) {
-        return features.isFeatureEnabled(featureId);
+        return features.isEnabled(featureId);
     }
 
     public boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature){
-        return features.isFeatureEnabled(feature);
+        return features.isEnabled(feature);
     }
 
     @NotNull
@@ -191,7 +186,7 @@ public abstract class BindingImpl implements WSBinding {
      * @param feature
      */
     private void enableFeature(@NotNull WebServiceFeature feature) {
-        features.addFeature(feature);
+        features.add(feature);
     }
 
     public void setFeatures(WebServiceFeature... newFeatures) {
