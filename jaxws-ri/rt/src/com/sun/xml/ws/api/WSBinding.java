@@ -110,6 +110,9 @@ public interface WSBinding extends Binding {
      * @param features WebServiceFeatures that should be enabled or disabled.
      *        A feature is disabled if isenabled() returns false;
      *
+     *      This will be method will removed soon as it is not supposed to be
+     *      used outside of RI. I don't see a use case where others want to set
+     *      features on WSBinding directly. If you do, send us the usecase.
      */
     @Deprecated
     void setFeatures(WebServiceFeature... features);
