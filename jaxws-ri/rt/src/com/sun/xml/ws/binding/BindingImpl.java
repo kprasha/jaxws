@@ -54,12 +54,6 @@ public abstract class BindingImpl implements WSBinding {
     private final BindingID bindingId;
     // Features that are set(enabled/disabled) on the binding
     protected final WebServiceFeatureList features = new WebServiceFeatureList();
-    /**
-     * Computed from {@link #features} by {@link #updateCache()}
-     * to make {@link #getAddressingVersion()} faster.
-     * // TODO: remove this constant value after debugging
-     */
-    private AddressingVersion addressingVersion = null;
 
     protected BindingImpl(BindingID bindingId) {
         this.bindingId = bindingId;
@@ -109,7 +103,7 @@ public abstract class BindingImpl implements WSBinding {
     }
 
     public AddressingVersion getAddressingVersion() {
-        return addressingVersion;
+        return features.getAddressingVersion();
     }
 
     public final
@@ -170,19 +164,10 @@ public abstract class BindingImpl implements WSBinding {
         return features;
     }
 
-    private void updateCache() {
-//        addressingVersion = AddressingVersion.W3C;
-        if (isFeatureEnabled(AddressingFeature.class))
-            addressingVersion = AddressingVersion.W3C;
-        else if (isFeatureEnabled(MemberSubmissionAddressingFeature.class))
-            addressingVersion = AddressingVersion.MEMBER;
-        else
-            addressingVersion = null;
-    }
 
     /**
      * Make sure updateCache() is called after a feature is enabled
-     *  
+     *
      * @param feature
      */
     private void enableFeature(@NotNull WebServiceFeature feature) {
@@ -195,17 +180,16 @@ public abstract class BindingImpl implements WSBinding {
                 enableFeature(f);
             }
         }
-        updateCache();
     }
 
     public void addFeature(@NotNull WebServiceFeature newFeature) {
         enableFeature(newFeature);
-        updateCache();
     }
+
 
     //what does this mean
     public boolean isAddressingEnabled() {
-        return addressingVersion != null;
+        return features.getAddressingVersion() != null;
     }
 
 }

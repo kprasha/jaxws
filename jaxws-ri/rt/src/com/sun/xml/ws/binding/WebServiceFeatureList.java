@@ -23,6 +23,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSFeatureList;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
@@ -57,6 +58,12 @@ import java.util.Map;
 public final class WebServiceFeatureList implements WSFeatureList {
     private  Map<Class<? extends WebServiceFeature>, WebServiceFeature> wsfeatures =
             new HashMap<Class<? extends WebServiceFeature>, WebServiceFeature>();
+    /**
+     * Computed from {@link #features} by {@link #updateCache()}
+     * to make {@link #getAddressingVersion()} faster.
+     * // TODO: remove this constant value after debugging
+     */
+    private AddressingVersion addressingVersion = null;
 
     public WebServiceFeatureList() {
     }
@@ -157,8 +164,11 @@ public final class WebServiceFeatureList implements WSFeatureList {
      * Adds a feature to the list if it's not already added.
      */
     public void add(@NotNull WebServiceFeature f) {
-        if(!wsfeatures.containsKey(f.getClass()))
+        if(!wsfeatures.containsKey(f.getClass())) {
             wsfeatures.put(f.getClass(), f);
+            //TODO remove this temporary fix.
+            updateCache();
+        }
     }
 
     /**
@@ -219,5 +229,18 @@ public final class WebServiceFeatureList implements WSFeatureList {
 
             }
         }
+    }
+
+    public AddressingVersion getAddressingVersion() {
+        return addressingVersion;
+    }
+
+    private void updateCache() {
+        if (isEnabled(AddressingFeature.class))
+            addressingVersion = AddressingVersion.W3C;
+        else if (isEnabled(MemberSubmissionAddressingFeature.class))
+            addressingVersion = AddressingVersion.MEMBER;
+        else
+            addressingVersion = null;
     }
 }
