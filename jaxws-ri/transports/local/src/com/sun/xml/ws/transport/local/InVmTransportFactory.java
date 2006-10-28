@@ -16,7 +16,7 @@ import java.net.URI;
 public final class InVmTransportFactory extends TransportTubeFactory {
     public Tube doCreate(@NotNull ClientTubeAssemblerContext context) {
         URI adrs = context.getAddress().getURI();
-        if(!adrs.getScheme().equals("in-vm"))
+        if(!adrs.getScheme().equals("in-vm") && !adrs.getScheme().equals("in-vm-async"))
             return null;
 
         String serverId = adrs.getHost();
@@ -32,6 +32,9 @@ public final class InVmTransportFactory extends TransportTubeFactory {
             throw new WebServiceException("No such port exists: "+adrs);
 
         // maybe I should be passing in my custom adapter
-        return new LocalTransportTube(adrs,endpoint,context.getCodec());
+        if(adrs.getScheme().equals("in-vm"))
+            return new LocalTransportTube(adrs,endpoint,context.getCodec());
+        else
+            return new LocalAsyncTransportTube(adrs,endpoint,context.getCodec());
     }
 }
