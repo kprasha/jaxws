@@ -22,13 +22,13 @@
 
 package com.sun.xml.ws.binding;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.encoding.soap.streaming.SOAP12NamespaceConstants;
 import com.sun.xml.ws.handler.HandlerException;
 import com.sun.xml.ws.resources.ClientMessages;
-import com.sun.xml.ws.client.HandlerConfiguration;
-import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -38,9 +38,13 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.MTOMFeature;
-import java.util.*;
+import javax.xml.ws.soap.SOAPBinding;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -62,7 +66,18 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      * Use {@link BindingImpl#create(BindingID)} to create this.
      */
     SOAPBindingImpl(BindingID bindingId) {
+        this(bindingId,EMPTY_FEATURES);
+    }
 
+    /**
+     * Use {@link BindingImpl#create(BindingID)} to create this.
+     *
+     * @param features
+     *      These features have a precedence over
+     *      {@link BindingID#createBuiltinFeatureList() the implicit features}
+     *      associated with the {@link BindingID}. 
+     */
+    SOAPBindingImpl(BindingID bindingId, WebServiceFeature... features) {
         super(bindingId);
         this.soapVersion = bindingId.getSOAPVersion();
         roles = new HashSet<String>();
@@ -70,19 +85,8 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
         //Is this still required? comment out for now
         //setupSystemHandlerDelegate(serviceName);
 
-        //this.enableMtom = bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled();
-        if(bindingId.isMTOMEnabled() != null && bindingId.isMTOMEnabled()) {
-            setFeatures(new MTOMFeature());
-        }
-
-    }
-
-    /**
-     * Use {@link BindingImpl#create(BindingID)} to create this.
-     */
-    SOAPBindingImpl(BindingID bindingId, WebServiceFeature... features) {
-        this(bindingId);
         setFeatures(features);
+        this.features.addAll(bindingId.createBuiltinFeatureList());
     }
 
     /**
@@ -176,4 +180,6 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     public MessageFactory getMessageFactory() {
         return soapVersion.saajMessageFactory;
     }
+
+    private static final WebServiceFeature[] EMPTY_FEATURES = new WebServiceFeature[0];
 }
