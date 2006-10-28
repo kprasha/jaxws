@@ -53,7 +53,7 @@ public abstract class BindingImpl implements WSBinding {
     private HandlerConfiguration handlerConfig;
     private final BindingID bindingId;
     // Features that are set(enabled/disabled) on the binding
-    private final WebServiceFeatureList features = new WebServiceFeatureList();
+    protected final WebServiceFeatureList features = new WebServiceFeatureList();
     /**
      * Computed from {@link #features} by {@link #updateCache()}
      * to make {@link #getAddressingVersion()} faster.

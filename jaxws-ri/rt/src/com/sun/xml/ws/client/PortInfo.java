@@ -96,7 +96,7 @@ public class PortInfo {
     protected WebServiceFeatureList resolveFeatures(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
         WebServiceFeatureList r = new WebServiceFeatureList(webServiceFeatures);
         if (portModel != null)
-            r.mergeFeatures(portModel,isDispatch);
+            r.mergeFeatures(portModel, isDispatch, false);
         return r;
     }
 }

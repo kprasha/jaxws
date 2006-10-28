@@ -168,21 +168,6 @@ public final class WebServiceFeatureList implements WSFeatureList {
         for (WebServiceFeature f : list)
             add(f);
     }
-    /**
-         * Extracts features from {@link WSDLPortImpl#getFeatures()}.
-         * Extra features that are not already set on binding.
-         * i.e, if a feature is set already on binding through someother API
-         * the coresponding wsdlFeature is not set.
-         * @param wsdlPort WSDLPort model
-         * @param honorWsdlRequired
-         *          If this is true add WSDL Feature only if wsd:Required=true
-         *          In SEI case, it should be false
-         *          In Provider case, it should be true
-         *
-         */
-        public void mergeFeatures(@NotNull WSDLPort wsdlPort, boolean honorWsdlRequired) {
-            mergeFeatures(wsdlPort, honorWsdlRequired, false);
-        }
 
     /**
      * Extracts features from {@link WSDLPortImpl#getFeatures()}.
@@ -199,7 +184,6 @@ public final class WebServiceFeatureList implements WSFeatureList {
      *          policy configuration) colflicts with feature setting in Deployed Service.
      *          should be true on server-side, so that we verify what you specify in wsdl
      *          contract is not aganist the implementation
-     *
      */
     public void mergeFeatures(@NotNull WSDLPort wsdlPort, boolean honorWsdlRequired, boolean reportConflicts) {
         if(honorWsdlRequired && !isEnabled(RespectBindingFeature.class))
