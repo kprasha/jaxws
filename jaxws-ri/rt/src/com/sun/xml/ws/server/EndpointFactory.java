@@ -170,7 +170,7 @@ public class EndpointFactory {
                 //Provider case:
                 //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
                 if (wsdlPort != null)
-                    features.mergeFeatures(wsdlPort,true);
+                    features.mergeFeatures(wsdlPort,true,true);
 
                 terminal = ProviderInvokerTube.create(implType,binding,invoker);
 
@@ -185,7 +185,7 @@ public class EndpointFactory {
                 //SEI case:
                 //         Enable Addressing from WSDL if it uses addressing
                 if (wsdlPort != null)
-                    features.mergeFeatures(wsdlPort,false);
+                    features.mergeFeatures(wsdlPort,false,true);
                 terminal= new SEIInvokerTube(seiModel,invoker,binding);
             }
             if (processHandlerAnnotation) {
@@ -266,7 +266,11 @@ public class EndpointFactory {
         if(wsdlPort == null){
             rap = new RuntimeModeler(implType,serviceName, binding.getBindingId());
         } else {
+            /*
+            This not needed anymore as wsdlFeatures are merged later anyway
+            and so is the MTOMFeature.
             applyEffectiveMtomSetting(wsdlPort.getBinding(), binding);
+            */
             //now we got the Binding so lets build the model
             rap = new RuntimeModeler(implType, serviceName, (WSDLPortImpl)wsdlPort);
         }
@@ -278,7 +282,7 @@ public class EndpointFactory {
      *Set the mtom enable setting from wsdl model (mtom policy assertion) on to @link WSBinding} if DD has
      * not already set it on BindingID. Also check conflicts.
      */
-
+    /*
     private static void applyEffectiveMtomSetting(WSDLBoundPortType wsdlBinding, WSBinding binding){
         if(wsdlBinding.isMTOMEnabled()){
             BindingID bindingId = binding.getBindingId();
@@ -290,7 +294,7 @@ public class EndpointFactory {
             }
         }
     }
-
+    */
     /**
      * If service name is not already set via DD or programmatically, it uses
      * annotations {@link WebServiceProvider}, {@link WebService} on implementorClass to get PortName.
