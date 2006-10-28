@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
@@ -93,7 +94,8 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
                 ClientMessages.UNDEFINED_BINDING(bindingName), getLocation());
         }
 
-        if(features != null)
-            features.addAll(boundPortType.getFeatures());
+        if(features == null)
+            features =  new WebServiceFeatureList();
+        features.addAll(boundPortType.getFeatures());
     }
 }
