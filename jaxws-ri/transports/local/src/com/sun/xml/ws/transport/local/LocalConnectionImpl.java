@@ -153,9 +153,11 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
 
     @Override
     public void close() {
-        super.close();
-        if (callback != null) {
-            callback.onClosed();
+        if (!isClosed()) {
+            super.close();
+            if (callback != null) {
+                callback.onClosed();
+            }
         }
     }
 

@@ -43,6 +43,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -246,29 +247,31 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 os.close();
             }
         }
-        con.close();
     }
 
     public void invokeAsync(final WSHTTPConnection con) throws IOException {
         final HttpToolkit tk = pool.take();
-        Packet request = decodePacket(con, tk.codec);
+        final Packet request = decodePacket(con, tk.codec);
         if (!request.getMessage().isFault()) {
             endpoint.schedule(request, new CompletionCallback() {
                 public void onCompletion(@NotNull Packet response) {
                     try {
-                        encodePacket(response, con, tk.codec);
-                    } catch(IOException ioe) {
-                        ioe.printStackTrace();
+                        try {
+                            encodePacket(response, con, tk.codec);
+                        } catch(IOException ioe) {
+                            ioe.printStackTrace();
+                        }
+                        pool.recycle(tk);
+                    } finally{
+                        con.close();
                     }
-                    pool.recycle(tk);
-                    con.close();
                 }
                 public void onCompletion(@NotNull Throwable error) {
                     error.printStackTrace();
-                    con.close();
-                    //if (!con.isClosed()) {
-                    //    writeInternalServerError(con);
-                    //}
+                    Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
+                            endpoint.getBinding().getSOAPVersion(), null, error);
+                    Packet response = request.createServerResponse(faultMsg, request.endpoint.getPort(), request.endpoint.getBinding());
+                    onCompletion(response);
                 }
             });
         }
@@ -341,6 +344,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 }
             }
             encodePacket(response, con, codec);
+            con.close();
         }
     }
 
