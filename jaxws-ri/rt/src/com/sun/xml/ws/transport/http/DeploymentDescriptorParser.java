@@ -278,10 +278,11 @@ public class DeploymentDescriptorParser<A> {
             // mtom through Feature annotation or DD takes precendece
 
             features = new WebServiceFeatureList();
-            features.add(mtomfeature); // this wins over MTOM setting in bindingID
+            if(mtomfeature != null)
+                features.add(mtomfeature); // this wins over MTOM setting in bindingID
             features.addAll(bindingID.createBuiltinFeatureList());
         }
-        
+
         WSBinding binding = bindingID.createBinding(features.toArray());
         return binding;
     }
