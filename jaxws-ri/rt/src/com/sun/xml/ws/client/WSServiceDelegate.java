@@ -185,9 +185,9 @@ public class WSServiceDelegate extends WSService {
                 WSDLModelImpl model = parseWSDL(url, wsdl);
                 service = model.getService(this.serviceName);
                 if (service == null)
-                        throw new WebServiceException(
-                                ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
-                                        buildNameList(model.getServices().keySet())));
+                    throw new WebServiceException(
+                        ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
+                            buildNameList(model.getServices().keySet())));
                 // fill in statically known ports
                 for (WSDLPortImpl port : service.getPorts())
                     ports.put(port.getName(), new PortInfo(this, port));
