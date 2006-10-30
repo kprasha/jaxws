@@ -181,10 +181,10 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     public Source readPayloadAsSource() {
-        assert unconsumed();
-        if(hasPayload())
+        if(hasPayload()) {
+            assert unconsumed();
             return new StAXSource(reader, true);
-        else
+        } else
             return null;
     }
 
@@ -217,9 +217,9 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     public void writePayloadTo(XMLStreamWriter writer)throws XMLStreamException {
-        assert unconsumed();
         if(payloadLocalName==null)
             return; // no body
+        assert unconsumed();
         new XMLStreamReaderToXMLStreamWriter().bridge(reader,writer);
     }
 
@@ -232,7 +232,6 @@ public final class StreamMessage extends AbstractMessageImpl {
      * @param writer
      */
     private void writeEnvelope(XMLStreamWriter writer) throws XMLStreamException {
-        assert unconsumed();
         writer.writeStartDocument();
         envelopeTag.writeStart(writer);
 
@@ -318,6 +317,9 @@ public final class StreamMessage extends AbstractMessageImpl {
     /**
      * Used for an assertion. Returns true when the message is unconsumed,
      * or otherwise throw an exception.
+     *
+     * <p>
+     * Calling this method also marks the stream as 'consumed'
      */
     private boolean unconsumed() {
         if(payloadLocalName==null)
