@@ -273,11 +273,11 @@ public final class StreamMessage extends AbstractMessageImpl {
     }
 
     public Message copy() {
-        assert unconsumed();
         try {
             // copy the payload
             XMLStreamReader clone;
             if(hasPayload()) {
+                assert unconsumed();
                 XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
                 reader = xsb.readAsXMLStreamReader();
                 clone = xsb.readAsXMLStreamReader();
