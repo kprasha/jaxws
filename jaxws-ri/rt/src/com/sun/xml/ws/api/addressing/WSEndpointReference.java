@@ -78,7 +78,12 @@ public final class WSEndpointReference {
      */
     private @NotNull Header[] referenceParameters;
     private @NotNull String address;
-
+    private @Nullable QName serviceName;
+    private @Nullable QName portName;
+    private @Nullable QName portTypeName; //interfaceName
+    // only wsdlSource and wsdlLocation are mutually exclusive and both can be null
+    private @Nullable String wsdlLocation;
+    private @Nullable Source wsdlSource;
     /**
      * Creates from the spec version of {@link EndpointReference}.
      *
@@ -190,7 +195,7 @@ public final class WSEndpointReference {
      *
      * <p>
      * This version takes various information about metadata, and creates an EPR that has
-     * the necessary embedded WSDL. 
+     * the necessary embedded WSDL.
      */
     public WSEndpointReference(@NotNull AddressingVersion version,
                                @NotNull String address,
@@ -200,12 +205,19 @@ public final class WSEndpointReference {
                                @Nullable List<Element> metadata,
                                @Nullable String wsdlAddress,
                                @Nullable List<Element> referenceParameters) {
-        this(
+       this(
             createBufferFromData(version, address, referenceParameters, service, port, portType, metadata, wsdlAddress),
             version );
+
+        this.serviceName = service;
+        this.portName = port;
+        this.portTypeName = portType;
+        this.wsdlLocation = wsdlAddress;
+
     }
 
     private static XMLStreamBuffer createBufferFromData(AddressingVersion version, String address, List<Element> referenceParameters, QName service, QName port, QName portType, List<Element> metadata, String wsdlAddress) {
+
         StreamWriterBufferCreator writer = new StreamWriterBufferCreator();
 
         try {
@@ -395,7 +407,7 @@ public final class WSEndpointReference {
      *
      * <p>
      * The following example shows how you can use this to force an HTTPS EPR,
-     * when the endpoint can serve both HTTP and HTTPS requests. 
+     * when the endpoint can serve both HTTP and HTTPS requests.
      * <pre>
      * if(epr.getAddress().startsWith("http:"))
      *   epr = epr.createWithAddress("https:"+epr.getAddress().substring(5));
@@ -455,7 +467,7 @@ public final class WSEndpointReference {
      * Converts the EPR to the specified spec version.
      *
      * If the {@link #getVersion() the addressing version in use} and
-     * the given class is different, then this may involve version conversion. 
+     * the given class is different, then this may involve version conversion.
      */
     public @NotNull <T extends EndpointReference> T toSpec(Class<T> clazz) {
         return EndpointReferenceUtil.transform(clazz,toSpec());
@@ -584,6 +596,97 @@ public final class WSEndpointReference {
 
         if(address==null)
             throw new InvalidMapException(new QName(version.nsUri,rootLocalName),version.fault_missingAddressInEpr);
+    }
+    /**
+     * Parses inside EPR and mark all reference parameters.
+     */
+    private void parseData() throws XMLStreamException {
+        // TODO: validate the EPR structure.
+        // check for non-existent Address, that sort of things.
+
+        StreamReaderBufferProcessor xsr = infoset.readAsXMLStreamReader();
+
+        // parser should be either at the start element or the start document
+        if(xsr.getEventType()==XMLStreamReader.START_DOCUMENT)
+            xsr.nextTag();
+        assert xsr.getEventType()==XMLStreamReader.START_ELEMENT;
+
+        String rootLocalName = xsr.getLocalName();
+        if(!xsr.getNamespaceURI().equals(version.nsUri))
+            throw new WebServiceException(AddressingMessages.WRONG_ADDRESSING_VERSION(
+                version.nsUri, xsr.getNamespaceURI()));
+
+        // since often EPR doesn't have a reference parameter, create array lazily
+        List<Header> marks=null;
+
+        while(xsr.nextTag()==XMLStreamReader.START_ELEMENT) {
+            String localName = xsr.getLocalName();
+            if(version.isReferenceParameter(localName)) {
+                XMLStreamBuffer mark;
+                while((mark = xsr.nextTagAndMark())!=null) {
+                    if(marks==null)
+                        marks = new ArrayList<Header>();
+
+                    // TODO: need a different header for member submission version
+                    marks.add(version.createReferenceParameterHeader(
+                        mark, xsr.getNamespaceURI(), xsr.getLocalName()));
+                    XMLStreamReaderUtil.skipElement(xsr);
+                }
+            } else
+            if(localName.equals(version.eprType.address)) {
+                if(address!=null) // double <Address>. That's an error.
+                    throw new InvalidMapException(new QName(version.nsUri,rootLocalName),AddressingVersion.fault_duplicateAddressInEpr);
+                address = xsr.getElementText();
+            }
+            if (localName.equals(version.eprType.metadata)) {
+                XMLStreamBuffer mark;
+                while((mark = xsr.nextTagAndMark()) != null) {
+                    localName = xsr.getLocalName();
+                    String ns = xsr.getNamespaceURI();
+                    if (localName.equals(version.eprType.serviceName)) {
+                        serviceName = getElementTextAsQName(xsr);
+                        if (serviceName != null)
+                            portName = new QName(serviceName.getNamespaceURI(),
+                                    xsr.getAttributeValue(null, version.eprType.portName));
+                    } else if (localName.equals(version.eprType.portTypeName)) {
+                        portTypeName = getElementTextAsQName(xsr);
+                    } else if (ns.equals(WSDLConstants.NS_WSDL)
+                            && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                        wsdlSource = new XMLStreamBufferSource(mark);
+                    }
+                    XMLStreamReaderUtil.skipElement(xsr);
+                }
+            } else {
+                XMLStreamReaderUtil.skipElement(xsr);
+            }
+        }
+
+        // hit to </EndpointReference> by now
+
+        if(marks==null) {
+            this.referenceParameters = EMPTY_ARRAY;
+        } else {
+            this.referenceParameters = marks.toArray(new Header[marks.size()]);
+        }
+
+        if(address==null)
+            throw new InvalidMapException(new QName(version.nsUri,rootLocalName),version.fault_missingAddressInEpr);
+    }
+
+    private QName getElementTextAsQName(StreamReaderBufferProcessor xsr) throws XMLStreamException {
+        String text = xsr.getElementText();
+        String prefix = XmlUtil.getPrefix(text);
+        String name = XmlUtil.getLocalPart(text);
+        if (name != null) {
+            if (prefix != null) {
+                String ns = xsr.getNamespaceURI(prefix);
+            if (ns != null)
+                 return new QName(ns, name, prefix);
+            } else {
+                return new QName(null, name);
+            }
+        }
+        return null;
     }
 
     /**
@@ -748,6 +851,22 @@ public final class WSEndpointReference {
             }
             super.processElement(uri, localName, qName);
         }
+    }
+
+    public @Nullable QName getServiceName(){
+        return serviceName;
+    }
+    public @Nullable QName getPortName(){
+        return portName;
+    }
+    public @Nullable QName getPortTypeName(){
+        return portTypeName;
+    }
+    public @Nullable String getWsdlLocation(){
+        return wsdlLocation;
+    }
+    public @Nullable Source getWsdlSource(){
+        return wsdlSource;
     }
 
     private static final OutboundReferenceParameterHeader[] EMPTY_ARRAY = new OutboundReferenceParameterHeader[0];
