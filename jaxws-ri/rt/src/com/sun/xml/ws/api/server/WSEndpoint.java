@@ -31,7 +31,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Engine;
-import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -207,7 +206,7 @@ public abstract class WSEndpoint<T> {
      * @see {@link Packet#webServiceContextDelegate}
      * 
      * @param request web service request
-     * @param callback callback to get response packet(exception if there is one)
+     * @param callback callback to get response packet
      */
     public final void schedule(@NotNull Packet request, @NotNull CompletionCallback callback ) {
         schedule(request,callback,null);
@@ -223,6 +222,25 @@ public abstract class WSEndpoint<T> {
      * @param interceptor caller's interceptor to impose a context of execution
      */
     public abstract void schedule(@NotNull Packet request, @NotNull CompletionCallback callback, @Nullable FiberContextSwitchInterceptor interceptor );
+
+    /**
+     * Callback to notify that jax-ws runtime has finished execution of a request
+     * submitted via schedule().
+     */
+    public interface CompletionCallback {
+        /**
+         * Indicates that the jax-ws runtime has finished execution of a request
+         * submitted via schedule().
+         *
+         * <p>
+         * Since the JAX-WS RI runs asynchronously,
+         * this method maybe invoked by a different thread
+         * than any of the threads that started it or run a part of tubeline.
+         *
+         * @param response {@link Packet}
+         */
+        void onCompletion(@NotNull Packet response);
+    }
 
     /**
      * Creates a new {@link PipeHead} to process

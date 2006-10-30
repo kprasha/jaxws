@@ -106,7 +106,7 @@ public abstract class AbstractServerAsyncTransport<T> {
         final Codec codec = codecPool.take();
         Packet request = decodePacket(connection, codec);
         if (!request.getMessage().isFault()) {
-            endpoint.schedule(request, new Fiber.CompletionCallback() {
+            endpoint.schedule(request, new WSEndpoint.CompletionCallback() {
                 public void onCompletion(@NotNull Packet response) {
                     try {
                         encodePacket(connection, response, codec);
@@ -114,9 +114,6 @@ public abstract class AbstractServerAsyncTransport<T> {
                         ioe.printStackTrace();
                     }
                     codecPool.recycle(codec);
-                }
-                public void onCompletion(@NotNull Throwable error) {
-                    error.printStackTrace();
                 }
             });
         }

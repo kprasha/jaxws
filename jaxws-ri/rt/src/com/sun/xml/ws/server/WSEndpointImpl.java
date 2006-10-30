@@ -160,24 +160,35 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         engine.setExecutor(exec);
     }
 
-    public void schedule(Packet request, final CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
+    public void schedule(final Packet request, final CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
         request.endpoint = WSEndpointImpl.this;
         Fiber fiber = engine.createFiber();
         if (interceptor != null) {
             fiber.addInterceptor(interceptor);
         }
         final Tube tube = tubePool.take();
-        fiber.start(tube, request, new CompletionCallback() {
+        fiber.start(tube, request, new Fiber.CompletionCallback() {
             public void onCompletion(@NotNull Packet response) {
                 tubePool.recycle(tube);
-                if(callback!=null)
+                if (callback!=null) {
                     callback.onCompletion(response);
+                }
             }
 
             public void onCompletion(@NotNull Throwable error) {
-                // let's not reuse tubes as they might be in a wrong state
-                if(callback!=null)
-                    callback.onCompletion(error);
+                // let's not reuse tubes as they might be in a wrong state, so not
+                // calling tubePool.recycle()
+                error.printStackTrace();
+                // Convert all runtime exceptions to Packet so that transport doesn't
+                // have to worry about converting to wire message
+                // TODO XML/HTTP binding
+                Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
+                        soapVersion, null, error);
+                Packet response = request.createServerResponse(faultMsg, request.endpoint.getPort(),
+                        request.endpoint.getBinding());
+                if (callback!=null) {
+                    callback.onCompletion(response);
+                }
             }
         });
     }

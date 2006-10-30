@@ -31,7 +31,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.server.AbstractServerAsyncTransport;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -43,7 +42,6 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -253,7 +251,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         final HttpToolkit tk = pool.take();
         final Packet request = decodePacket(con, tk.codec);
         if (!request.getMessage().isFault()) {
-            endpoint.schedule(request, new CompletionCallback() {
+            endpoint.schedule(request, new WSEndpoint.CompletionCallback() {
                 public void onCompletion(@NotNull Packet response) {
                     try {
                         try {
@@ -265,13 +263,6 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                     } finally{
                         con.close();
                     }
-                }
-                public void onCompletion(@NotNull Throwable error) {
-                    error.printStackTrace();
-                    Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
-                            endpoint.getBinding().getSOAPVersion(), null, error);
-                    Packet response = request.createServerResponse(faultMsg, request.endpoint.getPort(), request.endpoint.getBinding());
-                    onCompletion(response);
                 }
             });
         }
@@ -331,19 +322,18 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     final class HttpToolkit extends Adapter.Toolkit {
         public void handle(WSHTTPConnection con) throws IOException {
             Packet request = decodePacket(con, codec);
-            Packet response = null;
             if (!request.getMessage().isFault()) {
                 try {
-                    response = head.process(request, con.getWebServiceContextDelegate(), request.transportBackChannel);
-                } catch (Exception e) {
+                    Packet response = head.process(request, con.getWebServiceContextDelegate(),
+                            request.transportBackChannel);
+                    encodePacket(response, con, codec);
+                } catch(Exception e) {
                     e.printStackTrace();
                     if (!con.isClosed()) {
                         writeInternalServerError(con);
                     }
-                    return;
                 }
             }
-            encodePacket(response, con, codec);
             con.close();
         }
     }
