@@ -46,4 +46,9 @@ public interface WSFeatureList extends Iterable<WebServiceFeature> {
      *      Otherwise null.
      */
     @Nullable <F extends WebServiceFeature> F get(@NotNull Class<F> featureType);
+
+    /**
+     * Obtains all the features in the array.
+      */
+    @NotNull WebServiceFeature[] toArray();
 }
