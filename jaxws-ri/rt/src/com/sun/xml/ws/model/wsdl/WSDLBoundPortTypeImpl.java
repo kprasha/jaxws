@@ -27,7 +27,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.util.QNameMap;
 
 import javax.jws.WebParam.Mode;
@@ -50,7 +49,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
     private boolean mtomEnabled;
-    private WebServiceFeatureList features;
 
     /**
      * Operations keyed by the payload tag name.
