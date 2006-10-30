@@ -23,6 +23,7 @@
 package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -49,7 +50,7 @@ final class EndpointMethodDispatcherGetter {
     EndpointMethodDispatcherGetter(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
         dispatcherList = new ArrayList<EndpointMethodDispatcher>();
 
-        if (binding.getAddressingVersion() != null) {
+        if (AddressingVersion.fromBinding(binding) != null) {
             dispatcherList.add(new ActionBasedDispatcher(model, binding, invokerTube));
         } else {
             dispatcherList.add(new PayloadQNameBasedDispatcher(model, binding, invokerTube));
