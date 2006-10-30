@@ -80,8 +80,10 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -441,7 +443,8 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NO_WSDL(serviceName));
 
         if (wsdlService.get(portName)==null) {
-            throw new WebServiceException("WSDLPort " + portName + "is not found in service " + serviceName);
+            throw new WebServiceException(
+                ClientMessages.INVALID_PORT_NAME(portName,buildWsdlPortNames()));
         }
 
         SEIPortInfo eif = seiContext.get(portInterface);
@@ -458,14 +461,25 @@ public class WSServiceDelegate extends WSService {
     }
 
     /**
+     * Lists up the port names in WSDL. For error diagnostics.
+     */
+    private StringBuilder buildWsdlPortNames() {
+        Set<QName> wsdlPortNames = new HashSet<QName>();
+        for (WSDLPortImpl port : wsdlService.getPorts())
+            wsdlPortNames.add(port.getName());
+        return buildNameList(wsdlPortNames);
+    }
+
+    /**
      * Obtains a {@link WSDLPortImpl} with error check.
      *
      * @return guaranteed to be non-null.
      */
-    public WSDLPortImpl getPortModel(QName portName) {
+    public @NotNull WSDLPortImpl getPortModel(QName portName) {
         WSDLPortImpl port = wsdlService.get(portName);
         if (port == null)
-            throw new WebServiceException("Port \"" + portName + "\" not found in service \"" + serviceName + "\"");
+            throw new WebServiceException(
+                ClientMessages.INVALID_PORT_NAME(portName,buildWsdlPortNames()));
         return port;
     }
 
@@ -478,7 +492,6 @@ public class WSServiceDelegate extends WSService {
         SEIPortInfo spi = seiContext.get(portInterface);
         if (spi != null) return;
         WSDLPortImpl wsdlPort = getPortModel(portName);
-        // TODO: error check against wsdlPort==null
         RuntimeModeler modeler = new RuntimeModeler(portInterface, serviceName, wsdlPort);
         modeler.setPortName(portName);
         AbstractSEIModelImpl model = modeler.buildRuntimeModel();
@@ -514,7 +527,7 @@ public class WSServiceDelegate extends WSService {
             try {
                 eprWsdlMdl = parseWSDL(new URL(uri), msepr.toWSDLSource());
             } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+                throw new WebServiceException(ClientMessages.INVALID_ADDRESS(uri));
             }
 
             validate(eprWsdlMdl);
