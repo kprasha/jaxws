@@ -22,10 +22,13 @@
 
 package com.sun.xml.ws.api;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 
-import javax.xml.ws.spi.ServiceDelegate;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.spi.ServiceDelegate;
 
 /**
  * JAX-WS implementation of {@link ServiceDelegate}.
@@ -49,4 +52,10 @@ import javax.xml.ws.Service;
 public abstract class WSService extends ServiceDelegate {
     protected WSService() {
     }
+
+    /**
+     * Works like {@link #getPort(EndpointReference, Class, WebServiceFeature...)}
+     * but takes {@link WSEndpointReference}. 
+     */
+    public abstract <T> T getPort(WSEndpointReference epr, Class<T> portInterface, WebServiceFeature... features);
 }

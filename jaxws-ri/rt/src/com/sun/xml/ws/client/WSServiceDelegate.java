@@ -66,6 +66,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
@@ -130,6 +131,9 @@ public class WSServiceDelegate extends WSService {
      */
     private final Map<QName, PortInfo> ports = new HashMap<QName, PortInfo>();
 
+    /**
+     * Whenever we create {@link BindingProvider}, we use this to configure handlers.
+     */
     private @NotNull HandlerConfigurator handlerConfigurator = new HandlerResolverImpl(null);
 
     private final Class<? extends Service> serviceClass;
@@ -272,8 +276,11 @@ public class WSServiceDelegate extends WSService {
         return createEndpointIFBaseProxy(null, portName, portInterface, features);
     }
 
-
     public <T> T getPort(EndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
+        return getPort(WSEndpointReference.create(epr),portInterface,features);
+    }
+
+    public <T> T getPort(WSEndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
         //get the first port corresponding to the SEI
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
         WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
@@ -437,7 +444,7 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    private <T> T createEndpointIFBaseProxy(@Nullable EndpointReference epr,QName portName, Class<T> portInterface, WebServiceFeature[] webServiceFeatures) {
+    private <T> T createEndpointIFBaseProxy(@Nullable WSEndpointReference epr,QName portName, Class<T> portInterface, WebServiceFeature[] webServiceFeatures) {
         //fail if service doesnt have WSDL
         if (wsdlService == null)
             throw new WebServiceException(ClientMessages.INVALID_SERVICE_NO_WSDL(serviceName));
@@ -450,7 +457,7 @@ public class WSServiceDelegate extends WSService {
         SEIPortInfo eif = seiContext.get(portInterface);
 
         BindingImpl binding = eif.createBinding(webServiceFeatures,false);
-        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), WSEndpointReference.create(epr));
+        SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), epr);
 
         T proxy = portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
                 new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis));
