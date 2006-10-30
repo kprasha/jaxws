@@ -21,6 +21,9 @@
  */
 package com.sun.xml.ws.message.stream;
 
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
+
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
@@ -102,7 +105,7 @@ public final class StreamMessage extends AbstractMessageImpl {
         this.attachmentSet = attachmentSet;
         this.reader = reader;
 
-        if(reader.getEventType()== XMLStreamConstants.START_DOCUMENT)
+        if(reader.getEventType()== START_DOCUMENT)
             XMLStreamReaderUtil.nextElementContent(reader);
 
         //if the reader is pointing to the end element </soapenv:Body> then its empty message
@@ -282,6 +285,9 @@ public final class StreamMessage extends AbstractMessageImpl {
                 XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
                 reader = xsb.readAsXMLStreamReader();
                 clone = xsb.readAsXMLStreamReader();
+                // advance to the start tag of the first element
+                proceedToRootElement(reader);
+                proceedToRootElement(clone);
             } else {
                 // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
                 // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.
@@ -292,6 +298,12 @@ public final class StreamMessage extends AbstractMessageImpl {
         } catch (XMLStreamException e) {
             throw new WebServiceException("Failed to copy a message",e);
         }
+    }
+
+    private void proceedToRootElement(XMLStreamReader xsr) throws XMLStreamException {
+        assert xsr.getEventType()==START_DOCUMENT;
+        xsr.nextTag();
+        assert xsr.getEventType()==START_ELEMENT;
     }
 
     public void writeTo( ContentHandler contentHandler, ErrorHandler errorHandler ) throws SAXException {
