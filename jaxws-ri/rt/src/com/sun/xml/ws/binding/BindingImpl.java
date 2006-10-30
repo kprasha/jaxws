@@ -30,22 +30,24 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.soap.AddressingFeature;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Instances are created by the service, which then
  * sets the handler chain on the binding impl.
- * <p/>
- * <p>This class is made abstract as we dont see a situation when a BindingImpl has much meaning without binding id.
- * IOw, for a specific binding there will be a class extending BindingImpl, for example SOAPBindingImpl.
- * <p/>
- * <p>The spi Binding interface extends Binding.
+ *
+ * <p>
+ * This class is made abstract as we don't see a situation when
+ * a BindingImpl has much meaning without binding id.
+ * IOW, for a specific binding there will be a class
+ * extending BindingImpl, for example SOAPBindingImpl.
+ *
+ * <p>
+ * The spi Binding interface extends Binding.
  *
  * @author WS Development Team
  */
@@ -165,27 +167,17 @@ public abstract class BindingImpl implements WSBinding {
     }
 
 
-    /**
-     * Make sure updateCache() is called after a feature is enabled
-     *
-     * @param feature
-     */
-    private void enableFeature(@NotNull WebServiceFeature feature) {
-        features.add(feature);
-    }
-
     public void setFeatures(WebServiceFeature... newFeatures) {
         if (newFeatures != null) {
             for (WebServiceFeature f : newFeatures) {
-                enableFeature(f);
+                features.add(f);
             }
         }
     }
 
     public void addFeature(@NotNull WebServiceFeature newFeature) {
-        enableFeature(newFeature);
+        features.add(newFeature);
     }
-
 
     //what does this mean
     public boolean isAddressingEnabled() {
