@@ -21,15 +21,15 @@
  */
 package com.sun.xml.ws.client;
 
-import javax.xml.ws.handler.LogicalHandler;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.namespace.QName;
-import java.util.*;
-
-/**
- * @author Rama Pulavarthi
- */
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.LogicalHandler;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class holds the handler information on the BindingProvider.
@@ -40,6 +40,8 @@ import java.util.*;
  * Packet.handlerConfig
  * The information in the HandlerConfiguration is used by MUPipe and HandlerTube
  * implementations.
+ * 
+ * @author Rama Pulavarthi
  */
 public class HandlerConfiguration {
     private final Set<String> roles;

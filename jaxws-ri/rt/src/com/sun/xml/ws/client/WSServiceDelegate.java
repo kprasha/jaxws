@@ -43,10 +43,10 @@ import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.binding.WebServiceFeatureList;
+import com.sun.xml.ws.client.HandlerConfigurator.AnnotationConfigurator;
+import com.sun.xml.ws.client.HandlerConfigurator.HandlerResolverImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
-import com.sun.xml.ws.handler.PortInfoImpl;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -71,22 +71,17 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
-import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -133,7 +128,7 @@ public class WSServiceDelegate extends WSService {
      */
     private final Map<QName, PortInfo> ports = new HashMap<QName, PortInfo>();
 
-    private HandlerResolver handlerResolver;
+    private @NotNull HandlerConfigurator handlerConfigurator = new HandlerResolverImpl(null);
 
     private final Class<? extends Service> serviceClass;
 
@@ -146,8 +141,6 @@ public class WSServiceDelegate extends WSService {
      * Information about SEI, keyed by their interface type.
      */
     private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
-
-    private final HashMap<QName,Set<String>> rolesMap = new HashMap<QName,Set<String>>();
 
     private Executor executor;
 
@@ -203,19 +196,6 @@ public class WSServiceDelegate extends WSService {
         this.wsdlService = service;
 
         if (serviceClass != Service.class) {
-            /*
-        if (serviceClass != Service.class) {
-            SCAnnotations serviceCAnnotations = new SCAnnotations(serviceClass);
-
-            if(wsdlDocumentLocation==null)
-                wsdlDocumentLocation = serviceCAnnotations.wsdlLocation;
-            for (Class clazz : serviceCAnnotations.classes)
-                addSEI(clazz);
-        } else {
-            if(wsdlDocumentLocation!=null)
-                parseWSDL(wsdlDocumentLocation);
-        }
-        */
             //if @HandlerChain present, set HandlerResolver on service context
             HandlerChain handlerChain =
                     AccessController.doPrivileged(new PrivilegedAction<HandlerChain>() {
@@ -223,10 +203,8 @@ public class WSServiceDelegate extends WSService {
                             return serviceClass.getAnnotation(HandlerChain.class);
                         }
                     });
-            if (handlerChain != null) {
-                HandlerResolverImpl hresolver = new HandlerResolverImpl(this);
-                setHandlerResolver(hresolver);
-            }
+            if (handlerChain != null)
+                handlerConfigurator = new AnnotationConfigurator(this);
         }
 
     }
@@ -269,11 +247,15 @@ public class WSServiceDelegate extends WSService {
     }
 
     public HandlerResolver getHandlerResolver() {
-        return handlerResolver;
+        return handlerConfigurator.getResolver();
+    }
+
+    /*package*/ final HandlerConfigurator getHandlerConfigurator() {
+        return handlerConfigurator;
     }
 
     public void setHandlerResolver(HandlerResolver resolver) {
-        handlerResolver = resolver;
+        handlerConfigurator = new HandlerResolverImpl(resolver);
     }
 
     public <T> T getPort(QName portName, Class<T> portInterface) throws WebServiceException {
@@ -436,14 +418,6 @@ public class WSServiceDelegate extends WSService {
         return serviceClass;
     }
 
-    protected Set<String> getRoles(QName portName) {
-        return rolesMap.get(portName);
-    }
-
-    protected void setRoles(QName portName, Set<String> roles) {
-        rolesMap.put(portName, roles);
-    }
-
     public Iterator<QName> getPorts() throws WebServiceException {
         // KK: the spec seems to be ambigous about whether
         // this returns ports that are dynamically added or not.
@@ -484,44 +458,10 @@ public class WSServiceDelegate extends WSService {
     }
 
     /**
-     * Determines the binding of the given port.
-     */
-    protected BindingImpl createBinding(QName portName, BindingID bindingId, WebServiceFeatureList webServiceFeatures) {
-
-        // get handler chain
-        List<Handler> handlerChain;
-        if (handlerResolver != null) {
-            javax.xml.ws.handler.PortInfo portInfo = new PortInfoImpl(bindingId, portName, serviceName);
-            handlerChain = handlerResolver.getHandlerChain(portInfo);
-        } else {
-            handlerChain = new ArrayList<Handler>();
-        }
-
-        // create binding
-        BindingImpl bindingImpl = BindingImpl.create(bindingId, webServiceFeatures.toArray());
-        PortInfo portInfo = ports.get(portName);
-        if (portInfo.portModel != null && portInfo.portModel.getBinding().isMTOMEnabled()) {
-            bindingImpl.setMTOMEnabled(true);
-        }
-        if (bindingImpl instanceof SOAPBinding) {
-            Set<String> roles = rolesMap.get(portName);
-            if (roles != null) {
-                ((SOAPBinding) bindingImpl).setRoles(roles);
-            }
-        }
-
-        bindingImpl.setHandlerChain(handlerChain);
-
-        return bindingImpl;
-    }
-
-
-    /**
      * Obtains a {@link WSDLPortImpl} with error check.
      *
      * @return guaranteed to be non-null.
      */
-
     public WSDLPortImpl getPortModel(QName portName) {
         WSDLPortImpl port = wsdlService.get(portName);
         if (port == null)

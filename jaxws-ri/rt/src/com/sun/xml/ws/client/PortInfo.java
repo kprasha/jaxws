@@ -40,20 +40,12 @@ import javax.xml.ws.WebServiceFeature;
  *
  * @author JAXWS Development Team
  */
-public class PortInfo {
-    private final
-    @NotNull
-    WSServiceDelegate owner;
+public class PortInfo implements javax.xml.ws.handler.PortInfo {
+    private final @NotNull WSServiceDelegate owner;
 
-    public final
-    @NotNull
-    QName portName;
-    public final
-    @NotNull
-    EndpointAddress targetEndpoint;
-    public final
-    @NotNull
-    BindingID bindingId;
+    public final @NotNull QName portName;
+    public final @NotNull EndpointAddress targetEndpoint;
+    public final @NotNull BindingID bindingId;
 
     /**
      * If a port is known statically to a WSDL, {@link PortInfo} may
@@ -63,9 +55,7 @@ public class PortInfo {
      * <p/>
      * If this is a {@link SEIPortInfo}, then this is always non-null.
      */
-    public final
-    @Nullable
-    WSDLPort portModel;
+    public final @Nullable WSDLPort portModel;
 
     public PortInfo(WSServiceDelegate owner, EndpointAddress targetEndpoint, QName name, BindingID bindingId) {
         this.owner = owner;
@@ -84,7 +74,15 @@ public class PortInfo {
     }
 
     public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
-        return owner.createBinding(portName, bindingId, resolveFeatures(webServiceFeatures, isDispatch));
+        // create binding
+        BindingImpl bindingImpl = BindingImpl.create(bindingId, resolveFeatures(webServiceFeatures, isDispatch).toArray());
+        if (portModel != null && portModel.getBinding().isMTOMEnabled()) {
+            bindingImpl.setMTOMEnabled(true);
+        }
+
+        owner.getHandlerConfigurator().configureHandlers(this,bindingImpl);
+
+        return bindingImpl;
     }
 
     private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
@@ -98,6 +96,36 @@ public class PortInfo {
         if (portModel != null)
             r.mergeFeatures(portModel, isDispatch, false);
         return r;
+    }
+
+//
+// implementation of API PortInfo interface
+//
+    /**
+     * @deprecated
+     *      Only meant to be used via {@link javax.xml.ws.handler.PortInfo}.
+     *      Use {@link WSServiceDelegate#getServiceName()}.
+     */
+    public QName getServiceName() {
+        return owner.getServiceName();
+    }
+
+    /**
+     * @deprecated
+     *      Only meant to be used via {@link javax.xml.ws.handler.PortInfo}.
+     *      Use {@link #portName}.
+     */
+    public QName getPortName() {
+        return portName;
+    }
+
+    /**
+     * @deprecated
+     *      Only meant to be used via {@link javax.xml.ws.handler.PortInfo}.
+     *      Use {@link #bindingId}.
+     */
+    public String getBindingID() {
+        return bindingId.toString();
     }
 }
 
