@@ -278,6 +278,7 @@ public final class StreamMessage extends AbstractMessageImpl {
             XMLStreamReader clone;
             if(hasPayload()) {
                 assert unconsumed();
+                consumedAt = null; // but we don't want to mark it as consumed
                 XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
                 reader = xsb.readAsXMLStreamReader();
                 clone = xsb.readAsXMLStreamReader();
