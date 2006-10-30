@@ -25,7 +25,7 @@ package com.sun.xml.ws.api;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
@@ -93,7 +93,7 @@ public abstract class BindingID {
         return BindingImpl.create(this);
     }
 
-    public final @NotNull WSBinding createBinding(WebServiceFeature[] features) {
+    public final @NotNull WSBinding createBinding(WebServiceFeature... features) {
         return BindingImpl.create(this, features);
     }
 
@@ -108,7 +108,7 @@ public abstract class BindingID {
      *
      *      If the binding is not based on SOAP, this method
      *      returns null. See {@link Message} for how a non-SOAP
-     *      binding shall be handled by {@link Pipe}s.
+     *      binding shall be handled by {@link Tube}s.
      */
     public abstract SOAPVersion getSOAPVersion();
 
