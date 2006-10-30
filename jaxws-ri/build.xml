@@ -453,6 +453,8 @@ major-version=${release.impl.version}
         </zip>
     </target>
 
+    <target name="hudson" depends="clean, dist.zip, src.zip, libs.src.zip, javadocs" />
+
     <target name="push-to-maven-prepare"
     description="prepare a repository image for the push-to-maven target">
     <taskdef resource="maven-repository-importer.properties">
