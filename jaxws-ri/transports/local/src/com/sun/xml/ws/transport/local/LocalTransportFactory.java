@@ -54,10 +54,11 @@ import java.util.List;
 public final class LocalTransportFactory extends TransportTubeFactory {
     public Tube doCreate(@NotNull ClientTubeAssemblerContext context) {
         URI adrs = context.getAddress().getURI();
-        if(!adrs.getScheme().equals("local"))
+        if(!(adrs.getScheme().equals("local") || adrs.getScheme().equals("local-async")))
             return null;
-
-        return new LocalTransportTube(adrs,createServerService(adrs),context.getCodec());
+        return adrs.getScheme().equals("local")
+                ? new LocalTransportTube(adrs,createServerService(adrs),context.getCodec())
+                : new LocalAsyncTransportTube(adrs,createServerService(adrs),context.getCodec());
     }
 
     /**
@@ -101,4 +102,5 @@ public final class LocalTransportFactory extends TransportTubeFactory {
 
         return parser.parse(new File(riFile));
     }
+
 }
