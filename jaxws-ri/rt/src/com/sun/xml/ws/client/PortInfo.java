@@ -73,9 +73,19 @@ public class PortInfo implements javax.xml.ws.handler.PortInfo {
         this.portModel = port;
     }
 
+    /**
+     * Creates {@link BindingImpl} for this {@link PortInfo}.
+     *
+     * @param webServiceFeatures
+     *      User-specified features.
+     */
     public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
-        // create binding
-        BindingImpl bindingImpl = BindingImpl.create(bindingId, resolveFeatures(webServiceFeatures, isDispatch).toArray());
+        WebServiceFeatureList r = new WebServiceFeatureList(webServiceFeatures);
+        if (portModel != null)
+            // merge features from WSDL
+            r.mergeFeatures(portModel, isDispatch, false);
+
+        BindingImpl bindingImpl = BindingImpl.create(bindingId, r.toArray());
         if (portModel != null && portModel.getBinding().isMTOMEnabled()) {
             bindingImpl.setMTOMEnabled(true);
         }
@@ -91,14 +101,7 @@ public class PortInfo implements javax.xml.ws.handler.PortInfo {
         return null;
     }
 
-    protected WebServiceFeatureList resolveFeatures(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
-        WebServiceFeatureList r = new WebServiceFeatureList(webServiceFeatures);
-        if (portModel != null)
-            r.mergeFeatures(portModel, isDispatch, false);
-        return r;
-    }
-
-//
+    //
 // implementation of API PortInfo interface
 //
     /**
