@@ -97,7 +97,7 @@ public final class WSEndpointReference {
             epr.writeTo(new XMLStreamBufferResult(xsb));
             this.infoset = xsb;
             this.version = version;
-            parse();
+            parseData();
         } catch (XMLStreamException e) {
             throw new WebServiceException(ClientMessages.FAILED_TO_PARSE_EPR(epr),e);
         }
