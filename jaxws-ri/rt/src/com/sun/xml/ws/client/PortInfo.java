@@ -86,10 +86,6 @@ public class PortInfo implements javax.xml.ws.handler.PortInfo {
             r.mergeFeatures(portModel, isDispatch, false);
 
         BindingImpl bindingImpl = BindingImpl.create(bindingId, r.toArray());
-        if (portModel != null && portModel.getBinding().isMTOMEnabled()) {
-            bindingImpl.setMTOMEnabled(true);
-        }
-
         owner.getHandlerConfigurator().configureHandlers(this,bindingImpl);
 
         return bindingImpl;

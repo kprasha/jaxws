@@ -34,6 +34,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.soap.MTOMFeature;
 
 /**
  * Implementation of {@link WSDLBoundPortType}
@@ -48,7 +49,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     private final @NotNull WSDLModelImpl owner;
     private boolean finalized = false;
     private final QNameMap<WSDLBoundOperationImpl> bindingOperations = new QNameMap<WSDLBoundOperationImpl>();
-    private boolean mtomEnabled;
 
     /**
      * Operations keyed by the payload tag name.
@@ -188,11 +188,11 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     }
 
     public void enableMTOM() {
-        mtomEnabled = true;
+        features.add(new MTOMFeature());
     }
 
     public boolean isMTOMEnabled() {
-        return mtomEnabled;
+        return features.isEnabled(MTOMFeature.class);
     }
 
     public SOAPVersion getSOAPVersion(){
