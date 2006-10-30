@@ -118,7 +118,7 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         this.engine = new Engine();
         this.endpointReference = epr;
 
-        if(!binding.isAddressingEnabled() && epr!=null)
+        if(AddressingVersion.isEnabled(binding) && epr!=null)
             throw new WebServiceException(ClientMessages.EPR_WITHOUT_ADDRESSING_ON());
     }
 
@@ -177,7 +177,7 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
             packet.proxy = this;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
-            if (binding.isAddressingEnabled()) {
+            if (AddressingVersion.isEnabled(binding)) {
                 if(endpointReference!=null)
                     endpointReference.addReferenceParameters(packet.getMessage().getHeaders());
             }

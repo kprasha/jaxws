@@ -94,7 +94,7 @@ public class WsaClientTube extends WsaTube {
             return;
         }
 
-        String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, binding.getSOAPVersion());
 
         if (gotA == null)
             throw new WebServiceException(AddressingMessages.VALIDATION_CLIENT_NULL_ACTION());
@@ -110,7 +110,7 @@ public class WsaClientTube extends WsaTube {
     protected void checkMandatoryHeaders(boolean foundAction, boolean foundTo) {
         // if no wsa:Action header is found
         if (!foundAction)
-            throw new MapRequiredException(binding.getAddressingVersion().actionTag);
+            throw new MapRequiredException(addressingVersion.actionTag);
 
         // wsa:To is opional
         // if not present, then anonymous value is assumed

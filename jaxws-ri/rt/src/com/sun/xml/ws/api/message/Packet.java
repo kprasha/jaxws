@@ -682,7 +682,7 @@ public final class Packet extends DistributedPropertySet {
     }
 
     private Packet populateAddressingHeaders(WSBinding binding, Packet responsePacket, WSDLPort wsdlPort) {
-        AddressingVersion addressingVersion = binding.getAddressingVersion();
+        AddressingVersion addressingVersion = AddressingVersion.fromBinding(binding);
 
         if (addressingVersion == null)
             return responsePacket;
@@ -692,7 +692,7 @@ public final class Packet extends DistributedPropertySet {
                 wsaHelper.getFaultAction(this, responsePacket) :
                 wsaHelper.getOutputAction(this);
 
-        return populateAddressingHeaders(responsePacket, binding.getAddressingVersion(), binding.getSOAPVersion(), action);
+        return populateAddressingHeaders(responsePacket, AddressingVersion.fromBinding(binding), binding.getSOAPVersion(), action);
     }
 
     // completes TypedMap

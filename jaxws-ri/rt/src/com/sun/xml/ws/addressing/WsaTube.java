@@ -60,11 +60,13 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
     protected final WSDLPort wsdlPort;
     protected final WSBinding binding;
     final WsaTubeHelper helper;
+    protected final AddressingVersion addressingVersion;
 
     public WsaTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(next);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
+        addressingVersion = AddressingVersion.fromBinding(binding);
         helper = getTubeHelper();
     }
 
@@ -73,6 +75,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         this.wsdlPort = that.wsdlPort;
         this.binding = that.binding;
         this.helper = that.helper;
+        addressingVersion = AddressingVersion.fromBinding(binding);
     }
 
     @Override
@@ -106,11 +109,11 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
 
             return packet;
         } catch (InvalidMapException e) {
-            soapFault = helper.newInvalidMapFault(e, binding.getAddressingVersion());
-            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getMapQName());
+            soapFault = helper.newInvalidMapFault(e, addressingVersion);
+            s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
         } catch (MapRequiredException e) {
-            soapFault = helper.newMapRequiredFault(e, binding.getAddressingVersion());
-            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getMapQName());
+            soapFault = helper.newMapRequiredFault(e, addressingVersion);
+            s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
 //        } catch (ActionNotSupportedException e) {
 //            soapFault = helper.newActionNotSupportedFault(e.getAction(), binding.getAddressingVersion());
 //            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getAction());
@@ -147,7 +150,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         if (packet.getMessage().getHeaders() != null)
             return false;
 
-        String action = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+        String action = packet.getMessage().getHeaders().getAction(addressingVersion, binding.getSOAPVersion());
         if (action == null)
             return true;
 
@@ -174,7 +177,6 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
 
     public final void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
         Message message = packet.getMessage();
-        AddressingVersion av = binding.getAddressingVersion();
         boolean addressingRequired = AddressingVersion.isRequired(binding);
         if (message == null) {
             if (addressingRequired)
@@ -190,13 +192,13 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
                 return;
         }
 
-        java.util.Iterator<Header> hIter = message.getHeaders().getHeaders(av.nsUri, true);
+        java.util.Iterator<Header> hIter = message.getHeaders().getHeaders(addressingVersion.nsUri, true);
 
         if (!hIter.hasNext()) {
             // no WS-A headers are found
             if (addressingRequired)
                 // if WS-A is required, then throw an exception looking for wsa:Action header
-                throw new InvalidMapException(av.actionTag, av.invalidCardinalityTag);
+                throw new InvalidMapException(addressingVersion.actionTag, addressingVersion.invalidCardinalityTag);
             else
                 // else no need to process
                 return;
@@ -221,56 +223,56 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
             }
 
             String local = h.getLocalPart();
-            if (local.equals(av.fromTag.getLocalPart())) {
+            if (local.equals(addressingVersion.fromTag.getLocalPart())) {
                 if (foundFrom) {
-                    duplicateHeader = av.fromTag;
+                    duplicateHeader = addressingVersion.fromTag;
                     break;
                 }
                 foundFrom = true;
-            } else if (local.equals(av.toTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.toTag.getLocalPart())) {
                 if (foundTo) {
-                    duplicateHeader = av.toTag;
+                    duplicateHeader = addressingVersion.toTag;
                     break;
                 }
                 foundTo = true;
-            } else if (local.equals(av.replyToTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.replyToTag.getLocalPart())) {
                 if (foundReplyTo) {
-                    duplicateHeader = av.replyToTag;
+                    duplicateHeader = addressingVersion.replyToTag;
                     break;
                 }
                 foundReplyTo = true;
                 try {
-                    replyTo = h.readAsEPR(binding.getAddressingVersion());
+                    replyTo = h.readAsEPR(addressingVersion);
                 } catch (XMLStreamException e) {
                     throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
                 }
-            } else if (local.equals(av.faultToTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.faultToTag.getLocalPart())) {
                 if (foundFaultTo) {
-                    duplicateHeader = av.faultToTag;
+                    duplicateHeader = addressingVersion.faultToTag;
                     break;
                 }
                 foundFaultTo = true;
                 try {
-                    faultTo = h.readAsEPR(binding.getAddressingVersion());
+                    faultTo = h.readAsEPR(addressingVersion);
                 } catch (XMLStreamException e) {
                     throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
                 }
-            } else if (local.equals(av.actionTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.actionTag.getLocalPart())) {
                 if (foundAction) {
-                    duplicateHeader = av.actionTag;
+                    duplicateHeader = addressingVersion.actionTag;
                     break;
                 }
                 foundAction = true;
-            } else if (local.equals(av.messageIDTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.messageIDTag.getLocalPart())) {
                 if (foundMessageId) {
-                    duplicateHeader = av.messageIDTag;
+                    duplicateHeader = addressingVersion.messageIDTag;
                     break;
                 }
                 foundMessageId = true;
-            } else if (local.equals(av.relatesToTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.relatesToTag.getLocalPart())) {
                 // no validation for RelatesTo
                 // since there can be many
-            } else if (local.equals(av.faultDetailTag.getLocalPart())) {
+            } else if (local.equals(addressingVersion.faultDetailTag.getLocalPart())) {
                 // TODO: should anything be done here ?
                 // TODO: fault detail element - only for SOAP 1.1
             } else {
@@ -280,7 +282,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
 
         // check for invalid cardinality first before checking for mandatory headers
         if (duplicateHeader != null) {
-            throw new InvalidMapException(duplicateHeader, av.invalidCardinalityTag);
+            throw new InvalidMapException(duplicateHeader, addressingVersion.invalidCardinalityTag);
         }
 
         // WS-A is engaged if wsa:Action header is found
@@ -329,7 +331,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
 
     final void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) {
         // no check if Addressing is not enabled or is Member Submission
-        if (binding.getAddressingVersion() == null || binding.getAddressingVersion() == AddressingVersion.MEMBER)
+        if (addressingVersion == null || addressingVersion == AddressingVersion.MEMBER)
             return;
 
         if (wbo == null)
@@ -337,8 +339,6 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
 
         WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)wbo;
         WSDLBoundOperationImpl.ANONYMOUS anon = impl.getAnonymous();
-
-        AddressingVersion av = binding.getAddressingVersion();
 
         String replyToValue = null;
         String faultToValue = null;
@@ -352,18 +352,18 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         if (anon == WSDLBoundOperationImpl.ANONYMOUS.optional) {
             // no check is required
         } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.required) {
-            if (replyToValue != null && !replyToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
+            if (replyToValue != null && !replyToValue.equals(addressingVersion.getAnonymousUri()))
+                throw new InvalidMapException(addressingVersion.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
-            if (faultToValue != null && !faultToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
+            if (faultToValue != null && !faultToValue.equals(addressingVersion.getAnonymousUri()))
+                throw new InvalidMapException(addressingVersion.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
         } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.prohibited) {
-            if (replyToValue != null && replyToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
+            if (replyToValue != null && replyToValue.equals(addressingVersion.getAnonymousUri()))
+                throw new InvalidMapException(addressingVersion.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 
-            if (faultToValue != null && faultToValue.equals(av.getAnonymousUri()))
-                throw new InvalidMapException(av.faultToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
+            if (faultToValue != null && faultToValue.equals(addressingVersion.getAnonymousUri()))
+                throw new InvalidMapException(addressingVersion.faultToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 
         } else {
             // cannot reach here

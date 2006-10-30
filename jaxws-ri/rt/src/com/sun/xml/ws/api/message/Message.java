@@ -627,7 +627,7 @@ public abstract class Message {
      * @return unique id for the message
      */
     public @NotNull String getID(@NotNull WSBinding binding) {
-        return getID(binding.getAddressingVersion(), binding.getSOAPVersion());
+        return getID(AddressingVersion.fromBinding(binding), binding.getSOAPVersion());
     }
 
     /**

@@ -73,16 +73,15 @@ public class WsaServerTube extends WsaTube {
         // Store request ReplyTo and FaultTo in requestPacket.invocationProperties
         // so that they can be used after responsePacket is received.
         // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.
-        AddressingVersion av = binding.getAddressingVersion();
         String replyTo = null;
         String faultTo = null;
         if (request.getMessage() != null) {
             HeaderList hl = request.getMessage().getHeaders();
             if (hl != null) {
-                WSEndpointReference epr = hl.getReplyTo(av, binding.getSOAPVersion());
+                WSEndpointReference epr = hl.getReplyTo(addressingVersion, binding.getSOAPVersion());
                 if (epr != null)
                     replyTo = epr.getAddress();
-                epr = hl.getFaultTo(av, binding.getSOAPVersion());
+                epr = hl.getFaultTo(addressingVersion, binding.getSOAPVersion());
                 if (epr != null)
                     faultTo = epr.getAddress();
             }
@@ -98,7 +97,7 @@ public class WsaServerTube extends WsaTube {
             // default to ReplyTo
 
             // if ReplyTo is non-anonymous or None URI
-            if (replyTo != null && (!replyTo.equals(av.getAnonymousUri()) || replyTo.equals(av.getNoneUri()))) {
+            if (replyTo != null && (!replyTo.equals(addressingVersion.getAnonymousUri()) || replyTo.equals(addressingVersion.getNoneUri()))) {
                 // close the transport back channel
                 if (request.transportBackChannel != null) {
                     request.transportBackChannel.close();
@@ -106,10 +105,10 @@ public class WsaServerTube extends WsaTube {
             }
         } else {
             // if both FaultTo and ReplyTo are non-anonymous
-            if ((!faultTo.equals(av.getAnonymousUri()) && replyTo != null && !replyTo.equals(av.getAnonymousUri())) ||
+            if ((!faultTo.equals(addressingVersion.getAnonymousUri()) && replyTo != null && !replyTo.equals(addressingVersion.getAnonymousUri())) ||
 
                     // or if both FaultTo and ReplyTo are none
-                    (faultTo.equals(av.getNoneUri()) && replyTo != null && replyTo.equals(av.getNoneUri()))
+                    (faultTo.equals(addressingVersion.getNoneUri()) && replyTo != null && replyTo.equals(addressingVersion.getNoneUri()))
                     ) {
                 if (request.transportBackChannel != null) {
                     request.transportBackChannel.close();
@@ -131,16 +130,16 @@ public class WsaServerTube extends WsaTube {
 
         if (replyTo != null) {
             // none ReplyTo
-            if (replyTo.equals(av.getNoneUri()) &&
+            if (replyTo.equals(addressingVersion.getNoneUri()) &&
                     ((faultTo == null) ||
-                            (!faultTo.equals(av.getAnonymousUri())))) {
+                            (!faultTo.equals(addressingVersion.getAnonymousUri())))) {
                 return doInvoke(next,p);
             }
 
             // non-anonymous ReplyTo
-            if (!replyTo.equals(av.getAnonymousUri()) &&
+            if (!replyTo.equals(addressingVersion.getAnonymousUri()) &&
                     ((faultTo == null) ||
-                            (!faultTo.equals(av.getAnonymousUri())))) {
+                            (!faultTo.equals(addressingVersion.getAnonymousUri())))) {
                 return doReturnWith(processNonAnonymousReply(p, false, true));
             }
         }
@@ -156,7 +155,7 @@ public class WsaServerTube extends WsaTube {
                 // reach here if endpoint was invoked with both replyTo and faultTo
                 // not equal to either non-anonymous or none
                 String uri = getResponseAddress(response, false);
-                if (!uri.equals(binding.getAddressingVersion().getAnonymousUri()) && !uri.equals(binding.getAddressingVersion().getNoneUri()))
+                if (!uri.equals(addressingVersion.getAnonymousUri()) && !uri.equals(addressingVersion.getNoneUri()))
                     response = processNonAnonymousReply(response, false, false);
             }
         }
@@ -178,7 +177,6 @@ public class WsaServerTube extends WsaTube {
         if (hl == null)
             return responsePacket;
 
-        AddressingVersion av = binding.getAddressingVersion();
         String replyTo = (String)responsePacket.invocationProperties.get(REQUEST_REPLY_TO);
         String faultTo = (String)responsePacket.invocationProperties.get(REQUEST_FAULT_TO);
 
@@ -187,11 +185,11 @@ public class WsaServerTube extends WsaTube {
 
             if (replyTo != null) {
                 // if none, then fault message is not sent back
-                if (replyTo.equals(av.getNoneUri())) {
+                if (replyTo.equals(addressingVersion.getNoneUri())) {
                     if (endpointInvoked) {
                         return responsePacket.createServerResponse(responsePacket.getMessage(), responsePacket.endpoint.getPort(), responsePacket.endpoint.getBinding());
                     }
-                } else if (!replyTo.equals(av.getAnonymousUri())) {
+                } else if (!replyTo.equals(addressingVersion.getAnonymousUri())) {
                     // non-anonymous default FaultTo
                     return processNonAnonymousReply(responsePacket, false, endpointInvoked);
                 }
@@ -200,12 +198,12 @@ public class WsaServerTube extends WsaTube {
             // explicit FaultTo
 
             // if none, then fault message is not sent back
-            if (faultTo.equals(av.getNoneUri())) {
+            if (faultTo.equals(addressingVersion.getNoneUri())) {
                 if (endpointInvoked) {
                     responsePacket.setMessage(null);
                     return responsePacket;
                 }
-            } else if (!faultTo.equals(av.getAnonymousUri())) {
+            } else if (!faultTo.equals(addressingVersion.getAnonymousUri())) {
                 // non-anonymous FaultTo
                 return processNonAnonymousReply(responsePacket, true, endpointInvoked);
             }
@@ -294,7 +292,7 @@ public class WsaServerTube extends WsaTube {
             return;
         }
 
-        String gotA = packet.getMessage().getHeaders().getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, binding.getSOAPVersion());
 
         if (gotA == null)
             throw new WebServiceException(AddressingMessages.VALIDATION_SERVER_NULL_ACTION());
@@ -313,12 +311,12 @@ public class WsaServerTube extends WsaTube {
     protected void checkMandatoryHeaders(boolean foundAction, boolean foundTo) {
         // if no wsa:Action header is found
         if (!foundAction)
-            throw new MapRequiredException(binding.getAddressingVersion().actionTag);
+            throw new MapRequiredException(addressingVersion.actionTag);
 
         // if no wsa:To header is found
         // TODO: should we throw a fault for missing To as it's optional ?
         if (!foundTo)
-            throw new MapRequiredException(binding.getAddressingVersion().toTag);
+            throw new MapRequiredException(addressingVersion.toTag);
     }
 
     private static final String REQUEST_REPLY_TO = "com.sun.xml.ws.addressing.request.replyTo";

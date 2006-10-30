@@ -54,7 +54,7 @@ import org.w3c.dom.Element;
 public abstract class WsaTubeHelper {
 
     public String getFaultAction(Packet requestPacket, Packet responsePacket) {
-        String action = binding.getAddressingVersion().getDefaultFaultAction();
+        String action = AddressingVersion.fromBinding(binding).getDefaultFaultAction();
 
         if (wsdlPort == null)
             return action;

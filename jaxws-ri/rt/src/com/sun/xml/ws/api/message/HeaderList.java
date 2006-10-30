@@ -629,7 +629,7 @@ public final class HeaderList extends ArrayList<Header> {
         if (binding == null)
             throw new IllegalArgumentException(AddressingMessages.NULL_BINDING());
 
-        AddressingVersion ver = binding.getAddressingVersion();
+        AddressingVersion ver = AddressingVersion.fromBinding(binding);
         WsaTubeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
 
         // wsa:Action
@@ -648,10 +648,10 @@ public final class HeaderList extends ArrayList<Header> {
 
         if (onewayFeature == null) {
             // standard oneway
-            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), oneway, action);
+            fillRequestAddressingHeaders(packet, AddressingVersion.fromBinding(binding), binding.getSOAPVersion(), oneway, action);
         } else {
             // custom oneway
-            fillRequestAddressingHeaders(packet, binding.getAddressingVersion(), binding.getSOAPVersion(), onewayFeature, action);
+            fillRequestAddressingHeaders(packet, AddressingVersion.fromBinding(binding), binding.getSOAPVersion(), onewayFeature, action);
         }
     }
 
@@ -775,7 +775,7 @@ public final class HeaderList extends ArrayList<Header> {
 
     public void readResponseAddressingHeaders(WSDLPort wsdlPort, WSBinding binding) {
         // read Action
-        String action = getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+        String action = getAction(AddressingVersion.fromBinding(binding), binding.getSOAPVersion());
         // TODO: validate client-inbound Action
     }
 }

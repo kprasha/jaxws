@@ -68,19 +68,6 @@ public interface WSBinding extends Binding {
     SOAPVersion getSOAPVersion();
 
     /**
-     * Gets the WS-Addressing version of this binding.
-     *
-     * TODO: clarify what to do with XML/HTTP binding
-     *
-     * @return
-     *      If the binding is using SOAP and WS-Addressing is enabled,
-     *      this method returns a {@link AddressingVersion} constant.
-     *      If binding is not using SOAP or WS-Addressing is not enabled,
-     *      this method returns null.
-     */
-    AddressingVersion getAddressingVersion();
-
-    /**
      * Gets the binding ID, which uniquely identifies the binding.
      *
      * <p>

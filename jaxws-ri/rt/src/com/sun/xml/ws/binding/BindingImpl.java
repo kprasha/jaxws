@@ -104,10 +104,6 @@ public abstract class BindingImpl implements WSBinding {
         return bindingId.getSOAPVersion();
     }
 
-    public AddressingVersion getAddressingVersion() {
-        return features.getAddressingVersion();
-    }
-
     public final
     @NotNull
     Codec createCodec() {
@@ -178,10 +174,4 @@ public abstract class BindingImpl implements WSBinding {
     public void addFeature(@NotNull WebServiceFeature newFeature) {
         features.add(newFeature);
     }
-
-    //what does this mean
-    public boolean isAddressingEnabled() {
-        return features.getAddressingVersion() != null;
-    }
-
 }
