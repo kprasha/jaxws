@@ -23,13 +23,24 @@
 package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+import javax.xml.ws.WebServiceException;
 
 /**
  * An {@link EndpointMethodDispatcher} that uses
@@ -71,8 +82,8 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
             return null;
 
         String action = null;
-        if (binding.getAddressingVersion() != null)
-            action = hl.getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
+        if (AddressingVersion.fromBinding(binding) != null)
+            action = hl.getAction(AddressingVersion.fromBinding(binding), binding.getSOAPVersion());
 
         if (action == null)
             return null;
@@ -87,5 +98,39 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
     public String getName() {
         return "Action-based Dispatcher";
+    }
+
+
+    public Message getFaultMessage() {
+        AddressingVersion av = AddressingVersion.fromBinding(binding);
+        QName subcode = av.actionNotSupportedTag;
+        String faultstring = String.format(av.actionNotSupportedText, dispatchKey);
+
+        try {
+            SOAPFault fault;
+            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
+                fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault();
+                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(subcode);
+                // TODO: add FaultDetail
+//                getProblemActionDetail(dispatchKey, fault.addDetail());
+            } else {
+                fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
+                fault.setFaultCode(subcode);
+            }
+
+            fault.setFaultString(faultstring);
+
+            Message faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(
+                    binding.getSOAPVersion(), faultstring, binding.getSOAPVersion().faultCodeClient);
+            if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
+                // TODO: add FaultDetail
+                faultMessage.getHeaders().add(null);
+            }
+
+            return faultMessage;
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
     }
 }

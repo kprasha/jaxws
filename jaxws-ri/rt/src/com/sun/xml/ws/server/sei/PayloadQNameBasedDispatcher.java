@@ -30,6 +30,8 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.util.QNameMap;
+import com.sun.xml.ws.resources.ServerMessages;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 /**
  * An {@link com.sun.xml.ws.server.sei.EndpointMethodDispatcher} that uses
@@ -47,8 +49,10 @@ public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
     private static final String EMPTY_PAYLOAD_LOCAL = "";
     private static final String EMPTY_PAYLOAD_NSURI = "";
     private String dispatchKey;
+    private WSBinding binding;
 
     public PayloadQNameBasedDispatcher(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
+        this.binding = binding;
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         for( JavaMethodImpl m : model.getJavaMethods() ) {
             EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,model,m,binding);
@@ -79,5 +83,11 @@ public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
 
     public String getName() {
         return "Payload QName-based Dispatcher";
+    }
+
+    public Message getFaultMessage() {
+        String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(dispatchKey, getName());
+        return SOAPFaultBuilder.createSOAPFaultMessage(
+                binding.getSOAPVersion(), faultString, binding.getSOAPVersion().faultCodeClient);
     }
 }
