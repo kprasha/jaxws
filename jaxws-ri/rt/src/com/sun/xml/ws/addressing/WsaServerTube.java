@@ -75,19 +75,22 @@ public class WsaServerTube extends WsaTube {
         // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.
         String replyTo = null;
         String faultTo = null;
+        String messageId = null;
         if (request.getMessage() != null) {
             HeaderList hl = request.getMessage().getHeaders();
             if (hl != null) {
-                WSEndpointReference epr = hl.getReplyTo(addressingVersion, binding.getSOAPVersion());
+                WSEndpointReference epr = hl.getReplyTo(addressingVersion, soapVersion);
                 if (epr != null)
                     replyTo = epr.getAddress();
-                epr = hl.getFaultTo(addressingVersion, binding.getSOAPVersion());
+                epr = hl.getFaultTo(addressingVersion, soapVersion);
                 if (epr != null)
                     faultTo = epr.getAddress();
+                messageId = hl.getMessageID(addressingVersion, soapVersion);
             }
         }
         request.invocationProperties.put(REQUEST_REPLY_TO, replyTo);
         request.invocationProperties.put(REQUEST_FAULT_TO, faultTo);
+        request.invocationProperties.put(REQUEST_MESSAGE_ID, messageId);
 
         // close the transportBackChannel if it cannot be used for sending
         // back either normal or fault replies
@@ -292,7 +295,7 @@ public class WsaServerTube extends WsaTube {
             return;
         }
 
-        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, binding.getSOAPVersion());
+        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
 
         if (gotA == null)
             throw new WebServiceException(AddressingMessages.VALIDATION_SERVER_NULL_ACTION());
@@ -321,4 +324,5 @@ public class WsaServerTube extends WsaTube {
 
     private static final String REQUEST_REPLY_TO = "com.sun.xml.ws.addressing.request.replyTo";
     private static final String REQUEST_FAULT_TO = "com.sun.xml.ws.addressing.request.faultTo";
+    public static final String REQUEST_MESSAGE_ID = "com.sun.xml.ws.addressing.request.messageID";
 }

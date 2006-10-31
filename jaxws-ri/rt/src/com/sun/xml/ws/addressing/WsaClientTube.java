@@ -94,7 +94,7 @@ public class WsaClientTube extends WsaTube {
             return;
         }
 
-        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, binding.getSOAPVersion());
+        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
 
         if (gotA == null)
             throw new WebServiceException(AddressingMessages.VALIDATION_CLIENT_NULL_ACTION());

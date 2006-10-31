@@ -60,7 +60,7 @@ public abstract class WsaTubeHelper {
             return action;
 
         try {
-            SOAPMessage sm = responsePacket.getMessage().readAsSOAPMessage();
+            SOAPMessage sm = responsePacket.getMessage().copy().readAsSOAPMessage();
             if (sm == null)
                 return action;
 
@@ -172,33 +172,6 @@ public abstract class WsaTubeHelper {
         }
 
         return action;
-    }
-
-    public SOAPFault newActionNotSupportedFault(String action, AddressingVersion av) {
-        QName subcode = av.actionNotSupportedTag;
-        String faultstring = String.format(av.actionNotSupportedText, action);
-
-        try {
-            SOAPFactory factory;
-            SOAPFault fault;
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
-                factory = SOAPVersion.SOAP_12.saajSoapFactory;
-                fault = factory.createFault();
-                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
-                fault.appendFaultSubcode(subcode);
-                getProblemActionDetail(action, fault.addDetail());
-            } else {
-                factory = SOAPVersion.SOAP_11.saajSoapFactory;
-                fault = factory.createFault();
-                fault.setFaultCode(subcode);
-            }
-
-            fault.setFaultString(faultstring);
-
-            return fault;
-        } catch (SOAPException e) {
-            throw new WebServiceException(e);
-        }
     }
 
     public SOAPFault newInvalidMapFault(InvalidMapException e, AddressingVersion av) {

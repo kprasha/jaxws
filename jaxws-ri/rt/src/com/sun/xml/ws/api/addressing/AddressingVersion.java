@@ -311,6 +311,12 @@ public enum AddressingVersion {
     public final QName problemHeaderQNameTag;
 
     /**
+     * Represents the QName of the element that conveys additional information
+     * if Action is not matching with that expected.
+     */
+    public final QName problemActionTag;
+
+    /**
      * Represents the QName of the header element that is used to capture the fault detail
      * if there is a fault processing WS-Addressing Message Addressing Property. This is
      * only used for SOAP 1.1.
@@ -376,6 +382,7 @@ public enum AddressingVersion {
         faultDetailTag = new QName(nsUri,"FaultDetail");
 
         problemHeaderQNameTag = new QName(nsUri,"ProblemHeaderQName");
+        problemActionTag = new QName(nsUri, "ProblemAction");
 
         fault_missingAddressInEpr = new QName(nsUri,"MissingAddressInEPR","wsa");
         isReferenceParameterTag = new QName(nsUri,getIsReferenceParameterLocalName());

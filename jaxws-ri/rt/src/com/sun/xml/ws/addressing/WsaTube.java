@@ -61,12 +61,14 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
     protected final WSBinding binding;
     final WsaTubeHelper helper;
     protected final AddressingVersion addressingVersion;
+    protected final SOAPVersion soapVersion;
 
     public WsaTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(next);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
         addressingVersion = AddressingVersion.fromBinding(binding);
+        soapVersion = binding.getSOAPVersion();
         helper = getTubeHelper();
     }
 
@@ -76,6 +78,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         this.binding = that.binding;
         this.helper = that.helper;
         addressingVersion = AddressingVersion.fromBinding(binding);
+        soapVersion = binding.getSOAPVersion();
     }
 
     @Override
@@ -126,7 +129,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
             }
 
             Message m = Messages.create(soapFault);
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
+            if (soapVersion == SOAPVersion.SOAP_11) {
                 m.getHeaders().add(s11FaultDetailHeader);
             }
 
@@ -150,7 +153,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         if (packet.getMessage().getHeaders() != null)
             return false;
 
-        String action = packet.getMessage().getHeaders().getAction(addressingVersion, binding.getSOAPVersion());
+        String action = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
         if (action == null)
             return true;
 
@@ -312,11 +315,11 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
             return true;
 
 
-        if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
+        if (soapVersion == SOAPVersion.SOAP_11) {
             // Rama: Why not checking for SOAP 1.1?
             return true;
         } else {
-            String role = header.getRole(binding.getSOAPVersion());
+            String role = header.getRole(soapVersion);
             return (role.equals(SOAPVersion.SOAP_12.implicitRole));
         }
     }
