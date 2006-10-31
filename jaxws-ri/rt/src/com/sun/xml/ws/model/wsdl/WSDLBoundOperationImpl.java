@@ -371,13 +371,9 @@ public final class WSDLBoundOperationImpl extends AbstractExtensibleImpl impleme
     }
 
     /**
-     * Gets the soapbinding:binding/operation/wsaw:Anonymous. A default value of OPTIONAL is returned.
-     *
-     * @return Anonymous value of the operation
+     * @inheritDoc
      */
     public ANONYMOUS getAnonymous() {
         return anonymous;
     }
-
-    public enum ANONYMOUS { optional, required, prohibited }
 }

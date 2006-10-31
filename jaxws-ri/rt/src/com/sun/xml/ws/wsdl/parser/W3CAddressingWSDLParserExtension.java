@@ -89,11 +89,11 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
                     // TODO: throw exception only if wsdl:required=true
                     // TODO: is this the right exception ?
                 } else if (value.equals("optional")) {
-                    impl.setAnonymous(WSDLBoundOperationImpl.ANONYMOUS.optional);
+                    impl.setAnonymous(WSDLBoundOperation.ANONYMOUS.optional);
                 } else if (value.equals("required")) {
-                    impl.setAnonymous(WSDLBoundOperationImpl.ANONYMOUS.required);
+                    impl.setAnonymous(WSDLBoundOperation.ANONYMOUS.required);
                 } else if (value.equals("prohibited")) {
-                    impl.setAnonymous(WSDLBoundOperationImpl.ANONYMOUS.prohibited);
+                    impl.setAnonymous(WSDLBoundOperation.ANONYMOUS.prohibited);
                 } else {
                     throw new WebServiceException("wsaw:Anonymous value \"" + value + "\" not understood.");
                     // TODO: throw exception only if wsdl:required=true
@@ -230,7 +230,7 @@ public class W3CAddressingWSDLParserExtension extends WSDLParserExtension {
     protected void patchAnonymousDefault(WSDLBoundPortTypeImpl binding) {
         for (WSDLBoundOperationImpl wbo : binding.getBindingOperations()) {
             if (wbo.getAnonymous() == null)
-                wbo.setAnonymous(WSDLBoundOperationImpl.ANONYMOUS.optional);
+                wbo.setAnonymous(WSDLBoundOperation.ANONYMOUS.optional);
         }
     }
 

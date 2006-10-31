@@ -46,7 +46,6 @@ import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.message.FaultDetailHeader;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
 import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
 import com.sun.xml.ws.resources.AddressingMessages;
@@ -106,10 +105,6 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         try {
             checkCardinality(packet, binding, wsdlPort);
 
-//            if (isAddressingEngagedOrRequired(packet, binding)) {
-//                validateAction(packet);
-//            }
-
             return packet;
         } catch (InvalidMapException e) {
             soapFault = helper.newInvalidMapFault(e, addressingVersion);
@@ -117,9 +112,6 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         } catch (MapRequiredException e) {
             soapFault = helper.newMapRequiredFault(e, addressingVersion);
             s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
-//        } catch (ActionNotSupportedException e) {
-//            soapFault = helper.newActionNotSupportedFault(e.getAction(), binding.getAddressingVersion());
-//            s11FaultDetailHeader = new FaultDetailHeader(binding.getAddressingVersion(), binding.getAddressingVersion().problemHeaderQNameTag.getLocalPart(), e.getAction());
         }
 
         if (soapFault != null) {
@@ -352,16 +344,16 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         if (faultTo != null)
             faultToValue = faultTo.getAddress();
 
-        if (anon == WSDLBoundOperationImpl.ANONYMOUS.optional) {
+        if (anon == WSDLBoundOperation.ANONYMOUS.optional) {
             // no check is required
-        } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.required) {
+        } else if (anon == WSDLBoundOperation.ANONYMOUS.required) {
             if (replyToValue != null && !replyToValue.equals(addressingVersion.getAnonymousUri()))
                 throw new InvalidMapException(addressingVersion.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
             if (faultToValue != null && !faultToValue.equals(addressingVersion.getAnonymousUri()))
                 throw new InvalidMapException(addressingVersion.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
-        } else if (anon == WSDLBoundOperationImpl.ANONYMOUS.prohibited) {
+        } else if (anon == WSDLBoundOperation.ANONYMOUS.prohibited) {
             if (replyToValue != null && replyToValue.equals(addressingVersion.getAnonymousUri()))
                 throw new InvalidMapException(addressingVersion.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 

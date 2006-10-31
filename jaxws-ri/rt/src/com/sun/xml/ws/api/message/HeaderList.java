@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.addressing.OneWayFeature;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.message.StringHeader;
@@ -629,8 +630,8 @@ public final class HeaderList extends ArrayList<Header> {
         if (binding == null)
             throw new IllegalArgumentException(AddressingMessages.NULL_BINDING());
 
-        AddressingVersion ver = AddressingVersion.fromBinding(binding);
-        WsaTubeHelper wsaHelper = ver.getWsaHelper(wsdlPort, binding);
+        AddressingVersion addressingVersion = AddressingVersion.fromBinding(binding);
+        WsaTubeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
 
         // wsa:Action
         // todo: abstract the algorithm of getting input action in getInputAction
@@ -646,12 +647,20 @@ public final class HeaderList extends ArrayList<Header> {
         if (binding.getFeature(OneWayFeature.class) != null)
             onewayFeature = binding.getFeature(OneWayFeature.class);
 
+        // if WSDL has <wsaw:Anonymous>prohibited</wsaw:Anonymous>, then throw an error
+        // as anonymous ReplyTo MUST NOT be added in that case. BindingProvider need to
+        // disable AddressingFeature and MemberSubmissionAddressingFeature and hand-craft
+        // the SOAP message with non-anonymous ReplyTo/FaultTo.
+        if (!oneway && packet.getMessage().getOperation(wsdlPort).getAnonymous() == WSDLBoundOperation.ANONYMOUS.prohibited) {
+            throw new WebServiceException(AddressingMessages.WSAW_ANONYMOUS_PROHIBITED());
+        }
+
         if (onewayFeature == null) {
             // standard oneway
-            fillRequestAddressingHeaders(packet, ver, binding.getSOAPVersion(), oneway, action);
+            fillRequestAddressingHeaders(packet, addressingVersion, binding.getSOAPVersion(), oneway, action);
         } else {
             // custom oneway
-            fillRequestAddressingHeaders(packet, ver, binding.getSOAPVersion(), onewayFeature, action);
+            fillRequestAddressingHeaders(packet, addressingVersion, binding.getSOAPVersion(), onewayFeature, action);
         }
     }
 

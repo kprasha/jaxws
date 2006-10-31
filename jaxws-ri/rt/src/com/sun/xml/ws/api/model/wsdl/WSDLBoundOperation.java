@@ -51,5 +51,14 @@ public interface WSDLBoundOperation extends WSDLObject, WSDLExtensible {
      *
      * @return always same {@link WSDLOperation}
      */
-    @NotNull WSDLOperation getOperation();    
+    @NotNull WSDLOperation getOperation();
+
+    /**
+     * Gets the soapbinding:binding/operation/wsaw:Anonymous. A default value of OPTIONAL is returned.
+     *
+     * @return Anonymous value of the operation
+     */
+    public ANONYMOUS getAnonymous();
+    
+    enum ANONYMOUS { optional, required, prohibited }
 }
