@@ -182,7 +182,7 @@ public final class TagInfoset {
 
         for( int i=0; i<atts.getLength(); i++ ) {
             String nsUri = atts.getURI(i);
-            if(nsUri==null) {
+            if(nsUri==null || nsUri.length() ==0) {
                 w.writeAttribute(atts.getLocalName(i),atts.getValue(i));
             } else {
                 String rawName = atts.getQName(i);
