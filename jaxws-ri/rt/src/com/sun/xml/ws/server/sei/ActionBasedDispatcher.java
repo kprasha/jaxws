@@ -115,7 +115,6 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
                 fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault();
                 fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
                 fault.appendFaultSubcode(subcode);
-                // TODO: add FaultDetail
                 Detail detail = fault.addDetail();
                 SOAPElement se = detail.addChildElement(av.problemActionTag);
                 se = se.addChildElement(av.actionTag);
@@ -127,8 +126,7 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
             fault.setFaultString(faultstring);
 
-            Message faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(
-                    binding.getSOAPVersion(), faultstring, subcode);
+            Message faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(binding.getSOAPVersion(), fault);
             if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
                 faultMessage.getHeaders().add(new ProblemActionHeader(dispatchKey, av));
             }

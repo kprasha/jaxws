@@ -108,6 +108,15 @@ class SOAP11Fault extends SOAPFaultBuilder {
         }
     }
 
+    SOAP11Fault(SOAPFault fault) {
+        this.faultcode = fault.getFaultCodeAsQName();
+        this.faultstring = fault.getFaultString();
+        this.faultactor = fault.getFaultActor();
+        if (fault.getDetail() != null) {
+            detail = new DetailType(fault.getDetail());
+        }
+    }
+
     QName getFaultcode() {
         return faultcode;
     }

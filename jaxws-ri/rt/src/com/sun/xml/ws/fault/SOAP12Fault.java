@@ -109,6 +109,21 @@ class SOAP12Fault extends SOAPFaultBuilder {
         Detail = detail;
     }
 
+    SOAP12Fault(SOAPFault fault) {
+        Code = new CodeType(fault.getFaultCodeAsQName());
+        if (Code != null) {
+            try {
+                fillFaultSubCodes(fault, Code.getSubcode());
+            } catch (SOAPException e) {
+                throw new WebServiceException(e);
+            }
+        }
+
+        Reason = new ReasonType(fault.getFaultString());
+        Role = fault.getFaultRole();
+        Detail = new DetailType(fault.getDetail());
+    }
+
     SOAP12Fault(QName code, String reason, String actor, Node detailObject) {
         Code = new CodeType(code);
         Reason = new ReasonType(reason);

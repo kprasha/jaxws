@@ -173,7 +173,17 @@ public abstract class SOAPFaultBuilder {
         if (faultCode == null)
             faultCode = getDefaultFaultCode(soapVersion);
         return createSOAPFaultMessage(soapVersion, faultString, faultCode, null);
+    }
 
+    public static Message createSOAPFaultMessage(SOAPVersion soapVersion, SOAPFault fault) {
+        switch (soapVersion) {
+            case SOAP_11:
+                return JAXBMessage.create(JAXB_CONTEXT, new SOAP11Fault(fault), soapVersion);
+            case SOAP_12:
+                return JAXBMessage.create(JAXB_CONTEXT, new SOAP12Fault(fault), soapVersion);
+            default:
+                throw new AssertionError();
+        }
     }
 
     private static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode, Node detail) {
