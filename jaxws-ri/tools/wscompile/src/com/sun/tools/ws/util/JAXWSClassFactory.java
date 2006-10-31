@@ -22,12 +22,8 @@
 
 package com.sun.tools.ws.util;
 
-import com.sun.tools.ws.processor.config.WSDLModelInfo;
 import com.sun.tools.ws.processor.generator.Names;
-import com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase;
 import com.sun.xml.ws.util.VersionUtil;
-
-import java.util.Properties;
 
 /**
  * Singleton factory class to instantiate concrete classes based on the jaxws version
@@ -63,25 +59,6 @@ public class JAXWSClassFactory {
             // TODO: throw exception
         } else
             classVersion = version;
-    }
-
-    /**
-     * Returns the WSDLModeler for specific target version.
-     *
-     * @param modelInfo
-     * @param options
-     * @return the WSDLModeler for specific target version.
-     */
-    public WSDLModelerBase createWSDLModeler(
-        WSDLModelInfo modelInfo,
-        Properties options) {
-        WSDLModelerBase wsdlModeler = null;
-//        if (classVersion.equals(VersionUtil.JAXWS_VERSION_20))
-//            /wsdlModeler = new WSDLModeler(modelInfo, options);
-//        else {
-//            // TODO: throw exception
-//        }
-        return wsdlModeler;
     }
 
     /**

@@ -66,29 +66,11 @@ public abstract class WSDLModelerBase implements Modeler {
     protected final WsimportOptions options;
     protected DOMForest forest;
 
-//    public WSDLModelerBase(WSDLModelInfo modelInfo, Properties options, ErrorReceiver receiver) {
-//        //init();
-//        _modelInfo = modelInfo;
-//        _options = options;
-//        _messageFactory =
-//            new LocalizableMessageFactory("com.sun.tools.ws.resources.modeler");
-//        _conflictingClassNames = null;
-//        _env = modelInfo.getParent().getEnvironment();
-//        reqResNames = new HashSet<String>();
-//        this.errReceiver = receiver;
-//    }
 
     public WSDLModelerBase(WsimportOptions options, ErrorReceiver receiver) {
         this.options = options;
         this.errReceiver = new ErrorReceiverFilter(receiver);;
     }
-
-
-
-
-//    protected WSDLModelInfo getWSDLModelInfo(){
-//        return _modelInfo;
-//    }
 
     /**
      *
@@ -734,18 +716,11 @@ public abstract class WSDLModelerBase implements Modeler {
         "com.sun.xml.ws.processor.modeler.wsdl.mimeMultipartRelatedBinding";
 
 
-//    public ProcessorEnvironment getOptions(){
-//        return _env;
-//    }
     protected ProcessSOAPOperationInfo info;
 
-//    protected WSDLModelInfo _modelInfo;
-//    protected Properties _options;
-//    protected LocalizableMessageFactory _messageFactory;
     private Set _conflictingClassNames;
     protected Map<String,JavaException> _javaExceptions;
     protected Map _faultTypeToStructureMap;
-//    private ProcessorEnvironment _env;
     protected JavaSimpleTypeCreator _javaTypes;
     protected Map<QName, Port> _bindingNameToPortMap;
     protected boolean useWSIBasicProfile = true;

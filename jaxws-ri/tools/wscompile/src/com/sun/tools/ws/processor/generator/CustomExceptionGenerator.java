@@ -39,13 +39,13 @@ import java.util.Map;
 public class CustomExceptionGenerator extends GeneratorBase {
     private Map<String, JClass> faults = new HashMap<String, JClass>();
 
-    public static final void generate(Model model,
+    public static void generate(Model model,
         WsimportOptions options,
         ErrorReceiver receiver){
         CustomExceptionGenerator exceptionGen = new CustomExceptionGenerator(model, options, receiver);
         exceptionGen.doGeneration();        
     }
-    protected CustomExceptionGenerator(
+    private CustomExceptionGenerator(
         Model model,
         WsimportOptions options,
         ErrorReceiver receiver) {
@@ -56,14 +56,8 @@ public class CustomExceptionGenerator extends GeneratorBase {
         return new CustomExceptionGenerator(model, options, receiver);
     }
 
-    protected void preVisitModel(Model model) throws Exception {
-    }
-
-    protected void postVisitModel(Model model) throws Exception {
-        faults = null;
-    }
-
-    protected void preVisitFault(Fault fault) throws Exception {
+    @Override
+    public void visit(Fault fault) throws Exception {
         if (isRegistered(fault))
             return;
         registerFault(fault);
@@ -86,7 +80,7 @@ public class CustomExceptionGenerator extends GeneratorBase {
         }
     }
 
-    private void write(Fault fault) throws Exception{
+    private void write(Fault fault) throws JClassAlreadyExistsException {
         String className = Names.customExceptionClassName(fault);
 
         JDefinedClass cls = cm._class(className, ClassType.CLASS);

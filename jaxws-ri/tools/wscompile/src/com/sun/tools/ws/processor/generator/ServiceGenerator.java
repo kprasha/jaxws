@@ -23,7 +23,6 @@
 package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.*;
-import com.sun.tools.ws.processor.ProcessorAction;
 import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
@@ -31,6 +30,7 @@ import com.sun.tools.ws.processor.model.java.JavaInterface;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.Options;
 import com.sun.tools.ws.wscompile.WsimportOptions;
+import com.sun.tools.ws.resources.GeneratorMessages;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.util.JAXWSUtils;
 
@@ -47,35 +47,22 @@ import java.net.URL;
  *
  * @author WS Development Team
  */
-public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
-    private String serviceNS;
+public class ServiceGenerator extends GeneratorBase{
 
-    public static final void generate(Model model, WsimportOptions options, ErrorReceiver receiver){
+    public static void generate(Model model, WsimportOptions options, ErrorReceiver receiver){
         ServiceGenerator serviceGenerator = new ServiceGenerator(model, options, receiver);
         serviceGenerator.doGeneration();
     }
-    protected ServiceGenerator(Model model, WsimportOptions options, ErrorReceiver receiver) {
+    private ServiceGenerator(Model model, WsimportOptions options, ErrorReceiver receiver) {
         super(model, options, receiver);
     }
 
-    public GeneratorBase getGenerator(Model model, WsimportOptions options, ErrorReceiver receiver) {
-        return new ServiceGenerator(model, options, receiver);
-    }
-
-
-    /**
-     * Generates an expression that evaluates to "new QName(...)"
-     */
-    private JInvocation createQName(QName name) {
-        return JExpr._new(cm.ref(QName.class)).arg(name.getNamespaceURI()).arg(name.getLocalPart());
-    }
-    
     private JInvocation createURL(URL url) {
         return JExpr._new(cm.ref(URL.class)).arg(url.toExternalForm());
     }
 
-
-    protected void visitService(Service service) {
+    @Override
+    public void visit(Service service) {
         try {
             JavaInterface intf = service.getJavaInterface();
             String className = Names.customJavaTypeClassName(intf);
@@ -147,9 +134,7 @@ public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
                     writeGetPort(port, cls);
             }
         } catch (IOException e) {
-            throw new GeneratorException(
-                "generator.nestedGeneratorError",
-                e);
+            receiver.error(e);
         }
     }
 
@@ -208,7 +193,7 @@ public class ServiceGenerator extends GeneratorBase implements ProcessorAction {
     
     private void writeWebServiceClientAnnotation(Service service, JAnnotationUse wsa) {
         String serviceName = service.getName().getLocalPart();
-        serviceNS = service.getName().getNamespaceURI();
+        String serviceNS= service.getName().getNamespaceURI();
         wsa.param("name", serviceName);
         wsa.param("targetNamespace", serviceNS);
         wsa.param("wsdlLocation", wsdlLocation);

@@ -80,37 +80,11 @@ public class Fault extends ModelObject {
         return parentFault;
     }
 
-    public void setParentFault(Fault parentFault) {
-        if (this.parentFault != null &&
-            parentFault != null &&
-            !this.parentFault.equals(parentFault)) {
-
-            throw new ModelException("model.parent.fault.already.set",
-                new Object[] {
-                    getName(),
-                    this.parentFault.getName(),
-                    parentFault.getName()
-            });
-        }
-        this.parentFault = parentFault;
-    }
-
-    public void addSubfault(Fault fault) {
-        subfaults.add(fault);
-        fault.setParentFault(this);
-    }
-
     public Iterator getSubfaults() {
         if (subfaults.size() == 0) {
             return null;
         }
         return subfaults.iterator();
-    }
-
-    public Iterator getSortedSubfaults() {
-        Set sortedFaults = new TreeSet(new GeneratorUtil.FaultComparator());
-        sortedFaults.addAll(subfaults);
-        return sortedFaults.iterator();
     }
 
     /* serialization */

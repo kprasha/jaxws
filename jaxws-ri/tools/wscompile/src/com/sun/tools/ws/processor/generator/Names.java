@@ -72,10 +72,6 @@ public class Names implements GeneratorConstants{
     }
 
 
-    public static String getPackageName(Service service) {
-        return getPackageName(service.getJavaInterface().getName());
-    }
-
     public static String customJavaTypeClassName(JavaInterface intf) {
         return intf.getName();
     }

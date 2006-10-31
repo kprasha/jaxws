@@ -62,7 +62,6 @@ import java.util.Set;
 public class WebServiceAP implements AnnotationProcessor, ModelBuilder, WebServiceConstants{
 
     protected AnnotationProcessorEnvironment apEnv;
-//    protected ProcessorEnvironment env;
 
     private File sourceDir;
 
@@ -75,7 +74,6 @@ public class WebServiceAP implements AnnotationProcessor, ModelBuilder, WebServi
     protected AnnotationProcessorContext context;
     private Set<TypeDeclaration> processedTypeDecls = new HashSet<TypeDeclaration>();
     protected Messager messager;
-//    private ToolBase tool;
     private boolean doNotOverWrite = false;
     private WsgenOptions options;
     private ErrorReceiver receiver;
@@ -103,18 +101,6 @@ public class WebServiceAP implements AnnotationProcessor, ModelBuilder, WebServi
         this.out = out;
         this.context = context;
     }
-
-//    public WebServiceAP(ToolBase tool, ProcessorEnvironment env, Properties options,  AnnotationProcessorContext context) {
-//        this.context = context;
-//        this.tool = tool;
-//        this.env = env;
-//        if (options != null) {
-//            sourceDir = new File(options.getProperty(ProcessorOptions.SOURCE_DIRECTORY_PROPERTY));
-//            String key = ProcessorOptions.DONOT_OVERWRITE_CLASSES;
-//            this.doNotOverWrite =
-//                Boolean.valueOf(options.getProperty(key));
-//        }
-//    }
 
     public void init(AnnotationProcessorEnvironment apEnv) {
         this.apEnv = apEnv;
@@ -191,17 +177,12 @@ public class WebServiceAP implements AnnotationProcessor, ModelBuilder, WebServi
                     cp + File.pathSeparator +
                     System.getProperty("java.class.path");
             options.classpath = cpath;
-//            env = new ClientProcessorEnvironment(output, cpath, this);
-//            ((ClientProcessorEnvironment) env).setNames(new Names());
             boolean setVerbose = false;
             for (String key : apOptions.keySet()) {
                 if (key.equals("-verbose"))
                     setVerbose = true;
             }
             options.verbose = setVerbose;
-//            if (setVerbose) {
-//                env.setFlags(ProcessorEnvironment.F_VERBOSE);
-//            }
             messager = apEnv.getMessager();
             isAPTInvocation = true;
         }

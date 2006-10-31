@@ -22,7 +22,6 @@
 
 package com.sun.tools.ws.processor.model;
 
-import com.sun.tools.ws.processor.ProcessorActionVersion;
 import com.sun.tools.ws.processor.model.jaxb.JAXBModel;
 import com.sun.tools.ws.wsdl.framework.Entity;
 
@@ -138,31 +137,6 @@ public class Model extends ModelObject {
         source = string;
     }
 
-    public ProcessorActionVersion getProcessorActionVersion(){
-        return processorActionVersion;
-    }
-
-    public void setProcessorActionVersion(ProcessorActionVersion version){
-        this.processorActionVersion = version;
-    }
-
-    public void setProcessorActionVersion(String version){
-        for(ProcessorActionVersion paVersion : EnumSet.allOf(ProcessorActionVersion.class)){
-            switch(paVersion){
-                case PRE_20:
-                    if(version.equals(ProcessorActionVersion.PRE_20.toString()))
-                        processorActionVersion = ProcessorActionVersion.PRE_20;
-                    break;
-                case VERSION_20:
-                    if(version.equals(ProcessorActionVersion.VERSION_20.toString()))
-                        processorActionVersion = ProcessorActionVersion.VERSION_20;
-                    break;
-                default:
-                    throw new ModelException("model.invalid.processorActionVersion", new Object[]{version});
-            }
-        }
-    }
-
     public void setJAXBModel(JAXBModel jaxBModel) {
         this.jaxBModel = jaxBModel;
     }
@@ -178,5 +152,4 @@ public class Model extends ModelObject {
     private Set<AbstractType> extraTypes = new HashSet<AbstractType>();
     private String source;
     private JAXBModel jaxBModel = null;
-    private ProcessorActionVersion processorActionVersion = ProcessorActionVersion.VERSION_20;
 }

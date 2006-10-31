@@ -94,22 +94,10 @@
  *  </d1>
  * <h2>Implementation Classes</h2>
  *  <d1>
-      <dt>{@link com.sun.tools.ws.wscompile.CompileTool CompileTool}
- *    <dd> This is the main implementation class for both WsGen and WsImport. 
- * 
- * 
- * <dt>{@link com.sun.tools.ws.processor.Processor Processor}
- *    <dd>This abstract class is used to process a particular {@link com.sun.tools.ws.processor.config.Configuration
- *    Configuration} to build a {@link com.sun.tools.ws.processor.model Model} and to run
- *   {@link com.sun.tools.ws.processor.ProcessorAction ProcessorActions} on that model.
-
  *    <dt>{@link com.sun.tools.ws.processor.model.Model Model}
  *    <dd>The model is used to represent the entire Web Service.  The JAX-WS ProcessorActions can process
  *    this Model to generate Java artifacts such as the service interface.
  *
-      <dt>{@link com.sun.tools.ws.processor.ProcessorAction ProcessorActions}
- *    <dd>A ProcessorAction is used to perform some operation on a Model object such as
- *    generating a Java source file.
  *
  *    <dt>{@link com.sun.tools.ws.processor.modeler.Modeler Modeler}
  *    <dd>A Modeler is used to create a Model of a Web Service from a particular Web 

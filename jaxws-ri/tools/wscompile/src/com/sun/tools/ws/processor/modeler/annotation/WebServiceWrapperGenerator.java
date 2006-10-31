@@ -196,14 +196,9 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             if (duplicateName(responseClassName) && canOverwriteResponse) {
                 builder.onError(WebserviceapMessages.WEBSERVICEAP_METHOD_RESPONSE_WRAPPER_BEAN_NAME_NOT_UNIQUE(typeDecl.getQualifiedName(), method.toString()));
             }
-  ///// fix for wsgen CR 6442344
-//            gfi=new GeneratedFileInfo();
-//            gfi.setFile(new File(DirectoryUtil.getOutputDirectoryFor(responseClassName, builder.getSourceDir()),
-//                                 Names.stripQualifier(responseClassName) + GeneratorConstants.JAVA_SRC_SUFFIX));
             file = new File(DirectoryUtil.getOutputDirectoryFor(responseClassName, builder.getSourceDir()),
                                  Names.stripQualifier(responseClassName) + GeneratorConstants.JAVA_SRC_SUFFIX);
             builder.getOptions().addGeneratedFile(file);
-////////////
         }
         ArrayList<MemberInfo> reqMembers = new ArrayList<MemberInfo>();
         ArrayList<MemberInfo> resMembers = new ArrayList<MemberInfo>();

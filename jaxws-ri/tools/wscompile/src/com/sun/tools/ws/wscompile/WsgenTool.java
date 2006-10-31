@@ -28,7 +28,6 @@ import com.sun.tools.ws.ToolVersion;
 import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext;
 import com.sun.tools.ws.processor.modeler.annotation.WebServiceAP;
 import com.sun.tools.ws.processor.modeler.wsdl.ConsoleErrorReporter;
-import com.sun.tools.ws.processor.util.ProcessorEnvironmentBase;
 import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.xjc.util.NullStream;
 import com.sun.xml.txw2.TXW;
@@ -133,7 +132,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
         }
         if (options.genWsdl) {
             String tmpPath = options.destDir.getAbsolutePath()+ File.pathSeparator+options.classpath;
-            ClassLoader classLoader = new URLClassLoader(ProcessorEnvironmentBase.pathToURLs(tmpPath),
+            ClassLoader classLoader = new URLClassLoader(Options.pathToURLs(tmpPath),
                     this.getClass().getClassLoader());
             Class<?> endpointClass = null;
 
