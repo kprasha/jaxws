@@ -74,13 +74,10 @@ public class SEIInvokerTube extends InvokerTube {
             EndpointMethodHandler handler = dispatcher.getEndpointMethodHandler(req);
             // TODO: iterate over the list
             if (handler == null) {
-                String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(dispatcher.getDispatchKey(), dispatcher.getName());
-                Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
-                        soapVersion, faultString, soapVersion.faultCodeClient);
+                Message faultMsg = dispatcher.getFaultMessage();
                 res = req.createServerResponse(faultMsg, model.getPort(), binding);
             } else {
                 res = handler.invoke(req);
-                break;
             }
         }
 

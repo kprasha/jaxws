@@ -31,6 +31,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.message.ProblemActionHeader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,8 @@ import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
+import javax.xml.soap.Detail;
+import javax.xml.soap.SOAPElement;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -113,7 +116,10 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
                 fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
                 fault.appendFaultSubcode(subcode);
                 // TODO: add FaultDetail
-//                getProblemActionDetail(dispatchKey, fault.addDetail());
+                Detail detail = fault.addDetail();
+                SOAPElement se = detail.addChildElement(av.problemActionTag);
+                se = se.addChildElement(av.actionTag);
+                se.addTextNode(dispatchKey);
             } else {
                 fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
                 fault.setFaultCode(subcode);
@@ -122,10 +128,9 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
             fault.setFaultString(faultstring);
 
             Message faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(
-                    binding.getSOAPVersion(), faultstring, binding.getSOAPVersion().faultCodeClient);
+                    binding.getSOAPVersion(), faultstring, subcode);
             if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
-                // TODO: add FaultDetail
-                faultMessage.getHeaders().add(null);
+                faultMessage.getHeaders().add(new ProblemActionHeader(dispatchKey, av));
             }
 
             return faultMessage;
