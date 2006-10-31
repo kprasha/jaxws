@@ -494,11 +494,14 @@ public class SAAJMessage extends Message {
         if (attrs != null) {
             for(int i=0;i< attrs.getLength();i++){
                 Attr attr = (Attr)attrs.item(i);
-                if(attr.getNamespaceURI().equals("http://www.w3.org/2000/xmlns/")){
+                String nsUri = attr.getNamespaceURI();
+                if (nsUri == null) {
+                    writer.writeAttribute(attr.getLocalName(),attr.getValue());
+                } else if (nsUri.equals("http://www.w3.org/2000/xmlns/")){
                     writer.setPrefix(attr.getLocalName(),attr.getValue());
                     writer.writeNamespace(attr.getLocalName(),attr.getValue());
-                } else{
-                    writer.writeAttribute(attr.getPrefix(),attr.getNamespaceURI(),attr.getLocalName(),attr.getValue());
+                } else {
+                    writer.writeAttribute(attr.getPrefix(),nsUri,attr.getLocalName(),attr.getValue());
                 }
             }
         }
