@@ -23,7 +23,6 @@
 package com.sun.tools.ws.processor.config;
 
 import com.sun.tools.ws.processor.ProcessorException;
-import com.sun.xml.ws.util.localization.Localizable;
 
 /**
  *

@@ -21,14 +21,15 @@
  */
 package com.sun.tools.ws.processor.modeler.wsdl;
 
-import com.sun.tools.ws.processor.config.ModelInfo;
+import com.sun.tools.ws.processor.generator.Names;
 import static com.sun.tools.ws.processor.modeler.wsdl.WSDLModelerBase.getExtensionOfType;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.tools.ws.wsdl.document.*;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBinding;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.document.soap.SOAP12Binding;
 import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
-import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
 import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
@@ -40,9 +41,9 @@ import java.util.*;
 
 
 /**
- * @author Vivek Pandey
- *
  * Builds all possible pseudo schemas for async operation ResponseBean to feed to XJC.
+ *
+ * @author Vivek Pandey 
  */
 public class PseudoSchemaBuilder {
 
@@ -85,9 +86,11 @@ public class PseudoSchemaBuilder {
 
     private final static String sysId = "http://dummy.pseudo-schema#schema";
 
-    public static List<InputSource> build(WSDLModeler wsdlModeler, ModelInfo modelInfo) {
+    private WsimportOptions options;
+    public static List<InputSource> build(WSDLModeler wsdlModeler, WsimportOptions options, ErrorReceiver errReceiver) {
         PseudoSchemaBuilder b = new PseudoSchemaBuilder(wsdlModeler.document);
         b.wsdlModeler = wsdlModeler;
+        b.options = options;
         b.build();
         int i;
         for(i = 0; i < b.schemas.size(); i++){
@@ -108,6 +111,7 @@ public class PseudoSchemaBuilder {
 
         return b.schemas;
     }
+
 
     private PseudoSchemaBuilder(WSDLDocument _wsdl) {
         this.wsdlDocument = _wsdl;
@@ -151,9 +155,6 @@ public class PseudoSchemaBuilder {
 
         for(Iterator itr=binding.operations(); itr.hasNext();){
             BindingOperation bindingOperation = (BindingOperation)itr.next();
-            SOAPOperation soapOperation =
-            (SOAPOperation)getExtensionOfType(bindingOperation,
-                SOAPOperation.class);
 
             // get only the bounded operations
             Set boundedOps = portType.getOperationsNamed(bindingOperation.getName());
@@ -192,7 +193,7 @@ public class PseudoSchemaBuilder {
         JAXWSBinding jaxwsCustomization = (JAXWSBinding)getExtensionOfType(operation, JAXWSBinding.class);
         String operationName = (jaxwsCustomization != null)?((jaxwsCustomization.getMethodName() != null)?jaxwsCustomization.getMethodName().getName():null):null;
         if(operationName != null){
-            if(wsdlModeler.getEnvironment().getNames().isJavaReservedWord(operationName)){
+            if(Names.isJavaReservedWord(operationName)){
                 return null;
             }
 
@@ -292,4 +293,5 @@ public class PseudoSchemaBuilder {
         buf.write(MessageFormat.format(msg,args));
         buf.write('\n');
     }
+
 }

@@ -22,13 +22,12 @@
 
 package com.sun.tools.ws.processor.util;
 
-import java.net.URLClassLoader;
-import java.util.Iterator;
-
+import com.sun.mirror.apt.Filer;
 import com.sun.tools.ws.processor.generator.Names;
 import com.sun.xml.ws.util.localization.Localizable;
 
-import com.sun.mirror.apt.Filer;
+import java.net.URLClassLoader;
+import java.util.Iterator;
 
 /**
  *

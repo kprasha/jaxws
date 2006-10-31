@@ -22,22 +22,19 @@
 
 package com.sun.tools.ws.processor.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.sun.tools.ws.wsdl.framework.Entity;
 
 import javax.xml.namespace.QName;
+import java.util.*;
 
 /**
  *
  * @author WS Development Team
  */
 public abstract class Message extends ModelObject {
+    protected Message(Entity entity) {
+        super(entity);
+    }
 
     public void addBodyBlock(Block b) {
         if (_bodyBlocks.containsKey(b.getName())) {

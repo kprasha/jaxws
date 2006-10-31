@@ -22,15 +22,12 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.wsdl.framework.QNameAction;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * Entity corresponding to the "fault" child element of a port type operation.
@@ -39,7 +36,8 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  */
 public class Fault extends Entity implements TWSDLExtensible {
 
-    public Fault() {
+    public Fault(Locator locator) {
+        super(locator);
         _helper = new ExtensibilityHelper();
     }
 

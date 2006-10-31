@@ -22,8 +22,8 @@
 
 package com.sun.tools.ws.api.wsdl;
 
-import org.w3c.dom.Element;
 import com.sun.tools.ws.wsdl.document.WSDLConstants;
+import org.w3c.dom.Element;
 
 /**
  * JAXWS WSDL parser {@link com.sun.tools.ws.wsdl.parser.WSDLParser} will call an {@link TWSDLExtensionHandler} registered

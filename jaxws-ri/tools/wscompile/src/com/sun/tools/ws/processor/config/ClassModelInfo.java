@@ -22,14 +22,9 @@
 
 package com.sun.tools.ws.processor.config;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
 import com.sun.tools.ws.processor.modeler.Modeler;
-import com.sun.tools.ws.processor.ProcessorOptions;
-import com.sun.xml.ws.util.VersionUtil;
+
+import java.util.Properties;
 
 /**
  *

@@ -22,10 +22,10 @@
 
 package com.sun.tools.ws.util.xml;
 
-import java.io.StringReader;
-
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+
+import java.io.StringReader;
 
 /**
  * @author WS Development Team

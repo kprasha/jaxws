@@ -22,9 +22,10 @@
 
 package com.sun.tools.ws.wsdl.document.soap;
 
-import javax.xml.namespace.QName;
-
 import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * A SOAP address extension.
@@ -33,7 +34,8 @@ import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
  */
 public class SOAPAddress extends ExtensionImpl {
 
-    public SOAPAddress() {
+    public SOAPAddress(Locator locator) {
+        super(locator);
     }
 
     public QName getElementName() {

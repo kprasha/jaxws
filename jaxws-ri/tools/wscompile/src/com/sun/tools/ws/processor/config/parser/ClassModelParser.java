@@ -23,13 +23,13 @@
 package com.sun.tools.ws.processor.config.parser;
 
 
-import java.io.File;
-import java.util.List;
-import java.util.Properties;
-
 import com.sun.tools.ws.processor.config.ClassModelInfo;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+
+import java.io.File;
+import java.util.List;
+import java.util.Properties;
 
 
 /**

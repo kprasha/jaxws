@@ -21,19 +21,18 @@
  */
 package com.sun.tools.ws.wsdl.parser;
 
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.resources.WsdlMessages;
-import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
-import com.sun.tools.xjc.util.DOMUtils;
-import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import com.sun.istack.SAXParseException2;
+import com.sun.tools.ws.resources.WsdlMessages;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.WsimportOptions;
+import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
+import com.sun.tools.xjc.util.DOMUtils;
+import com.sun.xml.bind.v2.util.EditDistance;
+import com.sun.xml.ws.util.JAXWSUtils;
+import org.w3c.dom.*;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
@@ -42,12 +41,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -55,33 +49,27 @@ import java.util.Set;
  * @author Vivek Pandey
  */
 public class Internalizer {
-    private Map<String, Element> wsdlDocuments;
-    private Map<String, Document> jaxwsBindings;
     private static final XPathFactory xpf = XPathFactory.newInstance();
     private final XPath xpath = xpf.newXPath();
-    private ProcessorEnvironment env;
+    private final WsimportOptions options;
+    private final DOMForest forest;
+    private final ErrorReceiver errorReceiver;
 
-    public  void transform(Map<String, Document> jaxwsBindings, Map<String, Element> wsdlDocuments, ProcessorEnvironment env) {
-        if(jaxwsBindings == null)
-            return;
-        this.env = env;
-        this.wsdlDocuments = wsdlDocuments;
-        this.jaxwsBindings = jaxwsBindings;
+
+    public Internalizer(DOMForest forest, WsimportOptions options, ErrorReceiver errorReceiver) {
+        this.forest = forest;
+        this.options = options;
+        this.errorReceiver = errorReceiver;
+    }
+
+    public void transform(){
         Map<Element,Node> targetNodes = new HashMap<Element,Node>();
-
-        // identify target nodes for all <JAXWS:bindings>
-        for(Map.Entry<String, Document> jaxwsBinding : jaxwsBindings.entrySet()) {
-            Element e = jaxwsBinding.getValue().getDocumentElement();
-            // initially, the inherited context is itself
-            buildTargetNodeMap( e, e, targetNodes );
+        for(Element jaxwsBinding : forest.outerMostBindings){
+            buildTargetNodeMap(jaxwsBinding, jaxwsBinding, targetNodes );
         }
-
-        // then move them to their respective positions.
-        for(Map.Entry<String, Document> jaxwsBinding : jaxwsBindings.entrySet()) {
-            Element e = jaxwsBinding.getValue().getDocumentElement();
-            move( e, targetNodes );
+        for(Element jaxwsBinding : forest.outerMostBindings){
+            move(jaxwsBinding, targetNodes );
         }
-
     }
 
     /**
@@ -103,47 +91,6 @@ public class Internalizer {
     }
 
     /**
-     * Gets the DOM tree associated with the specified system ID,
-     * or null if none is found.
-     */
-    public Document get( String systemId ) {
-        Element doc = wsdlDocuments.get(systemId);
-
-        if( doc==null && systemId.startsWith("file:/") && !systemId.startsWith("file://") ) {
-            // As of JDK1.4, java.net.URL.toExternal method returns URLs like
-            // "file:/abc/def/ghi" which is an incorrect file protocol URL according to RFC1738.
-            // Some other correctly functioning parts return the correct URLs ("file:///abc/def/ghi"),
-            // and this descripancy breaks DOM look up by system ID.
-
-            // this extra check solves this problem.
-            doc = wsdlDocuments.get( "file://"+systemId.substring(5) );
-        }
-
-        if( doc==null && systemId.startsWith("file:") ) {
-            // on Windows, filenames are case insensitive.
-            // perform case-insensitive search for improved user experience
-            String systemPath = getPath(systemId);
-            for (String key : wsdlDocuments.keySet()) {
-                if(key.startsWith("file:") && getPath(key).equalsIgnoreCase(systemPath)) {
-                    doc = wsdlDocuments.get(key);
-                    break;
-    }
-            }
-        }
-        return doc==null?null:doc.getOwnerDocument();
-    }
-
-    /**
-     * Strips off the leading 'file:///' portion from an URL.
-     */
-    private String getPath(String key) {
-        key = key.substring(5); // skip 'file:'
-        while(key.length()>0 && key.charAt(0)=='/')
-            key = key.substring(1);
-        return key;
-    }
-
-    /**
      * Determines the target node of the "bindings" element
      * by using the inherited target node, then put
      * the result into the "result" map.
@@ -162,27 +109,27 @@ public class Internalizer {
                 // absolutize this URI.
                 // TODO: use the URI class
                 // TODO: honor xml:base
-                wsdlLocation = new URL(new URL(getSystemId(bindings.getOwnerDocument())),
+                wsdlLocation = new URL(new URL(forest.getSystemId(bindings.getOwnerDocument())),
                         wsdlLocation ).toExternalForm();
             } catch( MalformedURLException e ) {
                 wsdlLocation = JAXWSUtils.absolutize(JAXWSUtils.getFileOrURLName(wsdlLocation));
             }
 
             //target = wsdlDocuments.get(wsdlLocation);
-            target = get(wsdlLocation);
+            target = forest.get(wsdlLocation);
             if(target==null) {
-                env.error(WsdlMessages.localizableINTERNALIZER_TARGET_NOT_FOUND(wsdlLocation));
+                reportError(bindings, WsdlMessages.INTERNALIZER_INCORRECT_SCHEMA_REFERENCE(wsdlLocation, EditDistance.findNearest(wsdlLocation, forest.listSystemIDs())));
                 return; // abort processing this <JAXWS:bindings>
             }
         }
 
         boolean hasNode = true;
         if(isJAXWSBindings(bindings) && bindings.getAttributeNode("node")!=null ) {
-            target = evaluateXPathNode(target, bindings.getAttribute("node"), new NamespaceContextImpl(bindings));
+            target = evaluateXPathNode(bindings, target, bindings.getAttribute("node"), new NamespaceContextImpl(bindings));
         }else if(isJAXWSBindings(bindings) && (bindings.getAttributeNode("node")==null) && !isTopLevelBinding(bindings)) {
             hasNode = false;
         }else if(isGlobalBinding(bindings) && !isWSDLDefinition(target) && isTopLevelBinding(bindings.getParentNode())){
-            target = getWSDLDefintionNode(target);
+            target = getWSDLDefintionNode(bindings, target);
         }
 
         //if target is null it means the xpath evaluation has some problem,
@@ -200,8 +147,8 @@ public class Internalizer {
             buildTargetNodeMap(child, target, result);
     }
 
-    private Node getWSDLDefintionNode(Node target){
-        return evaluateXPathNode(target, "wsdl:definitions",
+    private Node getWSDLDefintionNode(Node bindings, Node target){
+        return evaluateXPathNode(bindings, target, "wsdl:definitions",
             new NamespaceContext(){
                 public String getNamespaceURI(String prefix){
                     return "http://schemas.xmlsoap.org/wsdl/";
@@ -234,7 +181,7 @@ public class Internalizer {
 
     private boolean isGlobalBinding(Node bindings){
         if(bindings.getNamespaceURI() == null){
-            env.warn(WsdlMessages.localizableINVALID_CUSTOMIZATION_NAMESPACE(bindings.getLocalName()));
+            errorReceiver.warning(forest.locatorTable.getStartLocation((Element) bindings), WsdlMessages.INVALID_CUSTOMIZATION_NAMESPACE(bindings.getLocalName()));
             return false;
         }
         return  (bindings.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS) &&
@@ -258,34 +205,32 @@ public class Internalizer {
         return a.toArray(new Element[a.size()]);
     }
 
-    private Node evaluateXPathNode(Node target, String expression, NamespaceContext namespaceContext) {
+    private Node evaluateXPathNode(Node bindings, Node target, String expression, NamespaceContext namespaceContext) {
         NodeList nlst;
         try {
             xpath.setNamespaceContext(namespaceContext);
             nlst = (NodeList)xpath.evaluate(expression, target, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVALUATION_ERROR(e.getMessage()));
-            if(env.verbose())
-                e.printStackTrace();
+            reportError((Element) bindings, WsdlMessages.INTERNALIZER_X_PATH_EVALUATION_ERROR(e.getMessage()), e);
             return null; // abort processing this <jaxb:bindings>
         }
 
         if( nlst.getLength()==0 ) {
-            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVALUATES_TO_NO_TARGET(expression));
+            reportError((Element) bindings, WsdlMessages.INTERNALIZER_X_PATH_EVALUATES_TO_NO_TARGET(expression));
             return null; // abort
         }
 
         if( nlst.getLength()!=1 ) {
-            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVAULATES_TO_TOO_MANY_TARGETS(expression, nlst.getLength()));
+            reportError((Element) bindings, WsdlMessages.INTERNALIZER_X_PATH_EVAULATES_TO_TOO_MANY_TARGETS(expression, nlst.getLength()));
             return null; // abort
         }
 
         Node rnode = nlst.item(0);
         if(!(rnode instanceof Element )) {
-            env.error(WsdlMessages.localizableINTERNALIZER_X_PATH_EVALUATES_TO_NON_ELEMENT(expression));
+            reportError((Element) bindings, WsdlMessages.INTERNALIZER_X_PATH_EVALUATES_TO_NON_ELEMENT(expression));
             return null; // abort
         }
-        return (Element)rnode;
+        return rnode;
     }
 
     /**
@@ -503,11 +448,20 @@ public class Internalizer {
         else        return s;
     }
 
-    private String getSystemId(Document doc){
-        for(Map.Entry<String, Document> e:jaxwsBindings.entrySet()){
-            if (e.getValue() == doc)
-                return e.getKey();
-        }
-        return null;
+
+    private void reportError( Element errorSource, String formattedMsg ) {
+        reportError( errorSource, formattedMsg, null );
     }
+
+    private void reportError( Element errorSource,
+        String formattedMsg, Exception nestedException ) {
+
+        SAXParseException e = new SAXParseException2( formattedMsg,
+            forest.locatorTable.getStartLocation(errorSource),
+            nestedException );
+        errorReceiver.error(e);
+    }
+
+
+
 }

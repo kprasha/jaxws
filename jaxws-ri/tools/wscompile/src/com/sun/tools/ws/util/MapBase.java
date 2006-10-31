@@ -22,12 +22,7 @@
 
 package com.sun.tools.ws.util;
 
-import java.util.AbstractCollection;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /*
  * This class was lifted from JDK 1.4 (where it's called java.util.AbstractMap)

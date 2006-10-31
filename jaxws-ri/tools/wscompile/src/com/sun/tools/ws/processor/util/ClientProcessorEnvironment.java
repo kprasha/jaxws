@@ -22,17 +22,17 @@
 
 package com.sun.tools.ws.processor.util;
 
+import com.sun.tools.ws.processor.ProcessorNotificationListener;
+import com.sun.tools.ws.processor.generator.Names;
+import com.sun.tools.ws.util.JAXWSClassFactory;
+import com.sun.xml.ws.util.localization.Localizable;
+
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import com.sun.tools.ws.processor.ProcessorNotificationListener;
-import com.sun.tools.ws.processor.generator.Names;
-import com.sun.tools.ws.util.JAXWSClassFactory;
-import com.sun.xml.ws.util.localization.Localizable;
 
 /**
  *

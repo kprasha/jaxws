@@ -22,13 +22,14 @@
 
 package com.sun.tools.ws.wsdl.document.mime;
 
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import com.sun.tools.ws.wsdl.framework.EntityAction;
+import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * A MIME part extension.
@@ -37,7 +38,8 @@ import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
  */
 public class MIMEPart extends ExtensionImpl implements TWSDLExtensible {
 
-    public MIMEPart() {
+    public MIMEPart(Locator locator) {
+        super(locator);
         _helper = new ExtensibilityHelper();
     }
 

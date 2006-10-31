@@ -21,14 +21,6 @@
  */
 package com.sun.tools.ws.processor.modeler;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.xjc.api.S2JJAXBModel;
-import com.sun.tools.xjc.api.TypeAndAnnotation;
 import com.sun.tools.ws.processor.model.AbstractType;
 import com.sun.tools.ws.processor.model.Block;
 import com.sun.tools.ws.processor.model.ModelProperties;
@@ -41,6 +33,13 @@ import com.sun.tools.ws.processor.model.jaxb.*;
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wsdl.document.Message;
 import com.sun.tools.ws.wsdl.document.MessagePart;
+import com.sun.tools.xjc.api.S2JJAXBModel;
+import com.sun.tools.xjc.api.TypeAndAnnotation;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Utilities to be used by modelers such as WSDLModeler and Rmimodeler
@@ -161,7 +160,7 @@ public class ModelerUtils {
      */
     public static Parameter createParameter(String partName, AbstractType jaxbType,
             Block block) {
-        Parameter parameter = new Parameter(partName);
+        Parameter parameter = new Parameter(partName, block.getEntity());
         parameter.setProperty(ModelProperties.PROPERTY_PARAM_MESSAGE_PART_NAME,
                 partName);
         parameter.setEmbedded(false);

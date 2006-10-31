@@ -21,11 +21,11 @@
  */
 package com.sun.tools.ws.processor.modeler.annotation;
 
-import javax.xml.namespace.QName;
-
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.declaration.Declaration;
 import com.sun.istack.NotNull;
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.type.TypeMirror;
+
+import javax.xml.namespace.QName;
 
 /**
  *

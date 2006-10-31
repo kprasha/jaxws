@@ -22,21 +22,12 @@
 
 package com.sun.tools.ws.wsdl.document;
 
+import com.sun.tools.ws.wsdl.framework.*;
+
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceValidator;
-import com.sun.tools.ws.wsdl.framework.GloballyKnown;
-import com.sun.tools.ws.wsdl.framework.Kind;
-import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
-import com.sun.tools.ws.wsdl.framework.ValidationException;
 
 /**
  * A WSDL document.

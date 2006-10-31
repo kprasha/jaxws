@@ -22,51 +22,35 @@
 
 package com.sun.tools.ws.processor.generator;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
+import com.sun.codemodel.*;
+import com.sun.tools.ws.ToolVersion;
 import com.sun.tools.ws.processor.ProcessorAction;
-import com.sun.tools.ws.processor.ProcessorOptions;
-import com.sun.tools.ws.processor.config.Configuration;
-import com.sun.tools.ws.processor.config.WSDLModelInfo;
-import com.sun.tools.ws.processor.model.AbstractType;
-import com.sun.tools.ws.processor.model.Block;
-import com.sun.tools.ws.processor.model.Fault;
-import com.sun.tools.ws.processor.model.Model;
-import com.sun.tools.ws.processor.model.ModelVisitor;
-import com.sun.tools.ws.processor.model.Operation;
-import com.sun.tools.ws.processor.model.Parameter;
-import com.sun.tools.ws.processor.model.Port;
-import com.sun.tools.ws.processor.model.Request;
-import com.sun.tools.ws.processor.model.Response;
-import com.sun.tools.ws.processor.model.Service;
+import com.sun.tools.ws.processor.model.*;
 import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.JAXBTypeVisitor;
 import com.sun.tools.ws.processor.model.jaxb.RpcLitStructure;
-import com.sun.tools.ws.processor.util.IndentingWriter;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.processor.util.DirectoryUtil;
-import com.sun.tools.ws.processor.util.GeneratedFileInfo;
-import com.sun.tools.ws.ToolVersion;
+import com.sun.tools.ws.processor.util.IndentingWriter;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.codemodel.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import javax.jws.HandlerChain;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -81,7 +65,6 @@ public abstract class GeneratorBase
     protected File sourceDir;
     protected File destDir;
     protected File nonclassDestDir;
-    protected ProcessorEnvironment env;
     protected Model model;
     protected Service service;
     protected SOAPVersion curSOAPVersion;
@@ -94,73 +77,75 @@ public abstract class GeneratorBase
 
     private LocalizableMessageFactory messageFactory;
 
-    public GeneratorBase() {
-        sourceDir = null;
-        destDir = null;
-        nonclassDestDir = null;
-        env = null;
-        model = null;
-    }
-
     public void perform(
         Model model,
-        Configuration config,
-        Properties properties) {
-        GeneratorBase generator = getGenerator(model, config, properties);
+        WsimportOptions options,
+        ErrorReceiver receiver) {
+        GeneratorBase generator = getGenerator(model, options, receiver);
 
         generator.doGeneration();
     }
 
+
     public abstract GeneratorBase getGenerator(
         Model model,
-        Configuration config,
-        Properties properties);
-    public abstract GeneratorBase getGenerator(
-        Model model,
-        Configuration config,
-        Properties properties,
-        SOAPVersion ver);
+        WsimportOptions options,
+        ErrorReceiver receiver);
 
-    protected GeneratorBase(
-        Model model,
-        Configuration config,
-        Properties properties) {
-
+    protected WsimportOptions options;
+    protected ErrorReceiver receiver;
+    protected GeneratorBase(Model model, WsimportOptions options, ErrorReceiver receiver){
         this.model = model;
-
-        if(model.getJAXBModel().getS2JJAXBModel() != null)
-            cm = model.getJAXBModel().getS2JJAXBModel().generateCode(null, new JAXBTypeGenerator.JAXBErrorListener());
-        else
-            cm = new JCodeModel();
-
-        this.env = (ProcessorEnvironment) config.getEnvironment();
-        String key = ProcessorOptions.DESTINATION_DIRECTORY_PROPERTY;
-        String dirPath = properties.getProperty(key);
-        this.destDir = new File(dirPath);
-        key = ProcessorOptions.SOURCE_DIRECTORY_PROPERTY;
-        String sourcePath = properties.getProperty(key);
-        this.sourceDir = new File(sourcePath);
-        key = ProcessorOptions.NONCLASS_DESTINATION_DIRECTORY_PROPERTY;
-        String nonclassDestPath = properties.getProperty(key);
-        this.nonclassDestDir = new File(nonclassDestPath);
-        if (nonclassDestDir == null)
-            nonclassDestDir = destDir;
-        messageFactory =
-            new LocalizableMessageFactory("com.sun.tools.ws.resources.generator");
-        this.targetVersion =
-            properties.getProperty(ProcessorOptions.JAXWS_SOURCE_VERSION);
-        key = ProcessorOptions.DONOT_OVERWRITE_CLASSES;
-        this.donotOverride =
-            Boolean.valueOf(properties.getProperty(key)).booleanValue();
-        this.printStackTrace = Boolean.valueOf(properties.getProperty(ProcessorOptions.PRINT_STACK_TRACE_PROPERTY));
-        this.wsdlLocation = properties.getProperty(ProcessorOptions.WSDL_LOCATION);
+        this.options = options;
+        this.destDir = options.destDir;
+        this.sourceDir = options.sourceDir;
+        this.nonclassDestDir = destDir;
+        this.receiver = receiver;
+        this.wsdlLocation = options.wsdlLocation;
+        this.targetVersion = options.target.name();
+        this.cm = options.getCodeModel();
     }
+
+//    protected GeneratorBase(
+//        Model model,
+//        Configuration config,
+//        Properties properties) {
+//
+//        this.model = model;
+//
+////        if(model.getJAXBModel().getS2JJAXBModel() != null)
+////            cm = model.getJAXBModel().getS2JJAXBModel().generateCode(null, new JAXBTypeGenerator.JAXBErrorListener());
+////        else
+////            cm = new JCodeModel();
+//
+//        this.env = (ProcessorEnvironment) config.getEnvironment();
+//        String key = ProcessorOptions.DESTINATION_DIRECTORY_PROPERTY;
+//        String dirPath = properties.getProperty(key);
+//        this.destDir = new File(dirPath);
+//        key = ProcessorOptions.SOURCE_DIRECTORY_PROPERTY;
+//        String sourcePath = properties.getProperty(key);
+//        this.sourceDir = new File(sourcePath);
+//        key = ProcessorOptions.NONCLASS_DESTINATION_DIRECTORY_PROPERTY;
+//        String nonclassDestPath = properties.getProperty(key);
+//        this.nonclassDestDir = new File(nonclassDestPath);
+//        if (nonclassDestDir == null)
+//            nonclassDestDir = destDir;
+//        messageFactory =
+//            new LocalizableMessageFactory("com.sun.tools.ws.resources.generator");
+//        this.targetVersion =
+//            properties.getProperty(ProcessorOptions.JAXWS_SOURCE_VERSION);
+//        key = ProcessorOptions.DONOT_OVERWRITE_CLASSES;
+//        this.donotOverride =
+//            Boolean.valueOf(properties.getProperty(key)).booleanValue();
+//        this.printStackTrace = Boolean.valueOf(properties.getProperty(ProcessorOptions.PRINT_STACK_TRACE_PROPERTY));
+//        this.wsdlLocation = properties.getProperty(ProcessorOptions.WSDL_LOCATION);
+//    }
 
     protected void doGeneration() {
         try {
             model.accept(this);
         } catch (Exception e) {
-            if (env.verbose())
+            if (options.verbose)
                 e.printStackTrace();
             throw new GeneratorException("generator.nestedGeneratorError",e);
         }
@@ -176,7 +161,6 @@ public abstract class GeneratorBase
     }
 
     protected void visitModel(Model model) throws Exception {
-        env.getNames().resetPrefixFactory();
         for (Service service : model.getServices()) {
             service.accept(this);
         }
@@ -473,7 +457,7 @@ public abstract class GeneratorBase
     }
 
     protected void log(String msg) {
-        if (env.verbose()) {
+        if (options.verbose) {
             System.out.println(
                 "["
                     + Names.stripQualifier(this.getClass().getName())
@@ -481,48 +465,6 @@ public abstract class GeneratorBase
                     + msg
                     + "]");
         }
-    }
-
-    protected void warn(String key) {
-        env.warn(messageFactory.getMessage(key));
-    }
-
-    protected void warn(String key, String arg) {
-        env.warn(messageFactory.getMessage(key, arg));
-    }
-
-    protected void warn(String key, Object[] args) {
-        env.warn(messageFactory.getMessage(key, args));
-    }
-
-    protected void info(String key) {
-        env.info(messageFactory.getMessage(key));
-    }
-
-    protected void info(String key, String arg) {
-        env.info(messageFactory.getMessage(key, arg));
-    }
-
-    protected static void fail(String key) {
-        throw new GeneratorException(key);
-    }
-
-    protected static void fail(String key, String arg) {
-        throw new GeneratorException(key, arg);
-    }
-
-    protected static void fail(String key, String arg1, String arg2) {
-        throw new GeneratorException(key, new Object[] { arg1, arg2 });
-    }
-
-    protected static void fail(Localizable arg) {
-        throw new GeneratorException("generator.nestedGeneratorError", arg);
-    }
-
-    protected static void fail(Throwable arg) {
-        throw new GeneratorException(
-            "generator.nestedGeneratorError",
-            arg);
     }
 
     /* (non-Javadoc)
@@ -568,12 +510,11 @@ public abstract class GeneratorBase
 
     }
 
-    protected void writeHandlerConfig(String className, JDefinedClass cls, WSDLModelInfo wsdlModelInfo) {
-        Element e = wsdlModelInfo.getHandlerConfig();
+    protected void writeHandlerConfig(String className, JDefinedClass cls, WsimportOptions options) {
+        Element e = options.getHandlerChainConfiguration();
         if(e == null)
             return;
         JAnnotationUse handlerChainAnn = cls.annotate(cm.ref(HandlerChain.class));
-        //String fullName = env.getNames().customJavaTypeClassName(port.getJavaInterface());
         NodeList nl = e.getElementsByTagNameNS(
             "http://java.sun.com/xml/ns/javaee", "handler-chain");
         if(nl.getLength() > 0){
@@ -592,14 +533,10 @@ public abstract class GeneratorBase
     private void generateHandlerChainFile(Element hChains, String name) {
         String hcName = getHandlerConfigFileName(name);
 
-        File packageDir = DirectoryUtil.getOutputDirectoryFor(name, destDir, env);
+        File packageDir = DirectoryUtil.getOutputDirectoryFor(name, destDir);
         File hcFile = new File(packageDir, hcName);
 
-        /* adding the file name and its type */
-        GeneratedFileInfo fi = new GeneratedFileInfo();
-        fi.setFile(hcFile);
-        fi.setType("HandlerConfig");
-        env.addGeneratedFile(fi);
+        options.addGeneratedFile(hcFile);
 
         try {
             IndentingWriter p =

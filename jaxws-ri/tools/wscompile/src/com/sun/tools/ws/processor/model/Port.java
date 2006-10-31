@@ -22,17 +22,16 @@
 
 package com.sun.tools.ws.processor.model;
 
+import com.sun.tools.ws.processor.model.java.JavaInterface;
+import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
+import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.xml.ws.api.SOAPVersion;
+
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.processor.config.HandlerChainInfo;
-import com.sun.tools.ws.processor.model.java.JavaInterface;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 
 /**
  *
@@ -40,9 +39,12 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
  */
 public class Port extends ModelObject {
 
-    public Port() {}
+    public Port(Entity entity) {
+        super(entity);
+    }
 
-    public Port(QName name) {
+    public Port(QName name, Entity entity) {
+        super(entity);
         _name = name;
     }
 
@@ -104,28 +106,6 @@ public class Port extends ModelObject {
 
     public void setAddress(String s) {
         _address = s;
-    }
-
-    public HandlerChainInfo getClientHandlerChainInfo() {
-        if (_clientHandlerChainInfo == null) {
-            _clientHandlerChainInfo  = new HandlerChainInfo();
-        }
-        return _clientHandlerChainInfo;
-    }
-
-    public void setClientHandlerChainInfo(HandlerChainInfo i) {
-        _clientHandlerChainInfo = i;
-    }
-
-    public HandlerChainInfo getServerHandlerChainInfo() {
-        if (_serverHandlerChainInfo == null) {
-            _serverHandlerChainInfo  = new HandlerChainInfo();
-        }
-        return _serverHandlerChainInfo;
-    }
-
-    public void setServerHandlerChainInfo(HandlerChainInfo i) {
-        _serverHandlerChainInfo = i;
     }
 
     public SOAPVersion getSOAPVersion() {
@@ -200,7 +180,5 @@ public class Port extends ModelObject {
     private String _address;
     private String _serviceImplName;
     private Map operationsByName = new HashMap();
-    private HandlerChainInfo _clientHandlerChainInfo;
-    private HandlerChainInfo _serverHandlerChainInfo;
     private SOAPVersion _soapVersion = SOAPVersion.SOAP_11;
 }

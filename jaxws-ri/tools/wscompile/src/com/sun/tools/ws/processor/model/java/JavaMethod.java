@@ -22,12 +22,12 @@
 
 package com.sun.tools.ws.processor.model.java;
 
+import com.sun.codemodel.JClass;
+import com.sun.tools.ws.processor.model.ModelException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import com.sun.tools.ws.processor.model.ModelException;
-import com.sun.codemodel.JClass;
 
 /**
  *

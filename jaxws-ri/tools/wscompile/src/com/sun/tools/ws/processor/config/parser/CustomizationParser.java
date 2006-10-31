@@ -21,25 +21,22 @@
  */
 package com.sun.tools.ws.processor.config.parser;
 
-import java.net.URL;
-import java.util.*;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.EntityResolver;
-
 import com.sun.tools.ws.processor.ProcessorOptions;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.config.WSDLModelInfo;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.JAXWSUtils;
-import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 import javax.xml.stream.XMLStreamReader;
+import java.util.*;
 
 /**
  * @author Vivek Pandey

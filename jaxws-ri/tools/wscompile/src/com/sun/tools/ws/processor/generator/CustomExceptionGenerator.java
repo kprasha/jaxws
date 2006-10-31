@@ -23,15 +23,14 @@
 package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.*;
-import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.model.Fault;
 import com.sun.tools.ws.processor.model.Model;
-import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.WsimportOptions;
 
 import javax.xml.ws.WebFault;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  *
@@ -40,29 +39,21 @@ import java.util.Properties;
 public class CustomExceptionGenerator extends GeneratorBase {
     private Map<String, JClass> faults = new HashMap<String, JClass>();
 
-    public CustomExceptionGenerator() {
+    public static final void generate(Model model,
+        WsimportOptions options,
+        ErrorReceiver receiver){
+        CustomExceptionGenerator exceptionGen = new CustomExceptionGenerator(model, options, receiver);
+        exceptionGen.doGeneration();        
     }
-
-    public GeneratorBase getGenerator(
-        Model model,
-        Configuration config,
-        Properties properties) {
-        return new CustomExceptionGenerator(model, config, properties);
-    }
-
-    public GeneratorBase getGenerator(
-        Model model,
-        Configuration config,
-        Properties properties,
-        SOAPVersion ver) {
-        return new CustomExceptionGenerator(model, config, properties);
-    }
-
     protected CustomExceptionGenerator(
         Model model,
-        Configuration config,
-        Properties properties) {
-        super(model, config, properties);
+        WsimportOptions options,
+        ErrorReceiver receiver) {
+        super(model, options, receiver);
+    }
+
+    public GeneratorBase getGenerator(Model model, WsimportOptions options, ErrorReceiver receiver) {
+        return new CustomExceptionGenerator(model, options, receiver);
     }
 
     protected void preVisitModel(Model model) throws Exception {
@@ -96,7 +87,7 @@ public class CustomExceptionGenerator extends GeneratorBase {
     }
 
     private void write(Fault fault) throws Exception{
-        String className = env.getNames().customExceptionClassName(fault);
+        String className = Names.customExceptionClassName(fault);
 
         JDefinedClass cls = cm._class(className, ClassType.CLASS);
         JDocComment comment = cls.javadoc();

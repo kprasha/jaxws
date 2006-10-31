@@ -23,7 +23,6 @@
 package com.sun.tools.ws.processor;
 
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
-import com.sun.xml.ws.util.localization.Localizable;
 
 /**
  * ProcessorException represents an exception that occurred while processing

@@ -22,6 +22,8 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
+import org.xml.sax.Locator;
+
 /**
  * An entity that can be defined in a target namespace.
  *
@@ -29,7 +31,8 @@ package com.sun.tools.ws.wsdl.framework;
  */
 public abstract class GlobalEntity extends Entity implements GloballyKnown {
 
-    public GlobalEntity(Defining defining) {
+    public GlobalEntity(Defining defining, Locator locator) {
+        super(locator);
         _defining = defining;
     }
 

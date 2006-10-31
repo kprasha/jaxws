@@ -29,13 +29,10 @@ import com.sun.tools.ws.api.wsdl.TWSDLOperation;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
+import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Entity corresponding to the "operation" child element of a "portType" WSDL element.
@@ -44,7 +41,8 @@ import java.util.Map;
  */
 public class Operation extends Entity implements TWSDLOperation {
 
-    public Operation() {
+    public Operation(Locator locator) {
+        super(locator);
         _faults = new ArrayList<Fault>();
         _helper = new ExtensibilityHelper();
     }

@@ -25,57 +25,35 @@ package com.sun.tools.ws.processor.modeler.wsdl;
 
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.processor.config.WSDLModelInfo;
 import com.sun.tools.ws.processor.generator.Names;
 import com.sun.tools.ws.processor.model.Fault;
-import com.sun.tools.ws.processor.model.Model;
-import com.sun.tools.ws.processor.model.ModelObject;
 import com.sun.tools.ws.processor.model.Operation;
-import com.sun.tools.ws.processor.model.Parameter;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.java.JavaException;
 import com.sun.tools.ws.processor.modeler.JavaSimpleTypeCreator;
 import com.sun.tools.ws.processor.modeler.Modeler;
-import com.sun.tools.ws.processor.modeler.ModelerException;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.wsdl.document.BindingFault;
-import com.sun.tools.ws.wsdl.document.BindingOperation;
-import com.sun.tools.ws.wsdl.document.Documentation;
-import com.sun.tools.ws.wsdl.document.Kinds;
-import com.sun.tools.ws.wsdl.document.Message;
-import com.sun.tools.ws.wsdl.document.MessagePart;
-import com.sun.tools.ws.wsdl.document.OperationStyle;
-import com.sun.tools.ws.wsdl.document.WSDLDocument;
+import com.sun.tools.ws.resources.ModelerMessages;
+import com.sun.tools.ws.wscompile.AbortException;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.ErrorReceiverFilter;
+import com.sun.tools.ws.wscompile.WsimportOptions;
+import com.sun.tools.ws.wsdl.document.*;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBinding;
 import com.sun.tools.ws.wsdl.document.mime.MIMEContent;
 import com.sun.tools.ws.wsdl.document.mime.MIMEMultipartRelated;
 import com.sun.tools.ws.wsdl.document.mime.MIMEPart;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
-import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
-import com.sun.tools.ws.wsdl.document.soap.SOAPBody;
-import com.sun.tools.ws.wsdl.document.soap.SOAPFault;
-import com.sun.tools.ws.wsdl.document.soap.SOAPHeader;
-import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
+import com.sun.tools.ws.wsdl.document.soap.*;
+import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.GloballyKnown;
 import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
-import com.sun.tools.ws.wsdl.parser.Constants;
-import com.sun.tools.ws.wsdl.parser.Util;
+import com.sun.tools.ws.wsdl.parser.DOMForest;
 import com.sun.tools.ws.wsdl.parser.WSDLParser;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import org.w3c.dom.Element;
+import com.sun.xml.bind.api.JAXBRIContext;
+import org.xml.sax.helpers.LocatorImpl;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  *
@@ -84,52 +62,36 @@ import java.util.StringTokenizer;
  * Base class for WSDL->Model classes.
  */
 public abstract class WSDLModelerBase implements Modeler {
-    public WSDLModelerBase(WSDLModelInfo modelInfo, Properties options) {
-        //init();
-        _modelInfo = modelInfo;
-        _options = options;
-        _messageFactory =
-            new LocalizableMessageFactory("com.sun.tools.ws.resources.modeler");
-        _conflictingClassNames = null;
-        _env = modelInfo.getParent().getEnvironment();
-        reqResNames = new HashSet<String>();
+    protected final ErrorReceiverFilter errReceiver;
+    protected final WsimportOptions options;
+    protected DOMForest forest;
+
+//    public WSDLModelerBase(WSDLModelInfo modelInfo, Properties options, ErrorReceiver receiver) {
+//        //init();
+//        _modelInfo = modelInfo;
+//        _options = options;
+//        _messageFactory =
+//            new LocalizableMessageFactory("com.sun.tools.ws.resources.modeler");
+//        _conflictingClassNames = null;
+//        _env = modelInfo.getParent().getEnvironment();
+//        reqResNames = new HashSet<String>();
+//        this.errReceiver = receiver;
+//    }
+
+    public WSDLModelerBase(WsimportOptions options, ErrorReceiver receiver) {
+        this.options = options;
+        this.errReceiver = new ErrorReceiverFilter(receiver);;
     }
 
 
-    protected WSDLParser createWSDLParser(){
-        return new WSDLParser(_modelInfo);
-    }
+
+
+//    protected WSDLModelInfo getWSDLModelInfo(){
+//        return _modelInfo;
+//    }
 
     /**
-     * Builds model from WSDL document. Model contains abstraction which is used by the
-     * generators to generate the stub/tie/serializers etc. code.
      *
-     * @see Modeler#buildModel()
-     */
-    public Model buildModel() {
-        return null;
-    }
-
-    protected WSDLModelInfo getWSDLModelInfo(){
-        return _modelInfo;
-    }
-
-    protected Documentation getDocumentationFor(Element e) {
-        String s = XmlUtil.getTextForNode(e);
-        if (s == null) {
-            return null;
-        } else {
-            return new Documentation(s);
-        }
-    }
-
-    protected void checkNotWsdlElement(Element e) {
-        // possible extensibility element -- must live outside the WSDL namespace
-        if (e.getNamespaceURI().equals(Constants.NS_WSDL))
-            Util.fail("parsing.invalidWsdlElement", e.getTagName());
-    }
-
-    /**
      * @param port
      * @param wsdlPort
      */
@@ -143,7 +105,7 @@ public abstract class WSDLModelerBase implements Modeler {
             port.setPortGetter(portMethodName);
         }else{
             portMethodName = Names.getPortName(port);
-            portMethodName = getEnvironment().getNames().validJavaClassName(portMethodName);
+            portMethodName = JAXBRIContext.mangleNameToClassName(portMethodName);
             port.setPortGetter("get"+portMethodName);
         }
 
@@ -163,71 +125,13 @@ public abstract class WSDLModelerBase implements Modeler {
         return false;
     }
 
-//    protected void createParentFault(Fault fault) {
-//        AbstractType faultType = fault.getBlock().getType();
-//        AbstractType parentType = null;
-//
-//
-//        if (parentType == null) {
-//            return;
-//        }
-//
-//        if (fault.getParentFault() != null) {
-//            return;
-//        }
-//        Fault parentFault =
-//            new Fault(((AbstractType)parentType).getName().getLocalPart());
-//        /* this is what it really should be but for interop with JAXRPC 1.0.1 we are not doing
-//         * this at this time.
-//         *
-//         * TODO - we should double-check this; the above statement might not be true anymore.
-//         */
-//        QName faultQName =
-//            new QName(
-//                fault.getBlock().getName().getNamespaceURI(),
-//                parentFault.getName());
-//        Block block = new Block(faultQName);
-//        block.setType((AbstractType)parentType);
-//        parentFault.setBlock(block);
-//        parentFault.addSubfault(fault);
-//        createParentFault(parentFault);
-//    }
-
-//    protected void createSubfaults(Fault fault) {
-//        AbstractType faultType = fault.getBlock().getType();
-//        Iterator subtypes = null;
-//        if (subtypes != null) {
-//            AbstractType subtype;
-//            while (subtypes.hasNext()) {
-//                subtype = (AbstractType)subtypes.next();
-//                Fault subFault = new Fault(subtype.getName().getLocalPart());
-//                /* this is what it really is but for interop with JAXRPC 1.0.1 we are not doing
-//                 * this at this time
-//                 *
-//                 * TODO - we should double-check this; the above statement might not be true anymore.
-//                 */
-//                QName faultQName =
-//                    new QName(
-//                        fault.getBlock().getName().getNamespaceURI(),
-//                        subFault.getName());
-//                Block block = new Block(faultQName);
-//                block.setType(subtype);
-//                subFault.setBlock(block);
-//                fault.addSubfault(subFault);
-//                createSubfaults(subFault);
-//            }
-//        }
-//    }
-
     protected SOAPBody getSOAPRequestBody() {
         SOAPBody requestBody =
             (SOAPBody)getAnyExtensionOfType(info.bindingOperation.getInput(),
                 SOAPBody.class);
         if (requestBody == null) {
             // the WSDL document is invalid
-            throw new ModelerException(
-                "wsdlmodeler.invalid.bindingOperation.inputMissingSoapBody",
-                info.bindingOperation.getName());
+            error(info.bindingOperation.getInput(), ModelerMessages.WSDLMODELER_INVALID_BINDING_OPERATION_INPUT_MISSING_SOAP_BODY(info.bindingOperation.getName()));
         }
         return requestBody;
     }
@@ -259,9 +163,7 @@ public abstract class WSDLModelerBase implements Modeler {
                 SOAPBody.class);
         if (responseBody == null) {
             // the WSDL document is invalid
-            throw new ModelerException(
-                "wsdlmodeler.invalid.bindingOperation.outputMissingSoapBody",
-                info.bindingOperation.getName());
+            error(info.bindingOperation.getOutput(),  ModelerMessages.WSDLMODELER_INVALID_BINDING_OPERATION_OUTPUT_MISSING_SOAP_BODY(info.bindingOperation.getName()));
         }
         return responseBody;
     }
@@ -301,9 +203,7 @@ public abstract class WSDLModelerBase implements Modeler {
                 String part = in.nextToken();
                 MessagePart mPart = message.getPart(part);
                 if (null == mPart) {
-                    throw new ModelerException(
-                        "wsdlmodeler.error.partsNotFound",
-                        part, message.getName());
+                    error(message,  ModelerMessages.WSDLMODELER_ERROR_PARTS_NOT_FOUND(part, message.getName()));
                 }
                 mPart.setBindingExtensibilityElementKind(MessagePart.SOAP_BODY_BINDING);
                 partsList.add(mPart);
@@ -354,9 +254,7 @@ public abstract class WSDLModelerBase implements Modeler {
             for (TWSDLExtension obj : mPart.extensions()) {
                 if (obj instanceof SOAPBody) {
                     if (gotRootPart) {
-                        //bug fix: 5024020
-                        warn("mimemodeler.invalidMimePart.moreThanOneSOAPBody",
-                            new Object[]{info.operation.getName().getLocalPart()});
+                        warning(mPart, ModelerMessages.MIMEMODELER_INVALID_MIME_PART_MORE_THAN_ONE_SOAP_BODY(info.operation.getName().getLocalPart()));
                         return false;
                     }
                     gotRootPart = true;
@@ -367,9 +265,7 @@ public abstract class WSDLModelerBase implements Modeler {
             if(!validateMimeContentPartNames(mimeContents))
                 return false;
             if(mPart.getName() != null) {
-                //bug fix: 5024018
-                warn("mimemodeler.invalidMimePart.nameNotAllowed",
-                        info.portTypeOperation.getName());
+                warning(mPart, ModelerMessages.MIMEMODELER_INVALID_MIME_PART_NAME_NOT_ALLOWED(info.portTypeOperation.getName()));
             }
         }
         return true;
@@ -382,8 +278,7 @@ public abstract class WSDLModelerBase implements Modeler {
             MessagePart mPart = message.getPart(mimeContentPartName);
             //RXXXX mime:content MUST have part attribute
             if(null == mPart) {
-                throw new ModelerException("wsdlmodeler.error.partsNotFound",
-                        mimeContentPartName, message.getName());
+                error(mimeContent,  ModelerMessages.WSDLMODELER_ERROR_PARTS_NOT_FOUND(mimeContentPartName, message.getName()));
             }
             mPart.setBindingExtensibilityElementKind(MessagePart.WSDL_MIME_BINDING);
             return mPart;
@@ -411,19 +306,17 @@ public abstract class WSDLModelerBase implements Modeler {
             if(mimeContnetPart == null) {
                 mimeContnetPart = getMimeContentPartName(mimeContent);
                 if(mimeContnetPart == null) {
-                    warn("mimemodeler.invalidMimeContent.missingPartAttribute",
-                            new Object[] {info.operation.getName().getLocalPart()});
+                    warning(mimeContent, ModelerMessages.MIMEMODELER_INVALID_MIME_CONTENT_MISSING_PART_ATTRIBUTE(info.operation.getName().getLocalPart()));
                     return false;
                 }
             }else {
                 String newMimeContnetPart = getMimeContentPartName(mimeContent);
                 if(newMimeContnetPart == null) {
-                    warn("mimemodeler.invalidMimeContent.missingPartAttribute",
-                            new Object[] {info.operation.getName().getLocalPart()});
+                    warning(mimeContent, ModelerMessages.MIMEMODELER_INVALID_MIME_CONTENT_MISSING_PART_ATTRIBUTE(info.operation.getName().getLocalPart()));
                     return false;
                 }else if(!newMimeContnetPart.equals(mimeContnetPart)) {
                     //throw new ModelerException("mimemodeler.invalidMimeContent.differentPart");
-                    warn("mimemodeler.invalidMimeContent.differentPart");
+                    warning(mimeContent, ModelerMessages.MIMEMODELER_INVALID_MIME_CONTENT_DIFFERENT_PART());
                     return false;
                 }
             }
@@ -466,8 +359,7 @@ public abstract class WSDLModelerBase implements Modeler {
     private String getMimeContentType(MIMEContent mimeContent){
         String mimeType = mimeContent.getType();
         if(mimeType == null){
-            throw new ModelerException("mimemodeler.invalidMimeContent.missingTypeAttribute",
-                    info.operation.getName().getLocalPart());
+            error(mimeContent, ModelerMessages.MIMEMODELER_INVALID_MIME_CONTENT_MISSING_TYPE_ATTRIBUTE(info.operation.getName().getLocalPart()));
         }
         return mimeType;
     }
@@ -510,9 +402,7 @@ public abstract class WSDLModelerBase implements Modeler {
         if (namespaceURI == null) {
             // the WSDL document is invalid
             // at least, that's my interpretation of section 3.5 of the WSDL 1.1 spec!
-            throw new ModelerException(
-                "wsdlmodeler.invalid.bindingOperation.inputSoapBody.missingNamespace",
-                info.bindingOperation.getName());
+            error(body, ModelerMessages.WSDLMODELER_INVALID_BINDING_OPERATION_INPUT_SOAP_BODY_MISSING_NAMESPACE(info.bindingOperation.getName()));
         }
         return namespaceURI;
     }
@@ -522,9 +412,7 @@ public abstract class WSDLModelerBase implements Modeler {
         if (namespaceURI == null) {
             // the WSDL document is invalid
             // at least, that's my interpretation of section 3.5 of the WSDL 1.1 spec!
-            throw new ModelerException(
-                "wsdlmodeler.invalid.bindingOperation.outputSoapBody.missingNamespace",
-                info.bindingOperation.getName());
+            error(body, ModelerMessages.WSDLMODELER_INVALID_BINDING_OPERATION_OUTPUT_SOAP_BODY_MISSING_NAMESPACE(info.bindingOperation.getName()));
         }
         return namespaceURI;
     }
@@ -542,10 +430,7 @@ public abstract class WSDLModelerBase implements Modeler {
                         if (obj instanceof SOAPHeader) {
                             //bug fix: 5024015
                             if (!isRootPart) {
-                                warn(
-                                    "mimemodeler.warning.IgnoringinvalidHeaderPart.notDeclaredInRootPart",
-                                    new Object[]{
-                                        info.bindingOperation.getName()});
+                                warning((Entity) obj, ModelerMessages.MIMEMODELER_WARNING_IGNORINGINVALID_HEADER_PART_NOT_DECLARED_IN_ROOT_PART(info.bindingOperation.getName()));
                                 return new ArrayList<SOAPHeader>();
                             }
                             headerList.add((SOAPHeader) obj);
@@ -581,10 +466,8 @@ public abstract class WSDLModelerBase implements Modeler {
                 if (aFault.getName().equals(bindingFault.getName())) {
                     if (portTypeFault != null) {
                         // the WSDL document is invalid
-                        throw new ModelerException(
-                            "wsdlmodeler.invalid.bindingFault.notUnique",
-                            bindingFault.getName(),
-                            info.bindingOperation.getName());
+                        error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_NOT_UNIQUE(bindingFault.getName(),
+                            info.bindingOperation.getName()));
                     } else {
                         portTypeFault = aFault;
                     }
@@ -592,36 +475,27 @@ public abstract class WSDLModelerBase implements Modeler {
             }
             if (portTypeFault == null) {
                 // the WSDL document is invalid
-                throw new ModelerException(
-                    "wsdlmodeler.invalid.bindingFault.notFound",
-                    bindingFault.getName(),
-                    info.bindingOperation.getName());
-
+                error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_NOT_FOUND(bindingFault.getName(),
+                    info.bindingOperation.getName()));
             }
             SOAPFault soapFault =
                 (SOAPFault)getExtensionOfType(bindingFault, SOAPFault.class);
             if (soapFault == null) {
                 // the WSDL document is invalid
-                throw new ModelerException(
-                    "wsdlmodeler.invalid.bindingFault.outputMissingSoapFault",
-                    bindingFault.getName(),
-                    info.bindingOperation.getName());
+                error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(),
+                    info.bindingOperation.getName()));
             }
 
             com.sun.tools.ws.wsdl.document.Message faultMessage =
                 portTypeFault.resolveMessage(info.document);
             if(faultMessage.getParts().isEmpty()) {
                 // the WSDL document is invalid
-                throw new ModelerException(
-                    "wsdlmodeler.invalid.bindingFault.emptyMessage",
-                    bindingFault.getName(),
-                    faultMessage.getName());
+                error(faultMessage, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_EMPTY_MESSAGE(bindingFault.getName(),
+                    faultMessage.getName()));
             }
             //  bug fix: 4852729
-            if (useWSIBasicProfile && (soapFault.getNamespace() != null)) {
-                warn(
-                    "wsdlmodeler.warning.r2716r2726",
-                    new Object[] { "soapbind:fault", soapFault.getName()});
+            if (!options.isExtensionMode() && (soapFault.getNamespace() != null)) {
+                warning(soapFault, ModelerMessages.WSDLMODELER_WARNING_R_2716_R_2726("soapbind:fault", soapFault.getName()));
             }
             String faultNamespaceURI = soapFault.getNamespace();
             if (faultNamespaceURI == null) {
@@ -703,81 +577,15 @@ public abstract class WSDLModelerBase implements Modeler {
         return null;
     }
 
-    protected ProcessorEnvironment getEnvironment() {
-        return _env;
-    }
-
-    protected void warn(Localizable msg) {
-        getEnvironment().warn(msg);
-    }
-
-    protected void warn(String key) {
-        getEnvironment().warn(_messageFactory.getMessage(key));
-    }
-
-    protected void warn(String key, String arg) {
-        getEnvironment().warn(_messageFactory.getMessage(key, arg));
-    }
-
-    protected void error(String key, String arg) {
-        getEnvironment().error(_messageFactory.getMessage(key, arg));
-    }
-
-    protected void warn(String key, Object[] args) {
-        getEnvironment().warn(_messageFactory.getMessage(key, args));
-    }
-
-    protected void info(String key) {
-        getEnvironment().info(_messageFactory.getMessage(key));
-    }
-
-    protected void info(String key, String arg) {
-        getEnvironment().info(_messageFactory.getMessage(key, arg));
-    }
-
-    protected String makePackageQualified(String s, QName name) {
-        return makePackageQualified(s, name, true);
-    }
-
-    protected String makePackageQualified(
-        String s,
-        QName name,
-        boolean useNamespaceMapping) {
-        String javaPackageName = null;
-        if (useNamespaceMapping) {
-            javaPackageName = getJavaPackageName(name);
-        }
-        if (javaPackageName != null) {
-            return javaPackageName + "." + s;
-        } else if (
-            _modelInfo.getJavaPackageName() != null
-                && !_modelInfo.getJavaPackageName().equals("")) {
-            return _modelInfo.getJavaPackageName() + "." + s;
+    protected String makePackageQualified(String s) {
+        if (options.defaultPackage != null
+            && !options.defaultPackage.equals("")) {
+            return options.defaultPackage + "." + s;
         } else {
             return s;
         }
     }
 
-    protected QName makePackageQualified(QName name) {
-        return makePackageQualified(name, true);
-    }
-
-    protected QName makePackageQualified(
-        QName name,
-        boolean useNamespaceMapping) {
-        return new QName(
-            name.getNamespaceURI(),
-            makePackageQualified(name.getLocalPart(), name));
-    }
-
-    protected String makeNameUniqueInSet(String candidateName, Set names) {
-        String baseName = candidateName;
-        String name = baseName;
-        for (int i = 2; names.contains(name); ++i) {
-            name = baseName + Integer.toString(i);
-        }
-        return name;
-    }
 
     protected String getUniqueName(
         com.sun.tools.ws.wsdl.document.Operation operation,
@@ -786,35 +594,6 @@ public abstract class WSDLModelerBase implements Modeler {
             return operation.getUniqueKey().replace(' ', '_');
         } else {
             return operation.getName();
-        }
-    }
-
-    protected String getUniqueParameterName(
-        Operation operation,
-        String baseName) {
-        Set<String> names = new HashSet<String>();
-        for( Parameter p : operation.getRequest().getParametersList() ) {
-            names.add(p.getName());
-        }
-        for( Parameter p : operation.getResponse().getParametersList() ) {
-            names.add(p.getName());
-        }
-        String candidateName = baseName;
-        while (names.contains(candidateName)) {
-            candidateName += "_prime";
-        }
-        return candidateName;
-    }
-
-    protected String getNonQualifiedNameFor(QName name) {
-        return _env.getNames().validJavaClassName(name.getLocalPart());
-    }
-
-    protected static void setDocumentationIfPresent(
-        ModelObject obj,
-        Documentation documentation) {
-        if (documentation != null && documentation.getContent() != null) {
-            obj.setProperty(WSDL_DOCUMENTATION, documentation.getContent());
         }
     }
 
@@ -902,20 +681,6 @@ public abstract class WSDLModelerBase implements Modeler {
         return uniqueName;
     }
 
-    private String getJavaPackageName(QName name) {
-        String packageName = null;
-/*        if (_modelInfo.getNamespaceMappingRegistry() != null) {
-            NamespaceMappingInfo i =
-                _modelInfo
-                    .getNamespaceMappingRegistry()
-                    .getNamespaceMappingInfo(
-                    name);
-            if (i != null)
-                return i.getJavaPackageName();
-        }*/
-        return packageName;
-    }
-
     protected boolean isConflictingClassName(String name) {
         if (_conflictingClassNames == null) {
             return false;
@@ -944,10 +709,23 @@ public abstract class WSDLModelerBase implements Modeler {
         return isConflictingClassName(name);
     }
 
+    protected void warning(Entity entity, String message){
+        if(entity == null)
+            errReceiver.warning(NULL_LOCATOR, message);
+        else
+            errReceiver.warning(entity.getLocator(), message);
+    }
+
+    protected void error(Entity entity, String message){
+        if(entity == null)
+            errReceiver.error(NULL_LOCATOR, message);
+        else
+            errReceiver.error(entity.getLocator(), message);
+        throw new AbortException();
+    }
+
     protected static final String OPERATION_HAS_VOID_RETURN_TYPE =
         "com.sun.xml.ws.processor.modeler.wsdl.operationHasVoidReturnType";
-    private static final String WSDL_DOCUMENTATION =
-        "com.sun.xml.ws.processor.modeler.wsdl.documentation";
     protected static final String WSDL_PARAMETER_ORDER =
         "com.sun.xml.ws.processor.modeler.wsdl.parameterOrder";
     public static final String WSDL_RESULT_PARAMETER =
@@ -956,23 +734,24 @@ public abstract class WSDLModelerBase implements Modeler {
         "com.sun.xml.ws.processor.modeler.wsdl.mimeMultipartRelatedBinding";
 
 
-    public ProcessorEnvironment getProcessorEnvironment(){
-        return _env;
-    }
+//    public ProcessorEnvironment getOptions(){
+//        return _env;
+//    }
     protected ProcessSOAPOperationInfo info;
 
-    protected WSDLModelInfo _modelInfo;
-    protected Properties _options;
-    protected LocalizableMessageFactory _messageFactory;
+//    protected WSDLModelInfo _modelInfo;
+//    protected Properties _options;
+//    protected LocalizableMessageFactory _messageFactory;
     private Set _conflictingClassNames;
     protected Map<String,JavaException> _javaExceptions;
     protected Map _faultTypeToStructureMap;
-    private ProcessorEnvironment _env;
+//    private ProcessorEnvironment _env;
     protected JavaSimpleTypeCreator _javaTypes;
     protected Map<QName, Port> _bindingNameToPortMap;
     protected boolean useWSIBasicProfile = true;
 
-    private Set<String> reqResNames;
+    private final Set<String> reqResNames = new HashSet<String>();
+
     public class ProcessSOAPOperationInfo {
 
         public ProcessSOAPOperationInfo(
@@ -1019,4 +798,5 @@ public abstract class WSDLModelerBase implements Modeler {
 
     protected WSDLParser parser;
     protected WSDLDocument document;
+    protected static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }

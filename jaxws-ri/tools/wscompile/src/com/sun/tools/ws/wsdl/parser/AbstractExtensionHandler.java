@@ -25,7 +25,6 @@ package com.sun.tools.ws.wsdl.parser;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
-import com.sun.tools.ws.wsdl.document.WSDLConstants;
 import com.sun.tools.ws.wsdl.document.mime.MIMEConstants;
 import org.w3c.dom.Element;
 

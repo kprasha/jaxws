@@ -22,6 +22,8 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
+import org.xml.sax.Locator;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +34,14 @@ import java.util.Map;
  */
 public abstract class Entity implements Elemental {
 
-    public Entity() {
+    private final Locator locator;
+    public Entity(Locator locator) {
+        this.locator = locator;
+    }
+
+
+    public Locator getLocator() {
+        return locator;
     }
 
     public Object getProperty(String key) {

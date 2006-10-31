@@ -57,7 +57,7 @@ final class Invoker {
      * @return
      *      exit code
      */
-    static int main(String toolName, String[] args) throws Throwable {
+    static int WsimportMain(String[] args) throws Throwable {
         // use the platform default proxy if available.
         // see sun.net.spi.DefaultProxySelector for details.
         try {
@@ -71,9 +71,9 @@ final class Invoker {
             APTClassLoader cl = new APTClassLoader(Invoker.class.getClassLoader(),prefixes);
             Thread.currentThread().setContextClassLoader(cl);
 
-            Class compileTool = cl.loadClass("com.sun.tools.ws.wscompile.CompileTool");
-            Constructor ctor = compileTool.getConstructor(OutputStream.class,String.class);
-            Object tool = ctor.newInstance(System.out,toolName);
+            Class compileTool = cl.loadClass("com.sun.tools.ws.wscompile.WsimportTool");
+            Constructor ctor = compileTool.getConstructor(OutputStream.class);
+            Object tool = ctor.newInstance(System.out);
             Method runMethod = compileTool.getMethod("run",String[].class);
             boolean r = (Boolean)runMethod.invoke(tool,new Object[]{args});
             return r ? 0 : 1;
@@ -87,4 +87,42 @@ final class Invoker {
 
         return -1;
     }
+
+    /**
+     * CLI entry point.
+     *
+     * @return
+     *      exit code
+     */
+    static int WsgenMain(String[] args) throws Throwable {
+        // use the platform default proxy if available.
+        // see sun.net.spi.DefaultProxySelector for details.
+        try {
+            System.setProperty("java.net.useSystemProxies","true");
+        } catch (SecurityException e) {
+            // failing to set this property isn't fatal
+        }
+
+        ClassLoader oldcc = Thread.currentThread().getContextClassLoader();
+        try {
+            APTClassLoader cl = new APTClassLoader(Invoker.class.getClassLoader(),prefixes);
+            Thread.currentThread().setContextClassLoader(cl);
+
+            Class compileTool = cl.loadClass("com.sun.tools.ws.wscompile.WsgenTool");
+            Constructor ctor = compileTool.getConstructor(OutputStream.class);
+            Object tool = ctor.newInstance(System.out);
+            Method runMethod = compileTool.getMethod("run",String[].class);
+            boolean r = (Boolean)runMethod.invoke(tool,new Object[]{args});
+            return r ? 0 : 1;
+        } catch (ToolsJarNotFoundException e) {
+            System.err.println(e.getMessage());
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldcc);
+        }
+
+        return -1;
+    }
+
 }

@@ -22,54 +22,25 @@
 package com.sun.tools.ws.processor.modeler.annotation;
 
 import static com.sun.codemodel.ClassType.CLASS;
-import com.sun.codemodel.CodeWriter;
-import com.sun.codemodel.JAnnotationArrayMember;
-import com.sun.codemodel.JAnnotationUse;
-import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JCommentPart;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JDocComment;
-import com.sun.codemodel.JExpr;
-import com.sun.codemodel.JFieldVar;
-import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JMod;
-import com.sun.codemodel.JType;
-import com.sun.codemodel.JVar;
+import com.sun.codemodel.*;
 import com.sun.codemodel.writer.ProgressCodeWriter;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.InterfaceDeclaration;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.ReferenceType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.VoidType;
-import com.sun.mirror.type.MirroredTypeException;
+import com.sun.mirror.type.*;
 import com.sun.tools.ws.processor.generator.GeneratorBase;
 import com.sun.tools.ws.processor.generator.GeneratorConstants;
 import com.sun.tools.ws.processor.generator.Names;
 import com.sun.tools.ws.processor.modeler.ModelerException;
 import com.sun.tools.ws.processor.util.DirectoryUtil;
-import com.sun.tools.ws.processor.util.GeneratedFileInfo;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.resources.WebserviceapMessages;
 import com.sun.tools.ws.util.ClassNameInfo;
 import com.sun.tools.ws.wscompile.FilerCodeWriter;
+import com.sun.tools.ws.wscompile.WsgenOptions;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.xml.ws.util.StringUtils;
 
-import javax.jws.Oneway;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.jws.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 import javax.xml.ws.RequestWrapper;
@@ -77,11 +48,7 @@ import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebFault;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 
 /**
@@ -121,10 +88,10 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         if (cm != null) {
             File sourceDir = builder.getSourceDir();
             assert(sourceDir != null);
-            ProcessorEnvironment env = builder.getProcessorEnvironment();
+            WsgenOptions options = builder.getOptions();
             try {
-                CodeWriter cw = new FilerCodeWriter(sourceDir, env);
-                if(env.verbose())
+                CodeWriter cw = new FilerCodeWriter(sourceDir, options);
+                if(options.verbose)
                     cw = new ProgressCodeWriter(cw, System.out);
                 cm.build(cw);
             } catch (IOException e) {
@@ -152,17 +119,12 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         if (packageName.length() == 0)
             beanPackage = JAXWS_PACKAGE_PD;
         boolean beanGenerated = false;
-        try {
-            for (ReferenceType thrownType : method.getThrownTypes()) {
-                ClassDeclaration typeDecl = ((ClassType)thrownType).getDeclaration();
-                if (typeDecl == null)
-                    builder.onError("webserviceap.could.not.find.typedecl",
-                         thrownType.toString(), context.getRound());
-                boolean tmp = generateExceptionBean(typeDecl, beanPackage);
-                beanGenerated = beanGenerated || tmp;
-            }
-        } catch (Exception e) {
-            throw new ModelerException("modeler.nestedGeneratorError",e);
+        for (ReferenceType thrownType : method.getThrownTypes()) {
+            ClassDeclaration typeDecl = ((ClassType)thrownType).getDeclaration();
+            if (typeDecl == null)
+                builder.onError(WebserviceapMessages.WEBSERVICEAP_COULD_NOT_FIND_TYPEDECL(thrownType.toString(), context.getRound()));
+            boolean tmp = generateExceptionBean(typeDecl, beanPackage);
+            beanGenerated = beanGenerated || tmp;
         }
         return beanGenerated;
     }
@@ -202,18 +164,16 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         }
         builder.log("requestWrapper: "+requestClassName);
 ///// fix for wsgen CR 6442344
-        GeneratedFileInfo gfi=new GeneratedFileInfo();
-        gfi.setFile(new File(DirectoryUtil.getOutputDirectoryFor(requestClassName, builder.getSourceDir(), builder.getProcessorEnvironment()),
-                             Names.stripQualifier(requestClassName) + GeneratorConstants.JAVA_SRC_SUFFIX));
-        builder.getProcessorEnvironment().addGeneratedFile(gfi);
+        File file = new File(DirectoryUtil.getOutputDirectoryFor(requestClassName, builder.getSourceDir()),
+                             Names.stripQualifier(requestClassName) + GeneratorConstants.JAVA_SRC_SUFFIX);
+        builder.getOptions().addGeneratedFile(file);
 //////////
         boolean canOverwriteRequest = builder.canOverWriteClass(requestClassName);
         if (!canOverwriteRequest) {
             builder.log("Class " + requestClassName + " exists. Not overwriting.");
         }
         if (duplicateName(requestClassName) && canOverwriteRequest) {
-            builder.onError("webserviceap.method.request.wrapper.bean.name.not.unique",
-                             typeDecl.getQualifiedName(), method.toString());
+            builder.onError(WebserviceapMessages.WEBSERVICEAP_METHOD_REQUEST_WRAPPER_BEAN_NAME_NOT_UNIQUE(typeDecl.getQualifiedName(), method.toString()));
         }
 
         String responseClassName = null;
@@ -234,14 +194,15 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 builder.log("Class " + responseClassName + " exists. Not overwriting.");
             }
             if (duplicateName(responseClassName) && canOverwriteResponse) {
-                builder.onError("webserviceap.method.response.wrapper.bean.name.not.unique",
-                    typeDecl.getQualifiedName(), method.toString());
+                builder.onError(WebserviceapMessages.WEBSERVICEAP_METHOD_RESPONSE_WRAPPER_BEAN_NAME_NOT_UNIQUE(typeDecl.getQualifiedName(), method.toString()));
             }
   ///// fix for wsgen CR 6442344
-            gfi=new GeneratedFileInfo();
-            gfi.setFile(new File(DirectoryUtil.getOutputDirectoryFor(responseClassName, builder.getSourceDir(), builder.getProcessorEnvironment()),
-                                 Names.stripQualifier(responseClassName) + GeneratorConstants.JAVA_SRC_SUFFIX));
-            builder.getProcessorEnvironment().addGeneratedFile(gfi);
+//            gfi=new GeneratedFileInfo();
+//            gfi.setFile(new File(DirectoryUtil.getOutputDirectoryFor(responseClassName, builder.getSourceDir()),
+//                                 Names.stripQualifier(responseClassName) + GeneratorConstants.JAVA_SRC_SUFFIX));
+            file = new File(DirectoryUtil.getOutputDirectoryFor(responseClassName, builder.getSourceDir()),
+                                 Names.stripQualifier(responseClassName) + GeneratorConstants.JAVA_SRC_SUFFIX);
+            builder.getOptions().addGeneratedFile(file);
 ////////////
         }
         ArrayList<MemberInfo> reqMembers = new ArrayList<MemberInfo>();
@@ -481,8 +442,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         faultInfo = new FaultInfo(className, false);
 
         if (duplicateName(className)) {
-            builder.onError("webserviceap.method.exception.bean.name.not.unique",
-                             new Object[] {typeDecl.getQualifiedName(), thrownDecl.getQualifiedName()});
+            builder.onError(WebserviceapMessages.WEBSERVICEAP_METHOD_EXCEPTION_BEAN_NAME_NOT_UNIQUE(typeDecl.getQualifiedName(), thrownDecl.getQualifiedName()));
         }
 
         ArrayList<MemberInfo> members = new ArrayList<MemberInfo>();

@@ -23,49 +23,42 @@
 package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.*;
-import com.sun.codemodel.writer.ProgressCodeWriter;
 import com.sun.tools.ws.api.TJavaGeneratorExtension;
 import com.sun.tools.ws.processor.ProcessorAction;
-import com.sun.tools.ws.processor.config.Configuration;
-import com.sun.tools.ws.processor.config.WSDLModelInfo;
 import com.sun.tools.ws.processor.model.*;
 import com.sun.tools.ws.processor.model.java.JavaInterface;
 import com.sun.tools.ws.processor.model.java.JavaMethod;
 import com.sun.tools.ws.processor.model.java.JavaParameter;
 import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.JAXBTypeAndAnnotation;
-import com.sun.tools.ws.wscompile.WSCodeWriter;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.Options;
+import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
-import com.sun.tools.xjc.api.JAXBModel;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SeiGenerator extends GeneratorBase implements ProcessorAction {
-    private WSDLModelInfo wsdlModelInfo;
     private String serviceNS;
     private TJavaGeneratorExtension extension;
     List<TJavaGeneratorExtension> extensionHandlers;
 
-    public SeiGenerator() {
-    }
 
     protected void doGeneration() {
         try {
             model.accept(this);
         } catch (Exception e) {
-            if (env.verbose())
+            if (options.verbose)
                 e.printStackTrace();
             throw new GeneratorException(
                 "generator.nestedGeneratorError",
@@ -73,14 +66,19 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         }
     }
 
-    public GeneratorBase getGenerator(Model model, Configuration config, Properties properties) {
-        return new SeiGenerator(model, config, properties, ServiceFinder.find(TJavaGeneratorExtension.class).toArray());
+
+    public  GeneratorBase getGenerator(Model model, WsimportOptions options, ErrorReceiver receiver) {
+        return new SeiGenerator(model, options, receiver, ServiceFinder.find(TJavaGeneratorExtension.class).toArray());
     }
 
-    public SeiGenerator(Model model, Configuration config, Properties properties, TJavaGeneratorExtension... extensions) {
-        super(model, config, properties);
+    public static final void generate(Model model, WsimportOptions options, ErrorReceiver receiver, TJavaGeneratorExtension... extensions){
+        SeiGenerator seiGenerator = new SeiGenerator(model, options, receiver, extensions);
+        seiGenerator.doGeneration();
+    }
+
+    protected SeiGenerator(Model model, WsimportOptions options, ErrorReceiver receiver, TJavaGeneratorExtension... extensions) {
+        super(model, options, receiver);
         this.model = model;
-        this.wsdlModelInfo = (WSDLModelInfo)config.getModelInfo();
         extensionHandlers = new ArrayList<TJavaGeneratorExtension>();
 
         // register handlers for default extensions
@@ -92,16 +90,11 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         this.extension = new JavaGeneratorExtensionFacade(extensionHandlers.toArray(new TJavaGeneratorExtension[0]));
     }
 
-    public GeneratorBase getGenerator(Model model, Configuration config, Properties properties, SOAPVersion ver) {
-        return new SeiGenerator(model, config, properties, ServiceFinder.find(TJavaGeneratorExtension.class).toArray());
-    }
-
-
     private void write(Service service, Port port) throws Exception{
         JavaInterface intf = port.getJavaInterface();
-        String className = env.getNames().customJavaTypeClassName(intf);
+        String className = Names.customJavaTypeClassName(intf);
 
-        if (donotOverride && GeneratorUtil.classExists(env, className)) {
+        if (donotOverride && GeneratorUtil.classExists(options, className)) {
             log("Class " + className + " exists. Not overriding.");
             return;
         }
@@ -135,13 +128,14 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
         writeWebServiceAnnotation(port, webServiceAnn);
 
         //@HandlerChain
-        writeHandlerConfig(env.getNames().customJavaTypeClassName(port.getJavaInterface()), cls, wsdlModelInfo);
+        writeHandlerConfig(Names.customJavaTypeClassName(port.getJavaInterface()), cls, options);
 
         //@SOAPBinding
         writeSOAPBinding(port, cls);
 
         //@XmlSeeAlso
-        writeXmlSeeAlso(port, cls);
+        if(options.target.isLaterThan(Options.Target.V2_1))
+            writeXmlSeeAlso(port, cls);
 
         for (Operation operation: port.getOperations()) {
             JavaMethod method = operation.getJavaMethod();
@@ -191,11 +185,6 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
             //It should be the last thing to invoke after JMethod is built completely
             extension.writeMethodAnnotations(wsdlOp, m);
         }
-        CodeWriter cw = new WSCodeWriter(sourceDir,env);
-
-        if(env.verbose())
-            cw = new ProgressCodeWriter(cw, System.out);
-        cm.build(cw);
     }
 
     private void writeXmlSeeAlso(Port port, JDefinedClass cls) {        
@@ -463,7 +452,7 @@ public class SeiGenerator extends GeneratorBase implements ProcessorAction {
     public void visit(Service service) throws Exception {
         String jd = model.getJavaDoc();
         if(jd != null){
-            JPackage pkg = cm._package(wsdlModelInfo.getJavaPackageName());
+            JPackage pkg = cm._package(options.defaultPackage);
             pkg.javadoc().add(jd);
         }
 

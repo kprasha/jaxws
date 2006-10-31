@@ -22,9 +22,9 @@
 
 package com.sun.tools.ws.wsdl.document.jaxws;
 
-import javax.xml.namespace.QName;
-
 import com.sun.tools.ws.wsdl.parser.Constants;
+
+import javax.xml.namespace.QName;
 
 /**
  * @author Vivek Pandey

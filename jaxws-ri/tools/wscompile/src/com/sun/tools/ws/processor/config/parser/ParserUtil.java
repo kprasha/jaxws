@@ -22,13 +22,10 @@
 
 package com.sun.tools.ws.processor.config.parser;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamReader;
-
 import com.sun.tools.ws.processor.config.ConfigurationException;
-import com.sun.xml.ws.streaming.Attributes;
 import com.sun.xml.ws.streaming.XMLReader;
-import com.sun.xml.ws.util.xml.XmlUtil;
+
+import javax.xml.stream.XMLStreamReader;
 
 /**
  *

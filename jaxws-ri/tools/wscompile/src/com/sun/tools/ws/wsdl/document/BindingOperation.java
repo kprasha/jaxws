@@ -27,6 +27,7 @@ import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
+import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -39,7 +40,8 @@ import java.util.List;
  */
 public class BindingOperation extends Entity implements TWSDLExtensible {
 
-    public BindingOperation() {
+    public BindingOperation(Locator locator) {
+        super(locator);
         _faults = new ArrayList<BindingFault>();
         _helper = new ExtensibilityHelper();
     }

@@ -22,12 +22,11 @@
 
 package com.sun.tools.ws.processor.config;
 
-import java.util.Properties;
-
 import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.processor.modeler.Modeler;
-import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.EntityResolver;
+
+import java.util.Properties;
 
 /**
  * This class contiains information used by {@link com.sun.tools.ws.processor.modeler.Modeler

@@ -22,18 +22,30 @@
 
 package com.sun.tools.ws.processor.model;
 
+import com.sun.tools.ws.wsdl.framework.Entity;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  *
  * @author WS Development Team
  */
 public abstract class ModelObject {
-
     public abstract void accept(ModelVisitor visitor) throws Exception;
+
+    private final Entity entity;
+
+    protected ModelObject(Entity entity) {
+        this.entity = entity;
+    }
+
+
+    public Entity getEntity() {
+        return entity;
+    }
 
     public Object getProperty(String key) {
         if (_properties == null) {

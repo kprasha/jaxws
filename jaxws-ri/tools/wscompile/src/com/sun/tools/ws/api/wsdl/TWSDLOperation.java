@@ -24,7 +24,6 @@ package com.sun.tools.ws.api.wsdl;
 
 import com.sun.codemodel.JClass;
 
-import javax.xml.namespace.QName;
 import java.util.Map;
 
 /**

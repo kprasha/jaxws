@@ -24,54 +24,45 @@ package com.sun.tools.ws.processor.modeler.annotation;
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.Messager;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.InterfaceDeclaration;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.TypeParameterDeclaration;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.InterfaceType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.SourcePosition;
 import com.sun.tools.ws.ToolVersion;
-import com.sun.tools.ws.processor.ProcessorNotificationListener;
-import com.sun.tools.ws.processor.ProcessorOptions;
 import com.sun.tools.ws.processor.generator.GeneratorUtil;
 import com.sun.tools.ws.processor.generator.Names;
-import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.processor.model.Operation;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.modeler.ModelerException;
-import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.util.ToolBase;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.util.localization.LocalizableMessage;
+import com.sun.tools.ws.processor.modeler.wsdl.ConsoleErrorReporter;
+import com.sun.tools.ws.resources.WebserviceapMessages;
+import com.sun.tools.ws.wscompile.*;
+import org.xml.sax.SAXParseException;
 
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 
 /**
  * WebServiceAP is a APT AnnotationProcessor for processing javax.jws.* and 
  * javax.xml.ws.* annotations. This class is used either by the WsGen (CompileTool) tool or 
- *    idirectly via the {@link com.sun.istack.ws.WSAP WSAP} when invoked by APT.
+ *    idirectly via the {@link com.sun.istack.ws.AnnotationProcessorFactoryImpl} when invoked by APT.
  *
  * @author WS Development Team
  */
-public class WebServiceAP extends ToolBase implements AnnotationProcessor, ModelBuilder, WebServiceConstants,
-    ProcessorNotificationListener {
+public class WebServiceAP implements AnnotationProcessor, ModelBuilder, WebServiceConstants{
 
     protected AnnotationProcessorEnvironment apEnv;
-    protected ProcessorEnvironment env;
+//    protected ProcessorEnvironment env;
 
     private File sourceDir;
 
@@ -84,11 +75,15 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
     protected AnnotationProcessorContext context;
     private Set<TypeDeclaration> processedTypeDecls = new HashSet<TypeDeclaration>();
     protected Messager messager;
-    private ToolBase tool;
+//    private ToolBase tool;
     private boolean doNotOverWrite = false;
+    private WsgenOptions options;
+    private ErrorReceiver receiver;
+    private PrintStream out;
+
     /*
-     * Is this invocation from APT or JavaC?
-     */
+    * Is this invocation from APT or JavaC?
+    */
     private boolean isAPTInvocation = false;
 
 
@@ -99,18 +94,27 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
        return true;
     }
 
-    public WebServiceAP(ToolBase tool, ProcessorEnvironment env, Properties options,  AnnotationProcessorContext context) {
-        super(System.out, "WebServiceAP");
+
+    public WebServiceAP(WsgenOptions options, AnnotationProcessorContext context, ErrorReceiver receiver, PrintStream out) {
+        this.options = options;
+        this.sourceDir = (options != null)?options.sourceDir:null;
+        this.doNotOverWrite = (options != null) && options.doNotOverWrite;
+        this.receiver = receiver;
+        this.out = out;
         this.context = context;
-        this.tool = tool;
-        this.env = env;
-        if (options != null) {
-            sourceDir = new File(options.getProperty(ProcessorOptions.SOURCE_DIRECTORY_PROPERTY));
-            String key = ProcessorOptions.DONOT_OVERWRITE_CLASSES;
-            this.doNotOverWrite =
-                Boolean.valueOf(options.getProperty(key));
-        }
     }
+
+//    public WebServiceAP(ToolBase tool, ProcessorEnvironment env, Properties options,  AnnotationProcessorContext context) {
+//        this.context = context;
+//        this.tool = tool;
+//        this.env = env;
+//        if (options != null) {
+//            sourceDir = new File(options.getProperty(ProcessorOptions.SOURCE_DIRECTORY_PROPERTY));
+//            String key = ProcessorOptions.DONOT_OVERWRITE_CLASSES;
+//            this.doNotOverWrite =
+//                Boolean.valueOf(options.getProperty(key));
+//        }
+//    }
 
     public void init(AnnotationProcessorEnvironment apEnv) {
         this.apEnv = apEnv;
@@ -118,10 +122,62 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
         remoteExceptionDecl = this.apEnv.getTypeDeclaration(REMOTE_EXCEPTION_CLASSNAME);
         exceptionDecl = this.apEnv.getTypeDeclaration(EXCEPTION_CLASSNAME);
         defHolderDecl = this.apEnv.getTypeDeclaration(HOLDER_CLASSNAME);
+        if (options == null) {
+            options = new WsgenOptions();
+            out = new PrintStream(new ByteArrayOutputStream());
+            class Listener extends WsimportListener {
+                ConsoleErrorReporter cer = new ConsoleErrorReporter(out);
 
-        if (env == null) {
+                @Override
+                public void generatedFile(String fileName) {
+                    message(fileName);
+                }
+
+                @Override
+                public void message(String msg) {
+                    out.println(msg);
+                }
+
+                @Override
+                public void error(SAXParseException exception) {
+                    cer.error(exception);
+                }
+
+                @Override
+                public void fatalError(SAXParseException exception) {
+                    cer.fatalError(exception);
+                }
+
+                @Override
+                public void warning(SAXParseException exception) {
+                    cer.warning(exception);
+                }
+
+                @Override
+                public void info(SAXParseException exception) {
+                    cer.info(exception);
+                }
+            }
+
+            final Listener listener = new Listener();
+            receiver = new ErrorReceiverFilter(new Listener()) {
+                public void info(SAXParseException exception) {
+                    if (options.verbose)
+                        super.info(exception);
+                }
+
+                public void warning(SAXParseException exception) {
+                    if (!options.quiet)
+                        super.warning(exception);
+                }
+
+                @Override
+                public void pollAbort() throws AbortException {
+                    if (listener.isCanceled())
+                        throw new AbortException();
+                }
+            };
             Map<String, String> apOptions = apEnv.getOptions();
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
             String classDir = apOptions.get("-d");
             if (classDir == null)
                 classDir = ".";
@@ -134,82 +190,75 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
                     File.pathSeparator +
                     cp + File.pathSeparator +
                     System.getProperty("java.class.path");
-            env = new ClientProcessorEnvironment(output, cpath, this);
-            ((ClientProcessorEnvironment) env).setNames(new Names());
+            options.classpath = cpath;
+//            env = new ClientProcessorEnvironment(output, cpath, this);
+//            ((ClientProcessorEnvironment) env).setNames(new Names());
             boolean setVerbose = false;
             for (String key : apOptions.keySet()) {
                 if (key.equals("-verbose"))
-                    setVerbose=true;
+                    setVerbose = true;
             }
-            if (setVerbose) {
-                env.setFlags(ProcessorEnvironment.F_VERBOSE);
-            }
+            options.verbose = setVerbose;
+//            if (setVerbose) {
+//                env.setFlags(ProcessorEnvironment.F_VERBOSE);
+//            }
             messager = apEnv.getMessager();
             isAPTInvocation = true;
         }
-        env.setFiler(apEnv.getFiler());
+        options.filer = apEnv.getFiler();
+//        env.setFiler(apEnv.getFiler());
     }
 
     public AnnotationProcessorEnvironment getAPEnv() {
         return apEnv;
     }
 
-    public ProcessorEnvironment getEnvironment() {
-        return env;
-    }
-
-    public ProcessorEnvironment getProcessorEnvironment() {
-        return env;
+    public WsgenOptions getOptions() {
+        return options;
     }
 
     public File getSourceDir() {
         return sourceDir;
     }
 
-    public void onError(String key) {
-        onError(new LocalizableMessage(getResourceBundleName(), key));
-    }
-
-    public void onError(String key, Object... args) throws ModelerException {
-        onError(null, key, args);
-    }
-    
-    public void onError(SourcePosition pos, String key, Object... args) throws ModelerException {
-        onError(pos, new LocalizableMessage(getResourceBundleName(), key, args));
-    }
-
-    public void onError(Localizable msg) throws ModelerException {
-        onError(null, msg);
-    }
-
-    public void onError(SourcePosition pos, Localizable msg) throws ModelerException {
+    public void onError(String message) {
         if (messager != null) {
-            messager.printError(pos, localizer.localize(msg));
+            messager.printError(message);
+        } else {
+            throw new ModelerException(message);
+        }
+    }
+
+    public void onError(SourcePosition pos, String msg) throws ModelerException {
+        if (messager != null) {
+            messager.printError(pos, msg);
         } else {
             throw new ModelerException(msg);
         }
     }
 
-    public void onWarning(String key) {
-        onWarning(new LocalizableMessage(getResourceBundleName(), key));
-    }
-
-    public void onWarning(Localizable msg) {
-        String message = localizer.localize(getMessage("webserviceap.warning", localizer.localize(msg)));
+    public void onWarning(String message) {
         if (messager != null) {
             messager.printWarning(message);
         } else {
             report(message);
         }
     }
-    public void onInfo(Localizable msg) {
+    public void onInfo(String message) {
         if (messager != null) {
-            String message = localizer.localize(msg);
             messager.printNotice(message);
         } else {
-            String message = localizer.localize(getMessage("webserviceap.info", localizer.localize(msg)));
             report(message);
         }
+    }
+
+    protected void report(String msg) {
+        PrintStream outstream =
+                out instanceof PrintStream
+                        ? out
+                        : new PrintStream(out, true);
+        outstream.println(msg);
+        outstream.flush();
     }
 
     public void process() {
@@ -229,20 +278,6 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
 
     public void clearProcessed() {
         processedTypeDecls.clear();
-    }
-
-    protected void runProcessorActions(Model model) throws Exception {
-        if (tool != null)
-            tool.runProcessorActions();
-    }
-
-
-    protected String getGenericErrorMessage() {
-        return "webserviceap.error";
-    }
-
-    protected String getResourceBundleName() {
-        return "com.sun.tools.ws.resources.webserviceap";
     }
 
     public void setService(Service service) {
@@ -281,8 +316,7 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
             webService = typedecl.getAnnotation(WebService.class);
             if (webServiceProvider != null) {
                 if (webService != null) {
-                    onError("webserviceap.webservice.and.webserviceprovider",
-                        typedecl.getQualifiedName());
+                    onError(WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_AND_WEBSERVICEPROVIDER(typedecl.getQualifiedName()));
                 }
                 processedEndpoint = true;
             }
@@ -293,9 +327,9 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
         }
         if (!processedEndpoint) {
             if (isAPTInvocation)
-                onWarning("webserviceap.no.webservice.endpoint.found");
+                onWarning(WebserviceapMessages.WEBSERVICEAP_NO_WEBSERVICE_ENDPOINT_FOUND());
             else
-                onError("webserviceap.no.webservice.endpoint.found");                
+                onError(WebserviceapMessages.WEBSERVICEAP_NO_WEBSERVICE_ENDPOINT_FOUND());
         }
     }
 
@@ -376,11 +410,11 @@ public class WebServiceAP extends ToolBase implements AnnotationProcessor, Model
     }
 
     public boolean canOverWriteClass(String className) {
-        return !((doNotOverWrite && GeneratorUtil.classExists(env, className)));
+        return !((doNotOverWrite && GeneratorUtil.classExists(options, className)));
     }
 
     public void log(String msg) {
-        if (env != null && env.verbose()) {
+        if (options != null && options.verbose) {
             String message = "[" + msg + "]";
             if (messager != null) {
                 messager.printNotice(message);

@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.7 2006-10-04 20:20:40 arungupta Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.8 2006-10-31 19:52:05 vivekp Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,34 +26,34 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.tools.ws.util.xml.XmlUtil;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wsdl.document.Fault;
 import com.sun.tools.ws.wsdl.document.Input;
 import com.sun.tools.ws.wsdl.document.Output;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import org.w3c.dom.Element;
+import org.xml.sax.helpers.LocatorImpl;
+
+import javax.xml.namespace.QName;
+import java.util.Map;
 
 /**
  * @author Arun Gupta
  */
 public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
-    private final ProcessorEnvironment env;
+    private ErrorReceiver errReceiver;
 
     public W3CAddressingExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap) {
         this(extensionHandlerMap, null);
     }
 
-    public W3CAddressingExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap, ProcessorEnvironment env) {
+    public W3CAddressingExtensionHandler(Map<String, AbstractExtensionHandler> extensionHandlerMap, ErrorReceiver errReceiver) {
         super(extensionHandlerMap);
-        this.env = env;
+        this.errReceiver = errReceiver;
     }
 
     @Override
@@ -117,7 +117,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleFaultExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
-            env.warn(WsdlMessages.localizableWARNING_FAULT_EMPTY_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+            errReceiver.warning(NULL_LOCATOR, WsdlMessages.WARNING_FAULT_EMPTY_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
             return false; // keep compiler happy
         }
 
@@ -134,7 +134,9 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     }
 
     private boolean warnEmptyAction(TWSDLExtensible parent) {
-        env.warn(WsdlMessages.localizableWARNING_INPUT_OUTPUT_EMPTY_ACTION(parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+        errReceiver.warning(NULL_LOCATOR, WsdlMessages.WARNING_INPUT_OUTPUT_EMPTY_ACTION(parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
         return false; // keep compiler happy
     }
+
+    private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }

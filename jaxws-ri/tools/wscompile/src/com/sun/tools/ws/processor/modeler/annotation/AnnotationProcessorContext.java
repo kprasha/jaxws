@@ -21,28 +21,18 @@
  */
 package com.sun.tools.ws.processor.modeler.annotation;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.TypeMirror;
 import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.processor.model.Operation;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
-import com.sun.tools.ws.processor.model.jaxb.JAXBModel;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
 
-import com.sun.tools.xjc.api.Reference;
-
-import javax.xml.namespace.QName;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import com.sun.tools.ws.processor.modeler.annotation.*;
 
 
 /**

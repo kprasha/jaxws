@@ -21,29 +21,27 @@
  */
 package com.sun.tools.ws.wsdl.parser;
 
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
+import com.sun.tools.ws.util.xml.XmlUtil;
 import com.sun.tools.ws.wsdl.document.*;
 import com.sun.tools.ws.wsdl.document.jaxws.CustomName;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBinding;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.tools.ws.wsdl.document.jaxws.Parameter;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
-import com.sun.tools.ws.util.xml.XmlUtil;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.util.Iterator;
+import java.util.Map;
 
 
 /**
@@ -79,7 +77,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
 
         JAXWSBinding jaxwsBinding =  getJAXWSExtension(parent);
         if(jaxwsBinding == null)
-            jaxwsBinding = new JAXWSBinding();
+            jaxwsBinding = new JAXWSBinding(context.getLocation(e));
         String attr = XmlUtil.getAttributeOrNull(e, JAXWSBindingsConstants.WSDL_LOCATION_ATTR);
         if (attr != null) {
             jaxwsBinding.setWsdlLocation(attr);
@@ -357,7 +355,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
         if(XmlUtil.matchesTagNS(e, JAXWSBindingsConstants.JAXWS_BINDINGS)){
             context.push();
             context.registerNamespaces(e);
-            JAXWSBinding jaxwsBinding = new JAXWSBinding();
+            JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
             for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
                 Element e2 = Util.nextElement(iter);
@@ -417,7 +415,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
         if(XmlUtil.matchesTagNS(e, JAXWSBindingsConstants.JAXWS_BINDINGS)){
             context.push();
             context.registerNamespaces(e);
-            JAXWSBinding jaxwsBinding = new JAXWSBinding();
+            JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
             for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
                 Element e2 = Util.nextElement(iter);
@@ -457,7 +455,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
     private boolean handlePortTypeOperation(TWSDLParserContext context, Operation parent, Element e) {
         context.push();
         context.registerNamespaces(e);
-        JAXWSBinding jaxwsBinding = new JAXWSBinding();
+        JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
         for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
             Element e2 = Util.nextElement(iter);
@@ -495,7 +493,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
         if(XmlUtil.matchesTagNS(e, JAXWSBindingsConstants.JAXWS_BINDINGS)){
             context.push();
             context.registerNamespaces(e);
-            JAXWSBinding jaxwsBinding = new JAXWSBinding();
+            JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
             for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
                 Element e2 = Util.nextElement(iter);
@@ -537,7 +535,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
         if(XmlUtil.matchesTagNS(e, JAXWSBindingsConstants.JAXWS_BINDINGS)){
             context.push();
             context.registerNamespaces(e);
-            JAXWSBinding jaxwsBinding = new JAXWSBinding();
+            JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
             for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
                 Element e2 = Util.nextElement(iter);
@@ -575,7 +573,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
         if(XmlUtil.matchesTagNS(e, JAXWSBindingsConstants.JAXWS_BINDINGS)){
             context.push();
             context.registerNamespaces(e);
-            JAXWSBinding jaxwsBinding = new JAXWSBinding();
+            JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
             for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
                 Element e2 = Util.nextElement(iter);
@@ -613,7 +611,7 @@ public class JAXWSBindingExtensionHandler extends AbstractExtensionHandler {
         if(XmlUtil.matchesTagNS(e, JAXWSBindingsConstants.JAXWS_BINDINGS)){
             context.push();
             context.registerNamespaces(e);
-            JAXWSBinding jaxwsBinding = new JAXWSBinding();
+            JAXWSBinding jaxwsBinding = new JAXWSBinding(context.getLocation(e));
 
             for(Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();){
                 Element e2 = Util.nextElement(iter);

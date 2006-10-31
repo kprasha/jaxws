@@ -22,13 +22,12 @@
 package com.sun.tools.ws.processor.config.parser;
 
 
-import java.util.List;
-import java.util.Properties;
-
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-
 import org.xml.sax.EntityResolver;
+
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Vivek Pandey

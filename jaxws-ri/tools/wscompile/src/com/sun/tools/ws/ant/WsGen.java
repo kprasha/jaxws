@@ -21,14 +21,8 @@
  */
 package com.sun.tools.ws.ant;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.sun.tools.ws.wscompile.WsgenTool;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Execute;
 import org.apache.tools.ant.taskdefs.LogOutputStream;
@@ -36,12 +30,10 @@ import org.apache.tools.ant.taskdefs.LogStreamHandler;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Commandline;
 import org.apache.tools.ant.types.CommandlineJava;
-import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 
-import com.sun.tools.ws.wscompile.CompileTool;
-import com.sun.xml.ws.util.VersionUtil;
+import java.io.*;
 
 /**
  * wsgen task for use with the JAXWS project.
@@ -466,7 +458,7 @@ public class WsGen extends MatchingTask {
                 ClassLoader old = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
                 try {
-                    CompileTool compTool = new CompileTool(logstr, "wsgen");
+                    WsgenTool compTool = new WsgenTool(logstr);
                     ok = compTool.run(cmd.getJavaCommand().getArguments());
                 } finally {
                     Thread.currentThread().setContextClassLoader(old);

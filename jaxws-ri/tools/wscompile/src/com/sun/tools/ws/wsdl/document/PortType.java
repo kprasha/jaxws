@@ -22,23 +22,13 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.Defining;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.wsdl.framework.GlobalEntity;
-import com.sun.tools.ws.wsdl.framework.Kind;
-import com.sun.tools.ws.wsdl.framework.ValidationException;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
+import java.util.*;
 
 /**
  * Entity corresponding to the "portType" WSDL element.
@@ -47,8 +37,8 @@ import com.sun.tools.ws.wsdl.framework.ValidationException;
  */
 public class PortType extends GlobalEntity implements TWSDLExtensible {
 
-    public PortType(Defining defining) {
-        super(defining);
+    public PortType(Defining defining, Locator locator) {
+        super(defining, locator);
         _operations = new ArrayList();
         _operationKeys = new HashSet();
         _helper = new ExtensibilityHelper();

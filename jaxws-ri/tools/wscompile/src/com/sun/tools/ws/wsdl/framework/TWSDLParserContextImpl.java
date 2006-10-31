@@ -22,18 +22,18 @@
 
 package com.sun.tools.ws.wsdl.framework;
 
+import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
+import com.sun.tools.ws.wsdl.parser.DOMForest;
+import com.sun.xml.ws.util.NamespaceSupport;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
-
-import com.sun.xml.ws.util.NamespaceSupport;
-import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 
 /**
  * The context used by parser classes.
@@ -44,16 +44,18 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
 
     private final static String PREFIX_XMLNS = "xmlns";
     private boolean _followImports;
-    private AbstractDocument _document;
-    private NamespaceSupport _nsSupport;
-    private ArrayList<ParserListener> _listeners;
-    private WSDLLocation _wsdlLocation;
+    private final AbstractDocument _document;
+    private final NamespaceSupport _nsSupport;
+    private final ArrayList<ParserListener> _listeners;
+    private final WSDLLocation _wsdlLocation;
+    private final DOMForest forest;
 
-    public TWSDLParserContextImpl(AbstractDocument doc, ArrayList<ParserListener> listeners) {
-        _document = doc;
-        _listeners = listeners;
-        _nsSupport = new NamespaceSupport();
-        _wsdlLocation = new WSDLLocation();
+    public TWSDLParserContextImpl(DOMForest forest, AbstractDocument doc, ArrayList<ParserListener> listeners) {
+        this._document = doc;
+        this._listeners = listeners;
+        this._nsSupport = new NamespaceSupport();
+        this._wsdlLocation = new WSDLLocation();
+        this.forest = forest;
     }
 
     public AbstractDocument getDocument() {
@@ -105,6 +107,10 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
         }
     }
 
+    public Locator getLocation(Element e) {
+        return forest.locatorTable.getStartLocation(e);
+    }
+
     public QName translateQualifiedName(String s) {
         if (s == null)
             return null;
@@ -126,7 +132,9 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
         return new QName(uri, XmlUtil.getLocalPart(s));
     }
 
-    public void fireIgnoringExtension(QName name, QName parent) {
+    public void fireIgnoringExtension(Element e, Entity entity) {
+        QName name = new QName(e.getNamespaceURI(), e.getLocalName());
+        QName parent = entity.getElementName();
         List _targets = null;
 
         synchronized (this) {
@@ -138,7 +146,7 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
         if (_targets != null) {
             for (Iterator iter = _targets.iterator(); iter.hasNext();) {
                 ParserListener l = (ParserListener) iter.next();
-                l.ignoringExtension(name, parent);
+                l.ignoringExtension(entity, name, parent);
             }
         }
     }

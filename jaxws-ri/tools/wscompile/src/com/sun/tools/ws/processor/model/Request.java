@@ -22,13 +22,17 @@
 
 package com.sun.tools.ws.processor.model;
 
+import com.sun.tools.ws.wsdl.framework.Entity;
+
 /**
  *
  * @author WS Development Team
  */
 public class Request extends Message {
 
-    public Request() {}
+    public Request(Entity entity) {
+        super(entity);
+    }
 
     public void accept(ModelVisitor visitor) throws Exception {
         visitor.visit(this);

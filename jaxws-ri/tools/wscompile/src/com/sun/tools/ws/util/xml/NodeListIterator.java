@@ -22,10 +22,10 @@
 
 package com.sun.tools.ws.util.xml;
 
+import org.w3c.dom.NodeList;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import org.w3c.dom.NodeList;
 
 /**
  * @author WS Development Team

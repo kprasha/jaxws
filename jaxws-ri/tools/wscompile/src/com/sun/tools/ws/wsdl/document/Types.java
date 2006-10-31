@@ -22,14 +22,15 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import javax.xml.namespace.QName;
-
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * Entity corresponding to the "types" WSDL element.
@@ -38,7 +39,8 @@ import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
  */
 public class Types extends Entity implements TWSDLExtensible {
 
-    public Types() {
+    public Types(Locator locator) {
+        super(locator);
         _helper = new ExtensibilityHelper();
     }
 

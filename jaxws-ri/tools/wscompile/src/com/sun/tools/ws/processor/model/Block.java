@@ -21,6 +21,9 @@
  */
 package com.sun.tools.ws.processor.model;
 
+
+import com.sun.tools.ws.wsdl.framework.Entity;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -34,13 +37,18 @@ public class Block extends ModelObject {
     public static final int HEADER = 2;
     public static final int ATTACHMENT = 3;
 
-    public Block() {}
+    public Block(Entity entity) {
+        super(entity);
 
-    public Block(QName name) {
+    }
+
+    public Block(QName name, Entity entity) {
+        super(entity);
         this.name = name;
     }
 
-    public Block(QName name, AbstractType type) {
+    public Block(QName name, AbstractType type, Entity entity) {
+        super(entity);
         this.name = name;
         this.type = type;
     }

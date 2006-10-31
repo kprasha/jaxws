@@ -24,11 +24,8 @@ package com.sun.tools.ws.wsdl.document;
 
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.wsdl.framework.QNameAction;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
 
@@ -39,7 +36,8 @@ import javax.xml.namespace.QName;
  */
 public class Output extends Entity implements TWSDLExtensible {
 
-    public Output() {
+    public Output(Locator locator) {
+        super(locator);
     }
 
     public String getName() {

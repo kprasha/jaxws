@@ -22,16 +22,16 @@
 
 package com.sun.tools.ws.wsdl.document.mime;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A MIME multipartRelated extension.
@@ -40,7 +40,8 @@ import com.sun.tools.ws.wsdl.framework.ExtensionVisitor;
  */
 public class MIMEMultipartRelated extends ExtensionImpl {
 
-    public MIMEMultipartRelated() {
+    public MIMEMultipartRelated(Locator locator) {
+        super(locator);
         _parts = new ArrayList<MIMEPart>();
     }
 

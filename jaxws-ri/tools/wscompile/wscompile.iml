@@ -11,7 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="rt" />
+    <orderEntry type="module" module-name="rt" exported="" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
@@ -32,7 +32,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="APT" level="application" />
+    <orderEntry type="library" exported="" name="APT" level="application" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

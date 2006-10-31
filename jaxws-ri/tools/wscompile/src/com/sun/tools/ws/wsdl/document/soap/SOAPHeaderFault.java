@@ -22,10 +22,11 @@
 
 package com.sun.tools.ws.wsdl.document.soap;
 
-import javax.xml.namespace.QName;
-
 import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
 import com.sun.tools.ws.wsdl.framework.QNameAction;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * A SOAP header fault extension.
@@ -34,7 +35,8 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  */
 public class SOAPHeaderFault extends ExtensionImpl {
 
-    public SOAPHeaderFault() {
+    public SOAPHeaderFault(Locator locator) {
+        super(locator);
     }
 
     public QName getElementName() {

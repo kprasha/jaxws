@@ -22,13 +22,9 @@
 
 package com.sun.tools.ws.util.xml;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-
 import com.sun.xml.ws.util.xml.CDATA;
+
+import java.io.*;
 
 // ## Delay IOExceptions until flush or close
 // ## Need DOM, SAX output

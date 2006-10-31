@@ -22,26 +22,16 @@
 
 package com.sun.tools.ws.processor.util;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.processor.model.AbstractType;
-import com.sun.tools.ws.processor.model.Block;
-import com.sun.tools.ws.processor.model.ExtendedModelVisitor;
-import com.sun.tools.ws.processor.model.Fault;
-import com.sun.tools.ws.processor.model.Model;
-import com.sun.tools.ws.processor.model.ModelProperties;
-import com.sun.tools.ws.processor.model.Parameter;
-import com.sun.tools.ws.processor.model.Port;
-import com.sun.tools.ws.processor.model.Service;
+import com.sun.tools.ws.processor.model.*;
+import com.sun.tools.ws.processor.model.java.JavaInterface;
 import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.JAXBTypeVisitor;
 import com.sun.tools.ws.processor.model.jaxb.RpcLitStructure;
-import com.sun.tools.ws.processor.model.java.JavaInterface;
-import com.sun.xml.ws.util.VersionUtil;
+
+import javax.xml.namespace.QName;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * This class writes out a Model as an XML document.

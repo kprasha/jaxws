@@ -1,14 +1,12 @@
 package com.sun.tools.ws.wsdl.parser;
 
-import java.util.Iterator;
-
-import javax.xml.namespace.NamespaceContext;
-
+import com.sun.xml.bind.v2.WellKnownNamespace;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.sun.xml.bind.v2.WellKnownNamespace;
+import javax.xml.namespace.NamespaceContext;
+import java.util.Iterator;
 
 public class NamespaceContextImpl implements NamespaceContext {
 

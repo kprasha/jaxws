@@ -21,7 +21,7 @@
  */
 package com.sun.tools.ws;
 
-import com.sun.tools.ws.wscompile.CompileTool;
+import com.sun.tools.ws.wscompile.WsimportTool;
 
 /**
  * WsImport tool entry point.
@@ -35,7 +35,7 @@ public class WsImport {
      * load tools.jar
      */
     public static void main(String[] args) throws Throwable {
-        System.exit(Invoker.main("wsimport",args));
+        System.exit(Invoker.WsimportMain(args));
     }
 
     /**
@@ -52,6 +52,6 @@ public class WsImport {
      *      0 if the tool runs successfully.
      */
     public static int doMain(String[] args) throws Throwable {
-        return new CompileTool(System.out,"wsimport").run(args) ? 0 : 1;
+        return new WsimportTool(System.out).run(args) ? 0 : 1;
     }
 }

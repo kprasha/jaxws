@@ -96,7 +96,7 @@ public class Processor {
             }
 
             for (ProcessorAction action : _actions) {
-                action.perform(_model, _configuration, _options);
+//                action.perform(_model, _configuration, _options);
             }
         } catch (JAXWSExceptionBase e) {
             if (_printStackTrace || _env.verbose()) {

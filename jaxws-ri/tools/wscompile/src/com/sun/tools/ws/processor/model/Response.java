@@ -22,6 +22,8 @@
 
 package com.sun.tools.ws.processor.model;
 
+import com.sun.tools.ws.wsdl.framework.Entity;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,7 +34,9 @@ import java.util.Map;
  */
 public class Response extends Message {
 
-    public Response() {}
+    public Response(Entity entity) {
+        super(entity);
+    }
 
     public void addFaultBlock(Block b) {
         if (_faultBlocks.containsKey(b.getName())) {

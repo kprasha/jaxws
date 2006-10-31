@@ -21,19 +21,17 @@
  */
 package com.sun.tools.ws.processor.config.parser;
 
+import com.sun.tools.ws.processor.config.Configuration;
+import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
+import org.xml.sax.InputSource;
+
+import javax.xml.namespace.QName;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.xml.namespace.QName;
-
-import org.xml.sax.InputSource;
-
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.processor.config.Configuration;
-import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 
 /**
  * @author Vivek Pandey

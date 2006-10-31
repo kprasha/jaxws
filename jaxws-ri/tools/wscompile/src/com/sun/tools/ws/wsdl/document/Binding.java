@@ -22,23 +22,15 @@
 
 package com.sun.tools.ws.wsdl.document;
 
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Defining;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.wsdl.framework.GlobalEntity;
-import com.sun.tools.ws.wsdl.framework.Kind;
-import com.sun.tools.ws.wsdl.framework.QNameAction;
 
 /**
  * Entity corresponding to the "binding" WSDL element.
@@ -47,8 +39,8 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  */
 public class Binding extends GlobalEntity implements TWSDLExtensible {
 
-    public Binding(Defining defining) {
-        super(defining);
+    public Binding(Defining defining, Locator locator) {
+        super(defining, locator);
         _operations = new ArrayList();
         _helper = new ExtensibilityHelper();
     }

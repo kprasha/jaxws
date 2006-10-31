@@ -21,17 +21,12 @@
  */
 package com.sun.tools.ws.wsdl.document.jaxws;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import org.w3c.dom.Element;
+import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
-
-import org.w3c.dom.Element;
-
-import com.sun.tools.ws.wsdl.framework.ExtensionImpl;
+import java.util.*;
 
 
 /**
@@ -45,8 +40,8 @@ public class JAXWSBinding extends ExtensionImpl {
     /**
      *
      */
-    public JAXWSBinding(){
-        super();
+    public JAXWSBinding(Locator locator){
+        super(locator);
         jaxbBindings = new HashSet<Element>();
         // TODO Auto-generated constructor stub
     }

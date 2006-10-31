@@ -23,6 +23,7 @@
 package com.sun.tools.ws.api.wsdl;
 
 import org.w3c.dom.Element;
+import org.xml.sax.Locator;
 
 /**
  * Provides WSDL parsing context. It should be used by the WSDL extension handlers to register their namespaces so that
@@ -68,4 +69,10 @@ public interface TWSDLParserContext {
      * @param e {@link Element} whose namespace declarations need to be registered
      */
     void registerNamespaces(Element e);
+
+    /**
+     * gives the location information for the given Element.
+     */
+    Locator getLocation(Element e);
+
 }

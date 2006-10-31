@@ -21,7 +21,7 @@
  */
 package com.sun.tools.ws;
 
-import com.sun.tools.ws.wscompile.CompileTool;
+import com.sun.tools.ws.wscompile.WsgenTool;
 
 /**
  * WsGen tool entry point.
@@ -35,7 +35,7 @@ public class WsGen {
      * load tools.jar
      */
     public static void main(String[] args) throws Throwable {
-        System.exit(Invoker.main("wsgen",args));
+        System.exit(Invoker.WsgenMain(args));
     }
 
     /**
@@ -52,6 +52,6 @@ public class WsGen {
      *      0 if the tool runs successfully.
      */
     public static int doMain(String[] args) throws Throwable {
-        return new CompileTool(System.out,"wsgen").run(args) ? 0 : 1;
+        return new WsgenTool(System.out).run(args) ? 0 : 1;
     }
 }

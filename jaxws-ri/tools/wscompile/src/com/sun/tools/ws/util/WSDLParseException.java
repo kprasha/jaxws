@@ -23,7 +23,6 @@
 package com.sun.tools.ws.util;
 
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
-import com.sun.xml.ws.util.localization.Localizable;
 
 /**
   * @author WS Development Team

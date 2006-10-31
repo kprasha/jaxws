@@ -22,12 +22,12 @@
 
 package com.sun.tools.ws.util;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
-
 import com.sun.xml.ws.util.localization.Localizable;
 import com.sun.xml.ws.util.localization.LocalizableMessageFactory;
 import com.sun.xml.ws.util.localization.Localizer;
+
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * A base class for command-line tools.

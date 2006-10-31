@@ -21,25 +21,16 @@
  */
 package com.sun.tools.ws.processor.generator;
 
-import java.util.Properties;
-
-import org.xml.sax.SAXParseException;
-
-import com.sun.codemodel.CodeWriter;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.writer.ProgressCodeWriter;
-//import com.sun.tools.xjc.addon.Augmenter;
-import com.sun.tools.xjc.api.ErrorListener;
-import com.sun.tools.xjc.api.JAXBModel;
-import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.processor.model.jaxb.JAXBType;
 import com.sun.tools.ws.processor.model.jaxb.RpcLitStructure;
-import com.sun.tools.ws.processor.modeler.wsdl.ConsoleErrorReporter;
-import com.sun.tools.ws.processor.ProcessorOptions;
+import com.sun.tools.xjc.api.ErrorListener;
+import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.tools.ws.wscompile.WSCodeWriter;
+import org.xml.sax.SAXParseException;
+
+import java.util.Properties;
 
 /**
  * @author Vivek Pandey
@@ -47,7 +38,7 @@ import com.sun.tools.ws.wscompile.WSCodeWriter;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class JAXBTypeGenerator extends GeneratorBase {
+public class JAXBTypeGenerator {
 
     /**
      * @author Vivek Pandey
@@ -111,21 +102,23 @@ public class JAXBTypeGenerator extends GeneratorBase {
      */
     public JAXBTypeGenerator(Model model, Configuration config,
             Properties properties) {
-        super(model, config, properties);
+//        super(model, config, properties);
     }
     /* (non-Javadoc)
      * @see GeneratorBase#getGenerator(com.sun.xml.ws.processor.model.Model, com.sun.xml.ws.processor.config.Configuration, java.util.Properties)
      */
     public GeneratorBase getGenerator(Model model, Configuration config,
             Properties properties) {
-        return new JAXBTypeGenerator(model, config, properties);
+//        return new JAXBTypeGenerator(model, config, properties);
+        return null;
     }
     /* (non-Javadoc)
      * @see cGeneratorBase#getGenerator(com.sun.xml.ws.processor.model.Model, com.sun.xml.ws.processor.config.Configuration, java.util.Properties, com.sun.xml.ws.soap.SOAPVersion)
      */
     public GeneratorBase getGenerator(Model model, Configuration config,
             Properties properties, SOAPVersion ver) {
-        return new JAXBTypeGenerator(model, config, properties);
+//        return new JAXBTypeGenerator(model, config, properties);
+        return null;
     }
 
     /* (non-Javadoc)
@@ -136,8 +129,8 @@ public class JAXBTypeGenerator extends GeneratorBase {
         if(type.getJaxbModel() == null)
             return;
         S2JJAXBModel model = type.getJaxbModel().getS2JJAXBModel();
-        if (model != null)
-            generateJAXBClasses(model);
+//        if (model != null)
+//            generateJAXBClasses(model);
     }
 
 
@@ -146,26 +139,26 @@ public class JAXBTypeGenerator extends GeneratorBase {
      */
     public void visit(RpcLitStructure type) throws Exception {
         S2JJAXBModel model = type.getJaxbModel().getS2JJAXBModel();
-        generateJAXBClasses(model);
+//        generateJAXBClasses(model);
     }
 
     private static boolean doneGeneration = true;
-    private void generateJAXBClasses(S2JJAXBModel model) throws Exception{
-        if(doneGeneration)
-            return;
-        JCodeModel cm = null;
-
-        // get the list of jaxb source files
-        CodeWriter cw = new WSCodeWriter(sourceDir,env);
-
-        if(env.verbose())
-            cw = new ProgressCodeWriter(cw, System.out); // TODO this should not be System.out, should be
-                                                         // something from ProcessorEnvironment
-        //TODO:set package level javadoc in JPackage        
-        cm = model.generateCode(null, new ConsoleErrorReporter(env, printStackTrace));
-        cm.build(cw);
-        doneGeneration = true;
-    }
+//    private void generateJAXBClasses(S2JJAXBModel model) throws Exception{
+//        if(doneGeneration)
+//            return;
+//        JCodeModel cm = null;
+//
+//        // get the list of jaxb source files
+//        CodeWriter cw = new WSCodeWriter(sourceDir,env);
+//
+//        if(env.verbose())
+//            cw = new ProgressCodeWriter(cw, System.out); // TODO this should not be System.out, should be
+//                                                         // something from ProcessorEnvironment
+//        //TODO:set package level javadoc in JPackage
+//        cm = model.generateCode(null, new ConsoleErrorReporter(env, printStackTrace));
+//        cm.build(cw);
+//        doneGeneration = true;
+//    }
 
 
 }

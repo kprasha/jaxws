@@ -22,22 +22,13 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Defining;
-import com.sun.tools.ws.wsdl.framework.DuplicateEntityException;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
+import java.util.*;
 
 /**
  * Entity corresponding to the "definitions" WSDL element.
@@ -46,7 +37,8 @@ import com.sun.tools.ws.api.wsdl.TWSDLExtension;
  */
 public class Definitions extends Entity implements Defining, TWSDLExtensible {
 
-    public Definitions(AbstractDocument document) {
+    public Definitions(AbstractDocument document, Locator locator) {
+        super(locator);
         _document = document;
         _bindings = new ArrayList();
         _imports = new ArrayList();

@@ -22,49 +22,24 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
-import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
-import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensionHandler;
-import com.sun.tools.ws.processor.config.WSDLModelInfo;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.util.xml.NullEntityResolver;
+import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.tools.ws.util.xml.XmlUtil;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.tools.ws.wsdl.document.*;
+import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.ParseException;
 import com.sun.tools.ws.wsdl.framework.ParserListener;
 import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
-import com.sun.tools.ws.resources.WsdlMessages;
-import com.sun.xml.ws.util.DOMUtil;
-import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.ServiceFinder;
-import static com.sun.xml.ws.util.xml.XmlUtil.DRACONIAN_ERROR_HANDLER;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.EntityResolver;
+import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -73,32 +48,26 @@ import java.util.*;
  * @author WS Development Team
  */
 public class WSDLParser {
-    private WSDLModelInfo modelInfo;
-    private EntityResolver entityResolver;
+    private final ErrorReceiver errReceiver;
+    private WsimportOptions options;
+
+
     //all the wsdl:import system Ids
     private final Set<String> imports = new HashSet<String>();
-    //Map which holds wsdl Document(s) for a given SystemId
-    private final Map<String, Element> wsdlDocuments = new HashMap<String, Element>();
 
     //inlined schema elements inside wsdl:type section
-    private final List<Element> schemaElements;
+    private final List<Element> schemaElements = new ArrayList<Element>();
 
     //wsdl extension handlers
     private final Map extensionHandlers;
-
-    private final ProcessorEnvironment env;
-
     private String targetNamespaceURI;
 
     private ArrayList<ParserListener> listeners;
 
-    public WSDLParser(WSDLModelInfo modelInfo) {
-        assert(modelInfo != null);
+    public WSDLParser(WsimportOptions options, ErrorReceiver errReceiver) {
         this.extensionHandlers = new HashMap();
-        this.schemaElements = new ArrayList<Element>();
-        this.modelInfo = modelInfo;
-        this.entityResolver = modelInfo.getEntityResolver();
-        this.env = modelInfo.getConfiguration().getEnvironment();
+        this.options = options;
+        this.errReceiver = errReceiver;
 
         // register handlers for default extensions
         register(new SOAPExtensionHandler(extensionHandlers));
@@ -106,8 +75,8 @@ public class WSDLParser {
         register(new MIMEExtensionHandler(extensionHandlers));
         register(new JAXWSBindingExtensionHandler(extensionHandlers));
         register(new SOAP12ExtensionHandler(extensionHandlers));
-        register(new MemberSubmissionAddressingExtensionHandler(extensionHandlers, env));
-        register(new W3CAddressingExtensionHandler(extensionHandlers, env));
+        register(new MemberSubmissionAddressingExtensionHandler(extensionHandlers, errReceiver));
+        register(new W3CAddressingExtensionHandler(extensionHandlers, errReceiver));
 
         for (TWSDLExtensionHandler te : ServiceFinder.find(TWSDLExtensionHandler.class).toArray()) {
             register(te);
@@ -133,286 +102,128 @@ public class WSDLParser {
         listeners.remove(l);
     }
 
-    public WSDLDocument parse(){
-        String location = modelInfo.getLocation();
-        assert(location != null);
-        WSDLDocument document = new WSDLDocument();
-        InputSource source = null;
-        String wsdlLoc = JAXWSUtils.absolutize(JAXWSUtils.getFileOrURLName(location));
-        if(entityResolver != null){
-            try {
-                source = entityResolver.resolveEntity(null, wsdlLoc);
-            } catch (SAXException e) {
-                if (source.getSystemId() != null) {
-                    throw new ParseException(
-                        "parsing.saxExceptionWithSystemId",
-                        source.getSystemId(),e);
-                } else {
-                    throw new ParseException("parsing.saxException",e);
-                }
-            } catch (IOException e) {
-                if (source.getSystemId() != null) {
-                    throw new ParseException(
-                        "parsing.ioExceptionWithSystemId",
-                        source.getSystemId(),e);
-                } else {
-                    throw new ParseException("parsing.ioException",e);
-                }
+    public WSDLDocument parse() throws SAXException {
+        // parse into DOM forest
+        forest = new DOMForest(new WSDLInternalizationLogic(), options, errReceiver);
+
+        // parse source grammars
+        for (InputSource value : options.getWSDLs()) {
+            errReceiver.pollAbort();
+            forest.parse(value, true);
+        }
+
+
+        // parse external binding files
+        for (InputSource value : options.getWSDLBindings()) {
+            errReceiver.pollAbort();
+            Document root = forest.parse(value, true);
+            if(root==null)       continue;   // error must have been reported
+            Element binding = root.getDocumentElement();
+            if (!fixNull(binding.getNamespaceURI()).equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS)
+                    || !binding.getLocalName().equals("bindings")){
+                    errReceiver.error(forest.locatorTable.getStartLocation(binding), WsdlMessages.PARSER_NOT_A_BINDING_FILE(
+                        binding.getNamespaceURI(),
+                        binding.getLocalName()));
+                continue;
             }
+
+            NodeList nl = binding.getElementsByTagNameNS(
+                "http://java.sun.com/xml/ns/javaee", "handler-chains");
+            for(int i = 0; i < nl.getLength(); i++){
+                options.addHandlerChainConfiguration((Element) nl.item(i));
+            }
+
         }
-        if(source == null){
-            //default resolution
-            source = new InputSource(wsdlLoc);
-        }
-        document.setSystemId(wsdlLoc);
-        TWSDLParserContextImpl context = new TWSDLParserContextImpl(document, listeners);
-        Definitions definitions = parseDefinitions(context, source, null);
-        if(env.getErrorCount() > 0)
-            return null;
+        return buildWSDLDocument(forest);
+    }
+
+    private String fixNull(String s) {
+        if(s==null) return "";
+        else        return s;
+    }
+
+    private DOMForest forest;
+
+
+    public DOMForest getDOMForest() {
+        return forest;
+    }
+
+    private WSDLDocument buildWSDLDocument(DOMForest forest){
+        this.forest = forest;
+        /**
+         * Currently we are working off first WSDL document
+         * TODO: add support of creating WSDLDocument from collection of WSDL documents
+         */
+        String location = options.getWSDLs()[0].getSystemId();
+        WSDLDocument document = new WSDLDocument();
+        document.setSystemId(location);
+        TWSDLParserContextImpl context = new TWSDLParserContextImpl(forest, document, listeners);
+        String sysId = context.getDocument().getSystemId();
+        Document root = forest.get(sysId);
+        if(root == null)
+            return null;                    
+
+        Definitions definitions = parseDefinitions(context, root);
         document.setDefinitions(definitions);
         return document;
     }
 
-    protected Definitions parseDefinitions(TWSDLParserContextImpl context,
-                                           InputSource source, String expectedTargetNamespaceURI) {
+    protected Definitions parseDefinitions(TWSDLParserContextImpl context, Document root) {
         context.pushWSDLLocation();
         context.setWSDLLocation(context.getDocument().getSystemId());
-        String sysId = context.getDocument().getSystemId();
-        Element root = null;
 
-        if(sysId.endsWith("?wsdl")){
-            try {
-                root = buildDocumentFromWSDL(sysId, source, expectedTargetNamespaceURI);
-            } catch (IOException e) {
-                //lets try with MetadataResolverFactory
-                root = getFromMetadataResolver(sysId, null, null);
-                if(root == null){
-                    env.error(WsdlMessages.localizablePARSING_UNABLE_TO_GET_METADATA(sysId));
-                    return null;
-                }
-            }
-
-        }else{
-            root = getFromMetadataResolver(
-                sysId, source, expectedTargetNamespaceURI);
-
-            //if the metadata could not be resolved, try to the location and try to get the
-            //metadata, it might be a wsdl on the filesystem
-            if(root == null){
-                try {
-                    root = buildDocumentFromWSDL(sysId, source, expectedTargetNamespaceURI);
-                } catch (IOException e) {
-                    throw new ParseException(WsdlMessages.localizablePARSING_IO_EXCEPTION_WITH_SYSTEM_ID(sysId, e));
-                }
-            }
-        }
-
-        if(root == null)
-            return null;
-
-        //Internalizer.transform takes Set of jaxws:bindings elements, this is to allow multiple external
-        //bindings to be transformed.
-        new Internalizer().transform(modelInfo.getJAXWSBindings(), wsdlDocuments, modelInfo.getParent().getEnvironment());
+        new Internalizer(forest, options, errReceiver).transform();
 
         //print the wsdl
 //        try{
-//            dump(System.out);
+//            forest.dump(System.out);
 //        }catch(IOException e){
 //            e.printStackTrace();
 //        }
 
         Definitions definitions = parseDefinitionsNoImport(context, root);
-        processImports(context, source, definitions);
+        processImports(context);
         context.popWSDLLocation();
         return definitions;
     }
 
-    /*
-     * If source and target namespace are also passed in,
-     * then if the mex resolver is found and it cannot get
-     * the data, wsimport attempts to add ?wsdl to the
-     * address and retrieve the data with a normal http get.
-     * This behavior should only happen when trying a
-     * mex request first.
-     */
-    private Element getFromMetadataResolver(String systemId,
-        InputSource source, String expectedTargetNamespaceURI){
-        
-        //try MEX
-        MetaDataResolver resolver = null;
-        ServiceDescriptor serviceDescriptor = null;
-        for(MetadataResolverFactory resolverFactory:ServiceFinder.find(MetadataResolverFactory.class)){
-            resolver = resolverFactory.metadataResolver(entityResolver);
-            try {
-                serviceDescriptor = resolver.resolve(new URI(JAXWSUtils.getFileOrURLName(systemId)));
-                //we got the ServiceDescriptor, now break
-                if(serviceDescriptor != null)
-                    break;
-            } catch (URISyntaxException e) {
-                throw new ParseException(e);
-            }
-        }
 
-        if(serviceDescriptor != null){
-            return parseMetadata(serviceDescriptor);
-        } else if (resolver != null &&
-            source != null &&
-            systemId.startsWith("http")){
-            
-            // tried mex already if resolver != null
-            String getSysId = systemId + "?wsdl";
-            try {
-                source = new InputSource(getSysId);
-                return buildDocumentFromWSDL(getSysId, source,
-                    expectedTargetNamespaceURI);
-            } catch (Exception e) {
-                env.error(
-                    WsdlMessages.localizablePARSING_UNABLE_TO_GET_METADATA(
-                    getSysId));
-            }
-        }
-        return null;
-    }
 
-    /**
-     * Populates {@link #wsdlDocuments} and {@link #schemaElements} and returns root element
-     */
-    private Element parseMetadata(ServiceDescriptor serviceDescriptor){
-        List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
-        List<? extends Source> schemas = serviceDescriptor.getSchemas();
-        Element root = null;
-        for(Source src:wsdls){
-            if(src instanceof DOMSource){
-                Node n = ((DOMSource) src).getNode();
-                Element e = (n.getNodeType() == Node.ELEMENT_NODE)?(Element)n:DOMUtil.getFirstElementChild(n);
-                if(root == null)
-                    root = e;
-                wsdlDocuments.put(src.getSystemId(), e);
-            }
-            //TODO:handle SAXSource
-            //TODO:handler StreamSource
-        }
+//    private void fillImports(Element e, String systemId) throws IOException, SAXException {
+//        for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
+//            Element e2 = Util.nextElement(iter);
+//            if (e2 == null)
+//                break;
+//
+//            //check to see if it has imports
+//            if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_IMPORT)){
+//                String location = Util.getRequiredAttribute(e2, Constants.ATTR_LOCATION);
+//                location = getAdjustedLocation(systemId, location);
+//                if(location != null && !location.equals("")){
+//                    if(!imports.contains(location)){
+//                        imports.add(location);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-        for(Source src:schemas){
-            if(src instanceof DOMSource){
-                Node n = ((DOMSource) src).getNode();
-                Element e = (n.getNodeType() == Node.ELEMENT_NODE)?(Element)n:DOMUtil.getFirstElementChild(n);
-                schemaElements.add(e);
-            }
-            //TODO:handle SAXSource
-            //TODO:handler StreamSource
-        }
-        return root;
-    }
+//    private String getAdjustedLocation(String systemId, String location) {
+//        return systemId == null
+//            ? location
+//            : Util.processSystemIdWithBase(
+//                systemId,
+//                location);
+//    }
 
-    private Element buildDocumentFromWSDL(String systemId, InputSource source, String expectedTargetNamespaceURI) throws IOException {
-        try {
-            Document document = null;
-
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            builderFactory.setNamespaceAware(true);
-            builderFactory.setValidating(false);
-            DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            builder.setErrorHandler(DRACONIAN_ERROR_HANDLER);
-            if(entityResolver != null)
-                builder.setEntityResolver(entityResolver);
-            else
-                builder.setEntityResolver(new NullEntityResolver());
-
-            document = builder.parse(source);
-            Element e = document.getDocumentElement();
-            if(!Util.isTagName(e, WSDLConstants.QNAME_DEFINITIONS)){
-                env.error(WsdlMessages.localizablePARSING_INVALID_TAG_NS(e.getTagName(),
-                        e.getNamespaceURI(),
-                        WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
-                        WSDLConstants.QNAME_DEFINITIONS.getNamespaceURI(), systemId));
-                return null;
-            }
-            wsdlDocuments.put(systemId, e);
-            processWSDLDocument(e, expectedTargetNamespaceURI, source);
-            return e;
-        } catch (SAXException e) {
-            throw new ParseException(WsdlMessages.localizablePARSING_SAX_EXCEPTION_WITH_SYSTEM_ID(source.getSystemId(), e));
-        } catch (ParserConfigurationException e) {
-            throw new ParseException(WsdlMessages.localizablePARSING_PARSER_CONFIG_EXCEPTION(e));
-        } catch (FactoryConfigurationError e) {
-            throw new ParseException(WsdlMessages.localizablePARSING_FACTORY_CONFIG_EXCEPTION(e));
-        }
-    }
-
-    private void processWSDLDocument(Element e, String expectedTargetNamespaceURI, InputSource source) throws IOException, SAXException {
-        String _targetNamespaceURI =
-            XmlUtil.getAttributeOrNull(e, Constants.ATTR_TARGET_NAMESPACE);
-
-        if (expectedTargetNamespaceURI != null
-            && !expectedTargetNamespaceURI.equals(_targetNamespaceURI)){
-            //TODO: throw an exception???
-        }
-
-        for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
-            Element e2 = Util.nextElement(iter);
-            if (e2 == null)
-                break;
-
-            //check to see if it has imports
-            if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_IMPORT)){
-                String namespace = Util.getRequiredAttribute(e2, Constants.ATTR_NAMESPACE);
-                String location = Util.getRequiredAttribute(e2, Constants.ATTR_LOCATION);
-                location = getAdjustedLocation(source, location);
-                if(location != null && !location.equals("")){
-                    if(!imports.contains(location)){
-                        imports.add(location);
-                        InputSource impSource = null;
-                        if(entityResolver != null){
-                            impSource = entityResolver.resolveEntity(null, location);
-                        }
-
-                        if(impSource==null)
-                            impSource = new InputSource(location);  // default resolution{
-
-                        buildDocumentFromWSDL(location, impSource, namespace);
-                    }
-                }
-            }
-        }
-    }
-
-    private String getAdjustedLocation(InputSource source, String location) {
-        return source.getSystemId() == null
-            ? location
-            : Util.processSystemIdWithBase(
-                source.getSystemId(),
-                location);
-    }
-
-    /**
-     * Dumps the contents of the forest to the specified stream.
-     *
-     * This is a debug method. As such, error handling is sloppy.
-     */
-    public void dump( OutputStream out ) throws IOException {
-        try {
-            // create identity transformer
-            Transformer it = XmlUtil.newTransformer();
-
-            for( Iterator itr=wsdlDocuments.entrySet().iterator(); itr.hasNext(); ) {
-                Map.Entry e = (Map.Entry)itr.next();
-
-                out.write( ("---<< "+e.getKey()+"\n").getBytes() );
-
-                it.transform( new DOMSource((Document)e.getValue()), new StreamResult(out) );
-
-                out.write( "\n\n\n".getBytes() );
-            }
-        } catch( TransformerException e ) {
-            e.printStackTrace();
-        }
-    }
-
-    private void processImports(TWSDLParserContextImpl context, InputSource source, Definitions definitions) {
-        for(String location : imports){
+    private void processImports(TWSDLParserContextImpl context) {
+        for(String location : forest.getExternalReferences()){
             if (!context.getDocument().isImportedDocument(location)){
-                Definitions importedDefinitions = parseDefinitionsNoImport(context, wsdlDocuments.get(location));
+                Document doc = forest.get(location);
+                if(doc == null)
+                    continue;
+                Definitions importedDefinitions = parseDefinitionsNoImport(context, doc);
                 if(importedDefinitions == null)
                     continue;
                 context.getDocument().addImportedEntity(importedDefinitions);
@@ -423,11 +234,14 @@ public class WSDLParser {
 
     private Definitions parseDefinitionsNoImport(
         TWSDLParserContextImpl context,
-        Element e) {
+        Document doc) {
+        Element e = doc.getDocumentElement();
+        if(!e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !e.getLocalName().equals("definitions"))
+            return null;
         context.push();
         context.registerNamespaces(e);
 
-        Definitions definitions = new Definitions(context.getDocument());
+        Definitions definitions = new Definitions(context.getDocument(), forest.locatorTable.getStartLocation(e));
         String name = XmlUtil.getAttributeOrNull(e, Constants.ATTR_NAME);
         definitions.setName(name);
 
@@ -446,7 +260,7 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    env.error(WsdlMessages.localizablePARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
+                    errReceiver.error(forest.locatorTable.getStartLocation(e2), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                     return null;
                 }
                 gotDocumentation = true;
@@ -454,7 +268,7 @@ public class WSDLParser {
                     definitions.setDocumentation(getDocumentationFor(e2));
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_TYPES)) {
                 if (gotTypes) {
-                    env.error(WsdlMessages.localizablePARSING_ONLY_ONE_TYPES_ALLOWED(Constants.TAG_DEFINITIONS));
+                    errReceiver.error(forest.locatorTable.getStartLocation(e2), WsdlMessages.PARSING_ONLY_ONE_TYPES_ALLOWED(Constants.TAG_DEFINITIONS));
                     return null;
                 }
                 //add all the wsdl:type elements to latter make a list of all the schema elements
@@ -476,7 +290,7 @@ public class WSDLParser {
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_IMPORT)) {
                 definitions.add(parseImport(context, definitions, e2));
             } else if (XmlUtil.matchesTagNS(e2, SchemaConstants.QNAME_IMPORT)) {
-                env.warn(WsdlMessages.localizableWARNING_WSI_R_2003());
+                errReceiver.warning(forest.locatorTable.getStartLocation(e2), WsdlMessages.WARNING_WSI_R_2003());
             } else {
                 // possible extensibility element -- must live outside the WSDL namespace
                 checkNotWsdlElement(e2);
@@ -499,7 +313,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Message message = new Message(definitions);
+        Message message = new Message(definitions, forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         message.setName(name);
 
@@ -537,7 +351,7 @@ public class WSDLParser {
     protected MessagePart parseMessagePart(TWSDLParserContextImpl context, Element e) {
         context.push();
         context.registerNamespaces(e);
-        MessagePart part = new MessagePart();
+        MessagePart part = new MessagePart(forest.locatorTable.getStartLocation(e));
         String partName = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         part.setName(partName);
 
@@ -559,8 +373,7 @@ public class WSDLParser {
             // XXX-NOTE - this is wrong; for extensibility purposes,
             // any attribute can be specified on a <part> element, so
             // we need to put an extensibility hook here
-            env.warn(WsdlMessages.localizablePARSING_ELEMENT_OR_TYPE_REQUIRED(partName));
-//            env.warn("parsing.elementOrTypeRequired", partName);
+            errReceiver.warning(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ELEMENT_OR_TYPE_REQUIRED(partName));
         }
 
         context.pop();
@@ -574,7 +387,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        PortType portType = new PortType(definitions);
+        PortType portType = new PortType(definitions, forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         portType.setName(name);
 
@@ -587,9 +400,7 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                 }
                 gotDocumentation = true;
                 if(portType.getDocumentation() == null)
@@ -624,7 +435,7 @@ public class WSDLParser {
         context.push();
         context.registerNamespaces(e);
 
-        Operation operation = new Operation();
+        Operation operation = new Operation(forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         operation.setName(name);
         String parameterOrderAttr =
@@ -645,26 +456,21 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e2), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e2.getLocalName()));
                 }
                 gotDocumentation = true;
                 if(operation.getDocumentation() == null)
                     operation.setDocumentation(getDocumentationFor(e2));
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_INPUT)) {
                 if (gotInput) {
-                    Util.fail(
-                        "parsing.tooManyElements",
-                        new Object[] {
-                            Constants.TAG_INPUT,
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_TOO_MANY_ELEMENTS(Constants.TAG_INPUT,
                             Constants.TAG_OPERATION,
-                            name });
+                            name));
                 }
 
                 context.push();
                 context.registerNamespaces(e2);
-                Input input = new Input();
+                Input input = new Input(forest.locatorTable.getStartLocation(e2));
                 input.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
@@ -707,33 +513,26 @@ public class WSDLParser {
                     if (XmlUtil
                         .matchesTagNS(e3, WSDLConstants.QNAME_DOCUMENTATION)) {
                         if (gotDocumentation2) {
-                            Util.fail(
-                                "parsing.onlyOneDocumentationAllowed",
-                                e.getLocalName());
+                            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                         }
                         gotDocumentation2 = true;
                         input.setDocumentation(getDocumentationFor(e3));
                     } else {
-                        Util.fail(
-                            "parsing.invalidElement",
-                            e3.getTagName(),
-                            e3.getNamespaceURI());
+                        errReceiver.error(forest.locatorTable.getStartLocation(e3), WsdlMessages.PARSING_INVALID_ELEMENT(e3.getTagName(),
+                            e3.getNamespaceURI()));
                     }
                 }
                 context.pop();
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_OUTPUT)) {
                 if (gotOutput) {
-                    Util.fail(
-                        "parsing.tooManyElements",
-                        new Object[] {
-                            Constants.TAG_OUTPUT,
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_TOO_MANY_ELEMENTS(Constants.TAG_INPUT,
                             Constants.TAG_OPERATION,
-                            name });
+                            name));
                 }
 
                 context.push();
                 context.registerNamespaces(e2);
-                Output output = new Output();
+                Output output = new Output(forest.locatorTable.getStartLocation(e2));
                 output.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
@@ -776,24 +575,20 @@ public class WSDLParser {
                     if (XmlUtil
                         .matchesTagNS(e3, WSDLConstants.QNAME_DOCUMENTATION)) {
                         if (gotDocumentation2) {
-                            Util.fail(
-                                "parsing.onlyOneDocumentationAllowed",
-                                e.getLocalName());
+                            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                         }
                         gotDocumentation2 = true;
                         output.setDocumentation(getDocumentationFor(e3));
                     } else {
-                        Util.fail(
-                            "parsing.invalidElement",
-                            e3.getTagName(),
-                            e3.getNamespaceURI());
+                        errReceiver.error(forest.locatorTable.getStartLocation(e3), WsdlMessages.PARSING_INVALID_ELEMENT(e3.getTagName(),
+                            e3.getNamespaceURI()));
                     }
                 }
                 context.pop();
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_FAULT)) {
                 context.push();
                 context.registerNamespaces(e2);
-                Fault fault = new Fault();
+                Fault fault = new Fault(forest.locatorTable.getStartLocation(e2));
                 fault.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
@@ -833,9 +628,7 @@ public class WSDLParser {
                     if (XmlUtil
                         .matchesTagNS(e3, WSDLConstants.QNAME_DOCUMENTATION)) {
                         if (gotDocumentation2) {
-                            Util.fail(
-                                "parsing.onlyOneDocumentationAllowed",
-                                e.getLocalName());
+                            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                         }
                         gotDocumentation2 = true;
                         if(fault.getDocumentation() == null)
@@ -877,7 +670,7 @@ public class WSDLParser {
         } else if (gotOutput && !gotInput && !gotFault) {
             operation.setStyle(OperationStyle.NOTIFICATION);
         } else {
-            Util.fail("parsing.invalidOperationStyle", name);
+            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_INVALID_OPERATION_STYLE(name));
         }
 
         context.pop();
@@ -891,7 +684,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Binding binding = new Binding(definitions);
+        Binding binding = new Binding(definitions, forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         binding.setName(name);
         String typeAttr = Util.getRequiredAttribute(e, Constants.ATTR_TYPE);
@@ -906,9 +699,7 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                 }
                 gotDocumentation = true;
                 binding.setDocumentation(getDocumentationFor(e2));
@@ -935,7 +726,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        BindingOperation operation = new BindingOperation();
+        BindingOperation operation = new BindingOperation(forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         operation.setName(name);
 
@@ -952,20 +743,15 @@ public class WSDLParser {
                 break;
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                 }
                 gotDocumentation = true;
                 operation.setDocumentation(getDocumentationFor(e2));
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_INPUT)) {
                 if (gotInput) {
-                    Util.fail(
-                        "parsing.tooManyElements",
-                        new Object[] {
-                            Constants.TAG_INPUT,
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_TOO_MANY_ELEMENTS(Constants.TAG_INPUT,
                             Constants.TAG_OPERATION,
-                            name });
+                            name));
                 }
 
                 /* Here we check for the use scenario */
@@ -973,7 +759,7 @@ public class WSDLParser {
                 Element ee = Util.nextElement(itere2);
                 context.push();
                 context.registerNamespaces(e2);
-                BindingInput input = new BindingInput();
+                BindingInput input = new BindingInput(forest.locatorTable.getStartLocation(e2));
                 String nameAttr =
                     XmlUtil.getAttributeOrNull(e2, Constants.ATTR_NAME);
                 input.setName(nameAttr);
@@ -995,9 +781,7 @@ public class WSDLParser {
                     if (XmlUtil
                         .matchesTagNS(e3, WSDLConstants.QNAME_DOCUMENTATION)) {
                         if (gotDocumentation2) {
-                            Util.fail(
-                                "parsing.onlyOneDocumentationAllowed",
-                                e.getLocalName());
+                            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                         }
                         gotDocumentation2 = true;
                         input.setDocumentation(getDocumentationFor(e3));
@@ -1012,17 +796,14 @@ public class WSDLParser {
                 context.pop();
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_OUTPUT)) {
                 if (gotOutput) {
-                    Util.fail(
-                        "parsing.tooManyElements",
-                        new Object[] {
-                            Constants.TAG_OUTPUT,
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_TOO_MANY_ELEMENTS(Constants.TAG_INPUT,
                             Constants.TAG_OPERATION,
-                            name });
+                            name));
                 }
 
                 context.push();
                 context.registerNamespaces(e2);
-                BindingOutput output = new BindingOutput();
+                BindingOutput output = new BindingOutput(forest.locatorTable.getStartLocation(e2));
                 String nameAttr =
                     XmlUtil.getAttributeOrNull(e2, Constants.ATTR_NAME);
                 output.setName(nameAttr);
@@ -1045,9 +826,7 @@ public class WSDLParser {
                     if (XmlUtil
                         .matchesTagNS(e3, WSDLConstants.QNAME_DOCUMENTATION)) {
                         if (gotDocumentation2) {
-                            Util.fail(
-                                "parsing.onlyOneDocumentationAllowed",
-                                e.getLocalName());
+                            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                         }
                         gotDocumentation2 = true;
                         output.setDocumentation(getDocumentationFor(e3));
@@ -1063,7 +842,7 @@ public class WSDLParser {
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_FAULT)) {
                 context.push();
                 context.registerNamespaces(e2);
-                BindingFault fault = new BindingFault();
+                BindingFault fault = new BindingFault(forest.locatorTable.getStartLocation(e2));
                 String nameAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_NAME);
                 fault.setName(nameAttr);
@@ -1082,9 +861,7 @@ public class WSDLParser {
                     if (XmlUtil
                         .matchesTagNS(e3, WSDLConstants.QNAME_DOCUMENTATION)) {
                         if (gotDocumentation2) {
-                            Util.fail(
-                                "parsing.onlyOneDocumentationAllowed",
-                                e.getLocalName());
+                            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                         }
                         gotDocumentation2 = true;
                         if(fault.getDocumentation() == null)
@@ -1116,7 +893,7 @@ public class WSDLParser {
         } else if (gotOutput && !gotInput && !gotFault) {
             operation.setStyle(OperationStyle.NOTIFICATION);
         } else {
-            Util.fail("parsing.invalidOperationStyle", name);
+            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_INVALID_OPERATION_STYLE(name));
         }
 
         context.pop();
@@ -1130,7 +907,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Import anImport = new Import();
+        Import anImport = new Import(forest.locatorTable.getStartLocation(e));
         String namespace =
             Util.getRequiredAttribute(e, Constants.ATTR_NAMESPACE);
         anImport.setNamespace(namespace);
@@ -1147,17 +924,13 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                 }
                 gotDocumentation = true;
                 anImport.setDocumentation(getDocumentationFor(e2));
             } else {
-                Util.fail(
-                    "parsing.invalidElement",
-                    e2.getTagName(),
-                    e2.getNamespaceURI());
+                errReceiver.error(forest.locatorTable.getStartLocation(e2), WsdlMessages.PARSING_INVALID_ELEMENT(e2.getTagName(),
+                    e2.getNamespaceURI()));
             }
         }
         context.pop();
@@ -1171,7 +944,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Service service = new Service(definitions);
+        Service service = new Service(definitions, forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         service.setName(name);
 
@@ -1184,9 +957,7 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                 }
                 gotDocumentation = true;
                 if(service.getDocumentation() == null)
@@ -1215,7 +986,7 @@ public class WSDLParser {
         context.push();
         context.registerNamespaces(e);
 
-        Port port = new Port(definitions);
+        Port port = new Port(definitions, forest.locatorTable.getStartLocation(e));
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         port.setName(name);
 
@@ -1232,9 +1003,7 @@ public class WSDLParser {
 
             if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_DOCUMENTATION)) {
                 if (gotDocumentation) {
-                    Util.fail(
-                        "parsing.onlyOneDocumentationAllowed",
-                        e.getLocalName());
+                    errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
                 }
                 gotDocumentation = true;
                 if(port.getDocumentation() == null)
@@ -1261,12 +1030,10 @@ public class WSDLParser {
             if (e == null)
                 break;
             if (gotDocumentation) {
-                Util.fail(
-                    "parsing.onlyOneDocumentationAllowed",
-                    e.getLocalName());
+                errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
             }
             if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_IMPORT)) {
-                env.warn(WsdlMessages.localizableWARNING_WSI_R_2003());
+                errReceiver.warning(forest.locatorTable.getStartLocation(e), WsdlMessages.WARNING_WSI_R_2003());
             }else{
                 checkNotWsdlElement(e);
                 if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_SCHEMA)) {
@@ -1276,9 +1043,6 @@ public class WSDLParser {
         }
     }
 
-    public List getSchemaElements(){
-        return schemaElements;
-    }
 
     protected boolean handleExtension(
         TWSDLParserContextImpl context,
@@ -1287,9 +1051,7 @@ public class WSDLParser {
         TWSDLExtensionHandler h =
              (TWSDLExtensionHandler) extensionHandlers.get(e.getNamespaceURI());
         if (h == null) {
-            context.fireIgnoringExtension(
-                new QName(e.getNamespaceURI(), e.getLocalName()),
-                ((Entity) entity).getElementName());
+            context.fireIgnoringExtension(e, (Entity) entity);
             return false;
         } else {
             return h.doHandleExtension(context, entity, e);
@@ -1304,9 +1066,7 @@ public class WSDLParser {
         TWSDLExtensionHandler h =
             (TWSDLExtensionHandler) extensionHandlers.get(n.getNamespaceURI());
         if (h == null) {
-            context.fireIgnoringExtension(
-                new QName(n.getNamespaceURI(), n.getLocalName()),
-                ((Entity) entity).getElementName());
+            context.fireIgnoringExtension(e, (Entity) entity);
             return false;
         } else {
             return h.doHandleExtension(context, entity, e);
@@ -1316,13 +1076,13 @@ public class WSDLParser {
     protected void checkNotWsdlElement(Element e) {
         // possible extensibility element -- must live outside the WSDL namespace
         if (e.getNamespaceURI().equals(Constants.NS_WSDL))
-            Util.fail("parsing.invalidWsdlElement", e.getTagName());
+            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_INVALID_WSDL_ELEMENT(e.getTagName()));
     }
 
     protected void checkNotWsdlAttribute(Attr a) {
         // possible extensibility element -- must live outside the WSDL namespace
         if (a.getNamespaceURI().equals(Constants.NS_WSDL))
-            Util.fail("parsing.invalidWsdlElement", a.getLocalName());
+            errReceiver.error(forest.locatorTable.getStartLocation(a.getOwnerElement()), WsdlMessages.PARSING_INVALID_WSDL_ELEMENT(a.getLocalName()));
     }
 
     protected void checkNotWsdlRequired(Element e) {
@@ -1333,10 +1093,8 @@ public class WSDLParser {
                 Constants.ATTR_REQUIRED,
                 Constants.NS_WSDL);
         if (required != null && required.equals(Constants.TRUE)) {
-            Util.fail(
-                "parsing.requiredExtensibilityElement",
-                e.getTagName(),
-                e.getNamespaceURI());
+            errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_REQUIRED_EXTENSIBILITY_ELEMENT(e.getTagName(),
+                e.getNamespaceURI()));
         }
     }
 

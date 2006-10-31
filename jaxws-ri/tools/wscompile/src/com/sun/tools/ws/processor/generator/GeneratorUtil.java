@@ -22,17 +22,14 @@
 
 package com.sun.tools.ws.processor.generator;
 
-import java.io.IOException;
-import java.util.Comparator;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.processor.model.Block;
 import com.sun.tools.ws.processor.model.Fault;
-import com.sun.tools.ws.processor.model.Operation;
 import com.sun.tools.ws.processor.model.java.JavaStructureType;
 import com.sun.tools.ws.processor.util.IndentingWriter;
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.wscompile.Options;
+
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.util.Comparator;
 
 
 /**
@@ -52,49 +49,12 @@ public class GeneratorUtil implements GeneratorConstants {
     }
 
 
-    public static void writeBlockQNameDeclaration(
-        IndentingWriter p,
-        Operation operation,
-        Block block,
-        Names names)
-        throws IOException {
-        String qname = names.getBlockQNameName(operation, block);
-        p.p("private static final QName ");
-        p.p(qname + " = ");
-        writeNewQName(p, block.getName());
-        p.pln(";");
-    }
-
-    public static void writeQNameDeclaration(
-        IndentingWriter p,
-        QName name,
-        Names names)
-        throws IOException {
-        String qname = names.getQNameName(name);
-        p.p("private static final QName ");
-        p.p(qname + " = ");
-        writeNewQName(p, name);
-        p.pln(";");
-    }
-
-    public static void writeQNameTypeDeclaration(
-        IndentingWriter p,
-        QName name,
-        Names names)
-        throws IOException {
-        String qname = names.getTypeQName(name);
-        p.p("private static final QName ");
-        p.p(qname + " = ");
-        writeNewQName(p, name);
-        p.pln(";");
-    }
-
     public static boolean classExists(
-        ProcessorEnvironment env,
+        Options options,
         String className) {
         try {
             // Takes care of inner classes.
-            getLoadableClassName(className, env.getClassLoader());
+            getLoadableClassName(className, options.getClassLoader());
             return true;
         } catch(ClassNotFoundException ce) {
         }

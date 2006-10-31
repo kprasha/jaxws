@@ -24,6 +24,7 @@ package com.sun.tools.ws.wsdl.framework;
 
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import org.xml.sax.Locator;
 
 /**
  * An entity extending another entity.
@@ -32,7 +33,8 @@ import com.sun.tools.ws.api.wsdl.TWSDLExtension;
  */
 public abstract class ExtensionImpl extends Entity implements TWSDLExtension {
 
-    public ExtensionImpl() {
+    public ExtensionImpl(Locator locator) {
+        super(locator);
     }
 
     public TWSDLExtensible getParent() {

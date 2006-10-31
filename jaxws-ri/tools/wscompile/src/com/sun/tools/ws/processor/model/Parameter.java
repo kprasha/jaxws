@@ -22,11 +22,12 @@
 
 package com.sun.tools.ws.processor.model;
 
+import com.sun.tools.ws.processor.model.java.JavaParameter;
+import com.sun.tools.ws.wsdl.framework.Entity;
+
+import javax.jws.WebParam.Mode;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.sun.tools.ws.processor.model.java.JavaParameter;
-import javax.jws.WebParam.Mode;
 
 /**
  *
@@ -34,9 +35,12 @@ import javax.jws.WebParam.Mode;
  */
 public class Parameter extends ModelObject {
 
-    public Parameter() {}
+    public Parameter(Entity entity) {
+        super(entity);
+    }
 
-    public Parameter(String name) {
+    public Parameter(String name, Entity entity) {
+        super(entity);
         this.name = name;
     }
 

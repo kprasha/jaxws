@@ -22,19 +22,13 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.util.Map;
-
-import org.w3c.dom.Element;
-
-import com.sun.tools.ws.wsdl.document.http.HTTPAddress;
-import com.sun.tools.ws.wsdl.document.http.HTTPBinding;
-import com.sun.tools.ws.wsdl.document.http.HTTPConstants;
-import com.sun.tools.ws.wsdl.document.http.HTTPOperation;
-import com.sun.tools.ws.wsdl.document.http.HTTPUrlEncoded;
-import com.sun.tools.ws.wsdl.document.http.HTTPUrlReplacement;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 import com.sun.tools.ws.util.xml.XmlUtil;
+import com.sun.tools.ws.wsdl.document.http.*;
+import org.w3c.dom.Element;
+
+import java.util.Map;
 
 /**
  * The HTTP extension handler for WSDL.
@@ -82,7 +76,7 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            HTTPBinding binding = new HTTPBinding();
+            HTTPBinding binding = new HTTPBinding(context.getLocation(e));
 
             String verb = Util.getRequiredAttribute(e, Constants.ATTR_VERB);
             binding.setVerb(verb);
@@ -108,7 +102,7 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            HTTPOperation operation = new HTTPOperation();
+            HTTPOperation operation = new HTTPOperation(context.getLocation(e));
 
             String location =
                 Util.getRequiredAttribute(e, Constants.ATTR_LOCATION);
@@ -134,11 +128,11 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
         TWSDLExtensible parent,
         Element e) {
         if (XmlUtil.matchesTagNS(e, HTTPConstants.QNAME_URL_ENCODED)) {
-            parent.addExtension(new HTTPUrlEncoded());
+            parent.addExtension(new HTTPUrlEncoded(context.getLocation(e)));
             return true;
         } else if (
             XmlUtil.matchesTagNS(e, HTTPConstants.QNAME_URL_REPLACEMENT)) {
-            parent.addExtension(new HTTPUrlReplacement());
+            parent.addExtension(new HTTPUrlReplacement(context.getLocation(e)));
             return true;
         } else {
             Util.fail(
@@ -190,7 +184,7 @@ public class HTTPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            HTTPAddress address = new HTTPAddress();
+            HTTPAddress address = new HTTPAddress(context.getLocation(e));
 
             String location =
                 Util.getRequiredAttribute(e, Constants.ATTR_LOCATION);

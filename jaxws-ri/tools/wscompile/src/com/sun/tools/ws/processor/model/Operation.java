@@ -25,6 +25,7 @@ package com.sun.tools.ws.processor.model;
 import com.sun.tools.ws.processor.model.java.JavaMethod;
 import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
+import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.xml.bind.api.JAXBRIContext;
 
 import javax.xml.namespace.QName;
@@ -38,15 +39,18 @@ import java.util.Set;
  */
 public class Operation extends ModelObject {
 
-    public Operation() {}
+    public Operation(Entity entity) {
+        super(entity);
+    }
 
-    public Operation(Operation operation){
-        this(operation._name);
+    public Operation(Operation operation, Entity entity){
+        this(operation._name, entity);
         this._style = operation._style;
         this._use = operation._use;
         this.customizedName = operation.customizedName;
     }
-    public Operation(QName name) {
+    public Operation(QName name, Entity entity) {
+        super(entity);
         _name = name;
         _uniqueName = name.getLocalPart();
         _faultNames = new HashSet<String>();

@@ -21,16 +21,16 @@
  */
 package com.sun.tools.ws.processor.model;
 
+import com.sun.codemodel.JClass;
+import com.sun.tools.ws.processor.generator.GeneratorUtil;
+import com.sun.tools.ws.processor.model.java.JavaException;
+import com.sun.tools.ws.wsdl.framework.Entity;
+
+import javax.xml.namespace.QName;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.processor.generator.GeneratorUtil;
-import com.sun.tools.ws.processor.model.java.JavaException;
-import com.sun.codemodel.JClass;
 
 /**
  *
@@ -38,9 +38,12 @@ import com.sun.codemodel.JClass;
  */
 public class Fault extends ModelObject {
 
-    public Fault() {}
+    public Fault(Entity entity) {
+        super(entity);
+    }
 
-    public Fault(String name) {
+    public Fault(String name, Entity entity) {
+        super(entity);
         this.name = name;
         parentFault = null;
     }

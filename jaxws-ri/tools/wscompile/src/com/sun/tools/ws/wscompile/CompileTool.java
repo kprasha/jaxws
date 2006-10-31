@@ -34,8 +34,6 @@ import com.sun.tools.ws.processor.config.ClassModelInfo;
 import com.sun.tools.ws.processor.config.Configuration;
 import com.sun.tools.ws.processor.config.WSDLModelInfo;
 import com.sun.tools.ws.processor.config.parser.Reader;
-import com.sun.tools.ws.processor.generator.CustomExceptionGenerator;
-import com.sun.tools.ws.processor.generator.SeiGenerator;
 import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext;
 import com.sun.tools.ws.processor.modeler.annotation.WebServiceAP;
 import com.sun.tools.ws.processor.util.ClientProcessorEnvironment;
@@ -43,7 +41,6 @@ import com.sun.tools.ws.processor.util.GeneratedFileInfo;
 import com.sun.tools.ws.processor.util.ProcessorEnvironment;
 import com.sun.tools.ws.processor.util.ProcessorEnvironmentBase;
 import com.sun.tools.ws.util.ForkEntityResolver;
-import com.sun.tools.ws.util.JavaCompilerHelper;
 import com.sun.tools.ws.util.ToolBase;
 import com.sun.tools.ws.wscompile.CompileTool.ReportOutput.Schema;
 import com.sun.xml.txw2.TXW;
@@ -71,23 +68,9 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Holder;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  *    This is the real implementation class for both WsGen and WsImport.
@@ -128,7 +111,7 @@ import java.util.Set;
  * @author WS Development Team
  *
  */
-public class CompileTool extends ToolBase implements ProcessorNotificationListener,
+class CompileTool extends ToolBase implements ProcessorNotificationListener,
         AnnotationProcessorFactory {
 
     public CompileTool(OutputStream out, Container container, String program) {
@@ -602,14 +585,14 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
         super.initialize();
         properties = new Properties();
         actions = new HashMap<String,ProcessorAction>();
-        actions.put(ActionConstants.ACTION_SERVICE_GENERATOR,
-                new com.sun.tools.ws.processor.generator.ServiceGenerator());
-        actions.put(ActionConstants.ACTION_REMOTE_INTERFACE_GENERATOR,
-                new SeiGenerator());
-        actions.put(ActionConstants.ACTION_CUSTOM_EXCEPTION_GENERATOR,
-                new CustomExceptionGenerator());
-        actions.put(ActionConstants.ACTION_JAXB_TYPE_GENERATOR,
-                new com.sun.tools.ws.processor.generator.JAXBTypeGenerator());
+//        actions.put(ActionConstants.ACTION_SERVICE_GENERATOR,
+//                new com.sun.tools.ws.processor.generator.ServiceGenerator());
+//        actions.put(ActionConstants.ACTION_REMOTE_INTERFACE_GENERATOR,
+//                new SeiGenerator());
+//        actions.put(ActionConstants.ACTION_CUSTOM_EXCEPTION_GENERATOR,
+//                new CustomExceptionGenerator());
+//        actions.put(ActionConstants.ACTION_JAXB_TYPE_GENERATOR,
+//                new com.sun.tools.ws.processor.generator.JAXBTypeGenerator());
     }
 
     public void removeGeneratedFiles() {
@@ -618,7 +601,7 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
 
     public void buildModel(String endpoint) {
         context = new AnnotationProcessorContext();
-        webServiceAP = new WebServiceAP(this, environment, properties, context);
+//        webServiceAP = new WebServiceAP(this, environment, properties, context);
 
         String classpath = environment.getClassPath();
 
@@ -841,11 +824,11 @@ public class CompileTool extends ToolBase implements ProcessorNotificationListen
             }
 
             // ByteArrayOutputStream javacOutput = new ByteArrayOutputStream();
-            JavaCompilerHelper compilerHelper = new JavaCompilerHelper(out);
-            boolean result = compilerHelper.compile(args);
-            if (!result) {
-                environment.error(getMessage("wscompile.compilationFailed"));
-            }
+//            JavaCompilerHelper compilerHelper = new JavaCompilerHelper(out);
+//            boolean result = compilerHelper.compile(args);
+//            if (!result) {
+//                environment.error(getMessage("wscompile.compilationFailed"));
+//            }
         }
     }
 

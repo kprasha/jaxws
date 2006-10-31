@@ -22,18 +22,12 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Defining;
-import com.sun.tools.ws.wsdl.framework.EntityAction;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.wsdl.framework.GlobalEntity;
-import com.sun.tools.ws.wsdl.framework.Kind;
-import com.sun.tools.ws.wsdl.framework.QNameAction;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * Entity corresponding to the "port" WSDL element.
@@ -42,8 +36,8 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  */
 public class Port extends GlobalEntity implements TWSDLExtensible {
 
-    public Port(Defining defining) {
-        super(defining);
+    public Port(Defining defining, Locator locator) {
+        super(defining, locator);
         _helper = new ExtensibilityHelper();
     }
 

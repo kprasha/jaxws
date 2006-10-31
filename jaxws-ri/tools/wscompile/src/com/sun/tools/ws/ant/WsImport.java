@@ -21,7 +21,8 @@
  */
 package com.sun.tools.ws.ant;
 
-import com.sun.tools.ws.wscompile.CompileTool;
+import com.sun.tools.ws.wscompile.Options;
+import com.sun.tools.ws.wscompile.WsimportTool;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
@@ -30,13 +31,12 @@ import org.apache.tools.ant.taskdefs.Execute;
 import org.apache.tools.ant.taskdefs.LogOutputStream;
 import org.apache.tools.ant.taskdefs.LogStreamHandler;
 import org.apache.tools.ant.taskdefs.MatchingTask;
-import org.apache.tools.ant.types.Commandline;
-import org.apache.tools.ant.types.CommandlineJava;
-import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.XMLCatalog;
+import org.apache.tools.ant.types.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -140,6 +140,32 @@ public class WsImport extends MatchingTask {
     public void setKeep(boolean keep) {
         this.keep = keep;
     }
+
+    /** -quiet switch **/
+    private boolean quiet = false;
+
+
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    public void setQuiet(boolean quiet) {
+        this.quiet = quiet;
+    }
+
+    /**
+     * Sets the target version of the compilation
+     */
+    private String target;
+    public void setTarget( String version ) {
+        Options.Target targetVersion = Options.Target.parse(version);
+        if(targetVersion==null)
+            throw new BuildException(version+" is not a valid version number");
+        target = Options.Target.getVersion(targetVersion);
+    }
+
+
+
 
     /*************************  -fork option *************************/
     private boolean fork = false;
@@ -425,6 +451,15 @@ public class WsImport extends MatchingTask {
             cmd.createArgument().setValue("-verbose");
         }
 
+        if(quiet){
+            cmd.createArgument().setValue("-quiet");
+        }
+
+        if(target != null){
+            cmd.createArgument().setValue("-target");
+            cmd.createArgument().setValue(target);
+        }
+
         //wsdl
         if(getWsdl() != null){
             cmd.createArgument().setValue(getWsdl());
@@ -504,7 +539,7 @@ public class WsImport extends MatchingTask {
                 Thread.currentThread().setContextClassLoader(loader);
                 String sysPath = System.getProperty("java.class.path");
                 try {
-                    CompileTool compTool = new CompileTool(logstr, "wsimport");
+                    WsimportTool compTool = new WsimportTool(logstr);
                     if(xmlCatalog != null){
                         compTool.setEntityResolver(xmlCatalog);
                     }

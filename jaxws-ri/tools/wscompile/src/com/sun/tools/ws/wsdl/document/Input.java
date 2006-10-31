@@ -24,13 +24,10 @@ package com.sun.tools.ws.wsdl.document;
 
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
-import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import javax.xml.namespace.QName;
+import com.sun.tools.ws.wsdl.framework.*;
+import org.xml.sax.Locator;
 
-import com.sun.tools.ws.wsdl.framework.AbstractDocument;
-import com.sun.tools.ws.wsdl.framework.Entity;
-import com.sun.tools.ws.wsdl.framework.EntityReferenceAction;
-import com.sun.tools.ws.wsdl.framework.QNameAction;
+import javax.xml.namespace.QName;
 
 /**
  * Entity corresponding to the "input" child element of a port type operation.
@@ -39,7 +36,8 @@ import com.sun.tools.ws.wsdl.framework.QNameAction;
  */
 public class Input extends Entity implements TWSDLExtensible {
 
-    public Input() {
+    public Input(Locator locator) {
+        super(locator);
         _helper = new ExtensibilityHelper();
     }
 

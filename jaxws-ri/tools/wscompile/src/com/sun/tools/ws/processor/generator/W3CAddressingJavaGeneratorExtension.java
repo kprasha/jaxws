@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingJavaGeneratorExtension.java,v 1.1.2.3 2006-08-25 04:12:22 arungupta Exp $
+ $Id: W3CAddressingJavaGeneratorExtension.java,v 1.1.2.4 2006-10-31 19:57:28 vivekp Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -26,19 +26,18 @@
 
 package com.sun.tools.ws.processor.generator;
 
-import java.util.Map;
+import com.sun.codemodel.JAnnotationArrayMember;
+import com.sun.codemodel.JAnnotationUse;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JMethod;
+import com.sun.tools.ws.api.TJavaGeneratorExtension;
+import com.sun.tools.ws.api.wsdl.TWSDLOperation;
+import com.sun.tools.ws.wsdl.document.Fault;
+import com.sun.tools.ws.wsdl.document.Operation;
 
 import javax.xml.ws.Action;
 import javax.xml.ws.FaultAction;
-
-import com.sun.tools.ws.api.TJavaGeneratorExtension;
-import com.sun.tools.ws.api.wsdl.TWSDLOperation;
-import com.sun.tools.ws.wsdl.document.Operation;
-import com.sun.tools.ws.wsdl.document.Fault;
-import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JAnnotationUse;
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JAnnotationArrayMember;
+import java.util.Map;
 
 /**
  * @author Arun Gupta

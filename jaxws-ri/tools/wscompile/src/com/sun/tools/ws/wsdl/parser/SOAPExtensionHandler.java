@@ -22,27 +22,17 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
-import org.w3c.dom.Element;
-
-import com.sun.tools.ws.wsdl.document.soap.SOAPAddress;
-import com.sun.tools.ws.wsdl.document.soap.SOAPBinding;
-import com.sun.tools.ws.wsdl.document.soap.SOAPBody;
-import com.sun.tools.ws.wsdl.document.soap.SOAPConstants;
-import com.sun.tools.ws.wsdl.document.soap.SOAPFault;
-import com.sun.tools.ws.wsdl.document.soap.SOAPHeader;
-import com.sun.tools.ws.wsdl.document.soap.SOAPHeaderFault;
-import com.sun.tools.ws.wsdl.document.soap.SOAPOperation;
-import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
-import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
-import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
+import com.sun.tools.ws.wsdl.document.soap.*;
+import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
+import org.w3c.dom.Element;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * The SOAP extension handler for WSDL.
@@ -81,8 +71,8 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
         return false; // keep compiler happy
     }
 
-    protected SOAPBinding getSOAPBinding(){
-        return new SOAPBinding();
+    protected SOAPBinding getSOAPBinding(Locator location){
+        return new SOAPBinding(location);
     }
 
     public boolean handleBindingExtension(
@@ -93,7 +83,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            SOAPBinding binding = getSOAPBinding();
+            SOAPBinding binding = getSOAPBinding(context.getLocation(e));
 
             // NOTE - the "transport" attribute is required according to section 3.3 of the WSDL 1.1 spec,
             // but optional according to the schema in appendix A 4.2 of the same document!
@@ -135,7 +125,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            SOAPOperation operation = new SOAPOperation();
+            SOAPOperation operation = new SOAPOperation(context.getLocation(e));
 
             String soapAction =
                 XmlUtil.getAttributeOrNull(e, Constants.ATTR_SOAP_ACTION);
@@ -201,7 +191,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            SOAPBody body = new SOAPBody();
+            SOAPBody body = new SOAPBody(context.getLocation(e));
 
             String use = XmlUtil.getAttributeOrNull(e, Constants.ATTR_USE);
             if (use != null) {
@@ -242,7 +232,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            SOAPHeader header = new SOAPHeader();
+            SOAPHeader header = new SOAPHeader(context.getLocation(e));
 
             String use = XmlUtil.getAttributeOrNull(e, Constants.ATTR_USE);
             if (use != null) {
@@ -291,7 +281,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
                     context.push();
                     context.registerNamespaces(e);
 
-                    SOAPHeaderFault headerfault = new SOAPHeaderFault();
+                    SOAPHeaderFault headerfault = new SOAPHeaderFault(context.getLocation(e));
 
                     String use2 =
                         XmlUtil.getAttributeOrNull(e2, Constants.ATTR_USE);
@@ -368,7 +358,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            SOAPFault fault = new SOAPFault();
+            SOAPFault fault = new SOAPFault(context.getLocation(e));
 
             String name = XmlUtil.getAttributeOrNull(e, Constants.ATTR_NAME);
             if (name != null) {
@@ -434,7 +424,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            SOAPAddress address = new SOAPAddress();
+            SOAPAddress address = new SOAPAddress(context.getLocation(e));
 
             String location =
                 Util.getRequiredAttribute(e, Constants.ATTR_LOCATION);

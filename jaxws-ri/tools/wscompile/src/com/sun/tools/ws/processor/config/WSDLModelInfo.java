@@ -23,14 +23,13 @@
 package com.sun.tools.ws.processor.config;
 
 
-import java.util.*;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
 import com.sun.tools.ws.processor.modeler.Modeler;
 import com.sun.tools.ws.util.JAXWSClassFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+
+import java.util.*;
 
 /**
  *

@@ -22,21 +22,15 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.util.Iterator;
-import java.util.Map;
-
-import org.w3c.dom.Element;
-
-import com.sun.tools.ws.wsdl.document.WSDLConstants;
-import com.sun.tools.ws.wsdl.document.mime.MIMEConstants;
-import com.sun.tools.ws.wsdl.document.mime.MIMEContent;
-import com.sun.tools.ws.wsdl.document.mime.MIMEMultipartRelated;
-import com.sun.tools.ws.wsdl.document.mime.MIMEPart;
-import com.sun.tools.ws.wsdl.document.mime.MIMEXml;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
-import com.sun.tools.ws.wsdl.framework.TWSDLParserContextImpl;
 import com.sun.tools.ws.util.xml.XmlUtil;
+import com.sun.tools.ws.wsdl.document.WSDLConstants;
+import com.sun.tools.ws.wsdl.document.mime.*;
+import org.w3c.dom.Element;
+
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * The MIME extension handler for WSDL.
@@ -80,7 +74,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
             context.push();
             context.registerNamespaces(e);
 
-            MIMEMultipartRelated mpr = new MIMEMultipartRelated();
+            MIMEMultipartRelated mpr = new MIMEMultipartRelated(context.getLocation(e));
 
             for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
                 Element e2 = Util.nextElement(iter);
@@ -91,7 +85,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
                     context.push();
                     context.registerNamespaces(e2);
 
-                    MIMEPart part = new MIMEPart();
+                    MIMEPart part = new MIMEPart(context.getLocation(e2));
 
                     String name =
                         XmlUtil.getAttributeOrNull(e2, Constants.ATTR_NAME);
@@ -196,7 +190,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
         context.push();
         context.registerNamespaces(e);
 
-        MIMEContent content = new MIMEContent();
+        MIMEContent content = new MIMEContent(context.getLocation(e));
 
         String part = XmlUtil.getAttributeOrNull(e, Constants.ATTR_PART);
         if (part != null) {
@@ -217,7 +211,7 @@ public class MIMEExtensionHandler extends AbstractExtensionHandler {
         context.push();
         context.registerNamespaces(e);
 
-        MIMEXml mimeXml = new MIMEXml();
+        MIMEXml mimeXml = new MIMEXml(context.getLocation(e));
 
         String part = XmlUtil.getAttributeOrNull(e, Constants.ATTR_PART);
         if (part != null) {

@@ -22,20 +22,18 @@
 
 package com.sun.tools.ws.wsdl.parser;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Iterator;
-
-import javax.xml.namespace.QName;
-
+import com.sun.tools.ws.wsdl.framework.ParseException;
+import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
-import com.sun.tools.ws.wsdl.framework.ParseException;
-import com.sun.xml.ws.util.xml.XmlUtil;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
 
 /**2
  * Defines various utility methods.

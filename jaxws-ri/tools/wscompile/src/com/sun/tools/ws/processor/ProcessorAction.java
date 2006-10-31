@@ -22,10 +22,9 @@
 
 package com.sun.tools.ws.processor;
 
-import java.util.Properties;
-
 import com.sun.tools.ws.processor.model.Model;
-import com.sun.tools.ws.processor.config.Configuration;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.WsimportOptions;
 
 /**
  * A ProcessorAction is used to perform some operation on a
@@ -35,5 +34,5 @@ import com.sun.tools.ws.processor.config.Configuration;
  * @author WS Development Team
  */
 public interface ProcessorAction {
-    public void perform(Model model, Configuration config, Properties options);
+    public void perform(Model model, WsimportOptions config, ErrorReceiver receiver);
 }

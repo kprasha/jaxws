@@ -22,13 +22,14 @@
 
 package com.sun.tools.ws.wsdl.document;
 
-import javax.xml.namespace.QName;
-
+import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
+import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.Entity;
 import com.sun.tools.ws.wsdl.framework.EntityAction;
 import com.sun.tools.ws.wsdl.framework.ExtensibilityHelper;
-import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
-import com.sun.tools.ws.api.wsdl.TWSDLExtension;
+import org.xml.sax.Locator;
+
+import javax.xml.namespace.QName;
 
 /**
  * Entity corresponding to the "output" child element of a binding operation.
@@ -37,7 +38,8 @@ import com.sun.tools.ws.api.wsdl.TWSDLExtension;
  */
 public class BindingOutput extends Entity implements TWSDLExtensible {
 
-    public BindingOutput() {
+    public BindingOutput(Locator locator) {
+        super(locator);
         _helper = new ExtensibilityHelper();
     }
 

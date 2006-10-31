@@ -21,26 +21,22 @@
  */
 package com.sun.tools.ws.processor.config.parser;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import com.sun.tools.ws.processor.util.ProcessorEnvironment;
+import com.sun.tools.ws.util.xml.NullEntityResolver;
+import com.sun.tools.ws.wsdl.framework.ParseException;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
-import com.sun.tools.ws.processor.util.ProcessorEnvironment;
-import com.sun.tools.ws.util.xml.NullEntityResolver;
-import com.sun.tools.ws.wsdl.framework.ParseException;
-import com.sun.xml.ws.util.xml.XmlUtil;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Vivek Pandey

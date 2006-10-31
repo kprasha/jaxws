@@ -22,14 +22,13 @@
 
 package com.sun.tools.ws.processor.model;
 
+import com.sun.tools.ws.processor.model.java.JavaType;
+
+import javax.xml.namespace.QName;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collections;
-
-import javax.xml.namespace.QName;
-
-import com.sun.tools.ws.processor.model.java.JavaType;
 
 /**
  *
