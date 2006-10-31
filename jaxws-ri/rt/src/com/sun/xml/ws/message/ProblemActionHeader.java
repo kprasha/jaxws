@@ -77,7 +77,7 @@ public class ProblemActionHeader extends AbstractHeaderImpl {
 
     @Nullable
     public String getAttribute(@NotNull String nsUri, @NotNull String localName) {
-        return getAttribute(getNamespaceURI(), getLocalPart());
+        return null;
     }
 
     public XMLStreamReader readHeader() throws XMLStreamException {
