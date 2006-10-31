@@ -281,13 +281,17 @@ public class WSServiceDelegate extends WSService {
     }
 
     public <T> T getPort(WSEndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
-        //get the first port corresponding to the SEI
+        //get the port specified in EPR
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
-        WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
-        if(port==null)
-            throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
-        QName portName = port.getName();
-
+        QName portName = epr.getPortName();
+        //TODO validate service and port in epr and wsdl.
+        if (portName == null) {
+            //get the first port corresponding to the SEI
+            WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
+            if (port == null)
+                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
+            portName = port.getName();
+        }
         addSEI(portName, portInterface);
         return createEndpointIFBaseProxy(epr,portName,portInterface,features);
     }

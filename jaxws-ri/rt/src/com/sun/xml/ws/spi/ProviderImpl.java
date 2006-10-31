@@ -52,6 +52,7 @@ import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -101,10 +102,24 @@ public class ProviderImpl extends Provider {
     }
 
     public <T> T getPort(EndpointReference endpointReference, Class<T> clazz, WebServiceFeature... webServiceFeatures) {
+        /*
         final @NotNull MemberSubmissionEndpointReference msepr =
                 EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, endpointReference);
-        WSService service = new WSServiceDelegate(msepr.toWSDLSource(), msepr.serviceName.name, Service.class);
-        return service.getPort(msepr, clazz, webServiceFeatures);
+                WSService service = new WSServiceDelegate(msepr.toWSDLSource(), msepr.serviceName.name, Service.class);
+                */
+        WSEndpointReference wsepr = WSEndpointReference.create(endpointReference);
+        WSService service;
+        if(wsepr.getWsdlSource() != null)
+            service = new WSServiceDelegate(wsepr.getWsdlSource(), wsepr.getServiceName(), Service.class);
+        else if (wsepr.getWsdlLocation() != null)
+            try {
+                service = new WSServiceDelegate(new URL(wsepr.getWsdlLocation()), wsepr.getServiceName(), Service.class);
+            } catch (MalformedURLException e) {
+                throw new WebServiceException(e);
+            }
+        else
+            throw new WebServiceException("WSDL metadata is missing in EPR");
+        return ((WSServiceDelegate)service).getPort(wsepr, clazz, webServiceFeatures);
     }
 
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
