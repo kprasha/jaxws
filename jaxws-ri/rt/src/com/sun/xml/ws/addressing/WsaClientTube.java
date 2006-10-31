@@ -60,7 +60,7 @@ public class WsaClientTube extends WsaTube {
             // Addressing is not enabled
             return doInvoke(next,request);
         }
-        if (AddressingVersion.fromBinding(binding) != null) {
+        if (addressingVersion != null) {
             // populate request WS-Addressing headers
             HeaderList headerList = request.getMessage().getHeaders();
             headerList.fillRequestAddressingHeaders(wsdlPort, binding, request);

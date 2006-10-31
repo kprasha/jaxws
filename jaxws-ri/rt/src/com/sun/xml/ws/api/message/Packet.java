@@ -693,7 +693,7 @@ public final class Packet extends DistributedPropertySet {
                 wsaHelper.getFaultAction(this, responsePacket) :
                 wsaHelper.getOutputAction(this);
 
-        return populateAddressingHeaders(responsePacket, AddressingVersion.fromBinding(binding), binding.getSOAPVersion(), action);
+        return populateAddressingHeaders(responsePacket, addressingVersion, binding.getSOAPVersion(), action);
     }
 
     // completes TypedMap
