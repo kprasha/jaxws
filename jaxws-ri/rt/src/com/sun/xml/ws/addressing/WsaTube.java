@@ -271,7 +271,7 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
                 // TODO: should anything be done here ?
                 // TODO: fault detail element - only for SOAP 1.1
             } else {
-                throw new WebServiceException(AddressingMessages.UNKNOWN_WSA_HEADER());
+                System.err.println(AddressingMessages.UNKNOWN_WSA_HEADER());
             }
         }
 
