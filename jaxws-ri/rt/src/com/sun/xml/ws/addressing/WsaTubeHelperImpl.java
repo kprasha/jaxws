@@ -47,7 +47,8 @@ public class WsaTubeHelperImpl extends WsaTubeHelper {
         }
     }
 
-    public WsaTubeHelperImpl() {
+    public WsaTubeHelperImpl(WSDLPort wsdlPort, WSBinding binding) {
+        super(binding,wsdlPort);
         try {
             unmarshaller = jc.createUnmarshaller();
             marshaller = jc.createMarshaller();
@@ -55,12 +56,6 @@ public class WsaTubeHelperImpl extends WsaTubeHelper {
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
-    }
-
-    public WsaTubeHelperImpl(WSDLPort wsdlPort, WSBinding binding) {
-        this();
-        this.wsdlPort = wsdlPort;
-        this.binding = binding;
     }
 
     @Override

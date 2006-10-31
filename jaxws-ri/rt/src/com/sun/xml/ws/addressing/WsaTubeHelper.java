@@ -53,8 +53,16 @@ import org.w3c.dom.Element;
  */
 public abstract class WsaTubeHelper {
 
+    public WsaTubeHelper(WSBinding binding, WSDLPort wsdlPort) {
+        this.binding = binding;
+        this.wsdlPort = wsdlPort;
+        this.soapVer = binding.getSOAPVersion();
+        this.addVer = AddressingVersion.fromBinding(binding);
+
+    }
+
     public String getFaultAction(Packet requestPacket, Packet responsePacket) {
-        String action = AddressingVersion.fromBinding(binding).getDefaultFaultAction();
+        String action = addVer.getDefaultFaultAction();
 
         if (wsdlPort == null)
             return action;
@@ -183,7 +191,7 @@ public abstract class WsaTubeHelper {
         try {
             SOAPFactory factory;
             SOAPFault fault;
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
+            if (soapVer == SOAPVersion.SOAP_12) {
                 factory = SOAPVersion.SOAP_12.saajSoapFactory;
                 fault = factory.createFault();
                 fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
@@ -212,7 +220,7 @@ public abstract class WsaTubeHelper {
         try {
             SOAPFactory factory;
             SOAPFault fault;
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
+            if (soapVer == SOAPVersion.SOAP_12) {
                 factory = SOAPVersion.SOAP_12.saajSoapFactory;
                 fault = factory.createFault();
                 fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
@@ -242,4 +250,6 @@ public abstract class WsaTubeHelper {
 
     protected WSDLPort wsdlPort;
     protected WSBinding binding;
+    protected final SOAPVersion soapVer;
+    protected final AddressingVersion addVer;
 }
