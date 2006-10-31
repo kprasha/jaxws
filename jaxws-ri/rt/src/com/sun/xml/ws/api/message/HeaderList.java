@@ -578,9 +578,9 @@ public final class HeaderList extends ArrayList<Header> {
      * <p><p>
      * This method needs to be invoked right after such a Message is
      * created which is error prone but so far only MEX, RM and JAX-WS
-     * creates a request so this ugliness is acceptable. This method is used
-     * to create protocol messages that are not associated with
-     * any {@link WSBinding} and {@link WSDLPort}.
+     * creates a request so this ugliness is acceptable. This method is also used
+     * to create protocol messages that are not associated with any {@link WSBinding}
+     * and {@link WSDLPort}.
      *
      * @param packet request packet
      * @param av WS-Addressing version
