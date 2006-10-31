@@ -33,6 +33,8 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.ContainerResolver;
 import com.sun.xml.ws.api.client.PortCreationCallback;
+import com.sun.xml.ws.api.client.ServiceInterceptor;
+import com.sun.xml.ws.api.client.ServiceInterceptorFactory;
 import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -160,7 +162,10 @@ public class WSServiceDelegate extends WSService {
     private  @Nullable WSDLServiceImpl wsdlService;
 
     private final Container container;
-    private final @Nullable PortCreationCallback portCreationCallback;
+    /**
+     * Multiple {@link ServiceInterceptor}s are aggregated into one.
+     */
+    /*package*/ final @NotNull ServiceInterceptor serviceInterceptor;
 
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class<? extends Service> serviceClass) {
@@ -180,7 +185,14 @@ public class WSServiceDelegate extends WSService {
         this.serviceName = serviceName;
         this.serviceClass = serviceClass;
         this.container = ContainerResolver.getInstance().getContainer();
-        this.portCreationCallback = container.getSPI(PortCreationCallback.class);
+
+        // load interceptor
+        ServiceInterceptor interceptor = ServiceInterceptorFactory.load(this, Thread.currentThread().getContextClassLoader());
+        // backward compatiblity. also pick one up from container 
+        PortCreationCallback pcc = container.getSPI(PortCreationCallback.class);
+        if(pcc!=null)
+            interceptor = ServiceInterceptor.aggregate(interceptor,pcc);
+        this.serviceInterceptor = interceptor;
 
         WSDLServiceImpl service=null;
         if (wsdl != null) {
@@ -330,10 +342,9 @@ public class WSServiceDelegate extends WSService {
 
     private <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding(features,true);
+        BindingImpl binding = port.createBinding(features,null);
         Dispatch<T> dispatch = Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), WSEndpointReference.create(epr));
-         if (portCreationCallback != null)
-             portCreationCallback.dispatchCreated((WSBindingProvider) dispatch);
+         serviceInterceptor.postCreateDispatch((WSBindingProvider) dispatch);
          return dispatch;
 
     }
@@ -400,13 +411,11 @@ public class WSServiceDelegate extends WSService {
 
     private Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
         PortInfo port = safeGetPort(portName);
-        BindingImpl binding = port.createBinding(features,true);
+        BindingImpl binding = port.createBinding(features,null);
         Dispatch<Object> dispatch = Stubs.createJAXBDispatch(
                 portName, this, binding, jaxbContext, mode,
                 createPipeline(port, binding), WSEndpointReference.create(epr));
-         if (portCreationCallback != null) {
-             portCreationCallback.dispatchCreated((WSBindingProvider)dispatch);
-         }
+         serviceInterceptor.postCreateDispatch((WSBindingProvider)dispatch);
          return dispatch;
     }
 
@@ -460,13 +469,13 @@ public class WSServiceDelegate extends WSService {
 
         SEIPortInfo eif = seiContext.get(portInterface);
 
-        BindingImpl binding = eif.createBinding(webServiceFeatures,false);
+        BindingImpl binding = eif.createBinding(webServiceFeatures,portInterface);
         SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), epr);
 
         T proxy = portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
                 new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis));
-        if (portCreationCallback != null) {
-            portCreationCallback.proxyCreated((WSBindingProvider)proxy, portInterface);
+        if (serviceInterceptor != null) {
+            serviceInterceptor.postCreateProxy((WSBindingProvider)proxy, portInterface);
         }
         return proxy;
     }

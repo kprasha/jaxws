@@ -2,6 +2,7 @@ package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.handler.HandlerChainsModel;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
@@ -28,7 +29,7 @@ abstract class HandlerConfigurator {
     /**
      * Configures the given {@link BindingImpl} object by adding handlers to it.
      */
-    abstract void configureHandlers(@NotNull PortInfo port, @NotNull BindingImpl binding);
+    abstract void configureHandlers(@NotNull WSPortInfo port, @NotNull BindingImpl binding);
 
     /**
      * Returns a {@link HandlerResolver}, if this object encapsulates any {@link HandlerResolver}.
@@ -51,7 +52,7 @@ abstract class HandlerConfigurator {
             this.resolver = resolver;
         }
 
-        void configureHandlers(@NotNull PortInfo port, @NotNull BindingImpl binding) {
+        void configureHandlers(@NotNull WSPortInfo port, @NotNull BindingImpl binding) {
             if(resolver!=null)
                 binding.setHandlerChain(resolver.getHandlerChain(port));
         }
@@ -83,7 +84,7 @@ abstract class HandlerConfigurator {
      */
     static final class AnnotationConfigurator extends HandlerConfigurator {
         private final HandlerChainsModel handlerModel;
-        private final Map<PortInfo,HandlerAnnotationInfo> chainMap = new HashMap<PortInfo,HandlerAnnotationInfo>();
+        private final Map<WSPortInfo,HandlerAnnotationInfo> chainMap = new HashMap<WSPortInfo,HandlerAnnotationInfo>();
         private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.util.Constants.LoggingDomain + ".handler");
 
@@ -93,7 +94,7 @@ abstract class HandlerConfigurator {
         }
 
 
-        void configureHandlers(PortInfo port, BindingImpl binding) {
+        void configureHandlers(WSPortInfo port, BindingImpl binding) {
             //Check in cache first
             HandlerAnnotationInfo chain = chainMap.get(port);
 
@@ -116,21 +117,21 @@ abstract class HandlerConfigurator {
             return null;
         }
         // logged at finer level
-        private void logSetChain(PortInfo info, HandlerAnnotationInfo chain) {
+        private void logSetChain(WSPortInfo info, HandlerAnnotationInfo chain) {
             logger.finer("Setting chain of length " + chain.getHandlers().size() +
                 " for port info");
             logPortInfo(info, Level.FINER);
         }
 
         // logged at fine level
-        private void logGetChain(PortInfo info) {
+        private void logGetChain(WSPortInfo info) {
             logger.fine("No handler chain found for port info:");
             logPortInfo(info, Level.FINE);
             logger.fine("Existing handler chains:");
             if (chainMap.isEmpty()) {
                 logger.fine("none");
             } else {
-                for (PortInfo key : chainMap.keySet()) {
+                for (WSPortInfo key : chainMap.keySet()) {
                     logger.fine(chainMap.get(key).getHandlers().size() +
                         " handlers for port info ");
                     logPortInfo(key, Level.FINE);
@@ -138,7 +139,7 @@ abstract class HandlerConfigurator {
             }
         }
 
-        private void logPortInfo(javax.xml.ws.handler.PortInfo info, Level level) {
+        private void logPortInfo(WSPortInfo info, Level level) {
             logger.log(level, "binding: " + info.getBindingID() +
                 "\nservice: " + info.getServiceName() +
                 "\nport: " + info.getPortName());

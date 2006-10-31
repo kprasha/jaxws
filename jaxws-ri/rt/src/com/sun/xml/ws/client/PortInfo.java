@@ -25,6 +25,8 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
@@ -40,7 +42,7 @@ import javax.xml.ws.WebServiceFeature;
  *
  * @author JAXWS Development Team
  */
-public class PortInfo implements javax.xml.ws.handler.PortInfo {
+public class PortInfo implements WSPortInfo {
     private final @NotNull WSServiceDelegate owner;
 
     public final @NotNull QName portName;
@@ -78,12 +80,18 @@ public class PortInfo implements javax.xml.ws.handler.PortInfo {
      *
      * @param webServiceFeatures
      *      User-specified features.
+     * @param portInterface
+     *      Null if this is for dispatch. Otherwise the interface the proxy is going to implement
      */
-    public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures, boolean isDispatch) {
+    public BindingImpl createBinding(WebServiceFeature[] webServiceFeatures, Class<?> portInterface) {
         WebServiceFeatureList r = new WebServiceFeatureList(webServiceFeatures);
         if (portModel != null)
             // merge features from WSDL
-            r.mergeFeatures(portModel, isDispatch, false);
+            r.mergeFeatures(portModel, portInterface==null/*if dispatch, true*/, false);
+        
+        // merge features from interceptor
+        for( WebServiceFeature wsf : owner.serviceInterceptor.preCreateBinding(this,r) )
+            r.add(wsf);
 
         BindingImpl bindingImpl = BindingImpl.create(bindingId, r.toArray());
         owner.getHandlerConfigurator().configureHandlers(this,bindingImpl);
@@ -97,9 +105,30 @@ public class PortInfo implements javax.xml.ws.handler.PortInfo {
         return null;
     }
 
-    //
+//
 // implementation of API PortInfo interface
 //
+
+    @Nullable
+    public WSDLPort getPort() {
+        return portModel;
+    }
+
+    @NotNull
+    public WSService getOwner() {
+        return owner;
+    }
+
+    @NotNull
+    public BindingID getBindingId() {
+        return bindingId;
+    }
+
+    @NotNull
+    public EndpointAddress getEndpointAddress() {
+        return targetEndpoint;
+    }
+
     /**
      * @deprecated
      *      Only meant to be used via {@link javax.xml.ws.handler.PortInfo}.

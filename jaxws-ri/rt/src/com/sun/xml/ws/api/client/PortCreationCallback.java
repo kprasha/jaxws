@@ -21,9 +21,11 @@
  */
 package com.sun.xml.ws.api.client;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.server.Container;
+
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
-import com.sun.xml.ws.api.server.Container;
 
 /**
  * Gives an interception point for appserver after creating a proxy or {@link Dispatch}
@@ -34,23 +36,39 @@ import com.sun.xml.ws.api.server.Container;
  * on the client side.
  *
  * @author Jitendra Kotamraju
+ *
+ * @deprecated
+ * Use {@link ServiceInterceptor}. This class extends from {@link ServiceInterceptor}
+ * just for the backward compatibility. 
  */
-public abstract class PortCreationCallback {
+public abstract class PortCreationCallback extends ServiceInterceptor {
 
     /**
      * A callback to notify the event of creation of proxy object for SEI endpoint. The
-     * callback could set some properties on the {link @BindingProvider}.
+     * callback could set some properties on the {@link BindingProvider}.
      *
      * @param bp created proxy instance
      * @param serviceEndpointInterface SEI of the endpoint
      */
-    public abstract void proxyCreated(WSBindingProvider bp, Class<?> serviceEndpointInterface);
+    public void proxyCreated(WSBindingProvider bp, Class<?> serviceEndpointInterface) {
+    }
 
     /**
      * A callback to notify that a {@link Dispatch} object is created. The callback
-     * could set some properties on the {link @BindingProvider}.
+     * could set some properties on the {@link BindingProvider}.
      *
      * @param bp BindingProvider of dispatch object
      */
-    public abstract void dispatchCreated(WSBindingProvider bp);
+    public void dispatchCreated(WSBindingProvider bp) {
+    }
+
+// adapting new interfaces to old calls for compatibility
+    public final void postCreateProxy(@NotNull WSBindingProvider bp, @NotNull Class<?> serviceEndpointInterface) {
+        proxyCreated(bp,serviceEndpointInterface);
+    }
+
+    public final void postCreateDispatch(@NotNull WSBindingProvider bp) {
+        dispatchCreated(bp);
+    }
+
 }
