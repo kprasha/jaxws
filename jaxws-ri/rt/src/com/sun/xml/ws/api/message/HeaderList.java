@@ -648,10 +648,10 @@ public final class HeaderList extends ArrayList<Header> {
 
         if (onewayFeature == null) {
             // standard oneway
-            fillRequestAddressingHeaders(packet, AddressingVersion.fromBinding(binding), binding.getSOAPVersion(), oneway, action);
+            fillRequestAddressingHeaders(packet, ver, binding.getSOAPVersion(), oneway, action);
         } else {
             // custom oneway
-            fillRequestAddressingHeaders(packet, AddressingVersion.fromBinding(binding), binding.getSOAPVersion(), onewayFeature, action);
+            fillRequestAddressingHeaders(packet, ver, binding.getSOAPVersion(), onewayFeature, action);
         }
     }
 

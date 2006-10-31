@@ -61,9 +61,11 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
     private final WSBinding binding;
     private final Map<String, EndpointMethodHandler> actionMethodHandlers;
     private String dispatchKey;
+    private final AddressingVersion av;
 
     public ActionBasedDispatcher(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
         this.binding = binding;
+        av = AddressingVersion.fromBinding(binding);
         actionMethodHandlers = new HashMap<String, EndpointMethodHandler>();
 
         for( JavaMethodImpl m : model.getJavaMethods() ) {
@@ -85,8 +87,8 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
             return null;
 
         String action = null;
-        if (AddressingVersion.fromBinding(binding) != null)
-            action = hl.getAction(AddressingVersion.fromBinding(binding), binding.getSOAPVersion());
+        if (av != null)
+            action = hl.getAction(av, binding.getSOAPVersion());
 
         if (action == null)
             return null;
@@ -105,7 +107,6 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
 
     public Message getFaultMessage() {
-        AddressingVersion av = AddressingVersion.fromBinding(binding);
         QName subcode = av.actionNotSupportedTag;
         String faultstring = String.format(av.actionNotSupportedText, dispatchKey);
 

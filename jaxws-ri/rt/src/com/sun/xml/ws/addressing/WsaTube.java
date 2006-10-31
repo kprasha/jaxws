@@ -77,8 +77,8 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         this.wsdlPort = that.wsdlPort;
         this.binding = that.binding;
         this.helper = that.helper;
-        addressingVersion = AddressingVersion.fromBinding(binding);
-        soapVersion = binding.getSOAPVersion();
+        addressingVersion = that.addressingVersion;
+        soapVersion = that.soapVersion;
     }
 
     @Override
