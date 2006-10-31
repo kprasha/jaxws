@@ -32,6 +32,7 @@ import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.xml.ws.WebServiceException;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
@@ -87,6 +88,8 @@ public final class WSServletContextListener
             DeploymentDescriptorParser<ServletAdapter> parser = new DeploymentDescriptorParser<ServletAdapter>(
                 classLoader,new ServletResourceLoader(context), container, new ServletAdapterList());
             URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);
+            if(sunJaxWsXml==null)
+                throw new WebServiceException(WsservletMessages.NO_SUNJAXWS_XML(JAXWS_RI_RUNTIME));
             List<ServletAdapter> adapters = parser.parse(sunJaxWsXml.toExternalForm(), sunJaxWsXml.openStream());
 
             delegate = new WSServletDelegate(adapters,context);
