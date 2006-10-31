@@ -2,6 +2,8 @@ package com.sun.xml.ws.server;
 
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.ResourceInjector;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.util.localization.Localizable;
 
@@ -110,6 +112,13 @@ abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
                 r += plan.count();
             return r;
         }
+    }
+
+    protected static ResourceInjector getResourceInjector(WSEndpoint endpoint) {
+        ResourceInjector ri = endpoint.getContainer().getSPI(ResourceInjector.class);
+        if(ri==null)
+            ri = ResourceInjector.STANDALONE;
+        return ri;
     }
 
     /**

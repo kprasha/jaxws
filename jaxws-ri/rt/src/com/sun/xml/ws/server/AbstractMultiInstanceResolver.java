@@ -1,12 +1,12 @@
 package com.sun.xml.ws.server;
 
 import com.sun.xml.ws.api.server.InstanceResolver;
+import com.sun.xml.ws.api.server.ResourceInjector;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSWebServiceContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.xml.ws.WebServiceContext;
 import java.lang.reflect.Method;
 
 /**
@@ -19,11 +19,11 @@ public abstract class AbstractMultiInstanceResolver<T> extends AbstractInstanceR
     protected final Class<T> clazz;
 
     // fields for resource injection.
-    private /*almost final*/ InjectionPlan<T, WebServiceContext> injectionPlan;
-    private /*almost final*/ WebServiceContext webServiceContext;
+    private /*almost final*/ WSWebServiceContext webServiceContext;
     protected /*almost final*/ WSEndpoint owner;
     private final Method postConstructMethod;
     private final Method preDestroyMethod;
+    private /*almost final*/ ResourceInjector resourceInjector;
 
     public AbstractMultiInstanceResolver(Class<T> clazz) {
         this.clazz = clazz;
@@ -39,7 +39,7 @@ public abstract class AbstractMultiInstanceResolver<T> extends AbstractInstanceR
         // we can only start creating new instances after the start method is invoked.
         assert webServiceContext!=null;
 
-        injectionPlan.inject(t,webServiceContext);
+        resourceInjector.inject(webServiceContext,t);
         invokeMethod(postConstructMethod,t);
     }
 
@@ -54,7 +54,7 @@ public abstract class AbstractMultiInstanceResolver<T> extends AbstractInstanceR
 
     @Override
     public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
-        injectionPlan = buildInjectionPlan(clazz,WebServiceContext.class,false);
+        resourceInjector = getResourceInjector(endpoint);
         this.webServiceContext = wsc;
         this.owner = endpoint;
     }

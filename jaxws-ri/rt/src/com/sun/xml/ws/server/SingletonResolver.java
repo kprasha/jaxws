@@ -30,7 +30,6 @@ import com.sun.xml.ws.api.server.WSWebServiceContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.xml.ws.WebServiceContext;
 
 /**
  * {@link InstanceResolver} that always returns a single instance.
@@ -49,7 +48,7 @@ public final class SingletonResolver<T> extends AbstractInstanceResolver<T> {
     }
 
     public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
-        buildInjectionPlan(singleton.getClass(),WebServiceContext.class,false).inject(singleton,wsc);
+        getResourceInjector(endpoint).inject(wsc,singleton);
         // notify that we are ready to serve
         invokeMethod(findAnnotatedMethod(singleton.getClass(),PostConstruct.class),singleton);
     }
