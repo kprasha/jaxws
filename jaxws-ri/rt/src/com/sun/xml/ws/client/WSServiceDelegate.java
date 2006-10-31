@@ -295,8 +295,11 @@ public class WSServiceDelegate extends WSService {
     public <T> T getPort(WSEndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
         //get the port specified in EPR
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
-        WSEndpointReference.Metadata metadata = epr.getMetaData();
-        QName portName = metadata.getPortName();
+        QName portName = null;
+        if(epr != null) {
+            WSEndpointReference.Metadata metadata = epr.getMetaData();
+            portName = metadata.getPortName();
+        }
         //TODO validate service and port in epr and wsdl.
         if (portName == null) {
             //get the first port corresponding to the SEI
