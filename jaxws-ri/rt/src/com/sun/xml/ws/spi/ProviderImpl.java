@@ -22,8 +22,6 @@
 package com.sun.xml.ws.spi;
 
 
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.addressing.EndpointReferenceUtil;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -108,12 +106,13 @@ public class ProviderImpl extends Provider {
                 WSService service = new WSServiceDelegate(msepr.toWSDLSource(), msepr.serviceName.name, Service.class);
                 */
         WSEndpointReference wsepr = WSEndpointReference.create(endpointReference);
+        WSEndpointReference.Metadata metadata = wsepr.getMetaData();
         WSService service;
-        if(wsepr.getWsdlSource() != null)
-            service = new WSServiceDelegate(wsepr.getWsdlSource(), wsepr.getServiceName(), Service.class);
-        else if (wsepr.getWsdlLocation() != null)
+        if(metadata.getWsdlSource() != null)
+            service = new WSServiceDelegate(metadata.getWsdlSource(), metadata.getServiceName(), Service.class);
+        else if (metadata.getWsdlLocation() != null)
             try {
-                service = new WSServiceDelegate(new URL(wsepr.getWsdlLocation()), wsepr.getServiceName(), Service.class);
+                service = new WSServiceDelegate(new URL(metadata.getWsdlLocation()), metadata.getServiceName(), Service.class);
             } catch (MalformedURLException e) {
                 throw new WebServiceException(e);
             }

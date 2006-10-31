@@ -188,7 +188,7 @@ public class WSServiceDelegate extends WSService {
 
         // load interceptor
         ServiceInterceptor interceptor = ServiceInterceptorFactory.load(this, Thread.currentThread().getContextClassLoader());
-        // backward compatiblity. also pick one up from container 
+        // backward compatiblity. also pick one up from container
         PortCreationCallback pcc = container.getSPI(PortCreationCallback.class);
         if(pcc!=null)
             interceptor = ServiceInterceptor.aggregate(interceptor,pcc);
@@ -295,7 +295,8 @@ public class WSServiceDelegate extends WSService {
     public <T> T getPort(WSEndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
         //get the port specified in EPR
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
-        QName portName = epr.getPortName();
+        WSEndpointReference.Metadata metadata = epr.getMetaData();
+        QName portName = metadata.getPortName();
         //TODO validate service and port in epr and wsdl.
         if (portName == null) {
             //get the first port corresponding to the SEI
