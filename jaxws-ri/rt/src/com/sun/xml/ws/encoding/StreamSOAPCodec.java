@@ -208,10 +208,15 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
             // Create Header
             headers.add(createHeader(reader, mark));
 
+
             // Cache the header block
             // After caching Reader will be positioned at next header block or
             // the end of the </soap:header>
             creator.createElementFragment(reader, false);
+            if (reader.getEventType() != XMLStreamConstants.START_ELEMENT &&
+                    reader.getEventType() != XMLStreamConstants.END_ELEMENT) {
+                XMLStreamReaderUtil.nextElementContent(reader);
+            }
         }
 
         return buffer;
