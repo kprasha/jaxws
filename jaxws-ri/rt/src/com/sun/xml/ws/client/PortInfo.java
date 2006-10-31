@@ -90,7 +90,7 @@ public class PortInfo implements WSPortInfo {
             r.mergeFeatures(portModel, portInterface==null/*if dispatch, true*/, false);
         
         // merge features from interceptor
-        for( WebServiceFeature wsf : owner.serviceInterceptor.preCreateBinding(this,r) )
+        for( WebServiceFeature wsf : owner.serviceInterceptor.preCreateBinding(this,portInterface,r) )
             r.add(wsf);
 
         BindingImpl bindingImpl = BindingImpl.create(bindingId, r.toArray());
