@@ -767,8 +767,6 @@ public final class WSEndpointReference {
         private @Nullable QName serviceName;
         private @Nullable QName portName;
         private @Nullable QName portTypeName; //interfaceName
-        // only wsdlSource and wsdlLocation are mutually exclusive and both can be null
-        private @Nullable String wsdlLocation;
         private @Nullable Source wsdlSource;
         public @Nullable QName getServiceName(){
             return serviceName;
@@ -778,9 +776,6 @@ public final class WSEndpointReference {
         }
         public @Nullable QName getPortTypeName(){
             return portTypeName;
-        }
-        public @Nullable String getWsdlLocation(){
-            return wsdlLocation;
         }
         public @Nullable Source getWsdlSource(){
             return wsdlSource;

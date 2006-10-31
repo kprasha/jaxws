@@ -110,15 +110,9 @@ public class ProviderImpl extends Provider {
         WSService service;
         if(metadata.getWsdlSource() != null)
             service = new WSServiceDelegate(metadata.getWsdlSource(), metadata.getServiceName(), Service.class);
-        else if (metadata.getWsdlLocation() != null)
-            try {
-                service = new WSServiceDelegate(new URL(metadata.getWsdlLocation()), metadata.getServiceName(), Service.class);
-            } catch (MalformedURLException e) {
-                throw new WebServiceException(e);
-            }
         else
             throw new WebServiceException("WSDL metadata is missing in EPR");
-        return ((WSServiceDelegate)service).getPort(wsepr, clazz, webServiceFeatures);
+        return service.getPort(wsepr, clazz, webServiceFeatures);
     }
 
     public W3CEndpointReference createW3CEndpointReference(String address, QName serviceName, QName portName, List<Element> metadata, String wsdlDocumentLocation, List<Element> referenceParameters) {
