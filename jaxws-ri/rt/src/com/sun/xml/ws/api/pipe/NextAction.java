@@ -84,4 +84,17 @@ public final class NextAction {
     public void suspend() {
         set(SUSPEND, null, null, null);
     }
+
+    /**
+     * Dumps the contents to assist debugging.
+     */
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        buf.append(super.toString()).append(" [");
+        buf.append("kind=").append(kind).append(',');
+        buf.append("next=").append(next).append(',');
+        buf.append("packet=").append(packet).append(',');
+        buf.append("throwable=").append(throwable).append(']');
+        return buf.toString();
+    }
 }
