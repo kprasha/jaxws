@@ -166,9 +166,11 @@ public class WsimportTool {
             }
 
             if (!receiver.hadError()) {
-                if (!compileGeneratedClasses(receiver)) {
-                    listener.message(WscompileMessages.WSCOMPILE_COMPILATION_FAILED());
-                    return false;
+                if (!options.nocompile){
+                    if(!compileGeneratedClasses(receiver)){
+                        listener.message(WscompileMessages.WSCOMPILE_COMPILATION_FAILED());
+                        return false;
+                    }
                 }
             }
 
