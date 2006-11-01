@@ -110,7 +110,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
 
     private int round = 0;
 
-    public boolean buildModel(String endpoint, Listener listener) {
+    public boolean buildModel(String endpoint, Listener listener) throws BadCommandLineException {
         final ErrorReceiverFilter errReceiver = new ErrorReceiverFilter(listener);
         context = new AnnotationProcessorContext();
         webServiceAP = new WebServiceAP(options, context, errReceiver, out);
@@ -134,7 +134,12 @@ public class WsgenTool implements AnnotationProcessorFactory {
             String tmpPath = options.destDir.getAbsolutePath()+ File.pathSeparator+options.classpath;
             ClassLoader classLoader = new URLClassLoader(Options.pathToURLs(tmpPath),
                     this.getClass().getClassLoader());
-            Class<?> endpointClass = options.endpoint;
+            Class<?> endpointClass;
+            try {
+                endpointClass = classLoader.loadClass(endpoint);
+            } catch (ClassNotFoundException e) {
+                throw new BadCommandLineException(WscompileMessages.WSGEN_CLASS_NOT_FOUND(endpoint));
+            }
 
             BindingID bindingID = WsgenOptions.getBindingID(options.protocol);
             if (!options.protocolSet) {

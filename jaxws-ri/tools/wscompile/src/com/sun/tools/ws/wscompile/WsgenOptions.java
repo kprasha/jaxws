@@ -130,14 +130,7 @@ public class WsgenOptions extends Options {
                     protocol = value.substring(0, index);
                     transport = value.substring(index + 1);
                 }
-                if (!protocol.equalsIgnoreCase(SOAP11) ||
-                        !protocol.equalsIgnoreCase(X_SOAP12)) {
-                    throw new BadCommandLineException(WscompileMessages.WSGEN_INVALID_PROTOCOL(protocol, SOAP11 + ", " + X_SOAP12));
-                }
                 protocolSet = true;
-                if (transport.equalsIgnoreCase(HTTP)) {
-                    throw new BadCommandLineException(WscompileMessages.WSGEN_INVALID_TRANSPORT(transport, HTTP));
-                }
             }
             return 1;
         } else if (args[i].equals("-XwsgenReport")) {
@@ -166,6 +159,15 @@ public class WsgenOptions extends Options {
     private boolean noWebServiceEndpoint;
 
     public void validate() throws BadCommandLineException {
+        if (!protocol.equalsIgnoreCase(SOAP11) &&
+                !protocol.equalsIgnoreCase(X_SOAP12)) {
+            throw new BadCommandLineException(WscompileMessages.WSGEN_INVALID_PROTOCOL(protocol, SOAP11 + ", " + X_SOAP12));
+        }
+
+        if (transport != null && !transport.equalsIgnoreCase(HTTP)) {
+            throw new BadCommandLineException(WscompileMessages.WSGEN_INVALID_TRANSPORT(transport, HTTP));
+        }
+
         if (endpoints.isEmpty()) {
             throw new BadCommandLineException(WscompileMessages.WSGEN_MISSING_FILE());
         }
@@ -248,10 +250,7 @@ public class WsgenOptions extends Options {
             return getClassLoader().loadClass(className);
         } catch (ClassNotFoundException e) {
             return null;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return null;
     }
 
 }
