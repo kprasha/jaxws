@@ -206,6 +206,53 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         return reply;
     }
 
+    /**
+     * Passes a message through a {@link Tube}line for processing. The processing happens
+     * asynchronously and when the response is available, Fiber.CompletionCallback is
+     * called. The processing could happen on multiple threads.
+     *
+     * <p>
+     * Unlike {@link Tube} instances,
+     * this method is thread-safe and can be invoked from
+     * multiple threads concurrently.
+     *
+     * @param request         The message to be sent to the server
+     * @param requestContext The {@link RequestContext} when this invocation is originally scheduled.
+     *                       This must be the same object as {@link #requestContext} for synchronous
+     *                       invocations, but for asynchronous invocations, it needs to be a snapshot
+     *                       captured at the point of invocation, to correctly satisfy the spec requirement.
+     * @param completionCallback Once the processing is done, the callback is invoked.
+     */
+    protected final void processAsync(Packet request, RequestContext requestContext, final Fiber.CompletionCallback completionCallback) {
+        // fill in Packet
+        request.proxy = this;
+        request.handlerConfig = binding.getHandlerConfig();
+        requestContext.fill(request);
+        if (AddressingVersion.isEnabled(binding)) {
+            if(endpointReference!=null)
+                endpointReference.addReferenceParameters(request.getMessage().getHeaders());
+        }
+
+        final Pool<Tube> pool = tubes;
+        if (pool == null)
+            throw new WebServiceException("close method has already been invoked"); // TODO: i18n
+
+        Fiber fiber = engine.createFiber();
+        // then send it away!
+        final Tube tube = pool.take();
+        fiber.start(tube, request, new Fiber.CompletionCallback() {
+            public void onCompletion(@NotNull Packet response) {
+                pool.recycle(tube);
+                completionCallback.onCompletion(response);
+            }
+            public void onCompletion(@NotNull Throwable error) {
+                // let's not reuse tubes as they might be in a wrong state, so not
+                // calling pool.recycle()
+                completionCallback.onCompletion(error);
+            }
+        });
+    }
+
     public void close() {
         if (tubes != null) {
             // multi-thread safety of 'close' needs to be considered more carefully.
