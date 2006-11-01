@@ -814,17 +814,16 @@ public final class WSEndpointReference {
                         localName = xsr.getLocalName();
                         String ns = xsr.getNamespaceURI();
                         if (localName.equals(version.eprType.serviceName)) {
+                            String portStr = xsr.getAttributeValue(null, version.eprType.portName);
                             serviceName = getElementTextAsQName(xsr);
                             if (serviceName != null)
-                                portName = new QName(serviceName.getNamespaceURI(),
-                                        xsr.getAttributeValue(null, version.eprType.portName));
+                                portName = new QName(serviceName.getNamespaceURI(),portStr);
                         } else if (localName.equals(version.eprType.portTypeName)) {
                             portTypeName = getElementTextAsQName(xsr);
                         } else if (ns.equals(WSDLConstants.NS_WSDL)
                                 && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
                             wsdlSource = new XMLStreamBufferSource(mark);
-                        }
-                        XMLStreamReaderUtil.skipElement(xsr);
+                        }                        
                     }
                 } else {
                     XMLStreamReaderUtil.skipElement(xsr);
