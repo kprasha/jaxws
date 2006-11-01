@@ -57,7 +57,7 @@ public abstract class WsaTubeHelper {
         this.binding = binding;
         this.wsdlPort = wsdlPort;
         this.soapVer = binding.getSOAPVersion();
-        this.addVer = AddressingVersion.fromBinding(binding);
+        this.addVer = binding.getAddressingVersion();
 
     }
 

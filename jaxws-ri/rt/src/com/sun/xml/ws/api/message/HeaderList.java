@@ -630,7 +630,7 @@ public final class HeaderList extends ArrayList<Header> {
         if (binding == null)
             throw new IllegalArgumentException(AddressingMessages.NULL_BINDING());
 
-        AddressingVersion addressingVersion = AddressingVersion.fromBinding(binding);
+        AddressingVersion addressingVersion = binding.getAddressingVersion();
         WsaTubeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, binding);
 
         // wsa:Action
@@ -784,7 +784,7 @@ public final class HeaderList extends ArrayList<Header> {
 
     public void readResponseAddressingHeaders(WSDLPort wsdlPort, WSBinding binding) {
         // read Action
-        String action = getAction(AddressingVersion.fromBinding(binding), binding.getSOAPVersion());
+        String action = getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
         // TODO: validate client-inbound Action
     }
 }

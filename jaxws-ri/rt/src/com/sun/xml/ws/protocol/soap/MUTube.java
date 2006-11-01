@@ -72,7 +72,7 @@ abstract class MUTube extends AbstractFilterTubeImpl {
                     "MUPipe should n't be used for bindings other than SOAP.");
         }
         this.soapVersion = binding.getSOAPVersion();
-        this.addressingVersion = AddressingVersion.fromBinding(binding);
+        this.addressingVersion = binding.getAddressingVersion();
     }
 
     protected MUTube(MUTube that, TubeCloner cloner) {

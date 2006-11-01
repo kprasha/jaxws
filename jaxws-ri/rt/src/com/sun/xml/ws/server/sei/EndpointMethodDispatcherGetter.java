@@ -50,7 +50,7 @@ final class EndpointMethodDispatcherGetter {
     EndpointMethodDispatcherGetter(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
         dispatcherList = new ArrayList<EndpointMethodDispatcher>();
 
-        if (AddressingVersion.fromBinding(binding) != null) {
+        if (binding.getAddressingVersion() != null) {
             dispatcherList.add(new ActionBasedDispatcher(model, binding, invokerTube));
         } else {
             dispatcherList.add(new PayloadQNameBasedDispatcher(model, binding, invokerTube));

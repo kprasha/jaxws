@@ -683,7 +683,7 @@ public final class Packet extends DistributedPropertySet {
     }
 
     private Packet populateAddressingHeaders(WSBinding binding, Packet responsePacket, WSDLPort wsdlPort) {
-        AddressingVersion addressingVersion = AddressingVersion.fromBinding(binding);
+        AddressingVersion addressingVersion = binding.getAddressingVersion();
 
         if (addressingVersion == null)
             return responsePacket;

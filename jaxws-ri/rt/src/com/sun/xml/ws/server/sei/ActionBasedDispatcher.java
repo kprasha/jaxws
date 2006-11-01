@@ -65,7 +65,7 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
     public ActionBasedDispatcher(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
         this.binding = binding;
-        av = AddressingVersion.fromBinding(binding);
+        av = binding.getAddressingVersion();
         actionMethodHandlers = new HashMap<String, EndpointMethodHandler>();
 
         for( JavaMethodImpl m : model.getJavaMethods() ) {

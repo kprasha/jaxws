@@ -150,7 +150,7 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
     public void start(WSWebServiceContext wsc, WSEndpoint endpoint) {
         super.start(wsc,endpoint);
 
-        if(AddressingVersion.fromBinding(endpoint.getBinding())==null)
+        if(endpoint.getBinding().getAddressingVersion()==null)
             // addressing is not enabled.
             throw new WebServiceException(ServerMessages.STATEFUL_REQURES_ADDRESSING(clazz));
 
