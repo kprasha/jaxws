@@ -30,8 +30,10 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.client.HandlerConfiguration;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.handler.Handler;
 import java.util.Collections;
 import java.util.List;
@@ -102,6 +104,17 @@ public abstract class BindingImpl implements WSBinding {
 
     public final SOAPVersion getSOAPVersion() {
         return bindingId.getSOAPVersion();
+    }
+
+    public AddressingVersion getAddressingVersion() {
+        AddressingVersion addressingVersion;
+        if (features.isEnabled(AddressingFeature.class))
+            addressingVersion = AddressingVersion.W3C;
+        else if (features.isEnabled(MemberSubmissionAddressingFeature.class))
+            addressingVersion = AddressingVersion.MEMBER;
+        else
+            addressingVersion = null;
+        return addressingVersion;
     }
 
     public final
