@@ -651,14 +651,6 @@ public final class Fiber implements Runnable {
         return fiber;
     }
 
-    // don't know if we want to expose this.
-    ///**
-    // * Creates a new {@link Fiber} as a sibling of the current fiber.
-    // */
-    //public static Fiber create() {
-    //    return current().owner.createFiber();
-    //}
-
     private static final ThreadLocal<Fiber> CURRENT_FIBER = new ThreadLocal<Fiber>();
 
     /**
