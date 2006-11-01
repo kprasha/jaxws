@@ -91,10 +91,24 @@ public final class NextAction {
     public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append(super.toString()).append(" [");
-        buf.append("kind=").append(kind).append(',');
+        buf.append("kind=").append(getKindString()).append(',');
         buf.append("next=").append(next).append(',');
         buf.append("packet=").append(packet).append(',');
         buf.append("throwable=").append(throwable).append(']');
         return buf.toString();
+    }
+
+    /**
+     * Returns {@link #kind} in a human readable string, to assist debugging.
+     */
+    public String getKindString() {
+        switch(kind) {
+        case INVOKE:            return "INVOKE";
+        case INVOKE_AND_FORGET: return "INVOKE_AND_FORGET";
+        case RETURN:            return "RETURN";
+        case THROW:             return "THROW";
+        case SUSPEND:           return "SUSPEND";
+        default:                throw new AssertionError(kind);
+        }
     }
 }
