@@ -27,22 +27,19 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.MimeMultipart;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.client.ContentNegotiation;
+import com.sun.xml.ws.encoding.MimeMultipartParser;
 import com.sun.xml.ws.encoding.XMLHTTPBindingCodec;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.EmptyMessageImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
 
 import javax.activation.DataSource;
 import javax.xml.stream.XMLStreamException;
@@ -51,17 +48,13 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.BufferedInputStream;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import com.sun.xml.ws.encoding.MimeMultipartParser;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.util.FastInfosetReflection;
-import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -118,18 +111,11 @@ public final class XMLMessage {
             if (ct != null) {
                 final ContentType contentType = new ContentType(ct);
                 final int contentTypeId = identifyContentType(contentType);
-                final boolean isFastInfoset = (contentTypeId & FI_ENCODED_FLAG) != 0;
                 if ((contentTypeId & MIME_MULTIPART_FLAG) != 0) {
-                    data = new XMLMultiPart(ct, in, isFastInfoset);
-                } else if ((contentTypeId & PLAIN_XML_FLAG) != 0 || isFastInfoset) {
-                    if ((contentTypeId & FI_ENCODED_FLAG) != 0) {
-                        data = Messages.createUsingPayload(
-                                FastInfosetReflection.FastInfosetSource_new(in), 
-                                SOAPVersion.SOAP_11);
-                    } else {
-                        data = Messages.createUsingPayload(new StreamSource(in), 
-                                SOAPVersion.SOAP_11);
-                    }
+                    data = new XMLMultiPart(ct, in);
+                } else if ((contentTypeId & PLAIN_XML_FLAG) != 0) {
+                    data = Messages.createUsingPayload(new StreamSource(in),
+                            SOAPVersion.SOAP_11);
                 } else {
                     data = new UnknownContent(ct, in);
                 }
@@ -268,18 +254,11 @@ public final class XMLMessage {
      */
     public static final class XMLMultiPart extends AbstractMessageImpl implements MessageDataSource {
         private final DataSource dataSource;
-        private boolean rootIsFastInfoset;
         private MimeMultipartParser mpp;
 
         public XMLMultiPart(final String contentType, final InputStream is) {
-            this(contentType, is, false);
-        }
-
-        public XMLMultiPart(final String contentType, final InputStream is, 
-                final boolean rootIsFastInfoset) {
             super(SOAPVersion.SOAP_11);
             dataSource = createDataSource(contentType, is);
-            this.rootIsFastInfoset = rootIsFastInfoset;
         }
         
         public XMLMultiPart(DataSource dataSource) {
@@ -298,8 +277,6 @@ public final class XMLMessage {
                     mpp = new MimeMultipartParser(
                             dataSource.getInputStream(),
                             dataSource.getContentType());
-                    if (!rootIsFastInfoset)
-                        rootIsFastInfoset = isFastInfosetType(mpp.getRootPart().getContentType());
                 } catch(IOException ioe) {
                     throw new WebServiceException(ioe);
                 }
@@ -343,24 +320,13 @@ public final class XMLMessage {
 
         public Source readPayloadAsSource() {
             convertDataSourceToMessage();
-            if (rootIsFastInfoset) {
-                return FastInfosetReflection.FastInfosetSource_new(
-                        mpp.getRootPart().asInputStream());
-            } else {
-                return mpp.getRootPart().asSource();
-            }
+            return mpp.getRootPart().asSource();
         }
 
         public XMLStreamReader readPayload() throws XMLStreamException {
             convertDataSourceToMessage();
-            
-            if (rootIsFastInfoset) {
-                return XMLStreamReaderFactory.createFIStreamReader(
-                        mpp.getRootPart().asInputStream());
-            } else {
-                return XMLStreamReaderFactory.createXMLStreamReader(
-                        mpp.getRootPart().asInputStream(), true);
-            }
+            return XMLStreamReaderFactory.createXMLStreamReader(
+                    mpp.getRootPart().asInputStream(), true);
         }
 
         public void writePayloadTo(XMLStreamWriter sw) {
