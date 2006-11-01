@@ -46,6 +46,18 @@ import java.util.logging.Logger;
  * becomes the thread's CCL when it's executing the fiber. The original CCL
  * of the thread will be restored when the thread leaves the fiber execution.
  *
+ *
+ * <h2>Debugging Aid</h2>
+ * <p>
+ * Because {@link Fiber} doesn't keep much in the call stack, and instead use
+ * {@link #conts} to store the continuation, debugging fiber related activities
+ * could be harder.
+ *
+ * <p>
+ * Setting the {@link #LOGGER} for FINE would give you basic start/stop/resume/suspend
+ * level logging. Using FINER would cause more detailed logging, which includes
+ * what tubes are executed in what order and how they behaved.
+ *
  * @author Kohsuke Kawaguchi
  * @author Jitendra Kotamraju
  */
@@ -678,9 +690,5 @@ public final class Fiber implements Runnable {
         return LOGGER.isLoggable(Level.FINE);
     }
 
-    /**
-     * {@link Level#FINE} is used for basic tracing of fiber.
-     * {@link Level#FINER} is for gory detailed execution trace.
-     */
     private static final Logger LOGGER = Logger.getLogger(Fiber.class.getName());
 }
