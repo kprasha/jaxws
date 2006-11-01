@@ -22,35 +22,35 @@
 
 package com.sun.xml.ws.addressing;
 
-import javax.xml.ws.soap.AddressingFeature;
-import javax.xml.ws.WebServiceException;
-import javax.xml.soap.SOAPFault;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.message.FaultDetailHeader;
-import com.sun.xml.ws.addressing.model.InvalidMapException;
-import com.sun.xml.ws.addressing.model.MapRequiredException;
+import com.sun.istack.NotNull;
 import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
 import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
-import com.sun.xml.ws.resources.AddressingMessages;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
+import com.sun.xml.ws.message.FaultDetailHeader;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.resources.AddressingMessages;
+
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPFault;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.AddressingFeature;
 
 /**
  * @author Arun Gupta
@@ -347,17 +347,17 @@ public abstract class WsaTube extends AbstractFilterTubeImpl {
         if (anon == WSDLBoundOperation.ANONYMOUS.optional) {
             // no check is required
         } else if (anon == WSDLBoundOperation.ANONYMOUS.required) {
-            if (replyToValue != null && !replyToValue.equals(addressingVersion.getAnonymousUri()))
+            if (replyToValue != null && !replyToValue.equals(addressingVersion.anonymousUri))
                 throw new InvalidMapException(addressingVersion.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
-            if (faultToValue != null && !faultToValue.equals(addressingVersion.getAnonymousUri()))
+            if (faultToValue != null && !faultToValue.equals(addressingVersion.anonymousUri))
                 throw new InvalidMapException(addressingVersion.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
 
         } else if (anon == WSDLBoundOperation.ANONYMOUS.prohibited) {
-            if (replyToValue != null && replyToValue.equals(addressingVersion.getAnonymousUri()))
+            if (replyToValue != null && replyToValue.equals(addressingVersion.anonymousUri))
                 throw new InvalidMapException(addressingVersion.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 
-            if (faultToValue != null && faultToValue.equals(addressingVersion.getAnonymousUri()))
+            if (faultToValue != null && faultToValue.equals(addressingVersion.anonymousUri))
                 throw new InvalidMapException(addressingVersion.faultToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
 
         } else {

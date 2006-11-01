@@ -22,13 +22,11 @@
 
 package com.sun.xml.ws.api.addressing;
 
-import java.io.ByteArrayInputStream;
-
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.addressing.W3CAddressingConstants;
+import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
@@ -44,6 +42,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import java.io.ByteArrayInputStream;
 
 /**
  * 'Traits' object that absorbs differences of WS-Addressing versions.
@@ -56,7 +55,8 @@ public enum AddressingVersion {
         W3CAddressingConstants.ANONYMOUS_EPR,
         "http://www.w3.org/2006/05/addressing/wsdl",
         "http://www.w3.org/2006/05/addressing/wsdl",
-            new EPR(W3CEndpointReference.class,
+        "http://www.w3.org/2005/08/addressing/anonymous",
+        new EPR(W3CEndpointReference.class,
                     "Address",
                     "ServiceName",
                     "EndpointName",
@@ -77,11 +77,6 @@ public enum AddressingVersion {
         @Override
         public String getNoneUri() {
             return nsUri + "/none";
-        }
-
-        @Override
-        public String getAnonymousUri() {
-            return nsUri + "/anonymous";
         }
 
         @Override
@@ -137,7 +132,8 @@ public enum AddressingVersion {
            MemberSubmissionAddressingConstants.ANONYMOUS_EPR,
            "http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy",
-            new EPR(MemberSubmissionEndpointReference.class,
+           "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous",
+           new EPR(MemberSubmissionEndpointReference.class,
                     "Address",
                     "ServiceName",
                     "PortName",
@@ -158,11 +154,6 @@ public enum AddressingVersion {
         @Override
         public String getNoneUri() {
             return "";
-        }
-
-        @Override
-        public String getAnonymousUri() {
-            return nsUri + "/role/anonymous";
         }
 
         @Override
@@ -235,6 +226,11 @@ public enum AddressingVersion {
      * Namespace URI for the WSDL Binding
      */
     public final String policyNsUri;
+
+    /**
+     * Gets the anonymous URI value associated with this WS-Addressing version.
+     */
+    public final String anonymousUri;
 
     /**
      * Represents the anonymous EPR.
@@ -362,10 +358,13 @@ public enum AddressingVersion {
         EXTENDED_FAULT_NAMESPACE, "DuplicateAddressInEpr"
     );
 
-    private AddressingVersion(String nsUri, String anonymousEprString, String wsdlNsUri, String policyNsUri, EPR eprType ) {
+    private AddressingVersion(String nsUri, String anonymousEprString, String wsdlNsUri, String policyNsUri,
+                              String anonymousUri,
+                              EPR eprType ) {
         this.nsUri = nsUri;
         this.wsdlNsUri = wsdlNsUri;
         this.policyNsUri = policyNsUri;
+        this.anonymousUri = anonymousUri;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
@@ -497,9 +496,12 @@ public enum AddressingVersion {
     /**
      * Gets the anonymous URI value associated with this WS-Addressing version.
      *
-     * @return anonymous URI value
+     * @deprecated
+     *      Use {@link #anonymousUri}
      */
-    public abstract String getAnonymousUri();
+    public final String getAnonymousUri() {
+        return anonymousUri;
+    }
 
     /**
      * Gets the default fault Action value associated with this WS-Addressing version.
