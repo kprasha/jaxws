@@ -193,7 +193,9 @@ public class DOMForest {
                 reader.setEntityResolver(options.entityResolver);
             reader.parse(inputSource);
             Element doc = dom.getDocumentElement();
-
+            if(doc == null){
+                return null;
+            }
             //if its JAXWS binding file just return it
             if(doc.getNamespaceURI().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getNamespaceURI()) &&
                     doc.getLocalName().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getLocalPart()))
