@@ -160,7 +160,7 @@ public final class Fiber implements Runnable {
         this.owner = engine;
         if(isTraceEnabled()) {
             id = iotaGen.incrementAndGet();
-            System.out.println(getName()+" created");
+            LOGGER.fine(getName()+" created");
         } else {
             id = -1;
         }
@@ -491,6 +491,9 @@ public final class Fiber implements Runnable {
         final Fiber old = CURRENT_FIBER.get();
         CURRENT_FIBER.set(this);
 
+        // if true, lots of debug messages to show what's being executed
+        final boolean traceEnabled = LOGGER.isLoggable(Level.FINER);
+
         try {
             while(!isBlocking() && !needsToReenter) {
                 try {
@@ -503,9 +506,13 @@ public final class Fiber implements Runnable {
                             return null;
                         }
                         last = popCont();
+                        if(traceEnabled)
+                            LOGGER.finer(getName()+' '+last+".processException("+throwable+')');
                         na = last.processException(throwable);
                     } else {
                         if(next!=null) {
+                            if(traceEnabled)
+                                LOGGER.finer(getName()+' '+next+".processRequest("+packet+')');
                             na = next.processRequest(packet);
                             last = next;
                         } else {
@@ -514,9 +521,14 @@ public final class Fiber implements Runnable {
                                 return null;
                             }
                             last = popCont();
+                            if(traceEnabled)
+                                LOGGER.finer(getName()+' '+last+".processResponse("+packet+')');
                             na = last.processResponse(packet);
                         }
                     }
+
+                    if(traceEnabled)
+                        LOGGER.finer(getName()+' '+last+" returned with "+na);
 
                     // If resume is called before suspend, then make sure
 					// resume(Packet) is not lost
@@ -545,9 +557,13 @@ public final class Fiber implements Runnable {
                         throw new AssertionError();
                     }
                 } catch (RuntimeException t) {
+                    if(traceEnabled)
+                        LOGGER.log(Level.FINER,getName()+" Caught "+t+". Start stack unwinding",t);
                     packet = null;
                     throwable = t;
                 } catch (Error t) {
+                    if(traceEnabled)
+                        LOGGER.log(Level.FINER,getName()+" Caught "+t+". Start stack unwinding",t);
                     packet = null;
                     throwable = t;
                 }
