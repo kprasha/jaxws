@@ -51,16 +51,8 @@ public class WSDLParser {
     private final ErrorReceiver errReceiver;
     private WsimportOptions options;
 
-
-    //all the wsdl:import system Ids
-    private final Set<String> imports = new HashSet<String>();
-
-    //inlined schema elements inside wsdl:type section
-    private final List<Element> schemaElements = new ArrayList<Element>();
-
     //wsdl extension handlers
     private final Map extensionHandlers;
-    private String targetNamespaceURI;
 
     private ArrayList<ParserListener> listeners;
 
@@ -93,13 +85,6 @@ public class WSDLParser {
             listeners = new ArrayList<ParserListener>();
         }
         listeners.add(l);
-    }
-
-    private void removeParserListener(ParserListener l) {
-        if (listeners == null) {
-            return;
-        }
-        listeners.remove(l);
     }
 
     public WSDLDocument parse() throws SAXException {
@@ -169,7 +154,7 @@ public class WSDLParser {
         return document;
     }
 
-    protected Definitions parseDefinitions(TWSDLParserContextImpl context, Document root) {
+    private Definitions parseDefinitions(TWSDLParserContextImpl context, Document root) {
         context.pushWSDLLocation();
         context.setWSDLLocation(context.getDocument().getSystemId());
 
@@ -187,35 +172,6 @@ public class WSDLParser {
         context.popWSDLLocation();
         return definitions;
     }
-
-
-
-//    private void fillImports(Element e, String systemId) throws IOException, SAXException {
-//        for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
-//            Element e2 = Util.nextElement(iter);
-//            if (e2 == null)
-//                break;
-//
-//            //check to see if it has imports
-//            if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_IMPORT)){
-//                String location = Util.getRequiredAttribute(e2, Constants.ATTR_LOCATION);
-//                location = getAdjustedLocation(systemId, location);
-//                if(location != null && !location.equals("")){
-//                    if(!imports.contains(location)){
-//                        imports.add(location);
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-//    private String getAdjustedLocation(String systemId, String location) {
-//        return systemId == null
-//            ? location
-//            : Util.processSystemIdWithBase(
-//                systemId,
-//                location);
-//    }
 
     private void processImports(TWSDLParserContextImpl context) {
         for(String location : forest.getExternalReferences()){
@@ -245,7 +201,7 @@ public class WSDLParser {
         String name = XmlUtil.getAttributeOrNull(e, Constants.ATTR_NAME);
         definitions.setName(name);
 
-        targetNamespaceURI =
+        String targetNamespaceURI =
             XmlUtil.getAttributeOrNull(e, Constants.ATTR_TARGET_NAMESPACE);
 
         definitions.setTargetNamespaceURI(targetNamespaceURI);
@@ -267,13 +223,15 @@ public class WSDLParser {
                 if(definitions.getDocumentation() == null)
                     definitions.setDocumentation(getDocumentationFor(e2));
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_TYPES)) {
-                if (gotTypes) {
+                if (gotTypes && !options.isExtensionMode()) {
                     errReceiver.error(forest.locatorTable.getStartLocation(e2), WsdlMessages.PARSING_ONLY_ONE_TYPES_ALLOWED(Constants.TAG_DEFINITIONS));
                     return null;
                 }
+                gotTypes = true;
                 //add all the wsdl:type elements to latter make a list of all the schema elements
                 // that will be needed to create jaxb model
-                addSchemaElements(e2);
+                if(!options.isExtensionMode())
+                    validateSchemaImports(e2);
             } else if (XmlUtil.matchesTagNS(e2, WSDLConstants.QNAME_MESSAGE)) {
                 Message message = parseMessage(context, definitions, e2);
                 definitions.add(message);
@@ -307,7 +265,7 @@ public class WSDLParser {
         return definitions;
     }
 
-    protected Message parseMessage(
+    private Message parseMessage(
         TWSDLParserContextImpl context,
         Definitions definitions,
         Element e) {
@@ -348,7 +306,7 @@ public class WSDLParser {
         return message;
     }
 
-    protected MessagePart parseMessagePart(TWSDLParserContextImpl context, Element e) {
+    private MessagePart parseMessagePart(TWSDLParserContextImpl context, Element e) {
         context.push();
         context.registerNamespaces(e);
         MessagePart part = new MessagePart(forest.locatorTable.getStartLocation(e));
@@ -381,7 +339,7 @@ public class WSDLParser {
         return part;
     }
 
-    protected PortType parsePortType(
+    private PortType parsePortType(
         TWSDLParserContextImpl context,
         Definitions definitions,
         Element e) {
@@ -429,7 +387,7 @@ public class WSDLParser {
         return portType;
     }
 
-    protected Operation parsePortTypeOperation(
+    private Operation parsePortTypeOperation(
         TWSDLParserContextImpl context,
         Element e) {
         context.push();
@@ -678,7 +636,7 @@ public class WSDLParser {
         return operation;
     }
 
-    protected Binding parseBinding(
+    private Binding parseBinding(
         TWSDLParserContextImpl context,
         Definitions definitions,
         Element e) {
@@ -721,7 +679,7 @@ public class WSDLParser {
         return binding;
     }
 
-    protected BindingOperation parseBindingOperation(
+    private BindingOperation parseBindingOperation(
         TWSDLParserContextImpl context,
         Element e) {
         context.push();
@@ -756,7 +714,6 @@ public class WSDLParser {
 
                 /* Here we check for the use scenario */
                 Iterator itere2 = XmlUtil.getAllChildren(e2);
-                Element ee = Util.nextElement(itere2);
                 context.push();
                 context.registerNamespaces(e2);
                 BindingInput input = new BindingInput(forest.locatorTable.getStartLocation(e2));
@@ -901,7 +858,7 @@ public class WSDLParser {
         return operation;
     }
 
-    protected Import parseImport(
+    private Import parseImport(
         TWSDLParserContextImpl context,
         Definitions definitions,
         Element e) {
@@ -938,7 +895,7 @@ public class WSDLParser {
         return anImport;
     }
 
-    protected Service parseService(
+    private Service parseService(
         TWSDLParserContextImpl context,
         Definitions definitions,
         Element e) {
@@ -979,7 +936,7 @@ public class WSDLParser {
         return service;
     }
 
-    protected Port parsePort(
+    private Port parsePort(
         TWSDLParserContextImpl context,
         Definitions definitions,
         Element e) {
@@ -1022,29 +979,21 @@ public class WSDLParser {
         return port;
     }
 
-    private void addSchemaElements(Element typesElement){
-        boolean gotDocumentation = false;
-
+    private void validateSchemaImports(Element typesElement){
         for (Iterator iter = XmlUtil.getAllChildren(typesElement); iter.hasNext();) {
             Element e = Util.nextElement(iter);
             if (e == null)
                 break;
-            if (gotDocumentation) {
-                errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_ONLY_ONE_DOCUMENTATION_ALLOWED(e.getLocalName()));
-            }
             if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_IMPORT)) {
                 errReceiver.warning(forest.locatorTable.getStartLocation(e), WsdlMessages.WARNING_WSI_R_2003());
             }else{
                 checkNotWsdlElement(e);
-                if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_SCHEMA)) {
-                    schemaElements.add(e);
-                }
             }
         }
     }
 
 
-    protected boolean handleExtension(
+    private boolean handleExtension(
         TWSDLParserContextImpl context,
         TWSDLExtensible entity,
         Element e) {
@@ -1058,7 +1007,7 @@ public class WSDLParser {
         }
     }
 
-    protected boolean handleExtension(
+    private boolean handleExtension(
         TWSDLParserContextImpl context,
         TWSDLExtensible entity,
         Node n,
@@ -1073,19 +1022,19 @@ public class WSDLParser {
         }
     }
 
-    protected void checkNotWsdlElement(Element e) {
+    private void checkNotWsdlElement(Element e) {
         // possible extensibility element -- must live outside the WSDL namespace
         if (e.getNamespaceURI().equals(Constants.NS_WSDL))
             errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_INVALID_WSDL_ELEMENT(e.getTagName()));
     }
 
-    protected void checkNotWsdlAttribute(Attr a) {
+    private void checkNotWsdlAttribute(Attr a) {
         // possible extensibility element -- must live outside the WSDL namespace
         if (a.getNamespaceURI().equals(Constants.NS_WSDL))
             errReceiver.error(forest.locatorTable.getStartLocation(a.getOwnerElement()), WsdlMessages.PARSING_INVALID_WSDL_ELEMENT(a.getLocalName()));
     }
 
-    protected void checkNotWsdlRequired(Element e) {
+    private void checkNotWsdlRequired(Element e) {
         // check the wsdl:required attribute, fail if set to "true"
         String required =
             XmlUtil.getAttributeNSOrNull(
@@ -1098,7 +1047,7 @@ public class WSDLParser {
         }
     }
 
-    protected Documentation getDocumentationFor(Element e) {
+    private Documentation getDocumentationFor(Element e) {
         String s = XmlUtil.getTextForNode(e);
         if (s == null) {
             return null;
