@@ -134,7 +134,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
             String tmpPath = options.destDir.getAbsolutePath()+ File.pathSeparator+options.classpath;
             ClassLoader classLoader = new URLClassLoader(Options.pathToURLs(tmpPath),
                     this.getClass().getClassLoader());
-            Class<?> endpointClass = null;
+            Class<?> endpointClass = options.endpoint;
 
             BindingID bindingID = WsgenOptions.getBindingID(options.protocol);
             if (!options.protocolSet) {

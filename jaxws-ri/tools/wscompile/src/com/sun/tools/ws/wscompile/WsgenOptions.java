@@ -117,7 +117,8 @@ public class WsgenOptions extends Options {
             return 2;
         } else if (args[i].startsWith("-wsdl")) {
             genWsdl = true;
-            String value = requireArgument("-wsdl", args, ++i).substring(5);
+            //String value = requireArgument("-wsdl", args, ++i).substring(5);
+            String value = args[i].substring(5);
             int index = value.indexOf(':');
             if (index == 0) {
                 value = value.substring(1);
@@ -138,7 +139,7 @@ public class WsgenOptions extends Options {
                     throw new BadCommandLineException(WscompileMessages.WSGEN_INVALID_TRANSPORT(transport, HTTP));
                 }
             }
-            return 2;
+            return 1;
         } else if (args[i].equals("-XwsgenReport")) {
             // undocumented switch for the test harness
             wsgenReport = new File(requireArgument("-XwsgenReport", args, ++i));
