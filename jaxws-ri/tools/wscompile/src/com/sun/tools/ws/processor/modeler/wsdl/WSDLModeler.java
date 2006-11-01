@@ -55,6 +55,7 @@ import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.Locator;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -117,7 +118,7 @@ public class WSDLModeler extends WSDLModelerBase {
             });
 
             document = parser.parse();
-            if (document == null || errReceiver.hadError())
+            if (document == null || document.getDefinitions() == null || errReceiver.hadError())
                 return null;
 
             document.validateLocally();
@@ -159,11 +160,11 @@ public class WSDLModeler extends WSDLModelerBase {
         } catch (ModelException e) {
             reportError(document.getDefinitions(), e.getMessage(), e);
         } catch (ParseException e) {
-            reportError(document.getDefinitions(), e.getMessage(), e);
+            errReceiver.error(e);
         } catch (ValidationException e) {
             reportError(document.getDefinitions(), e.getMessage(), e);
         } catch (SAXException e) {
-            reportError(document.getDefinitions(), e.getMessage(), e);
+            errReceiver.error(e);
         }
         //should never reach here
         return null;
@@ -2573,9 +2574,10 @@ public class WSDLModeler extends WSDLModelerBase {
 
     private void reportError(Entity entity,
         String formattedMsg, Exception nestedException ) {
+        Locator locator = (entity == null)?NULL_LOCATOR:entity.getLocator();
 
         SAXParseException e = new SAXParseException2( formattedMsg,
-            entity.getLocator(),
+            locator,
             nestedException );
         errReceiver.error(e);
     }
