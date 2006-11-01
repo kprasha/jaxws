@@ -9,6 +9,8 @@ import com.sun.xml.ws.api.server.Adapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * User-level thread&#x2E; Represents the execution of one request/response processing.
@@ -156,7 +158,7 @@ public final class Fiber implements Runnable {
 
     Fiber(Engine engine) {
         this.owner = engine;
-        if(DEBUG) {
+        if(isTraceEnabled()) {
             id = iotaGen.incrementAndGet();
             System.out.println(getName()+" created");
         } else {
@@ -212,8 +214,8 @@ public final class Fiber implements Runnable {
      * need not worry about synchronizing {@link NextAction#suspend()} and this method. 
      */
     public synchronized void resume(@NotNull Packet response) {
-        if(DEBUG)
-            System.out.println(getName()+" resumed");
+        if(isTraceEnabled())
+            LOGGER.fine(getName()+" resumed");
         packet = response;
         if( --suspendedCount == 0 ) {
             if(synchronous) {
@@ -232,8 +234,8 @@ public final class Fiber implements Runnable {
      * the execution picks up from the last scheduled continuation.
      */
     private synchronized void suspend() {
-        if(DEBUG)
-            System.out.println(getName()+" suspended\n");
+        if(isTraceEnabled())
+            LOGGER.fine(getName()+" suspended");
         suspendedCount++;
     }
 
@@ -393,8 +395,8 @@ public final class Fiber implements Runnable {
 
     private synchronized void completionCheck() {
         if(contsSize==0) {
-            if(DEBUG)
-                System.out.println(getName()+" completed\n");
+            if(isTraceEnabled())
+                LOGGER.fine(getName()+" completed");
             completed = true;
             notifyAll();
             if(completionCallback!=null) {
@@ -458,8 +460,8 @@ public final class Fiber implements Runnable {
     private Tube doRun(Tube next) {
         Thread currentThread = Thread.currentThread();
 
-        if(DEBUG)
-            System.out.println(getName()+" running by "+currentThread.getName());
+        if(isTraceEnabled())
+            LOGGER.fine(getName()+" running by "+currentThread.getName());
 
         ClassLoader old = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(contextClassLoader);
@@ -582,8 +584,8 @@ public final class Fiber implements Runnable {
         if(synchronous) {
             while(suspendedCount==1)
                 try {
-                    if (DEBUG) {
-                        System.out.println(getName()+" is blocking thread "+Thread.currentThread().getName());
+                    if (isTraceEnabled()) {
+                        LOGGER.fine(getName()+" is blocking thread "+Thread.currentThread().getName());
                     }
                     wait();
                 } catch (InterruptedException e) {
@@ -664,8 +666,13 @@ public final class Fiber implements Runnable {
      */
     private static final AtomicInteger iotaGen = new AtomicInteger();
 
+    private static boolean isTraceEnabled() {
+        return LOGGER.isLoggable(Level.FINE);
+    }
+
     /**
-     * Set to false to disable debug diagnostis (used for benchmark.)
+     * {@link Level#FINE} is used for basic tracing of fiber.
+     * {@link Level#FINER} is for gory detailed execution trace.
      */
-    public static boolean DEBUG = false;
+    private static final Logger LOGGER = Logger.getLogger(Fiber.class.getName());
 }
