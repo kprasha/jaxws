@@ -84,8 +84,7 @@ class DOMBuilder extends SAX2DOMEx {
             // external binding file) or if the parent is XML Schema element
             // (meaning that this is an "inlined" external binding)
             Node p = e.getParentNode();
-            if( p instanceof Document
-            ||( p instanceof Element && !e.getNamespaceURI().equals(p.getNamespaceURI()))) {
+            if( p instanceof Document) {
                 outerMostBindings.add(e);   // remember this value
             }
         }
