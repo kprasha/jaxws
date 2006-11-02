@@ -135,7 +135,7 @@ public enum AddressingVersion {
                     "ServiceName",
                     "PortName",
                     "PortType",
-                    null,
+                    "EndpointReference",
                     "ReferenceParameters",
                     "ReferenceProperties")) {
         @Override
@@ -672,7 +672,12 @@ public enum AddressingVersion {
         public final String portName;
         public final String portTypeName;
         public final String referenceParameters;
-        public final String metadata;
+        /**
+         * Element under which metadata is specified.
+         * In W3C, it is wsa:Metadata
+         * In Member, it is directly under wsa:EndpointReference
+         */
+        public final String metadataElement;
         public final String referenceProperties;
 
         public EPR(Class<? extends EndpointReference> eprClass, String address, String serviceName, String portName,
@@ -685,7 +690,7 @@ public enum AddressingVersion {
             this.portTypeName = portTypeName;
             this.referenceParameters = referenceParameters;
             this.referenceProperties = referenceProperties;
-            this.metadata = metadata;
+            this.metadataElement = metadata;
 
         }
     }
