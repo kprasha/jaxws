@@ -205,7 +205,7 @@ public abstract class Message {
      * @return
      *      always return the same non-null object.
      */
-    public abstract HeaderList getHeaders();
+    public abstract @NotNull HeaderList getHeaders();
 
     /**
      * Gets the attachments of this message
