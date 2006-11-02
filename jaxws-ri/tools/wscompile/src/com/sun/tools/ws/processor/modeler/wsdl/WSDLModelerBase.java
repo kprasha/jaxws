@@ -691,7 +691,12 @@ public abstract class WSDLModelerBase implements Modeler {
         return isConflictingClassName(name);
     }
 
+    int numPasses = 0;
+
     protected void warning(Entity entity, String message){
+        //avoid duplicate warning for the second pass
+        if(numPasses > 1)
+            return;
         if(entity == null)
             errReceiver.warning(NULL_LOCATOR, message);
         else

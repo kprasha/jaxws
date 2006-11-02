@@ -171,8 +171,8 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     private Model internalBuildModel(WSDLDocument document) {
-
-//        //build the jaxbModel to be used latter
+        numPasses++;
+        //build the jaxbModel to be used latter
         buildJAXBModel(document);
 
         QName modelName =
@@ -270,12 +270,16 @@ public class WSDLModeler extends WSDLModelerBase {
             SOAPAddress soapAddress =
                     (SOAPAddress) getExtensionOfType(wsdlPort, SOAPAddress.class);
             if (soapAddress == null) {
-                // not a SOAP port, ignore it
-                warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_NON_SOAP_PORT_NO_ADDRESS(wsdlPort.getName()));
-                return false;
+                if(options.isExtensionMode()){
+                    warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_NO_SOAP_ADDRESS(wsdlPort.getName()));
+                }else{
+                    // not a SOAP port, ignore it
+                    warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_NON_SOAP_PORT_NO_ADDRESS(wsdlPort.getName()));
+                    return false;
+                }
             }
-
-            port.setAddress(soapAddress.getLocation());
+            if(soapAddress != null)
+                port.setAddress(soapAddress.getLocation());
             Binding binding = wsdlPort.resolveBinding(document);
             QName bindingName = getQNameOf(binding);
             PortType portType = binding.resolvePortType(document);
@@ -308,23 +312,28 @@ public class WSDLModeler extends WSDLModelerBase {
                     soapBinding =
                             (SOAPBinding) getExtensionOfType(binding, SOAP12Binding.class);
                     if (soapBinding == null) {
-                        // cannot deal with non-SOAP ports
-                        warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_NON_SOAP_PORT(wsdlPort.getName()));
-                        return false;
-                    }
-                    // we can only do soap1.2 if extensions are on
-                    if (options.isExtensionMode()) {
-                        warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_PORT_SOAP_BINDING_12(wsdlPort.getName()));
-                    } else {
-                        warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_SOAP_BINDING_12(wsdlPort.getName()));
-                        return false;
+                        if(!options.isExtensionMode()){
+                            // cannot deal with non-SOAP ports
+                            warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_NON_SOAP_PORT(wsdlPort.getName()));
+                            return false;
+                        }else{
+                            warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_NON_SOAP_PORT(wsdlPort.getName()));
+                        }
+                    }else{
+                        // we can only do soap1.2 if extensions are on
+                        if (options.isExtensionMode()) {
+                            warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_PORT_SOAP_BINDING_12(wsdlPort.getName()));
+                        } else {
+                            warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_SOAP_BINDING_12(wsdlPort.getName()));
+                            return false;
+                        }
                     }
                 }
 
-                if (soapBinding.getTransport() == null
+                if (soapBinding != null  && (soapBinding.getTransport() == null
                         || (!soapBinding.getTransport().equals(
                         SOAPConstants.URI_SOAP_TRANSPORT_HTTP) && !soapBinding.getTransport().equals(
-                        SOAP12Constants.URI_SOAP_TRANSPORT_HTTP))) {
+                        SOAP12Constants.URI_SOAP_TRANSPORT_HTTP)))) {
                     warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_IGNORING_SOAP_BINDING_NON_HTTP_TRANSPORT(wsdlPort.getName()));
                     if (!options.isExtensionMode()) {
                         // cannot deal with non-HTTP ports
@@ -336,7 +345,7 @@ public class WSDLModeler extends WSDLModelerBase {
                  * validate wsdl:binding uniqueness in style, e.g. rpclit or doclit
                  * ref: WSI BP 1.1 R 2705
                  */
-                if (!validateWSDLBindingStyle(binding)) {
+                if (soapBinding != null && !validateWSDLBindingStyle(binding)) {
                     if (options.isExtensionMode()) {
                         warning(wsdlPort, ModelerMessages.WSDLMODELER_WARNING_PORT_SOAP_BINDING_MIXED_STYLE(wsdlPort.getName()));
                     } else {
@@ -344,7 +353,10 @@ public class WSDLModeler extends WSDLModelerBase {
                     }
                 }
 
-                port.setStyle(soapBinding.getStyle());
+                if(soapBinding != null){
+                    port.setStyle(soapBinding.getStyle());
+                }
+
                 boolean hasOverloadedOperations = false;
                 Set<String> operationNames = new HashSet<String>();
                 for (Iterator iter = portType.operations(); iter.hasNext();) {
@@ -442,7 +454,13 @@ public class WSDLModeler extends WSDLModelerBase {
                                         hasOverloadedOperations,
                                         headers);
 
-                        Operation operation = processSOAPOperation();
+
+                        Operation operation;
+                        if(soapBinding != null)
+                            operation = processSOAPOperation();
+                        else{
+                            operation = processNonSOAPOperation();
+                        }
                         if (operation != null) {
                             port.addOperation(operation);
                             hasOperations = true;
@@ -472,6 +490,100 @@ public class WSDLModeler extends WSDLModelerBase {
             // should not happen
             return false;
         }
+    }
+
+    /**
+     * Returns an operation purely from abstract operation 
+     */
+    private Operation processNonSOAPOperation() {
+        Operation operation =
+                new Operation(new QName(null, info.bindingOperation.getName()), info.bindingOperation);
+
+        setDocumentationIfPresent(
+                operation,
+                info.portTypeOperation.getDocumentation());
+
+        if (info.portTypeOperation.getStyle()
+                != OperationStyle.REQUEST_RESPONSE
+                && info.portTypeOperation.getStyle() != OperationStyle.ONE_WAY) {
+            if (options.isExtensionMode()) {
+                warning(info.portTypeOperation, ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_NOT_SUPPORTED_STYLE(info.portTypeOperation.getName()));
+                return null;
+            } else {
+                error(info.portTypeOperation, ModelerMessages.WSDLMODELER_INVALID_OPERATION_NOT_SUPPORTED_STYLE(info.portTypeOperation.getName(),
+                        info.port.resolveBinding(document).resolvePortType(document).getName()));
+            }
+        }
+
+        boolean isRequestResponse = info.portTypeOperation.getStyle() == OperationStyle.REQUEST_RESPONSE;
+        Message inputMessage = getInputMessage();
+        Request request = new Request(inputMessage, errReceiver);
+        request.setErrorReceiver(errReceiver);
+        info.operation = operation;
+        info.operation.setWSDLPortTypeOperation(info.portTypeOperation);
+
+        Response response = null;
+
+        Message outputMessage = null;
+        if (isRequestResponse) {
+            outputMessage = getOutputMessage();
+            response = new Response(outputMessage, errReceiver);
+        }else{
+            response = new Response(null, errReceiver);
+        }
+
+        // Process parameterOrder and get the parameterList
+        List<MessagePart> parameterList = getParameterOrder();
+
+        List<Parameter> params = null;
+        boolean unwrappable = isUnwrappable();
+        info.operation.setWrapped(unwrappable);
+            params = getDoclitParameters(request, response, parameterList);
+        if (!validateParameterName(params)) {
+            return null;
+        }
+
+        // create a definitive list of parameters to match what we'd like to get
+        // in the java interface (which is generated much later), parameterOrder
+        List<Parameter> definitiveParameterList = new ArrayList<Parameter>();
+        for (Parameter param : params) {
+            if (param.isReturn()) {
+                info.operation.setProperty(WSDL_RESULT_PARAMETER, param);
+                response.addParameter(param);
+                continue;
+            }
+            if (param.isIN()) {
+                request.addParameter(param);
+            } else if (param.isOUT()) {
+                response.addParameter(param);
+            } else if (param.isINOUT()) {
+                request.addParameter(param);
+                response.addParameter(param);
+            }
+            definitiveParameterList.add(param);
+        }
+
+        info.operation.setRequest(request);
+
+        if (isRequestResponse) {
+            info.operation.setResponse(response);
+        }
+
+        // faults with duplicate names
+        Set duplicateNames = getDuplicateFaultNames();
+
+        // handle soap:fault
+        handleLiteralSOAPFault(response, duplicateNames);
+        info.operation.setProperty(
+                WSDL_PARAMETER_ORDER,
+                definitiveParameterList);
+
+        Binding binding = info.port.resolveBinding(document);
+        PortType portType = binding.resolvePortType(document);
+        if (isAsync(portType, info.portTypeOperation)) {
+            warning(portType, "Can not generate Async methods for non-soap binding!");
+        }
+        return info.operation;
     }
 
     /* (non-Javadoc)

@@ -29,6 +29,7 @@ import com.sun.tools.ws.processor.util.DirectoryUtil;
 import com.sun.tools.ws.processor.util.IndentingWriter;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.WsimportOptions;
+import com.sun.tools.ws.wscompile.Options;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -68,7 +69,7 @@ public abstract class GeneratorBase
         this.destDir = options.destDir;
         this.receiver = receiver;
         this.wsdlLocation = options.wsdlLocation;
-        this.targetVersion = options.target.name();
+        this.targetVersion = Options.Target.getVersion(options.target);
         this.cm = options.getCodeModel();
     }
 
