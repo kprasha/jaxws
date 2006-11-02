@@ -108,11 +108,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     abstract T toReturnValue(Packet response);
 
     public final Response<T> invokeAsync(T param) {
-        Invoker invoker = new Invoker(param);
-        ResponseImpl<T> ft = new ResponseImpl<T>(invoker,null);
+        //Invoker invoker = new Invoker(param);
+        //ResponseImpl<T> ft = new ResponseImpl<T>(invoker,null);
         // TODO move to the following once things work
-        //AsyncInvoker invoker = new DispatchAsyncInvoker(param);
-        //AsyncResponseImpl<T> ft = new AsyncResponseImpl<T>(invoker,null);
+        AsyncInvoker invoker = new DispatchAsyncInvoker(param);
+        AsyncResponseImpl<T> ft = new AsyncResponseImpl<T>(invoker,null);
         invoker.setReceiver(ft);
 
         owner.getExecutor().execute(ft);

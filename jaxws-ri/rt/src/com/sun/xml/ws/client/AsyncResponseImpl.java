@@ -23,19 +23,29 @@ public final class AsyncResponseImpl<T> extends FutureTask<T> implements Respons
      */
     private final AsyncHandler<T> handler;
     private ResponseContext responseContext;
+    private final Runnable callable;
 
     /**
      *
      * @param callable
-     *      This {@link java.util.concurrent.Callable} is executed asynchronously.
+     *      This {@link Runnable} is executed asynchronously.
      * @param handler
      *      Optional {@link javax.xml.ws.AsyncHandler} to invoke at the end
      *      of the processing. Can be null.
      */
     public AsyncResponseImpl(Runnable callable, AsyncHandler<T> handler) {
         super(callable, null);
+        this.callable = callable;
         this.handler = handler;
     }
+
+    @Override
+    public void run() {
+        // override so that AsyncInvoker calls set()
+        // when Fiber calls the callback
+        callable.run();
+    }
+
 
     public ResponseContext getContext() {
         return responseContext;
