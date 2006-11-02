@@ -95,4 +95,8 @@ public class PipeAdapter extends AbstractTubeImpl {
     public PipeAdapter copy(TubeCloner cloner) {
         return new PipeAdapter(this,cloner);
     }
+
+    public String toString() {
+        return super.toString()+"["+next.toString()+"]";
+    }
 }
