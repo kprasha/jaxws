@@ -138,7 +138,7 @@ public enum AddressingVersion {
                     "ServiceName",
                     "PortName",
                     "PortType",
-                    "Metadata",
+                    null,
                     "ReferenceParameters",
                     "ReferenceProperties")) {
         @Override

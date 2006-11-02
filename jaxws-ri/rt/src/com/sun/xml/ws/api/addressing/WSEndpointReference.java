@@ -792,47 +792,64 @@ public final class WSEndpointReference {
        /**
          * Parses the Metadata section of the EPR.
          */
-        private Metadata parseMetaData() throws XMLStreamException {
-            StreamReaderBufferProcessor xsr = infoset.readAsXMLStreamReader();
+       private void parseMetaData() throws XMLStreamException {
+           StreamReaderBufferProcessor xsr = infoset.readAsXMLStreamReader();
 
-            // parser should be either at the start element or the start document
-            if (xsr.getEventType() == XMLStreamReader.START_DOCUMENT)
-                xsr.nextTag();
-            assert xsr.getEventType() == XMLStreamReader.START_ELEMENT;
+           // parser should be either at the start element or the start document
+           if (xsr.getEventType() == XMLStreamReader.START_DOCUMENT)
+               xsr.nextTag();
+           assert xsr.getEventType() == XMLStreamReader.START_ELEMENT;
 
-            String rootLocalName = xsr.getLocalName();
-            if (!xsr.getNamespaceURI().equals(version.nsUri))
-                throw new WebServiceException(AddressingMessages.WRONG_ADDRESSING_VERSION(
-                        version.nsUri, xsr.getNamespaceURI()));
-
-
-            while (xsr.nextTag() == XMLStreamReader.START_ELEMENT) {
-                String localName = xsr.getLocalName();
-                if (localName.equals(version.eprType.metadata)) {
-                    XMLStreamBuffer mark;
-                    while ((mark = xsr.nextTagAndMark()) != null) {
-                        localName = xsr.getLocalName();
-                        String ns = xsr.getNamespaceURI();
-                        if (localName.equals(version.eprType.serviceName)) {
-                            String portStr = xsr.getAttributeValue(null, version.eprType.portName);
-                            serviceName = getElementTextAsQName(xsr);
-                            if (serviceName != null)
-                                portName = new QName(serviceName.getNamespaceURI(),portStr);
-                        } else if (localName.equals(version.eprType.portTypeName)) {
-                            portTypeName = getElementTextAsQName(xsr);
-                        } else if (ns.equals(WSDLConstants.NS_WSDL)
-                                && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
-                            wsdlSource = new XMLStreamBufferSource(mark);
-                        }                        
-                    }
-                } else {
-                    XMLStreamReaderUtil.skipElement(xsr);
-                }
-            }
-            return this;
-            // hit to </EndpointReference> by now
-
-        }
+           if (!xsr.getNamespaceURI().equals(version.nsUri))
+               throw new WebServiceException(AddressingMessages.WRONG_ADDRESSING_VERSION(
+                       version.nsUri, xsr.getNamespaceURI()));
+           XMLStreamBuffer mark;
+           if (version == AddressingVersion.MEMBER) {
+               String ns;
+               String localName;
+               while ((mark = xsr.nextTagAndMark()) != null) {
+                   ns = xsr.getNamespaceURI();
+                   localName = xsr.getLocalName();
+                   if (localName.equals(version.eprType.serviceName)) {
+                       String portStr = xsr.getAttributeValue(null, version.eprType.portName);
+                       serviceName = getElementTextAsQName(xsr);
+                       if (serviceName != null)
+                           portName = new QName(serviceName.getNamespaceURI(), portStr);
+                   } else if (localName.equals(version.eprType.portTypeName)) {
+                       portTypeName = getElementTextAsQName(xsr);
+                   } else if (ns.equals(WSDLConstants.NS_WSDL)
+                           && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                       wsdlSource = new XMLStreamBufferSource(mark);
+                   } else {
+                       XMLStreamReaderUtil.skipElement(xsr);
+                   }
+               }
+           } else {
+               while (xsr.nextTag() == XMLStreamReader.START_ELEMENT) {
+                   if (xsr.getLocalName().equals(W3CAddressingConstants.WSA_METADATA_NAME)) {
+                       String localName;
+                       String ns;
+                       while ((mark = xsr.nextTagAndMark()) != null) {
+                           localName = xsr.getLocalName();
+                           ns = xsr.getNamespaceURI();
+                           if (localName.equals(version.eprType.serviceName)) {
+                               String portStr = xsr.getAttributeValue(null, version.eprType.portName);
+                               serviceName = getElementTextAsQName(xsr);
+                               if (serviceName != null)
+                                   portName = new QName(serviceName.getNamespaceURI(), portStr);
+                           } else if (localName.equals(version.eprType.portTypeName)) {
+                               portTypeName = getElementTextAsQName(xsr);
+                           } else if (ns.equals(WSDLConstants.NS_WSDL)
+                                   && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                               wsdlSource = new XMLStreamBufferSource(mark);
+                           }
+                       }
+                   } else {
+                       XMLStreamReaderUtil.skipElement(xsr);
+                   }
+               }
+           }           
+       }
 
         private QName getElementTextAsQName(StreamReaderBufferProcessor xsr) throws XMLStreamException {
             String text = xsr.getElementText();
