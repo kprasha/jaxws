@@ -222,9 +222,12 @@ public enum AddressingVersion {
     /**
      * Gets the anonymous URI value associated with this WS-Addressing version.
      */
-    public final String anonymousUri;
+    public final @NotNull String anonymousUri;
 
-    public final String noneUri;
+    /**
+     * Gets the none URI value associated with this WS-Addressing version.
+     */
+    public final @NotNull String noneUri;
 
     /**
      * Represents the anonymous EPR.
