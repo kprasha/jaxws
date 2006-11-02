@@ -9,6 +9,7 @@ import com.sun.xml.ws.api.server.Adapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +58,13 @@ import java.util.logging.Logger;
  * Setting the {@link #LOGGER} for FINE would give you basic start/stop/resume/suspend
  * level logging. Using FINER would cause more detailed logging, which includes
  * what tubes are executed in what order and how they behaved.
+ *
+ * <p>
+ * When you debug the server side, consider setting {@link Fiber#serializeExecution}
+ * to true, so that execution of fibers are serialized. Debugging a server
+ * with more than one running threads is very tricky, and this switch will
+ * prevent that. This can be also enabled by setting the system property on.
+ * See the source code.
  *
  * @author Kohsuke Kawaguchi
  * @author Jitendra Kotamraju
@@ -475,6 +483,9 @@ public final class Fiber implements Runnable {
         if(isTraceEnabled())
             LOGGER.fine(getName()+" running by "+currentThread.getName());
 
+        if(serializeExecution)
+            serializedExecutionLock.lock();
+
         ClassLoader old = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(contextClassLoader);
         try {
@@ -491,6 +502,8 @@ public final class Fiber implements Runnable {
             return next;
         } finally {
             currentThread.setContextClassLoader(old);
+            if(serializeExecution)
+                serializedExecutionLock.unlock();
         }
     }
 
@@ -691,4 +704,12 @@ public final class Fiber implements Runnable {
     }
 
     private static final Logger LOGGER = Logger.getLogger(Fiber.class.getName());
+
+    private static final ReentrantLock serializedExecutionLock = new ReentrantLock();
+
+    /**
+     * Set this boolean to true to execute fibers sequentially one by one.
+     * See class javadoc.
+     */
+    public static boolean serializeExecution = Boolean.getBoolean(Fiber.class.getName()+".serialize");
 }
