@@ -29,7 +29,12 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.wsdl.parser.*;
+import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
+import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
+import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
+import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLFaultImpl;
@@ -50,7 +55,6 @@ import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.xml.XmlUtil;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
@@ -217,7 +221,7 @@ public class RuntimeWSDLParser {
         for (WSDLParserExtension e : extensions)
             register(e);
 
-        this.extensionFacade = new WSDLParserExtensionFacade(this.extensions.toArray(new WSDLParserExtension[0]));
+        this.extensionFacade =  new WSDLParserExtensionFacade(this.extensions.toArray(new WSDLParserExtension[0]));
     }
 
     private void parseWSDL(@NotNull URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
@@ -750,6 +754,7 @@ public class RuntimeWSDLParser {
     }
 
     private void register(WSDLParserExtension e) {
-        extensions.add(e);
+        // protect JAX-WS RI from broken parser extension
+        extensions.add(new FoolProofParserExtension(e));
     }
 }
