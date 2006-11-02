@@ -106,6 +106,11 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         }
     }
 
+    /**
+     * Validates the inbound message. If an error is found, create
+     * a fault message and returns that. Otherwise
+     * it will pass through the parameter 'packet' object to the return value.
+     */
     protected final Packet validateInboundHeaders(Packet packet) {
         SOAPFault soapFault;
         FaultDetailHeader s11FaultDetailHeader;
@@ -324,12 +329,8 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         }
     }
 
-    final WSDLBoundOperation getWSDLBoundOperation(Packet packet) {
-        WSDLBoundOperation wbo = null;
-        if (wsdlPort != null) {
-            wbo = packet.getMessage().getOperation(wsdlPort);
-        }
-        return wbo;
+    protected final WSDLBoundOperation getWSDLBoundOperation(Packet packet) {
+        return packet.getMessage().getOperation(wsdlPort);
     }
 
     final void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) {

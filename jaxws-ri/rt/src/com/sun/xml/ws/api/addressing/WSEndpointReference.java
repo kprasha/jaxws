@@ -531,6 +531,21 @@ public final class WSEndpointReference {
     }
 
     /**
+     * Returns true if this has anonymous URI as the {@link #getAddress() address}.
+     */
+    public boolean isAnonymous() {
+        return address.equals(version.anonymousUri);
+    }
+
+    /**
+     * Returns true if this has {@link AddressingVersion#noneUri none URI}
+     * as the {@link #getAddress() address}.
+     */
+    public boolean isNone() {
+        return address.equals(version.noneUri);
+    }
+
+    /**
      * Parses inside EPR and mark all reference parameters.
      */
     private void parse() throws XMLStreamException {

@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -58,8 +57,6 @@ public final class WsaClientTube extends WsaTube {
         // populate request WS-Addressing headers
         HeaderList headerList = request.getMessage().getHeaders();
         headerList.fillRequestAddressingHeaders(wsdlPort, binding, request);
-//      if(endpointReference!=null)
-//          endpointReference.addReferenceParameters(headerList);
 
         return doInvoke(next,request);
    }
@@ -78,26 +75,16 @@ public final class WsaClientTube extends WsaTube {
         //For instance this may be a RM CreateSequence message.
         WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
 
-        WSDLOperation op = null;
-
-        if (wbo != null) {
-            op = wbo.getOperation();
-        }
-
-        if (wbo == null || op == null) {
-            return;
-        }
+        if (wbo == null)    return;
 
         String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
-
         if (gotA == null)
             throw new WebServiceException(AddressingMessages.VALIDATION_CLIENT_NULL_ACTION());
 
         String expected = helper.getOutputAction(packet);
 
-        if (expected != null && !gotA.equals(expected)) {
+        if (expected != null && !gotA.equals(expected))
             throw new ActionNotSupportedException(gotA);
-        }
     }
 
     @Override
