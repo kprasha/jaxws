@@ -22,24 +22,22 @@
 
 package com.sun.xml.ws.message;
 
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.namespace.QName;
-
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
-import com.sun.xml.stream.buffer.XMLStreamBufferException;
-import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * @author Arun Gupta
@@ -66,7 +64,7 @@ public class ProblemActionHeader extends AbstractHeaderImpl {
     public
     @NotNull
     String getNamespaceURI() {
-        return av.getNsUri();
+        return av.nsUri;
     }
 
     public

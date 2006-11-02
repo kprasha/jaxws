@@ -95,7 +95,7 @@ public final class WsaServerTube extends WsaTube {
             // default to ReplyTo
 
             // if ReplyTo is non-anonymous or None URI
-            if (replyTo != null && (!replyTo.equals(addressingVersion.anonymousUri) || replyTo.equals(addressingVersion.getNoneUri()))) {
+            if (replyTo != null && (!replyTo.equals(addressingVersion.anonymousUri) || replyTo.equals(addressingVersion.noneUri))) {
                 // close the transport back channel
                 if (request.transportBackChannel != null) {
                     request.transportBackChannel.close();
@@ -106,7 +106,7 @@ public final class WsaServerTube extends WsaTube {
             if ((!faultTo.equals(addressingVersion.anonymousUri) && replyTo != null && !replyTo.equals(addressingVersion.anonymousUri)) ||
 
                     // or if both FaultTo and ReplyTo are none
-                    (faultTo.equals(addressingVersion.getNoneUri()) && replyTo != null && replyTo.equals(addressingVersion.getNoneUri()))
+                    (faultTo.equals(addressingVersion.noneUri) && replyTo != null && replyTo.equals(addressingVersion.noneUri))
                     ) {
                 if (request.transportBackChannel != null) {
                     request.transportBackChannel.close();
@@ -128,7 +128,7 @@ public final class WsaServerTube extends WsaTube {
 
         if (replyTo != null) {
             // none ReplyTo
-            if (replyTo.equals(addressingVersion.getNoneUri()) &&
+            if (replyTo.equals(addressingVersion.noneUri) &&
                     ((faultTo == null) ||
                             (!faultTo.equals(addressingVersion.anonymousUri)))) {
                 return doInvoke(next,p);
@@ -153,7 +153,7 @@ public final class WsaServerTube extends WsaTube {
                 // reach here if endpoint was invoked with both replyTo and faultTo
                 // not equal to either non-anonymous or none
                 String uri = getResponseAddress(response, false);
-                if (!uri.equals(addressingVersion.anonymousUri) && !uri.equals(addressingVersion.getNoneUri()))
+                if (!uri.equals(addressingVersion.anonymousUri) && !uri.equals(addressingVersion.noneUri))
                     response = processNonAnonymousReply(response, false, false);
             }
         }
@@ -183,7 +183,7 @@ public final class WsaServerTube extends WsaTube {
 
             if (replyTo != null) {
                 // if none, then fault message is not sent back
-                if (replyTo.equals(addressingVersion.getNoneUri())) {
+                if (replyTo.equals(addressingVersion.noneUri)) {
                     if (endpointInvoked) {
                         return responsePacket.createServerResponse(responsePacket.getMessage(), responsePacket.endpoint.getPort(), responsePacket.endpoint.getBinding());
                     }
@@ -196,7 +196,7 @@ public final class WsaServerTube extends WsaTube {
             // explicit FaultTo
 
             // if none, then fault message is not sent back
-            if (faultTo.equals(addressingVersion.getNoneUri())) {
+            if (faultTo.equals(addressingVersion.noneUri)) {
                 if (endpointInvoked) {
                     responsePacket.setMessage(null);
                     return responsePacket;

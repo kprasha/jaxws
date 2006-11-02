@@ -56,6 +56,7 @@ public enum AddressingVersion {
         "http://www.w3.org/2006/05/addressing/wsdl",
         "http://www.w3.org/2006/05/addressing/wsdl",
         "http://www.w3.org/2005/08/addressing/anonymous",
+        "http://www.w3.org/2005/08/addressing/none",
         new EPR(W3CEndpointReference.class,
                     "Address",
                     "ServiceName",
@@ -72,11 +73,6 @@ public enum AddressingVersion {
         @Override
         public WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
             return new com.sun.xml.ws.addressing.WsaTubeHelperImpl(wsdlPort, binding);
-        }
-
-        @Override
-        public String getNoneUri() {
-            return nsUri + "/none";
         }
 
         @Override
@@ -133,6 +129,7 @@ public enum AddressingVersion {
            "http://schemas.xmlsoap.org/ws/2004/08/addressing",
            "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy",
            "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous",
+            "",
            new EPR(MemberSubmissionEndpointReference.class,
                     "Address",
                     "ServiceName",
@@ -149,11 +146,6 @@ public enum AddressingVersion {
         @Override
         public WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
             return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, binding);
-        }
-
-        @Override
-        public String getNoneUri() {
-            return "";
         }
 
         @Override
@@ -231,6 +223,8 @@ public enum AddressingVersion {
      * Gets the anonymous URI value associated with this WS-Addressing version.
      */
     public final String anonymousUri;
+
+    public final String noneUri;
 
     /**
      * Represents the anonymous EPR.
@@ -359,12 +353,13 @@ public enum AddressingVersion {
     );
 
     private AddressingVersion(String nsUri, String anonymousEprString, String wsdlNsUri, String policyNsUri,
-                              String anonymousUri,
+                              String anonymousUri, String noneUri,
                               EPR eprType ) {
         this.nsUri = nsUri;
         this.wsdlNsUri = wsdlNsUri;
         this.policyNsUri = policyNsUri;
         this.anonymousUri = anonymousUri;
+        this.noneUri = noneUri;
         toTag = new QName(nsUri,"To");
         fromTag = new QName(nsUri,"From");
         replyToTag = new QName(nsUri,"ReplyTo");
@@ -463,6 +458,8 @@ public enum AddressingVersion {
      * Returns {@link #nsUri} associated with this {@link AddressingVersion}
      *
      * @return namespace URI
+     * @deprecated
+     *      Use {@link #nsUri}.
      */
     public String getNsUri() {
         return nsUri;
@@ -490,8 +487,12 @@ public enum AddressingVersion {
      * Gets the none URI value associated with this WS-Addressing version.
      *
      * @return none URI value
+     * @deprecated
+     *      Use {@link #noneUri}.
      */
-    public abstract String getNoneUri();
+    public final String getNoneUri() {
+        return noneUri;
+    }
 
     /**
      * Gets the anonymous URI value associated with this WS-Addressing version.
