@@ -22,7 +22,19 @@
 
 package com.sun.xml.ws.addressing;
 
-import java.util.Map;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -34,19 +46,7 @@ import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
-
-import com.sun.xml.ws.addressing.model.InvalidMapException;
-import com.sun.xml.ws.addressing.model.MapRequiredException;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
-import org.w3c.dom.Element;
+import java.util.Map;
 
 /**
  * @author Arun Gupta
@@ -168,14 +168,11 @@ public abstract class WsaTubeHelper {
         String action = AddressingVersion.UNSET_OUTPUT_ACTION;
 
         if (wsdlPort != null) {
-            if (wsdlPort.getBinding() != null) {
-                WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(packet.getMessage().getPayloadNamespaceURI(), packet.getMessage().getPayloadLocalPart());
-                if (wbo != null) {
-                    WSDLOperation op = wbo.getOperation();
-                    if (op != null) {
-                        action = op.getOutput().getAction();
-                    }
-                }
+            WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(packet.getMessage().getPayloadNamespaceURI(), packet.getMessage().getPayloadLocalPart());
+            if (wbo != null) {
+                WSDLOutput op = wbo.getOperation().getOutput();
+                if(op!=null)
+                    action = op.getAction();
             }
         }
 
