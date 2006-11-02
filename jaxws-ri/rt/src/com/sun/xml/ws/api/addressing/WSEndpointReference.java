@@ -846,8 +846,7 @@ public final class WSEndpointReference {
                    if (!xsr.getLocalName().equals(rootElement))
                        XMLStreamReaderUtil.skipElement(xsr);
                }
-           } while (xsr.getEventType() != XMLStreamReader.END_DOCUMENT &&
-                    xsr.nextTag() == XMLStreamReader.START_ELEMENT);
+           } while (XMLStreamReaderUtil.nextElementContent(xsr) == XMLStreamReader.START_ELEMENT);
        }
 
         private QName getElementTextAsQName(StreamReaderBufferProcessor xsr) throws XMLStreamException {
