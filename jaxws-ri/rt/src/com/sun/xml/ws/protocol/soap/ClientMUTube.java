@@ -21,20 +21,24 @@
  */
 package com.sun.xml.ws.protocol.soap;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.client.HandlerConfiguration;
-import javax.xml.ws.soap.SOAPFaultException;
 
 import javax.xml.namespace.QName;
-import java.util.Set;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
+ * Performs soap mustUnderstand processing for clients.
+ *
  * @author Rama Pulavarthi
  */
-
 public class ClientMUTube extends MUTube {
 
     public ClientMUTube(WSBinding binding, Tube next) {
@@ -54,7 +58,7 @@ public class ClientMUTube extends MUTube {
      * @throws SOAPFaultException
      *         if all the headers in the packet are not understood, throws SOAPFaultException
      */
-    @Override
+    @Override @NotNull
     public NextAction processResponse(Packet response) {
         if (response.getMessage() == null) {
             return super.processResponse(response);
@@ -66,8 +70,7 @@ public class ClientMUTube extends MUTube {
             knownHeaders = handlerConfig.getKnownHeaders();
             roles = handlerConfig.getRoles();
         } else {
-            roles = new HashSet<String>();
-            roles.add(soapVersion.implicitRole);
+            roles = soapVersion.implicitRoleSet;
             knownHeaders = new HashSet<QName>();
         }
         Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(

@@ -125,6 +125,11 @@ public enum SOAPVersion {
     public final String implicitRole;
 
     /**
+     * Singleton set that contains {@link #implicitRole}.
+     */
+    public final Set<String> implicitRoleSet;
+
+    /**
      * This represents the roles required to be assumed by SOAP binding implementation.
      */
     public final Set<String> requiredRoles;
@@ -152,6 +157,7 @@ public enum SOAPVersion {
         this.nsUri = nsUri;
         this.contentType = contentType;
         this.implicitRole = implicitRole;
+        this.implicitRoleSet = Collections.singleton(implicitRole);
         this.roleAttributeName = roleAttributeName;
         try {
             saajMessageFactory = MessageFactory.newInstance(saajFactoryString);
