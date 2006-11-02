@@ -705,6 +705,7 @@ public final class Fiber implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Fiber.class.getName());
 
+    
     private static final ReentrantLock serializedExecutionLock = new ReentrantLock();
 
     /**
