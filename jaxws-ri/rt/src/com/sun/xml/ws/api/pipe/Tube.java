@@ -76,7 +76,7 @@ import java.text.SimpleDateFormat;
  * if one comes after another and they don't overlap.
  * <p>
  * Where a need arises to process multiple requests concurrently, a pipeline
- * gets cloned through {@link PipeCloner}. Note that this need may happen on
+ * gets cloned through {@link TubeCloner}. Note that this need may happen on
  * both server (because it quite often serves multiple requests concurrently)
  * and client (because it needs to support asynchronous method invocations.)
  * <p>
@@ -198,7 +198,7 @@ public interface Tube {
      *      On the server side, this signals an error condition where
      *      a fault reply is in order (or the exception gets eaten by
      *      the top-most transport {@link Adapter} if it's one-way.)
-     *      This frees each {@link Pipe} from try/catching a
+     *      This frees each {@link Tube} from try/catching a
      *      {@link WebServiceException} in every layer.
      *
      *      Note that this method is also allowed to return
@@ -209,8 +209,8 @@ public interface Tube {
      *      On the client side, the {@link WebServiceException} thrown
      *      will be propagated all the way back to the calling client
      *      applications. (The consequence of that is that if you are
-     *      a filtering {@link Pipe}, you must not catch the exception
-     *      that your next {@link Pipe} threw.
+     *      a filtering {@link Tube}, you must not eat the exception
+     *      that was given to {@link #processException(Throwable)} .
      *
      * @throws RuntimeException
      *      Other runtime exception thrown by this method must
@@ -338,34 +338,34 @@ public interface Tube {
      * <h3>Implementation Note</h3>
      * <p>
      * It is the implementation's responsibility to call
-     * {@link PipeCloner#add(Pipe,Pipe)} to register the copied pipe
+     * {@link TubeCloner#add(Tube,Tube)} to register the copied pipe
      * with the original. This is required before you start copying
-     * the other {@link Pipe} references you have, or else there's a
+     * the other {@link Tube} references you have, or else there's a
      * risk of infinite recursion.
      * <p>
-     * For most {@link Pipe} implementations that delegate to another
-     * {@link Pipe}, this method requires that you also copy the {@link Pipe}
+     * For most {@link Tube} implementations that delegate to another
+     * {@link Tube}, this method requires that you also copy the {@link Tube}
      * that you delegate to.
      * <p>
-     * For limited number of {@link Pipe}s that do not maintain any
+     * For limited number of {@link Tube}s that do not maintain any
      * thread unsafe resource, it is allowed to simply return <tt>this</tt>
      * from this method (notice that even if you are stateless, if you
-     * got a delegating {@link Pipe} and that one isn't stateless, you
+     * got a delegating {@link Tube} and that one isn't stateless, you
      * still have to copy yourself.)
      *
      * <p>
      * Note that this method might be invoked by one thread while another
-     * thread is executing the {@link #process(Packet)} method. See
+     * thread is executing the other process method. See
      * the {@link Codec#copy()} for more discussion about this.
      *
      * @param cloner
-     *      Use this object (in particular its {@link PipeCloner#copy(Pipe)} method
+     *      Use this object (in particular its {@link TubeCloner#copy(Tube)} method
      *      to clone other pipe references you have
-     *      in your pipe. See {@link PipeCloner} for more discussion
+     *      in your pipe. See {@link TubeCloner} for more discussion
      *      about why.
      *
      * @return
-     *      always non-null {@link Pipe}.
+     *      always non-null {@link Tube}.
      * @param cloner
      */
     Tube copy(TubeCloner cloner);
