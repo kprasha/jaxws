@@ -106,7 +106,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         }
     }
 
-    public final Packet validateInboundHeaders(Packet packet) {
+    protected final Packet validateInboundHeaders(Packet packet) {
         SOAPFault soapFault;
         FaultDetailHeader s11FaultDetailHeader;
 

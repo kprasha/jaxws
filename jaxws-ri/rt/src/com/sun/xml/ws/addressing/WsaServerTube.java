@@ -31,7 +31,6 @@ import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -87,32 +86,16 @@ public final class WsaServerTube extends WsaTube {
         request.invocationProperties.put(REQUEST_FAULT_TO, faultTo);
         request.invocationProperties.put(REQUEST_MESSAGE_ID, messageId);
 
-        // close the transportBackChannel if it cannot be used for sending
-        // back either normal or fault replies
 
-        // if there is no FaultTo
-        if (faultTo == null) {
-            // default to ReplyTo
+        // defaulting
+        if (replyTo == null)    replyTo = addressingVersion.anonymousUri;
+        if (faultTo == null)    faultTo = replyTo;
 
-            // if ReplyTo is non-anonymous or None URI
-            if (replyTo != null && (!replyTo.equals(addressingVersion.anonymousUri) || replyTo.equals(addressingVersion.noneUri))) {
-                // close the transport back channel
-                if (request.transportBackChannel != null) {
-                    request.transportBackChannel.close();
-                }
-            }
-        } else {
-            // if both FaultTo and ReplyTo are non-anonymous
-            if ((!faultTo.equals(addressingVersion.anonymousUri) && replyTo != null && !replyTo.equals(addressingVersion.anonymousUri)) ||
-
-                    // or if both FaultTo and ReplyTo are none
-                    (faultTo.equals(addressingVersion.noneUri) && replyTo != null && replyTo.equals(addressingVersion.noneUri))
-                    ) {
-                if (request.transportBackChannel != null) {
-                    request.transportBackChannel.close();
-                }
-            }
-        }
+        // close the transportBackChannel if we know that
+        // we'll never use them
+        if (!faultTo.equals(addressingVersion.anonymousUri) && !replyTo.equals(addressingVersion.anonymousUri)
+          && request.transportBackChannel != null)
+            request.transportBackChannel.close();
 
         Packet p = validateInboundHeaders(request);
 
@@ -126,20 +109,13 @@ public final class WsaServerTube extends WsaTube {
             return doReturnWith(processFault(p, false));
         }
 
-        if (replyTo != null) {
-            // none ReplyTo
-            if (replyTo.equals(addressingVersion.noneUri) &&
-                    ((faultTo == null) ||
-                            (!faultTo.equals(addressingVersion.anonymousUri)))) {
-                return doInvoke(next,p);
-            }
+        // none ReplyTo
+        if (replyTo.equals(addressingVersion.noneUri) && !faultTo.equals(addressingVersion.anonymousUri))
+            return doInvoke(next,p);
 
-            // non-anonymous ReplyTo
-            if (!replyTo.equals(addressingVersion.anonymousUri) &&
-                    ((faultTo == null) ||
-                            (!faultTo.equals(addressingVersion.anonymousUri)))) {
-                return doReturnWith(processNonAnonymousReply(p, false, true));
-            }
+        // non-anonymous ReplyTo
+        if (!replyTo.equals(addressingVersion.anonymousUri) && !faultTo.equals(addressingVersion.anonymousUri)) {
+            return doReturnWith(processNonAnonymousReply(p, false, true));
         }
 
         return doInvoke(next,p);
@@ -283,12 +259,6 @@ public final class WsaServerTube extends WsaTube {
 
         if (wbo == null)
             return;
-
-        WSDLOperation op = wbo.getOperation();
-
-        if (op == null) {
-            return;
-        }
 
         String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
 
