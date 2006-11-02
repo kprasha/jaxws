@@ -47,10 +47,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Handles WS-Addressing for the server.
+ *
  * @author Arun Gupta
  */
-public class WsaServerTube extends WsaTube {
-    public WsaServerTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
+public final class WsaServerTube extends WsaTube {
+    public WsaServerTube(@NotNull WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
 
@@ -63,11 +65,6 @@ public class WsaServerTube extends WsaTube {
     }
 
     public @NotNull NextAction processRequest(Packet request) {
-        if(wsdlPort == null) {
-            // Addressing is not enabled
-            return doInvoke(next,request);
-        }
-
         // Store request ReplyTo and FaultTo in requestPacket.invocationProperties
         // so that they can be used after responsePacket is received.
         // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.

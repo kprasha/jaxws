@@ -26,17 +26,17 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.addressing.WsaServerTube;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.api.server.ServerPipelineHook;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.handler.HandlerTube;
 import com.sun.xml.ws.handler.ServerLogicalHandlerTube;
 import com.sun.xml.ws.handler.ServerSOAPHandlerTube;
 import com.sun.xml.ws.protocol.soap.ServerMUTube;
 import com.sun.xml.ws.util.pipe.DumpTube;
-import com.sun.xml.ws.binding.BindingImpl;
 
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.PrintStream;
@@ -187,7 +187,7 @@ public class ServerTubeAssemblerContext {
      * Creates WS-Addressing pipe
      */
     public Tube createWsaTube(Tube next) {
-        if (binding instanceof SOAPBinding && AddressingVersion.isEnabled(binding))
+        if (binding instanceof SOAPBinding && AddressingVersion.isEnabled(binding) && wsdlModel!=null)
             return new WsaServerTube(wsdlModel, binding, next);
         else
             return next;

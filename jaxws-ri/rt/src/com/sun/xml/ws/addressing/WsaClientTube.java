@@ -22,27 +22,26 @@
 
 package com.sun.xml.ws.addressing;
 
-import javax.xml.ws.WebServiceException;
-
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
-import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.resources.AddressingMessages;
+
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Arun Gupta
  */
-public class WsaClientTube extends WsaTube {
+public final class WsaClientTube extends WsaTube {
     public WsaClientTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
@@ -56,17 +55,12 @@ public class WsaClientTube extends WsaTube {
     }
 
     public @NotNull NextAction processRequest(Packet request) {
-        if(wsdlPort == null) {
-            // Addressing is not enabled
-            return doInvoke(next,request);
-        }
-        if (addressingVersion != null) {
-            // populate request WS-Addressing headers
-            HeaderList headerList = request.getMessage().getHeaders();
-            headerList.fillRequestAddressingHeaders(wsdlPort, binding, request);
-//            if(endpointReference!=null)
-//                endpointReference.addReferenceParameters(headerList);
-        }
+        // populate request WS-Addressing headers
+        HeaderList headerList = request.getMessage().getHeaders();
+        headerList.fillRequestAddressingHeaders(wsdlPort, binding, request);
+//      if(endpointReference!=null)
+//          endpointReference.addReferenceParameters(headerList);
+
         return doInvoke(next,request);
    }
 

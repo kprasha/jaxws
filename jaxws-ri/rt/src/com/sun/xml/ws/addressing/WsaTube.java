@@ -53,13 +53,21 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.AddressingFeature;
 
 /**
+ * WS-Addressing processing code shared between client and server.
+ *
+ * <p>
+ * This tube is used only when WS-Addressing is enabled.
+ *
  * @author Arun Gupta
  */
-public abstract class WsaTube extends AbstractFilterTubeImpl {
-    protected final WSDLPort wsdlPort;
+abstract class WsaTube extends AbstractFilterTubeImpl {
+    /**
+     * Port that we are processing.
+     */
+    protected final @NotNull WSDLPort wsdlPort;
     protected final WSBinding binding;
     final WsaTubeHelper helper;
-    protected final AddressingVersion addressingVersion;
+    protected final @NotNull AddressingVersion addressingVersion;
     protected final SOAPVersion soapVersion;
 
     public WsaTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
