@@ -75,11 +75,11 @@ public class PipeAdapter extends AbstractTubeImpl {
      * Uses the current fiber and runs the whole pipe to the completion
      * (meaning everything from now on will run synchronously.)
      */
-    public NextAction processRequest(Packet p) {
+    public @NotNull NextAction processRequest(@NotNull Packet p) {
         return doReturnWith(next.process(p));
     }
 
-    public NextAction processResponse(Packet p) {
+    public @NotNull NextAction processResponse(@NotNull Packet p) {
         throw new IllegalStateException();
     }
 
