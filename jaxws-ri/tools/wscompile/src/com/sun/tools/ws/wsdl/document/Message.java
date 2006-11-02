@@ -23,6 +23,9 @@
 package com.sun.tools.ws.wsdl.document;
 
 import com.sun.tools.ws.wsdl.framework.*;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.AbortException;
+import com.sun.tools.ws.resources.WsdlMessages;
 import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
@@ -35,17 +38,19 @@ import java.util.*;
  */
 public class Message extends GlobalEntity {
 
-    public Message(Defining defining, Locator locator) {
+    public Message(Defining defining, Locator locator, ErrorReceiver errReceiver) {
         super(defining, locator);
+        setErrorReceiver(errReceiver);
         _parts = new ArrayList<MessagePart>();
         _partsByName = new HashMap<String, MessagePart>();
     }
 
     public void add(MessagePart part) {
-        if (_partsByName.get(part.getName()) != null)
-            throw new ValidationException(
-                "validation.duplicateName",
-                part.getName());
+        if (_partsByName.get(part.getName()) != null){
+            errorReceiver.error(part.getLocator(), WsdlMessages.VALIDATION_DUPLICATE_PART_NAME(getName(), part.getName()));
+            throw new AbortException();
+        }
+
         _partsByName.put(part.getName(), part);
         _parts.add(part);
     }
@@ -100,7 +105,8 @@ public class Message extends GlobalEntity {
 
     public void validateThis() {
         if (getName() == null) {
-            failValidation("validation.missingRequiredAttribute", "name");
+            errorReceiver.error(getLocator(), WsdlMessages.VALIDATION_MISSING_REQUIRED_ATTRIBUTE("name", "wsdl:message"));
+            throw new AbortException();
         }
     }
 

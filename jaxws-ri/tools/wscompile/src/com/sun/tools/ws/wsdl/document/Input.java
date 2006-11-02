@@ -25,6 +25,9 @@ package com.sun.tools.ws.wsdl.document;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.*;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.AbortException;
+import com.sun.tools.ws.resources.WsdlMessages;
 import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
@@ -36,8 +39,9 @@ import javax.xml.namespace.QName;
  */
 public class Input extends Entity implements TWSDLExtensible {
 
-    public Input(Locator locator) {
+    public Input(Locator locator, ErrorReceiver errReceiver) {
         super(locator);
+        this.errorReceiver = errReceiver;
         _helper = new ExtensibilityHelper();
     }
 
@@ -93,7 +97,8 @@ public class Input extends Entity implements TWSDLExtensible {
 
     public void validateThis() {
         if (_message == null) {
-            failValidation("validation.missingRequiredAttribute", "message");
+            errorReceiver.error(getLocator(), WsdlMessages.VALIDATION_MISSING_REQUIRED_ATTRIBUTE("name", "wsdl:message"));
+            throw new AbortException();            
         }
     }
 

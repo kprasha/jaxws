@@ -23,6 +23,9 @@
 package com.sun.tools.ws.processor.model;
 
 import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.wscompile.AbortException;
+import com.sun.tools.ws.resources.ModelMessages;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -32,13 +35,15 @@ import java.util.*;
  * @author WS Development Team
  */
 public abstract class Message extends ModelObject {
-    protected Message(Entity entity) {
+    protected Message(com.sun.tools.ws.wsdl.document.Message entity, ErrorReceiver receiver) {
         super(entity);
+        setErrorReceiver(receiver);
     }
 
     public void addBodyBlock(Block b) {
         if (_bodyBlocks.containsKey(b.getName())) {
-            throw new ModelException("model.uniqueness");
+            errorReceiver.error(getEntity().getLocator(), ModelMessages.MODEL_PART_NOT_UNIQUE(((com.sun.tools.ws.wsdl.document.Message)getEntity()).getName(), b.getName()));
+            throw new AbortException();
         }
         _bodyBlocks.put(b.getName(), b);
         b.setLocation(Block.BODY);
@@ -79,7 +84,8 @@ public abstract class Message extends ModelObject {
 
     public void addHeaderBlock(Block b) {
         if (_headerBlocks.containsKey(b.getName())) {
-            throw new ModelException("model.uniqueness");
+            errorReceiver.error(getEntity().getLocator(), ModelMessages.MODEL_PART_NOT_UNIQUE(((com.sun.tools.ws.wsdl.document.Message)getEntity()).getName(), b.getName()));
+            throw new AbortException();
         }
         _headerBlocks.put(b.getName(), b);
         b.setLocation(Block.HEADER);
@@ -110,7 +116,8 @@ public abstract class Message extends ModelObject {
     /** attachment block */
     public void addAttachmentBlock(Block b) {
         if (_attachmentBlocks.containsKey(b.getName())) {
-            throw new ModelException("model.uniqueness");
+            errorReceiver.error(getEntity().getLocator(), ModelMessages.MODEL_PART_NOT_UNIQUE(((com.sun.tools.ws.wsdl.document.Message)getEntity()).getName(), b.getName()));
+            throw new AbortException();
         }
         _attachmentBlocks.put(b.getName(), b);
         b.setLocation(Block.ATTACHMENT);
@@ -162,8 +169,9 @@ public abstract class Message extends ModelObject {
     }
 
     public void addParameter(Parameter p) {
-        if (_parametersByName.containsKey(p.getName())) {
-            throw new ModelException("model.uniqueness");
+        if (_parametersByName.containsKey(p.getName())) {            
+            errorReceiver.error(getEntity().getLocator(), ModelMessages.MODEL_PARAMETER_NOTUNIQUE(p.getName(), p.getName()));
+            throw new AbortException();
         }
         _parameters.add(p);
         _parametersByName.put(p.getName(), p);
@@ -197,8 +205,8 @@ public abstract class Message extends ModelObject {
                 Parameter param = (Parameter) iter.next();
                 if (param.getName() != null &&
                     _parametersByName.containsKey(param.getName())) {
-
-                    throw new ModelException("model.uniqueness");
+                    errorReceiver.error(getEntity().getLocator(), ModelMessages.MODEL_PARAMETER_NOTUNIQUE(param.getName(), param.getName()));
+                    throw new AbortException();
                 }
                 _parametersByName.put(param.getName(), param);
             }

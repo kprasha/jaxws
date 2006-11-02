@@ -27,6 +27,8 @@ import org.xml.sax.Locator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+
 /**
  * An entity, typically corresponding to an XML element.
  *
@@ -35,10 +37,14 @@ import java.util.Map;
 public abstract class Entity implements Elemental {
 
     private final Locator locator;
+    protected ErrorReceiver errorReceiver;
     public Entity(Locator locator) {
         this.locator = locator;
     }
 
+    public void setErrorReceiver(ErrorReceiver errorReceiver) {
+        this.errorReceiver = errorReceiver;
+    }
 
     public Locator getLocator() {
         return locator;

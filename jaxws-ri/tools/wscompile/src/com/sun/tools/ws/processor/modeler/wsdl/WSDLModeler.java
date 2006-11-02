@@ -162,7 +162,7 @@ public class WSDLModeler extends WSDLModelerBase {
         } catch (ParseException e) {
             errReceiver.error(e);
         } catch (ValidationException e) {
-            reportError(document.getDefinitions(), e.getMessage(), e);
+            errReceiver.error(e.getMessage(), e);
         } catch (SAXException e) {
             errReceiver.error(e);
         }
@@ -548,7 +548,8 @@ public class WSDLModeler extends WSDLModelerBase {
 
         boolean isRequestResponse = info.portTypeOperation.getStyle() == OperationStyle.REQUEST_RESPONSE;
         Message inputMessage = getInputMessage();
-        Request request = new Request(inputMessage);
+        Request request = new Request(inputMessage, errReceiver);
+        request.setErrorReceiver(errReceiver);
         info.operation.setUse(SOAPUse.LITERAL);
         info.operation.setWSDLPortTypeOperation(info.portTypeOperation);
         SOAPBody soapRequestBody = getSOAPRequestBody();
@@ -567,9 +568,9 @@ public class WSDLModeler extends WSDLModelerBase {
                 warning(soapResponseBody, ModelerMessages.WSDLMODELER_WARNING_R_2716("soapbind:body", info.bindingOperation.getName()));
             }
             outputMessage = getOutputMessage();
-            response = new Response(outputMessage);
+            response = new Response(outputMessage, errReceiver);
         }else{
-            response = new Response(null);
+            response = new Response(null, errReceiver);
         }
 
         //ignore operation if there are more than one root part
@@ -876,16 +877,15 @@ public class WSDLModeler extends WSDLModelerBase {
         SOAPBody soapRequestBody = getSOAPRequestBody();
 
         Message inputMessage = getInputMessage();
-
-        Request request = new Request(inputMessage);
-        Response response = new Response(null);
+        Request request = new Request(inputMessage, errReceiver);
+        Response response = new Response(null, errReceiver);
 
         SOAPBody soapResponseBody = null;
         Message outputMessage = null;
         if (isRequestResponse) {
             soapResponseBody = getSOAPResponseBody();
             outputMessage = getOutputMessage();
-            response = new Response(outputMessage);
+            response = new Response(outputMessage, errReceiver);
         }
 
         // Process parameterOrder and get the parameterList

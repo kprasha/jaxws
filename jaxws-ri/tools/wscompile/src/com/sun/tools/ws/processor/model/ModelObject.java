@@ -23,6 +23,7 @@
 package com.sun.tools.ws.processor.model;
 
 import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,11 +38,15 @@ public abstract class ModelObject {
     public abstract void accept(ModelVisitor visitor) throws Exception;
 
     private final Entity entity;
+    protected ErrorReceiver errorReceiver;
 
     protected ModelObject(Entity entity) {
         this.entity = entity;
     }
 
+    public void setErrorReceiver(ErrorReceiver errorReceiver) {
+        this.errorReceiver = errorReceiver;
+    }
 
     public Entity getEntity() {
         return entity;

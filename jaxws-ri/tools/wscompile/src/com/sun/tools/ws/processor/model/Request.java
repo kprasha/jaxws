@@ -23,6 +23,7 @@
 package com.sun.tools.ws.processor.model;
 
 import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 
 /**
  *
@@ -30,8 +31,8 @@ import com.sun.tools.ws.wsdl.framework.Entity;
  */
 public class Request extends Message {
 
-    public Request(Entity entity) {
-        super(entity);
+    public Request(com.sun.tools.ws.wsdl.document.Message entity, ErrorReceiver receiver) {
+        super(entity, receiver);
     }
 
     public void accept(ModelVisitor visitor) throws Exception {

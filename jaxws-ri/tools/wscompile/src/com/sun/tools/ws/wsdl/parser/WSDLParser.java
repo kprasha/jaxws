@@ -39,6 +39,7 @@ import com.sun.xml.ws.util.ServiceFinder;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.Locator;
 
 import java.util.*;
 
@@ -168,6 +169,11 @@ public class WSDLParser {
 //        }
 
         Definitions definitions = parseDefinitionsNoImport(context, root);
+        if(definitions == null){
+            Locator locator = forest.locatorTable.getStartLocation(root.getDocumentElement());
+            errReceiver.error(locator, WsdlMessages.PARSING_NOT_AWSDL(locator.getSystemId()));
+
+        }
         processImports(context);
         context.popWSDLLocation();
         return definitions;
@@ -192,8 +198,9 @@ public class WSDLParser {
         TWSDLParserContextImpl context,
         Document doc) {
         Element e = doc.getDocumentElement();
-        if(!e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !e.getLocalName().equals("definitions"))
+        if(!e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !e.getLocalName().equals("definitions")){
             return null;
+        }          
         context.push();
         context.registerNamespaces(e);
 
@@ -271,7 +278,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Message message = new Message(definitions, forest.locatorTable.getStartLocation(e));
+        Message message = new Message(definitions, forest.locatorTable.getStartLocation(e), errReceiver);
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         message.setName(name);
 
@@ -428,7 +435,7 @@ public class WSDLParser {
 
                 context.push();
                 context.registerNamespaces(e2);
-                Input input = new Input(forest.locatorTable.getStartLocation(e2));
+                Input input = new Input(forest.locatorTable.getStartLocation(e2), errReceiver);
                 input.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
@@ -490,7 +497,7 @@ public class WSDLParser {
 
                 context.push();
                 context.registerNamespaces(e2);
-                Output output = new Output(forest.locatorTable.getStartLocation(e2));
+                Output output = new Output(forest.locatorTable.getStartLocation(e2), errReceiver);
                 output.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
