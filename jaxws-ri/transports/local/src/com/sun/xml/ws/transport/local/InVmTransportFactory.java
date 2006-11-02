@@ -19,7 +19,7 @@ public final class InVmTransportFactory extends TransportTubeFactory {
         if(!adrs.getScheme().equals("in-vm") && !adrs.getScheme().equals("in-vm-async"))
             return null;
 
-        String serverId = adrs.getHost();
+        String serverId = adrs.getAuthority();
         InVmServer server = InVmServer.get(serverId);
         if(server==null)
             throw new WebServiceException("No such server is running: "+adrs);
