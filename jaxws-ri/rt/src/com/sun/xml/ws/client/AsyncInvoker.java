@@ -1,18 +1,17 @@
 package com.sun.xml.ws.client;
 
-import com.sun.xml.ws.util.CompletedFuture;
-
-import javax.xml.ws.Response;
-import javax.xml.ws.AsyncHandler;
-import java.util.concurrent.FutureTask;
-import java.util.Map;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
+import com.sun.xml.ws.api.pipe.Tube;
 
 /**
- * {@link javax.xml.ws.Response} implementation.
+ * Invokes {@link Tube}line asynchronously for the client's async API(for e.g.: Dispatch#invokeAsync}
+ * The concrete classes need to call {@link Stub#processAsync(Packet, RequestContext, CompletionCallback)} in
+ * run() method.
  *
  * @author Jitendra Kotamraju
  */
-public abstract class AsyncInvoker<T> implements Runnable {
+public abstract class AsyncInvoker implements Runnable {
     /**
      * Because of the object instantiation order,
      * we can't take this as a constructor parameter.
