@@ -145,25 +145,27 @@ public abstract class PropertySet {
         return AccessController.doPrivileged(new PrivilegedAction<PropertyMap>() {
             public PropertyMap run() {
                 PropertyMap props = new PropertyMap();
-                for (Field f : clazz.getFields()) {
-                    Property cp = f.getAnnotation(Property.class);
-                    if(cp!=null)
-                        props.put(cp.value(), new FieldAccessor(f, cp));
-                }
-                for (Method m : clazz.getMethods()) {
-                    Property cp = m.getAnnotation(Property.class);
-                    if(cp!=null) {
-                        String name = m.getName();
-                        assert name.startsWith("get");
+                for( Class c=clazz; c!=null; c=c.getSuperclass()) {
+                    for (Field f : c.getDeclaredFields()) {
+                        Property cp = f.getAnnotation(Property.class);
+                        if(cp!=null)
+                            props.put(cp.value(), new FieldAccessor(f, cp));
+                    }
+                    for (Method m : c.getDeclaredMethods()) {
+                        Property cp = m.getAnnotation(Property.class);
+                        if(cp!=null) {
+                            String name = m.getName();
+                            assert name.startsWith("get");
 
-                        String setName = 's'+name.substring(1);   // getFoo -> setFoo
-                        Method setter;
-                        try {
-                            setter = clazz.getMethod(setName,m.getReturnType());
-                        } catch (NoSuchMethodException e) {
-                            setter = null; // no setter
+                            String setName = 's'+name.substring(1);   // getFoo -> setFoo
+                            Method setter;
+                            try {
+                                setter = clazz.getMethod(setName,m.getReturnType());
+                            } catch (NoSuchMethodException e) {
+                                setter = null; // no setter
+                            }
+                            props.put(cp.value(), new MethodAccessor(m,setter,cp));
                         }
-                        props.put(cp.value(), new MethodAccessor(m,setter,cp));
                     }
                 }
 
