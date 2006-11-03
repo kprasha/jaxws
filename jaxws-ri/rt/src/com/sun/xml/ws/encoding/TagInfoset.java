@@ -122,7 +122,7 @@ public final class TagInfoset {
                 String localName = reader.getAttributeLocalName(i);
 
                 String qname;
-                if(prefix.length()!=0){
+                if(prefix != null && prefix.length()!=0){
                     sb.append(prefix);
                     sb.append(":");
                     sb.append(localName);
