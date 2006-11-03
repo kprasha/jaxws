@@ -105,7 +105,9 @@ public class ProviderImpl extends Provider {
                 EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, endpointReference);
                 WSService service = new WSServiceDelegate(msepr.toWSDLSource(), msepr.serviceName.name, Service.class);
                 */
-        WSEndpointReference wsepr = WSEndpointReference.create(endpointReference);
+        if(endpointReference == null)
+            throw new WebServiceException(ProviderApiMessages.NULL_EPR());
+        WSEndpointReference wsepr =  new WSEndpointReference(endpointReference);
         WSEndpointReference.Metadata metadata = wsepr.getMetaData();
         WSService service;
         if(metadata.getWsdlSource() != null)
