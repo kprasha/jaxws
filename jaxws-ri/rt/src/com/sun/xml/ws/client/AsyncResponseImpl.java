@@ -1,24 +1,28 @@
 package com.sun.xml.ws.client;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.util.CompletedFuture;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.istack.NotNull;
 
-import javax.xml.ws.Response;
 import javax.xml.ws.AsyncHandler;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.Callable;
+import javax.xml.ws.Response;
 import java.util.Map;
+import java.util.concurrent.FutureTask;
 
 /**
- * {@link javax.xml.ws.Response} implementation.
+ * {@link Response} implementation. When Runnbale is executed, it just hands the
+ * request to Fiber and returns. When the Fiber finishes the execution, it sets
+ * response in the {@link FutureTask}
+ *
+ * <p>
+ * {@link ResponseImpl} executes things synchronously and waits for the return
+ * parameter.
  *
  * @author Jitendra Kotamraju
  */
 public final class AsyncResponseImpl<T> extends FutureTask<T> implements Response<T>, ResponseContextReceiver {
 
     /**
-     * Optional {@link javax.xml.ws.AsyncHandler} that gets invoked
+     * Optional {@link AsyncHandler} that gets invoked
      * at the completion of the task.
      */
     private final AsyncHandler<T> handler;
@@ -27,15 +31,15 @@ public final class AsyncResponseImpl<T> extends FutureTask<T> implements Respons
 
     /**
      *
-     * @param callable
+     * @param runnable
      *      This {@link Runnable} is executed asynchronously.
      * @param handler
-     *      Optional {@link javax.xml.ws.AsyncHandler} to invoke at the end
+     *      Optional {@link AsyncHandler} to invoke at the end
      *      of the processing. Can be null.
      */
-    public AsyncResponseImpl(Runnable callable, AsyncHandler<T> handler) {
-        super(callable, null);
-        this.callable = callable;
+    public AsyncResponseImpl(Runnable runnable, @Nullable AsyncHandler<T> handler) {
+        super(runnable, null);
+        this.callable = runnable;
         this.handler = handler;
     }
 
