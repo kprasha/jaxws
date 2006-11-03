@@ -104,7 +104,7 @@ public class WsimportOptions extends Options {
             }
             return 2;
         } else if (args[i].startsWith("-httpproxy:")) {
-            String value = requireArgument("-httpproxy:", args, ++i).substring(11);
+            String value = args[i].substring(11);
             if (value.length() == 0) {
                 throw new BadCommandLineException(WscompileMessages.WSCOMPILE_INVALID_OPTION(args[i]));
             }
@@ -118,7 +118,7 @@ public class WsimportOptions extends Options {
                 System.setProperty("proxyHost", value.substring(0, index));
                 System.setProperty("proxyPort", value.substring(index + 1));
             }
-            return 2;
+            return 1;
         }
         return j;
     }
