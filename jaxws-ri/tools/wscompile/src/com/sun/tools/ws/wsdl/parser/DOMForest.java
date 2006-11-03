@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the "License").  You may not use this file except
  * in compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://jwsdp.dev.java.net/CDDLv1.0.html
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * HEADER in each file and include the License file at
  * https://jwsdp.dev.java.net/CDDLv1.0.html  If applicable,
@@ -126,8 +126,8 @@ public class DOMForest {
         }
     }
 
-    public Iterable<Element> getInlinedSchemaElement(){
-        return inlinedSchemaElements;        
+    public List<Element> getInlinedSchemaElement(){
+        return inlinedSchemaElements;
     }
 
     public Document parse(InputSource source, boolean root) throws SAXException {
@@ -200,9 +200,14 @@ public class DOMForest {
             if(doc.getNamespaceURI() != null && doc.getNamespaceURI().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getNamespaceURI()) &&
                     doc.getLocalName().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getLocalPart()))
                     return dom;
-            
+
+            if(doc.getNamespaceURI() != null && doc.getNamespaceURI().equals(SchemaConstants.NS_XSD))
+                return dom;
+
+
             //if its not a WSDL document, retry with MEX
             if (doc.getNamespaceURI() == null || !doc.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !doc.getLocalName().equals("definitions")) {
+                errorReceiver.warning(locatorTable.getStartLocation(doc), WsdlMessages.INVALID_WSDL(systemId, "{"+doc.getNamespaceURI()+"}"+doc.getLocalName()));
                 return getFromMetadataResolver(systemId);
             }
             NodeList schemas = doc.getElementsByTagNameNS(SchemaConstants.NS_XSD, "schema");
@@ -343,39 +348,52 @@ public class DOMForest {
         }
 
         if(serviceDescriptor != null){
-            return parseMetadata(serviceDescriptor);
-        } else if (resolver != null &&
-            systemId.startsWith("http")){
-
-            if(systemId.endsWith("?wsdl")){
-                errorReceiver.error(new LocatorImpl(), WsdlMessages.PARSING_UNABLE_TO_GET_METADATA(systemId));
-            }else{
-                // tried mex already if resolver != null and URL doesnt end with ?wsdl
-                String getSysId = systemId + "?wsdl";
-                try {
-                    InputSource source = new InputSource(getSysId);
-                    return parse(getSysId, source, true);
-                } catch (SAXException e) {
-                    errorReceiver.error(WsdlMessages.PARSING_UNABLE_TO_GET_METADATA(getSysId), e);
-                }
-            }
+            return parseMetadata(systemId, serviceDescriptor);
+        } else{
+            errorReceiver.error(new LocatorImpl(), WsdlMessages.PARSING_UNABLE_TO_GET_METADATA(systemId));
         }
         return null;
     }
 
-    private Document parseMetadata(ServiceDescriptor serviceDescriptor){
+    private Document parseMetadata(String systemId, ServiceDescriptor serviceDescriptor){
         List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
         List<? extends Source> schemas = serviceDescriptor.getSchemas();
         Document root = null;
         for(Source src:wsdls){
             if(src instanceof DOMSource){
-                Document n = (Document) ((DOMSource) src).getNode();
+                Node n = ((DOMSource) src).getNode();
+                Document doc;
+                if(n.getNodeType() == Node.ELEMENT_NODE && n.getOwnerDocument() == null){
+                    doc = DOMUtil.createDom();
+                    doc.importNode(n, true);
+                }else{
+                    doc = n.getOwnerDocument();
+                }
 
 //                Element e = (n.getNodeType() == Node.ELEMENT_NODE)?(Element)n: DOMUtil.getFirstElementChild(n);
-                if(root == null)
-                    root = n;
-                core.put(src.getSystemId(), n);
+                if(root == null){
+                    //check if its main wsdl, then set it to root
+                    NodeList nl = doc.getDocumentElement().getElementsByTagNameNS(WSDLConstants.NS_WSDL, "service");
+                    if(nl.getLength() > 0){
+                        root = doc;
+                        mexRootDoc = src.getSystemId();
+                    }
+                }
+                NodeList nl = doc.getDocumentElement().getElementsByTagNameNS(WSDLConstants.NS_WSDL, "import");
+                if(nl.getLength() > 0){
+                    Element imp = (Element) nl.item(0);
+                    String loc = imp.getAttribute("location");
+                    if(loc != null){
+                        if(!externalReferences.contains(loc))
+                            externalReferences.add(loc);
+                    }
+                }
+                if(core.keySet().contains(systemId))
+                    core.remove(systemId);
+                core.put(src.getSystemId(), doc);
+                isMexMetadata = true;
             }
+
             //TODO:handle SAXSource
             //TODO:handler StreamSource
         }
@@ -390,6 +408,13 @@ public class DOMForest {
             //TODO:handler StreamSource
         }
         return root;
+    }
+
+
+    public boolean isMexMetadata;
+    private String mexRootDoc;
+    public Document getMexRootWSDL(){
+        return get(mexRootDoc);
     }
 
     /**
@@ -440,7 +465,7 @@ public class DOMForest {
     public String[] listSystemIDs() {
         return core.keySet().toArray(new String[core.keySet().size()]);
     }
-    
+
     /**
      * Gets the system ID from which the given DOM is parsed.
      * <p>
@@ -478,7 +503,5 @@ public class DOMForest {
             e.printStackTrace();
         }
     }
-
-
 
 }

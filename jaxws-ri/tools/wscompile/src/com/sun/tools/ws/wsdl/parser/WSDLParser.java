@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 
@@ -142,13 +142,18 @@ public class WSDLParser {
          * TODO: add support of creating WSDLDocument from collection of WSDL documents
          */
         String location = options.getWSDLs()[0].getSystemId();
+        Document root = forest.get(location);
+
+        if(forest.isMexMetadata){
+            root = forest.getMexRootWSDL();
+        }
+
+        if(root == null)
+            return null;
+
         WSDLDocument document = new WSDLDocument();
         document.setSystemId(location);
         TWSDLParserContextImpl context = new TWSDLParserContextImpl(forest, document, listeners);
-        String sysId = context.getDocument().getSystemId();
-        Document root = forest.get(sysId);
-        if(root == null)
-            return null;                    
 
         Definitions definitions = parseDefinitions(context, root);
         document.setDefinitions(definitions);
@@ -179,6 +184,20 @@ public class WSDLParser {
         return definitions;
     }
 
+    private void processMexDocs(TWSDLParserContextImpl context){
+        for(String location : forest.listSystemIDs()){
+            if (!context.getDocument().isImportedDocument(location)){
+                Document doc = forest.get(location);
+                if(doc == null)
+                    continue;
+                Definitions importedDefinitions = parseDefinitionsNoImport(context, doc);
+                if(importedDefinitions == null)
+                    continue;
+                context.getDocument().addImportedEntity(importedDefinitions);
+                context.getDocument().addImportedDocument(location);
+            }
+        }
+    }
     private void processImports(TWSDLParserContextImpl context) {
         for(String location : forest.getExternalReferences()){
             if (!context.getDocument().isImportedDocument(location)){
@@ -198,9 +217,10 @@ public class WSDLParser {
         TWSDLParserContextImpl context,
         Document doc) {
         Element e = doc.getDocumentElement();
-        if(!e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !e.getLocalName().equals("definitions")){
+        //at this poinjt we expect a wsdl or schema document to be fully qualified
+        if(e.getNamespaceURI() == null || (!e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !e.getLocalName().equals("definitions"))){
             return null;
-        }          
+        }
         context.push();
         context.registerNamespaces(e);
 
@@ -995,6 +1015,10 @@ public class WSDLParser {
                 errReceiver.warning(forest.locatorTable.getStartLocation(e), WsdlMessages.WARNING_WSI_R_2003());
             }else{
                 checkNotWsdlElement(e);
+//                if (XmlUtil.matchesTagNS(e, SchemaConstants.QNAME_SCHEMA)) {
+//                    forest.getInlinedSchemaElement().add(e);
+//                }
+
             }
         }
     }
