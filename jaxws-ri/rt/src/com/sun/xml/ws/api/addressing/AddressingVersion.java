@@ -62,7 +62,7 @@ public enum AddressingVersion {
                     "ServiceName",
                     "EndpointName",
                     "InterfaceName",
-                    "Metadata",
+                    new QName("http://www.w3.org/2005/08/addressing","Metadata"),
                     "ReferenceParameters",
                     null )) {
         @Override
@@ -135,7 +135,7 @@ public enum AddressingVersion {
                     "ServiceName",
                     "PortName",
                     "PortType",
-                    "EndpointReference",
+                    MemberSubmissionAddressingConstants.MEX_METADATA_SECTION,
                     "ReferenceParameters",
                     "ReferenceProperties")) {
         @Override
@@ -675,13 +675,13 @@ public enum AddressingVersion {
         /**
          * Element under which metadata is specified.
          * In W3C, it is wsa:Metadata
-         * In Member, it is directly under wsa:EndpointReference
+         * In Member, it is directly under mex:MetadataSection
          */
-        public final String metadataElement;
+        public final QName wsdlMetadata;
         public final String referenceProperties;
 
         public EPR(Class<? extends EndpointReference> eprClass, String address, String serviceName, String portName,
-                    String portTypeName, String metadata,
+                    String portTypeName, QName wsdlMetadata,
                     String referenceParameters, String referenceProperties) {
             this.eprClass = eprClass;
             this.address = address;
@@ -690,7 +690,7 @@ public enum AddressingVersion {
             this.portTypeName = portTypeName;
             this.referenceParameters = referenceParameters;
             this.referenceProperties = referenceProperties;
-            this.metadataElement = metadata;
+            this.wsdlMetadata = wsdlMetadata;
 
         }
     }
