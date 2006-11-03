@@ -135,7 +135,7 @@ public enum AddressingVersion {
                     "ServiceName",
                     "PortName",
                     "PortType",
-                    MemberSubmissionAddressingConstants.MEX_METADATA_SECTION,
+                    MemberSubmissionAddressingConstants.MEX_METADATA,
                     "ReferenceParameters",
                     "ReferenceProperties")) {
         @Override

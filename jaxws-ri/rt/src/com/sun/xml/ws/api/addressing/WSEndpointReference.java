@@ -908,15 +908,17 @@ public final class WSEndpointReference {
                     //If the current element is metadata enclosure, look inside
                     if (localName.equals(version.eprType.wsdlMetadata.getLocalPart()) &&
                             ns.equals(version.eprType.wsdlMetadata.getNamespaceURI())) {
-                        XMLStreamBuffer mark;
-                        while ((mark = xsr.nextTagAndMark()) != null) {
-                            localName = xsr.getLocalName();
-                            ns = xsr.getNamespaceURI();
-                            if (ns.equals(WSDLConstants.NS_WSDL)
-                                    && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
-                                wsdlSource = new XMLStreamBufferSource(mark);
-                            } else {
-                                XMLStreamReaderUtil.skipElement(xsr);
+                        while (xsr.nextTag() == XMLStreamReader.START_ELEMENT) {
+                            XMLStreamBuffer mark;
+                            while ((mark = xsr.nextTagAndMark()) != null) {
+                                localName = xsr.getLocalName();
+                                ns = xsr.getNamespaceURI();
+                                if (ns.equals(WSDLConstants.NS_WSDL)
+                                        && localName.equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                                    wsdlSource = new XMLStreamBufferSource(mark);
+                                } else {
+                                    XMLStreamReaderUtil.skipElement(xsr);
+                                }
                             }
                         }
                     } else if (localName.equals(version.eprType.serviceName)) {
