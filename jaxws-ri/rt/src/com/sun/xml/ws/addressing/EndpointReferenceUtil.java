@@ -28,10 +28,8 @@ import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
+import org.w3c.dom.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -150,9 +148,12 @@ public class EndpointReferenceUtil {
             //Check for wsdl in extension elements
             if ((msEpr.elements != null) && (msEpr.elements.size() > 0)) {
                 for (Element e : msEpr.elements) {
-                    if (e.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
-                            e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
-                        wsdlElement = e;
+                    if(e.getNamespaceURI().equals(MemberSubmissionAddressingConstants.MEX_METADATA.getNamespaceURI()) &&
+                            e.getLocalName().equals(MemberSubmissionAddressingConstants.MEX_METADATA.getLocalPart())) {
+                        NodeList nl = e.getElementsByTagNameNS(WSDLConstants.NS_WSDL,
+                                WSDLConstants.QNAME_DEFINITIONS.getLocalPart());
+                        if(nl != null)
+                            wsdlElement = (Element) nl.item(0);
                     }
                 }
             }
@@ -280,6 +281,20 @@ public class EndpointReferenceUtil {
                                 msEpr.portTypeName.name = new QName(null, name);
                             }
                             msEpr.portTypeName.attributes = getAttributes(elm);
+                        } else if(elm.getNamespaceURI().equals(WSDLConstants.NS_WSDL) &&
+                                elm.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
+                            Document doc = DOMUtil.createDom();
+                            Element mexEl = doc.createElementNS(MemberSubmissionAddressingConstants.MEX_METADATA.getNamespaceURI(),
+                                    MemberSubmissionAddressingConstants.MEX_METADATA.getPrefix()+":"
+                                            +MemberSubmissionAddressingConstants.MEX_METADATA.getLocalPart());
+                            Element metadataEl = doc.createElementNS(MemberSubmissionAddressingConstants.MEX_METADATA_SECTION.getNamespaceURI(),
+                                    MemberSubmissionAddressingConstants.MEX_METADATA_SECTION.getPrefix()+":"
+                                            +MemberSubmissionAddressingConstants.MEX_METADATA_SECTION.getLocalPart());
+                            metadataEl.setAttribute(MemberSubmissionAddressingConstants.MEX_METADATA_DIALECT_ATTRIBUTE,
+                                    MemberSubmissionAddressingConstants.MEX_METADATA_DIALECT_VALUE);
+                            metadataEl.appendChild(elm);
+                            mexEl.appendChild(metadataEl);
+
                         } else {
                             //TODO : Revisit this
                             //its extensions in META-DATA and should be copied to extensions in MS EPR

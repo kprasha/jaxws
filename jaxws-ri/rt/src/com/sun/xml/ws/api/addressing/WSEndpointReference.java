@@ -349,15 +349,29 @@ public final class WSEndpointReference {
     }
 
     private static void writeWsdl(StreamWriterBufferCreator writer, QName service, String wsdlAddress) throws XMLStreamException {
-        writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
-                WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
-                WSDLConstants.NS_WSDL);
-        writer.writeNamespace(WSDLConstants.PREFIX_NS_WSDL, WSDLConstants.NS_WSDL);
-        writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
-                WSDLConstants.QNAME_IMPORT.getLocalPart(),
-                WSDLConstants.NS_WSDL);
-        writer.writeAttribute("namespace", service.getNamespaceURI());
-        writer.writeAttribute("location", wsdlAddress);
+        //Write mex:Metadata wrapper
+        writer.writeStartElement(MemberSubmissionAddressingConstants.MEX_METADATA.getPrefix(),
+                MemberSubmissionAddressingConstants.MEX_METADATA.getLocalPart(),
+                MemberSubmissionAddressingConstants.MEX_METADATA.getNamespaceURI());
+        writer.writeStartElement(MemberSubmissionAddressingConstants.MEX_METADATA_SECTION.getPrefix(),
+                MemberSubmissionAddressingConstants.MEX_METADATA_SECTION.getLocalPart(),
+                MemberSubmissionAddressingConstants.MEX_METADATA_SECTION.getNamespaceURI());
+        writer.writeAttribute(MemberSubmissionAddressingConstants.MEX_METADATA_DIALECT_ATTRIBUTE,
+                MemberSubmissionAddressingConstants.MEX_METADATA_DIALECT_VALUE);
+        {
+            // Inline-wsdl
+            writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                    WSDLConstants.QNAME_DEFINITIONS.getLocalPart(),
+                    WSDLConstants.NS_WSDL);
+            writer.writeNamespace(WSDLConstants.PREFIX_NS_WSDL, WSDLConstants.NS_WSDL);
+            writer.writeStartElement(WSDLConstants.PREFIX_NS_WSDL,
+                    WSDLConstants.QNAME_IMPORT.getLocalPart(),
+                    WSDLConstants.NS_WSDL);
+            writer.writeAttribute("namespace", service.getNamespaceURI());
+            writer.writeAttribute("location", wsdlAddress);
+            writer.writeEndElement();
+            writer.writeEndElement();
+        }
         writer.writeEndElement();
         writer.writeEndElement();
     }
