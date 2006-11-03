@@ -50,7 +50,7 @@ public final class ServletAdapter extends HttpAdapter {
     final String urlPattern;
 
 
-    protected ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, HttpAdapterList<ServletAdapter> owner) {
+    protected ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, ServletAdapterList owner) {
         super(endpoint, owner);
         this.name = name;
         this.urlPattern = urlPattern;
