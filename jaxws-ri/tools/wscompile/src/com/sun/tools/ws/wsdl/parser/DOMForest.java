@@ -197,12 +197,12 @@ public class DOMForest {
                 return null;
             }
             //if its JAXWS binding file just return it
-            if(doc.getNamespaceURI().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getNamespaceURI()) &&
+            if(doc.getNamespaceURI() != null && doc.getNamespaceURI().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getNamespaceURI()) &&
                     doc.getLocalName().equals(JAXWSBindingsConstants.JAXWS_BINDINGS.getLocalPart()))
                     return dom;
             
             //if its not a WSDL document, retry with MEX
-            if (!doc.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !doc.getLocalName().equals("definitions")) {
+            if (doc.getNamespaceURI() == null || !doc.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !doc.getLocalName().equals("definitions")) {
                 return getFromMetadataResolver(systemId);
             }
             NodeList schemas = doc.getElementsByTagNameNS(SchemaConstants.NS_XSD, "schema");
