@@ -47,7 +47,7 @@ public class WsgenOptions extends Options {
     /**
      * -r
      */
-    public File nonclassDestDir = destDir;
+    public File nonclassDestDir;
 
 
     /**
@@ -159,6 +159,8 @@ public class WsgenOptions extends Options {
     private boolean noWebServiceEndpoint;
 
     public void validate() throws BadCommandLineException {
+        if(nonclassDestDir == null)
+            nonclassDestDir = destDir;
         if (!protocol.equalsIgnoreCase(SOAP11) &&
                 !protocol.equalsIgnoreCase(X_SOAP12)) {
             throw new BadCommandLineException(WscompileMessages.WSGEN_INVALID_PROTOCOL(protocol, SOAP11 + ", " + X_SOAP12));
