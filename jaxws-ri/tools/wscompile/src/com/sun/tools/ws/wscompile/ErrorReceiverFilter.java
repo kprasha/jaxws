@@ -47,6 +47,14 @@ public class ErrorReceiverFilter extends ErrorReceiver {
     private boolean hadError = false;
     public final boolean hadError() { return hadError; }
 
+    /**
+     * Resets the error state its currently in. It allows to ignore the error reported by
+     * any sub-system. 
+     */
+    public void reset(){
+        hadError = false;
+    }
+
     public void info(SAXParseException exception) {
         if(core!=null)  core.info(exception);
     }

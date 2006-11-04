@@ -176,6 +176,8 @@ public class DOMForest {
 
         systemId = normalizeSystemId(systemId);
 
+        boolean retryMex = false;
+        Exception exception = null;
         // put into the map before growing a tree, to
         // prevent recursive reference from causing infinite loop.
         core.put(systemId, dom);
@@ -207,30 +209,44 @@ public class DOMForest {
 
             //if its not a WSDL document, retry with MEX
             if (doc.getNamespaceURI() == null || !doc.getNamespaceURI().equals(WSDLConstants.NS_WSDL) || !doc.getLocalName().equals("definitions")) {
-                errorReceiver.warning(locatorTable.getStartLocation(doc), WsdlMessages.INVALID_WSDL(systemId, "{"+doc.getNamespaceURI()+"}"+doc.getLocalName()));
-                return getFromMetadataResolver(systemId);
+                retryMex = true;
             }
             NodeList schemas = doc.getElementsByTagNameNS(SchemaConstants.NS_XSD, "schema");
             for (int i = 0; i < schemas.getLength(); i++) {
                 inlinedSchemaElements.add((Element) schemas.item(i));
             }
         } catch (ParserConfigurationException e) {
-            // in practice, this exception won't happen.
-            errorReceiver.error(e.getMessage(), e);
-            core.remove(systemId);
-            rootDocuments.remove(systemId);
-            return null;
-        } catch (IOException e) {
+            retryMex = true;
+            exception = e;
+        } catch (IOException e) {            
             //lets try with MetadataResolverFactory
-            dom = getFromMetadataResolver(systemId);
-            if (dom == null) {
-                errorReceiver.error(e.getMessage(), e);
-                core.remove(systemId);
-                rootDocuments.remove(systemId);
-                return null;
+            retryMex = true;
+            exception = e;
+        }catch(SAXException e){
+            //lets try with MetadataResolverFactory
+            retryMex = true;
+            exception = e;
+
+        }
+        
+        if(retryMex){
+            if(dom.getDocumentElement() != null){
+                Element doc = dom.getDocumentElement();
+                errorReceiver.warning(locatorTable.getStartLocation(doc), WsdlMessages.INVALID_WSDL_WITH_DOOC(systemId, "{"+doc.getNamespaceURI()+"}"+doc.getLocalName()));
+            }else{
+                errorReceiver.warning(new LocatorImpl(), WsdlMessages.INVALID_WSDL(systemId));
+            }
+            dom =  getFromMetadataResolver(systemId);
+            //mex succedded
+            if(dom != null){
+                return dom;
             }
         }
-
+        if(exception != null){
+            errorReceiver.error(exception.getMessage(), exception);
+            core.remove(systemId);
+            rootDocuments.remove(systemId);
+        }
         return dom;
     }
 

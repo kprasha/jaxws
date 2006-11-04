@@ -118,9 +118,11 @@ public class WSDLModeler extends WSDLModelerBase {
             });
 
             document = parser.parse();
-            if (document == null || document.getDefinitions() == null || errReceiver.hadError())
+            if (document == null || document.getDefinitions() == null)
                 return null;
 
+            //reset the errors reported earlier
+            errReceiver.reset();
             document.validateLocally();
             forest = parser.getDOMForest();
             Model model = internalBuildModel(document);
