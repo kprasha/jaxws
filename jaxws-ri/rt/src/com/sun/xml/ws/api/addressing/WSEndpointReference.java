@@ -475,7 +475,7 @@ public final class WSEndpointReference {
     public
     @NotNull
     EndpointReference toSpec() {
-        return ProviderImpl.INSTANCE.readEndpointReference(new XMLStreamBufferSource(infoset));
+        return ProviderImpl.INSTANCE.readEndpointReference(asSource("EndpointReference"));
     }
 
     /**
