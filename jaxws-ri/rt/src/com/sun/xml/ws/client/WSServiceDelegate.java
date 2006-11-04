@@ -298,14 +298,7 @@ public class WSServiceDelegate extends WSService {
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
         QName portName = null;
         if(wsepr != null) {
-            portName = getPortName(wsepr);            
-        }
-        if (portName == null) {
-            //get the first port corresponding to the SEI
-            WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
-            if (port == null)
-                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
-            portName = port.getName();
+            portName = getPortNameFromEPR(wsepr,portTypeName);
         }
         addSEI(portName, portInterface);
         return createEndpointIFBaseProxy(wsepr,portName,portInterface,features);
@@ -421,7 +414,7 @@ public class WSServiceDelegate extends WSService {
         if (endpointReference == null)
             throw new WebServiceException(ProviderApiMessages.NULL_EPR());
         WSEndpointReference wsepr = new WSEndpointReference(endpointReference);
-        QName eprPortName = getPortName(wsepr);
+        QName eprPortName = getPortNameFromEPR(wsepr,null);
         //add Port, if it does n't exist;
         // TODO: what if it has different epr address?
         {
@@ -434,7 +427,20 @@ public class WSServiceDelegate extends WSService {
         return eprPortName;
     }
 
-    private QName getPortName(WSEndpointReference wsepr) {
+    /**
+     *
+     * @param wsepr EndpointReference from which portName will be extracted.
+     *      If EndpointName ( port name) is null in EPR, then it will try to get if from WSDLModel using portType QName
+     * @param portTypeName
+     *          should be null in dispatch case
+     *          should be non null in SEI case
+     * @return
+     *      port name from EPR after validating various metadat elements.
+     *      Also if service instance does n't have wsdl,
+     *      then it gets the WSDL metadata from EPR and builds wsdl model.
+     */
+    private QName getPortNameFromEPR(@NotNull WSEndpointReference wsepr, @Nullable QName portTypeName) {
+        QName portName;
         WSEndpointReference.Metadata metadata = wsepr.getMetaData();
         QName eprServiceName = metadata.getServiceName();
         QName eprPortName = metadata.getPortName();
@@ -444,8 +450,6 @@ public class WSServiceDelegate extends WSService {
             throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n"
                     + " The two Service QNames must match");
         }
-        if (eprPortName == null)
-            throw new WebServiceException(ProviderApiMessages.NULL_PORTNAME());
         if (wsdlService == null) {
             Source eprWsdlSource = metadata.getWsdlSource();
             if (eprWsdlSource == null) {
@@ -461,10 +465,21 @@ public class WSServiceDelegate extends WSService {
                 throw new WebServiceException(ClientMessages.INVALID_ADDRESS(wsepr.getAddress()));
             }
         }
-        if (wsdlService.get(eprPortName) == null)
-            throw new WebServiceException(ClientMessages.INVALID_EPR_PORT_NAME(eprPortName, buildWsdlPortNames()));
+        portName = eprPortName;
 
-        return eprPortName;
+        if (portName == null && portTypeName != null) {
+            //get the first port corresponding to the SEI
+            WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
+            if (port == null)
+                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
+            portName = port.getName();
+        }
+        if (portName == null)
+            throw new WebServiceException(ProviderApiMessages.NULL_PORTNAME());
+        if (wsdlService.get(portName) == null)
+            throw new WebServiceException(ClientMessages.INVALID_EPR_PORT_NAME(portName, buildWsdlPortNames()));
+
+        return portName;
 
     }
     public QName getServiceName() {
