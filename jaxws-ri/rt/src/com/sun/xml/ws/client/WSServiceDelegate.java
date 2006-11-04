@@ -298,7 +298,14 @@ public class WSServiceDelegate extends WSService {
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
         QName portName = null;
         if(wsepr != null) {
+            //if port name is not specified in EPR, it will use portTypeName to get it from the WSDL model.
             portName = getPortNameFromEPR(wsepr,portTypeName);
+        } else {
+            //get the first port corresponding to the SEI
+            WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
+            if (port == null)
+                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
+            portName = port.getName();
         }
         addSEI(portName, portInterface);
         return createEndpointIFBaseProxy(wsepr,portName,portInterface,features);
