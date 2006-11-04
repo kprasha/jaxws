@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.Container;
@@ -116,7 +117,7 @@ public class EndpointFactory {
             md.add(primaryWsdl);
 
         if(container==null)
-            container = Container.NONE;
+            container = ContainerResolver.getInstance().getContainer();
 
         if(serviceName==null)
             serviceName = getDefaultServiceName(implType);
