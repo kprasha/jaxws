@@ -445,7 +445,7 @@ public final class WSEndpointReference {
         };
         filter.setContentHandler(xsb.createFromSAXBufferCreator());
         try {
-            infoset.writeTo(filter);
+            infoset.writeTo(filter,false);
         } catch (SAXException e) {
             throw new AssertionError(e); // impossible since we are writing from XSB to XSB.
         }
@@ -648,18 +648,30 @@ public final class WSEndpointReference {
     }
 
     /**
+     * @deprecated
+     *      Use {@link #writeTo(String, ContentHandler, ErrorHandler, boolean)}
+     *      To be removed before FCS. 
+     */
+    public void writeTo(@NotNull String localName, ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+        writeTo(localName,contentHandler,errorHandler,true);
+    }
+
+    /**
      * Writes this EPR to the given {@link ContentHandler}.
      *
      * @param localName
      *      EPR uses a different root tag name depending on the context.
      *      The returned {@link Source} will use the given local name
      *      for the root element name.
+     * @param fragment
+     *      If true, generate a fragment SAX events without start/endDocument callbacks.
+     *      If false, generate a full XML document event.
      */
-    public void writeTo(@NotNull String localName, ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
+    public void writeTo(@NotNull String localName, ContentHandler contentHandler, ErrorHandler errorHandler, boolean fragment) throws SAXException {
         SAXBufferProcessorImpl p = new SAXBufferProcessorImpl(localName);
         p.setContentHandler(contentHandler);
         p.setErrorHandler(errorHandler);
-        p.process(infoset);
+        p.process(infoset,fragment);
     }
 
     /**
@@ -708,7 +720,7 @@ public final class WSEndpointReference {
             public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
                 super.writeStartElement(prefix, override(localName), namespaceURI);
             }
-        });
+        },true/*write as fragment*/);
     }
 
     /**
@@ -761,7 +773,7 @@ public final class WSEndpointReference {
         private boolean root=true;
 
         public SAXBufferProcessorImpl(String rootLocalName) {
-            super(infoset);
+            super(infoset,false);
             this.rootLocalName = rootLocalName;
         }
 
