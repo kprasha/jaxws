@@ -99,5 +99,15 @@ public interface WebServiceContextDelegate {
      */
     @NotNull String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 
+    /**
+     * Gets the address of the primary wsdl that can be used for writing wsdl in EPR.
+     * for http case, it is always getEPRAddress()+"?wsdl" 
+     * @param request
+     *      Always non-null. See class javadoc.
+     * @param endpoint
+     *      The endpoint whose address will be returned.
+     *
+     * @return null if there is no WSDL for this endpoint.
+     */
     @Nullable String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 }
