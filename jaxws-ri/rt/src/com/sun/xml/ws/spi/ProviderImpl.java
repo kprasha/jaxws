@@ -24,6 +24,8 @@ package com.sun.xml.ws.spi;
 
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.server.*;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -52,6 +54,7 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.awt.*;
 
 /**
  * The entry point to the JAX-WS RI from the JAX-WS API.
@@ -122,11 +125,26 @@ public class ProviderImpl extends Provider {
             if (serviceName == null || portName == null) {
                 throw new IllegalStateException(ProviderApiMessages.NULL_ADDRESS_SERVICE_ENDPOINT());
             } else {
-                //TODO create SPI to get if from JavaEE Container
-                //address = getMeAddress(serviceName,portName);
-
+                //check if it is run in a Java EE Container and if so, get address using serviceName and portName
+                Container container = ContainerResolver.getInstance().getContainer();
+                Module module = container.getSPI(Module.class);
+                if (module != null) {
+                    List<BoundEndpoint> beList = module.getBoundEndpoints();
+                    for (BoundEndpoint be : beList) {
+                        WSEndpoint wse = be.getEndpoint();
+                        if (wse.getServiceName().equals(serviceName) && wse.getPortName().equals(portName)) {
+                            try {
+                                address = be.getAddress().toString();
+                            } catch (WebServiceException e) {
+                                // May be the container does n't support this
+                                //just ignore the exception
+                            }
+                            break;
+                        }
+                    }
+                }
                 //address is still null? may be its not run in a JavaEE Container
-                if(address == null)
+                if (address == null)
                     throw new IllegalStateException(ProviderApiMessages.NULL_ADDRESS());
             }
         }
@@ -136,11 +154,8 @@ public class ProviderImpl extends Provider {
         //Validate Service and Port in WSDL
         if (wsdlDocumentLocation != null) {
             try {
-                EntityResolver er = null;
-                //TODO get catalog resolver from Container
-                if (er == null) {
-                    er = XmlUtil.createDefaultCatalogResolver();
-                }
+                EntityResolver er = XmlUtil.createDefaultCatalogResolver();
+
                 URL wsdlLoc = new URL(wsdlDocumentLocation);
                 WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(wsdlLoc, null, er,
                         false, ServiceFinder.find(WSDLParserExtension.class).toArray());
