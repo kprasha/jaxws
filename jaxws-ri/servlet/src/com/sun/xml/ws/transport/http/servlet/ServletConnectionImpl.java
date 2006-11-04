@@ -60,7 +60,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     private Headers requestHeaders;
     private final HttpAdapter adapter;
 
-    public ServletConnectionImpl(HttpAdapter adapter, ServletContext context, HttpServletRequest request, HttpServletResponse response) {
+    public ServletConnectionImpl(@NotNull HttpAdapter adapter, ServletContext context, HttpServletRequest request, HttpServletResponse response) {
         this.adapter = adapter;
         this.context = context;
         this.request = request;
@@ -164,6 +164,15 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         if(address==null)
             throw new WebServiceException(WsservletMessages.SERVLET_NO_ADDRESS_AVAILABLE(endpoint.getPortName()));
         return address;
+    }
+
+
+    public String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
+        String eprAddress = getEPRAddress(request,endpoint);
+        if(adapter.getEndpoint().getPort() != null)
+            return eprAddress+"?wsdl";
+        else
+            return null;
     }
 
     @Override

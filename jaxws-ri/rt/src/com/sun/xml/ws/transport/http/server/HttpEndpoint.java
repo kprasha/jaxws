@@ -106,7 +106,8 @@ final class HttpEndpoint {
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         WSEndpointImpl endpointImpl = (WSEndpointImpl) adapter.getEndpoint();
-        return clazz.cast(endpointImpl.getEndpointReference(clazz, getEPRAddress(),referenceParameters));
+        String eprAddress = getEPRAddress();
+        return clazz.cast(endpointImpl.getEndpointReference(clazz, eprAddress,eprAddress+"?wsdl", referenceParameters));
     }
 
 }

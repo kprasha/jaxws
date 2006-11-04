@@ -23,6 +23,7 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Pipe;
 
@@ -97,4 +98,6 @@ public interface WebServiceContextDelegate {
      * @see WebServiceContext#getEndpointReference
      */
     @NotNull String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
+
+    @Nullable String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 }

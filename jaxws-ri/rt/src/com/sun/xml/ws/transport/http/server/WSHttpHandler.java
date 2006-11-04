@@ -83,7 +83,7 @@ final class WSHttpHandler implements HttpHandler {
     }
 
     public void handleExchange(HttpExchange msg) throws IOException {
-        WSHTTPConnection con = new ServerConnectionImpl(msg);
+        WSHTTPConnection con = new ServerConnectionImpl(adapter,msg);
         try {
             logger.fine("Received HTTP request:"+msg.getRequestURI());
             String method = msg.getRequestMethod();

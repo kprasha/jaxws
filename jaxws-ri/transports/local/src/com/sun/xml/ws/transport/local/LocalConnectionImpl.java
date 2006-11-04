@@ -26,6 +26,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
@@ -95,6 +96,14 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
 
     public @NotNull String getEPRAddress(Packet request, WSEndpoint endpoint) {
         return baseURI.resolve("?"+endpoint.getPortName().getLocalPart()).toString();
+    }
+
+    public String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
+        ServiceDefinition sd = endpoint.getServiceDefinition();
+        if(sd != null) {
+            return sd.getPrimary().getURL().toString();
+        } else
+            return null;
     }
 
     @Property(MessageContext.HTTP_REQUEST_METHOD)

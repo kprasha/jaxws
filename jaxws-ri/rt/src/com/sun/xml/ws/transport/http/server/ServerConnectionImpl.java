@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
+import com.sun.xml.ws.transport.http.HttpAdapter;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
@@ -52,11 +53,11 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     private final HttpExchange httpExchange;
     private int status;
     private int responseContentLength = 0;
-
+    private HttpAdapter adapter;
     private boolean outputWritten;
 
 
-    public ServerConnectionImpl(@NotNull HttpExchange httpExchange) {
+    public ServerConnectionImpl(@NotNull HttpAdapter adapter, @NotNull HttpExchange httpExchange) {
         this.httpExchange = httpExchange;
     }
 
@@ -135,6 +136,14 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
 
     public @NotNull String getEPRAddress(Packet request, WSEndpoint endpoint) {
         return WSHttpHandler.getRequestAddress(httpExchange);
+    }
+
+    public String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint) {
+        String eprAddress = getEPRAddress(request,endpoint);
+        if(adapter.getEndpoint().getPort() != null)
+            return eprAddress+"?wsdl";
+        else
+            return null;
     }
 
     @Override
