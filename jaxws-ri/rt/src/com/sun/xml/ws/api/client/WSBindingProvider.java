@@ -5,7 +5,7 @@ import javax.xml.ws.BindingProvider;
 /**
  * Extends {@link BindingProvider} with RI specific methods. This object is
  * accessed after creating a proxy or dispatch instance in
- * {@link PortCreationCallback} methods. The callback implementor(typically
+ * {@link PortCreationCallback}, {@link ServiceInterceptor} methods. The callback implementor(typically
  * a container) could use this object to add some functionality under the
  * covers.
  *
@@ -17,6 +17,7 @@ import javax.xml.ws.BindingProvider;
  * Since dynamic proxy is created using this, this needs be an interface
  *
  * @see PortCreationCallback
+ * @see ServiceInterceptor
  *
  * @author Jitendra Kotamraju
  */
