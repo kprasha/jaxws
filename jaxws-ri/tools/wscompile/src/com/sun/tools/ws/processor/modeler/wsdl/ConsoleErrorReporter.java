@@ -33,6 +33,7 @@ public class ConsoleErrorReporter extends ErrorReceiver {
 
     private boolean hasError;
     private PrintStream output;
+    private boolean debug;
 
     public ConsoleErrorReporter(PrintStream stream) {
         this.output = stream;
@@ -47,11 +48,15 @@ public class ConsoleErrorReporter extends ErrorReceiver {
     }
 
     public void error(SAXParseException e) {
+        if(debug)
+            e.printStackTrace();
         hasError = true;
         print(WscompileMessages.WSIMPORT_ERROR_MESSAGE(e.getMessage()), e);
     }
 
     public void fatalError(SAXParseException e) {
+        if(debug)
+            e.printStackTrace();
         hasError = true;
         print(WscompileMessages.WSIMPORT_ERROR_MESSAGE(e.getMessage()), e);
     }
@@ -72,6 +77,10 @@ public class ConsoleErrorReporter extends ErrorReceiver {
         output.println(message);
         output.println(getLocationString(e));
         output.println();
+    }
+
+    public void enableDebugging(){
+        this.debug = true;
     }
 
 }

@@ -143,6 +143,7 @@ public class Options {
 
 
     public boolean debug = false;
+    public boolean debugMode = false;
 
 
     private final List<File> generatedFiles = new ArrayList<File>();
@@ -239,6 +240,9 @@ public class Options {
     protected int parseArguments(String[] args, int i) throws BadCommandLineException {
         if (args[i].equals("-g")) {
             debug = true;
+            return 1;
+        } else if (args[i].equals("-Xdebug")) {
+            debugMode = true;
             return 1;
         } else if (args[i].equals("-verbose")) {
             verbose = true;

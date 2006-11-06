@@ -101,6 +101,10 @@ public class WsimportTool {
             public void info(SAXParseException exception) {
                 cer.info(exception);
             }
+
+            public void enableDebugging(){
+                cer.enableDebugging();
+            }
         }
         final Listener listener = new Listener();
         ErrorReceiverFilter receiver = new ErrorReceiverFilter(listener) {
@@ -130,6 +134,8 @@ public class WsimportTool {
         try {
             options.parseArguments(args);
             options.validate();
+            if(options.debugMode)
+                listener.enableDebugging();
             options.parseBindings(receiver);
             //set the entityResolver passed form tool
             if(options.entityResolver == null){
