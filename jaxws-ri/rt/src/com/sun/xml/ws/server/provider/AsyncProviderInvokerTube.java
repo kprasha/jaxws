@@ -6,18 +6,13 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.server.*;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.server.EndpointMessageContextImpl;
-import com.sun.xml.ws.server.WSEndpointImpl;
+import com.sun.xml.ws.api.server.AsyncProvider;
+import com.sun.xml.ws.api.server.AsyncProviderCallback;
+import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.server.AbstractWebServiceContext;
 
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.logging.Logger;
-import java.security.Principal;
-
-import org.w3c.dom.Element;
 
 /**
  * This {@link Tube} is used to invoke the {@link AsyncProvider} endpoints.
@@ -39,7 +34,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     * invoke() is used to create a new {@link Message} that traverses
     * through the Pipeline to transport.
     */
-    public NextAction processRequest(Packet request) {
+    public @NotNull NextAction processRequest(@NotNull Packet request) {
         T param = argsBuilder.getParameter(request.getMessage());
         AsyncProviderCallback callback = new AsyncProviderInvokerTube.AsyncProviderCallbackImpl(request);
         AsyncWebServiceContext ctxt = new AsyncWebServiceContext(getEndpoint(),request);
@@ -65,13 +60,13 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
             this.fiber = Fiber.current();
         }
 
-        public void send(T param) {
+        public void send(@NotNull T param) {
             Message responseMessage = argsBuilder.getResponse(param);
             Packet packet = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
             fiber.resume(packet);
         }
 
-        public void sendError(Throwable t) {
+        public void sendError(@NotNull Throwable t) {
             Exception e;
             if (t instanceof RuntimeException) {
                 e = (RuntimeException)t;
@@ -87,53 +82,24 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     /**
      * The single {@link javax.xml.ws.WebServiceContext} instance injected into application.
      */
-    private static final class AsyncWebServiceContext implements WSWebServiceContext {
-
+    private static final class AsyncWebServiceContext extends AbstractWebServiceContext {
         final Packet packet;
-        final WSEndpoint endpoint;
 
         AsyncWebServiceContext(WSEndpoint endpoint, Packet packet) {
+            super(endpoint);
             this.packet = packet;
-            this.endpoint = endpoint;
-        }
-
-        public MessageContext getMessageContext() {
-            return new EndpointMessageContextImpl(getRequestPacket());
-        }
-
-        public Principal getUserPrincipal() {
-            return packet.webServiceContextDelegate.getUserPrincipal(packet);
         }
 
         public @NotNull Packet getRequestPacket() {
             return packet;
         }
-
-        public boolean isUserInRole(String role) {
-            Packet packet = getRequestPacket();
-            return packet.webServiceContextDelegate.isUserInRole(packet,role);
-        }
-
-        public EndpointReference getEndpointReference(Element...referenceParameters) {
-            return getEndpointReference(W3CEndpointReference.class, referenceParameters);
-        }
-
-        public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
-            Packet packet = getRequestPacket();
-            String address = packet.webServiceContextDelegate.getEPRAddress(packet, endpoint);
-            String wsdlAddress = null;
-            if(endpoint.getServiceDefinition() != null) {
-                wsdlAddress = packet.webServiceContextDelegate.getWSDLAddress(packet,endpoint);
-            }
-            return clazz.cast(((WSEndpointImpl)endpoint).getEndpointReference(clazz,address,wsdlAddress, referenceParameters));
-        }
     }
 
-    public NextAction processResponse(Packet response) {
+    public @NotNull NextAction processResponse(@NotNull Packet response) {
         return doReturnWith(response);
     }
 
-    public NextAction processException(@NotNull Throwable t) {
+    public @NotNull NextAction processException(@NotNull Throwable t) {
         throw new IllegalStateException("AsyncProviderInvokerTube's processException shouldn't be called.");
     }
 
