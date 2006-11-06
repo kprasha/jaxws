@@ -86,7 +86,8 @@ public interface WebServiceContextDelegate {
      *
      * <p>
      * The "address" of endpoints is always affected by a particular
-     * client being served.
+     * client being served, hence it's up to transport to provide this
+     * information.
      *
      * @param request
      *      Always non-null. See class javadoc.
@@ -95,19 +96,53 @@ public interface WebServiceContextDelegate {
      *
      * @throws WebServiceException
      *      if this method could not compute the address for some reason.
+     * @return
+     *      Absolute URL of the endpoint. This shold be an address that the client
+     *      can use to talk back to this same service later.
+     *
      * @see WebServiceContext#getEndpointReference
      */
     @NotNull String getEPRAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 
     /**
-     * Gets the address of the primary wsdl that can be used for writing wsdl in EPR.
-     * for http case, it is always getEPRAddress()+"?wsdl" 
+     * Gets the address of the primary WSDL.
+     *
+     * <p>
+     * If a transport supports publishing of WSDL by itself (instead/in addition to MEX),
+     * then it should implement this method so that the rest of the JAX-WS RI can
+     * use that information.
+     *
+     * For example, HTTP transports often use the convention {@code getEPRAddress()+"?wsdl"}
+     * for publishing WSDL on HTTP.
+     *
+     * <p>
+     * Some transports may not have such WSDL publishing mechanism on its own.
+     * Those transports may choose to return null, indicating that WSDL
+     * is not published. If such transports are always used in conjunction with
+     * other transports that support WSDL publishing (such as SOAP/TCP used
+     * with Servlet transport), then such transport may
+     * choose to find the corresponding servlet endpoint by {@link Module#getBoundEndpoints()}
+     * and try to obtain the address from there. 
+     *
+     * <p>
+     * This information is used to put a metadata reference inside an EPR,
+     * among other things. Clients that do not support MEX rely on this
+     * WSDL URL to retrieve metadata, it is desirable for transports to support
+     * this, but not mandatory.
+     *
+     * <p>
+     * This method will be never invoked if the {@link WSEndpoint}
+     * does not have a corresponding WSDL to begin with
+     * (IOW {@link WSEndpoint#getServiceDefinition() returning null}.
+     *
      * @param request
      *      Always non-null. See class javadoc.
      * @param endpoint
      *      The endpoint whose address will be returned.
      *
-     * @return null if there is no WSDL for this endpoint.
+     * @return
+     *      null if the implementation does not support the notion of
+     *      WSDL publishing.
      */
     @Nullable String getWSDLAddress(@NotNull Packet request, @NotNull WSEndpoint endpoint);
 }
