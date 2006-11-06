@@ -451,9 +451,7 @@ public class WSServiceDelegate extends WSService {
         WSEndpointReference.Metadata metadata = wsepr.getMetaData();
         QName eprServiceName = metadata.getServiceName();
         QName eprPortName = metadata.getPortName();
-        if (eprServiceName == null)
-            throw new WebServiceException(ProviderApiMessages.NULL_SERVICE());
-        if (!eprServiceName.equals(serviceName)) {
+        if ((eprServiceName != null ) && !eprServiceName.equals(serviceName)) {
             throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n"
                     + " The two Service QNames must match");
         }
