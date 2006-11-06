@@ -196,7 +196,10 @@ public abstract class InvokerTube<T> extends AbstractTubeImpl {
         public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
             Packet packet = getRequestPacket();
             String address = packet.webServiceContextDelegate.getEPRAddress(packet, endpoint);
-            String wsdlAddress = packet.webServiceContextDelegate.getWSDLAddress(packet,endpoint);
+            String wsdlAddress = null;
+            if(endpoint.getServiceDefinition() != null) {
+                wsdlAddress = packet.webServiceContextDelegate.getWSDLAddress(packet,endpoint);
+            }
             return clazz.cast(((WSEndpointImpl)endpoint).getEndpointReference(clazz,address,wsdlAddress, referenceParameters));
         }
     };
