@@ -11,6 +11,11 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.security.Principal;
 
 /**
+ * Partial {@link WSWebServiceContext} implementation. This implementation depends on
+ * {@link Packet} and concrete implementations provide it via
+ * {@link #getRequestPacket()}.
+ *
+ * @see InvokerTube, AsyncProviderInvokerTube
  *
  * @author Jitendra Kotamraju
  */
