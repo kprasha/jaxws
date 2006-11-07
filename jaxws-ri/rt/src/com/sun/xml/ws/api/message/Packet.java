@@ -165,6 +165,7 @@ public final class Packet extends DistributedPropertySet {
         this.handlerConfig = that.handlerConfig;
         this.invocationProperties = that.invocationProperties;
         this.handlerScopePropertyNames = that.handlerScopePropertyNames;
+        this.contentNegotiation = that.contentNegotiation;
         // copy other properties that need to be copied. is there any?
     }
 
