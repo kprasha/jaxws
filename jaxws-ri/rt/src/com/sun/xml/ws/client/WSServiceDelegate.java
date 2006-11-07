@@ -69,12 +69,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.*;
 import javax.xml.ws.handler.HandlerResolver;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -377,6 +372,9 @@ public class WSServiceDelegate extends WSService {
      * Creates a new pipeline for the given port name.
      */
     private Tube createPipeline(PortInfo portInfo, WSBinding binding) {
+        //Check all required WSDL extensions are understood
+        checkAllWSDLExtensionsUnderstood(portInfo,binding);
+
         BindingID bindingId = portInfo.bindingId;
 
         TubelineAssembler assembler = TubelineAssemblerFactory.create(
@@ -388,6 +386,19 @@ public class WSServiceDelegate extends WSService {
                         portInfo.targetEndpoint,
                         portInfo.portModel,
                         this, binding, container));
+    }
+
+    /**
+     * Checks only if RespectBindingFeature is enabled
+     * checks if all required wsdl extensions in the
+     * corresponding wsdl:Port are understood when RespectBindingFeature is enabled.
+     * @throws WebServiceException
+     *      when any wsdl extension that has wsdl:required=true is not understood
+     */
+    private void checkAllWSDLExtensionsUnderstood(PortInfo port, WSBinding binding) {
+        if (port.portModel != null && binding.isFeatureEnabled(RespectBindingFeature.class)) {
+            ((WSDLPortImpl) port.portModel).areRequiredExtensionsUnderstood();
+        }
     }
 
     public EndpointAddress getEndpointAddress(QName qName) {

@@ -97,5 +97,6 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
         if(features == null)
             features =  new WebServiceFeatureList();
         features.addAll(boundPortType.getFeatures());
+        notUnderstoodExtensions.addAll(boundPortType.notUnderstoodExtensions);
     }
 }
