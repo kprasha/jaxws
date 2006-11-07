@@ -24,6 +24,7 @@ package com.sun.tools.ws.processor.model;
 
 import com.sun.tools.ws.processor.model.java.JavaParameter;
 import com.sun.tools.ws.wsdl.framework.Entity;
+import com.sun.tools.ws.wsdl.document.MessagePart;
 
 import javax.jws.WebParam.Mode;
 import java.util.ArrayList;
@@ -34,14 +35,24 @@ import java.util.List;
  * @author WS Development Team
  */
 public class Parameter extends ModelObject {
-
-    public Parameter(Entity entity) {
-        super(entity);
-    }
+    private final String entityName;
 
     public Parameter(String name, Entity entity) {
         super(entity);
         this.name = name;
+        if(entity instanceof com.sun.tools.ws.wsdl.document.Message){
+            this.entityName = ((com.sun.tools.ws.wsdl.document.Message)entity).getName();
+        }else if(entity instanceof MessagePart){
+            this.entityName = ((MessagePart)entity).getName();
+        }else{
+            this.entityName = name;
+        }
+
+    }
+
+
+    public String getEntityName() {
+        return entityName;
     }
 
     public String getName() {

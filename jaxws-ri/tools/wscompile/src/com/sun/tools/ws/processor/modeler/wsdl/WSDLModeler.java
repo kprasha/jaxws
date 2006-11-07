@@ -1547,7 +1547,7 @@ public class WSDLModeler extends WSDLModelerBase {
     private List<Parameter> getDoclitParameters(Request req, Response res, List<MessagePart> parameterList) {
         if (parameterList.size() == 0)
             return new ArrayList<Parameter>();
-        List<Parameter> params = null;
+        List<Parameter> params = new ArrayList<Parameter>();
         Message inMsg = getInputMessage();
         Message outMsg = getOutputMessage();
         boolean unwrappable = isUnwrappable();
@@ -1669,8 +1669,6 @@ public class WSDLModeler extends WSDLModelerBase {
                         res.addUnboundBlock(block);
                     }
                 }
-                if (params == null)
-                    params = new ArrayList<Parameter>();
                 Parameter param = ModelerUtils.createParameter(part.getName(), jaxbType, block);
                 param.setMode(part.getMode());
                 if (part.isReturn()) {
@@ -1695,20 +1693,19 @@ public class WSDLModeler extends WSDLModelerBase {
                 } else {
                     Parameter inParam = ModelerUtils.getParameter(param.getName(), params);
                     if ((inParam != null) && inParam.isIN()) {
-                        QName inElementName = ((JAXBType) inParam.getType()).getName();
-                        QName outElementName = ((JAXBType) param.getType()).getName();
+                        QName inElementName = inParam.getType().getName();
+                        QName outElementName = param.getType().getName();
                         String inJavaType = inParam.getTypeName();
                         String outJavaType = param.getTypeName();
                         TypeAndAnnotation inTa = inParam.getType().getJavaType().getType().getTypeAnn();
                         TypeAndAnnotation outTa = param.getType().getJavaType().getType().getTypeAnn();
-                        if (inElementName.getLocalPart().equals(outElementName.getLocalPart()) &&
-                                inJavaType.equals(outJavaType) &&
-                                ((inTa == null || outTa == null) ||
-                                        ((inTa != null) && (outTa != null) && inTa.equals(outTa)))) {
+                        if (inElementName.getLocalPart().equals(outElementName.getLocalPart()) && inJavaType.equals(outJavaType) &&
+                                (inTa == null || outTa == null || inTa.equals(outTa))) {
                             inParam.setMode(Mode.INOUT);
                             continue;
                         }
-                    } else if (outParams.size() == 1) {
+                    }
+                    if (outParams.size() == 1) {
                         param.setParameterIndex(-1);
                     } else {
                         param.setParameterIndex(index++);
@@ -2246,8 +2243,7 @@ public class WSDLModeler extends WSDLModelerBase {
     private void createJavaMethodForAsyncOperation(Port port, Operation operation,
                                                    JavaInterface intf) {
         String candidateName = getJavaNameForOperation(operation);
-        JavaMethod method = new JavaMethod(candidateName);
-        method.setThrowsRemoteException(false);
+        JavaMethod method = new JavaMethod(candidateName, errReceiver);
         Request request = operation.getRequest();
         Iterator requestBodyBlocks = request.getBodyBlocks();
         Block requestBlock =
@@ -2314,7 +2310,7 @@ public class WSDLModeler extends WSDLModelerBase {
             return;
         }
         String candidateName = getJavaNameForOperation(operation);
-        JavaMethod method = new JavaMethod(candidateName);
+        JavaMethod method = new JavaMethod(candidateName, errReceiver);
         Request request = operation.getRequest();
         Parameter returnParam = (Parameter) operation.getProperty(WSDL_RESULT_PARAMETER);
         if (returnParam != null) {

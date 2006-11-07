@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xml.sax.Locator;
+
 /**
  *
  * @author WS Development Team
@@ -85,12 +87,14 @@ public abstract class ModelObject {
         }
     }
 
-    /* serialization */
+    public Locator getLocator(){
+        return entity.getLocator();
+    }
+
     public Map getPropertiesMap() {
         return _properties;
     }
 
-    /* serialization */
     public void setPropertiesMap(Map m) {
         _properties = m;
     }
