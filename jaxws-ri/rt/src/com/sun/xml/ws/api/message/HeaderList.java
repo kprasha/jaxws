@@ -651,7 +651,7 @@ public final class HeaderList extends ArrayList<Header> {
         // as anonymous ReplyTo MUST NOT be added in that case. BindingProvider need to
         // disable AddressingFeature and MemberSubmissionAddressingFeature and hand-craft
         // the SOAP message with non-anonymous ReplyTo/FaultTo.
-        if (!oneway && packet.getMessage().getOperation(wsdlPort).getAnonymous() == WSDLBoundOperation.ANONYMOUS.prohibited) {
+        if (!oneway && packet.getMessage() != null && packet.getMessage().getOperation(wsdlPort) != null && packet.getMessage().getOperation(wsdlPort).getAnonymous() == WSDLBoundOperation.ANONYMOUS.prohibited) {
             throw new WebServiceException(AddressingMessages.WSAW_ANONYMOUS_PROHIBITED());
         }
 
