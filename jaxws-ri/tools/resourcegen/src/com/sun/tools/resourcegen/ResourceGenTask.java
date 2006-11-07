@@ -48,7 +48,10 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Generate source files from resource bundles.
+ * Generate source files from resource bundles,
+ * so that code can refer to resources as methods,
+ * instead of hard-coding string constants, which is
+ * much harder to search.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -204,10 +207,15 @@ public class ResourceGenTask extends Task {
         }
     }
 
+    /**
+     * Computes the class name from the resource bundle name.
+     */
     private String getClassName(File res) {
         String name = res.getName();
         int suffixIndex = name.lastIndexOf('.');
         name = name.substring(0,suffixIndex);
+        if(name.equalsIgnoreCase("Messages"))
+            return "Messages";  // messages.properties is special cased to go to Messages.java
         return NameConverter.smart.toClassName(name)+"Messages";
     }
 }
