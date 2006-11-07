@@ -51,6 +51,7 @@ import java.util.*;
 public class WSDLParser {
     private final ErrorReceiver errReceiver;
     private WsimportOptions options;
+    private MetadataFinder forest;
 
     //wsdl extension handlers
     private final Map extensionHandlers;
@@ -89,15 +90,8 @@ public class WSDLParser {
     }
 
     public WSDLDocument parse() throws SAXException {
-        // parse into DOM forest
-        forest = new DOMForest(new WSDLInternalizationLogic(), options, errReceiver);
-
-        // parse source grammars
-        for (InputSource value : options.getWSDLs()) {
-            errReceiver.pollAbort();
-            forest.parse(value, true);
-        }
-
+        forest = new MetadataFinder(new WSDLInternalizationLogic(), options, errReceiver);
+        forest.parseWSDL();
 
         // parse external binding files
         for (InputSource value : options.getWSDLBindings()) {
@@ -120,7 +114,7 @@ public class WSDLParser {
             }
 
         }
-        return buildWSDLDocument(forest);
+        return buildWSDLDocument();
     }
 
     private String fixNull(String s) {
@@ -128,15 +122,11 @@ public class WSDLParser {
         else        return s;
     }
 
-    private DOMForest forest;
-
-
-    public DOMForest getDOMForest() {
+    public MetadataFinder getDOMForest() {
         return forest;
     }
 
-    private WSDLDocument buildWSDLDocument(DOMForest forest){
-        this.forest = forest;
+    private WSDLDocument buildWSDLDocument(){
         /**
          * Currently we are working off first WSDL document
          * TODO: add support of creating WSDLDocument from collection of WSDL documents

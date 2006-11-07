@@ -47,6 +47,7 @@ import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.document.soap.*;
 import com.sun.tools.ws.wsdl.framework.*;
 import com.sun.tools.ws.wsdl.parser.WSDLParser;
+import com.sun.tools.ws.wsdl.parser.MetadataFinder;
 import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.tools.xjc.api.TypeAndAnnotation;
 import com.sun.tools.xjc.api.XJC;
@@ -73,7 +74,6 @@ public class WSDLModeler extends WSDLModelerBase {
     private final Map<QName, QName> uniqueBodyBlocks = new HashMap<QName, QName>();
     private final QName VOID_BODYBLOCK = new QName("");
     private ClassNameCollector classNameCollector;
-
 
     public WSDLModeler(WsimportOptions options, ErrorReceiver receiver) {
         super(options, receiver);

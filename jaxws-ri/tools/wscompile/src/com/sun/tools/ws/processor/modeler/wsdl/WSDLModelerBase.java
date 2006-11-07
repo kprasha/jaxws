@@ -49,6 +49,7 @@ import com.sun.tools.ws.wsdl.framework.GloballyKnown;
 import com.sun.tools.ws.wsdl.framework.NoSuchEntityException;
 import com.sun.tools.ws.wsdl.parser.DOMForest;
 import com.sun.tools.ws.wsdl.parser.WSDLParser;
+import com.sun.tools.ws.wsdl.parser.MetadataFinder;
 import com.sun.xml.bind.api.JAXBRIContext;
 import org.xml.sax.helpers.LocatorImpl;
 
@@ -64,7 +65,7 @@ import java.util.*;
 public abstract class WSDLModelerBase implements Modeler {
     protected final ErrorReceiverFilter errReceiver;
     protected final WsimportOptions options;
-    protected DOMForest forest;
+    protected MetadataFinder forest;
 
 
     public WSDLModelerBase(WsimportOptions options, ErrorReceiver receiver) {

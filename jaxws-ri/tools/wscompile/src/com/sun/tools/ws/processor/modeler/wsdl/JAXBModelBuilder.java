@@ -32,8 +32,8 @@ import com.sun.tools.ws.wscompile.AbortException;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.tools.ws.wscompile.Options;
-import com.sun.tools.ws.wsdl.parser.DOMForest;
 import com.sun.tools.ws.wsdl.parser.DOMForestScanner;
+import com.sun.tools.ws.wsdl.parser.MetadataFinder;
 import com.sun.tools.xjc.api.*;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -50,13 +50,13 @@ public class JAXBModelBuilder {
 
     private final ErrorReceiver errReceiver;
     private final WsimportOptions options;
-    private final DOMForest forest;
+    private final MetadataFinder forest;
 
-    public JAXBModelBuilder(WsimportOptions options, ClassNameCollector classNameCollector, DOMForest forest, ErrorReceiver errReceiver) {
+    public JAXBModelBuilder(WsimportOptions options, ClassNameCollector classNameCollector, MetadataFinder finder, ErrorReceiver errReceiver) {
         this._classNameAllocator = new ClassNameAllocatorImpl(classNameCollector);
         this.errReceiver = errReceiver;
         this.options = options;
-        this.forest = forest;
+        this.forest = finder;
 
         internalBuildJAXBModel();
     }
