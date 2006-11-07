@@ -24,6 +24,7 @@ package com.sun.tools.ws.processor.model.java;
 
 import com.sun.tools.ws.resources.ModelMessages;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.processor.model.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,10 +67,21 @@ public class JavaMethod {
         return false;
     }
 
+    private Parameter getParameter(String paramName){
+        for (JavaParameter parameter : parameters) {
+            if (paramName.equals(parameter.getName())) {
+                return parameter.getParameter();
+            }
+        }
+        return null;
+    }
+
     public void addParameter(JavaParameter param) {
         // verify that this member does not already exist
         if (hasParameter(param.getName())) {
             errorReceiver.error(param.getParameter().getLocator(), ModelMessages.MODEL_PARAMETER_NOTUNIQUE(param.getName(), param.getParameter().getEntityName()));
+            Parameter duplicParam = getParameter(param.getName());
+            errorReceiver.error(duplicParam.getLocator(), ModelMessages.MODEL_PARAMETER_NOTUNIQUE(param.getName(), duplicParam.getEntityName()));
             return;
         }
         parameters.add(param);
