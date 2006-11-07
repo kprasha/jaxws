@@ -214,8 +214,6 @@ public class ResourceGenTask extends Task {
         String name = res.getName();
         int suffixIndex = name.lastIndexOf('.');
         name = name.substring(0,suffixIndex);
-        if(name.equalsIgnoreCase("Messages"))
-            return "Messages";  // messages.properties is special cased to go to Messages.java
         return NameConverter.smart.toClassName(name)+"Messages";
     }
 }
