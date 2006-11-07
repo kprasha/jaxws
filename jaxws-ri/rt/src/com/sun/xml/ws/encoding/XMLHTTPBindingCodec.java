@@ -69,7 +69,7 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
     /**
      * True if the Fast Infoset codec should be used
      */
-    private boolean _useFastInfosetForEncoding;
+    private boolean useFastInfosetForEncoding;
 
     /**
      * The XML codec
@@ -179,6 +179,13 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
 
     @Override
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
+        /**
+         * Reset the encoding state when on the server side for each
+         * decode/encode step.
+         */
+        if (packet.contentNegotiation == null)
+            useFastInfosetForEncoding = false;
+        
         if (contentType == null) {
             xmlCodec.decode(in, contentType, packet);
         } else if (isMultipartRelated(contentType)) {
@@ -188,7 +195,7 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
                 throw new RuntimeException(StreamingMessages.FASTINFOSET_NO_IMPLEMENTATION());
             }
             
-            _useFastInfosetForEncoding = true;
+            useFastInfosetForEncoding = true;
             fiCodec.decode(in, contentType, packet);
         } else if (isXml(contentType)) {
             xmlCodec.decode(in, contentType, packet);
@@ -196,8 +203,8 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
             packet.setMessage(new UnknownContent(contentType, in));
         }
         
-        if (!_useFastInfosetForEncoding) {
-            _useFastInfosetForEncoding = isFastInfosetAcceptable(packet.acceptableMimeTypes);
+        if (!useFastInfosetForEncoding) {
+            useFastInfosetForEncoding = isFastInfosetAcceptable(packet.acceptableMimeTypes);
         }
     }
     
@@ -252,7 +259,7 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
         final boolean isFastInfoset = XMLMessage.isFastInfoset(contentType);
         
         if (!requiresTransformationOfDataSource(isFastInfoset, 
-                _useFastInfosetForEncoding)) {
+                useFastInfosetForEncoding)) {
             return new ContentTypeImpl(contentType);
         } else {
             return null;
@@ -264,7 +271,7 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
             final boolean isFastInfoset = XMLMessage.isFastInfoset(
                     mds.getDataSource().getContentType());
             DataSource ds = transformDataSource(mds.getDataSource(), 
-                    isFastInfoset, _useFastInfosetForEncoding);
+                    isFastInfoset, useFastInfosetForEncoding);
             
             InputStream is = ds.getInputStream();
             byte[] buf = new byte[1024];
@@ -287,13 +294,13 @@ public final class XMLHTTPBindingCodec extends MimeCodec {
         if (p.contentNegotiation == ContentNegotiation.none) {
             // The client may have changed the negotiation property from
             // pessismistic to none between invocations
-            _useFastInfosetForEncoding = false;
+            useFastInfosetForEncoding = false;
         } else if (p.contentNegotiation == ContentNegotiation.optimistic) {
             // Always encode using Fast Infoset if in optimisitic mode
-            _useFastInfosetForEncoding = true;
+            useFastInfosetForEncoding = true;
         }
 
-        rootCodec = (_useFastInfosetForEncoding && fiCodec != null)
+        rootCodec = (useFastInfosetForEncoding && fiCodec != null)
             ? fiCodec : xmlCodec;
     }
 
