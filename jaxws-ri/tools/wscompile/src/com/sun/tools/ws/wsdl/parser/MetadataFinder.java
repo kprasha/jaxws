@@ -76,7 +76,8 @@ public final class MetadataFinder extends DOMForest{
             }
             NodeList schemas = doc.getElementsByTagNameNS(SchemaConstants.NS_XSD, "schema");
             for (int i = 0; i < schemas.getLength(); i++) {
-                inlinedSchemaElements.add((Element) schemas.item(i));
+                if(!inlinedSchemaElements.contains(schemas.item(i)))
+                    inlinedSchemaElements.add((Element) schemas.item(i));
             }
         }
     }
