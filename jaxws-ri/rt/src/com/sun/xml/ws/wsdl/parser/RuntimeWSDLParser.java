@@ -49,6 +49,7 @@ import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.xml.ws.resources.WsdlmodelMessages;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
@@ -75,6 +76,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Parses WSDL and builds {@link WSDLModel}.
@@ -161,7 +163,7 @@ public class RuntimeWSDLParser {
                         String systemId = wsdls.get(0).getSystemId();
                         Parser wsdlParser = parser.resolver.resolveEntity(null, systemId);
                         if(wsdlParser != null)
-                            parser.parseWSDL(wsdlParser);
+                            parser.parseWSDL(wsdlParser, false);
                     }catch(WebServiceException e){
                         wsdlException = e;
                     }
@@ -200,7 +202,7 @@ public class RuntimeWSDLParser {
     public static WSDLModelImpl parse(XMLEntityResolver.Parser wsdl, XMLEntityResolver resolver, boolean isClientSide, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId, resolver, isClientSide, extensions);
-        parser.parseWSDL(wsdl);
+        parser.parseWSDL(wsdl, false);
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.context);
         parser.extensionFacade.postFinished(parser.context);
@@ -232,18 +234,27 @@ public class RuntimeWSDLParser {
         if (parser == null) {
             parser = new Parser(wsdlLoc, createReader(wsdlLoc));
         }
-        parseWSDL(parser);
+        parseWSDL(parser, false);
+    }
+
+    private void parseImport(@NotNull URL wsdlLoc) throws XMLStreamException, IOException, SAXException {
+        String systemId = wsdlLoc.toExternalForm();
+        XMLEntityResolver.Parser parser = resolver.resolveEntity(null, systemId);
+        if (parser == null) {
+            parser = new Parser(wsdlLoc, createReader(wsdlLoc));
+        }
+        parseWSDL(parser, true);
     }
 
     private void parseWSDL(URL url, Source wsdlLoc) throws XMLStreamException, IOException, SAXException {
         XMLStreamReader reader = createReader(wsdlLoc);
         importedWSDLs.clear();
         Parser parser = new Parser(url, reader);
-        parseWSDL(parser);
+        parseWSDL(parser, false);
     }
 
 
-    private void parseWSDL(Parser parser) throws XMLStreamException, IOException, SAXException {
+    private void parseWSDL(Parser parser, boolean imported) throws XMLStreamException, IOException, SAXException {
         // avoid processing the same WSDL twice.
         // if no system ID is given, the check won't work
         if (parser.systemId!=null && !importedWSDLs.add(parser.systemId.toExternalForm()))
@@ -255,6 +266,11 @@ public class RuntimeWSDLParser {
 
         //wsdl:definition
         if (!reader.getName().equals(WSDLConstants.QNAME_DEFINITIONS)) {
+            if (imported) {
+                // wsdl:import could be a schema. Relaxing BP R2001 requirement.
+                LOGGER.warning(WsdlmodelMessages.WSDL_IMPORT_SHOULD_BE_WSDL(parser.systemId));
+                return;
+            }
             errors.set(NOT_A_WSDL);
             throw new WebServiceException(ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(parser.systemId,
                     WSDLConstants.QNAME_DEFINITIONS, reader.getName(), reader.getLocation()));
@@ -596,7 +612,7 @@ public class RuntimeWSDLParser {
             importURL = new URL(baseURL, importLocation);
         else // no base URL. this better be absolute
             importURL = new URL(importLocation);
-        parseWSDL(importURL);
+        parseImport(importURL);
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             XMLStreamReaderUtil.skipElement(reader);
         }
@@ -757,4 +773,6 @@ public class RuntimeWSDLParser {
         // protect JAX-WS RI from broken parser extension
         extensions.add(new FoolProofParserExtension(e));
     }
+
+    private static final Logger LOGGER = Logger.getLogger(RuntimeWSDLParser.class.getName());
 }
