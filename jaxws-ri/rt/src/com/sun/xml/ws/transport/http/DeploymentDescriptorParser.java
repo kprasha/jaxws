@@ -194,7 +194,7 @@ public class DeploymentDescriptorParser<A> {
             Class<?> implementorClass = getImplementorClass(implementationName,reader);
             EndpointFactory.verifyImplementorClass(implementorClass);
 
-            SDDocumentSource primaryWSDL = getPrimaryWSDL(attrs, implementorClass);
+            SDDocumentSource primaryWSDL = getPrimaryWSDL(reader, attrs, implementorClass);
 
             QName serviceName = getQNameAttribute(attrs, ATTR_SERVICE);
             if (serviceName == null)
@@ -283,8 +283,7 @@ public class DeploymentDescriptorParser<A> {
             features.addAll(bindingID.createBuiltinFeatureList());
         }
 
-        WSBinding binding = bindingID.createBinding(features.toArray());
-        return binding;
+        return bindingID.createBinding(features.toArray());
     }
 
     private static boolean checkMtomConflict(MTOMFeature lhs, MTOMFeature rhs) {
@@ -335,35 +334,35 @@ public class DeploymentDescriptorParser<A> {
      * @return
      *      The pointed WSDL, if any. Otherwise null.
      */
-    private SDDocumentSource getPrimaryWSDL(Attributes attrs, Class<?> implementorClass) {
-        {
-            String wsdlFile = getAttribute(attrs, ATTR_WSDL);
-            if (wsdlFile == null) {
-                wsdlFile = EndpointFactory.getWsdlLocation(implementorClass);
+    private SDDocumentSource getPrimaryWSDL(XMLStreamReader xsr, Attributes attrs, Class<?> implementorClass) {
+
+        String wsdlFile = getAttribute(attrs, ATTR_WSDL);
+        if (wsdlFile == null) {
+            wsdlFile = EndpointFactory.getWsdlLocation(implementorClass);
+        }
+
+        if (wsdlFile!=null) {
+            if (!wsdlFile.startsWith(JAXWS_WSDL_DD_DIR)) {
+                logger.warning("Ignoring wrong wsdl="+wsdlFile+". It should start with "
+                        +JAXWS_WSDL_DD_DIR
+                        +". Going to generate and publish a new WSDL.");
+                return null;
             }
 
-            if(wsdlFile!=null) {
-                if (!wsdlFile.startsWith(JAXWS_WSDL_DD_DIR)) {
-                    logger.warning("Ignoring wrong wsdl="+wsdlFile+". It should start with "
-                            +JAXWS_WSDL_DD_DIR
-                            +". Going to generate and publish a new WSDL.");
-                    wsdlFile = null;
-                }
-
-                try {
-                    URL wsdl = loader.getResource('/'+wsdlFile);
-                    SDDocumentSource docInfo = docs.get(wsdl.toExternalForm());
-                    if(docInfo==null) {
-                        // this shouldn't happen since 'docs' should contain
-                        // all the WSDLs inside /WEB-INF/wsdl, and wsdlFile
-                        // is required to be in this directory.
-                        logger.log(Level.WARNING,"Ignoring wrong wsdl="+wsdlFile);
-                    }
-                    return docInfo;
-                } catch (MalformedURLException e) {
-                    logger.log(Level.WARNING,"Ignoring wrong wsdl="+wsdlFile,e);
-                }
+            URL wsdl;
+            try {
+                wsdl = loader.getResource('/'+wsdlFile);
+            } catch (MalformedURLException e) {
+                throw new LocatableWebServiceException(
+                    ServerMessages.RUNTIME_PARSER_WSDL_NOT_FOUND(wsdlFile), e, xsr );
             }
+            if (wsdl == null) {
+                throw new LocatableWebServiceException(
+                    ServerMessages.RUNTIME_PARSER_WSDL_NOT_FOUND(wsdlFile), xsr );
+            }
+            SDDocumentSource docInfo = docs.get(wsdl.toExternalForm());
+            assert docInfo != null;
+            return docInfo;
         }
 
         return null;
