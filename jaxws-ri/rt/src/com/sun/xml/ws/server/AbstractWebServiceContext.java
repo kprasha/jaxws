@@ -3,6 +3,7 @@ package com.sun.xml.ws.server;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSWebServiceContext;
+import com.sun.istack.NotNull;
 import org.w3c.dom.Element;
 
 import javax.xml.ws.EndpointReference;
@@ -23,7 +24,7 @@ public abstract class AbstractWebServiceContext implements WSWebServiceContext {
 
     private final WSEndpoint endpoint;
 
-    public AbstractWebServiceContext(WSEndpoint endpoint) {
+    public AbstractWebServiceContext(@NotNull WSEndpoint endpoint) {
         this.endpoint = endpoint;
     }
 

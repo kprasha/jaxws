@@ -26,24 +26,15 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
-import com.sun.xml.ws.api.server.AsyncProviderCallback;
-import com.sun.xml.ws.api.server.InstanceResolver;
-import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.server.WSWebServiceContext;
+import com.sun.xml.ws.api.server.*;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.provider.ProviderInvokerTube;
 import com.sun.xml.ws.server.sei.SEIInvokerTube;
-import org.w3c.dom.Element;
 
-import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.Principal;
 
 /**
  * Base code for {@link ProviderInvokerTube} and {@link SEIInvokerTube}.
@@ -65,6 +56,13 @@ public abstract class InvokerTube<T> extends AbstractTubeImpl {
 
     public void setEndpoint(WSEndpoint endpoint) {
         this.endpoint = endpoint;
+        WSWebServiceContext webServiceContext = new AbstractWebServiceContext(endpoint) {
+            public @NotNull Packet getRequestPacket() {
+                Packet p = packets.get();
+                assert p!=null; // invoker must set
+                return p;
+            }
+        };
         invoker.start(webServiceContext,endpoint);
     }
 
@@ -164,14 +162,4 @@ public abstract class InvokerTube<T> extends AbstractTubeImpl {
         }
     };
 
-    /**
-     * The single {@link WebServiceContext} instance injected into application.
-     */
-    private final WSWebServiceContext webServiceContext = new AbstractWebServiceContext(endpoint) {
-        public @NotNull Packet getRequestPacket() {
-            Packet p = packets.get();
-            assert p!=null; // invoker must set
-            return p;
-        }
-    };
 }
