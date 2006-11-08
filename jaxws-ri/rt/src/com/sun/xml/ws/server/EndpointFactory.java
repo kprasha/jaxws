@@ -137,8 +137,6 @@ public class EndpointFactory {
         if (binding == null)
             binding = BindingImpl.create(BindingID.parse(implType));
 
-
-
         if (primaryWsdl != null) {
             verifyPrimaryWSDL(primaryWsdl, serviceName);
         }
@@ -165,39 +163,36 @@ public class EndpointFactory {
         WebServiceFeatureList features=((BindingImpl)binding).getFeatures();
         features.parseAnnotations(implType);
 
-        {// create terminal pipe that invokes the application
-            if (implType.getAnnotation(WebServiceProvider.class)!=null) {
-                //Provider case:
-                //         Enable Addressing from WSDL only if it has RespectBindingFeature enabled
-                if (wsdlPort != null)
-                    features.mergeFeatures(wsdlPort,true,true);
-
-                terminal = ProviderInvokerTube.create(implType,binding,invoker);
-
-            } else {
-                // Create runtime model for non Provider endpoints
-                seiModel = createSEIModel(wsdlPort, implType, serviceName, portName, binding);
-                if(binding instanceof SOAPBindingImpl){
-                    //set portKnownHeaders on Binding, so that they can be used for MU processing
-                    ((SOAPBindingImpl)binding).setPortKnownHeaders(
-                            ((SOAPSEIModel)seiModel).getKnownHeaders());
-                }
-                // Generate WSDL for SEI endpoints(not for Provider endpoints)
-                if (primaryDoc == null) {
-                    primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
-                    // create WSDL model
-                    wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
-                    seiModel.freeze(wsdlPort);
-                }
-                // New Features might have been added in WSDL through Policy.
-                // This sets only the wsdl features that are not already set(enabled/disabled)
-                features.mergeFeatures(wsdlPort, false, true);
-                terminal= new SEIInvokerTube(seiModel,invoker,binding);
+        // create terminal pipe that invokes the application
+        if (implType.getAnnotation(WebServiceProvider.class)!=null) {
+            //Provider case: Enable Addressing from WSDL only if it has RespectBindingFeature enabled
+            if (wsdlPort != null)
+                features.mergeFeatures(wsdlPort,true,true);
+            terminal = ProviderInvokerTube.create(implType,binding,invoker);
+        } else {
+            // Create runtime model for non Provider endpoints
+            seiModel = createSEIModel(wsdlPort, implType, serviceName, portName, binding);
+            if(binding instanceof SOAPBindingImpl){
+                //set portKnownHeaders on Binding, so that they can be used for MU processing
+                ((SOAPBindingImpl)binding).setPortKnownHeaders(
+                        ((SOAPSEIModel)seiModel).getKnownHeaders());
             }
-            if (processHandlerAnnotation) {
-                //Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
-                processHandlerAnnotation(binding, implType, serviceName, portName);
+            // Generate WSDL for SEI endpoints(not for Provider endpoints)
+            if (primaryDoc == null) {
+                primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
+                // create WSDL model
+                wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
+                seiModel.freeze(wsdlPort);
             }
+            // New Features might have been added in WSDL through Policy.
+            // This sets only the wsdl features that are not already set(enabled/disabled)
+            features.mergeFeatures(wsdlPort, false, true);
+            terminal= new SEIInvokerTube(seiModel,invoker,binding);
+        }
+
+        // Process @HandlerChain, if handler-chain is not set via Deployment Descriptor
+        if (processHandlerAnnotation) {
+            processHandlerAnnotation(binding, implType, serviceName, portName);
         }
 
         ServiceDefinitionImpl serviceDefiniton = (primaryDoc != null) ? new ServiceDefinitionImpl(docList, primaryDoc) : null;
