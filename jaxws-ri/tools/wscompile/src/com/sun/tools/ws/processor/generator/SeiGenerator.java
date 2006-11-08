@@ -201,7 +201,9 @@ public class SeiGenerator extends GeneratorBase{
             if (operation.getResponse().getBodyBlocks().hasNext()) {
                 block = operation.getResponse().getBodyBlocks().next();
                 resultName = block.getName().getLocalPart();
-                nsURI = block.getName().getNamespaceURI();
+                if(isDocStyle || block.getLocation() == Block.HEADER){
+                    nsURI = block.getName().getNamespaceURI();
+                }
             }
 
             for (Parameter parameter : operation.getResponse().getParametersList()) {
