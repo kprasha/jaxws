@@ -182,20 +182,16 @@ public class EndpointFactory {
                     ((SOAPBindingImpl)binding).setPortKnownHeaders(
                             ((SOAPSEIModel)seiModel).getKnownHeaders());
                 }
-                //SEI case:
-                //         Enable Addressing from WSDL if it uses addressing
-                if (wsdlPort != null)
-                    features.mergeFeatures(wsdlPort,false,true);
                 // Generate WSDL for SEI endpoints(not for Provider endpoints)
                 if (primaryDoc == null) {
                     primaryDoc = generateWSDL(binding, seiModel, docList, container, implType);
                     // create WSDL model
                     wsdlPort = getWSDLPort(primaryDoc, docList, serviceName, portName);
                     seiModel.freeze(wsdlPort);
-                    // New Features might have been added in WSDL through Policy.
-                    // This sets only the wsdl features that are not already set(enabled/disabled)
-                    features.mergeFeatures(wsdlPort, false, false);
                 }
+                // New Features might have been added in WSDL through Policy.
+                // This sets only the wsdl features that are not already set(enabled/disabled)
+                features.mergeFeatures(wsdlPort, false, true);
                 terminal= new SEIInvokerTube(seiModel,invoker,binding);
             }
             if (processHandlerAnnotation) {
