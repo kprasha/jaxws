@@ -44,6 +44,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -251,9 +253,9 @@ final class EndpointMethodHandler {
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
                 if (cause != null) {
-                    cause.printStackTrace();
+                    LOGGER.log(Level.SEVERE, cause.getMessage(), cause);
                 } else {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }
                 if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
                     // Service specific exception
@@ -263,7 +265,7 @@ final class EndpointMethodHandler {
                     responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
             }
             return req.createServerResponse(responseMessage, req.endpoint.getPort(), req.endpoint.getBinding());
@@ -284,5 +286,7 @@ final class EndpointMethodHandler {
             filler.fillIn(args, returnValue, msg);
 
         return msg;
-    }    
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(EndpointMethodHandler.class.getName());
 }
