@@ -21,10 +21,10 @@
  */
 package com.sun.xml.ws.model;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.api.TypeReference;
-import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -35,8 +35,8 @@ import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPartImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.resources.ModelerMessages;
 import com.sun.xml.ws.util.Pool;
-import com.sun.istack.NotNull;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -45,12 +45,7 @@ import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * model of the web service.  Used by the runtime marshall/unmarshall
@@ -103,7 +98,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param type
      * @return the <code>Bridge</code> for the <code>type</code>
      */
     public final Bridge getBridge(TypeReference type) {
@@ -129,12 +123,12 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
             // Need to avoid doPriv block once JAXB is fixed. Afterwards, use the above
             jaxbContext = AccessController.doPrivileged(new PrivilegedExceptionAction<JAXBRIContext>() {
                 public JAXBRIContext run() throws Exception {
-                    return JAXBRIContext.newInstance(cls, types, targetNamespace, false);
+                    return JAXBRIContext.newInstance(cls, types, null, targetNamespace, false, null);
                 }
             });
             createBridgeMap(types);
         } catch (PrivilegedActionException e) {
-            throw new WebServiceException(e.getMessage(), e.getException());
+            throw new WebServiceException(ModelerMessages.UNABLE_TO_CREATE_JAXB_CONTEXT(), e);
         }
         knownNamespaceURIs = new ArrayList<String>();
         for (String namespace : jaxbContext.getKnownNamespaceURIs()) {
@@ -169,7 +163,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param qname
      * @return the <code>Method</code> for a given WSDLOperation <code>qname</code>
      */
     public Method getDispatchMethod(QName qname) {
@@ -184,8 +177,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param name
-     * @param method
      * @return true if <code>name</code> is the name
      * of a known fault name for the <code>Method method</code>
      */
@@ -199,8 +190,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param m
-     * @param ex
      * @return true if <code>ex</code> is a Checked Exception
      * for <code>Method m</code>
      */
@@ -214,7 +203,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param method
      * @return the <code>JavaMethod</code> representing the <code>method</code>
      */
     public JavaMethodImpl getJavaMethod(Method method) {
@@ -222,7 +210,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param name
      * @return the <code>JavaMethod</code> associated with the
      * operation named name
      */
@@ -231,7 +218,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * @param jm
      * @return the <code>QName</code> associated with the
      * JavaMethod jm
      */
@@ -263,7 +249,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
      * to apply the binding information from WSDL after the model is created frm SEI class on the client side. On the server
      * side all the binding information is available before modeling and this method is not used.
      *
-     * @param wsdlBinding
      * @deprecated To be removed once client side new architecture is implemented
      */
     public void applyParameterBinding(WSDLBoundPortTypeImpl wsdlBinding){
@@ -354,13 +339,8 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
     /**
-     * Applies binding related information to the RpcLitPayload. The payload map is populated correctly.
-     * @param method
-     * @param wrapperParameter
-     * @param boundPortType
-     * @param mode
+     * Applies binding related information to the RpcLitPayload. The payload map is populated correctl
      * @return
-     *
      * Returns attachment parameters if/any.
      */
     private List<ParameterImpl> applyRpcLitParamBinding(JavaMethodImpl method, WrapperParameter wrapperParameter, WSDLBoundPortTypeImpl boundPortType, Mode mode) {
@@ -414,18 +394,10 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
     }
 
 
-    /**
-     * @param name
-     * @param jm
-     */
     void put(QName name, JavaMethodImpl jm) {
         nameToJM.put(name, jm);
     }
 
-    /**
-     * @param method
-     * @param jm
-     */
     void put(Method method, JavaMethodImpl jm) {
         methodToJM.put(method, jm);
     }
