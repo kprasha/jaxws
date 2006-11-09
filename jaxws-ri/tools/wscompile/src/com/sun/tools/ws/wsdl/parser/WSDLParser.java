@@ -98,7 +98,7 @@ public class WSDLParser {
         register(new MemberSubmissionAddressingExtensionHandler(extensionHandlers, errReceiver));
         register(new W3CAddressingExtensionHandler(extensionHandlers, errReceiver));
 
-        for (TWSDLExtensionHandler te : ServiceFinder.find(TWSDLExtensionHandler.class).toArray()) {
+        for (TWSDLExtensionHandler te : ServiceFinder.find(TWSDLExtensionHandler.class)) {
             register(te);
         }
 
@@ -122,7 +122,7 @@ public class WSDLParser {
         // parse external binding files
         for (InputSource value : options.getWSDLBindings()) {
             errReceiver.pollAbort();
-            Document root = forest.parse(value, true);
+            Document root = forest.parse(value, true); // TODO: I think this should be false - KK
             if(root==null)       continue;   // error must have been reported
             Element binding = root.getDocumentElement();
             if (!fixNull(binding.getNamespaceURI()).equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS)
