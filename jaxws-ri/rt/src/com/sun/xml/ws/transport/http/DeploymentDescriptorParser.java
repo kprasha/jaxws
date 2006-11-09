@@ -124,13 +124,20 @@ public class DeploymentDescriptorParser<A> {
      * a set of {@link HttpAdapter}s.
      */
     public @NotNull List<A> parse(String systemId, InputStream is) {
+        XMLStreamReader reader = null;
         try {
-            XMLStreamReader reader =
+            reader =
                 XMLStreamReaderFactory.createFreshXMLStreamReader(systemId,is);
             XMLStreamReaderUtil.nextElementContent(reader);
             return parseAdapters(reader);
-        } catch (XMLStreamException e) {
-            throw new ServerRtException("runtime.parser.xmlReader",e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (XMLStreamException e) {
+                    throw new ServerRtException("runtime.parser.xmlReader",e);
+                }
+            }
         }
     }
 
@@ -165,7 +172,7 @@ public class DeploymentDescriptorParser<A> {
     }
 
 
-    private List<A> parseAdapters(XMLStreamReader reader) throws XMLStreamException {
+    private List<A> parseAdapters(XMLStreamReader reader) {
         if (!reader.getName().equals(QNAME_ENDPOINTS)) {
             failWithFullName("runtime.parser.invalidElement", reader);
         }
@@ -231,9 +238,6 @@ public class DeploymentDescriptorParser<A> {
         } else {
             failWithLocalName("runtime.parser.invalidElement", reader);
         }
-
-        reader.close();
-
         return adapters;
     }
 
