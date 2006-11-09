@@ -157,7 +157,8 @@ public class WSDLParser {
          * Currently we are working off first WSDL document
          * TODO: add support of creating WSDLDocument from collection of WSDL documents
          */
-        String location = forest.getFirstRootDocument();
+
+        String location = forest.getRootWSDL();
         Document root = forest.get(location);
 
         if(forest.isMexMetadata){

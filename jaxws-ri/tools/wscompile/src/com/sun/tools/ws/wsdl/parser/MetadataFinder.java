@@ -31,6 +31,8 @@ import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
 import com.sun.xml.ws.api.wsdl.parser.ServiceDescriptor;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.ServiceFinder;
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,11 +46,19 @@ import javax.xml.transform.dom.DOMSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * @author Vivek Pandey
  */
 public final class MetadataFinder extends DOMForest{
+
+    public boolean isMexMetadata;
+    private String mexRootDoc;
+    private String rootWSDL;
+    private Set<String> rootWsdls = new HashSet<String>();
+
 
     public MetadataFinder(InternalizationLogic logic, WsimportOptions options, ErrorReceiver errReceiver) {
         super(logic, options, errReceiver);
@@ -80,7 +90,53 @@ public final class MetadataFinder extends DOMForest{
                     inlinedSchemaElements.add((Element) schemas.item(i));
             }
         }
+        identifyRootWslds();
     }
+
+    /**
+     * Gives the root wsdl document systemId. A root wsdl document is the one which has wsdl:service.
+     * @return null if there is no root wsdl
+     */
+    public @Nullable
+    String getRootWSDL(){
+        return rootWSDL;
+    }
+
+    /**
+     * Gives all the WSDL documents.
+     */
+    public @NotNull
+    Set<String> getRootWSDLs(){
+        return rootWsdls;
+    }
+
+
+    /**
+     * Identifies WSDL documents from the {@link DOMForest}. Also identifies the root wsdl document.
+     */
+    private void identifyRootWslds(){
+        for(String location: rootDocuments){
+            Document doc = get(location);
+            if(doc!=null){
+                Element definition = doc.getDocumentElement();
+                if(definition == null)
+                    continue;
+                if(definition.getNamespaceURI().equals(WSDLConstants.NS_WSDL) && definition.getLocalName().equals("definitions")){
+                    rootWsdls.add(location);
+                    //set the root wsdl at this point. Root wsdl is one which has wsdl:service in it
+                    NodeList nl = definition.getElementsByTagNameNS(WSDLConstants.NS_WSDL, "service");
+
+                    //TODO:what if there are more than one wsdl with wsdl:service element. Probably such cases
+                    //are rare and we will take any one of them, this logic should still work
+                    if(nl.getLength() > 0)
+                        rootWSDL = location;
+                }
+            }
+        }
+    }
+
+
+
 
     private String fixNull(String s) {
         if (s == null) return "";
@@ -175,9 +231,6 @@ public final class MetadataFinder extends DOMForest{
         }
         return root;
     }
-
-    public boolean isMexMetadata;
-    private String mexRootDoc;
 
     public Document getMexRootWSDL() {
         return get(mexRootDoc);
