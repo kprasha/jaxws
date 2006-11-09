@@ -166,12 +166,18 @@ public class SeiGenerator extends GeneratorBase{
     }
 
     private void writeXmlSeeAlso(JDefinedClass cls) {
-        if(model.getJAXBModel().getS2JJAXBModel() != null){
+        if (model.getJAXBModel().getS2JJAXBModel() != null) {
+            List<JClass> objectFactories = model.getJAXBModel().getS2JJAXBModel().getAllObjectFactories();
+            
+            //if there are no object facotires, dont generate @XmlSeeAlso
+            if(objectFactories.size() == 0)
+                return;
+            
             JAnnotationUse xmlSeeAlso = cls.annotate(cm.ref(XmlSeeAlso.class));
             JAnnotationArrayMember paramArray = xmlSeeAlso.paramArray("value");
-           for(JClass of:model.getJAXBModel().getS2JJAXBModel().getAllObjectFactories()){
-               paramArray = paramArray.param(of);
-           }
+            for (JClass of : objectFactories) {
+                paramArray = paramArray.param(of);
+            }
         }
 
     }
