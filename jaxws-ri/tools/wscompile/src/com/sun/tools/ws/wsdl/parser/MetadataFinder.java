@@ -142,7 +142,7 @@ public final class MetadataFinder extends DOMForest{
                     NodeList nl = doc.getDocumentElement().getElementsByTagNameNS(WSDLConstants.NS_WSDL, "service");
                     if (nl.getLength() > 0) {
                         root = doc;
-                        mexRootDoc = src.getSystemId();;
+                        mexRootDoc = src.getSystemId();
                     }
                 }
                 NodeList nl = doc.getDocumentElement().getElementsByTagNameNS(WSDLConstants.NS_WSDL, "import");
@@ -182,6 +182,4 @@ public final class MetadataFinder extends DOMForest{
     public Document getMexRootWSDL() {
         return get(mexRootDoc);
     }
-
-
 }
