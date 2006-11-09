@@ -48,7 +48,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Vivek Pandey
@@ -359,6 +364,18 @@ public class DOMForest {
                 return e.getKey();
         }
         return null;
+    }
+
+    /**
+     * Gets the first one (which is more or less random) in {@link #rootDocuments}.
+     */
+    public String getFirstRootDocument() {
+        if(rootDocuments.isEmpty()) return null;
+        return rootDocuments.iterator().next();
+    }
+    
+    public Set<String> getRootDocuments() {
+        return rootDocuments;
     }
 
     /**
