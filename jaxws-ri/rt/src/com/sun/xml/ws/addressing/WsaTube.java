@@ -68,6 +68,11 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
     protected final @NotNull AddressingVersion addressingVersion;
     protected final SOAPVersion soapVersion;
 
+    /**
+     * True if the addressing headers are mandatory.
+     */
+    private final boolean addressingRequired;
+
     public WsaTube(WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(next);
         this.wsdlPort = wsdlPort;
@@ -75,6 +80,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         addressingVersion = binding.getAddressingVersion();
         soapVersion = binding.getSOAPVersion();
         helper = getTubeHelper();
+        addressingRequired = AddressingVersion.isRequired(binding);
     }
 
     public WsaTube(WsaTube that, TubeCloner cloner) {
@@ -84,6 +90,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         this.helper = that.helper;
         addressingVersion = that.addressingVersion;
         soapVersion = that.soapVersion;
+        addressingRequired = that.addressingRequired;
     }
 
     @Override
@@ -179,17 +186,9 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
      */
     public void checkCardinality(Packet packet) {
         Message message = packet.getMessage();
-        boolean addressingRequired = AddressingVersion.isRequired(binding);
         if (message == null) {
             if (addressingRequired)
                 throw new WebServiceException(AddressingMessages.NULL_MESSAGE());
-            else
-                return;
-        }
-
-        if (message.getHeaders() == null) {
-            if (addressingRequired)
-                throw new WebServiceException(AddressingMessages.NULL_HEADERS());
             else
                 return;
         }
