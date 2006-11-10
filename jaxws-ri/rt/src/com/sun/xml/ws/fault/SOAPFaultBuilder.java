@@ -75,19 +75,19 @@ public abstract class SOAPFaultBuilder {
     /**
      * This should be called from the client side to throw an {@link Exception} for a given soap mesage
      */
-    public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions, Message msg) throws JAXBException {
+    public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions) throws JAXBException {
         DetailType dt = getDetail();
         if ((dt == null) || (dt.getDetails() == null) || (dt.getDetails().size() != 1) || (exceptions == null)) {
             // No soap detail, doesnt look like its a checked exception
             // throw a protocol exception
-            return getProtocolException(msg);
+            return getProtocolException();
         }
         Node jaxbDetail = (Node)dt.getDetails().get(0);
         QName detailName = new QName(jaxbDetail.getNamespaceURI(), jaxbDetail.getLocalName());
         CheckedExceptionImpl ce = exceptions.get(detailName);
         if (ce == null) {
             //No Checked exception for the received detail QName, throw a SOAPFault exception
-            return getProtocolException(msg);
+            return getProtocolException();
 
         }
         if (ce.getExceptionType().equals(ExceptionType.UserDefined)) {
@@ -197,7 +197,7 @@ public abstract class SOAPFaultBuilder {
         }
     }
 
-    abstract protected Throwable getProtocolException(Message msg);
+    abstract protected Throwable getProtocolException();
 
     private Object getJAXBObject(Node jaxbBean, CheckedException ce) throws JAXBException {
         Bridge bridge = ce.getBridge();

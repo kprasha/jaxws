@@ -245,7 +245,7 @@ final class SyncMethodHandler extends MethodHandler {
             try {
                 if(msg.isFault()) {
                     SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
-                    throw faultBuilder.createException(checkedExceptions, msg);
+                    throw faultBuilder.createException(checkedExceptions);
                 } else {
                     return responseBuilder.readResponse(msg,args);
                 }

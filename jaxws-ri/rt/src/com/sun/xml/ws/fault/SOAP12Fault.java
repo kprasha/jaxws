@@ -33,12 +33,10 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPFault;
-import javax.xml.soap.Detail;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.ws.WebServiceException;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.SOAPVersion;
 
 /**
@@ -156,7 +154,7 @@ class SOAP12Fault extends SOAPFaultBuilder {
         return Reason.texts().get(0).getText();
     }
 
-     protected Throwable getProtocolException(Message msg) {
+     protected Throwable getProtocolException() {
         try {
             SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(Reason.texts().get(0).getText(), (Code != null)?Code.getValue():null);
             if(Detail != null && Detail.getDetails() != null && Detail.getDetails().size() > 0 && Detail.getDetails().get(0) instanceof Node){

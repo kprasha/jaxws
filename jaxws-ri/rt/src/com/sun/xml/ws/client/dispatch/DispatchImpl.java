@@ -169,7 +169,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                 SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
                 // passing null means there is no checked excpetion we're looking for all
                 // it will get back to us is a protocol exception
-                throw (SOAPFaultException)faultBuilder.createException(null, msg);
+                throw (SOAPFaultException)faultBuilder.createException(null);
             }
         } catch (JAXBException e) {
             //TODO: i18nify
@@ -398,7 +398,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                             SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
                             // passing null means there is no checked excpetion we're looking for all
                             // it will get back to us is a protocol exception
-                            throw (SOAPFaultException)faultBuilder.createException(null, msg);
+                            throw (SOAPFaultException)faultBuilder.createException(null);
                         }
                         responseImpl.setResponseContext(new ResponseContext(response));
                         responseImpl.set(toReturnValue(response), null);

@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.fault;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.SOAPVersion;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -157,7 +156,7 @@ class SOAP11Fault extends SOAPFaultBuilder {
         this.detail = detail;
     }
 
-    protected Throwable getProtocolException(Message msg) {
+    protected Throwable getProtocolException() {
         try {
             SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault(faultstring, faultcode);
             if(detail != null && detail.getDetails() != null && detail.getDetails().size() > 0 && detail.getDetails().get(0) instanceof Node){
