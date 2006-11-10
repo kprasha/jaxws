@@ -70,18 +70,6 @@ public final class WsaClientTube extends WsaTube {
     }
 
 
-    /**
-     * On the client, not finding &lt;wsa:RelatesTo> is an error,
-     * as per Table 5-3 of http://www.w3.org/TR/2006/WD-ws-addr-wsdl-20060216/#wsdl11requestresponse
-     */
-    @Override
-    protected void checkRelatesToCardinality(boolean foundRelatesTo) {
-        if(foundRelatesTo)  return; // good
-
-        // RelatesTo required.
-        throw new MapRequiredException(addressingVersion.relatesToTag);
-    }
-
     @Override
     public void validateAction(Packet packet) {
         //There may not be a WSDL operation.  There may not even be a WSDL.
@@ -101,10 +89,15 @@ public final class WsaClientTube extends WsaTube {
     }
 
     @Override
-    protected void checkMandatoryHeaders(boolean foundAction, boolean foundTo) {
+    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo, boolean foundMessageID) {
         // if no wsa:Action header is found
         if (!foundAction)
             throw new MapRequiredException(addressingVersion.actionTag);
+
+        if(!foundRelatesTo)
+            // RelatesTo required as per
+            // Table 5-3 of http://www.w3.org/TR/2006/WD-ws-addr-wsdl-20060216/#wsdl11requestresponse
+            throw new MapRequiredException(addressingVersion.relatesToTag);
 
         // wsa:To is opional
         // if not present, then anonymous value is assumed

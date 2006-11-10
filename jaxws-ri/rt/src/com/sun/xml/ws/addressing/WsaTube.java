@@ -290,8 +290,6 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
             throw new InvalidMapException(duplicateHeader, addressingVersion.invalidCardinalityTag);
         }
 
-        checkRelatesToCardinality(foundRelatesTo);
-
         // WS-A is engaged if wsa:Action header is found
         boolean engaged = foundAction;
 
@@ -301,16 +299,8 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         // Both wsa:Action and wsa:To MUST be present on request (for oneway MEP) and
         // response messages (for oneway and request/response MEP only)
         if (engaged || addressingRequired) {
-            checkMandatoryHeaders(foundAction, foundTo);
+            checkMandatoryHeaders(packet, foundAction, foundTo, foundRelatesTo, foundMessageId);
         }
-    }
-
-    /**
-     * Check the cardinality of the wsa:RelatesTo header and throw an exception
-     * if it's not right.
-     */
-    protected void checkRelatesToCardinality(boolean foundRelatesTo) {
-        // by default no check
     }
 
     final boolean isInCurrentRole(Header header, WSBinding binding) {
@@ -335,5 +325,6 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
     }
 
     protected abstract void validateAction(Packet packet);
-    protected abstract void checkMandatoryHeaders(boolean foundAction, boolean foundTo);
+    protected abstract void checkMandatoryHeaders(
+        Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo, boolean foundMessageID);
 }
