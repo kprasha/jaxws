@@ -28,7 +28,6 @@ import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
@@ -213,8 +212,6 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         boolean foundMessageId = false;
         boolean foundRelatesTo = false;
         QName duplicateHeader = null;
-        WSEndpointReference replyTo = null;
-        WSEndpointReference faultTo = null;
 
         while (hIter.hasNext()) {
             Header h = hIter.next();
@@ -243,8 +240,8 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
                     break;
                 }
                 foundReplyTo = true;
-                try {
-                    replyTo = h.readAsEPR(addressingVersion);
+                try { // verify that the header is in a good shape
+                    h.readAsEPR(addressingVersion);
                 } catch (XMLStreamException e) {
                     throw new WebServiceException(AddressingMessages.REPLY_TO_CANNOT_PARSE(), e);
                 }
@@ -254,8 +251,8 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
                     break;
                 }
                 foundFaultTo = true;
-                try {
-                    faultTo = h.readAsEPR(addressingVersion);
+                try { // verify that the header is in a good shape
+                    h.readAsEPR(addressingVersion);
                 } catch (XMLStreamException e) {
                     throw new WebServiceException(AddressingMessages.FAULT_TO_CANNOT_PARSE(), e);
                 }
