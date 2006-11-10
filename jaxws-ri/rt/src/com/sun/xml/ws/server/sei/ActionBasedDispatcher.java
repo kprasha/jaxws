@@ -88,6 +88,7 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
         if (action == null)
             // this message doesn't contain addressing headers, which is legal.
+            // this happens when the server is capable of processing addressing but the client didn't send them
             return null;
 
         dispatchKey = action;
