@@ -221,8 +221,8 @@ public final class WsaServerTube extends WsaTube {
     }
 
     @Override
-    public void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
-        super.checkCardinality(packet,binding,wsdlPort);
+    public void checkCardinality(Packet packet) {
+        super.checkCardinality(packet);
 
         // wsaw:Anonymous validation
         WSDLBoundOperation wbo = getWSDLBoundOperation(packet);

@@ -114,7 +114,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         FaultDetailHeader s11FaultDetailHeader;
 
         try {
-            checkCardinality(packet, binding, wsdlPort);
+            checkCardinality(packet);
 
             return packet;
         } catch (InvalidMapException e) {
@@ -169,9 +169,6 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
      * header) or wsdl:required=true.
      *
      * @param packet The inbound packet.
-     * @param binding The Binding.
-     * @param wsdlPort The WSDL port.
-     *
      * @throws WebServiceException if:
      * <ul>
      * <li>there is an error reading ReplyTo or FaultTo</li>
@@ -180,7 +177,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
      * <li>an uknown WS-Addressing header is present</li>
      * </ul>
      */
-    public void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
+    public void checkCardinality(Packet packet) {
         Message message = packet.getMessage();
         boolean addressingRequired = AddressingVersion.isRequired(binding);
         if (message == null) {
