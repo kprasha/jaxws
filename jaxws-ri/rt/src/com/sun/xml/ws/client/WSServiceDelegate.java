@@ -30,7 +30,10 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.client.*;
+import com.sun.xml.ws.api.client.ContainerResolver;
+import com.sun.xml.ws.api.client.PortCreationCallback;
+import com.sun.xml.ws.api.client.ServiceInterceptor;
+import com.sun.xml.ws.api.client.ServiceInterceptorFactory;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Stubs;
@@ -43,6 +46,7 @@ import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.HandlerConfigurator.AnnotationConfigurator;
 import com.sun.xml.ws.client.HandlerConfigurator.HandlerResolverImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -539,7 +543,7 @@ public class WSServiceDelegate extends WSService {
         SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), epr);
 
         T proxy = portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
-                new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis));
+                new Class[]{portInterface, com.sun.xml.ws.api.client.WSBindingProvider.class, Closeable.class}, pis));
         if (serviceInterceptor != null) {
             serviceInterceptor.postCreateProxy((WSBindingProvider)proxy, portInterface);
         }

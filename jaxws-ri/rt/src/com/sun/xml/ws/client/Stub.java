@@ -64,7 +64,7 @@ import java.util.concurrent.Executor;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Stub implements WSBindingProvider, ResponseContextReceiver, Closeable {
+public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvider, ResponseContextReceiver, Closeable {
 
     /**
      * Reuse pipelines as it's expensive to create.
