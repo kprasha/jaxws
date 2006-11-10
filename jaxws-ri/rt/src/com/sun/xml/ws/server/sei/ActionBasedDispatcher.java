@@ -69,10 +69,7 @@ final class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
         for( JavaMethodImpl m : model.getJavaMethods() ) {
             EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,model,m,binding);
-            String action = null;
-            if (m.getOperation() != null)
-                // Could be null for an SE-based endpoint with metadata explicitly set to null
-                action = m.getOperation().getOperation().getInput().getAction();
+            String action = m.getOperation().getOperation().getInput().getAction();
             if (action != null)
                 actionMethodHandlers.put(action, handler);
         }
