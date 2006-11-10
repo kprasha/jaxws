@@ -22,28 +22,26 @@
 
 package com.sun.xml.ws.server.sei;
 
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.ProblemActionHeader;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.sun.xml.ws.model.AbstractSEIModelImpl;
+import com.sun.xml.ws.model.JavaMethodImpl;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.Detail;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An {@link EndpointMethodDispatcher} that uses
@@ -83,8 +81,6 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
         dispatchKey = null;
 
         HeaderList hl = request.getMessage().getHeaders();
-        if (hl == null)
-            return null;
 
         String action = null;
         if (av != null)
