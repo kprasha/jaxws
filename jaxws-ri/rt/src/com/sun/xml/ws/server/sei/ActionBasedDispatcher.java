@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.server.sei;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -59,10 +60,11 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
     private final WSBinding binding;
     private final Map<String, EndpointMethodHandler> actionMethodHandlers;
     private String dispatchKey;
-    private final AddressingVersion av;
+    private final @NotNull AddressingVersion av;
 
     public ActionBasedDispatcher(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
         this.binding = binding;
+        assert binding.getAddressingVersion()!=null;    // this dispatcher can be only used when addressing is on.
         av = binding.getAddressingVersion();
         actionMethodHandlers = new HashMap<String, EndpointMethodHandler>();
 
@@ -82,11 +84,10 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
         HeaderList hl = request.getMessage().getHeaders();
 
-        String action = null;
-        if (av != null)
-            action = hl.getAction(av, binding.getSOAPVersion());
+        String action = hl.getAction(av, binding.getSOAPVersion());
 
         if (action == null)
+            // this message doesn't contain addressing headers, which is legal.
             return null;
 
         dispatchKey = action;
