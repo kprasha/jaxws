@@ -22,7 +22,10 @@
 
 package com.sun.xml.ws.client.dispatch;
 
+import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -95,5 +98,18 @@ public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Ob
         } catch (JAXBException e) {
             throw new WebServiceException(e);
         }
+    }
+
+    public void setOutboundHeaders(Object... headers) {
+        if(headers==null)
+            throw new IllegalArgumentException();
+        Header[] hl = new Header[headers.length];
+        for( int i=0; i<hl.length; i++ ) {
+            if(headers[i]==null)
+                throw new IllegalArgumentException();
+            // TODO: handle any JAXBContext.
+            hl[i] = Headers.create((JAXBRIContext)jaxbcontext,headers[i]);
+        }
+        super.setOutboundHeaders(hl);
     }
 }

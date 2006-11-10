@@ -423,7 +423,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    public final void setOutboundHeaders(Object... headers) {
+    public void setOutboundHeaders(Object... headers) {
         throw new UnsupportedOperationException();
     }
 }
