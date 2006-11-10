@@ -216,7 +216,7 @@ public final class WsaServerTube extends WsaTube {
         if (!foundTo)
             throw new MapRequiredException(addressingVersion.toTag);
 
-        if(!foundMessageID && packet.getMessage().isOneWay(wsdlPort))
+        if(!foundMessageID && !packet.getMessage().isOneWay(wsdlPort))
             throw new MapRequiredException(addressingVersion.messageIDTag);
     }
 
