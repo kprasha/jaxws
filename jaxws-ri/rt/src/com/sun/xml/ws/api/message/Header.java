@@ -70,6 +70,7 @@ import java.util.Set;
  * due to wrapping of {@link Message}.
  *
  * @see HeaderList
+ * @see Headers
  */
 public interface Header {
     // TODO: Vivek pointed out that the only time we are looking at
