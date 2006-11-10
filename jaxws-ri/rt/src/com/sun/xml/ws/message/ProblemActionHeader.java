@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.Header;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -40,22 +41,24 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
+ * {@link Header} that represents &lt;wsa:ProblemAction>
  * @author Arun Gupta
  */
 public class ProblemActionHeader extends AbstractHeaderImpl {
-    protected String action;
+    protected @NotNull String action;
     protected String soapAction;
-    protected AddressingVersion av;
+    protected @NotNull AddressingVersion av;
 
     private static final String actionLocalName = "Action";
     private static final String soapActionLocalName = "SoapAction";
 
-    public ProblemActionHeader(String action, AddressingVersion av) {
-        this.action = action;
-        this.av = av;
+    public ProblemActionHeader(@NotNull String action, @NotNull AddressingVersion av) {
+        this(action,null,av);
     }
 
-    public ProblemActionHeader(String action, String soapAction, AddressingVersion av) {
+    public ProblemActionHeader(@NotNull String action, String soapAction, @NotNull AddressingVersion av) {
+        assert action!=null;
+        assert av!=null;
         this.action = action;
         this.soapAction = soapAction;
         this.av = av;
