@@ -25,6 +25,8 @@ package com.sun.xml.ws.client.sei;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
@@ -120,5 +122,18 @@ public final class SEIStub extends Stub implements InvocationHandler {
 
     protected final @NotNull QName getPortName() {
         return wsdlPort.getName();
+    }
+
+
+    public void setOutboundHeaders(Object... headers) {
+        if(headers==null)
+            throw new IllegalArgumentException();
+        Header[] hl = new Header[headers.length];
+        for( int i=0; i<hl.length; i++ ) {
+            if(headers[i]==null)
+                throw new IllegalArgumentException();
+            hl[i] = Headers.create(seiModel.getJAXBContext(),headers[i]);
+        }
+        super.setOutboundHeaders(hl);
     }
 }

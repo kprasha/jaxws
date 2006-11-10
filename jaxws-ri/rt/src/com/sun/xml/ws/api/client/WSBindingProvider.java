@@ -20,7 +20,9 @@ import javax.xml.ws.BindingProvider;
  * @see ServiceInterceptor
  *
  * @author Jitendra Kotamraju
+ * @deprecated
+ *      Use {@link com.sun.xml.ws.developer.WSBindingProvider}
  */
-public interface WSBindingProvider extends BindingProvider {
+public interface WSBindingProvider extends com.sun.xml.ws.developer.WSBindingProvider {
     // We will add RI-specific methods when there is a need
 }

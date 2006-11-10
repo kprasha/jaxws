@@ -163,6 +163,14 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
+     * Adds all the headers.
+     */
+    public void addAll(Header... headers) {
+        for (Header header : headers)
+            add(header);
+    }
+
+    /**
      * Gets the {@link Header} at the specified index.
      *
      * <p>

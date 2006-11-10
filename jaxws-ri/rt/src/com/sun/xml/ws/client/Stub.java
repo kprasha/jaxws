@@ -29,14 +29,16 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.client.WSBindingProvider;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
 import com.sun.xml.ws.util.RuntimeVersion;
@@ -46,6 +48,8 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -97,6 +101,12 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
      */
     private ResponseContext responseContext;
     @Nullable protected final WSDLPort wsdlPort;
+
+    /**
+     * {@link Header}s to be added to outbound {@link Packet}.
+     * The contents is determined by the user.
+     */
+    @Nullable private volatile Header[] userOutboundHeaders;
 
     /**
      * @param master                 The created stub will send messages to this pipe.
@@ -182,6 +192,11 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
                 if(endpointReference!=null)
                     endpointReference.addReferenceParameters(packet.getMessage().getHeaders());
             }
+
+            // to make it multi-thread safe we need to first get a stable snapshot
+            Header[] hl = userOutboundHeaders;
+            if(hl!=null)
+                packet.getMessage().getHeaders().addAll(hl);
         }
 
         Packet reply;
@@ -304,5 +319,41 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         return new WSEndpointReference(
             AddressingVersion.fromSpecClass(clazz),
             eprAddress, getServiceName(), getPortName(), portTypeName, null, wsdlAddress, null).toSpec(clazz);
+    }
+
+//
+//
+// WSBindingProvider methods
+//
+//
+    public final void setOutboundHeaders(List<Header> headers) {
+        if(headers==null) {
+            this.userOutboundHeaders = null;
+        } else {
+            for (Header h : headers) {
+                if(h==null)
+                    throw new IllegalArgumentException();
+            }
+            userOutboundHeaders = headers.toArray(new Header[headers.size()]);
+        }
+    }
+
+    public final void setOutboundHeaders(Header... headers) {
+        if(headers==null) {
+            this.userOutboundHeaders = null;
+        } else {
+            for (Header h : headers) {
+                if(h==null)
+                    throw new IllegalArgumentException();
+            }
+            Header[] hl = new Header[headers.length];
+            System.arraycopy(headers,0,hl,0,headers.length);
+            userOutboundHeaders = hl;
+        }
+    }
+
+    public final List<Header> getInboundHeaders() {
+        return Collections.unmodifiableList((HeaderList)
+            responseContext.get(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY));
     }
 }

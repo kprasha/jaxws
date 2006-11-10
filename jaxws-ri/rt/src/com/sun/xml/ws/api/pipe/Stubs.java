@@ -25,7 +25,6 @@ package com.sun.xml.ws.api.pipe;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.client.WSBindingProvider;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -35,6 +34,7 @@ import com.sun.xml.ws.client.dispatch.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.xml.ws.client.dispatch.JAXBDispatch;
 import com.sun.xml.ws.client.sei.SEIStub;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.model.SOAPSEIModel;
 
 import javax.activation.DataSource;

@@ -26,37 +26,48 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.*;
+import com.sun.xml.ws.client.AsyncInvoker;
+import com.sun.xml.ws.client.AsyncResponseImpl;
+import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.ResponseContext;
+import com.sun.xml.ws.client.ResponseContextReceiver;
+import com.sun.xml.ws.client.ResponseImpl;
+import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.message.DataHandlerAttachment;
 import com.sun.xml.ws.message.AttachmentSetImpl;
+import com.sun.xml.ws.message.DataHandlerAttachment;
 
+import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.ws.*;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Response;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
-import javax.activation.DataHandler;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * TODO: update javadoc, use sandbox classes where can
@@ -410,6 +421,9 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             };
             processAsync(message,rc, callback);
         }
+    }
 
+    public final void setOutboundHeaders(Object... headers) {
+        throw new UnsupportedOperationException();
     }
 }

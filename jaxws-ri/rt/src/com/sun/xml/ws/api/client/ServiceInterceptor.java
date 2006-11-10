@@ -60,6 +60,15 @@ public abstract class ServiceInterceptor {
      * @param bp created proxy instance
      * @param serviceEndpointInterface SEI of the endpoint
      */
+    public void postCreateProxy(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
+        // backward compatibility
+        postCreateProxy((WSBindingProvider)bp,serviceEndpointInterface);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #postCreateProxy(com.sun.xml.ws.developer.WSBindingProvider, Class<?>)}
+     */
     public void postCreateProxy(@NotNull WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
     }
 
@@ -68,6 +77,15 @@ public abstract class ServiceInterceptor {
      * could set some properties on the {@link BindingProvider}.
      *
      * @param bp BindingProvider of dispatch object
+     */
+    public void postCreateDispatch(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp) {
+        // backward compatibility
+        postCreateDispatch((WSBindingProvider)bp);
+    }
+
+    /**
+     * @deprecated
+     *      Use {@link #postCreateDispatch(WSBindingProvider)} 
      */
     public void postCreateDispatch(@NotNull WSBindingProvider bp) {
     }
@@ -86,12 +104,12 @@ public abstract class ServiceInterceptor {
                 return r;
             }
 
-            public void postCreateProxy(@NotNull WSBindingProvider bp, @NotNull Class<?> serviceEndpointInterface) {
+            public void postCreateProxy(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp, @NotNull Class<?> serviceEndpointInterface) {
                 for (ServiceInterceptor si : interceptors)
                     si.postCreateProxy(bp,serviceEndpointInterface);
             }
 
-            public void postCreateDispatch(@NotNull WSBindingProvider bp) {
+            public void postCreateDispatch(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp) {
                 for (ServiceInterceptor si : interceptors)
                     si.postCreateDispatch(bp);
             }
