@@ -22,16 +22,17 @@
 
 package com.sun.xml.ws.server.sei;
 
-import javax.xml.namespace.QName;
-
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
-import com.sun.xml.ws.util.QNameMap;
 import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.util.QNameMap;
+
+import javax.xml.namespace.QName;
 
 /**
  * An {@link com.sun.xml.ws.server.sei.EndpointMethodDispatcher} that uses
@@ -44,11 +45,10 @@ import com.sun.xml.ws.fault.SOAPFaultBuilder;
  *
  * @author Arun Gupta
  */
-public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
+final class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
     private final QNameMap<EndpointMethodHandler> methodHandlers;
     private static final String EMPTY_PAYLOAD_LOCAL = "";
     private static final String EMPTY_PAYLOAD_NSURI = "";
-    private String dispatchKey;
     private WSBinding binding;
 
     public PayloadQNameBasedDispatcher(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
@@ -61,7 +61,11 @@ public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
         }
     }
 
-    public EndpointMethodHandler getEndpointMethodHandler(Packet request) {
+    /**
+     * {@link PayloadQNameBasedDispatcher} never returns null because this is always
+     * the last {@link EndpointMethodHandler} to kick in.
+     */
+    public @NotNull EndpointMethodHandler getEndpointMethodHandler(Packet request) throws DispatchException {
         Message message = request.getMessage();
         String localPart = message.getPayloadLocalPart();
         String nsUri;
@@ -71,23 +75,17 @@ public class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
         } else {
             nsUri = message.getPayloadNamespaceURI();
         }
-        dispatchKey = "{" + nsUri + "}" + localPart;
+        String dispatchKey = "{" + nsUri + "}" + localPart;
 
-        return methodHandlers.get(nsUri, localPart);
+        EndpointMethodHandler h = methodHandlers.get(nsUri, localPart);
+
+        if(h==null) {
+            String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(dispatchKey, "Payload QName-based Dispatcher");
+            throw new DispatchException(SOAPFaultBuilder.createSOAPFaultMessage(
+                binding.getSOAPVersion(), faultString, binding.getSOAPVersion().faultCodeClient));
+        }
+
+        return h;
     }
 
-    public String getDispatchKey() {
-        return dispatchKey;
-    }
-
-
-    public String getName() {
-        return "Payload QName-based Dispatcher";
-    }
-
-    public Message getFaultMessage() {
-        String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(dispatchKey, getName());
-        return SOAPFaultBuilder.createSOAPFaultMessage(
-                binding.getSOAPVersion(), faultString, binding.getSOAPVersion().faultCodeClient);
-    }
 }

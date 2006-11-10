@@ -56,10 +56,9 @@ import java.util.Map;
  *
  * @author Arun Gupta
  */
-public class ActionBasedDispatcher implements EndpointMethodDispatcher {
+final class ActionBasedDispatcher implements EndpointMethodDispatcher {
     private final WSBinding binding;
     private final Map<String, EndpointMethodHandler> actionMethodHandlers;
-    private String dispatchKey;
     private final @NotNull AddressingVersion av;
 
     public ActionBasedDispatcher(AbstractSEIModelImpl model, WSBinding binding, SEIInvokerTube invokerTube) {
@@ -79,8 +78,7 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
         }
     }
 
-    public EndpointMethodHandler getEndpointMethodHandler(Packet request) {
-        dispatchKey = null;
+    public EndpointMethodHandler getEndpointMethodHandler(Packet request) throws DispatchException {
 
         HeaderList hl = request.getMessage().getHeaders();
 
@@ -91,22 +89,14 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
             // this happens when the server is capable of processing addressing but the client didn't send them
             return null;
 
-        dispatchKey = action;
-        return actionMethodHandlers.get(action);
-    }
+        EndpointMethodHandler h = actionMethodHandlers.get(action);
+        if (h != null)
+            return h;
 
-    public String getDispatchKey() {
-        return dispatchKey;
-    }
-
-    public String getName() {
-        return "Action-based Dispatcher";
-    }
-
-
-    public Message getFaultMessage() {
+        // invalid action header
+        Message result;
         QName subcode = av.actionNotSupportedTag;
-        String faultstring = String.format(av.actionNotSupportedText, dispatchKey);
+        String faultstring = String.format(av.actionNotSupportedText, action);
 
         try {
             SOAPFault fault;
@@ -117,7 +107,7 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
                 Detail detail = fault.addDetail();
                 SOAPElement se = detail.addChildElement(av.problemActionTag);
                 se = se.addChildElement(av.actionTag);
-                se.addTextNode(dispatchKey);
+                se.addTextNode(action);
             } else {
                 fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
                 fault.setFaultCode(subcode);
@@ -127,12 +117,14 @@ public class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
             Message faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(binding.getSOAPVersion(), fault);
             if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
-                faultMessage.getHeaders().add(new ProblemActionHeader(dispatchKey, av));
+                faultMessage.getHeaders().add(new ProblemActionHeader(action, av));
             }
 
-            return faultMessage;
+            result = faultMessage;
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
+
+        throw new DispatchException(result);
     }
 }

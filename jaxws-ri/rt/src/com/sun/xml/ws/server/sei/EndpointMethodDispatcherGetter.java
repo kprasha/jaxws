@@ -23,7 +23,6 @@
 package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -52,9 +51,11 @@ final class EndpointMethodDispatcherGetter {
 
         if (binding.getAddressingVersion() != null) {
             dispatcherList.add(new ActionBasedDispatcher(model, binding, invokerTube));
-        } else {
-            dispatcherList.add(new PayloadQNameBasedDispatcher(model, binding, invokerTube));
         }
+
+        // even when action based dispatching is in place,
+        // we still need this because clients are alowed not to use addressing headers
+        dispatcherList.add(new PayloadQNameBasedDispatcher(model, binding, invokerTube));
     }
 
     List<EndpointMethodDispatcher> getDispatcherList() {

@@ -21,8 +21,6 @@
  */
 package com.sun.xml.ws.server.sei;
 
-import java.util.List;
-
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -31,10 +29,10 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.client.sei.MethodHandler;
-import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.server.InvokerTube;
+
+import java.util.List;
 
 /**
  * This pipe is used to invoke SEI based endpoints.
@@ -70,16 +68,20 @@ public class SEIInvokerTube extends InvokerTube {
 
         Packet res = null;
 
-        for (EndpointMethodDispatcher dispatcher : dispatcherList) {
-            EndpointMethodHandler handler = dispatcher.getEndpointMethodHandler(req);
-            // TODO: iterate over the list
-            if (handler == null) {
-                Message faultMsg = dispatcher.getFaultMessage();
-                res = req.createServerResponse(faultMsg, model.getPort(), binding);
-            } else {
-                res = handler.invoke(req);
+        try {
+            for (EndpointMethodDispatcher dispatcher : dispatcherList) {
+                EndpointMethodHandler handler = dispatcher.getEndpointMethodHandler(req);
+                if (handler != null) {
+                    res = handler.invoke(req);
+                    break;
+                }
             }
+        } catch (DispatchException e) {
+            return doReturnWith(req.createServerResponse(e.fault, model.getPort(), binding));
         }
+
+        // PayloadQNameBasedDispatcher should throw DispatchException
+        assert res!=null;
 
         return doReturnWith(res);
     }

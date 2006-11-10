@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: EndpointMethodDispatcher.java,v 1.1.2.4 2006-10-30 19:22:41 arungupta Exp $
+ $Id: EndpointMethodDispatcher.java,v 1.1.2.5 2006-11-10 00:55:03 kohsuke Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -27,7 +27,6 @@
 package com.sun.xml.ws.server.sei;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Message;
 
 /**
  * This interface needs to be implemented if a new dispatching
@@ -37,36 +36,18 @@ import com.sun.xml.ws.api.message.Message;
  * @author Arun Gupta
  * @see EndpointMethodDispatcherGetter
  */
-public interface EndpointMethodDispatcher {
+interface EndpointMethodDispatcher {
     /**
      * Returns the {@link EndpointMethodHandler} for the <code>request</code>
      * {@link Packet}.
      *
      * @param request request packet
-     * @return EndpointMethodHandler for the request packet
-     */
-    public EndpointMethodHandler getEndpointMethodHandler(Packet request);
-
-    /**
-     * Returns a String representation of the key from {@link Packet}
-     * used for extracting the {@link EndpointMethodHandler}.
-     *
-     * @return key used for dispatching
-     */
-    public String getDispatchKey();
-
-    /**
-     * Returns a name for {@link this} dispatcher.
-     *
      * @return
+     *      non-null {@link EndpointMethodHandler} that will route the request packet.
+     *      null to indicate that the request packet be processed by the next available
+     *      {@link EndpointMethodDispatcher}.
+     * @throws DispatchException
+     *      If the request is invalid, and processing shall be aborted with a specific fault.
      */
-    public String getName();
-
-    /**
-     * Returns the fault {@link Message} if null handler is returned
-     * when {@link #getEndpointMethodHandler(Packet)} is invoked. 
-     *
-     * @return
-     */
-    public Message getFaultMessage();
+    EndpointMethodHandler getEndpointMethodHandler(Packet request) throws DispatchException;
 }
