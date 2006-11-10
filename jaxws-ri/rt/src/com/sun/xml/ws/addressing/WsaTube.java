@@ -23,8 +23,6 @@
 package com.sun.xml.ws.addressing;
 
 import com.sun.istack.NotNull;
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
-import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -43,7 +41,6 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.message.FaultDetailHeader;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.resources.AddressingMessages;
 
 import javax.xml.namespace.QName;
@@ -51,6 +48,7 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.AddressingFeature;
+import java.util.Iterator;
 
 /**
  * WS-Addressing processing code shared between client and server.
@@ -182,8 +180,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
      * <li>an uknown WS-Addressing header is present</li>
      * </ul>
      */
-
-    public final void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
+    public void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
         Message message = packet.getMessage();
         boolean addressingRequired = AddressingVersion.isRequired(binding);
         if (message == null) {
@@ -200,7 +197,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
                 return;
         }
 
-        java.util.Iterator<Header> hIter = message.getHeaders().getHeaders(addressingVersion.nsUri, true);
+        Iterator<Header> hIter = message.getHeaders().getHeaders(addressingVersion.nsUri, true);
 
         if (!hIter.hasNext()) {
             // no WS-A headers are found
@@ -218,6 +215,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         boolean foundFaultTo = false;
         boolean foundAction = false;
         boolean foundMessageId = false;
+        boolean foundRelatesTo = false;
         QName duplicateHeader = null;
         WSEndpointReference replyTo = null;
         WSEndpointReference faultTo = null;
@@ -278,8 +276,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
                 }
                 foundMessageId = true;
             } else if (local.equals(addressingVersion.relatesToTag.getLocalPart())) {
-                // no validation for RelatesTo
-                // since there can be many
+                foundRelatesTo = true;
             } else if (local.equals(addressingVersion.faultDetailTag.getLocalPart())) {
                 // TODO: should anything be done here ?
                 // TODO: fault detail element - only for SOAP 1.1
@@ -293,6 +290,8 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
             throw new InvalidMapException(duplicateHeader, addressingVersion.invalidCardinalityTag);
         }
 
+        checkRelatesToCardinality(foundRelatesTo);
+
         // WS-A is engaged if wsa:Action header is found
         boolean engaged = foundAction;
 
@@ -304,12 +303,14 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         if (engaged || addressingRequired) {
             checkMandatoryHeaders(foundAction, foundTo);
         }
+    }
 
-        // wsaw:Anonymous validation only on the server-side
-        if (packet.proxy == null) {
-            WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
-            checkAnonymousSemantics(wbo, replyTo, faultTo);
-        }
+    /**
+     * Check the cardinality of the wsa:RelatesTo header and throw an exception
+     * if it's not right.
+     */
+    protected void checkRelatesToCardinality(boolean foundRelatesTo) {
+        // by default no check
     }
 
     final boolean isInCurrentRole(Header header, WSBinding binding) {
@@ -331,48 +332,6 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
 
     protected final WSDLBoundOperation getWSDLBoundOperation(Packet packet) {
         return packet.getMessage().getOperation(wsdlPort);
-    }
-
-    final void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) {
-        // no check if Addressing is not enabled or is Member Submission
-        if (addressingVersion == null || addressingVersion == AddressingVersion.MEMBER)
-            return;
-
-        if (wbo == null)
-            return;
-
-        WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)wbo;
-        WSDLBoundOperationImpl.ANONYMOUS anon = impl.getAnonymous();
-
-        String replyToValue = null;
-        String faultToValue = null;
-
-        if (replyTo != null)
-            replyToValue = replyTo.getAddress();
-
-        if (faultTo != null)
-            faultToValue = faultTo.getAddress();
-
-        if (anon == WSDLBoundOperation.ANONYMOUS.optional) {
-            // no check is required
-        } else if (anon == WSDLBoundOperation.ANONYMOUS.required) {
-            if (replyToValue != null && !replyToValue.equals(addressingVersion.anonymousUri))
-                throw new InvalidMapException(addressingVersion.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
-
-            if (faultToValue != null && !faultToValue.equals(addressingVersion.anonymousUri))
-                throw new InvalidMapException(addressingVersion.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
-
-        } else if (anon == WSDLBoundOperation.ANONYMOUS.prohibited) {
-            if (replyToValue != null && replyToValue.equals(addressingVersion.anonymousUri))
-                throw new InvalidMapException(addressingVersion.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
-
-            if (faultToValue != null && faultToValue.equals(addressingVersion.anonymousUri))
-                throw new InvalidMapException(addressingVersion.faultToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
-
-        } else {
-            // cannot reach here
-            throw new WebServiceException(AddressingMessages.INVALID_WSAW_ANONYMOUS(anon.toString()));
-        }
     }
 
     protected abstract void validateAction(Packet packet);

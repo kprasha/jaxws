@@ -69,6 +69,19 @@ public final class WsaClientTube extends WsaTube {
         return doReturnWith(response);
     }
 
+
+    /**
+     * On the client, not finding &lt;wsa:RelatesTo> is an error,
+     * as per Table 5-3 of http://www.w3.org/TR/2006/WD-ws-addr-wsdl-20060216/#wsdl11requestresponse
+     */
+    @Override
+    protected void checkRelatesToCardinality(boolean foundRelatesTo) {
+        if(foundRelatesTo)  return; // good
+
+        // RelatesTo required.
+        throw new MapRequiredException(addressingVersion.relatesToTag);
+    }
+
     @Override
     public void validateAction(Packet packet) {
         //There may not be a WSDL operation.  There may not even be a WSDL.

@@ -23,10 +23,14 @@
 package com.sun.xml.ws.addressing;
 
 import com.sun.istack.NotNull;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_ANONYMOUS_ADDRESS_SUPPORTED;
+import static com.sun.xml.ws.addressing.W3CAddressingConstants.ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED;
 import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -39,6 +43,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TransportTubeFactory;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.resources.AddressingMessages;
 
 import javax.xml.ws.WebServiceException;
@@ -210,6 +215,59 @@ public final class WsaServerTube extends WsaTube {
         // TODO: should we throw a fault for missing To as it's optional ?
         if (!foundTo)
             throw new MapRequiredException(addressingVersion.toTag);
+    }
+
+    @Override
+    public void checkCardinality(Packet packet, WSBinding binding, WSDLPort wsdlPort) {
+        super.checkCardinality(packet,binding,wsdlPort);
+
+        // wsaw:Anonymous validation
+        WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
+        checkAnonymousSemantics(wbo, replyTo, faultTo);
+    }
+
+    final void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) {
+        // no check if Addressing is not enabled or is Member Submission
+        if (addressingVersion == null || addressingVersion == AddressingVersion.MEMBER)
+            return;
+
+        if (wbo == null)
+            return;
+
+        WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)wbo;
+        WSDLBoundOperationImpl.ANONYMOUS anon = impl.getAnonymous();
+
+        String replyToValue = null;
+        String faultToValue = null;
+
+        if (replyTo != null)
+            replyToValue = replyTo.getAddress();
+
+        if (faultTo != null)
+            faultToValue = faultTo.getAddress();
+
+        switch (anon) {
+        case optional:
+            // no check is required
+            break;
+        case prohibited:
+            if (replyToValue != null && replyToValue.equals(addressingVersion.anonymousUri))
+                throw new InvalidMapException(addressingVersion.replyToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
+
+            if (faultToValue != null && faultToValue.equals(addressingVersion.anonymousUri))
+                throw new InvalidMapException(addressingVersion.faultToTag, ONLY_NON_ANONYMOUS_ADDRESS_SUPPORTED);
+            break;
+        case required:
+            if (replyToValue != null && !replyToValue.equals(addressingVersion.anonymousUri))
+                throw new InvalidMapException(addressingVersion.replyToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
+
+            if (faultToValue != null && !faultToValue.equals(addressingVersion.anonymousUri))
+                throw new InvalidMapException(addressingVersion.faultToTag, ONLY_ANONYMOUS_ADDRESS_SUPPORTED);
+            break;
+        default:
+            // cannot reach here
+            throw new WebServiceException(AddressingMessages.INVALID_WSAW_ANONYMOUS(anon.toString()));
+        }
     }
 
     public static final String REQUEST_MESSAGE_ID = "com.sun.xml.ws.addressing.request.messageID";
