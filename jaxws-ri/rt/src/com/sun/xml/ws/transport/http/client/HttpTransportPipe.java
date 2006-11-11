@@ -33,6 +33,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,10 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
                     codec.encode(request, buf);
                     dump(buf, "HTTP request", reqHeaders);
-                    buf.writeTo(con.getOutput());
+                    OutputStream out = con.getOutput();
+                    if (out != null) {
+                        buf.writeTo(out);
+                    }
                 } else {
                     codec.encode(request, con.getOutput());
                 }
