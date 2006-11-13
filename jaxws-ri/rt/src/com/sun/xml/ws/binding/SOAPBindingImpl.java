@@ -170,7 +170,7 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
      * Client application can override if the MTOM optimization should be enabled
      */
     public void setMTOMEnabled(boolean b) {
-        setFeatures(new MTOMFeature());
+        setFeatures(new MTOMFeature(b));
     }
 
     public SOAPFactory getSOAPFactory() {
