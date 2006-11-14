@@ -47,6 +47,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.Collections;
 import java.util.List;
@@ -300,11 +301,17 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
     }
 
     public final W3CEndpointReference getEndpointReference() {
+        if (binding.getBindingID().equals(HTTPBinding.HTTP_BINDING))
+            throw new java.lang.UnsupportedOperationException("BindingProvider.getEndpointReference() not supported with XML/HTTP Binding");
         return getEndpointReference(W3CEndpointReference.class);
     }
 
     public final <T extends EndpointReference>
     T getEndpointReference(Class<T> clazz) {
+
+        if (binding.getBindingID().equals(HTTPBinding.HTTP_BINDING))
+            throw new java.lang.UnsupportedOperationException("BindingProvider.getEndpointReference(Class<T> class) not supported with XML/HTTP Binding");
+
         // we need to expand WSEndpointAddress class to be able to return EPR with arbitrary address.
         if (endpointReference != null) {
             return endpointReference.toSpec(clazz);
