@@ -32,6 +32,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.message.stream.StreamAttachment;
+import com.sun.xml.ws.message.MimeAttachmentSet;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
@@ -139,27 +140,17 @@ public class MtomCodec extends MimeCodec {
                 packet.getMessage().writeTo(writer);
                 OutputUtil.writeln(out);
 
-                int numOfAttachments = 0;
-                Iterator<Attachment> mimeAttSet = packet.getMessage().getAttachments().iterator();
-
-                //if there no other mime parts to be written, write the end boundary
-                if(!mimeAttSet.hasNext() && mtomAttachmentStream.size() == 0){
-                    OutputUtil.writeAsAscii("--"+boundary, out);
-                    OutputUtil.writeAsAscii("--", out);
-                }
-
                 for(ByteArrayBuffer bos : mtomAttachmentStream){
                     bos.write(out);
-
-                    //once last attachment is written, end with boundary
-                    if(++numOfAttachments == mtomAttachmentStream.size()){
-                        OutputUtil.writeAsAscii("--"+boundary, out);
-                        OutputUtil.writeAsAscii("--", out);
-                    }
                 }
 
                 //now write out the attachments in the message
                 writeAttachments(packet.getMessage().getAttachments(),out);
+
+                //write out the end boundary
+                OutputUtil.writeAsAscii("--"+boundary, out);
+                OutputUtil.writeAsAscii("--", out);
+
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
@@ -202,8 +193,9 @@ public class MtomCodec extends MimeCodec {
 
     private void writeAttachments(AttachmentSet attachments, OutputStream out) throws IOException {
         for(Attachment att : attachments){
+            //build attachment frame
+            OutputUtil.writeln("--"+boundary, out);
             writeMimeHeaders(att.getContentType(), att.getContentId(), out);
-            OutputUtil.writeln(out);                    // write \r\n
             att.writeTo(out);
             OutputUtil.writeln(out);                    // write \r\n
         }
@@ -228,9 +220,17 @@ public class MtomCodec extends MimeCodec {
         // we'd like to reuse those reader objects but unfortunately decoder may be reused
         // before the decoded message is completely used.
 
-        packet.setMessage(codec.decode(new MtomXMLStreamReaderEx( mpp,
+        XMLStreamReader mtomReader = new MtomXMLStreamReaderEx( mpp,
             XMLStreamReaderFactory.createXMLStreamReader(mpp.getRootPart().asInputStream(), true)
-        )));
+        );
+
+        //TODO: remove this code after {@link StreamSOAPCodec#decode} is modified to
+        //take AttachmentSet.
+        if(codec instanceof com.sun.xml.ws.encoding.StreamSOAPCodec){
+            packet.setMessage(((com.sun.xml.ws.encoding.StreamSOAPCodec)codec).decode(mtomReader, new MimeAttachmentSet(mpp)));
+        }else{
+            packet.setMessage(codec.decode(mtomReader));
+        }
     }
 
     private class MtomStreamWriter extends XMLStreamWriterFilter implements XMLStreamWriterEx {
