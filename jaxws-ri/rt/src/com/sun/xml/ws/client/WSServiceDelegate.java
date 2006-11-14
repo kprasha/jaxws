@@ -148,8 +148,8 @@ public class WSServiceDelegate extends WSService {
     /**
      * Information about SEI, keyed by their interface type.
      */
-    private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
-
+   // private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
+   private final Map<QName,SEIPortInfo> seiContext = new HashMap<QName,SEIPortInfo>();
     private Executor executor;
 
     /**
@@ -537,7 +537,7 @@ public class WSServiceDelegate extends WSService {
                 ClientMessages.INVALID_PORT_NAME(portName,buildWsdlPortNames()));
         }
 
-        SEIPortInfo eif = seiContext.get(portInterface);
+        SEIPortInfo eif = seiContext.get(portName);
 
         BindingImpl binding = eif.createBinding(webServiceFeatures,portInterface);
         SEIStub pis = new SEIStub(this, binding, eif.model, createPipeline(eif, binding), epr);
@@ -579,7 +579,7 @@ public class WSServiceDelegate extends WSService {
      */
     //todo: valid port in wsdl
     private void addSEI(QName portName, Class portInterface) throws WebServiceException {
-        SEIPortInfo spi = seiContext.get(portInterface);
+        SEIPortInfo spi = seiContext.get(portName);
         if (spi != null) return;
         WSDLPortImpl wsdlPort = getPortModel(portName);
         RuntimeModeler modeler = new RuntimeModeler(portInterface, serviceName, wsdlPort);
@@ -587,7 +587,8 @@ public class WSServiceDelegate extends WSService {
         AbstractSEIModelImpl model = modeler.buildRuntimeModel();
 
         spi = new SEIPortInfo(this, portInterface, (SOAPSEIModel) model, wsdlPort);
-        seiContext.put(spi.sei, spi);
+        seiContext.put(spi.portName, spi);
+        //seiContext.put(spi.sei, spi);
         ports.put(spi.portName, spi);
 
     }
@@ -603,58 +604,7 @@ public class WSServiceDelegate extends WSService {
             return daemonThread;
         }
     }
-    /*
-    class EndpointReferenceInfo {
-        private final @NotNull MemberSubmissionEndpointReference msepr;
-        final String uri;
-        final QName sname;
-        final QName pname;
 
-        EndpointReferenceInfo(EndpointReference epr) {
-            msepr = EndpointReferenceUtil.transform(MemberSubmissionEndpointReference.class, epr);
-            uri = msepr.addr.uri;
-            sname = msepr.serviceName.name;
-            pname = new QName(sname.getNamespaceURI(), msepr.serviceName.portName);
-        }
-
-        private WSDLServiceImpl parseModel() {
-            WSDLModelImpl eprWsdlMdl;
-            try {
-                eprWsdlMdl = parseWSDL(new URL(uri), msepr.toWSDLSource());
-            } catch (MalformedURLException e) {
-                throw new WebServiceException(ClientMessages.INVALID_ADDRESS(uri));
-            }
-
-            validate(eprWsdlMdl);
-            return eprWsdlMdl.getService(sname);
-        }
-
-        private void validate(WSDLModelImpl eprWsdlContext) {
-
-            if (wsdlService != null) {
-                //do we have the same wsdl
-                if (!eprWsdlContext.getFirstServiceName().equals(serviceName))
-                    throw new WebServiceException("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n" + " The two Service QNames must match");
-
-                QName portName = pname;
-                if (eprWsdlContext.getBinding(sname, portName) == null ||
-                        wsdlService.get(portName) == null)
-                    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
-
-            } else {
-                WSDLServiceImpl eprService = eprWsdlContext.getService(serviceName);
-                if (eprService == null)
-                    throw new WebServiceException(
-                            ClientMessages.INVALID_SERVICE_NAME(serviceName,
-                                    buildNameList(eprWsdlContext.getServices().keySet())));
-
-                //if (!wsdlContext.contains(eprInfo.sname, new QName(eprInfo.sname.getNamespaceURI(), eprInfo.pname)))
-                //    throw new WebServiceException("EndpointReference WSDL port name differs from Service Instance WSDL port QName.\n");
-
-            }
-        }
-    }
-*/
     private static final WebServiceFeature[] EMPTY_FEATURES = new WebServiceFeature[0];
 }
 
