@@ -159,6 +159,11 @@ public class WSDLParser {
          */
 
         String location = forest.getRootWSDL();
+
+        //It means that WSDL is not found, an error might have been reported, lets try to recover
+        if(location == null)
+            return null;
+
         Document root = forest.get(location);
 
         if(forest.isMexMetadata){
