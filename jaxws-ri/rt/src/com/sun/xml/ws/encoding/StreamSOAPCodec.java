@@ -22,11 +22,13 @@
 
 package com.sun.xml.ws.encoding;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -34,10 +36,10 @@ import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
+import com.sun.xml.ws.protocol.soap.VersionMismatchException;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.protocol.soap.VersionMismatchException;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -114,7 +116,22 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
      * @param reader
      *      can point to the start document or the start element.
      */
-    public final Message decode(XMLStreamReader reader) {
+    public final @NotNull Message decode(@NotNull XMLStreamReader reader) {
+        return decode(reader,new AttachmentSetImpl());
+    }
+
+    /**
+     * Decodes a message from {@link XMLStreamReader} that points to
+     * the beginning of a SOAP infoset.
+     *
+     * @param reader
+     *      can point to the start document or the start element.
+     * @param attachmentSet
+     *      {@link StreamSOAPCodec} can take attachments parsed outside,
+     *      so that this codec can be used as a part of a biggre codec
+     *      (like MIME multipart codec.)
+     */
+    public final Message decode(XMLStreamReader reader, @NotNull AttachmentSet attachmentSet) {
 
         // Move to soap:Envelope and verify
         if(reader.getEventType()!=XMLStreamConstants.START_ELEMENT)
@@ -171,7 +188,7 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
         TagInfoset bodyTag = new TagInfoset(reader);
 
         XMLStreamReaderUtil.nextElementContent(reader);
-        return new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag,reader,soapVersion);
+        return new StreamMessage(envelopeTag,headerTag,attachments,headers,bodyTag,reader,soapVersion);
         // when there's no payload,
         // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
         // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.
