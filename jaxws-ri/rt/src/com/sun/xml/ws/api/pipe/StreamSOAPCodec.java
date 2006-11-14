@@ -1,7 +1,7 @@
 package com.sun.xml.ws.api.pipe;
 
-import com.sun.xml.ws.api.message.Message;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.stream.XMLStreamReader;
 
@@ -11,8 +11,8 @@ import javax.xml.stream.XMLStreamReader;
  * way to construct a whole codec that can handle MTOM, MIME
  * encoded packages using this codec.
  *
- * @see {@link Codecs}
- * 
+ *
+ * @see Codecs
  * @author Jitendra Kotamraju
  */
 public interface StreamSOAPCodec extends Codec {
