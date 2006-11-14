@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * {@link Adapter} that receives messages in HTTP.
@@ -172,7 +174,15 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
     }
 
-    public Packet decodePacket(@NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
+    /**
+     *
+     * @param con
+     * @param codec
+     * @return
+     * @throws IOException
+     *         ExceptionHasMessage exception that contains particular fault message
+     */
+    private Packet decodePacket(@NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
         String ct = con.getRequestHeader("Content-Type");
         InputStream in = con.getInput();
         Packet packet = new Packet();
@@ -187,16 +197,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             dump(buf, "HTTP request", con.getRequestHeaders());
             in = buf.newInputStream();
         }
-        try {
-            codec.decode(in, ct, packet);
-        } catch(ExceptionHasMessage e) {
-            e.printStackTrace();
-            packet.setMessage(e.getFaultMessage());
-        }
+        codec.decode(in, ct, packet);
         return packet;
     }
 
-    public void encodePacket(@NotNull Packet packet, @NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
+    private void encodePacket(@NotNull Packet packet, @NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
         if (con.isClosed()) {
             return;                 // Connection is already closed
         }
@@ -249,23 +254,33 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     public void invokeAsync(final WSHTTPConnection con) throws IOException {
         final HttpToolkit tk = pool.take();
-        final Packet request = decodePacket(con, tk.codec);
-        if (!request.getMessage().isFault()) {
-            endpoint.schedule(request, new WSEndpoint.CompletionCallback() {
-                public void onCompletion(@NotNull Packet response) {
-                    try {
-                        try {
-                            encodePacket(response, con, tk.codec);
-                        } catch(IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                        pool.recycle(tk);
-                    } finally{
-                        con.close();
-                    }
-                }
-            });
+        final Packet request;
+        try {
+            request = decodePacket(con, tk.codec);
+        } catch(ExceptionHasMessage e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            Packet response = new Packet();
+            response.setMessage(e.getFaultMessage());
+            encodePacket(response, con, tk.codec);
+            pool.recycle(tk);
+            con.close();
+            return;
         }
+
+        endpoint.schedule(request, new WSEndpoint.CompletionCallback() {
+            public void onCompletion(@NotNull Packet response) {
+                try {
+                    try {
+                        encodePacket(response, con, tk.codec);
+                    } catch(IOException ioe) {
+                        LOGGER.log(Level.SEVERE, ioe.getMessage(), ioe);
+                    }
+                    pool.recycle(tk);
+                } finally{
+                    con.close();
+                }
+            }
+        });
     }
 
     final class AsyncTransport extends AbstractServerAsyncTransport<WSHTTPConnection> {
@@ -321,20 +336,33 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     final class HttpToolkit extends Adapter.Toolkit {
         public void handle(WSHTTPConnection con) throws IOException {
-            Packet request = decodePacket(con, codec);
-            if (!request.getMessage().isFault()) {
+            try {
+                Packet packet;
                 try {
-                    Packet response = head.process(request, con.getWebServiceContextDelegate(),
-                            request.transportBackChannel);
-                    encodePacket(response, con, codec);
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    if (!con.isClosed()) {
-                        writeInternalServerError(con);
+                    packet = decodePacket(con, codec);
+                } catch(ExceptionHasMessage e) {
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                    packet = new Packet();
+                    packet.setMessage(e.getFaultMessage());
+                }
+                if (!packet.getMessage().isFault()) {
+                    try {
+                        packet = head.process(packet, con.getWebServiceContextDelegate(),
+                                packet.transportBackChannel);
+                    } catch(Exception e) {
+                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                        if (!con.isClosed()) {
+                            writeInternalServerError(con);
+                        }
+                        return;
                     }
                 }
+               encodePacket(packet, con, codec);
+            } finally {
+                if (!con.isClosed()) {
+                    con.close();
+                }
             }
-            con.close();
         }
     }
 
@@ -461,4 +489,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
         dump = b;
     }
+
+    private static final Logger LOGGER = Logger.getLogger(HttpAdapter.class.getName());
+
 }
