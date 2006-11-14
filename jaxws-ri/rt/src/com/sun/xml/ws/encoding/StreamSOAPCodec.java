@@ -188,7 +188,7 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
         TagInfoset bodyTag = new TagInfoset(reader);
 
         XMLStreamReaderUtil.nextElementContent(reader);
-        return new StreamMessage(envelopeTag,headerTag,attachments,headers,bodyTag,reader,soapVersion);
+        return new StreamMessage(envelopeTag,headerTag,attachmentSet,headers,bodyTag,reader,soapVersion);
         // when there's no payload,
         // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
         // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.
