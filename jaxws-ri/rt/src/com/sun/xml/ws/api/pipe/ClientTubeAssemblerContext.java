@@ -66,14 +66,20 @@ public class ClientTubeAssemblerContext {
 
     public ClientTubeAssemblerContext(@NotNull EndpointAddress address, @NotNull WSDLPort wsdlModel,
                                       @NotNull WSService rootOwner, @NotNull WSBinding binding,
-                                      @NotNull Container container) {
+                                      @NotNull Container container, Codec codec) {
         this.address = address;
         this.wsdlModel = wsdlModel;
         this.rootOwner = rootOwner;
         this.binding = binding;
         this.container = container;
+        this.codec = codec;
+    }
+
+    public ClientTubeAssemblerContext(@NotNull EndpointAddress address, @NotNull WSDLPort wsdlModel,
+                                      @NotNull WSService rootOwner, @NotNull WSBinding binding,
+                                      @NotNull Container container) {
         // WSBinding is actually BindingImpl
-        this.codec = ((BindingImpl)binding).createCodec();
+        this(address, wsdlModel, rootOwner, binding, container, ((BindingImpl)binding).createCodec() );
     }
 
     /**
