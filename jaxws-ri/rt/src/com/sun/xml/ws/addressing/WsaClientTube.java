@@ -89,7 +89,7 @@ public final class WsaClientTube extends WsaTube {
     }
 
     @Override
-    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundreplyTo, boolean foundRelatesTo, boolean foundMessageID) {
+    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo, boolean foundMessageID) {
         // if no wsa:Action header is found
         if (!foundAction)
             throw new MapRequiredException(addressingVersion.actionTag);
