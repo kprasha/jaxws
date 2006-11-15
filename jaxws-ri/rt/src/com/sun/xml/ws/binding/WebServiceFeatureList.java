@@ -48,6 +48,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Represents a list of {@link WebServiceFeature}s that has bunch of utility methods
@@ -182,9 +183,9 @@ public final class WebServiceFeatureList implements WSFeatureList {
      *          In Provider case, it should be true
      * @param reportConflicts
      *          If true, checks if the feature setting in WSDL (wsdl extension or
-     *          policy configuration) colflicts with feature setting in Deployed Service.
-     *          should be true on server-side, so that we verify what you specify in wsdl
-     *          contract is not aganist the implementation
+     *          policy configuration) colflicts with feature setting in Deployed Service and
+     *          logs warning if there are any conflicts.
+     *
      */
     public void mergeFeatures(@NotNull WSDLPort wsdlPort, boolean honorWsdlRequired, boolean reportConflicts) {
         if(honorWsdlRequired && !isEnabled(RespectBindingFeature.class))
@@ -214,11 +215,12 @@ public final class WebServiceFeatureList implements WSFeatureList {
                 }
             } else if(reportConflicts) {
                 if(isEnabled(wsdlFtr.getID()) != wsdlFtr.isEnabled()) {
-                    throw new RuntimeModelerException(ModelerMessages.localizableRUNTIME_MODELER_FEATURE_CONFLICT(
+                    LOGGER.warning(ModelerMessages.RUNTIME_MODELER_FEATURE_CONFLICT(
                             get(wsdlFtr.getClass()),wsdlFtr));
              }
 
             }
         }
     }
+    private static final Logger LOGGER = Logger.getLogger(WebServiceFeatureList.class.getName());
 }
