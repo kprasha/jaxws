@@ -151,18 +151,14 @@ public class XMLStreamReaderUtil {
     */
     public static QName getElementQName(XMLStreamReader reader) {
         try {
-            String namespaceURI = reader.getNamespaceURI(0);
             String text = reader.getElementText();
+            String prefix = text.substring(0,text.indexOf(':'));
+            String namespaceURI = reader.getNamespaceURI(prefix);
             if (namespaceURI == null) {
-                String prefix = text.substring(0,
-                    text.indexOf(':'));
-                namespaceURI = reader.getNamespaceURI(prefix);
-                if (namespaceURI == null) {
-                    namespaceURI = "";
-                }
+                namespaceURI = "";
             }
             String localPart = text.substring(
-                text.indexOf(':') + 1,  text.length());
+                    text.indexOf(':') + 1, text.length());
             return new QName(namespaceURI, localPart);
         } catch (XMLStreamException e) {
             throw wrapException(e);
