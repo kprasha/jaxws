@@ -153,9 +153,18 @@
     <td style="vertical-align: top;"><code>-wsdllocation
         &lt;location&gt;</code><br>
     </td>
-    <td style="vertical-align: top;"><code>@WebService.wsdlLocation</code>
-        and <code>@WebServiceClient.wsdlLocation</code> value<br>
+    <td style="vertical-align: top;"><code>@WebServiceClient.wsdlLocation</code> value<br>
     </td>
+</tr>
+<tr>
+    <td style="vertical-align: top;">target</td>
+    <td style="vertical-align: top;">Generate code as per the given JAXWS 
+	specification version. version 2.0 will generate compliant code for JAXWS 
+	2.0 spec.</td>
+</tr>
+<tr>
+    <td style="vertical-align: top;">quiet</td>
+    <td style="vertical-align: top;">Suppress wsimport output</td>
 </tr>
 </tbody>
 </table>
@@ -304,6 +313,18 @@
     <td style="vertical-align: top;"><code>-p</code><br>
     </td>
 </tr>
+<tr>
+    <td style="vertical-align: top;">target</td>
+    <td style="vertical-align: top;">Generate code as per the given JAXWS 
+	specification version. version 2.0 will generate compliant code for JAXWS 
+	2.0 spec.</td>
+    <td style="vertical-align: top;">-target</td>
+</tr>
+<tr>
+    <td style="vertical-align: top;">quiet</td>
+    <td style="vertical-align: top;">Suppress wsimport output</td>
+    <td style="vertical-align: top;">-quiet</td>
+</tr>
 </tbody>
 </table>
 <p>The <code></code><code>binding</code> attributes is like
@@ -339,28 +360,5 @@
     directory. <br>
 </p>
 
-<h3>Summary of Changed and Removed wsimport ant attributes</h3>
-
-<div style="margin-left: 40px;"><span style="font-weight: bold;">base</span>
-    replaced by <span style="font-weight: bold;">destdir</span><br>
-    <span style="font-weight: bold;"></span></div>
-<span style="font-weight: bold;"><br>
-</span>
-
-<div style="margin-left: 40px;"><span style="font-weight: bold;">sourceBase</span>
-    is replaced by <span style="font-weight: bold;">sourcedestdir</span><br>
-    <span style="font-weight: bold;"></span></div>
-<span style="font-weight: bold;"><span style="font-weight: bold;"><br>
-</span></span>
-
-<div style="margin-left: 40px;"><span style="font-weight: bold;"><span
-        style="font-weight: bold;">wsdlFile </span></span>is replaced by <span
-        style="font-weight: bold;">wsdl<br>
-<br>
-httpProxy </span>is removed. Use ant's setproxy task instead for proxy
-    configuration.<br>
-    <br>
-    <span style="font-weight: bold;">version </span>is removed<br>
-    <span style="font-weight: bold;"></span></div>
 </body>
 </html>
