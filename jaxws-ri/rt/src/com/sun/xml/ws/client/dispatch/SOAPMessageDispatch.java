@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.message.saaj.SAAJMessage;
+import com.sun.xml.ws.resources.DispatchMessages;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MimeHeader;
@@ -61,7 +62,7 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
     Packet createPacket(SOAPMessage arg) {
 
         if (arg == null && !isXMLHttp(binding))
-           throw new WebServiceException("Can not invoke a SOAPMessage with a null invocation parameter");
+           throw new WebServiceException(DispatchMessages.INVALID_NULLARG_SOAP_MSGMODE(mode.name(), Service.Mode.PAYLOAD.toString()));
 
         MimeHeaders mhs = arg.getMimeHeaders();
         mhs.addHeader("Content-Type", "text/xml");
@@ -84,7 +85,12 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
 
     SOAPMessage toReturnValue(Packet response) {
         try {
-            return response.getMessage().readAsSOAPMessage();
+
+            //not sure if this is the correct way to deal with this.
+            if ( response ==null || response.getMessage() == null )
+                     throw new NullPointerException(DispatchMessages.INVALID_RESPONSE());
+            else
+                return response.getMessage().readAsSOAPMessage();            
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
