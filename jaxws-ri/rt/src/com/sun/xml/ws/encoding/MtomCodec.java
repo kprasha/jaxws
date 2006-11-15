@@ -186,7 +186,10 @@ public class MtomCodec extends MimeCodec {
 
     private void writeMimeHeaders(String contentType, String contentId, OutputStream out) throws IOException {
         OutputUtil.writeln("Content-Type: " + contentType, out);
-        OutputUtil.writeln("Content-Id: <" + contentId+">", out);
+        String cid = contentId;
+        if(cid != null && cid.length() >0 && cid.charAt(0) != '<')
+            cid = '<' + cid + '>';
+        OutputUtil.writeln("Content-Id: " + cid, out);
         OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
         OutputUtil.writeln(out);
     }
