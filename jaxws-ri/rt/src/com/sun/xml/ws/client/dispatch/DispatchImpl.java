@@ -46,6 +46,7 @@ import com.sun.xml.ws.encoding.soap.DeserializationException;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.DataHandlerAttachment;
+import com.sun.xml.ws.resources.DispatchMessages;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
@@ -56,8 +57,10 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.ws.soap.SOAPBinding;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -222,32 +225,32 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         //with HTTP Request Method == POST
         if (isXMLHttp(binding)){
             if (methodNotOk(rc))
-                throw new WebServiceException("A XML/HTTP request using MessageContext.HTTP_REQUEST_METHOD equals \"POST\" with a Null invocation Argument is not allowed");
+                throw new WebServiceException(DispatchMessages.INVALID_NULLARG_XMLHTTP_REQUEST_METHOD(HTTP_REQUEST_METHOD_POST, HTTP_REQUEST_METHOD_GET));
         } else { //soapBinding
               if (mode == Service.Mode.MESSAGE )
-                  throw new WebServiceException("SOAP/HTTP Binding in Service.Mode.message is not allowed with a null invocation argument");
+                   throw new WebServiceException(DispatchMessages.INVALID_NULLARG_SOAP_MSGMODE(mode.name(), Service.Mode.PAYLOAD.toString()));
         }
     }
 
     static boolean methodNotOk(RequestContext rc) {
         String requestMethod = (String)rc.get(MessageContext.HTTP_REQUEST_METHOD);
-        String request = (requestMethod == null)? "POST": requestMethod;
+        String request = (requestMethod == null)? HTTP_REQUEST_METHOD_POST: requestMethod;
 
-        return "POST".equalsIgnoreCase(request) || "PUT".equalsIgnoreCase(request);
+        return HTTP_REQUEST_METHOD_POST.equalsIgnoreCase(request) || HTTP_REQUEST_METHOD_PUT.equalsIgnoreCase(request);
     }
 
     public static void checkValidSOAPMessageDispatch(WSBinding binding, Service.Mode mode) {
         if (DispatchImpl.isXMLHttp(binding))
-            throw new WebServiceException("Can not create Dispatch<SOAPMessage> with XML/HTTP Binding, SOAPBinding only.");
+            throw new WebServiceException(DispatchMessages.INVALID_SOAPMESSAGE_DISPATCH_BINDING(HTTPBinding.HTTP_BINDING, SOAPBinding.SOAP11HTTP_BINDING + " or " + SOAPBinding.SOAP12HTTP_BINDING));
         if (DispatchImpl.isPAYLOADMode(mode))
-            throw new WebServiceException("Can not create Dispatch<SOAPMessage> of Service.Mode.PAYLOAD, Service.Mode.MESSAGE only");
+            throw new WebServiceException(DispatchMessages.INVALID_SOAPMESSAGE_DISPATCH_MSGMODE(mode.name(), Service.Mode.MESSAGE.toString()));
     }
 
     public static void checkValidDataSourceDispatch(WSBinding binding, Service.Mode mode) {
         if (!DispatchImpl.isXMLHttp(binding))
-            throw new WebServiceException("Can not create Dispatch<DataSource> with SOAP Binding Binding, XML/HTTP Binding only.");
+            throw new WebServiceException(DispatchMessages.INVALID_DATASOURCE_DISPATCH_BINDING("SOAP/HTTP", HTTPBinding.HTTP_BINDING));
         if (DispatchImpl.isPAYLOADMode(mode))
-            throw new WebServiceException("Can not create Dispatch<DataSource> of Service.Mode.PAYLOAD, Service.Mode.MESSAGE only");
+            throw new WebServiceException(DispatchMessages.INVALID_DATASOURCE_DISPATCH_MSGMODE(mode.name(), Service.Mode.MESSAGE.toString()));
     }
 
     protected final @NotNull QName getPortName() {
@@ -426,4 +429,8 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     public void setOutboundHeaders(Object... headers) {
         throw new UnsupportedOperationException();
     }
+
+    static final String HTTP_REQUEST_METHOD_GET="GET";
+    static final String HTTP_REQUEST_METHOD_POST="POST";
+    static final String HTTP_REQUEST_METHOD_PUT="PUT";
 }
