@@ -12,7 +12,9 @@ is being done on the <b>mr-21 </b>branch in JAXWS CVS workspace.</p>
 <p>
 This release brings in the highly pluggable framework thru abstractions such as 
 Pipe and Message. Refer to the latest <span style="background-color: #FFFFFF">
-<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/?jaxws/package-summary.html">architecture document</a></span>. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
+<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/?jaxws/package-summary.html">architecture document</a></span>. 
+This architecture document is a glorified javadoc which includes all the JAXWS 
+RI specific APIs. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
 has many bug fixes made for interoperability with .NET 3.0. This is made mostly 
 possible due to WSIT, which uses JAXWS plugabble architecture to plug in support 
 for WS-Metadata, WS-Policy, WS-ReliableMessaging, WS-Transaction, WS-SecureConversation 
@@ -56,7 +58,8 @@ can be found <span style="background-color: #FFFFFF">
     </li>
     <li>
         <p>Tested to work with 
-		<a href="https://glassfish.dev.java.net/downloads/v2-b22.html">Glassfish v2 Milestone2</a> and Apache Tomcat 5.x</p>
+		<a href="https://glassfish.dev.java.net/downloads/v2-b25.html">Glassfish v2 Milestone2 
+		build 25</a> and Apache Tomcat 5.x</p>
     </li>
 </ul>
 
@@ -70,17 +73,19 @@ Services ${SPEC_VERSION} Specification</a>.</p>
 </ul> -->
 <h2>Whats new in this release</h2>
 <ul>
-	<li>Complete WS-Addressing W3C and Member Submission support</li>
-	<li>Type Substitution (supported using @XmlSeeAlso annotation)</li>
-		<li><a href="statefulWebservice.html">Stateful webservices</a></li>
-		<li><a href="asyncprovider.html">AsyncProvider</a></li> 
-      <li>Following JAXWS 2.1 APIs<ul>
-		<li>EndpointReference.getPort(epr, sei, WebServiceFeature... features)</li>
-		<li>Service.createDispatch(epr, type,mode, WebServiceFeature... 
-		features)</li>
-		<li>Service.createDispatch(epr,jaxbContext, 
-		mode,WebServiceFeature... features) </li>
-		</ul></li>
+	<li>Improved wsimport<ul>
+	<li>-quiet switch<ul>
+	<li>wsimport works in silent mode</li>
+</ul></li>
+	<li>-target switch<ul>
+	<li>wsimport generates code as per target spec version. It preserves the 
+	source level compatibility.</li>
+</ul></li>
+	<li>Improved error reporting<ul>
+	<li>wsimport reports more meaningful error messages with line number 
+	information</li>
+</ul></li>
+</ul></li>
 	<li>
 	<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?issue_type=DEFECT&issue_type=ENHANCEMENT&component=jax-ws&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&resolution=FIXED&target_milestone=2.1&email1=&emailtype1=exact&emailassigned_to1=1&emai">Bug fixes</a></li>
 </ul>
@@ -88,20 +93,20 @@ Services ${SPEC_VERSION} Specification</a>.</p>
 
 <p>The following applies to the JAX-WS standalone bundles.</p>
 
-<p>Once the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} bundle is extracted, it needs to be installed
-    on the
-    Application Server.</p>
-<p>Make sure <code>AS_HOME</code> is set to the installation
-    directory of the Application Server. You need to invoke <code>ANT_HOME/bin/ant install</code>
-    command from the root directory of the extracted bundle to install
-    JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}
-    binaries on the Glassfish application server. However this step is
-    required
-    if you intend to build and deploy a Web service on the Application
-    Server.</p>
-<p>To install JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} on Tomcat, simply 
-copy lib/*.jar from the root of JAXWS extracted bundle to $TOMCAT_HOME/shared/lib 
-directory.</p>
+<ul>
+	<li>Extract JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} bundle </li>
+	<li>Install on Glassfish application server<ul>
+		<li>Set AS_HOME to the installation directory of Glassfish</li>
+		<li>cd to the root directory of the extracted JAXWS RI bundle</li>
+		<li>Invoke <code>$ANT_HOME/bin/ant install</code></li>
+	</ul>
+	</li>
+	<li><code>Install on Tomcat</code><ul>
+		<li><code>Copy </code>lib/*.jar from the root of JAXWS extracted bundle 
+		to $TOMCAT_HOME/shared/lib</li>
+	</ul>
+	</li>
+</ul>
 
 <p>If you intend to only invoke an already existing Web service, then
     alternatively you can use the <code>wsimport</code> and <code>wsgen</code>
@@ -121,9 +126,6 @@ directory.</p>
         <span style="background-color: #FFFFFF">
 		<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?issue_type=DEFECT&component=jax-ws&issue_status=NEW&issue_status=STARTED&issue_status=REOPENED&target_milestone=2.1&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issuei">
 		Defects Submitted at IssueTracker</a></span></li>
-	<li>
-        <span style="background-color: #FFFFFF">Propagation of 
-		W3CEndpointReference from client to the service endpoint doesn't work.</span></li>
 	<li>
         swaRef header types dont get marshalled/unmarshalled fails to get 
 		attachment</li>
