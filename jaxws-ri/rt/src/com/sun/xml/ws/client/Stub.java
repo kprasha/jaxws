@@ -25,6 +25,7 @@ package com.sun.xml.ws.client;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.Closeable;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -302,7 +303,7 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
 
     public final W3CEndpointReference getEndpointReference() {
         if (binding.getBindingID().equals(HTTPBinding.HTTP_BINDING))
-            throw new java.lang.UnsupportedOperationException("BindingProvider.getEndpointReference() not supported with XML/HTTP Binding");
+            throw new java.lang.UnsupportedOperationException(ClientMessages.UNSUPPORTED_OPERATION("BindingProvider.getEndpointReference()", "XML/HTTP Binding", "SOAP11 or SOAP12 Binding"));
         return getEndpointReference(W3CEndpointReference.class);
     }
 
@@ -310,7 +311,7 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
     T getEndpointReference(Class<T> clazz) {
 
         if (binding.getBindingID().equals(HTTPBinding.HTTP_BINDING))
-            throw new java.lang.UnsupportedOperationException("BindingProvider.getEndpointReference(Class<T> class) not supported with XML/HTTP Binding");
+            throw new java.lang.UnsupportedOperationException(ClientMessages.UNSUPPORTED_OPERATION("BindingProvider.getEndpointReference(Class<T> class)", "XML/HTTP Binding", "SOAP11 or SOAP12 Binding"));
 
         // we need to expand WSEndpointAddress class to be able to return EPR with arbitrary address.
         if (endpointReference != null) {
