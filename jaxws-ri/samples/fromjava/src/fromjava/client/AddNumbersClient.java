@@ -1,12 +1,7 @@
 package fromjava.client;
 
-<<<<<<< AddNumbersClient.java
-import java.rmi.RemoteException;
-
 import javax.xml.ws.BindingProvider;
 
-=======
->>>>>>> 1.6.12.1.2.1
 public class AddNumbersClient {
     public static void main (String[] args) {
         try {
