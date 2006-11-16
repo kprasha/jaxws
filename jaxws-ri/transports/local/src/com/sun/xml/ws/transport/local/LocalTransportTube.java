@@ -37,6 +37,7 @@ import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.MessageContext;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -137,6 +138,8 @@ final class LocalTransportTube extends AbstractTubeImpl {
                 reqHeaders.put("Accept", Collections.singletonList(requestAccept));
             }
 
+            writeSOAPAction(reqHeaders, contentType.getSOAPActionHeader(), request);
+            
             if(dump)
                 dump(con,"request",reqHeaders);
 
@@ -164,6 +167,23 @@ final class LocalTransportTube extends AbstractTubeImpl {
         } catch (IOException ex) {
             throw new WebServiceException(ex);
         }
+    }
+
+    /**
+     * write SOAPAction header if the soapAction parameter is non-null or BindingProvider properties set.
+     * BindingProvider properties take precedence.
+     */
+    private void writeSOAPAction(Map<String, List<String>> reqHeaders, String soapAction, Packet packet) {
+        Boolean useAction = (Boolean) packet.invocationProperties.get(BindingProvider.SOAPACTION_USE_PROPERTY);
+        String sAction = null;
+        boolean use = (useAction != null) ? useAction.booleanValue() : false;
+        if (use)
+            sAction = (String) packet.invocationProperties.get(BindingProvider.SOAPACTION_URI_PROPERTY);
+        //request Property soapAction overrides wsdl
+        if (sAction != null)
+            reqHeaders.put("SOAPAction", Collections.singletonList(sAction));
+        else if (soapAction != null)
+            reqHeaders.put("SOAPAction", Collections.singletonList(soapAction));
     }
 
     private void checkFIConnegIntegrity(ContentNegotiation conneg,
