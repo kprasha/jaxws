@@ -55,6 +55,7 @@ import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.model.wsdl.WSDLServiceImpl;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.resources.ProviderApiMessages;
+import com.sun.xml.ws.resources.DispatchMessages;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
 import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
@@ -322,9 +323,10 @@ public class WSServiceDelegate extends WSService {
         if (!ports.containsKey(portName)) {
             BindingID bid = (bindingId == null) ? BindingID.SOAP11_HTTP : BindingID.parse(bindingId);
             ports.put(portName,
-                    new PortInfo(this, EndpointAddress.create(endpointAddress), portName, bid));
+                    new PortInfo(this, (endpointAddress == null) ? null :
+                            EndpointAddress.create(endpointAddress), portName, bid));
         } else
-            throw new WebServiceException("WSDLPort " + portName.toString() + " already exists can not create a port with the same name.");
+            throw new WebServiceException(DispatchMessages.DUPLICATE_PORT(portName.toString()));
     }
 
 
@@ -432,15 +434,15 @@ public class WSServiceDelegate extends WSService {
         return createDispatch(portName, context, mode, features, endpointReference );
     }
 
-    private QName addPortEpr(EndpointReference endpointReference){
+    private QName addPortEpr(EndpointReference endpointReference) {
         if (endpointReference == null)
             throw new WebServiceException(ProviderApiMessages.NULL_EPR());
         WSEndpointReference wsepr = new WSEndpointReference(endpointReference);
-        QName eprPortName = getPortNameFromEPR(wsepr,null);
+        QName eprPortName = getPortNameFromEPR(wsepr, null);
         //add Port, if it does n't exist;
         // TODO: what if it has different epr address?
         {
-            PortInfo portInfo = new PortInfo(this, EndpointAddress.create(wsepr.getAddress()), eprPortName,
+            PortInfo portInfo = new PortInfo(this, (wsepr.getAddress() == null) ? null : EndpointAddress.create(wsepr.getAddress()), eprPortName,
                     getPortModel(eprPortName).getBinding().getBindingId());
             if (!ports.containsKey(eprPortName)) {
                 ports.put(eprPortName, portInfo);
