@@ -135,12 +135,12 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             Packet reply = request.createClientResponse(null);
             reply.addSatellite(new HttpResponseProperties(con.getConnection()));
             InputStream response = con.getInput();
-            //if(dump) {
+            if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 buf.write(response);
                 dump(buf,"HTTP response "+con.statusCode, respHeaders);
                 response = buf.newInputStream();
-           // }
+            }
             codec.decode(response, contentType, reply);
 
             return reply;
@@ -156,9 +156,9 @@ public class HttpTransportPipe extends AbstractTubeImpl {
      * BindingProvider properties take precedence.
      */
     private void writeSOAPAction(Map<String, List<String>> reqHeaders, String soapAction, Packet packet) {
-        String useAction = (String) packet.invocationProperties.get(BindingProvider.SOAPACTION_USE_PROPERTY);
+        Boolean useAction = (Boolean) packet.invocationProperties.get(BindingProvider.SOAPACTION_USE_PROPERTY);
         String sAction = null;
-        boolean use = (useAction != null) ? Boolean.parseBoolean(useAction) : false;
+        boolean use = (useAction != null) ? useAction.booleanValue() : false;
         if (use)
             sAction = (String) packet.invocationProperties.get(BindingProvider.SOAPACTION_URI_PROPERTY);
         //request Property soapAction overrides wsdl
