@@ -484,6 +484,7 @@ major-version=${release.impl.version}
         pom="etc/poms/jaxws-tools.pom" />
       <filterset>
         <filter token="API_VERSION" value="${release.spec.version}"/>
+        <filter token="JAXB_VERSION" value="${jaxb.impl.version}"/>
       </filterset>
     </maven-repository-importer>
   </target>

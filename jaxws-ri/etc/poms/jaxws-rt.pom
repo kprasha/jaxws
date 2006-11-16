@@ -9,5 +9,10 @@
       <artifactId>jaxws-api</artifactId>
       <version>@API_VERSION@</version>
     </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>@JAXB_VERSION@</version>
+    </dependency>
   </dependencies>
 </project>
