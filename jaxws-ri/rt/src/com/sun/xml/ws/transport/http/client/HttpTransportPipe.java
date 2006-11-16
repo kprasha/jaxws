@@ -21,7 +21,6 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
@@ -30,6 +29,7 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,7 +95,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                 if (ct.getAcceptHeader() != null) {
                     reqHeaders.put("Accept", Collections.singletonList(ct.getAcceptHeader()));
                 }
-                writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
+                writeSOAPAction(reqHeaders, ct.getSOAPActionHeader(),request);
                 
                 if(dump)
                     dump(buf, "HTTP request", reqHeaders);
@@ -107,7 +107,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                 if (ct.getAcceptHeader() != null) {
                     reqHeaders.put("Accept", Collections.singletonList(ct.getAcceptHeader()));
                 }
-                writeSOAPAction(reqHeaders, ct.getSOAPActionHeader());
+                writeSOAPAction(reqHeaders, ct.getSOAPActionHeader(), request);
                 
                 if(dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
@@ -135,12 +135,12 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             Packet reply = request.createClientResponse(null);
             reply.addSatellite(new HttpResponseProperties(con.getConnection()));
             InputStream response = con.getInput();
-            if(dump) {
+            //if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 buf.write(response);
                 dump(buf,"HTTP response "+con.statusCode, respHeaders);
                 response = buf.newInputStream();
-            }
+           // }
             codec.decode(response, contentType, reply);
 
             return reply;
@@ -152,12 +152,20 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     }
 
     /**
-     * write SOAPAction header if the soapAction parameter is non-null
+     * write SOAPAction header if the soapAction parameter is non-null or BindingProvider properties set.
+     * BindingProvider properties take precedence.
      */
-    private void writeSOAPAction(Map<String, List<String>> reqHeaders, String soapAction) {
-        if(soapAction != null){
+    private void writeSOAPAction(Map<String, List<String>> reqHeaders, String soapAction, Packet packet) {
+        String useAction = (String) packet.invocationProperties.get(BindingProvider.SOAPACTION_USE_PROPERTY);
+        String sAction = null;
+        boolean use = (useAction != null) ? Boolean.parseBoolean(useAction) : false;
+        if (use)
+            sAction = (String) packet.invocationProperties.get(BindingProvider.SOAPACTION_URI_PROPERTY);
+        //request Property soapAction overrides wsdl
+        if (sAction != null)
+            reqHeaders.put("SOAPAction", Collections.singletonList(sAction));
+        else if (soapAction != null)
             reqHeaders.put("SOAPAction", Collections.singletonList(soapAction));
-        }
     }
 
     private String getContentType(Map<String, List<String>> headers) {
