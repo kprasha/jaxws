@@ -10,9 +10,13 @@ import com.sun.xml.ws.util.HandlerAnnotationProcessor;
 
 import javax.jws.HandlerChain;
 import javax.xml.ws.Service;
+import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.handler.PortInfo;
 import javax.xml.ws.soap.SOAPBinding;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,7 +118,12 @@ abstract class HandlerConfigurator {
         }
 
         HandlerResolver getResolver() {
-            return null;
+            return new HandlerResolver() {
+                public List<Handler> getHandlerChain(PortInfo portInfo) {
+                    return new ArrayList<Handler>(
+                        handlerModel.getHandlersForPortInfo(portInfo).getHandlers());
+                }
+            };
         }
         // logged at finer level
         private void logSetChain(WSPortInfo info, HandlerAnnotationInfo chain) {
