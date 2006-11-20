@@ -252,16 +252,14 @@ final class EndpointMethodHandler {
                 responseMessage = isOneWay ? null : createResponseMessage(args, ret);
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
-                if (cause != null) {
-                    LOGGER.log(Level.SEVERE, cause.getMessage(), cause);
-                } else {
-                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                }
+
                 if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
                     // Service specific exception
+                    LOGGER.log(Level.INFO, cause.getMessage(), cause);
                     responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion,
                             javaMethodModel.getCheckedException(cause.getClass()), cause);
                 } else {
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
                     responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
                 }
             } catch (Exception e) {
