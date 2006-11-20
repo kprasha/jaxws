@@ -166,10 +166,6 @@ public class WSDLParser {
 
         Document root = forest.get(location);
 
-        if(forest.isMexMetadata){
-            root = forest.getMexRootWSDL();
-        }
-
         if(root == null)
             return null;
 

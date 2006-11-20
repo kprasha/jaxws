@@ -55,7 +55,6 @@ import java.util.HashSet;
 public final class MetadataFinder extends DOMForest{
 
     public boolean isMexMetadata;
-    private String mexRootDoc;
     private String rootWSDL;
     private Set<String> rootWsdls = new HashSet<String>();
 
@@ -198,7 +197,7 @@ public final class MetadataFinder extends DOMForest{
                     NodeList nl = doc.getDocumentElement().getElementsByTagNameNS(WSDLConstants.NS_WSDL, "service");
                     if (nl.getLength() > 0) {
                         root = doc;
-                        mexRootDoc = src.getSystemId();
+                        rootWSDL = src.getSystemId();
                     }
                 }
                 NodeList nl = doc.getDocumentElement().getElementsByTagNameNS(WSDLConstants.NS_WSDL, "import");
@@ -230,9 +229,5 @@ public final class MetadataFinder extends DOMForest{
             //TODO:handler StreamSource
         }
         return root;
-    }
-
-    public Document getMexRootWSDL() {
-        return get(mexRootDoc);
     }
 }
