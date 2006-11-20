@@ -100,13 +100,12 @@ public final class WsaServerTube extends WsaTube {
         if (replyTo == null)    replyTo = addressingVersion.anonymousEpr;
         if (faultTo == null)    faultTo = replyTo;
 
+        Packet p = validateInboundHeaders(request);
         // close the transportBackChannel if we know that
         // we'll never use them
         if (!faultTo.isAnonymous() && !replyTo.isAnonymous() && request.transportBackChannel != null)
             request.transportBackChannel.close();
-
-        Packet p = validateInboundHeaders(request);
-
+        
         // if one-way message and WS-A header processing fault has occurred,
         // then do no further processing
         if (p.getMessage() == null)
