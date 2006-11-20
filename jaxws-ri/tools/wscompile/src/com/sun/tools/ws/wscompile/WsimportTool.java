@@ -171,12 +171,10 @@ public class WsimportTool {
                 receiver.error(e);
             }
 
-            if (!receiver.hadError()) {
-                if (!options.nocompile){
-                    if(!compileGeneratedClasses(receiver)){
-                        listener.message(WscompileMessages.WSCOMPILE_COMPILATION_FAILED());
-                        return false;
-                    }
+            if (!options.nocompile){
+                if(!compileGeneratedClasses(receiver)){
+                    listener.message(WscompileMessages.WSCOMPILE_COMPILATION_FAILED());
+                    return false;
                 }
             }
 
