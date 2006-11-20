@@ -37,7 +37,7 @@
 
     <condition property="notInstalled">
         <not>
-            <available file="${as.home}/.jaxws21ea3"/>
+            <available file="${as.home}/.jaxws21ea3/${domain}-domain.xml"/>
         </not>
     </condition>
 
@@ -45,7 +45,7 @@
         <mkdir dir="${backup.dir}"/>
     </target>
 
-    <target name="install">
+    <target name="install-AS8.X">
         <echo message="Installing JAX-WS 2.1 EA3 on ${as.home} ..." />
         <copy toDir="${backup.dir}">
             <fileset dir="${as.lib.home}">
@@ -60,7 +60,32 @@
                 <exclude name="relaxngDatatype.jar"/>
             </fileset>
         </copy>
+        
+        <antcall target="update-classpath-8.X"/>
+        <antcall target="install-tools"/>
+        <echo message="... done."/>
+    </target>
 
+    <target name="install-AS9">       
+        <antcall target="install-glassfish"/>
+    </target>
+
+    <target name="install-glassfish">
+        <echo message="Installing JAX-WS 2.1 EA3 on ${as.home} ..." />
+        <copy toDir="${backup.dir}">
+            <fileset dir="${as.lib.home}">
+                <include name="saaj-*.jar"/>
+            </fileset>
+        </copy>
+
+        <copy toDir="${as.lib.home}" overwrite="true">
+            <fileset dir="lib">
+                <include name="*.jar"/>
+                <exclude name="activation.jar"/>
+                <exclude name="relaxngDatatype.jar"/>
+            </fileset>
+        </copy>
+        
         <antcall target="update-classpath"/>
         <antcall target="install-tools"/>
         <echo message="... done."/>
@@ -75,19 +100,40 @@
         </not>
     </condition>
 
+    <target name="create.classpath.prefix-8.X" if="prefixUndefined" >
+        <echo message="Adding classpath-prefix to ${as.home}/domains/${domain}/config/domain.xml" />
+        <replace file="${as.home}/domains/${domain}/config/domain.xml" >
+            <replacetoken><![CDATA[server-classpath="]]></replacetoken>
+            <replacevalue><![CDATA[classpath-prefix="" server-classpath="]]></replacevalue>            
+        </replace>
+    </target>
+
     <target name="create.classpath.prefix" if="prefixUndefined" >
         <echo message="Adding classpath-prefix to ${as.home}/domains/${domain}/config/domain.xml" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
-            <replacevalue><![CDATA[classpath-prefix="" server-classpath="]]></replacevalue>
-            <replacetoken><![CDATA[server-classpath="]]></replacetoken>
+            <replacetoken><![CDATA[system-classpath="]]></replacetoken>
+            <replacevalue><![CDATA[classpath-prefix="" system-classpath="]]></replacevalue>            
+        </replace>
+    </target>
+
+    <target name="update-classpath-8.X" if="notInstalled">
+         
+        <!-- Add the JAX-WS 2.1 and JAXB 2.1 jars to classpath-prefix -->
+        <copy file="${as.home}/domains/${domain}/config/domain.xml" tofile="${backup.dir}/${domain}-domain.xml"/>
+        <!-- Add classpath-prefix, if not exists -->
+        <antcall target="create.classpath.prefix-8.X" />
+        <replace file="${as.home}/domains/${domain}/config/domain.xml" >
+            <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-api.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>
         </replace>
     </target>
 
     <target name="update-classpath" if="notInstalled">
-         <!-- Add classpath-prefix, if not exists -->
-        <antcall target="create.classpath.prefix" />
+         
         <!-- Add the JAX-WS 2.1 and JAXB 2.1 jars to classpath-prefix -->
         <copy file="${as.home}/domains/${domain}/config/domain.xml" tofile="${backup.dir}/${domain}-domain.xml"/>
+        <!-- Add classpath-prefix, if not exists -->
+        <antcall target="create.classpath.prefix" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
             <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-api.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>
@@ -115,7 +161,11 @@
     </target>
 
     <target name="help">
-        <echo message="install:    Installs JAX-WS 2.1 EA3 on the Application Server"/>
-        <echo message="            Usage: ANT_HOME/bin/ant install"/>
+        <echo message="install-AS8.X (Appserver 8.1, 8.2, install-AS9 (Appserver 9.0, 9.0 UR1), install-glassfish (Glassfish V1, V2,M1, V2,M2: "/>    
+        <chho message=""/>
+        <echo message="Installs JAX-WS 2.1 EA3 on the Application Server"/>
+        <echo message="            Usage: ANT_HOME/bin/ant install-glassfish"/>
+        <echo message="                   ANT_HOME/bin/ant install-AS9"/>
+        <echo message="                   ANT_HOME/bin/ant install-AS8.X"/>
     </target>
 </project>
