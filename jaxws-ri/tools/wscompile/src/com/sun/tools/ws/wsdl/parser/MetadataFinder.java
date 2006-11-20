@@ -82,6 +82,9 @@ public final class MetadataFinder extends DOMForest{
                 rootDocuments.remove(systemID);
                 errorReceiver.warning(locatorTable.getStartLocation(doc), WsdlMessages.INVALID_WSDL_WITH_DOOC(systemID, "{" + fixNull(doc.getNamespaceURI()) + "}" + doc.getLocalName()));
                 dom = getFromMetadataResolver(systemID);
+                if(dom == null)
+                    continue;
+                doc = dom.getDocumentElement();
             }
             NodeList schemas = doc.getElementsByTagNameNS(SchemaConstants.NS_XSD, "schema");
             for (int i = 0; i < schemas.getLength(); i++) {
