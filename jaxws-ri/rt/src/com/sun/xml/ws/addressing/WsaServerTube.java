@@ -206,18 +206,15 @@ public final class WsaServerTube extends WsaTube {
     }
 
     @Override
-    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo, boolean foundMessageID) {
+    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo) {
         // if no wsa:Action header is found
         if (!foundAction)
             throw new MapRequiredException(addressingVersion.actionTag);
 
         // if no wsa:To header is found
         // TODO: should we throw a fault for missing To as it's optional ?
-        if (!foundTo)
-            throw new MapRequiredException(addressingVersion.toTag);
-
-        if(!foundMessageID && !packet.getMessage().isOneWay(wsdlPort))
-            throw new MapRequiredException(addressingVersion.messageIDTag);
+//        if (!foundTo)
+//            throw new MapRequiredException(addressingVersion.toTag);
     }
 
     @Override
