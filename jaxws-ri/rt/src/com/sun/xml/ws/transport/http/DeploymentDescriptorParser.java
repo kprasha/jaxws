@@ -232,7 +232,7 @@ public class DeploymentDescriptorParser<A> {
                     implementorClass, !handlersSetInDD,
                     InstanceResolver.createDefault(implementorClass).createInvoker(),
                     serviceName, portName, container, binding,
-                    primaryWSDL, docs.values(), createEntityResolver()
+                    primaryWSDL, docs.values(), createEntityResolver(),false
             );
             adapters.add(adapterFactory.createAdapter(name, urlPattern, endpoint));
         } else {
