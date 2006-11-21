@@ -62,7 +62,7 @@ public final class WsaServerTube extends WsaTube {
     // both will be set to non-null in processRequest
     private WSEndpointReference replyTo;
     private WSEndpointReference faultTo;
-
+    private boolean isAnonymousRequired = false;
     public WsaServerTube(@NotNull WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
@@ -99,13 +99,10 @@ public final class WsaServerTube extends WsaTube {
         // defaulting
         if (replyTo == null)    replyTo = addressingVersion.anonymousEpr;
         if (faultTo == null)    faultTo = replyTo;
-
+        WSDLBoundOperationImpl wbo = (WSDLBoundOperationImpl) getWSDLBoundOperation(request);
+        if(wbo != null && wbo.getAnonymous()== WSDLBoundOperationImpl.ANONYMOUS.required)
+            isAnonymousRequired = true;
         Packet p = validateInboundHeaders(request);
-        // close the transportBackChannel if we know that
-        // we'll never use them
-        if (!faultTo.isAnonymous() && !replyTo.isAnonymous() && request.transportBackChannel != null)
-            request.transportBackChannel.close();
-        
         // if one-way message and WS-A header processing fault has occurred,
         // then do no further processing
         if (p.getMessage() == null)
@@ -113,9 +110,19 @@ public final class WsaServerTube extends WsaTube {
             return doReturnWith(p);
 
         // if we find an error in addressing header, just turn around the direction here
-        if (p.getMessage().isFault())
+        if (p.getMessage().isFault()) {
+            // close the transportBackChannel if we know that
+            // we'll never use them
+            if (!(isAnonymousRequired) &&
+                    !faultTo.isAnonymous() && request.transportBackChannel != null)
+                request.transportBackChannel.close();
             return processResponse(p);
-
+        }
+        // close the transportBackChannel if we know that
+        // we'll never use them
+        if (!(isAnonymousRequired) &&
+                !replyTo.isAnonymous() && request.transportBackChannel != null)
+            request.transportBackChannel.close();
         return doInvoke(next,p);
     }
 
@@ -127,7 +134,7 @@ public final class WsaServerTube extends WsaTube {
 
         WSEndpointReference target = msg.isFault()?faultTo:replyTo;
 
-        if(target.isAnonymous())
+        if(target.isAnonymous() || isAnonymousRequired )
             // the response will go back the back channel. most common case
             return doReturnWith(response);
 
