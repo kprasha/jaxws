@@ -19,7 +19,7 @@
  * 
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
-package com.sun.tools.ws.processor.modeler;
+package com.sun.tools.ws.processor.modeler.wsdl;
 
 import com.sun.tools.ws.processor.model.AbstractType;
 import com.sun.tools.ws.processor.model.Block;
@@ -30,7 +30,10 @@ import com.sun.tools.ws.processor.model.java.JavaStructureMember;
 import com.sun.tools.ws.processor.model.java.JavaStructureType;
 import com.sun.tools.ws.processor.model.java.JavaType;
 import com.sun.tools.ws.processor.model.jaxb.*;
+import com.sun.tools.ws.resources.ModelerMessages;
 import com.sun.tools.ws.util.ClassNameInfo;
+import com.sun.tools.ws.wscompile.AbortException;
+import com.sun.tools.ws.wscompile.ErrorReceiverFilter;
 import com.sun.tools.ws.wsdl.document.Message;
 import com.sun.tools.ws.wsdl.document.MessagePart;
 import com.sun.tools.xjc.api.S2JJAXBModel;
@@ -42,12 +45,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Utilities to be used by modelers such as WSDLModeler and Rmimodeler
+ * Utilities to be used by WSDLModeler
  *
  * @author Vivek Pandey
  *
  */
-public class ModelerUtils {
+class ModelerUtils {
 
     /**
      * This method should be called incase of wrapper style operations. This is
@@ -122,7 +125,7 @@ public class ModelerUtils {
         return parameter;
     }
 
-    public static List<Parameter> createRpcLitParameters(Message message, Block block, S2JJAXBModel jaxbModel){
+    public static List<Parameter> createRpcLitParameters(Message message, Block block, S2JJAXBModel jaxbModel, ErrorReceiverFilter errReceiver){
         RpcLitStructure rpcStruct = (RpcLitStructure)block.getType();
 
         List<Parameter> parameters = new ArrayList<Parameter>();
@@ -133,8 +136,9 @@ public class ModelerUtils {
             TypeAndAnnotation typeAndAnn = jaxbModel.getJavaType(name);
             if(typeAndAnn == null){
                 String msgQName = "{"+message.getDefining().getTargetNamespaceURI()+"}"+message.getName();
-                throw new ModelerException("wsdlmodeler.rpclit.unkownschematype", name.toString(),
-                        part.getName(), msgQName);
+                errReceiver.error(part.getLocator(), ModelerMessages.WSDLMODELER_RPCLIT_UNKOWNSCHEMATYPE(name.toString(),
+                        part.getName(), msgQName));
+                throw new AbortException();
             }
             String type = typeAndAnn.getTypeClass().fullName();
             type = ClassNameInfo.getGenericClass(type);

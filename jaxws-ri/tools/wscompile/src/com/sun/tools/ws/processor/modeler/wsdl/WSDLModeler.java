@@ -33,7 +33,6 @@ import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.model.java.*;
 import com.sun.tools.ws.processor.model.jaxb.*;
 import com.sun.tools.ws.processor.modeler.JavaSimpleTypeCreator;
-import com.sun.tools.ws.processor.modeler.ModelerUtils;
 import com.sun.tools.ws.processor.util.ClassNameCollector;
 import com.sun.tools.ws.resources.ModelerMessages;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
@@ -47,16 +46,15 @@ import com.sun.tools.ws.wsdl.document.schema.SchemaKinds;
 import com.sun.tools.ws.wsdl.document.soap.*;
 import com.sun.tools.ws.wsdl.framework.*;
 import com.sun.tools.ws.wsdl.parser.WSDLParser;
-import com.sun.tools.ws.wsdl.parser.MetadataFinder;
 import com.sun.tools.xjc.api.S2JJAXBModel;
 import com.sun.tools.xjc.api.TypeAndAnnotation;
 import com.sun.tools.xjc.api.XJC;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.Locator;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -1722,10 +1720,10 @@ public class WSDLModeler extends WSDLModelerBase {
         Message inMsg = getInputMessage();
         Message outMsg = getOutputMessage();
         S2JJAXBModel jaxbModel = ((RpcLitStructure) reqBlock.getType()).getJaxbModel().getS2JJAXBModel();
-        List<Parameter> inParams = ModelerUtils.createRpcLitParameters(inMsg, reqBlock, jaxbModel);
+        List<Parameter> inParams = ModelerUtils.createRpcLitParameters(inMsg, reqBlock, jaxbModel, errReceiver);
         List<Parameter> outParams = null;
         if (outMsg != null)
-            outParams = ModelerUtils.createRpcLitParameters(outMsg, resBlock, jaxbModel);
+            outParams = ModelerUtils.createRpcLitParameters(outMsg, resBlock, jaxbModel, errReceiver);
 
         //create parameters for header and mime parts
         int index = 0;
@@ -2022,7 +2020,7 @@ public class WSDLModeler extends WSDLModelerBase {
     private List<Parameter> createRpcLitRequestParameters(Request request, List<String> parameterList, Block block) {
         Message message = getInputMessage();
         S2JJAXBModel jaxbModel = ((RpcLitStructure) block.getType()).getJaxbModel().getS2JJAXBModel();
-        List<Parameter> parameters = ModelerUtils.createRpcLitParameters(message, block, jaxbModel);
+        List<Parameter> parameters = ModelerUtils.createRpcLitParameters(message, block, jaxbModel, errReceiver);
 
         //create parameters for header and mime parts
         for (String paramName : parameterList) {

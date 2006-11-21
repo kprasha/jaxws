@@ -268,7 +268,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
             String messageAttr =
                 XmlUtil.getAttributeOrNull(e, Constants.ATTR_MESSAGE);
             if (messageAttr != null) {
-                header.setMessage(context.translateQualifiedName(messageAttr));
+                header.setMessage(context.translateQualifiedName(context.getLocation(e), messageAttr));
             }
 
             for (Iterator iter = XmlUtil.getAllChildren(e); iter.hasNext();) {
@@ -324,7 +324,7 @@ public class SOAPExtensionHandler extends AbstractExtensionHandler {
                         XmlUtil.getAttributeOrNull(e2, Constants.ATTR_MESSAGE);
                     if (messageAttr2 != null) {
                         headerfault.setMessage(
-                            context.translateQualifiedName(messageAttr2));
+                            context.translateQualifiedName(context.getLocation(e2), messageAttr2));
                     }
 
                     header.add(headerfault);

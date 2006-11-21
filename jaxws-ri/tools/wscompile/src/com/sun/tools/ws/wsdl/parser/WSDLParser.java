@@ -171,7 +171,7 @@ public class WSDLParser {
 
         WSDLDocument document = new WSDLDocument();
         document.setSystemId(location);
-        TWSDLParserContextImpl context = new TWSDLParserContextImpl(forest, document, listeners);
+        TWSDLParserContextImpl context = new TWSDLParserContextImpl(forest, document, listeners, errReceiver);
 
         Definitions definitions = parseDefinitions(context, root);
         document.setDefinitions(definitions);
@@ -364,13 +364,14 @@ public class WSDLParser {
 
         if (elementAttr != null) {
             if (typeAttr != null) {
-                Util.fail("parsing.onlyOneOfElementOrTypeRequired", partName);
+                errReceiver.error(context.getLocation(e), WsdlMessages.PARSING_ONLY_ONE_OF_ELEMENT_OR_TYPE_REQUIRED(partName));
+
             }
 
-            part.setDescriptor(context.translateQualifiedName(elementAttr));
+            part.setDescriptor(context.translateQualifiedName(context.getLocation(e), elementAttr));
             part.setDescriptorKind(SchemaKinds.XSD_ELEMENT);
         } else if (typeAttr != null) {
-            part.setDescriptor(context.translateQualifiedName(typeAttr));
+            part.setDescriptor(context.translateQualifiedName(context.getLocation(e), typeAttr));
             part.setDescriptorKind(SchemaKinds.XSD_TYPE);
         } else {
             // XXX-NOTE - this is wrong; for extensibility purposes,
@@ -477,7 +478,7 @@ public class WSDLParser {
                 input.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
-                input.setMessage(context.translateQualifiedName(messageAttr));
+                input.setMessage(context.translateQualifiedName(context.getLocation(e2), messageAttr));
                 String nameAttr =
                     XmlUtil.getAttributeOrNull(e2, Constants.ATTR_NAME);
                 input.setName(nameAttr);
@@ -539,7 +540,7 @@ public class WSDLParser {
                 output.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
-                output.setMessage(context.translateQualifiedName(messageAttr));
+                output.setMessage(context.translateQualifiedName(context.getLocation(e2), messageAttr));
                 String nameAttr =
                     XmlUtil.getAttributeOrNull(e2, Constants.ATTR_NAME);
                 output.setName(nameAttr);
@@ -595,7 +596,7 @@ public class WSDLParser {
                 fault.setParent(operation);
                 String messageAttr =
                     Util.getRequiredAttribute(e2, Constants.ATTR_MESSAGE);
-                fault.setMessage(context.translateQualifiedName(messageAttr));
+                fault.setMessage(context.translateQualifiedName(context.getLocation(e2), messageAttr));
                 String nameAttr =
                     XmlUtil.getAttributeOrNull(e2, Constants.ATTR_NAME);
                 fault.setName(nameAttr);
@@ -691,7 +692,7 @@ public class WSDLParser {
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         binding.setName(name);
         String typeAttr = Util.getRequiredAttribute(e, Constants.ATTR_TYPE);
-        binding.setPortType(context.translateQualifiedName(typeAttr));
+        binding.setPortType(context.translateQualifiedName(context.getLocation(e), typeAttr));
 
         boolean gotDocumentation = false;
 
@@ -994,7 +995,7 @@ public class WSDLParser {
 
         String bindingAttr =
             Util.getRequiredAttribute(e, Constants.ATTR_BINDING);
-        port.setBinding(context.translateQualifiedName(bindingAttr));
+        port.setBinding(context.translateQualifiedName(context.getLocation(e), bindingAttr));
 
         boolean gotDocumentation = false;
 

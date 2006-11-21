@@ -465,8 +465,13 @@ public abstract class WSDLModelerBase implements Modeler {
                 (SOAPFault)getExtensionOfType(bindingFault, SOAPFault.class);
             if (soapFault == null) {
                 // the WSDL document is invalid
-                error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(),
+                if(options.isExtensionMode()){
+                    warning(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(),
                     info.bindingOperation.getName()));
+                }else {
+                    error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(),
+                        info.bindingOperation.getName()));
+                }
             }
 
             com.sun.tools.ws.wsdl.document.Message faultMessage =

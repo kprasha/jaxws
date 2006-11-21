@@ -24,6 +24,8 @@ package com.sun.tools.ws.wsdl.framework;
 
 import com.sun.tools.ws.api.wsdl.TWSDLParserContext;
 import com.sun.tools.ws.wsdl.parser.DOMForest;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
+import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.xml.ws.util.NamespaceSupport;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Attr;
@@ -49,13 +51,15 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
     private final ArrayList<ParserListener> _listeners;
     private final WSDLLocation _wsdlLocation;
     private final DOMForest forest;
+    private final ErrorReceiver errorReceiver;
 
-    public TWSDLParserContextImpl(DOMForest forest, AbstractDocument doc, ArrayList<ParserListener> listeners) {
+    public TWSDLParserContextImpl(DOMForest forest, AbstractDocument doc, ArrayList<ParserListener> listeners, ErrorReceiver errReceiver) {
         this._document = doc;
         this._listeners = listeners;
         this._nsSupport = new NamespaceSupport();
         this._wsdlLocation = new WSDLLocation();
         this.forest = forest;
+        this.errorReceiver = errReceiver;
     }
 
     public AbstractDocument getDocument() {
@@ -111,7 +115,7 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
         return forest.locatorTable.getStartLocation(e);
     }
 
-    public QName translateQualifiedName(String s) {
+    public QName translateQualifiedName(Locator locator, String s) {
         if (s == null)
             return null;
 
@@ -123,9 +127,7 @@ public class TWSDLParserContextImpl implements TWSDLParserContext {
         } else {
             uri = getNamespaceURI(prefix);
             if (uri == null) {
-                throw new ParseException(
-                    "parsing.unknownNamespacePrefix",
-                    prefix);
+                errorReceiver.error(locator, WsdlMessages.PARSING_UNKNOWN_NAMESPACE_PREFIX(prefix));
             }
         }
 
