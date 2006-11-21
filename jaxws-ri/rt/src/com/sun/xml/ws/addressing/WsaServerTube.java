@@ -121,7 +121,8 @@ public final class WsaServerTube extends WsaTube {
         // close the transportBackChannel if we know that
         // we'll never use them
         if (!(isAnonymousRequired) &&
-                !replyTo.isAnonymous() && request.transportBackChannel != null)
+                !replyTo.isAnonymous() && !faultTo.isAnonymous() && 
+                request.transportBackChannel != null)
             request.transportBackChannel.close();
         return doInvoke(next,p);
     }
