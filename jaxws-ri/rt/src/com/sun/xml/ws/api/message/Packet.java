@@ -290,9 +290,9 @@ public final class Packet extends DistributedPropertySet {
     public @NotNull List<Element> getReferenceParameters() {
         List<Element> refParams =  new ArrayList<Element>();
         HeaderList hl = message.getHeaders();
-        Document d = DOMUtil.createDom();
         for(Header h :hl) {
             if(Boolean.valueOf(h.getAttribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter"))) {
+                Document d = DOMUtil.createDom();
                 SAX2DOMEx s2d = new SAX2DOMEx(d);
                 try {
                     h.writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
