@@ -82,6 +82,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
     private void parseAttributes() {
         try {
             XMLStreamReader reader = readHeader();
+            reader.nextTag();   // move to the first element, which is the header element
 
             attributes = new FinalArrayList<Attribute>();
 
