@@ -14,6 +14,7 @@ import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * @author Jitendra Kotamraju
@@ -46,13 +47,9 @@ public final class DataHandlerAttachment implements Attachment {
 
     public byte[] asByteArray() {
         try {
-            InputStream is = dh.getDataSource().getInputStream();
-            //TODO: probably we should cache the ByteArrayBuffer, just incase some one needs
-            // to reuse it
-            ByteArrayBuffer buffer = new ByteArrayBuffer();
-            buffer.write(is);
-            is.close();
-            return buffer.toByteArray();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            dh.writeTo(os);
+            return os.toByteArray();
         } catch (IOException e) {
             throw new WebServiceException(e);
         }
