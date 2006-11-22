@@ -76,6 +76,7 @@ public class WsimportOptions extends Options {
     }
 
     private JCodeModel codeModel;
+    public boolean noAddressingBbinding;
 
     @Override
     public int parseArguments(String[] args, int i) throws BadCommandLineException {
@@ -118,6 +119,9 @@ public class WsimportOptions extends Options {
                 System.setProperty("proxyHost", value.substring(0, index));
                 System.setProperty("proxyPort", value.substring(index + 1));
             }
+            return 1;
+        }else if (args[i].equals("-Xno-addressing-binding")) {
+            noAddressingBbinding = true;
             return 1;
         }
         return j;

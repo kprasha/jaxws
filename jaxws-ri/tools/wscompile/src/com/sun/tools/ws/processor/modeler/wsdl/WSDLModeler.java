@@ -55,6 +55,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.LocatorImpl;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
@@ -83,7 +84,6 @@ public class WSDLModeler extends WSDLModelerBase {
         RPC_LITERAL, DOC_LITERAL
     }
 
-    ;
     private JAXBModelBuilder jaxbModelBuilder;
 
 //    /**
@@ -1245,7 +1245,12 @@ public class WSDLModeler extends WSDLModelerBase {
 
             // The WSDL document is invalid, can't have wsdl:fault without soapbind:fault
             if (soapFault == null) {
-                error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(), info.bindingOperation.getName()));
+                if(options.isExtensionMode()){
+                    warning(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(), info.bindingOperation.getName()));
+                    soapFault = new SOAPFault(new LocatorImpl());
+                }else{
+                    error(bindingFault, ModelerMessages.WSDLMODELER_INVALID_BINDING_FAULT_OUTPUT_MISSING_SOAP_FAULT(bindingFault.getName(), info.bindingOperation.getName()));
+                }
             }
 
             //the soapbind:fault must have use="literal" or no use attribute, in that case its assumed "literal"

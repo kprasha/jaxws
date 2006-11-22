@@ -482,14 +482,10 @@ public abstract class WSDLModelerBase implements Modeler {
                     faultMessage.getName()));
             }
             //  bug fix: 4852729
-            if (!options.isExtensionMode() && (soapFault.getNamespace() != null)) {
+            if (!options.isExtensionMode() && (soapFault != null && soapFault.getNamespace() != null)) {
                 warning(soapFault, ModelerMessages.WSDLMODELER_WARNING_R_2716_R_2726("soapbind:fault", soapFault.getName()));
             }
-            String faultNamespaceURI = soapFault.getNamespace();
-            if (faultNamespaceURI == null) {
-                faultNamespaceURI =
-                    portTypeFault.getMessage().getNamespaceURI();
-            }
+            String faultNamespaceURI = (soapFault != null && soapFault.getNamespace() != null)?soapFault.getNamespace():portTypeFault.getMessage().getNamespaceURI();
             String faultName = faultMessage.getName();
             QName faultQName = new QName(faultNamespaceURI, faultName);
             if (faultNames.contains(faultQName)) {

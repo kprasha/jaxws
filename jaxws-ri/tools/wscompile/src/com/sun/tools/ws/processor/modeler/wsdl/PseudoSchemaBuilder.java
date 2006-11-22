@@ -98,9 +98,11 @@ public class PseudoSchemaBuilder {
             is.setSystemId(sysId+(i + 1));
         }
         //add w3c EPR binding
-        InputSource is = new InputSource(new ByteArrayInputStream(w3ceprSchemaBinding.getBytes()));
-        is.setSystemId(sysId+(++i +1));
-        b.schemas.add(is);
+        if(!(options.noAddressingBbinding && options.isExtensionMode())){
+            InputSource is = new InputSource(new ByteArrayInputStream(w3ceprSchemaBinding.getBytes()));
+            is.setSystemId(sysId+(++i +1));
+            b.schemas.add(is);
+        }
 
 
         //TODO: uncomment after JAXB fixes the issue related to passing multiples of such bindings
