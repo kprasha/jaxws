@@ -76,6 +76,12 @@ public class WsimportOptions extends Options {
     }
 
     private JCodeModel codeModel;
+
+    /** -Xno-addressing-databinding option to disable addressing namespace data binding. This is
+     * experimental switch and will be working as a temporary workaround till
+     * jaxb can provide a better way to selelctively disable compiling of an
+     * schema component.
+     * **/
     public boolean noAddressingBbinding;
 
     @Override
@@ -120,7 +126,7 @@ public class WsimportOptions extends Options {
                 System.setProperty("proxyPort", value.substring(index + 1));
             }
             return 1;
-        }else if (args[i].equals("-Xno-addressing-binding")) {
+        }else if (args[i].equals("-Xno-addressing-databinding")) {
             noAddressingBbinding = true;
             return 1;
         }
