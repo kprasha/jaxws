@@ -394,8 +394,6 @@ public abstract class BindingID {
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL) {
             super(version, lexical, canGenerateWSDL);
-            String mtom = getParameter(SOAPHTTPImpl.MTOM_PARAM, null);
-            mtomSetting = mtom != null?Boolean.valueOf(mtom):null;
         }
 
         public SOAPHTTPImpl(SOAPVersion version, String lexical, boolean canGenerateWSDL, 
@@ -417,8 +415,9 @@ public abstract class BindingID {
 
         public WebServiceFeatureList createBuiltinFeatureList() {
             WebServiceFeatureList r=super.createBuiltinFeatureList();
-            if(mtomSetting!=null)
-                r.add(new MTOMFeature(mtomSetting));
+            Boolean mtom = isMTOMEnabled();
+            if(mtom != null)
+                r.add(new MTOMFeature(mtom));
             return r;
         }
 
