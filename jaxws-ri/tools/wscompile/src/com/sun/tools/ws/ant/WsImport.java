@@ -128,6 +128,19 @@ public class WsImport extends MatchingTask {
         this.extension = extension;
     }
 
+    public boolean getxNoAddressingDatabinding() {
+        return xNoAddressingDatabinding;
+    }
+
+    public void setxNoAddressingDatabinding(boolean xNoAddressingDatabinding) {
+        this.xNoAddressingDatabinding = xNoAddressingDatabinding;
+    }
+
+    /**** -Xno-addressing-databinding ***/
+    protected boolean xNoAddressingDatabinding;
+
+
+
     /*************************  -keep option *************************/
     private boolean keep = false;
 
@@ -417,6 +430,10 @@ public class WsImport extends MatchingTask {
         // extension flag
         if (getExtension()) {
             cmd.createArgument().setValue("-extension");
+        }
+
+        if(getxNoAddressingDatabinding()){
+            cmd.createArgument().setValue("-Xno-addressing-databinding");
         }
 
         // g option
