@@ -33,6 +33,7 @@ import com.sun.xml.ws.binding.WebServiceFeatureList;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Information about a port.
@@ -88,7 +89,7 @@ public class PortInfo implements WSPortInfo {
         if (portModel != null)
             // merge features from WSDL
             r.mergeFeatures(portModel, portInterface==null/*if dispatch, true*/, false);
-        
+
         // merge features from interceptor
         for( WebServiceFeature wsf : owner.serviceInterceptor.preCreateBinding(this,portInterface,r) )
             r.add(wsf);
@@ -99,9 +100,19 @@ public class PortInfo implements WSPortInfo {
         return bindingImpl;
     }
 
+    //This method is used for Dispatch client only
     private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
-        if (owner.getWsdlService() != null)
-            return owner.getPortModel(portName);
+        try {
+            if (owner.getWsdlService() != null)
+                return owner.getPortModel(portName);
+        } catch (WebServiceException e) {
+            //Issue 136: addPort can add ports that do not exist in the wsdl
+            if (e.getMessage().indexOf("Valid ports") == -1)
+                throw e;
+            // else we let it go and return null
+            // Dispatch can add dummy ports even
+            // if the port is not in the wsdl.
+        }
         return null;
     }
 
