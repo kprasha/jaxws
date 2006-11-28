@@ -151,9 +151,9 @@ public class XMLStreamReaderUtil {
     */
     public static QName getElementQName(XMLStreamReader reader) {
         try {
-            String text = reader.getElementText();
+            String text = reader.getElementText().trim();
             String prefix = text.substring(0,text.indexOf(':'));
-            String namespaceURI = reader.getNamespaceURI(prefix);
+            String namespaceURI = reader.getNamespaceContext().getNamespaceURI(prefix);
             if (namespaceURI == null) {
                 namespaceURI = "";
             }
