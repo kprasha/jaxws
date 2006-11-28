@@ -102,17 +102,9 @@ public class PortInfo implements WSPortInfo {
 
     //This method is used for Dispatch client only
     private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
-        try {
-            if (owner.getWsdlService() != null)
-                return owner.getPortModel(portName);
-        } catch (WebServiceException e) {
-            //Issue 136: addPort can add ports that do not exist in the wsdl
-            if (e.getMessage().indexOf("Valid ports") == -1)
-                throw e;
-            // else we let it go and return null
-            // Dispatch can add dummy ports even
-            // if the port is not in the wsdl.
-        }
+
+        if (owner.getWsdlService() != null)
+            return owner.getPortModel(portName);
         return null;
     }
 
