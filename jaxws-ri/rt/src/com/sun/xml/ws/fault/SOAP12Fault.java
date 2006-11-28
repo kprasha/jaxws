@@ -158,8 +158,13 @@ class SOAP12Fault extends SOAPFaultBuilder {
         try {
             SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(Reason.texts().get(0).getText(), (Code != null)?Code.getValue():null);
             if(Detail != null && Detail.getDetails() != null && Detail.getDetails().size() > 0 && Detail.getDetails().get(0) instanceof Node){
-                Node n = fault.getOwnerDocument().importNode((Node)Detail.getDetails().get(0), true);
-                fault.appendChild(n);
+                javax.xml.soap.Detail detail = fault.addDetail();
+                for(Object obj:Detail.getDetails()){
+                    if(!(obj instanceof Node))
+                        continue;
+                    Node n = fault.getOwnerDocument().importNode((Node)obj, true);
+                    detail.appendChild(n);
+                }
             }
             if(Code != null)
                 fillFaultSubCodes(fault, Code.getSubcode());
