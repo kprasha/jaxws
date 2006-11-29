@@ -49,6 +49,7 @@ import javax.xml.ws.WebFault;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.lang.annotation.Annotation;
 
 
 /**
@@ -252,6 +253,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                                 ArrayList<MemberInfo> responseMembers) {
 
         WebResult webResult = method.getAnnotation(WebResult.class);
+        List<Annotation> jaxbRespAnnotations = collectJAXBAnnotations(method);
         String responseElementName = RETURN;
         String responseNamespace = wrapped ? EMTPY_NAMESPACE_ID : typeNamespace;
         boolean isResultHeader = false;
@@ -280,10 +282,11 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
 
         if (!(method.getReturnType() instanceof VoidType) && !isResultHeader) {
             responseMembers.add(new MemberInfo(typeMirror, RETURN_VALUE,
-                new QName(responseNamespace, responseElementName), method));
+                new QName(responseNamespace, responseElementName), method, jaxbRespAnnotations.toArray(new Annotation[jaxbRespAnnotations.size()])));
         }
 
         for (ParameterDeclaration param : method.getParameters()) {
+            List<Annotation> jaxbAnnotation = collectJAXBAnnotations(param);
             WebParam.Mode mode = null;
             paramIndex++;
 //            System.out.println("param.getType(): "+param.getType());
@@ -308,7 +311,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                     paramNamespace = webParam.targetNamespace();
             }
             MemberInfo memInfo = new MemberInfo(paramType, paramName,
-                new QName(paramNamespace, paramName), param);
+                new QName(paramNamespace, paramName), param, jaxbAnnotation.toArray(new Annotation[jaxbAnnotation.size()]));
             if (holderType != null) {
                 if (mode == null || mode.equals(WebParam.Mode.INOUT)) {
                     requestMembers.add(memInfo);
@@ -318,6 +321,46 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 requestMembers.add(memInfo);
             }
         }
+    }
+
+    private List<Annotation> collectJAXBAnnotations(ParameterDeclaration param) {
+        List<Annotation> jaxbAnnotation = new ArrayList<Annotation>();
+        Annotation ann = param.getAnnotation(XmlAttachmentRef.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+
+        ann = param.getAnnotation(XmlMimeType.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+
+        ann = param.getAnnotation(XmlJavaTypeAdapter.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+
+        ann = param.getAnnotation(XmlList.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+        return jaxbAnnotation;
+    }
+
+    private List<Annotation> collectJAXBAnnotations(MethodDeclaration method) {
+        List<Annotation> jaxbAnnotation = new ArrayList<Annotation>();
+        Annotation ann = method.getAnnotation(XmlAttachmentRef.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+
+        ann = method.getAnnotation(XmlMimeType.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+
+        ann = method.getAnnotation(XmlJavaTypeAdapter.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+
+        ann = method.getAnnotation(XmlList.class);
+        if(ann != null)
+            jaxbAnnotation.add(ann);
+        return jaxbAnnotation;
     }
 
     private TypeMirror getSafeType(TypeMirror type) {
@@ -363,6 +406,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                 } else {
                     field.annotate(XmlValue.class);
                 }
+                annotateParameterWithJAXBAnnotations(field, memInfo.getJaxbAnnotations());                
             }
 
             // copy adapter if needed
@@ -381,6 +425,24 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         for (MemberInfo memInfo : members) {
             writeMember(cls, memInfo.getParamType(),
                         memInfo.getParamName());
+        }
+    }
+
+    private void annotateParameterWithJAXBAnnotations(JFieldVar field, Annotation[] jaxbAnnotations) {
+        for(Annotation ann : jaxbAnnotations){
+            if(ann instanceof XmlMimeType){
+                JAnnotationUse jaxbAnn = field.annotate(XmlMimeType.class);
+                jaxbAnn.param("value", ((XmlMimeType)ann).value());
+            }else if(ann instanceof XmlJavaTypeAdapter){
+                JAnnotationUse jaxbAnn = field.annotate(XmlJavaTypeAdapter.class);
+                XmlJavaTypeAdapter ja = (XmlJavaTypeAdapter) ann;
+                jaxbAnn.param("value", ja.value());
+                jaxbAnn.param("type", ja.type());
+            }else if(ann instanceof XmlAttachmentRef){
+                field.annotate(XmlAttachmentRef.class);
+            }else if(ann instanceof XmlList){
+                field.annotate(XmlList.class);
+            }
         }
     }
 

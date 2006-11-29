@@ -26,6 +26,7 @@ import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.type.TypeMirror;
 
 import javax.xml.namespace.QName;
+import java.lang.annotation.Annotation;
 
 /**
  *
@@ -35,16 +36,23 @@ public final class MemberInfo implements Comparable<MemberInfo> {
     private final TypeMirror paramType;
     private final String paramName;
     private final QName elementName;
+    private final Annotation[] jaxbAnnotations;
     /**
      * Use this to look up annotations on this parameter/return type.
      */
     private final Declaration decl;
 
-    public MemberInfo(TypeMirror paramType, String paramName, QName elementName, @NotNull Declaration decl) {
+    public MemberInfo(TypeMirror paramType, String paramName, QName elementName, @NotNull Declaration decl, Annotation... jaxbAnnotations) {
         this.paramType = paramType;
         this.paramName = paramName;
         this.elementName = elementName;
         this.decl = decl;
+        this.jaxbAnnotations = jaxbAnnotations;
+    }
+
+
+    public Annotation[] getJaxbAnnotations() {
+        return jaxbAnnotations;
     }
 
     public TypeMirror getParamType() {
