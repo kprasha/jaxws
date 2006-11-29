@@ -78,7 +78,7 @@ public abstract class SOAPFaultBuilder {
     public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions) throws JAXBException {
         DetailType dt = getDetail();
         Object detail = null;
-        if(dt != null && dt.getDetails().size() > 0){
+        if(dt != null && dt.getDetails() != null && dt.getDetails().size() > 0){
             detail = dt.getDetails().get(0);
         }
 
@@ -218,7 +218,8 @@ public abstract class SOAPFaultBuilder {
         try {
             Constructor constructor = exceptionClass.getConstructor(String.class);
             Object exception = constructor.newInstance(getFaultString());
-            Object jaxbDetail = getDetail().getDetails().get(0);
+            Node detail = (Node) getDetail().getDetails().get(0);
+            Object jaxbDetail = getJAXBObject(detail, ce);
             Field[] fields = jaxbDetail.getClass().getFields();
             for (Field f : fields) {
                 Method m = exceptionClass.getMethod(getWriteMethod(f));
