@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.server.AbstractServerAsyncTransport;
@@ -41,7 +42,9 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.resources.WsservletMessages;
+import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.server.ServerRtException;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -86,6 +89,10 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     public final Map<SDDocument,String> revWsdls;
 
     public final HttpAdapterList<? extends HttpAdapter> owner;
+
+    private static final String[] contentTypes = {
+            "text/xml", "application/soap+xml", "application/xop+xml",
+            "application/fastinfoset", "application/soap+fastinfoset" };
 
     /**
      * Creates a lone {@link HttpAdapter} that does not know of any other
@@ -197,9 +204,26 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             dump(buf, "HTTP request", con.getRequestHeaders());
             in = buf.newInputStream();
         }
+        if (!isContentTypeSupported(ct)) {
+            con.setStatus(WSHTTPConnection.UNSUPPORTED_MEDIA);
+            throw new ServerRtException(ServerMessages.UNSUPPORTED_CONTENT_TYPE(ct));
+        }
         codec.decode(in, ct, packet);
         return packet;
     }
+
+    /*
+     * Checks against known Content-Type headers
+     */
+    private boolean isContentTypeSupported(String ct) {
+        for(String contentType : contentTypes) {
+            if (ct.indexOf(contentType) != -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private void encodePacket(@NotNull Packet packet, @NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
         if (con.isClosed()) {
@@ -208,8 +232,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         Message responseMessage = packet.getMessage();
         if (responseMessage == null) {
             if (!con.isClosed()) {
+                // set the response code if not already set
+                // for example, 415 may have been set earlier for Unsupported Content-Type
+                if (con.getStatus() == 0)
+                    con.setStatus(WSHTTPConnection.ONEWAY);
                 // close the response channel now
-                con.setStatus(WSHTTPConnection.ONEWAY);
                 try {
                     con.getOutput().close(); // no payload
                 } catch (IOException e) {
@@ -337,15 +364,16 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     final class HttpToolkit extends Adapter.Toolkit {
         public void handle(WSHTTPConnection con) throws IOException {
             try {
-                Packet packet;
+                Packet packet = new Packet();
                 try {
                     packet = decodePacket(con, codec);
                 } catch(ExceptionHasMessage e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                    packet = new Packet();
                     packet.setMessage(e.getFaultMessage());
+                } catch (ServerRtException e) {
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }
-                if (!packet.getMessage().isFault()) {
+                if (packet.getMessage() != null && !packet.getMessage().isFault()) {
                     try {
                         packet = head.process(packet, con.getWebServiceContextDelegate(),
                                 packet.transportBackChannel);
