@@ -161,7 +161,9 @@
     </target>
 
     <target name="help">
-        <echo message="install-AS8.X (Appserver 8.1, 8.2, install-AS9 (Appserver 9.0, 9.0 UR1), install-glassfish (Glassfish V1, V2,M1, V2,M2: "/>    
+        <echo message="install-AS8.X (Appserver 8.1, 8.2) "/>    
+        <echo message="install-AS9 (Appserver 9.0, 9.0 UR1)"/>
+        <echo message="install-glassfish (Glassfish V1, V2,M1, V2,M2)"/>
         <echo message=""/>
         <echo message="Installs JAX-WS 2.1 EA3 on the Application Server"/>
         <echo message="            Usage: ANT_HOME/bin/ant install-glassfish"/>
