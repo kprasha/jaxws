@@ -77,11 +77,19 @@ public abstract class SOAPFaultBuilder {
      */
     public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions) throws JAXBException {
         DetailType dt = getDetail();
-        if ((dt == null) || (dt.getDetails() == null) || (dt.getDetails().size() > 0) || (exceptions == null)) {
+        Object detail = null;
+        if(dt != null && dt.getDetails().size() > 0){
+            detail = dt.getDetails().get(0);
+        }
+
+        //return ProtocolException if the detail is not present or there is no checked exception
+        if(detail == null || exceptions == null){
             // No soap detail, doesnt look like its a checked exception
             // throw a protocol exception
             return getProtocolException();
         }
+
+        //check if the detail is a checked exception, if not throw a ProtocolException
         Node jaxbDetail = (Node)dt.getDetails().get(0);
         QName detailName = new QName(jaxbDetail.getNamespaceURI(), jaxbDetail.getLocalName());
         CheckedExceptionImpl ce = exceptions.get(detailName);
@@ -90,6 +98,7 @@ public abstract class SOAPFaultBuilder {
             return getProtocolException();
 
         }
+
         if (ce.getExceptionType().equals(ExceptionType.UserDefined)) {
             return createUserDefinedException(ce);
 
