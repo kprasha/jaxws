@@ -5,6 +5,7 @@ import com.sun.xml.ws.util.CompletedFuture;
 
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
+import javax.xml.ws.WebServiceException;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
 
@@ -47,7 +48,17 @@ public final class AsyncResponseImpl<T> extends FutureTask<T> implements Respons
     public void run() {
         // override so that AsyncInvoker calls set()
         // when Fiber calls the callback
-        callable.run();
+        try {
+            callable.run();
+        } catch (WebServiceException e) {
+            //it could be a WebServiceException or a ProtocolException or any RuntimeException
+            // resulting due to some internal bug.
+            set(null, e);
+        } catch (Throwable e) {
+            //its some other exception resulting from user error, wrap it in
+            // WebServiceException
+            set(null, new WebServiceException(e));
+        }
     }
 
 
