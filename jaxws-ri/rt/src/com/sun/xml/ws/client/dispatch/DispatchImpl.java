@@ -281,8 +281,8 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                     throw new WebServiceException("Endpoint String " + endpoint + " is an invalid URI.");
                 }
             }
-            //requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, resolvedEndpoint);
-            message.endpointAddress = EndpointAddress.create(resolvedEndpoint);
+            requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, resolvedEndpoint);
+            //message.endpointAddress = EndpointAddress.create(resolvedEndpoint);
         }
     }
 
