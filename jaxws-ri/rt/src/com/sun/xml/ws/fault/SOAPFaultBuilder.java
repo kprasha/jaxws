@@ -303,7 +303,7 @@ public abstract class SOAPFaultBuilder {
         Node detailNode = null;
         if (detail == null && soapFaultException != null) {
             detailNode = soapFaultException.getFault().getDetail();
-        } else if(detail != null){
+        } else if(ce != null){
             try {
                 DOMResult dr = new DOMResult();
                 ce.getBridge().marshal(detail,dr);
