@@ -31,6 +31,7 @@ import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.tools.xjc.util.DOMUtils;
 import com.sun.xml.bind.v2.util.EditDistance;
 import com.sun.xml.ws.util.JAXWSUtils;
+import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.*;
 import org.xml.sax.SAXParseException;
 
@@ -123,7 +124,29 @@ public class Internalizer {
             }
         }
 
-        boolean hasNode = true;
+        //if the target node is xs:schema, declare the jaxb version on it as latter on it will be
+        //required by the inlined schema bindings
+
+        Element element = DOMUtil.getFirstElementChild(target);
+        if (element != null && element.getNamespaceURI().equals(Constants.NS_WSDL) && element.getLocalName().equals("definitions")) {
+            //get all schema elements
+            Element type = DOMUtils.getFirstChildElement(element, Constants.NS_WSDL, "types");
+            if(type != null){
+                for (Element schemaElement : DOMUtils.getChildElements(type, Constants.NS_XSD, "schema")) {
+                    if (!schemaElement.hasAttributeNS(Constants.NS_XMLNS, "jaxb")) {
+                        schemaElement.setAttributeNS(Constants.NS_XMLNS, "xmlns:jaxb", JAXWSBindingsConstants.NS_JAXB_BINDINGS);
+                    }
+
+                    //add jaxb:bindings version info. Lets put it to 1.0, may need to change latter
+                    if (!schemaElement.hasAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "version")) {
+                        schemaElement.setAttributeNS(JAXWSBindingsConstants.NS_JAXB_BINDINGS, "jaxb:version", JAXWSBindingsConstants.JAXB_BINDING_VERSION);
+                    }
+                }
+            }
+        }
+
+
+        boolean hasNode = true;        
         if(isJAXWSBindings(bindings) && bindings.getAttributeNode("node")!=null ) {
             target = evaluateXPathNode(bindings, target, bindings.getAttribute("node"), new NamespaceContextImpl(bindings));
         }else if(isJAXWSBindings(bindings) && (bindings.getAttributeNode("node")==null) && !isTopLevelBinding(bindings)) {
