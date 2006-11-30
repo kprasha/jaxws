@@ -90,9 +90,13 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
     public final HttpAdapterList<? extends HttpAdapter> owner;
 
+    //TODO: This is not inclusive of different media type that might be expected
+    //in case of XML/HTTP case. There might be better way to handle it - probably
+    // at the codec level to allow any kind of media type, if there is codec that
+    // can understand it we should let it go.
     private static final String[] contentTypes = {
             "text/xml", "application/soap+xml", "application/xop+xml",
-            "application/fastinfoset", "application/soap+fastinfoset" };
+            "application/fastinfoset", "application/soap+fastinfoset", "application/xml" };
 
     /**
      * Creates a lone {@link HttpAdapter} that does not know of any other
