@@ -23,6 +23,7 @@
 package com.sun.xml.ws.client.dispatch;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -99,7 +100,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
      * @param pipe    Master pipe for the pipeline
      * @param binding Binding of this Dispatch instance, current one of SOAP/HTTP or XML/HTTP
      */
-    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding, WSEndpointReference epr) {
+    protected DispatchImpl(QName port, Service.Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding, @Nullable WSEndpointReference epr) {
         super(owner, pipe, binding, (owner.getWsdlService() != null)? owner.getWsdlService().get(port) : null , owner.getEndpointAddress(port), epr);
         this.portname = port;
         this.mode = mode;
@@ -202,15 +203,15 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         packet.expectReply = expectReply;
     }
 
-    static boolean isXMLHttp(WSBinding binding) {
+    static boolean isXMLHttp(@NotNull WSBinding binding) {
         return binding.getBindingId().equals(BindingID.XML_HTTP);
     }
 
-    static boolean isPAYLOADMode(Service.Mode mode) {
+    static boolean isPAYLOADMode(@NotNull Service.Mode mode) {
            return mode == Service.Mode.PAYLOAD;
     }
 
-    static void checkNullAllowed(Object in, RequestContext rc, WSBinding binding, Service.Mode mode) {
+    static void checkNullAllowed(@Nullable Object in, RequestContext rc, WSBinding binding, Service.Mode mode) {
 
         if (in != null)
             return;
@@ -226,7 +227,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    static boolean methodNotOk(RequestContext rc) {
+    static boolean methodNotOk(@NotNull RequestContext rc) {
         String requestMethod = (String)rc.get(MessageContext.HTTP_REQUEST_METHOD);
         String request = (requestMethod == null)? HTTP_REQUEST_METHOD_POST: requestMethod;
         // if method == post or put with a null invocation parameter in xml/http binding this is not ok
@@ -254,7 +255,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
 
-    void resolveEndpointAddress(Packet message, RequestContext requestContext) {
+    void resolveEndpointAddress(@NotNull Packet message, @NotNull RequestContext requestContext) {
         //resolve endpoint look for query parameters, pathInfo
         String endpoint = (String) requestContext.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
         if (endpoint == null)
@@ -286,7 +287,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    protected String resolveURI(URI endpointURI, String pathInfo, String queryString) {
+    protected @NotNull String resolveURI(@NotNull URI endpointURI, @Nullable String pathInfo, @Nullable String queryString) {
         String query = null;
         String fragment = null;
         if (queryString != null) {
@@ -314,12 +315,12 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         }
     }
 
-    private static String checkPath(String path) {
+    private static String checkPath(@Nullable String path) {
         //does it begin with /
         return (path == null || path.startsWith("/")) ? path : "/" + path;
     }
 
-    private static String checkQuery(String query) {
+    private static String checkQuery(@Nullable String query) {
         if (query == null) return null;
 
         if (query.indexOf('?') == 0)
