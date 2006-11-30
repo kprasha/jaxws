@@ -96,7 +96,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     // can understand it we should let it go.
     private static final String[] contentTypes = {
             "text/xml", "application/soap+xml", "application/xop+xml",
-            "application/fastinfoset", "application/soap+fastinfoset", "application/xml" };
+            "application/fastinfoset", "application/soap+fastinfoset", "application/xml",
+            "application/x-www-form-urlencoded"};
 
     /**
      * Creates a lone {@link HttpAdapter} that does not know of any other
