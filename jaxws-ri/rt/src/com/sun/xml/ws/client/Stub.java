@@ -126,13 +126,13 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
         this.tubes = new TubePool(master);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
-        this.requestContext.setEndpointAddress(defaultEndPointAddress);
+        // if there is an EPR, EPR's address should be used for invocation instead of default address
+        if(epr != null)
+            this.requestContext.setEndPointAddressString(epr.getAddress());
+        else
+            this.requestContext.setEndpointAddress(defaultEndPointAddress);
         this.engine = new Engine();
         this.endpointReference = epr;
-
-        //Issue number Pending: Addressing does not need to be enabled to use an EPR
-        //if(AddressingVersion.isEnabled(binding) && epr!=null)
-        //    throw new WebServiceException(ClientMessages.EPR_WITHOUT_ADDRESSING_ON());
     }
 
     /**
