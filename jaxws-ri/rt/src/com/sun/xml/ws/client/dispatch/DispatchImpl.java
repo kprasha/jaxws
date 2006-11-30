@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
@@ -61,8 +62,7 @@ import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.ws.soap.SOAPBinding;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,10 +71,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.io.UnsupportedEncodingException;
 
-/**
- * TODO: update javadoc, use sandbox classes where can
- */
 
 /**
  * The <code>DispatchImpl</code> abstract class provides support
@@ -129,9 +127,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         owner.getExecutor().execute(ft);
         return ft;
     }
-
-    /* todo: Not sure that this meets the needs of tango for async callback */
-    /* todo: Need to review with team                                       */
 
     public final Future<?> invokeAsync(T param, AsyncHandler<T> asyncHandler) {
         Invoker invoker = new Invoker(param);
@@ -198,7 +193,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         
         checkNullAllowed(in, requestContext, binding, mode);
 
-
         Packet request = createPacket(in);
         setProperties(request,false);
         Packet response = process(request,requestContext,this);
@@ -235,11 +229,12 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     static boolean methodNotOk(RequestContext rc) {
         String requestMethod = (String)rc.get(MessageContext.HTTP_REQUEST_METHOD);
         String request = (requestMethod == null)? HTTP_REQUEST_METHOD_POST: requestMethod;
-
+        // if method == post or put with a null invocation parameter in xml/http binding this is not ok
         return HTTP_REQUEST_METHOD_POST.equalsIgnoreCase(request) || HTTP_REQUEST_METHOD_PUT.equalsIgnoreCase(request);
     }
 
     public static void checkValidSOAPMessageDispatch(WSBinding binding, Service.Mode mode) {
+        // Dispatch<SOAPMessage> is only valid for soap binding and in Service.Mode.MESSAGE
         if (DispatchImpl.isXMLHttp(binding))
             throw new WebServiceException(DispatchMessages.INVALID_SOAPMESSAGE_DISPATCH_BINDING(HTTPBinding.HTTP_BINDING, SOAPBinding.SOAP11HTTP_BINDING + " or " + SOAPBinding.SOAP12HTTP_BINDING));
         if (DispatchImpl.isPAYLOADMode(mode))
@@ -247,6 +242,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     public static void checkValidDataSourceDispatch(WSBinding binding, Service.Mode mode) {
+        // Dispatch<DataSource> is only valid with xml/http binding and in Service.Mode.MESSAGE
         if (!DispatchImpl.isXMLHttp(binding))
             throw new WebServiceException(DispatchMessages.INVALID_DATASOURCE_DISPATCH_BINDING("SOAP/HTTP", HTTPBinding.HTTP_BINDING));
         if (DispatchImpl.isPAYLOADMode(mode))
@@ -260,32 +256,33 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
 
     void resolveEndpointAddress(Packet message, RequestContext requestContext) {
         //resolve endpoint look for query parameters, pathInfo
-        String origEndpoint = (String) requestContext.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+        String endpoint = (String) requestContext.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+        if (endpoint == null)
+            endpoint = message.endpointAddress.toString();
 
         String pathInfo = null;
         String queryString = null;
-        if (requestContext.get(MessageContext.PATH_INFO) != null) {
+        if (requestContext.get(MessageContext.PATH_INFO) != null)
             pathInfo = (String) requestContext.get(MessageContext.PATH_INFO);
-        }
-        if (requestContext.get(MessageContext.QUERY_STRING) != null) {
+
+        if (requestContext.get(MessageContext.QUERY_STRING) != null)
             queryString = (String) requestContext.get(MessageContext.QUERY_STRING);
-        }
+
 
         String resolvedEndpoint = null;
         if (pathInfo != null || queryString != null) {
             pathInfo = checkPath(pathInfo);
             queryString = checkQuery(queryString);
-            if (origEndpoint != null) {
+            if (endpoint != null) {
                 try {
-                    URI endpointURI = new URI(origEndpoint);
+                    final URI endpointURI = new URI(endpoint);
                     resolvedEndpoint = resolveURI(endpointURI, pathInfo, queryString);
                 } catch (URISyntaxException e) {
-                    resolvedEndpoint = origEndpoint;
+                    throw new WebServiceException("Endpoint String " + endpoint + " is an invalid URI.");
                 }
             }
-
-            requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, resolvedEndpoint);
-            //message.endpointAddress = EndpointAddress.create(resolvedEndpoint);
+            //requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, resolvedEndpoint);
+            message.endpointAddress = EndpointAddress.create(resolvedEndpoint);
         }
     }
 
@@ -293,19 +290,28 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         String query = null;
         String fragment = null;
         if (queryString != null) {
-            URI result = endpointURI.resolve(queryString);
+            final URI result;
+            try {
+                URI tp = new URI(null, null, endpointURI.getPath(), queryString, null);
+                result = endpointURI.resolve(tp);
+            } catch (URISyntaxException e) {
+                throw new WebServiceException("Unable to resolve endpoint address using the supplied query string " + queryString);
+            }
             query = result.getQuery();
             fragment = result.getFragment();
         }
 
-        String path = (pathInfo != null) ? pathInfo : endpointURI.getPath();
+        final String path = (pathInfo != null) ? pathInfo : endpointURI.getPath();
         try {
-            URI temp = new URI(null, null, path, query, fragment);
-            return endpointURI.resolve(temp).toString();
+            final URI temp = new URI(null, null, path, query, fragment);
+            return URLDecoder.decode(endpointURI.resolve(temp).toURL().toExternalForm(), "UTF-8");
         } catch (URISyntaxException e) {
+            throw new WebServiceException("Unable to construct URI using path " + path + " and query string " + query);
+        } catch (MalformedURLException e) {
             throw new WebServiceException("Unable to resolve endpoint address using the supplied path " + path);
+        } catch (UnsupportedEncodingException e) {
+            throw new WebServiceException("Unable to decode the resolved endpoint using UTF-8 encoding");
         }
-       // return endpointURI.toString();
     }
 
     private static String checkPath(String path) {
@@ -314,8 +320,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     private static String checkQuery(String query) {
-        //does it begin with ?
-        return (query == null || query.startsWith("?")) ? query : "?" + query;
+        if (query == null) return null;
+
+        if (query.indexOf('?') == 0)
+           throw new WebServiceException("Leading '?' of MessageContext.QUERY_STRING: " + query + " is not valid.");
+        return query;
     }
 
 
