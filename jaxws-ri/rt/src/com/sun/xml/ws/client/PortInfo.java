@@ -30,6 +30,7 @@ import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
@@ -103,8 +104,13 @@ public class PortInfo implements WSPortInfo {
     //This method is used for Dispatch client only
     private WSDLPort getPortModel(WSServiceDelegate owner, QName portName) {
 
-        if (owner.getWsdlService() != null)
-            return owner.getPortModel(portName);
+        if (owner.getWsdlService() != null){
+            Iterable<WSDLPortImpl> ports = owner.getWsdlService().getPorts();
+            for (WSDLPortImpl port : ports){
+                if (port.getName().equals(portName))
+                    return port;                
+            }
+        }
         return null;
     }
 
