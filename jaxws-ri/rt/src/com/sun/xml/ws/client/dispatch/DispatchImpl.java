@@ -171,7 +171,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             }
         } catch (JAXBException e) {
             //TODO: i18nify
-            throw new DeserializationException("failed.to.read.response",e);
+            throw new DeserializationException(DispatchMessages.INVALID_RESPONSE_DESERIALIZATION(),e);
         } catch(RuntimeException e){
             //it could be a WebServiceException or a ProtocolException or any RuntimeException
             // resulting due to some internal bug.
@@ -278,7 +278,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                     final URI endpointURI = new URI(endpoint);
                     resolvedEndpoint = resolveURI(endpointURI, pathInfo, queryString);
                 } catch (URISyntaxException e) {
-                    throw new WebServiceException("Endpoint String " + endpoint + " is an invalid URI.");
+                    throw new WebServiceException(DispatchMessages.INVALID_URI(endpoint));
                 }
             }
             requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, resolvedEndpoint);
@@ -295,7 +295,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                 URI tp = new URI(null, null, endpointURI.getPath(), queryString, null);
                 result = endpointURI.resolve(tp);
             } catch (URISyntaxException e) {
-                throw new WebServiceException("Unable to resolve endpoint address using the supplied query string " + queryString);
+                throw new WebServiceException(DispatchMessages.INVALID_QUERY_STRING(queryString));
             }
             query = result.getQuery();
             fragment = result.getFragment();
@@ -306,11 +306,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
             final URI temp = new URI(null, null, path, query, fragment);
             return URLDecoder.decode(endpointURI.resolve(temp).toURL().toExternalForm(), "UTF-8");
         } catch (URISyntaxException e) {
-            throw new WebServiceException("Unable to construct URI using path " + path + " and query string " + query);
+            throw new WebServiceException(DispatchMessages.INVALID_URI_PATH_QUERY(path ,query));
         } catch (MalformedURLException e) {
-            throw new WebServiceException("Unable to resolve endpoint address using the supplied path " + path);
+            throw new WebServiceException(DispatchMessages.INVALID_URI_RESOLUTION(path));
         } catch (UnsupportedEncodingException e) {
-            throw new WebServiceException("Unable to decode the resolved endpoint using UTF-8 encoding");
+            throw new WebServiceException(DispatchMessages.INVALID_URI_DECODE());
         }
     }
 
@@ -323,7 +323,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         if (query == null) return null;
 
         if (query.indexOf('?') == 0)
-           throw new WebServiceException("Leading '?' of MessageContext.QUERY_STRING: " + query + " is not valid.");
+           throw new WebServiceException(DispatchMessages.INVALID_QUERY_LEADING_CHAR(query));
         return query;
     }
 
@@ -416,7 +416,7 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                         responseImpl.set(toReturnValue(response), null);
                     } catch (JAXBException e) {
                         //TODO: i18nify
-                        responseImpl.set(null, new DeserializationException("failed.to.read.response",e));
+                        responseImpl.set(null, new DeserializationException(DispatchMessages.INVALID_RESPONSE_DESERIALIZATION(),e));
                     } catch(RuntimeException e){
                         //it could be a WebServiceException or a ProtocolException or any RuntimeException
                         // resulting due to some internal bug.
