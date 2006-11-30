@@ -25,6 +25,7 @@ import com.sun.tools.ws.resources.ConfigurationMessages;
 import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
+import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.xjc.reader.Util;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -36,6 +37,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.helpers.LocatorImpl;
 
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -299,7 +301,8 @@ public class WsimportOptions extends Options {
             XMLStreamReaderUtil.nextElementContent(reader);
             if (reader.getName().equals(JAXWSBindingsConstants.JAXWS_BINDINGS)) {
                 jaxwsCustomBindings.add(is);
-            } else if (reader.getName().equals(JAXWSBindingsConstants.JAXB_BINDINGS)) {
+            } else if (reader.getName().equals(JAXWSBindingsConstants.JAXB_BINDINGS) ||
+                    reader.getName().equals(new QName(SchemaConstants.NS_XSD, "schema"))) {
                 jaxbCustomBindings.add(is);
             } else {
                 LocatorImpl locator = new LocatorImpl();
