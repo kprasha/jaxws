@@ -192,7 +192,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
 
             private void writeAddedAttribute() throws XMLStreamException {
                 if(!root)   return;
-                root=true;
+                root=false;
                 super.writeNamespace("wsa",AddressingVersion.W3C.nsUri);
                 super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
             }
