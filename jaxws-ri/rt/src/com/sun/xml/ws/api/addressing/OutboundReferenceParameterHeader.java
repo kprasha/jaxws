@@ -212,7 +212,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         try {
             Element node = (Element)infoset.writeTo(saaj.getSOAPHeader());
-            node.setAttributeNS(AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
+            node.setAttributeNS(AddressingVersion.W3C.nsUri,AddressingVersion.W3C.getPrefix()+":"+IS_REFERENCE_PARAMETER,TRUE_VALUE);
         } catch (XMLStreamBufferException e) {
             throw new SOAPException(e);
         }
