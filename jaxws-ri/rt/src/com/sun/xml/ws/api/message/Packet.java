@@ -291,7 +291,8 @@ public final class Packet extends DistributedPropertySet {
         List<Element> refParams =  new ArrayList<Element>();
         HeaderList hl = message.getHeaders();
         for(Header h :hl) {
-            if(Boolean.valueOf(h.getAttribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter"))) {
+            String attr = h.getAttribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter");
+            if(attr!=null && (attr.equals("true") || attr.equals("1"))) {
                 Document d = DOMUtil.createDom();
                 SAX2DOMEx s2d = new SAX2DOMEx(d);
                 try {
