@@ -193,7 +193,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
             private void writeAddedAttribute() throws XMLStreamException {
                 if(!root)   return;
                 root=false;
-                super.writeNamespace("wsa",AddressingVersion.W3C.nsUri);
+                writeNamespace("wsa",AddressingVersion.W3C.nsUri);
                 super.writeAttribute("wsa",AddressingVersion.W3C.nsUri,IS_REFERENCE_PARAMETER,TRUE_VALUE);
             }
 
@@ -203,8 +203,25 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
             }
 
             public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+                //TODO: Verify with KK later
+                //check if prefix is declared before writing start element.
+                boolean prefixDeclared = isPrefixDeclared(prefix,namespaceURI);
                 super.writeStartElement(prefix, localName, namespaceURI);
+                if(!prefixDeclared)
+                    super.writeNamespace(prefix,namespaceURI);
                 writeAddedAttribute();
+            }
+            public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException{
+                //TODO: Verify with KK later
+                if(isPrefixDeclared(prefix, namespaceURI)) {
+                    //Dont write it again , as its already in NamespaceContext
+                    return;
+                } else
+                    super.writeNamespace(prefix,namespaceURI);
+            }
+
+            private boolean isPrefixDeclared(String prefix, String namespaceURI ) {
+                return prefix.equals(getNamespaceContext().getPrefix(namespaceURI));
             }
         });
     }
