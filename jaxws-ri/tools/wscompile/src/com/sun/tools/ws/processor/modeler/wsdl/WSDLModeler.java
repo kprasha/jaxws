@@ -1014,7 +1014,7 @@ public class WSDLModeler extends WSDLModelerBase {
                     Iterator<MessagePart> parts = inputMessage.parts();
                     if (parts.hasNext()) {
                         MessagePart part = parts.next();
-                        JAXBType jaxbType = getJAXBType(part.getDescriptor());
+                        JAXBType jaxbType = getJAXBType(part);
                         List<JAXBProperty> memberList = jaxbType.getWrapperChildren();
                         Iterator<JAXBProperty> props = memberList.iterator();
                         while (props.hasNext()) {
@@ -1068,7 +1068,7 @@ public class WSDLModeler extends WSDLModelerBase {
             if (numOfOutMsgParts == 1) {
                 MessagePart part = outputParts.get(0);
                 if (isOperationDocumentLiteral(styleAndUse)) {
-                    JAXBType type = getJAXBType(part.getDescriptor());
+                    JAXBType type = getJAXBType(part);
                     operation.setResponseBean(type);
                 } else if (isOperationRpcLiteral(styleAndUse)) {
                     String operationName = info.bindingOperation.getName();
@@ -1086,7 +1086,10 @@ public class WSDLModeler extends WSDLModelerBase {
                 //create response bean
                 String nspace = "";
                 QName responseBeanName = new QName(nspace, getAsyncOperationName(info.operation) + "Response");
-                JAXBType responseBeanType = getJAXBType(responseBeanName);
+                JAXBType responseBeanType = jaxbModelBuilder.getJAXBType(responseBeanName);
+                if(responseBeanType == null){
+                    error(info.operation.getEntity(), ModelerMessages.WSDLMODELER_RESPONSEBEAN_NOTFOUND(info.operation.getName()));
+                }                
                 operation.setResponseBean(responseBeanType);
             }
         }
@@ -1169,7 +1172,7 @@ public class WSDLModeler extends WSDLModelerBase {
         while (headerParts.hasNext()) {
             MessagePart part = (MessagePart) headerParts.next();
             headerName = part.getDescriptor();
-            jaxbType = getJAXBType(headerName);
+            jaxbType = getJAXBType(part);
             headerBlock = new Block(headerName, jaxbType, part);
             TWSDLExtensible ext;
             if (processRequest) {
@@ -1300,7 +1303,7 @@ public class WSDLModeler extends WSDLModelerBase {
                 error(faultPart, ModelerMessages.WSDLMODELER_INVALID_MESSAGE_PART_MUST_HAVE_ELEMENT_DESCRIPTOR(faultMessage.getName(), faultPart.getName()));
             }
 
-            JAXBType jaxbType = getJAXBType(faultPart.getDescriptor());
+            JAXBType jaxbType = getJAXBType(faultPart);
 
             fault.setElementName(faultPart.getDescriptor());
             fault.setJavaMemberName(Names.getExceptionClassMemberName());
@@ -1534,7 +1537,10 @@ public class WSDLModeler extends WSDLModelerBase {
         JAXBType type = null;
         QName name = part.getDescriptor();
         if (part.getDescriptorKind().equals(SchemaKinds.XSD_ELEMENT)) {
-            type = getJAXBType(name);
+            type = jaxbModelBuilder.getJAXBType(name);
+            if(type == null){
+                error(part, ModelerMessages.WSDLMODELER_JAXB_JAVATYPE_NOTFOUND(name, part.getName()));
+            }
         } else {
             S2JJAXBModel jaxbModel = getJAXBModelBuilder().getJAXBModel().getS2JJAXBModel();
             TypeAndAnnotation typeAnno = jaxbModel.getJavaType(name);
@@ -1742,7 +1748,7 @@ public class WSDLModeler extends WSDLModelerBase {
                 }
             } else if (ModelerUtils.isBoundToSOAPHeader(part)) {
                 QName headerName = part.getDescriptor();
-                JAXBType jaxbType = getJAXBType(headerName);
+                JAXBType jaxbType = getJAXBType(part);
                 Block headerBlock = new Block(headerName, jaxbType, part);
                 param = ModelerUtils.createParameter(part.getName(), jaxbType, headerBlock);
                 if (part.isIN()) {
@@ -1899,10 +1905,6 @@ public class WSDLModeler extends WSDLModelerBase {
         }
     }
 
-    private JAXBType getJAXBType(QName name) {
-        return jaxbModelBuilder.getJAXBType(name);
-    }
-
     protected boolean isConflictingPortClassName(String name) {
         return false;
     }
@@ -1950,7 +1952,7 @@ public class WSDLModeler extends WSDLModelerBase {
         //if(inputPart != null && outputPart != null){
         if (inputPart != null) {
             boolean inputWrappable = false;
-            JAXBType inputType = getJAXBType(inputPart.getDescriptor());
+            JAXBType inputType = getJAXBType(inputPart);
             if (inputType != null) {
                 inputWrappable = inputType.isUnwrappable();
             }
@@ -1958,7 +1960,7 @@ public class WSDLModeler extends WSDLModelerBase {
             if (outputPart == null) {
                 return inputWrappable;
             }
-            JAXBType outputType = getJAXBType(outputPart.getDescriptor());
+            JAXBType outputType = getJAXBType(outputPart);
             if ((inputType != null) && (outputType != null))
                 return inputType.isUnwrappable() && outputType.isUnwrappable();
         }
@@ -2036,7 +2038,7 @@ public class WSDLModeler extends WSDLModelerBase {
                 if (parameters == null)
                     parameters = new ArrayList<Parameter>();
                 QName headerName = part.getDescriptor();
-                JAXBType jaxbType = getJAXBType(headerName);
+                JAXBType jaxbType = getJAXBType(part);
                 Block headerBlock = new Block(headerName, jaxbType, part);
                 request.addHeaderBlock(headerBlock);
                 Parameter param = ModelerUtils.createParameter(part.getName(), jaxbType, headerBlock);
@@ -2109,6 +2111,9 @@ public class WSDLModeler extends WSDLModelerBase {
             desc = new QName("", part.getName());
         } else if (part.getDescriptorKind() == SchemaKinds.XSD_ELEMENT) {
             typeAnno = getJAXBModelBuilder().getElementTypeAndAnn(desc);
+            if(typeAnno == null){
+                error(part, ModelerMessages.WSDLMODELER_JAXB_JAVATYPE_NOTFOUND(part.getDescriptor(), part.getName()));
+            }
             for (Iterator mimeTypeIter = mimeTypes.iterator(); mimeTypeIter.hasNext();) {
                 String mimeType = (String) mimeTypeIter.next();
                 if ((!mimeType.equals("text/xml") &&

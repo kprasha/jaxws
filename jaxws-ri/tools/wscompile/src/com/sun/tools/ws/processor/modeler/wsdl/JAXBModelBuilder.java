@@ -101,10 +101,8 @@ public class JAXBModelBuilder {
     public JAXBType  getJAXBType(QName qname){
         JAXBMapping mapping = jaxbModel.get(qname);
         if (mapping == null){
-//            errReceiver.error(NULL_LOCATOR, ModelMessages.MODEL_SCHEMA_ELEMENT_NOT_FOUND(qname));
-            throw new AbortException();
+            return null;
         }
-        assert mapping != null;
         JavaType javaType = new JavaSimpleType(mapping.getType());
         return new JAXBType(qname, javaType, mapping, jaxbModel);
     }
@@ -112,10 +110,8 @@ public class JAXBModelBuilder {
     public TypeAndAnnotation getElementTypeAndAnn(QName qname){
         JAXBMapping mapping = jaxbModel.get(qname);
         if (mapping == null){
-            //errReceiver.error(NULL_LOCATOR, ModelMessages.MODEL_SCHEMA_ELEMENT_NOT_FOUND(qname));
-            throw new AbortException();
+            return null;
         }
-        assert mapping != null;
         return mapping.getType().getTypeAnn();
     }
 
