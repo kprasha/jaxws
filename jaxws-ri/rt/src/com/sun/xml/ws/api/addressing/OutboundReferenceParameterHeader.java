@@ -210,6 +210,9 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
+        //TODO: SAAJ returns null instead of throwing SOAPException,
+        // when there is no SOAPHeader in the message,
+        // which leads to NPE.
         try {
             Element node = (Element)infoset.writeTo(saaj.getSOAPHeader());
             node.setAttributeNS(AddressingVersion.W3C.nsUri,AddressingVersion.W3C.getPrefix()+":"+IS_REFERENCE_PARAMETER,TRUE_VALUE);
