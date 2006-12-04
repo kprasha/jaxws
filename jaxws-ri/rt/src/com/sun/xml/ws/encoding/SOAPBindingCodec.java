@@ -272,6 +272,13 @@ public class SOAPBindingCodec extends MimeCodec {
         for (QName header : binding.getHandlerConfig().getKnownHeaders()) {
             boolean found = false;
             for (Header h : hl) {
+                // skip WS-Addressing headers as they'll be processed by
+                // WS-A tube later and an WS-Addressing specific fault
+                // will then be thrown
+                if (h.getNamespaceURI().equals(binding.getAddressingVersion().nsUri)) {
+                    continue;
+                }
+
                 if (found && h.getNamespaceURI().equals(header.getNamespaceURI()) && h.getLocalPart().equals(header.getLocalPart())) {
                     // duplicate port known header
                     try {
