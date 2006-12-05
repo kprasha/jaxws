@@ -258,7 +258,7 @@ public class SOAPBindingCodec extends MimeCodec {
         } else
             xmlSoapCodec.decode(in, contentType, packet);
 
-        checkDuplicateKnownHeaders(packet);
+//        checkDuplicateKnownHeaders(packet);
         if (!useFastInfosetForEncoding) {
             useFastInfosetForEncoding = isFastInfosetAcceptable(packet.acceptableMimeTypes);
         }
@@ -316,7 +316,7 @@ public class SOAPBindingCodec extends MimeCodec {
         } else
             xmlSoapCodec.decode(in, contentType, packet);
 
-        checkDuplicateKnownHeaders(packet);
+//        checkDuplicateKnownHeaders(packet);
         if (!useFastInfosetForEncoding) {
             useFastInfosetForEncoding = isFastInfosetAcceptable(packet.acceptableMimeTypes);
         }
@@ -345,7 +345,7 @@ public class SOAPBindingCodec extends MimeCodec {
             // TODO localize exception
             throw new IOException("");
         }
-        checkDuplicateKnownHeaders(packet);
+//        checkDuplicateKnownHeaders(packet);
     }
     
     private boolean isMultipartRelated(String contentType) {
