@@ -88,7 +88,7 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
 
             //not sure if this is the correct way to deal with this.
             if ( response ==null || response.getMessage() == null )
-                     throw new NullPointerException(DispatchMessages.INVALID_RESPONSE());
+                     throw new WebServiceException(DispatchMessages.INVALID_RESPONSE());
             else
                 return response.getMessage().readAsSOAPMessage();            
         } catch (SOAPException e) {
