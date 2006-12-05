@@ -283,16 +283,16 @@ public abstract class Messages {
 
     /**
      * Creates a fault {@link Message} that captures the code/subcode/subsubcode
-     * if wsa:Action is not supported.
+     * defined by WS-Addressing if wsa:Action is not supported.
      *
-     * @param unsupportedAction The unsupported Action
-     * @param av The WS-Addressing version
-     * @param sv The SOAP Version
+     * @param unsupportedAction The unsupported Action. Must not be null.
+     * @param av The WS-Addressing version of the message. Must not be null.
+     * @param sv The SOAP Version of the message. Must not be null.
      *
      * @return
-     *      Always non-null. A message that wraps this {@link SOAPFault}.
+     *      A message representing SOAPFault that contains the WS-Addressing code/subcode/subsubcode.
      */
-    public static Message create(String unsupportedAction, AddressingVersion av, SOAPVersion sv) {
+    public static Message create(@NotNull String unsupportedAction, @NotNull AddressingVersion av, @NotNull SOAPVersion sv) {
         QName subcode = av.actionNotSupportedTag;
         String faultstring = String.format(av.actionNotSupportedText, unsupportedAction);
 
