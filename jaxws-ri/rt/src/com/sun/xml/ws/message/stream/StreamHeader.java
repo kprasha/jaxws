@@ -135,6 +135,9 @@ public abstract class StreamHeader extends AbstractHeaderImpl {
         // check mustUnderstand
         if(!_isMustUnderstand) return true;
 
+        if (roles == null)
+            return true;
+
         // now role
         return !roles.contains(_role);
     }
