@@ -30,11 +30,13 @@ import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -45,8 +47,10 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.resources.AddressingMessages;
+import com.sun.xml.ws.message.FaultDetailHeader;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.soap.SOAPFault;
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -85,8 +89,26 @@ public final class WsaServerTube extends WsaTube {
         // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.
 
         HeaderList hl = request.getMessage().getHeaders();
-        replyTo = hl.getReplyTo(addressingVersion, soapVersion);
-        faultTo = hl.getFaultTo(addressingVersion, soapVersion);
+        try {
+            replyTo = hl.getReplyTo(addressingVersion, soapVersion);
+            faultTo = hl.getFaultTo(addressingVersion, soapVersion);
+        } catch (InvalidMapException e) {
+            SOAPFault soapFault = helper.newInvalidMapFault(e, addressingVersion);
+            // WS-A fault processing for one-way methods
+            if (request.getMessage().isOneWay(wsdlPort)) {
+                request.createServerResponse(null, wsdlPort, binding);
+                return doInvoke(next, request);
+            }
+
+            Message m = Messages.create(soapFault);
+            if (soapVersion == SOAPVersion.SOAP_11) {
+                FaultDetailHeader s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
+                m.getHeaders().add(s11FaultDetailHeader);
+            }
+
+            Packet response = request.createServerResponse(m, wsdlPort, binding);
+            return doReturnWith(response);
+        }
         String messageId = hl.getMessageID(addressingVersion, soapVersion);
 
         // TODO: This is probably not a very good idea.

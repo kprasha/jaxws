@@ -25,6 +25,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.addressing.WsaTubeHelper;
+import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.PropertySet;
@@ -648,9 +649,14 @@ public final class Packet extends DistributedPropertySet {
         HeaderList hl = responsePacket.getMessage().getHeaders();
 
         // wsa:To
-        WSEndpointReference replyTo = message.getHeaders().getReplyTo(av, sv);
-        if (replyTo != null)
-            hl.add(new StringHeader(av.toTag, replyTo.getAddress()));
+        WSEndpointReference replyTo;
+        try {
+            replyTo = message.getHeaders().getReplyTo(av, sv);
+            if (replyTo != null)
+                hl.add(new StringHeader(av.toTag, replyTo.getAddress()));
+        } catch (InvalidMapException e) {
+            replyTo = null;
+        }
 
         // wsa:Action
         hl.add(new StringHeader(av.actionTag, action));
