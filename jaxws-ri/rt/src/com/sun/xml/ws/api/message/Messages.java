@@ -28,12 +28,14 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.DOMMessage;
 import com.sun.xml.ws.message.EmptyMessageImpl;
+import com.sun.xml.ws.message.ProblemActionHeader;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.message.saaj.SAAJMessage;
 import com.sun.xml.ws.message.source.PayloadSourceMessage;
@@ -48,8 +50,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -278,6 +279,49 @@ public abstract class Messages {
     public static Message create(SOAPFault fault) {
         SOAPVersion ver = SOAPVersion.fromNsUri(fault.getNamespaceURI());
         return new DOMMessage(ver,fault);
+    }
+
+    /**
+     * Creates a fault {@link Message} that captures the code/subcode/subsubcode
+     * if wsa:Action is not supported.
+     *
+     * @param unsupportedAction The unsupported Action
+     * @param av The WS-Addressing version
+     * @param sv The SOAP Version
+     *
+     * @return
+     *      Always non-null. A message that wraps this {@link SOAPFault}.
+     */
+    public static Message create(String unsupportedAction, AddressingVersion av, SOAPVersion sv) {
+        QName subcode = av.actionNotSupportedTag;
+        String faultstring = String.format(av.actionNotSupportedText, unsupportedAction);
+
+        Message faultMessage;
+        SOAPFault fault;
+        try {
+            if (sv == SOAPVersion.SOAP_12) {
+                fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault();
+                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(subcode);
+                Detail detail = fault.addDetail();
+                SOAPElement se = detail.addChildElement(av.problemActionTag);
+                se = se.addChildElement(av.actionTag);
+                se.addTextNode(unsupportedAction);
+            } else {
+                fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
+                fault.setFaultCode(subcode);
+            }
+            fault.setFaultString(faultstring);
+
+            faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(sv, fault);
+            if (sv == SOAPVersion.SOAP_11) {
+                faultMessage.getHeaders().add(new ProblemActionHeader(unsupportedAction, av));
+            }
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
+
+        return faultMessage;
     }
 
     /**

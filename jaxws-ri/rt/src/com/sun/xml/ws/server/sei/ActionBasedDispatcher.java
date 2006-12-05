@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.ProblemActionHeader;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
@@ -91,36 +92,7 @@ final class ActionBasedDispatcher implements EndpointMethodDispatcher {
             return h;
 
         // invalid action header
-        Message result;
-        QName subcode = av.actionNotSupportedTag;
-        String faultstring = String.format(av.actionNotSupportedText, action);
-
-        try {
-            SOAPFault fault;
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_12) {
-                fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault();
-                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
-                fault.appendFaultSubcode(subcode);
-                Detail detail = fault.addDetail();
-                SOAPElement se = detail.addChildElement(av.problemActionTag);
-                se = se.addChildElement(av.actionTag);
-                se.addTextNode(action);
-            } else {
-                fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
-                fault.setFaultCode(subcode);
-            }
-
-            fault.setFaultString(faultstring);
-
-            Message faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(binding.getSOAPVersion(), fault);
-            if (binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
-                faultMessage.getHeaders().add(new ProblemActionHeader(action, av));
-            }
-
-            result = faultMessage;
-        } catch (SOAPException e) {
-            throw new WebServiceException(e);
-        }
+        Message result = Messages.create(action, av, binding.getSOAPVersion());
 
         throw new DispatchException(result);
     }
