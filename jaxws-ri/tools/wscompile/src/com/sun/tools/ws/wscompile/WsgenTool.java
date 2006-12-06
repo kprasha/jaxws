@@ -53,6 +53,9 @@ import javax.xml.ws.Holder;
 import java.io.*;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * @author Vivek Pandey
@@ -110,6 +113,34 @@ public class WsgenTool implements AnnotationProcessorFactory {
 
     private int round = 0;
 
+    // Workaround for bug 6499165 on jax-ws,
+    // Original bug with JDK 6500594 , 6500594 when compiled with debug option,
+    private void workAroundJavacDebug() {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            final Class aptMain = cl.loadClass("com.sun.tools.apt.main.Main");
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
+                    try {
+                        Field forcedOpts = aptMain.getDeclaredField("forcedOpts");
+                        forcedOpts.setAccessible(true);
+                        forcedOpts.set(null, new String[]{});
+                    } catch (NoSuchFieldException e) {
+                        if(options.verbose)
+                            e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        if(options.verbose)
+                            e.printStackTrace();
+                    }
+                    return null;
+                }
+            });
+        } catch (ClassNotFoundException e) {
+            if(options.verbose)
+                e.printStackTrace();
+        }
+    }
+
     public boolean buildModel(String endpoint, Listener listener) throws BadCommandLineException {
         final ErrorReceiverFilter errReceiver = new ErrorReceiverFilter(listener);
         context = new AnnotationProcessorContext();
@@ -125,6 +156,8 @@ public class WsgenTool implements AnnotationProcessorFactory {
         args[6] = "-XclassesAsDecls";
         args[7] = endpoint;
 
+        // Workaround for bug 6499165: issue with javac debug option
+        workAroundJavacDebug();
         int result = com.sun.tools.apt.Main.process(this, args);
         if (result != 0) {
             out.println(WscompileMessages.WSCOMPILE_ERROR(WscompileMessages.WSCOMPILE_COMPILATION_FAILED()));
