@@ -644,6 +644,16 @@ public final class Fiber implements Runnable {
     }
 
     /**
+     * Gets the current {@link Packet} associated with this fiber.
+     *
+     * <p>
+     * This method returns null if no packet has been associated with the fiber yet.
+     */
+    public @Nullable Packet getPacket() {
+        return packet;
+    }
+
+    /**
      * Returns true if this fiber is still running or suspended.
      */
     public boolean isAlive() {
