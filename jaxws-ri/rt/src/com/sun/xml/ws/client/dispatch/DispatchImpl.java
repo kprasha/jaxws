@@ -130,8 +130,8 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     }
 
     public final Future<?> invokeAsync(T param, AsyncHandler<T> asyncHandler) {
-        Invoker invoker = new Invoker(param);
-        ResponseImpl<T> ft = new ResponseImpl<T>(invoker,asyncHandler);
+        AsyncInvoker invoker = new DispatchAsyncInvoker(param);
+        AsyncResponseImpl<T> ft = new AsyncResponseImpl<T>(invoker,asyncHandler);
         invoker.setReceiver(ft);
 
         // temp needed so that unit tests run and complete otherwise they may
