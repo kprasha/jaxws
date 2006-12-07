@@ -22,8 +22,6 @@
 
 package com.sun.xml.ws.api.server;
 
-import com.sun.xml.ws.api.client.ContainerResolver;
-
 /**
  * Root of the SPI implemented by the container
  * (such as application server.)
