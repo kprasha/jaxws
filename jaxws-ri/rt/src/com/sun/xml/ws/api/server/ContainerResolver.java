@@ -36,6 +36,8 @@ public abstract class ContainerResolver {
      * @param resolver container resolver
      */
     public static void setInstance(ContainerResolver resolver) {
+        if(resolver==null)
+            resolver = NONE;
         theResolver = resolver;
     }
 
@@ -44,7 +46,7 @@ public abstract class ContainerResolver {
      *
      * @return container resolver instance
      */
-    public static ContainerResolver getInstance() {
+    public static @NotNull ContainerResolver getInstance() {
         return theResolver;
     }
 
