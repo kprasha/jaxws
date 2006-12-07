@@ -23,14 +23,19 @@ package com.sun.xml.ws.model.wsdl;
 
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.resources.ClientMessages;
+import com.sun.xml.ws.resources.WsdlmodelMessages;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Implementation of {@link WSDLPort}
@@ -42,6 +47,7 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
     private EndpointAddress address;
     private final QName bindingName;
     private final WSDLServiceImpl owner;
+    private WSEndpointReference epr;
 
     /**
      * To be set after the WSDL parsing is complete.
@@ -79,6 +85,17 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
         this.address = address;
     }
 
+    /**
+     * Only meant for {@link RuntimeWSDLParser} to call.
+     */
+    public void setEPR(@NotNull WSEndpointReference epr) {
+        assert epr!=null;
+        this.epr = epr;
+    }
+
+    public @Nullable WSEndpointReference getEPR() {
+        return epr;
+    }
     public WSDLBoundPortTypeImpl getBinding() {
         return boundPortType;
     }
@@ -88,6 +105,9 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
     }
 
     void freeze(WSDLModelImpl root) {
+        if(epr != null && !address.toString().equals(epr.getAddress().toString())) {
+            throw new WebServiceException(WsdlmodelMessages.WSDL_PORTADDRESS_EPRADDRESS_NOT_MATCH(name,address,epr.getAddress()));
+        }
         boundPortType = root.getBinding(bindingName);
         if(boundPortType==null) {
             throw new LocatableWebServiceException(

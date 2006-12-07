@@ -70,7 +70,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A parser for WSDL documents.
+ * A parser for WSDL documents. This parser is used only at the tool time.
+ * Extensions should extend TWSDLExtensionHandler, so that it will be called during
+ * parsing wsdl to handle wsdl extenisbility elements. Generally these extensions
+ * will effect the artifacts generated during WSDL processing.
+ *
+ * @see com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser which will be used for WSDL parsing
+ * at runtime.
  *
  * @author WS Development Team
  */

@@ -26,6 +26,8 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -341,7 +343,17 @@ public class RuntimeWSDLParser {
             if (SOAPConstants.QNAME_ADDRESS.equals(name) || SOAPConstants.QNAME_SOAP12ADDRESS.equals(name)) {
                 location = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_LOCATION);
                 XMLStreamReaderUtil.next(reader);
+            }
+            if (AddressingVersion.W3C.nsUri.equals(name.getNamespaceURI()) &&
+                    "EndpointReference".equals(name.getLocalPart())) {
+                try {
+                    WSEndpointReference wsepr = new WSEndpointReference(reader, AddressingVersion.W3C);
+                    port.setEPR(wsepr);
+                } catch (XMLStreamException e) {
+                    throw new WebServiceException(e);
+                }
             } else {
+
                 extensionFacade.portElements(port, reader);
             }
         }
