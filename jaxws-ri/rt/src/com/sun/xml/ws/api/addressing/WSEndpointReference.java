@@ -793,11 +793,14 @@ public final class WSEndpointReference {
         }
     }
 
-   private static final OutboundReferenceParameterHeader[] EMPTY_ARRAY = new OutboundReferenceParameterHeader[0];
+    private static final OutboundReferenceParameterHeader[] EMPTY_ARRAY = new OutboundReferenceParameterHeader[0];
 
-   public @NotNull Metadata getMetaData() {
-       return new Metadata();
-   }
+    /**
+     * Parses the metadata inside this EPR.
+     */
+    public @NotNull Metadata getMetaData() {
+        return new Metadata();
+    }
 
     /**
      * Parses the Metadata in an EPR and provides convenience methods to access
