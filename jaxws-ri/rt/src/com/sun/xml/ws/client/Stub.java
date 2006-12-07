@@ -210,7 +210,7 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
         Tube tube = pool.take();
 
         try {
-            fiber.runSync(tube, packet);
+            return fiber.runSync(tube, packet);
         } finally {
             // this allows us to capture the packet even when the call failed with an exception.
             // when the call fails with an exception it's no longer a 'reply' but it may provide some information
@@ -223,9 +223,6 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
 
             pool.recycle(tube);
         }
-
-
-        return reply;
     }
 
     /**
