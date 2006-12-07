@@ -25,7 +25,6 @@ package com.sun.xml.ws.client;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.Closeable;
-import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -39,7 +38,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.developer.JAXWSProperties;
-import com.sun.xml.ws.developer.WSBindingProvider;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
 import com.sun.xml.ws.util.RuntimeVersion;
@@ -201,7 +200,6 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
                 packet.getMessage().getHeaders().addAll(hl);
         }
 
-        Packet reply;
 
         Pool<Tube> pool = tubes;
         if (pool == null)
@@ -210,15 +208,22 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
         Fiber fiber = engine.createFiber();
         // then send it away!
         Tube tube = pool.take();
+
         try {
-            reply = fiber.runSync(tube, packet);
+            fiber.runSync(tube, packet);
         } finally {
+            // this allows us to capture the packet even when the call failed with an exception.
+            // when the call fails with an exception it's no longer a 'reply' but it may provide some information
+            // about what went wrong.
+            Packet reply = fiber.getPacket();
+
+            // note that Packet can still be updated after
+            // ResponseContext is created.
+            receiver.setResponseContext(new ResponseContext(reply));
+
             pool.recycle(tube);
         }
 
-        // not that Packet can still be updated after
-        // ResponseContext is created.
-        receiver.setResponseContext(new ResponseContext(reply));
 
         return reply;
     }
