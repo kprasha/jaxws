@@ -105,9 +105,6 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
     }
 
     void freeze(WSDLModelImpl root) {
-        if(epr != null && !address.toString().equals(epr.getAddress().toString())) {
-            throw new WebServiceException(WsdlmodelMessages.WSDL_PORTADDRESS_EPRADDRESS_NOT_MATCH(name,address,epr.getAddress()));
-        }
         boundPortType = root.getBinding(bindingName);
         if(boundPortType==null) {
             throw new LocatableWebServiceException(
