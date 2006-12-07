@@ -796,7 +796,10 @@ public final class WSEndpointReference {
     private static final OutboundReferenceParameterHeader[] EMPTY_ARRAY = new OutboundReferenceParameterHeader[0];
 
     /**
-     * Parses the metadata inside this EPR.
+     * Parses the metadata inside this EPR and obtains it in a easy-to-process form.
+     *
+     * <p>
+     * See {@link Metadata} class for what's avaliable as "metadata".
      */
     public @NotNull Metadata getMetaData() {
         return new Metadata();
