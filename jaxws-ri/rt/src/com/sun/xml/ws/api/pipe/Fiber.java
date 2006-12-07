@@ -584,12 +584,10 @@ public final class Fiber implements Runnable {
                 } catch (RuntimeException t) {
                     if(traceEnabled)
                         LOGGER.log(Level.FINER,getName()+" Caught "+t+". Start stack unwinding",t);
-                    packet = null;
                     throwable = t;
                 } catch (Error t) {
                     if(traceEnabled)
                         LOGGER.log(Level.FINER,getName()+" Caught "+t+". Start stack unwinding",t);
-                    packet = null;
                     throwable = t;
                 }
             }
