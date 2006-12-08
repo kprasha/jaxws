@@ -43,6 +43,7 @@ import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.client.HandlerConfigurator.AnnotationConfigurator;
 import com.sun.xml.ws.client.HandlerConfigurator.HandlerResolverImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
@@ -68,13 +69,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Dispatch;
-import javax.xml.ws.EndpointReference;
-import javax.xml.ws.RespectBindingFeature;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.*;
 import javax.xml.ws.handler.HandlerResolver;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -334,22 +329,28 @@ public class WSServiceDelegate extends WSService {
         return createDispatch(portName, aClass, mode, EMPTY_FEATURES);
     }
 
-    private <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
+    private <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature[] features, WSEndpointReference wsepr) {
         PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding(features,null);
-        Dispatch<T> dispatch = Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), WSEndpointReference.create(epr));
+        Dispatch<T> dispatch = Stubs.createDispatch(portName, this, binding, aClass, mode, createPipeline(port, binding), wsepr);
          serviceInterceptor.postCreateDispatch((WSBindingProvider) dispatch);
          return dispatch;
 
     }
 
     public <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature... features) {
-        return createDispatch(portName, aClass, mode, features, null);
+        WebServiceFeatureList featureList =  new WebServiceFeatureList(features);
+        WSEndpointReference wsepr = null;
+        if(featureList.isEnabled(RespectBindingFeature.class) && wsdlService != null && wsdlService.get(portName) != null) {
+            wsepr = wsdlService.get(portName).getEPR();
+        }
+        return createDispatch(portName, aClass, mode, features, wsepr);
     }
 
     public <T> Dispatch<T> createDispatch(EndpointReference endpointReference, Class<T> type, Service.Mode mode, WebServiceFeature... features) {
-        QName portName = addPortEpr(endpointReference);
-        return createDispatch(portName, type, mode, features, endpointReference);
+        WSEndpointReference wsepr = new WSEndpointReference(endpointReference);
+        QName portName = addPortEpr(wsepr);
+        return createDispatch(portName, type, mode, features, wsepr);
     }
 
     /**
@@ -415,29 +416,34 @@ public class WSServiceDelegate extends WSService {
         return createDispatch(portName, jaxbContext, mode, EMPTY_FEATURES);
     }
 
-    private Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] features, EndpointReference epr) {
+    private Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature[] features, WSEndpointReference wsepr) {
         PortInfo port = safeGetPort(portName);
         BindingImpl binding = port.createBinding(features,null);
         Dispatch<Object> dispatch = Stubs.createJAXBDispatch(
                 portName, this, binding, jaxbContext, mode,
-                createPipeline(port, binding), WSEndpointReference.create(epr));
+                createPipeline(port, binding), wsepr);
          serviceInterceptor.postCreateDispatch((WSBindingProvider)dispatch);
          return dispatch;
     }
 
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
-        return createDispatch(portName, jaxbContext, mode, webServiceFeatures, null );
+        WebServiceFeatureList featureList =  new WebServiceFeatureList(webServiceFeatures);
+        WSEndpointReference wsepr = null;
+        if(featureList.isEnabled(RespectBindingFeature.class) && wsdlService != null && wsdlService.get(portName) != null) {
+            wsepr = wsdlService.get(portName).getEPR();
+        }
+        return createDispatch(portName, jaxbContext, mode, webServiceFeatures, wsepr );
     }
 
     public Dispatch<Object> createDispatch(EndpointReference endpointReference, JAXBContext context, Service.Mode mode, WebServiceFeature... features) {
-        QName portName = addPortEpr(endpointReference);
-        return createDispatch(portName, context, mode, features, endpointReference );
+        WSEndpointReference wsepr = new WSEndpointReference(endpointReference);
+        QName portName = addPortEpr(wsepr);
+        return createDispatch(portName, context, mode, features, wsepr);
     }
 
-    private QName addPortEpr(EndpointReference endpointReference) {
-        if (endpointReference == null)
+    private QName addPortEpr(WSEndpointReference wsepr) {
+        if (wsepr == null)
             throw new WebServiceException(ProviderApiMessages.NULL_EPR());
-        WSEndpointReference wsepr = new WSEndpointReference(endpointReference);
         QName eprPortName = getPortNameFromEPR(wsepr, null);
         //add Port, if it does n't exist;
         // TODO: what if it has different epr address?
