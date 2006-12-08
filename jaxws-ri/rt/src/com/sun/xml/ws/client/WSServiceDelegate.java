@@ -279,7 +279,6 @@ public class WSServiceDelegate extends WSService {
     public <T> T getPort(QName portName, Class<T> portInterface, WebServiceFeature... features) {
         if (portName == null || portInterface == null)
             throw new IllegalArgumentException();
-        addSEI(portName, portInterface);
         return getPort(wsdlService.get(portName).getEPR(),portName,portInterface,features);
     }
 
