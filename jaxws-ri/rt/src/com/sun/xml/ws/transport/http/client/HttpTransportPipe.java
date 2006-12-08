@@ -74,6 +74,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     }
 
     public Packet process(Packet request) {
+        HttpClientTransport con = null;
         try {
             // get transport headers from message
             Map<String, List<String>> reqHeaders = (Map<String, List<String>>) request.invocationProperties.get(MessageContext.HTTP_REQUEST_HEADERS);
@@ -82,7 +83,8 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                 reqHeaders = new HashMap<String, List<String>>();
             }
 
-            HttpClientTransport con = new HttpClientTransport(request,reqHeaders);
+            con = new HttpClientTransport(request,reqHeaders);
+            request.addSatellite(new HttpResponseProperties(con));
 
             ContentType ct = codec.getStaticContentType(request);
             if (ct == null) {
@@ -133,7 +135,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             // TODO check if returned MIME type is the same as that which was sent
             // or is acceptable if an Accept header was used
             Packet reply = request.createClientResponse(null);
-            reply.addSatellite(new HttpResponseProperties(con.getConnection()));
+            //reply.addSatellite(new HttpResponseProperties(con));
             InputStream response = con.getInput();
             if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
@@ -142,7 +144,6 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                 response = buf.newInputStream();
             }
             codec.decode(response, contentType, reply);
-
             return reply;
         } catch(WebServiceException wex) {
             throw wex;

@@ -215,10 +215,10 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
             // this allows us to capture the packet even when the call failed with an exception.
             // when the call fails with an exception it's no longer a 'reply' but it may provide some information
             // about what went wrong.
-            Packet reply = fiber.getPacket();
 
             // note that Packet can still be updated after
             // ResponseContext is created.
+            Packet reply = (fiber.getPacket() == null) ? packet : fiber.getPacket();
             receiver.setResponseContext(new ResponseContext(reply));
 
             pool.recycle(tube);
