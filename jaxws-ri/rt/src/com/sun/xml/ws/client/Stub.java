@@ -189,6 +189,10 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
             packet.proxy = this;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
+            
+            // Spec is not clear on if ReferenceParameters are to be added when addressing is not enabled,
+            // but the EPR has ReferenceParameters.
+            // Current approach: Add ReferenceParameters only if addressing enabled.
             if (AddressingVersion.isEnabled(binding)) {
                 if(endpointReference!=null)
                     endpointReference.addReferenceParameters(packet.getMessage().getHeaders());
