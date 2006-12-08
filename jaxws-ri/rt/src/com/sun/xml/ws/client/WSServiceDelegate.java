@@ -276,12 +276,11 @@ public class WSServiceDelegate extends WSService {
         return getPort(portName, portInterface, EMPTY_FEATURES);
     }
 
-    //milestone 2
     public <T> T getPort(QName portName, Class<T> portInterface, WebServiceFeature... features) {
         if (portName == null || portInterface == null)
             throw new IllegalArgumentException();
         addSEI(portName, portInterface);
-        return createEndpointIFBaseProxy(null, portName, portInterface, features);
+        return getPort(wsdlService.get(portName).getEPR(),portName,portInterface,features);
     }
 
     public <T> T getPort(EndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
@@ -289,25 +288,27 @@ public class WSServiceDelegate extends WSService {
     }
 
     public <T> T getPort(WSEndpointReference wsepr, Class<T> portInterface, WebServiceFeature... features) {
-        //get the port specified in EPR
+        //get the portType from SEI, so that it can be used if EPR does n't have endpointName
         QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
-        QName portName = null;
-        if(wsepr != null) {
-            //if port name is not specified in EPR, it will use portTypeName to get it from the WSDL model.
-            portName = getPortNameFromEPR(wsepr,portTypeName);
-        } else {
-            //get the first port corresponding to the SEI
-            WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
-            if (port == null)
-                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
-            portName = port.getName();
-        }
+        //if port name is not specified in EPR, it will use portTypeName to get it from the WSDL model.
+        QName portName = getPortNameFromEPR(wsepr, portTypeName);
+        return getPort(wsepr,portName,portInterface,features);
+    }
+
+    private <T> T getPort(WSEndpointReference wsepr, QName portName, Class<T> portInterface,
+                          WebServiceFeature... features) {
         addSEI(portName, portInterface);
         return createEndpointIFBaseProxy(wsepr,portName,portInterface,features);
     }
-
     public <T> T getPort(Class<T> portInterface, WebServiceFeature... features) {
-        return getPort((EndpointReference)null,portInterface,features);
+        //get the portType from SEI
+        QName portTypeName = RuntimeModeler.getPortTypeName(portInterface);
+        //get the first port corresponding to the SEI
+        WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
+        if (port == null)
+                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
+        QName portName = port.getName();
+        return getPort(portName, portInterface,features);
     }
 
     public <T> T getPort(Class<T> portInterface) throws WebServiceException {
