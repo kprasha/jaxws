@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
+import com.sun.xml.ws.addressing.W3CAddressingConstants;
 import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
@@ -73,6 +74,9 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     private QName serviceName;
     private QName portName;
 
+    private enum EPR_ADDRESS_STATE {IN, OUT, DONE}
+    private EPR_ADDRESS_STATE eprAddressState = EPR_ADDRESS_STATE.OUT;
+
     /**
      * Creates a {@link WSDLPatcher} for patching WSDL.
      *
@@ -81,9 +85,8 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      *      to check other {@link SDDocument}s. Must not be null.
      * @param current
      *      The document that we are patching. Must not be null.
-     * @param serviceAddress
-     *      The address of the service, such as "http://host:port/context/"
-     *      Must not be null.
+     * @param portAddressResolver
+     *      address of the endpoint is resolved using this resolver.
      * @param resolver
      *      Consulted to generate references among  {@link SDDocument}s.
      *      Must not be null.
@@ -137,6 +140,9 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
 
     /**
      * Writes out an {@code i}-th attribute but with a different value.
+     * @param i attribute index
+     * @param value attribute value
+     * @throws XMLStreamException when an error encountered while writing attribute
      */
     private void writeAttribute(int i, String value) throws XMLStreamException {
         String nsUri = in.getAttributeNamespace(i);
@@ -168,13 +174,43 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
             if (value != null) {
                 portName = new QName(targetNamespace,value);
             }
+        } else if (name.equals(W3CAddressingConstants.WSA_ADDRESS_QNAME)) {
+            eprAddressState = EPR_ADDRESS_STATE.IN;
         }
         super.handleStartElement();
+    }
+
+    @Override
+    protected void handleEndElement() throws XMLStreamException {
+        QName name = in.getName();
+        if (name.equals(W3CAddressingConstants.WSA_ADDRESS_QNAME)) {
+            eprAddressState = EPR_ADDRESS_STATE.OUT;
+        }
+        super.handleEndElement();
+    }
+
+    @Override
+    protected void handleCharacters() throws XMLStreamException {
+        // handleCharacters() may be called multiple times. To take care of this,
+        // EPR_ADDRESS_STATE is used.
+        if (eprAddressState == EPR_ADDRESS_STATE.IN) {
+            String value = getAddressLocation();
+            if (value != null) {
+                logger.fine("Fixing EPR Address for service:"+serviceName+ " port:"+portName
+                            + " address with "+value);
+                out.writeCharacters(value);
+                eprAddressState = EPR_ADDRESS_STATE.DONE;
+            }
+        }
+        if (eprAddressState != EPR_ADDRESS_STATE.DONE) {
+            super.handleCharacters();
+        }
     }
 
     /**
      * Returns the location to be placed into the generated document.
      *
+     * @param relPath relative URI to be resolved
      * @return
      *      null to leave it to the "implicit reference".
      */
@@ -197,6 +233,8 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     /**
      * For the given service, port names it matches the correct endpoint and
      * reutrns its endpoint address
+     *
+     * @return returns the resolved endpoint address
      */
     private String getAddressLocation() {
         WSDLPort port = endpoint.getPort();
