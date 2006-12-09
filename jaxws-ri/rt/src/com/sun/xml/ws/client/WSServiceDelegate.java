@@ -70,6 +70,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
+import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.handler.HandlerResolver;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -341,7 +342,7 @@ public class WSServiceDelegate extends WSService {
     public <T> Dispatch<T> createDispatch(QName portName, Class<T> aClass, Service.Mode mode, WebServiceFeature... features) {
         WebServiceFeatureList featureList =  new WebServiceFeatureList(features);
         WSEndpointReference wsepr = null;
-        if(featureList.isEnabled(RespectBindingFeature.class) && wsdlService != null && wsdlService.get(portName) != null) {
+        if(featureList.isEnabled(AddressingFeature.class) && wsdlService != null && wsdlService.get(portName) != null) {
             wsepr = wsdlService.get(portName).getEPR();
         }
         return createDispatch(portName, aClass, mode, features, wsepr);
@@ -429,7 +430,7 @@ public class WSServiceDelegate extends WSService {
     public Dispatch<Object> createDispatch(QName portName, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... webServiceFeatures) {
         WebServiceFeatureList featureList =  new WebServiceFeatureList(webServiceFeatures);
         WSEndpointReference wsepr = null;
-        if(featureList.isEnabled(RespectBindingFeature.class) && wsdlService != null && wsdlService.get(portName) != null) {
+        if(featureList.isEnabled(AddressingFeature.class) && wsdlService != null && wsdlService.get(portName) != null) {
             wsepr = wsdlService.get(portName).getEPR();
         }
         return createDispatch(portName, jaxbContext, mode, webServiceFeatures, wsepr );
