@@ -26,17 +26,12 @@ final class HttpResponseProperties extends PropertySet {
 
     @Property(MessageContext.HTTP_RESPONSE_HEADERS)
     public Map<String, List<String>> getResponseHeaders() {
-        return deferedCon.getConnection().getHeaderFields();
+        return deferedCon.getHeaders();
     }
 
     @Property(MessageContext.HTTP_RESPONSE_CODE)
-    public int getResponseCode() {        
-        try {
-            return deferedCon.getConnection().getResponseCode();
-        } catch (IOException e) {
-            // by this time the connection should have been complete, so this is not possible
-            throw new AssertionError(e);
-        }
+    public int getResponseCode() {
+        return deferedCon.statusCode;
     }
 
     /**
