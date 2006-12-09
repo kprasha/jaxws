@@ -68,11 +68,7 @@ import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -194,10 +190,52 @@ public class EndpointFactory {
         if (processHandlerAnnotation) {
             processHandlerAnnotation(binding, implType, serviceName, portName);
         }
-
+        // Selects only required metadata for this endpoint from the passed-in metadata
+        if (primaryDoc != null) {
+            docList = findMetadataClosure(primaryDoc, docList);
+        }
         ServiceDefinitionImpl serviceDefiniton = (primaryDoc != null) ? new ServiceDefinitionImpl(docList, primaryDoc) : null;
 
         return new WSEndpointImpl<T>(serviceName, portName, binding,container,seiModel,wsdlPort,implType, serviceDefiniton,terminal, isTransportSynchronous);
+    }
+
+    /**
+     * Goes through the original metadata documents and collects the required ones.
+     * This done traversing from primary WSDL and its imports until it builds a
+     * complete set of documents(transitive closure) for the endpoint.
+     *
+     * @param primaryDoc primary WSDL doc
+     * @param docList complete metadata
+     * @return new metadata that doesn't contain extraneous documnets.
+     */
+    private static List<SDDocumentImpl> findMetadataClosure(SDDocumentImpl primaryDoc, List<SDDocumentImpl> docList) {
+        // create a map for old metadata
+        Map<URL, SDDocumentImpl> oldMap = new HashMap<URL, SDDocumentImpl>();
+        for(SDDocumentImpl doc : docList) {
+            oldMap.put(doc.getSystemId(), doc);
+        }
+        // create a map for new metadata
+        Map<URL, SDDocumentImpl> newMap = new HashMap<URL, SDDocumentImpl>();
+        newMap.put(primaryDoc.getSystemId(), primaryDoc);
+
+        List<URL> remaining = new ArrayList<URL>();
+        remaining.addAll(primaryDoc.getImports());
+        while(!remaining.isEmpty()) {
+            URL url = remaining.remove(0);
+            SDDocumentImpl doc = oldMap.get(url);
+            if (doc == null) {
+                // old metadata doesn't have this imported doc, may be external
+                continue;
+            }
+            // Check if new metadata already contains this doc
+            if (!newMap.containsKey(url)) {
+                newMap.put(url, doc);
+                remaining.addAll(doc.getImports());
+            }
+        }
+        List<SDDocumentImpl> newMetadata = new ArrayList<SDDocumentImpl>();
+        newMetadata.addAll(newMap.values());
+        return newMetadata;
     }
 
     private static <T> void processHandlerAnnotation(WSBinding binding, Class<T> implType, QName serviceName, QName portName) {
