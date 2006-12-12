@@ -73,7 +73,7 @@ public class ProviderImpl extends Provider {
     @Override
     public Endpoint createEndpoint(String bindingId, Object implementor) {
         return new EndpointImpl(
-            (bindingId == null) ? BindingID.SOAP11_HTTP : BindingID.parse(bindingId),
+            (bindingId != null) ? BindingID.parse(bindingId) : BindingID.parse(implementor.getClass()),
             implementor);
     }
 
