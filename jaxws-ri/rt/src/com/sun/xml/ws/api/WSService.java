@@ -25,10 +25,16 @@ package com.sun.xml.ws.api;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.client.WSServiceDelegate;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Dispatch;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
+import javax.xml.ws.Service.Mode;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.spi.ServiceDelegate;
+import java.net.URL;
 
 /**
  * JAX-WS implementation of {@link ServiceDelegate}.
@@ -58,4 +64,50 @@ public abstract class WSService extends ServiceDelegate {
      * but takes {@link WSEndpointReference}. 
      */
     public abstract <T> T getPort(WSEndpointReference epr, Class<T> portInterface, WebServiceFeature... features);
+
+    /**
+     * Works like {@link #createDispatch(EndpointReference, Class, Mode, WebServiceFeature[])}
+     * but it takes the port name separately, so that EPR without embedded metadata can be used.
+     */
+    public abstract <T> Dispatch<T> createDispatch(QName portName, WSEndpointReference wsepr, Class<T> aClass, Service.Mode mode, WebServiceFeature... features);
+
+    /**
+     * Works like {@link #createDispatch(EndpointReference, JAXBContext, Mode, WebServiceFeature[])}
+     * but it takes the port name separately, so that EPR without embedded metadata can be used.
+     */
+    public abstract Dispatch<Object> createDispatch(QName portName, WSEndpointReference wsepr, JAXBContext jaxbContext, Service.Mode mode, WebServiceFeature... features);
+
+    /**
+     * Create a <code>Service</code> instance.
+     *
+     * The specified WSDL document location and service qualified name MUST
+     * uniquely identify a <code>wsdl:service</code> element.
+     *
+     * @param wsdlDocumentLocation URL for the WSDL document location
+     *                             for the service
+     * @param serviceName QName for the service
+     * @throws WebServiceException If any error in creation of the
+     *                    specified service.
+     **/
+    public static WSService create( URL wsdlDocumentLocation, QName serviceName) {
+        return new WSServiceDelegate(wsdlDocumentLocation,serviceName,Service.class);
+    }
+
+    /**
+     * Create a <code>Service</code> instance.
+     *
+     * @param serviceName QName for the service
+     * @throws WebServiceException If any error in creation of the
+     *                    specified service
+     */
+    public static WSService create(QName serviceName) {
+        return create(null,serviceName);
+    }
+
+    /**
+     * Creates a service with a dummy service name.
+     */
+    public static WSService create() {
+        return create(null,new QName(WSService.class.getName(),"dummy"));
+    }
 }
