@@ -51,6 +51,9 @@ import org.jvnet.fastinfoset.FastInfosetSource;
  * @author Paul Sandoz
  */
 public class FastInfosetCodec implements Codec {
+    private static final int DEFAULT_INDEXED_STRING_SIZE_LIMIT = 32;
+    private static final int DEFAULT_INDEXED_STRING_MEMORY_LIMIT = 4 * 1024 * 1024; //4M limit
+    
     private StAXDocumentParser _parser;
     
     private StAXDocumentSerializer _serializer;
@@ -155,6 +158,19 @@ public class FastInfosetCodec implements Codec {
      * @return a new {@link StAXDocumentSerializer} instance.
      */ 
     /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out, boolean retainState) {        
+        return createNewStreamWriter(out, retainState, DEFAULT_INDEXED_STRING_SIZE_LIMIT, DEFAULT_INDEXED_STRING_MEMORY_LIMIT);
+    }
+    
+    /**
+     * Create a new (@link StAXDocumentSerializer} instance.
+     *
+     * @param in the OutputStream to serialize to.
+     * @param retainState if true the serializer should retain the state of
+     *        vocabulary tables for multiple serializations.
+     * @return a new {@link StAXDocumentSerializer} instance.
+     */ 
+    /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out, 
+            boolean retainState, int indexedStringSizeLimit, int stringsMemoryLimit) {
         StAXDocumentSerializer serializer = new StAXDocumentSerializer(out);
         if (retainState) {
             /**
@@ -165,10 +181,14 @@ public class FastInfosetCodec implements Codec {
              */
             SerializerVocabulary vocabulary = new SerializerVocabulary();
             serializer.setVocabulary(vocabulary);
+            serializer.setAttributeValueSizeLimit(indexedStringSizeLimit);
+            serializer.setCharacterContentChunkSizeLimit(indexedStringSizeLimit);
+            serializer.setAttributeValueMapMemoryLimit(stringsMemoryLimit);
+            serializer.setCharacterContentChunkMapMemoryLimit(stringsMemoryLimit);
         }
         return serializer;
     }
-    
+
     /**
      * Create a new (@link StAXDocumentParser} instance.
      *
