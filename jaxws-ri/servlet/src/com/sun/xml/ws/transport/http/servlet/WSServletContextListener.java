@@ -22,7 +22,10 @@
 
 package com.sun.xml.ws.transport.http.servlet;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.Module;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.transport.http.HttpAdapter;
@@ -34,6 +37,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.xml.ws.WebServiceException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -110,6 +114,14 @@ public final class WSServletContextListener
      */
     private static class ServletContainer extends Container {
         private final ServletContext servletContext;
+
+        private final Module module = new Module() {
+            private final List<BoundEndpoint> endpoints = new ArrayList<BoundEndpoint>();
+
+            public @NotNull List<BoundEndpoint> getBoundEndpoints() {
+                return endpoints;
+            }
+        };
         
         ServletContainer(ServletContext servletContext) {
             this.servletContext = servletContext;
@@ -118,6 +130,9 @@ public final class WSServletContextListener
         public <T> T getSPI(Class<T> spiType) {
             if (spiType == ServletContext.class) {
                 return (T)servletContext;
+            }
+            if (spiType == Module.class) {
+                return spiType.cast(module);
             }
             return null;
         }
