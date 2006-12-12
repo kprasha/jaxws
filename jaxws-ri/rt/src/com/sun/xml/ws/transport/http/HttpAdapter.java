@@ -198,6 +198,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         String ct = con.getRequestHeader("Content-Type");
         InputStream in = con.getInput();
         Packet packet = new Packet();
+        //packet.wasTransportSecure = con.isSecure();
         packet.acceptableMimeTypes = con.getRequestHeader("Accept");
         packet.addSatellite(con);
         packet.transportBackChannel = new Oneway(con);
@@ -209,7 +210,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             dump(buf, "HTTP request", con.getRequestHeaders());
             in = buf.newInputStream();
         }
-        if (!isContentTypeSupported(ct)) {
+        if (ct != null && !isContentTypeSupported(ct)) {
             con.setStatus(WSHTTPConnection.UNSUPPORTED_MEDIA);
             throw new ServerRtException(ServerMessages.UNSUPPORTED_CONTENT_TYPE(ct));
         }
