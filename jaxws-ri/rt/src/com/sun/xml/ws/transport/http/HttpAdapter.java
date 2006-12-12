@@ -198,7 +198,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         String ct = con.getRequestHeader("Content-Type");
         InputStream in = con.getInput();
         Packet packet = new Packet();
-        //packet.wasTransportSecure = con.isSecure();
+        packet.wasTransportSecure = con.isSecure();
         packet.acceptableMimeTypes = con.getRequestHeader("Accept");
         packet.addSatellite(con);
         packet.transportBackChannel = new Oneway(con);

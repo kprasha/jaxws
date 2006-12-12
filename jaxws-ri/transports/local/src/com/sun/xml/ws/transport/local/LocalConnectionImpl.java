@@ -111,6 +111,11 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         return "POST";   // not really supported
     }
 
+    @Override
+    public boolean isSecure() {
+        return false;   // not really supported
+    }
+
     @Property(MessageContext.QUERY_STRING)
     public String getQueryString() {
         return null;   // not really supported

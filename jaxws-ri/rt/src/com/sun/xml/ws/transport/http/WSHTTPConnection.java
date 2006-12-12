@@ -204,6 +204,14 @@ public abstract class WSHTTPConnection extends PropertySet {
      */
     public abstract @Nullable String getPathInfo();
 
+    /**
+     * Whether connection is HTTPS or not
+     *
+     * @return if the received request is on HTTPS, return true
+     *         else false
+     */
+    public abstract boolean isSecure();
+
     private boolean closed;
 
     /**

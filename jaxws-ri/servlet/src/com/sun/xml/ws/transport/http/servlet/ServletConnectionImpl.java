@@ -182,6 +182,11 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
+    public boolean isSecure() {
+        return request.getScheme().equals("https");
+    }
+
+    @Override
     public String getRequestHeader(String headerName) {
         return request.getHeader(headerName);
     }

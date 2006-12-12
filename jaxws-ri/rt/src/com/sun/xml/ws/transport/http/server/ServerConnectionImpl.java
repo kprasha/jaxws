@@ -25,6 +25,7 @@ package com.sun.xml.ws.transport.http.server;
 import com.sun.istack.NotNull;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpsExchange;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
@@ -144,6 +145,11 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
             return eprAddress+"?wsdl";
         else
             return null;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return (httpExchange instanceof HttpsExchange);
     }
 
     @Override
