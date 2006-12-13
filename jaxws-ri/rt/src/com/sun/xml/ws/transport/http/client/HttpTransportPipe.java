@@ -74,7 +74,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     }
 
     public Packet process(Packet request) {
-        HttpClientTransport con = null;
+        HttpClientTransport con;
         try {
             // get transport headers from message
             Map<String, List<String>> reqHeaders = (Map<String, List<String>>) request.invocationProperties.get(MessageContext.HTTP_REQUEST_HEADERS);
@@ -136,6 +136,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             // or is acceptable if an Accept header was used
             Packet reply = request.createClientResponse(null);
             //reply.addSatellite(new HttpResponseProperties(con));
+            reply.wasTransportSecure = con.isSecure();
             InputStream response = con.getInput();
             if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();

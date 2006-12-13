@@ -76,6 +76,7 @@ final class HttpClientTransport {
     private Map<String, List<String>> respHeaders = null;
 
     private OutputStream outputStream;
+    private boolean https;
 
     public HttpClientTransport(Packet packet, Map<String,List<String>> reqHeaders) {
         endpoint = packet.endpointAddress;
@@ -314,6 +315,9 @@ final class HttpClientTransport {
         checkEndpoints();
 
         HttpURLConnection httpConnection = createConnection();
+        if (httpConnection instanceof HttpsURLConnection) {
+            https = true;
+        }
 
         if (!verification) {
             // for https hostname verification  - turn off by default
@@ -364,6 +368,10 @@ final class HttpClientTransport {
         }
 
         return httpConnection;
+    }
+
+    public boolean isSecure() {
+        return https;
     }
 
     private HttpURLConnection createConnection() throws IOException {
