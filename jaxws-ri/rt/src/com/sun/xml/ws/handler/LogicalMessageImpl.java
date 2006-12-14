@@ -119,8 +119,11 @@ class LogicalMessageImpl implements LogicalMessage {
      */
     public Object getPayload(JAXBContext context) {
         try {
+            Source payloadSrc = getPayload();
+            if(payloadSrc == null)
+                return null; 
             Unmarshaller unmarshaller = context.createUnmarshaller();
-            return unmarshaller.unmarshal(getPayload());
+            return unmarshaller.unmarshal(payloadSrc);
         } catch (JAXBException e){
             throw new WebServiceException(e);
         }
