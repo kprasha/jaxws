@@ -26,6 +26,7 @@
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
+    <property name="as.lib.endorsed.dir" value="${as.home}/lib/endorsed"/>
     <property name="as.bin.home" value="${as.home}/bin"/>
     <property name="domain" value="domain1"/>
     <property name="backup.dir" value="${as.home}/.jaxws21ea3"/>
@@ -43,6 +44,7 @@
 
     <target name="init">
         <mkdir dir="${backup.dir}"/>
+        <mkdir dir="${as.lib.endorsed.dir}"/>
     </target>
 
     <target name="install-AS8.X">
@@ -56,8 +58,15 @@
         <copy toDir="${as.lib.home}" overwrite="true">
             <fileset dir="lib">
                 <include name="*.jar"/>
+                <exclude name="*api*.jar"/>
                 <exclude name="activation.jar"/>
                 <exclude name="relaxngDatatype.jar"/>
+            </fileset>
+        </copy>
+
+        <copy toDir="${as.lib.endorsed.dir}" overwrite="true">
+            <fileset dir="lib">
+                <include name="*api*.jar"/>
             </fileset>
         </copy>
         
@@ -72,17 +81,17 @@
 
     <target name="install-glassfish">
         <echo message="Installing JAX-WS 2.1 EA3 on ${as.home} ..." />
-        <copy toDir="${backup.dir}">
-            <fileset dir="${as.lib.home}">
-                <include name="saaj-*.jar"/>
-            </fileset>
-        </copy>
 
         <copy toDir="${as.lib.home}" overwrite="true">
             <fileset dir="lib">
                 <include name="*.jar"/>
-                <exclude name="activation.jar"/>
-                <exclude name="relaxngDatatype.jar"/>
+                <exclude name="*api*.jar"/>
+            </fileset>
+        </copy>
+
+        <copy toDir="${as.lib.endorsed.dir}" overwrite="true">
+            <fileset dir="lib">
+                <include name="*api*.jar"/>
             </fileset>
         </copy>
         
@@ -124,7 +133,7 @@
         <antcall target="create.classpath.prefix-8.X" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-api.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>       
         </replace>
     </target>
 
@@ -136,7 +145,7 @@
         <antcall target="create.classpath.prefix" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-api.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-api.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>
         </replace>
     </target>
 
