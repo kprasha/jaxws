@@ -286,7 +286,10 @@ public class WSServiceDelegate extends WSService {
     public <T> T getPort(QName portName, Class<T> portInterface, WebServiceFeature... features) {
         if (portName == null || portInterface == null)
             throw new IllegalArgumentException();
-        return getPort(wsdlService.get(portName).getEPR(),portName,portInterface,features);
+        //needed for tck regression - nonexistant portname is used in the getPort() method invoked.
+        //Expect WebServiceException, get NPE. 
+        WSDLPortImpl portModel = getPortModel(portName);
+        return getPort(portModel.getEPR(),portName,portInterface,features);
     }
 
     public <T> T getPort(EndpointReference epr, Class<T> portInterface, WebServiceFeature... features) {
