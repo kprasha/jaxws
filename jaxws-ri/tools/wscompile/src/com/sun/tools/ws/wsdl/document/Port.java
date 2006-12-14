@@ -25,6 +25,9 @@ package com.sun.tools.ws.wsdl.document;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.*;
+import com.sun.tools.ws.resources.WsdlMessages;
+import com.sun.tools.ws.wscompile.AbortException;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
@@ -36,8 +39,8 @@ import javax.xml.namespace.QName;
  */
 public class Port extends GlobalEntity implements TWSDLExtensible {
 
-    public Port(Defining defining, Locator locator) {
-        super(defining, locator);
+    public Port(Defining defining, Locator locator, ErrorReceiver errReceiver) {
+        super(defining, locator, errReceiver);
         _helper = new ExtensibilityHelper();
     }
 
@@ -58,7 +61,12 @@ public class Port extends GlobalEntity implements TWSDLExtensible {
     }
 
     public Binding resolveBinding(AbstractDocument document) {
-        return (Binding) document.find(Kinds.BINDING, _binding);
+        try{
+            return (Binding) document.find(Kinds.BINDING, _binding);
+        } catch (NoSuchEntityException e) {
+            errorReceiver.error(getLocator(), WsdlMessages.ENTITY_NOT_FOUND_BINDING(_binding, new QName(getNamespaceURI(), getName())));
+            throw new AbortException();
+        }
     }
 
     public Kind getKind() {

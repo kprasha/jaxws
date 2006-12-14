@@ -25,6 +25,7 @@ package com.sun.tools.ws.wsdl.document;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.*;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
@@ -37,8 +38,8 @@ import java.util.*;
  */
 public class PortType extends GlobalEntity implements TWSDLExtensible {
 
-    public PortType(Defining defining, Locator locator) {
-        super(defining, locator);
+    public PortType(Defining defining, Locator locator, ErrorReceiver errReceiver) {
+        super(defining, locator, errReceiver);
         _operations = new ArrayList();
         _operationKeys = new HashSet();
         _helper = new ExtensibilityHelper();

@@ -397,7 +397,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        PortType portType = new PortType(definitions, forest.locatorTable.getStartLocation(e));
+        PortType portType = new PortType(definitions, forest.locatorTable.getStartLocation(e), errReceiver);
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         portType.setName(name);
 
@@ -694,7 +694,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Binding binding = new Binding(definitions, forest.locatorTable.getStartLocation(e));
+        Binding binding = new Binding(definitions, forest.locatorTable.getStartLocation(e), errReceiver);
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         binding.setName(name);
         String typeAttr = Util.getRequiredAttribute(e, Constants.ATTR_TYPE);
@@ -953,7 +953,7 @@ public class WSDLParser {
         Element e) {
         context.push();
         context.registerNamespaces(e);
-        Service service = new Service(definitions, forest.locatorTable.getStartLocation(e));
+        Service service = new Service(definitions, forest.locatorTable.getStartLocation(e), errReceiver);
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         service.setName(name);
 
@@ -995,7 +995,7 @@ public class WSDLParser {
         context.push();
         context.registerNamespaces(e);
 
-        Port port = new Port(definitions, forest.locatorTable.getStartLocation(e));
+        Port port = new Port(definitions, forest.locatorTable.getStartLocation(e), errReceiver);
         String name = Util.getRequiredAttribute(e, Constants.ATTR_NAME);
         port.setName(name);
 

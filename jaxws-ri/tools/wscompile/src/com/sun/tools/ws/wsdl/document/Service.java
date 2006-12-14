@@ -25,6 +25,7 @@ package com.sun.tools.ws.wsdl.document;
 import com.sun.tools.ws.api.wsdl.TWSDLExtensible;
 import com.sun.tools.ws.api.wsdl.TWSDLExtension;
 import com.sun.tools.ws.wsdl.framework.*;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
@@ -39,8 +40,8 @@ import java.util.List;
  */
 public class Service extends GlobalEntity implements TWSDLExtensible {
 
-    public Service(Defining defining, Locator locator) {
-        super(defining, locator);
+    public Service(Defining defining, Locator locator, ErrorReceiver errReceiver) {
+        super(defining, locator, errReceiver);
         _ports = new ArrayList();
         _helper = new ExtensibilityHelper();
     }

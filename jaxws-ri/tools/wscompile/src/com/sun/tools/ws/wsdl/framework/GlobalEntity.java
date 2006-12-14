@@ -23,6 +23,7 @@
 package com.sun.tools.ws.wsdl.framework;
 
 import org.xml.sax.Locator;
+import com.sun.tools.ws.wscompile.ErrorReceiver;
 
 /**
  * An entity that can be defined in a target namespace.
@@ -31,9 +32,10 @@ import org.xml.sax.Locator;
  */
 public abstract class GlobalEntity extends Entity implements GloballyKnown {
 
-    public GlobalEntity(Defining defining, Locator locator) {
+    public GlobalEntity(Defining defining, Locator locator, ErrorReceiver errorReceiver) {
         super(locator);
         _defining = defining;
+        this.errorReceiver = errorReceiver;
     }
 
     public String getName() {

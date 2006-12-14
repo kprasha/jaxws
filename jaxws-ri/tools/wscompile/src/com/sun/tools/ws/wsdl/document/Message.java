@@ -39,8 +39,7 @@ import java.util.*;
 public class Message extends GlobalEntity {
 
     public Message(Defining defining, Locator locator, ErrorReceiver errReceiver) {
-        super(defining, locator);
-        setErrorReceiver(errReceiver);
+        super(defining, locator, errReceiver);
         _parts = new ArrayList<MessagePart>();
         _partsByName = new HashMap<String, MessagePart>();
     }
