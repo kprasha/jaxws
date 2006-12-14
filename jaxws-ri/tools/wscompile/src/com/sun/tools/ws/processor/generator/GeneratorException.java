@@ -38,7 +38,7 @@ public class GeneratorException extends ProcessorException {
         super(throwable);
     }
 
-    public String getResourceBundleName() {
+    public String getDefaultResourceBundleName() {
         return "com.sun.tools.ws.resources.generator";
     }
 }

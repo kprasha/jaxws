@@ -46,7 +46,7 @@ public class RuntimeModelerException extends JAXWSExceptionBase {
         super("nestedModelerError", arg);
     }
 
-    public String getResourceBundleName() {
+    public String getDefaultResourceBundleName() {
         return "com.sun.xml.ws.resources.modeler";
     }
 

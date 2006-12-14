@@ -37,7 +37,7 @@ public class WSDLParseException extends JAXWSExceptionBase {
         super(throwable);
     }
 
-    public String getResourceBundleName() {
+    public String getDefaultResourceBundleName() {
         return "com.sun.tools.ws.resources.util";
     }
 }

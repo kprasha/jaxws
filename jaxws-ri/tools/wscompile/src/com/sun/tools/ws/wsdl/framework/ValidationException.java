@@ -39,7 +39,7 @@ public class ValidationException extends JAXWSExceptionBase {
         super(throwable);
     }
 
-    public String getResourceBundleName() {
+    public String getDefaultResourceBundleName() {
         return "com.sun.tools.ws.resources.wsdl";
     }
 }

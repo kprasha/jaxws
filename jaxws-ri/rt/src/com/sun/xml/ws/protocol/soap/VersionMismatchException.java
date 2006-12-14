@@ -1,10 +1,10 @@
 package com.sun.xml.ws.protocol.soap;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
+import com.sun.xml.ws.encoding.soap.SOAPConstants;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 
 import javax.xml.namespace.QName;
@@ -25,7 +25,7 @@ public class VersionMismatchException extends ExceptionHasMessage {
         this.soapVersion = soapVersion;
     }
 
-    public String getResourceBundleName() {
+    public String getDefaultResourceBundleName() {
         return "com.sun.xml.ws.resources.soap";
     }
 

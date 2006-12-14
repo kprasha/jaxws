@@ -24,32 +24,30 @@ package com.sun.xml.ws.transport.http.client;
 
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.client.BindingProviderProperties;
 import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
-import com.sun.xml.ws.client.BindingProviderProperties;
+import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.ws.BindingProvider;
 import static javax.xml.ws.BindingProvider.SESSION_MAINTAIN_PROPERTY;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-import java.util.Set;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.soap.SOAPBinding;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.handler.MessageContext;
-import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 /**
  * TODO: this class seems to be pointless. Just merge it with {@link HttpTransportPipe}.
@@ -101,8 +99,8 @@ final class HttpClientTransport {
             connectForResponse();
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new ClientTransportException("http.client.failed",ex);
+            throw new ClientTransportException(
+                ClientMessages.localizableHTTP_CLIENT_FAILED(ex),ex);
         }
 
         return outputStream;
@@ -129,15 +127,14 @@ final class HttpClientTransport {
                 || (isFailure
                 && statusCode != HttpURLConnection.HTTP_INTERNAL_ERROR)) {
                 try {
-                    throw new ClientTransportException("http.status.code",
-                        statusCode, httpConnection.getResponseMessage());
+                    throw new ClientTransportException(ClientMessages.localizableHTTP_STATUS_CODE(
+                        statusCode, httpConnection.getResponseMessage()));
                 } catch (IOException ex) {
-                    throw new ClientTransportException("http.status.code",
-                        statusCode, ex);
+                    throw new ClientTransportException(ClientMessages.localizableHTTP_STATUS_CODE(
+                        statusCode, ex));
                 }
             }
-            throw new ClientTransportException("http.client.failed",
-                e.getMessage());
+            throw new ClientTransportException(ClientMessages.localizableHTTP_CLIENT_FAILED(e),e);
         }
         httpConnection = null;
 
@@ -209,29 +206,28 @@ final class HttpClientTransport {
                     == HttpURLConnection.HTTP_UNAUTHORIZED) {
 
                 // no soap message returned, so skip reading message and throw exception
-                throw new ClientTransportException("http.client.unauthorized",
-                    httpConnection.getResponseMessage());
+                throw new ClientTransportException(
+                    ClientMessages.localizableHTTP_CLIENT_UNAUTHORIZED(httpConnection.getResponseMessage()));
             } else if (
                 httpConnection.getResponseCode()
                     == HttpURLConnection.HTTP_NOT_FOUND) {
 
                 // no message returned, so skip reading message and throw exception
-                throw new ClientTransportException("http.not.found",
-                    httpConnection.getResponseMessage());
+                throw new ClientTransportException(
+                    ClientMessages.localizableHTTP_NOT_FOUND(httpConnection.getResponseMessage()));
             } else if (
                 (statusCode == HttpURLConnection.HTTP_MOVED_TEMP) ||
                     (statusCode == HttpURLConnection.HTTP_MOVED_PERM)) {
                 isFailure = true;
 
                 if (!redirect || (redirectCount <= 0)) {
-                    throw new ClientTransportException("http.status.code",
-                            statusCode,getStatusMessage(httpConnection));
+                    throw new ClientTransportException(
+                        ClientMessages.localizableHTTP_STATUS_CODE(statusCode,getStatusMessage()));
                 }
             } else if (
                 statusCode < 200 || (statusCode >= 303 && statusCode < 500)) {
-                throw new ClientTransportException("http.status.code",
-                    statusCode,
-                    getStatusMessage(httpConnection));
+                throw new ClientTransportException(
+                    ClientMessages.localizableHTTP_STATUS_CODE(statusCode,getStatusMessage()));
             } else if (statusCode >= 500) {
                 isFailure = true;
             }
@@ -249,8 +245,7 @@ final class HttpClientTransport {
         return isFailure;
     }
 
-    protected String getStatusMessage(HttpURLConnection httpConnection)
-        throws IOException {
+    private String getStatusMessage() throws IOException {
         int statusCode = httpConnection.getResponseCode();
         String message = httpConnection.getResponseMessage();
         if (statusCode == HttpURLConnection.HTTP_CREATED

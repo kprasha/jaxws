@@ -23,8 +23,6 @@
 package com.sun.xml.ws.transport.http.servlet;
 
 import com.sun.xml.ws.util.exception.JAXWSExceptionBase;
-import com.sun.xml.ws.util.localization.Localizable;
-import com.sun.xml.ws.server.*;
 
 /**
  *
@@ -39,7 +37,7 @@ final class WSServletException extends JAXWSExceptionBase {
         super(throwable);
     }
 
-    public String getResourceBundleName() {
+    public String getDefaultResourceBundleName() {
         return "com.sun.xml.ws.resources.wsservlet";
     }
 }

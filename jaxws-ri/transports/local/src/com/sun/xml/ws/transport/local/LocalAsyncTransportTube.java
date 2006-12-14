@@ -22,9 +22,13 @@
 package com.sun.xml.ws.transport.local;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.WSEndpoint;
