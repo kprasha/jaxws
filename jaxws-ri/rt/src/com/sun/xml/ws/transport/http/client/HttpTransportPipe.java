@@ -21,15 +21,20 @@
  */
 package com.sun.xml.ws.transport.http.client;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.istack.NotNull;
 
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
@@ -174,7 +179,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
         List<String> keys = headers.get("Content-type");
         if (keys == null) {
             //the response is invalid
-            throw new WebServiceException("No Content-Type in the header!");
+            throw new WebServiceException("No Content-type in the header!");
         }
         return keys.get(0);
     }
