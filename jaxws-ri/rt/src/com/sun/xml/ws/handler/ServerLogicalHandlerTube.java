@@ -154,10 +154,6 @@ public class ServerLogicalHandlerTube extends HandlerTube {
             //SERVER-SIDE
             handlerResult = processor.callHandlersRequest(HandlerProcessor.Direction.INBOUND, context, !isOneWay);
 
-        } catch (WebServiceException wse) {
-            remedyActionTaken = true;
-            //no rewrapping
-            throw wse;
         } catch (RuntimeException re) {
             remedyActionTaken = true;
             throw re;

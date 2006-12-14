@@ -135,8 +135,9 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
                 } else {
                     callHandleFault(context, getIndex() + 1, handlers.size() - 1);
                 }
+                return false;
             }
-            return false;
+            throw pe;
         } catch (RuntimeException re) {
             logger.log(Level.FINER, "exception in handler chain", re);
             throw re;

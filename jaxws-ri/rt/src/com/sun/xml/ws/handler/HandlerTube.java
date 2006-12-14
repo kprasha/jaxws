@@ -93,14 +93,14 @@ public abstract class HandlerTube extends AbstractFilterTubeImpl {
         setUpProcessor();
 
         MessageUpdatableContext context = getContext(packet);
+        boolean isOneWay = checkOneWay(packet);
         try {
-            boolean isOneWay = checkOneWay(packet);
             if (!isHandlerChainEmpty()) {
                 // Call handlers on Request
                 boolean handlerResult = callHandlersOnRequest(context, isOneWay);
                 //Update Packet with user modifications
                 context.updatePacket();
-                // the only case where no message is sent
+                // two-way case where no message is sent
                 if (!isOneWay && !handlerResult) {
                     return doReturnWith(packet);
                 }
@@ -108,6 +108,16 @@ public abstract class HandlerTube extends AbstractFilterTubeImpl {
             requestProcessingSucessful = true;
             // Call next Tube 
             return doInvoke(super.next, packet);
+        } catch (RuntimeException re) {
+            if(isOneWay) {
+                //Eat the exception, its already logged and close the transportBackChannel
+                if(packet.transportBackChannel != null ) {
+                    packet.transportBackChannel.close();
+                }
+                packet.setMessage(null);
+                return doReturnWith(packet);
+            } else
+                throw re;
         } finally {
             if(!requestProcessingSucessful) {
                 cleanUpState(context.getMessageContext());
