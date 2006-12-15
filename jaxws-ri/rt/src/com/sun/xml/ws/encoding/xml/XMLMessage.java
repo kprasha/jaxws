@@ -27,7 +27,12 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.ContentType;
 import com.sun.xml.messaging.saaj.packaging.mime.internet.MimeMultipart;
 import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.message.*;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.encoding.MimeMultipartParser;
@@ -413,18 +418,27 @@ public final class XMLMessage {
      */
     public static class UnknownContent extends AbstractMessageImpl implements MessageDataSource {
         private final DataSource ds;
-        private final HeaderList headerList = new HeaderList();
+        private final HeaderList headerList;
         
         public UnknownContent(final String ct, final InputStream in) {
-            super(SOAPVersion.SOAP_11);
-            ds = createDataSource(ct, in);
+            this(createDataSource(ct,in));
         }
         
         public UnknownContent(DataSource ds) {
             super(SOAPVersion.SOAP_11);
             this.ds = ds;
+            this.headerList = new HeaderList();
         }
-        
+
+        /**
+         * Copy constructor.
+         */
+        private UnknownContent(UnknownContent that) {
+            super(that.soapVersion);
+            this.ds = that.ds;
+            this.headerList = HeaderList.copy(that.headerList);
+        }
+
         public boolean hasUnconsumedDataSource() {
             return true;
         }
@@ -476,7 +490,7 @@ public final class XMLMessage {
         }
 
         public Message copy() {
-            throw new UnsupportedOperationException();
+            return new UnknownContent(this);
         }
 
     }
