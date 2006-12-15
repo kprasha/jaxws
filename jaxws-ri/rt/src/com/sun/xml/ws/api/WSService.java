@@ -34,7 +34,10 @@ import javax.xml.ws.Service.Mode;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.spi.ServiceDelegate;
+import java.lang.reflect.Field;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * JAX-WS implementation of {@link ServiceDelegate}.
@@ -109,5 +112,34 @@ public abstract class WSService extends ServiceDelegate {
      */
     public static WSService create() {
         return create(null,new QName(WSService.class.getName(),"dummy"));
+    }
+
+    /**
+     * Obtains the {@link WSService} that's encapsulated inside a {@link Service}.
+     *
+     * @throws IllegalArgumentException
+     *      if the given service object is not from the JAX-WS RI.
+     */
+    public static WSService unwrap(final Service svc) {
+        return AccessController.doPrivileged(new PrivilegedAction<WSService>() {
+            public WSService run() {
+                try {
+                    Field f = svc.getClass().getField("delegate");
+                    f.setAccessible(true);
+                    Object delegate = f.get(svc);
+                    if(!(delegate instanceof WSService))
+                        throw new IllegalArgumentException();
+                    return (WSService) delegate;
+                } catch (NoSuchFieldException e) {
+                    AssertionError x = new AssertionError("Unexpected service API implementation");
+                    x.initCause(e);
+                    throw x;
+                } catch (IllegalAccessException e) {
+                    IllegalAccessError x = new IllegalAccessError(e.getMessage());
+                    x.initCause(e);
+                    throw x;
+                }
+            }
+        });
     }
 }
