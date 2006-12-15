@@ -28,6 +28,7 @@ import com.sun.tools.ws.processor.model.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 /**
  * @author WS Development Team
@@ -96,5 +97,10 @@ public class JavaMethod {
         if (!exceptions.contains(exception)) {
             exceptions.add(exception);
         }
+    }
+
+    /** TODO: NB uses it, remove it once we expose it thru some API **/
+    public Iterator<String> getExceptions() {
+        return exceptions.iterator();
     }
 }
