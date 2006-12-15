@@ -71,15 +71,11 @@ public class SourceReaderFactory {
         }
     }
 
-    public static XMLStreamReader createSourceReader(Source source,
-        boolean rejectDTDs) 
-    {
+    public static XMLStreamReader createSourceReader(Source source, boolean rejectDTDs) {
         return createSourceReader(source, rejectDTDs, null);
     }
     
-    public static XMLStreamReader createSourceReader(Source source,
-        boolean rejectDTDs, String charsetName) 
-    {
+    public static XMLStreamReader createSourceReader(Source source, boolean rejectDTDs, String charsetName) {
         try {
             if (source instanceof StreamSource) {
                 StreamSource streamSource = (StreamSource) source;
