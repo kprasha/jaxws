@@ -380,7 +380,10 @@ public final class WSEndpointReference {
 
     /**
      * Converts from {@link EndpointReference}.
+     *
      * This handles null {@link EndpointReference} correctly.
+     * Call {@link #WSEndpointReference(EndpointReference)} directly
+     * if you know it's not null.
      */
     public static @Nullable
     WSEndpointReference create(@Nullable EndpointReference epr) {
