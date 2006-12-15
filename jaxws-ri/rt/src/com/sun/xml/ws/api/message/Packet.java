@@ -662,6 +662,9 @@ public final class Packet extends DistributedPropertySet {
         // wsa:Action
         hl.add(new StringHeader(av.actionTag, action));
 
+        //set the SOAPAction, as its got to be same as wsa:Action
+        responsePacket.soapAction = action;
+
         // wsa:MessageID
         hl.add(new StringHeader(av.messageIDTag, responsePacket.getMessage().getID(av, sv)));
 
