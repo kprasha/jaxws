@@ -318,6 +318,19 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
     }
 
     protected abstract void validateAction(Packet packet);
-    protected abstract void checkMandatoryHeaders(
-        Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo);
+    protected void checkMandatoryHeaders(
+        Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo) {
+        WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
+        // no need to check for for non-application messages
+        if (wbo == null)
+            return;
+        
+        // if no wsa:Action header is found
+        if (!foundAction)
+            throw new MapRequiredException(addressingVersion.actionTag);
+
+        // if no wsa:To header is found
+        if (!foundTo)
+            throw new MapRequiredException(addressingVersion.toTag);
+    }
 }

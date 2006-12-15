@@ -90,16 +90,12 @@ public final class WsaClientTube extends WsaTube {
 
     @Override
     protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo) {
-        // if no wsa:Action header is found
-        if (!foundAction)
-            throw new MapRequiredException(addressingVersion.actionTag);
-
+        super.checkMandatoryHeaders(packet, foundAction, foundTo, foundRelatesTo);
+        
         if(!foundRelatesTo)
             // RelatesTo required as per
             // Table 5-3 of http://www.w3.org/TR/2006/WD-ws-addr-wsdl-20060216/#wsdl11requestresponse
             throw new MapRequiredException(addressingVersion.relatesToTag);
 
-        // wsa:To is opional
-        // if not present, then anonymous value is assumed
     }
 }
