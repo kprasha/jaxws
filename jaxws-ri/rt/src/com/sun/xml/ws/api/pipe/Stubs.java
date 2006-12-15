@@ -128,7 +128,7 @@ public abstract class Stubs {
      * </pre>
      */
     public static Dispatch<Source> createSourceDispatch(QName portName, WSService owner, WSBinding binding, Service.Mode mode, Tube next, @Nullable WSEndpointReference epr) {
-        return new com.sun.xml.ws.client.dispatch.SourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
+        return DispatchImpl.createSourceDispatch(portName, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
     }
 
     /**

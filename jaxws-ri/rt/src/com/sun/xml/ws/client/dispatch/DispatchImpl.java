@@ -27,7 +27,6 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
@@ -41,7 +40,6 @@ import com.sun.xml.ws.client.AsyncResponseImpl;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContext;
 import com.sun.xml.ws.client.ResponseContextReceiver;
-import com.sun.xml.ws.client.ResponseImpl;
 import com.sun.xml.ws.client.Stub;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
@@ -53,17 +51,23 @@ import com.sun.xml.ws.resources.DispatchMessages;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Response;
 import javax.xml.ws.Service;
+import javax.xml.ws.Service.Mode;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
-import java.net.*;
+import javax.xml.ws.soap.SOAPFaultException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +76,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -443,4 +446,11 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
     static final String HTTP_REQUEST_METHOD_GET="GET";
     static final String HTTP_REQUEST_METHOD_POST="POST";
     static final String HTTP_REQUEST_METHOD_PUT="PUT";
+
+    public static Dispatch<Source> createSourceDispatch(QName port, Mode mode, WSServiceDelegate owner, Tube pipe, BindingImpl binding, WSEndpointReference epr) {
+        if(isXMLHttp(binding))
+            return new RESTSourceDispatch(port,mode,owner,pipe,binding,epr);
+        else
+            return new SOAPSourceDispatch(port,mode,owner,pipe,binding,epr);
+    }
 }
