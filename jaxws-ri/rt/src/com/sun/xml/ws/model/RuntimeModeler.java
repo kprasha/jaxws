@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.model.Parameter;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
@@ -1130,7 +1131,20 @@ public class RuntimeModeler {
             }
             javaMethod.addParameter(param);
         }
+        validateDocBare(javaMethod);        
         processExceptions(javaMethod, method);
+    }
+
+    private void validateDocBare(JavaMethodImpl javaMethod) {
+        int numInBodyBindings = 0;
+        for(Parameter param : javaMethod.getRequestParameters()){
+            if(param.getBinding().equals(ParameterBinding.BODY) && param.isIN()){
+                numInBodyBindings++;
+            }
+            if(numInBodyBindings > 1){
+                throw new RuntimeModelerException(ModelerMessages.localizableNOT_A_VALID_BARE_METHOD(portClass.getName(), javaMethod.getMethod().getName()));
+            }
+        }
     }
 
     private Class getAsyncReturnType(Method method, Class returnType) {
