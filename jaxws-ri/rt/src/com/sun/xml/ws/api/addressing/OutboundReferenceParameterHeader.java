@@ -207,7 +207,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
                 //check if prefix is declared before writing start element.
                 boolean prefixDeclared = isPrefixDeclared(prefix,namespaceURI);
                 super.writeStartElement(prefix, localName, namespaceURI);
-                if(!prefixDeclared)
+                if(!prefixDeclared && !prefix.equals(""))
                     super.writeNamespace(prefix,namespaceURI);
                 writeAddedAttribute();
             }
