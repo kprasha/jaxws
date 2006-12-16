@@ -29,6 +29,7 @@ import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.modeler.ModelerException;
 import com.sun.tools.ws.wscompile.WsgenOptions;
+import com.sun.xml.ws.util.localization.Localizable;
 
 import java.io.File;
 
@@ -56,5 +57,5 @@ public interface ModelBuilder {
     public void log(String msg);
 
     public void onError(String s);
-    public void onError(SourcePosition pos, String msg) throws ModelerException;
+    public void onError(SourcePosition pos, Localizable msg) throws ModelerException;
 }

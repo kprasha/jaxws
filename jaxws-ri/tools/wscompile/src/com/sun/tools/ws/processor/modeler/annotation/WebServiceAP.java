@@ -39,6 +39,8 @@ import com.sun.tools.ws.processor.modeler.ModelerException;
 import com.sun.tools.ws.processor.modeler.wsdl.ConsoleErrorReporter;
 import com.sun.tools.ws.resources.WebserviceapMessages;
 import com.sun.tools.ws.wscompile.*;
+import com.sun.xml.ws.util.localization.Localizable;
+import com.sun.xml.ws.util.localization.Localizer;
 import org.xml.sax.SAXParseException;
 
 import javax.jws.WebService;
@@ -210,13 +212,16 @@ public class WebServiceAP implements AnnotationProcessor, ModelBuilder, WebServi
         }
     }
 
-    public void onError(SourcePosition pos, String msg) throws ModelerException {
+    private final static Localizer localizer = new Localizer();
+
+    public void onError(SourcePosition pos, Localizable msg) throws ModelerException {
         if (messager != null) {
-            messager.printError(pos, msg);
+            messager.printError(pos, localizer.localize(msg));
         } else {
             throw new ModelerException(msg);
         }
     }
+
 
     public void onWarning(String message) {
         if (messager != null) {

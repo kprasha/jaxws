@@ -49,6 +49,12 @@ public abstract class JAXWSExceptionBase
         this.msg = new LocalizableImpl(key,fixNull(args),getDefaultResourceBundleName());
     }
 
+
+    protected JAXWSExceptionBase(String message) {
+        super(message);
+        msg=null;        
+    }
+
     private static Object[] fixNull(Object[] x) {
         if(x==null)     return new Object[0];
         else            return x;

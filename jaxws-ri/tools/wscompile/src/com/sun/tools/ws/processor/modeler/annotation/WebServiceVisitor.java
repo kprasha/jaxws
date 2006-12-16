@@ -35,6 +35,7 @@ import com.sun.tools.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.ws.wsdl.document.soap.SOAPUse;
 import com.sun.xml.ws.developer.Stateful;
 import com.sun.xml.ws.model.RuntimeModeler;
+import com.sun.xml.ws.util.localization.Localizable;
 
 import javax.jws.*;
 import javax.jws.soap.SOAPBinding;
@@ -93,7 +94,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             return;
         typeDecl = d;
         if (endpointInterfaceName != null && !endpointInterfaceName.equals(d.getQualifiedName())) {
-            builder.onError(d.getPosition(), WebserviceapMessages.WEBSERVICEAP_ENDPOINTINTERFACES_DO_NOT_MATCH(endpointInterfaceName, d.getQualifiedName()));
+            builder.onError(d.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ENDPOINTINTERFACES_DO_NOT_MATCH(endpointInterfaceName, d.getQualifiedName()));
         }
         verifySEIAnnotations(webService, d);
         endpointInterfaceName = d.getQualifiedName();
@@ -118,7 +119,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             SourcePosition pos = pos = d.getPosition();
             checkForInvalidImplAnnotation(d, SOAPBinding.class);
             if (webService.name().length() > 0)
-                annotationError(pos, WebserviceapMessages.WEBSERVICEAP_ENDPOINTINTEFACE_PLUS_ELEMENT("name"));
+                annotationError(pos, WebserviceapMessages.localizableWEBSERVICEAP_ENDPOINTINTEFACE_PLUS_ELEMENT("name"));
             endpointReferencesInterface = true;
             verifyImplAnnotations(d);
             inspectEndpointInterface(endpointInterfaceName, d);
@@ -135,13 +136,13 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     
     protected void verifySEIAnnotations(WebService webService, InterfaceDeclaration d) {
         if (webService.endpointInterface().length() > 0) {
-            builder.onError(d.getPosition(), WebserviceapMessages.WEBSERVICEAP_ENDPOINTINTERFACE_ON_INTERFACE(d.getQualifiedName(), webService.endpointInterface()));
+            builder.onError(d.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ENDPOINTINTERFACE_ON_INTERFACE(d.getQualifiedName(), webService.endpointInterface()));
         }
         if (webService.serviceName().length() > 0) {
-            builder.onError(d.getPosition(), WebserviceapMessages.WEBSERVICEAP_INVALID_SEI_ANNOTATION_ELEMENT("serviceName", d.getQualifiedName()));
+            builder.onError(d.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_INVALID_SEI_ANNOTATION_ELEMENT("serviceName", d.getQualifiedName()));
         }
         if (webService.portName().length() > 0) {
-            builder.onError(d.getPosition(), WebserviceapMessages.WEBSERVICEAP_INVALID_SEI_ANNOTATION_ELEMENT("portName", d.getQualifiedName()));
+            builder.onError(d.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_INVALID_SEI_ANNOTATION_ELEMENT("portName", d.getQualifiedName()));
         }
     }
     
@@ -160,7 +161,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         Object annotation = d.getAnnotation(annotationClass);
         if (annotation != null) {
             SourcePosition pos = d.getPosition();
-            annotationError(pos, WebserviceapMessages.WEBSERVICEAP_INVALID_SEI_ANNOTATION(annotationClass.getName(), d.getQualifiedName()));
+            annotationError(pos, WebserviceapMessages.localizableWEBSERVICEAP_INVALID_SEI_ANNOTATION(annotationClass.getName(), d.getQualifiedName()));
         }
     }
     
@@ -168,11 +169,11 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         Object annotation = d.getAnnotation(annotationClass);
         if (annotation != null) {
             SourcePosition pos = d.getPosition();
-            annotationError(pos, WebserviceapMessages.WEBSERVICEAP_ENDPOINTINTEFACE_PLUS_ANNOTATION(annotationClass.getName()));
+            annotationError(pos, WebserviceapMessages.localizableWEBSERVICEAP_ENDPOINTINTEFACE_PLUS_ANNOTATION(annotationClass.getName()));
         }
     }
     
-    protected void annotationError(SourcePosition pos, String message) {
+    protected void annotationError(SourcePosition pos, Localizable message) {
         builder.onError(pos, message);
     }
     
@@ -185,7 +186,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (targetNamespace == null || targetNamespace.length() == 0) {
             String packageName = d.getPackage().getQualifiedName();
             if (packageName == null || packageName.length() == 0) {
-                builder.onError(d.getPosition(), WebserviceapMessages.WEBSERVICEAP_NO_PACKAGE_CLASS_MUST_HAVE_TARGETNAMESPACE(d.getQualifiedName()));
+                builder.onError(d.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_NO_PACKAGE_CLASS_MUST_HAVE_TARGETNAMESPACE(d.getQualifiedName()));
             }
             targetNamespace = getNamespace(d.getPackage());
         }
@@ -234,13 +235,13 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         if (!sameStyle(soapBinding.style(), soapStyle)) {
             changed = true;
             if (pushedSOAPBinding)
-                builder.onError(bindingDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_MIXED_BINDING_STYLE(classDecl.getQualifiedName()));
+                builder.onError(bindingDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_MIXED_BINDING_STYLE(classDecl.getQualifiedName()));
         }
         if (soapBinding.style().equals(SOAPBinding.Style.RPC)) {
             soapStyle = SOAPStyle.RPC;
             wrapped = true;
             if (soapBinding.parameterStyle().equals(ParameterStyle.BARE)) {
-                builder.onError(bindingDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_RPC_LITERAL_MUST_NOT_BE_BARE(classDecl.getQualifiedName()));
+                builder.onError(bindingDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_RPC_LITERAL_MUST_NOT_BE_BARE(classDecl.getQualifiedName()));
             }
             
         } else {
@@ -251,7 +252,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             }
         }
         if (soapBinding.use().equals(SOAPBinding.Use.ENCODED)) {
-            builder.onError(bindingDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_RPC_ENCODED_NOT_SUPPORTED(classDecl.getQualifiedName()));
+            String style = "rpc";
+            if(soapBinding.style().equals(SOAPBinding.Style.DOCUMENT))
+                style = "document";
+            builder.onError(bindingDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICE_ENCODED_NOT_SUPPORTED(classDecl.getQualifiedName(), style));
         }
         if (changed || soapBindingStack.empty()) {
             soapBindingStack.push(soapBinding);
@@ -288,7 +292,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     protected boolean shouldProcessWebService(WebService webService, InterfaceDeclaration intf) {
         hasWebMethods = false;
         if (webService == null)
-            builder.onError(intf.getPosition(), WebserviceapMessages.WEBSERVICEAP_ENDPOINTINTERFACE_HAS_NO_WEBSERVICE_ANNOTATION(intf.getQualifiedName()));
+            builder.onError(intf.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ENDPOINTINTERFACE_HAS_NO_WEBSERVICE_ANNOTATION(intf.getQualifiedName()));
         if (isLegalSEI(intf))
             return true;
         return false;
@@ -323,9 +327,9 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             if (webMethod != null) {
                 if (webMethod.exclude()) {
                     if (webMethod.operationName().length() > 0)
-                        builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_INVALID_WEBMETHOD_ELEMENT_WITH_EXCLUDE("operationName", d.getQualifiedName(), method.toString()));
+                        builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_INVALID_WEBMETHOD_ELEMENT_WITH_EXCLUDE("operationName", d.getQualifiedName(), method.toString()));
                                 if (webMethod.action().length() > 0)
-                                    builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_INVALID_WEBMETHOD_ELEMENT_WITH_EXCLUDE("action", d.getQualifiedName(), method.toString()));
+                                    builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_INVALID_WEBMETHOD_ELEMENT_WITH_EXCLUDE("action", d.getQualifiedName(), method.toString()));
                 } else {
                     return true;
                 }
@@ -455,19 +459,19 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
 
         Collection<Modifier> modifiers = classDecl.getModifiers();
         if (!modifiers.contains(Modifier.PUBLIC)){
-            builder.onError(classDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_CLASS_NOT_PUBLIC(classDecl.getQualifiedName()));
+            builder.onError(classDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_WEBSERVICE_CLASS_NOT_PUBLIC(classDecl.getQualifiedName()));
                     return false;
         }
         if (modifiers.contains(Modifier.FINAL) && !isStateful) {
-            builder.onError(classDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_CLASS_IS_FINAL(classDecl.getQualifiedName()));
+            builder.onError(classDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_WEBSERVICE_CLASS_IS_FINAL(classDecl.getQualifiedName()));
             return false;
         }
         if (modifiers.contains(Modifier.ABSTRACT) && !isStateful) {
-            builder.onError(classDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_CLASS_IS_ABSTRACT(classDecl.getQualifiedName()));
+            builder.onError(classDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_WEBSERVICE_CLASS_IS_ABSTRACT(classDecl.getQualifiedName()));
             return false;
         }
         if (classDecl.getDeclaringType() != null && !modifiers.contains(Modifier.STATIC) && !isStateful) {
-            builder.onError(classDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_CLASS_IS_INNERCLASS_NOT_STATIC(classDecl.getQualifiedName()));
+            builder.onError(classDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_WEBSERVICE_CLASS_IS_INNERCLASS_NOT_STATIC(classDecl.getQualifiedName()));
             return false;
         }
         boolean hasDefaultConstructor = false;
@@ -479,7 +483,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             }
         }
         if (!hasDefaultConstructor && !isStateful) {
-            builder.onError(classDecl.getPosition(), WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_NO_DEFAULT_CONSTRUCTOR(classDecl.getQualifiedName()));
+            builder.onError(classDecl.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_WEBSERVICE_NO_DEFAULT_CONSTRUCTOR(classDecl.getQualifiedName()));
             return false;
         }
         if (webService.endpointInterface().length() == 0) {
@@ -514,7 +518,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
                 }
             }
             if (!implementsMethod) {
-                builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_METHOD_NOT_IMPLEMENTED(intfDecl.getSimpleName(), classDecl.getSimpleName(), method));
+                builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_METHOD_NOT_IMPLEMENTED(intfDecl.getSimpleName(), classDecl.getSimpleName(), method));
                 return false;
             }
         }
@@ -584,12 +588,12 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             return true;
         }
         if (typeDecl instanceof ClassDeclaration && method.getModifiers().contains(Modifier.ABSTRACT)) {
-            builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_WEBSERVICE_METHOD_IS_ABSTRACT(typeDecl.getQualifiedName(), method.getSimpleName()));
+            builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_WEBSERVICE_METHOD_IS_ABSTRACT(typeDecl.getQualifiedName(), method.getSimpleName()));
             return false;
         }
         
         if (!isLegalType(method.getReturnType())) {
-            builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_METHOD_RETURN_TYPE_CANNOT_IMPLEMENT_REMOTE(typeDecl.getQualifiedName(),
+            builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_METHOD_RETURN_TYPE_CANNOT_IMPLEMENT_REMOTE(typeDecl.getQualifiedName(),
                 method.getSimpleName(),
                 method.getReturnType()));
         }
@@ -601,7 +605,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         SOAPBinding soapBinding = method.getAnnotation(SOAPBinding.class);
         if (soapBinding != null) {
             if (soapBinding.style().equals(SOAPBinding.Style.RPC)) {
-                builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_RPC_SOAPBINDING_NOT_ALLOWED_ON_METHOD(typeDecl.getQualifiedName(), method.toString()));
+                builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_RPC_SOAPBINDING_NOT_ALLOWED_ON_METHOD(typeDecl.getQualifiedName(), method.toString()));
             }
         }
         
@@ -617,19 +621,19 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             int inParams = getModeParameterCount(method, WebParam.Mode.IN);
             int outParams = getModeParameterCount(method, WebParam.Mode.OUT);
             if (inParams != 1) {
-                builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_DOC_BARE_AND_NO_ONE_IN(typeDecl.getQualifiedName(), method.toString()));
+                builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_DOC_BARE_AND_NO_ONE_IN(typeDecl.getQualifiedName(), method.toString()));
             }
             if (method.getReturnType() instanceof VoidType) {
                 if (outParam == null && !isOneway) {
-                    builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_DOC_BARE_NO_OUT(typeDecl.getQualifiedName(), method.toString()));
+                    builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_DOC_BARE_NO_OUT(typeDecl.getQualifiedName(), method.toString()));
                 }
                 if (outParams != 1) {
                     if (!isOneway && outParams != 0)
-                        builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_DOC_BARE_NO_RETURN_AND_NO_OUT(typeDecl.getQualifiedName(), method.toString()));
+                        builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_DOC_BARE_NO_RETURN_AND_NO_OUT(typeDecl.getQualifiedName(), method.toString()));
                 }
             } else {
                 if (outParams > 0) {
-                    builder.onError(outParam.getPosition(), WebserviceapMessages.WEBSERVICEAP_DOC_BARE_RETURN_AND_OUT(typeDecl.getQualifiedName(), method.toString()));
+                    builder.onError(outParam.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_DOC_BARE_RETURN_AND_OUT(typeDecl.getQualifiedName(), method.toString()));
                 }
             }
         }
@@ -641,7 +645,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
             TypeDeclaration typeDecl,
             int paramIndex) {
         if (!isLegalType(param.getType())) {
-            builder.onError(param.getPosition(), WebserviceapMessages.WEBSERVICEAP_METHOD_PARAMETER_TYPES_CANNOT_IMPLEMENT_REMOTE(typeDecl.getQualifiedName(),
+            builder.onError(param.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_METHOD_PARAMETER_TYPES_CANNOT_IMPLEMENT_REMOTE(typeDecl.getQualifiedName(),
                 method.getSimpleName(),
                 param.getSimpleName(),
                 param.getType().toString()));
@@ -656,9 +660,9 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         
         if (holderType != null) {
             if (mode != null &&  mode==WebParam.Mode.IN)
-                builder.onError(param.getPosition(), WebserviceapMessages.WEBSERVICEAP_HOLDER_PARAMETERS_MUST_NOT_BE_IN_ONLY(typeDecl.getQualifiedName(), method.toString(), paramIndex));
+                builder.onError(param.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_HOLDER_PARAMETERS_MUST_NOT_BE_IN_ONLY(typeDecl.getQualifiedName(), method.toString(), paramIndex));
         } else if (mode != null && mode!=WebParam.Mode.IN) {
-            builder.onError(param.getPosition(), WebserviceapMessages.WEBSERVICEAP_NON_IN_PARAMETERS_MUST_BE_HOLDER(typeDecl.getQualifiedName(), method.toString(), paramIndex));
+            builder.onError(param.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_NON_IN_PARAMETERS_MUST_BE_HOLDER(typeDecl.getQualifiedName(), method.toString(), paramIndex));
         }
         
 
@@ -674,18 +678,18 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         boolean valid = true;
         if (!(method.getReturnType() instanceof VoidType)) {
             // this is an error, cannot be Oneway and have a return type
-            builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_ONEWAY_OPERATION_CANNOT_HAVE_RETURN_TYPE(typeDecl.getQualifiedName(), method.toString()));
+            builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ONEWAY_OPERATION_CANNOT_HAVE_RETURN_TYPE(typeDecl.getQualifiedName(), method.toString()));
             valid = false;
         }
         ParameterDeclaration outParam = getOutParameter(method);
         if (outParam != null) {
-            builder.onError(outParam.getPosition(), WebserviceapMessages.WEBSERVICEAP_ONEWAY_AND_OUT(typeDecl.getQualifiedName(), method.toString()));
+            builder.onError(outParam.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ONEWAY_AND_OUT(typeDecl.getQualifiedName(), method.toString()));
             valid = false;
         }
         if (!isDocLitWrapped() && soapStyle.equals(SOAPStyle.DOCUMENT)) {
             int inCnt = getModeParameterCount(method, WebParam.Mode.IN);
             if (inCnt != 1) {
-                builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_ONEWAY_AND_NOT_ONE_IN(typeDecl.getQualifiedName(), method.toString()));
+                builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ONEWAY_AND_NOT_ONE_IN(typeDecl.getQualifiedName(), method.toString()));
                 valid = false;
             }
         }
@@ -693,7 +697,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         for (ReferenceType thrownType : method.getThrownTypes()) {
             exDecl = ((ClassType)thrownType).getDeclaration();
             if (!builder.isRemoteException(exDecl)) {
-                builder.onError(method.getPosition(), WebserviceapMessages.WEBSERVICEAP_ONEWAY_OPERATION_CANNOT_DECLARE_EXCEPTIONS(typeDecl.getQualifiedName(), method.toString(), exDecl.getQualifiedName()));
+                builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_ONEWAY_OPERATION_CANNOT_DECLARE_EXCEPTIONS(typeDecl.getQualifiedName(), method.toString(), exDecl.getQualifiedName()));
                 valid = false;
             }                
         }

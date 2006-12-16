@@ -38,6 +38,10 @@ public class ProcessorException extends JAXWSExceptionBase {
         super(key, args);
     }
 
+    public ProcessorException(String msg){
+        super(msg);        
+    }
+
     public ProcessorException(Throwable throwable) {
         super(throwable);
     }
