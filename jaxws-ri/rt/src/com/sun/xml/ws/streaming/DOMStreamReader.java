@@ -34,6 +34,7 @@ import org.w3c.dom.Node;
 import static org.w3c.dom.Node.*;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
+import org.w3c.dom.Text;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
@@ -71,17 +72,28 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
     /**
      * Current DOM node being traversed.
      */
-    Node _current;
+    private Node _current;
 
     /**
      * Starting node of the subtree being traversed.
      */
-    Node _start;
+    private Node _start;
 
     /**
      * Named mapping for attributes and NS decls for the current node.
      */
-    NamedNodeMap _namedNodeMap;
+    private NamedNodeMap _namedNodeMap;
+
+    /**
+     * If the reader points at {@link #CHARACTERS the text node},
+     * its whole value.
+     *
+     * <p>
+     * This is simply a cache of {@link Text#getWholeText()} of {@link #_current},
+     * but when a large binary data sent as base64 text, this could get very much
+     * non-trivial.
+     */
+    private String wholeText;
 
     /**
      * List of attributes extracted from <code>_namedNodeMap</code>.
@@ -637,10 +649,10 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
     }
 
     public String getText() {
-        if (_state == CHARACTERS || _state == CDATA || _state == COMMENT ||
-                _state == ENTITY_REFERENCE) {
+        if (_state == CHARACTERS)
+            return wholeText;
+        if(_state == CDATA || _state == COMMENT || _state == ENTITY_REFERENCE)
             return _current.getNodeValue();
-        }
         throw new IllegalStateException("DOMStreamReader: getTextLength() called in illegal state");
     }
 
@@ -649,24 +661,20 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
     }
 
     public int getTextCharacters(int sourceStart, char[] target, int targetStart,
-                                 int targetLength) throws javax.xml.stream.XMLStreamException
-    {
-        char[] text = getTextCharacters();
-        System.arraycopy(text, sourceStart, target, targetStart, targetLength);
-        return Math.min(targetLength, text.length - sourceStart);
+                                 int targetLength) throws XMLStreamException {
+        String text = getText();
+        int copiedSize = Math.min(targetLength, text.length() - sourceStart);
+        text.getChars(sourceStart, sourceStart + copiedSize, target, targetStart);
+
+        return copiedSize;
     }
 
     public int getTextLength() {
-        if (_state == CHARACTERS || _state == CDATA || _state == COMMENT ||
-                _state == ENTITY_REFERENCE) {
-            return _current.getNodeValue().length();
-        }
-        throw new IllegalStateException("DOMStreamReader: getTextLength() called in illegal state");
+        return getText().length();
     }
 
     public int getTextStart() {
-        if (_state == CHARACTERS || _state == CDATA || _state == COMMENT ||
-                _state == ENTITY_REFERENCE) {
+        if (_state == CHARACTERS || _state == CDATA || _state == COMMENT || _state == ENTITY_REFERENCE) {
             return 0;
         }
         throw new IllegalStateException("DOMStreamReader: getTextStart() called in illegal state");
@@ -685,9 +693,8 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
     }
 
     public boolean hasText() {
-        if (_state == CHARACTERS || _state == CDATA || _state == COMMENT ||
-                _state == ENTITY_REFERENCE) {
-            return (_current.getNodeValue().trim().length() > 0);
+        if (_state == CHARACTERS || _state == CDATA || _state == COMMENT || _state == ENTITY_REFERENCE) {
+            return getText().trim().length() > 0;
         }
         return false;
     }
@@ -713,10 +720,8 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
     }
 
     public boolean isWhiteSpace() {
-        final int nodeType = _current.getNodeType();
-        if (nodeType == Node.TEXT_NODE || nodeType == Node.CDATA_SECTION_NODE) {
-            return (_current.getNodeValue().trim().length() == 0);
-        }
+        if (_state == CHARACTERS || _state == CDATA)
+            return getText().trim().length()==0;
         return false;
     }
 
@@ -743,7 +748,25 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
         }
     }
 
-    public int next() throws javax.xml.stream.XMLStreamException {
+    public int next() throws XMLStreamException {
+        while(true) {
+            int r = _next();
+            if(r!=CHARACTERS)   return r;
+
+            // if we are currently at text node, make sure that this is a meaningful text node.
+            Node prev = _current.getPreviousSibling();
+            if(prev!=null && prev.getNodeType()==Node.TEXT_NODE)
+                continue;   // nope. this is just a continuation of previous text that should be invisible
+
+            Text t = (Text)_current;
+            wholeText = t.getWholeText();
+            if(wholeText.length()==0)
+                continue;   // nope. this is empty text.
+            return CHARACTERS;
+        }
+    }
+    
+    private int _next() throws XMLStreamException {
         Node child;
 
         // Indicate that attributes still need processing
@@ -768,11 +791,6 @@ public final class DOMStreamReader implements XMLStreamReader, NamespaceContext 
                 }
             case START_ELEMENT:
                 depth++;
-                /*
-                 * SAAJ tree may contain multiple adjacent text nodes.  Normalization 
-                 * is very expensive, so we should think about changing SAAJ instead!
-                 */
-                _current.normalize();
 
                 child = _current.getFirstChild();
                 if (child == null) {
