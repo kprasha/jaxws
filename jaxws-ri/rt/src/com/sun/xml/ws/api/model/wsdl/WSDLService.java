@@ -42,6 +42,7 @@ public interface WSDLService extends WSDLObject, WSDLExtensible {
      * Gets the name of the wsdl:service@name attribute value as local name and wsdl:definitions@targetNamespace
      * as the namespace uri.
      */
+    @NotNull
     QName getName();
 
     /**

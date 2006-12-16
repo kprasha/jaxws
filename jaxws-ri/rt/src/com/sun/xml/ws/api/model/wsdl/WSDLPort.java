@@ -66,5 +66,6 @@ public interface WSDLPort extends WSDLFeaturedObject, WSDLExtensible {
      * @return
      *      always non-null.
      */
+    @NotNull
     WSDLService getOwner();
 }
