@@ -319,7 +319,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
 
     protected abstract void validateAction(Packet packet);
     protected void checkMandatoryHeaders(
-        Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo) {
+        Packet packet, boolean foundAction, boolean foundTo, boolean foundMessageId, boolean foundRelatesTo) {
         WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
         // no need to check for for non-application messages
         if (wbo == null)
@@ -332,5 +332,9 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         // if no wsa:To header is found
         if (!foundTo)
             throw new MapRequiredException(addressingVersion.toTag);
+
+        // if two-way and no wsa:MessageID is found
+        if (!wbo.getOperation().isOneWay() && !foundMessageId)
+            throw new MapRequiredException(addressingVersion.messageIDTag);
     }
 }
