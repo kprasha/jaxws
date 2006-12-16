@@ -1,6 +1,7 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 /**
  * Callback interface to signal JAX-WS RI that the processing of an asynchronous request is complete.
@@ -24,9 +25,9 @@ public interface AsyncProviderCallback<T> {
      *
      * @param response
      *      Represents an object to be sent back to the client
-     *      as a response.
+     *      as a response. To indicate one-way, response needs to be null
      */
-    void send(@NotNull T response);
+    void send(@Nullable T response);
 
     /**
      * Indicates that an error had occured while processing a request.
