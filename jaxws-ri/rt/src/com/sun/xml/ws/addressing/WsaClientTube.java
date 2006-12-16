@@ -89,8 +89,8 @@ public final class WsaClientTube extends WsaTube {
     }
 
     @Override
-    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundRelatesTo) {
-        super.checkMandatoryHeaders(packet, foundAction, foundTo, foundRelatesTo);
+    protected void checkMandatoryHeaders(Packet packet, boolean foundAction, boolean foundTo, boolean foundMessageID, boolean foundRelatesTo) {
+        super.checkMandatoryHeaders(packet, foundAction, foundTo, foundMessageID, foundRelatesTo);
         
         if(!foundRelatesTo)
             // RelatesTo required as per

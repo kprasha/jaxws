@@ -292,7 +292,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         // Both wsa:Action and wsa:To MUST be present on request (for oneway MEP) and
         // response messages (for oneway and request/response MEP only)
         if (engaged || addressingRequired) {
-            checkMandatoryHeaders(packet, foundAction, foundTo, foundRelatesTo);
+            checkMandatoryHeaders(packet, foundAction, foundTo, foundMessageId, foundRelatesTo);
         }
     }
 
