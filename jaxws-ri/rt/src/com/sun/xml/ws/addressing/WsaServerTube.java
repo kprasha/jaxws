@@ -243,6 +243,20 @@ public final class WsaServerTube extends WsaTube {
         checkAnonymousSemantics(wbo, replyTo, faultTo);
     }
 
+    protected void checkMandatoryHeaders(
+        Packet packet, boolean foundAction, boolean foundTo, boolean foundMessageId, boolean foundRelatesTo) {
+        super.checkMandatoryHeaders(packet, foundAction, foundTo, foundMessageId, foundRelatesTo);
+        WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
+        // no need to check for for non-application messages
+        if (wbo == null)
+            return;
+
+        // if two-way and no wsa:MessageID is found
+        if (!wbo.getOperation().isOneWay() && !foundMessageId)
+            throw new MapRequiredException(addressingVersion.messageIDTag);
+    }
+
+
     final void checkAnonymousSemantics(WSDLBoundOperation wbo, WSEndpointReference replyTo, WSEndpointReference faultTo) {
         // no check if Addressing is not enabled or is Member Submission
         if (addressingVersion == null || addressingVersion == AddressingVersion.MEMBER)
