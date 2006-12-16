@@ -598,11 +598,11 @@ public final class Packet extends DistributedPropertySet {
      * {@link #createServerResponse(Message, com.sun.xml.ws.api.addressing.AddressingVersion, com.sun.xml.ws.api.SOAPVersion, String)}.
      *
      * @param responseMessage The {@link Message} that represents a reply. Can be null.
-     * @param wsdlPort The response WSDL port. Cannot be null.
+     * @param wsdlPort The response WSDL port.
      * @param binding The response Binding. Cannot be null.
      * @return response packet
      */
-    public Packet createServerResponse(@Nullable Message responseMessage, @NotNull WSDLPort wsdlPort, @NotNull WSBinding binding) {
+    public Packet createServerResponse(@Nullable Message responseMessage, @Nullable WSDLPort wsdlPort, @NotNull WSBinding binding) {
         Packet r = createClientResponse(responseMessage);
 
         // if one-way, then dont populate any WS-A headers
