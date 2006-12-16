@@ -22,11 +22,12 @@
 
 package com.sun.xml.ws.streaming;
 
+import com.sun.istack.FinalArrayList;
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.util.exception.XMLStreamException2;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -37,23 +38,35 @@ import org.w3c.dom.ProcessingInstruction;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 /**
+ * Create an {@link XMLStreamReader} on top of a DOM tree.
  *
- * Create an XMLStreamReader on top of a DOM level 2 tree. It a DOM level
+ * <p>
+ * Since various libraries as well as users often create "incorrect" DOM node,
+ * this class spends a lot of efforts making sure that broken DOM trees are
+ * nevertheless interpreted correctly.
+ *
+ * <p>
+ * For example, if a DOM level
  * 1 tree is passed, each method will attempt to return the correct value
- * by using <code>getNodeName()</code>.
+ * by using {@link Node#getNodeName()}.
+ *
+ * <p>
+ * Similarly, if DOM is missing explicit namespace declarations,
+ * this class attempts to emulate necessary declarations.
+ *
  *
  * @author Santiago.PericasGeertsen@sun.com
+ * @author Kohsuke Kawaguchi
  */
-public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
+public final class DOMStreamReader implements XMLStreamReader, NamespaceContext {
 
     /**
      * Current DOM node being traversed.
@@ -73,16 +86,22 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
     /**
      * List of attributes extracted from <code>_namedNodeMap</code>.
      */
-    List<Attr> _currentAttributes = new ArrayList<Attr>();
+    private final FinalArrayList<Attr> _currentAttributes = new FinalArrayList<Attr>();
 
     /**
-     * List of namespace declarations extracted from <code>_namedNodeMap</code>
+     * {@link Scope} buffer.
      */
-    List<Attr> _currentNamespaces = new ArrayList<Attr>();
+    private Scope[] scopes = new Scope[8];
 
     /**
-     * Flag indicating if <code>_namedNodeMap</code> is already split into
-     * <code>_currentAttributes</code> and <code>_currentNamespaces</code>
+     * Depth of the current element. The first element gets depth==0.
+     * Also used as the index to {@link #scopes}.
+     */
+    private int depth = 0;
+
+    /**
+     * Flag indicating if {@link #_namedNodeMap} is already split into
+     * {@link #_currentAttributes} and {@link Scope#currentNamespaces}.
      */
     boolean _needAttributesSplit;
 
@@ -92,6 +111,108 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
      */
     int _state;
 
+    /**
+     * Namespace declarations on one element.
+     *
+     * Instances are reused.
+     */
+    private static final class Scope {
+        /**
+         * Scope for the parent element.
+         */
+        final Scope parent;
+
+        /**
+         * List of namespace declarations extracted from <code>_namedNodeMap</code>
+         */
+        final FinalArrayList<Attr> currentNamespaces = new FinalArrayList<Attr>();
+
+        /**
+         * Additional namespace declarations obtained as a result of "fixing" DOM tree,
+         * which were not part of the original DOM tree.
+         *
+         * One entry occupies two spaces (prefix followed by URI.)
+         */
+        final FinalArrayList<String> additionalNamespaces = new FinalArrayList<String>();
+
+        Scope(Scope parent) {
+            this.parent = parent;
+        }
+
+        void reset() {
+            currentNamespaces.clear();
+            additionalNamespaces.clear();
+        }
+
+        int getNamespaceCount() {
+            return currentNamespaces.size()+additionalNamespaces.size()/2;
+        }
+
+        String getNamespacePrefix(int index) {
+            int sz = currentNamespaces.size();
+            if(index< sz) {
+                Attr attr = currentNamespaces.get(index);
+                String result = attr.getLocalName();
+                if (result == null) {
+                    result = QName.valueOf(attr.getNodeName()).getLocalPart();
+                }
+                return result.equals("xmlns") ? null : result;
+            } else {
+                return additionalNamespaces.get((index-sz)*2);
+            }
+        }
+
+        String getNamespaceURI(int index) {
+            int sz = currentNamespaces.size();
+            if(index< sz) {
+                return currentNamespaces.get(index).getValue();
+            } else {
+                return additionalNamespaces.get((index-sz)*2+1);
+            }
+        }
+
+        /**
+         * Returns the prefix bound to the given URI, or null.
+         * This method recurses to the parent.
+         */
+        String getPrefix(String nsUri) {
+            for( Scope sp=this; sp!=null; sp=sp.parent ) {
+                for( int i=sp.currentNamespaces.size()-1; i>=0; i--) {
+                    String result = getPrefixForAttr(sp.currentNamespaces.get(i),nsUri);
+                    if(result!=null)
+                        return result;
+                }
+                for( int i=sp.additionalNamespaces.size()-2; i>=0; i-=2 )
+                    if(sp.additionalNamespaces.get(i+1).equals(nsUri))
+                        return sp.additionalNamespaces.get(i);
+            }
+            return null;
+        }
+
+        /**
+         * Returns the namespace URI bound by the given prefix.
+         *
+         * @param prefix
+         *      Prefix to look up.
+         */
+        String getNamespaceURI(@NotNull String prefix) {
+            String nsDeclName = prefix.length()==0 ? "xmlns" : "xmlns:"+prefix;
+
+            for( Scope sp=this; sp!=null; sp=sp.parent ) {
+                for( int i=sp.currentNamespaces.size()-1; i>=0; i--) {
+                    Attr a = sp.currentNamespaces.get(i);
+                    if(a.getNodeName().equals(nsDeclName))
+                        return a.getValue();
+                }
+                for( int i=sp.additionalNamespaces.size()-2; i>=0; i-=2 )
+                    if(sp.additionalNamespaces.get(i).equals(prefix))
+                        return sp.additionalNamespaces.get(i+1);
+            }
+            return null;
+        }
+    }
+
+
     public DOMStreamReader() {
     }
 
@@ -100,22 +221,31 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
     }
 
     public void setCurrentNode(Node node) {
+        scopes[0] = new Scope(null);
+        depth=0;
+
         _start = _current = node;
         _state = START_DOCUMENT;
         // verifyDOMIntegrity(node);
         // displayDOM(node, System.out);
     }
 
-    public void close() throws javax.xml.stream.XMLStreamException {
+    public void close() throws XMLStreamException {
     }
 
-
+    /**
+     * Called when the current node is {@link Element} to look at attribute list
+     * (which contains both ns decl and attributes in DOM) and split them
+     * to attributes-proper and namespace decls.
+     */
     private void splitAttributes() {
         if (!_needAttributesSplit) return;
+        _needAttributesSplit = false;
 
         // Clear attribute and namespace lists
         _currentAttributes.clear();
-        _currentNamespaces.clear();
+
+        Scope scope = allocateScope();
 
         _namedNodeMap = _current.getAttributes();
         if (_namedNodeMap != null) {
@@ -124,14 +254,71 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
                 final Attr attr = (Attr) _namedNodeMap.item(i);
                 final String attrName = attr.getNodeName();
                 if (attrName.startsWith("xmlns:") || attrName.equals("xmlns")) {     // NS decl?
-                    _currentNamespaces.add(attr);
+                    scope.currentNamespaces.add(attr);
                 }
                 else {
                     _currentAttributes.add(attr);
                 }
             }
         }
-        _needAttributesSplit = false;
+
+        // verify that all the namespaces used in element and attributes are indeed available
+        ensureNs(_current);
+        for( int i=_currentAttributes.size()-1; i>=0; i-- ) {
+            Attr a = _currentAttributes.get(i);
+            ensureNs(a);
+        }
+    }
+
+    /**
+     * Sub-routine of {@link #splitAttributes()}.
+     *
+     * <p>
+     * Makes sure that the namespace URI/prefix used in the given node is available,
+     * and if not, declare it on the current scope to "fix" it.
+     *
+     * It's often common to create DOM trees without putting namespace declarations,
+     * and this makes sure that such DOM tree will be properly marshalled.
+     */
+    private void ensureNs(Node n) {
+        String prefix = fixNull(n.getPrefix());
+        String uri = fixNull(n.getNamespaceURI());
+
+        Scope scope = scopes[depth];
+        
+        String currentUri = scope.getNamespaceURI(prefix);
+
+        if(prefix.length()==0) {
+            currentUri = fixNull(currentUri);
+            if(currentUri.equals(uri))
+                return; // declared correctly
+        } else {
+            if(currentUri!=null && currentUri.equals(uri))
+                return; // declared correctly
+        }
+
+        // needs to be declared
+
+        scope.additionalNamespaces.add(prefix);
+        scope.additionalNamespaces.add(uri);
+    }
+
+    /**
+     * Allocate new {@link Scope} for {@link #splitAttributes()}.
+     */
+    private Scope allocateScope() {
+        if(scopes.length==depth) {
+            Scope[] newBuf = new Scope[scopes.length*2];
+            System.arraycopy(scopes,0,newBuf,0,scopes.length);
+            scopes = newBuf;
+        }
+        Scope scope = scopes[depth];
+        if(scope==null) {
+            scope = scopes[depth] = new Scope(scopes[depth-1]);
+        } else {
+            scope.reset();
+        }
+        return scope;
     }
 
     public int getAttributeCount() {
@@ -168,8 +355,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
             if (localName != null) {
                 String prefix = attr.getPrefix();
                 String uri = attr.getNamespaceURI();
-                return new QName(uri != null ? uri : "", localName,
-                    prefix != null ? prefix : "");
+                return new QName(fixNull(uri), localName, fixNull(prefix));
             }
             else {
                 return QName.valueOf(attr.getNodeName());
@@ -182,7 +368,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         if (_state == START_ELEMENT) {
             splitAttributes();
             String uri = _currentAttributes.get(index).getNamespaceURI();
-            return uri != null ? uri : "";
+            return fixNull(uri);
         }
         throw new IllegalStateException("DOMStreamReader: getAttributeNamespace() called in illegal state");
     }
@@ -191,7 +377,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         if (_state == START_ELEMENT) {
             splitAttributes();
             String prefix = _currentAttributes.get(index).getPrefix();
-            return prefix != null ? prefix : "";
+            return fixNull(prefix);
         }
         throw new IllegalStateException("DOMStreamReader: getAttributePrefix() called in illegal state");
     }
@@ -267,8 +453,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
             if (localName != null) {
                 String prefix = _current.getPrefix();
                 String uri = _current.getNamespaceURI();
-                return new QName(uri != null ? uri : "", localName,
-                    prefix != null ? prefix : "");
+                return new QName(fixNull(uri), localName, fixNull(prefix));
             }
             else {
                 return QName.valueOf(_current.getNodeName());
@@ -281,42 +466,38 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         return this;
     }
 
-    public int getNamespaceCount() {
+    /**
+     * Verifies the current state to see if we can return the scope, and do so
+     * if appropriate.
+     *
+     * Used to implement a bunch of StAX API methods that have the same usage restriction.
+     */
+    private Scope getCheckedScope() {
         if (_state == START_ELEMENT || _state == END_ELEMENT) {
             splitAttributes();
-            return _currentNamespaces.size();
+            return scopes[depth];
         }
-        throw new IllegalStateException("DOMStreamReader: getNamespaceCount() called in illegal state");
+        throw new IllegalStateException("DOMStreamReader: neither on START_ELEMENT nor END_ELEMENT");
+    }
+
+    public int getNamespaceCount() {
+        return getCheckedScope().getNamespaceCount();
     }
 
     public String getNamespacePrefix(int index) {
-        if (_state == START_ELEMENT || _state == END_ELEMENT) {
-            splitAttributes();
+        return getCheckedScope().getNamespacePrefix(index);
+    }
 
-            Attr attr = _currentNamespaces.get(index);
-            String result = attr.getLocalName();
-            if (result == null) {
-                result = QName.valueOf(attr.getNodeName()).getLocalPart();
-            }
-            return result.equals("xmlns") ? null : result;
-        }
-        throw new IllegalStateException("DOMStreamReader: getNamespacePrefix() called in illegal state");
+    public String getNamespaceURI(int index) {
+        return getCheckedScope().getNamespaceURI(index);
     }
 
     public String getNamespaceURI() {
         if (_state == START_ELEMENT || _state == END_ELEMENT) {
             String uri = _current.getNamespaceURI();
-            return uri != null ? uri : "";
+            return fixNull(uri);
         }
         return null;
-    }
-
-    public String getNamespaceURI(int index) {
-        if (_state == START_ELEMENT || _state == END_ELEMENT) {
-            splitAttributes();
-            return _currentNamespaces.get(index).getValue();
-        }
-        throw new IllegalStateException("DOMStreamReader: getNamespaceURI(int) called in illegal state");
     }
 
     /**
@@ -334,30 +515,24 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         else if (prefix.equals("xmlns")) {
             return "http://www.w3.org/2000/xmlns/";
         }
-        else {
-            int type;
 
-            // Find nearest element node
-            Node node = _current;
-            while ((type = node.getNodeType()) != DOCUMENT_NODE
-                    && type != ELEMENT_NODE) {
-                node = node.getParentNode();
-            }
+        // check scopes
+        splitAttributes();
+        String nsUri = scopes[depth].getNamespaceURI(prefix);
+        if(nsUri!=null)    return nsUri;
 
-            boolean isDefault = (prefix.length() == 0);
-
-            while (node.getNodeType() != DOCUMENT_NODE) {
-                // Is ns declaration on this element?
-                NamedNodeMap namedNodeMap = node.getAttributes();
-                Attr attr = isDefault ? (Attr) namedNodeMap.getNamedItem("xmlns") :
-                                        (Attr) namedNodeMap.getNamedItem("xmlns:" + prefix);
-                if (attr != null) {
-                    return attr.getValue();
-                }
-                node = node.getParentNode();
-            }
-            return null;
+        // then ancestors above start node
+        Node node = findRootElement();
+        String nsDeclName = prefix.length()==0 ? "xmlns" : "xmlns:"+prefix;
+        while (node.getNodeType() != DOCUMENT_NODE) {
+            // Is ns declaration on this element?
+            NamedNodeMap namedNodeMap = node.getAttributes();
+            Attr attr = (Attr) namedNodeMap.getNamedItem(nsDeclName);
+            if (attr != null)
+                return attr.getValue();
+            node = node.getParentNode();
         }
+        return null;
     }
 
     public String getPrefix(String nsUri) {
@@ -370,37 +545,61 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         else if (nsUri.equals("http://www.w3.org/2000/xmlns/")) {
             return "xmlns";
         }
-        else {
-            int type;
 
-            // Find nearest element node
-            Node node = _current;
-            while ((type = node.getNodeType()) != DOCUMENT_NODE
-                    && type != ELEMENT_NODE) {
-                node = node.getParentNode();
+        // check scopes
+        splitAttributes();
+        String prefix = scopes[depth].getPrefix(nsUri);
+        if(prefix!=null)    return prefix;
+
+        // then ancestors above start node
+        Node node = findRootElement();
+
+        while (node.getNodeType() != DOCUMENT_NODE) {
+            // Is ns declaration on this element?
+            NamedNodeMap namedNodeMap = node.getAttributes();
+            for( int i=namedNodeMap.getLength()-1; i>=0; i-- ) {
+                Attr attr = (Attr)namedNodeMap.item(i);
+                prefix = getPrefixForAttr(attr,nsUri);
+                if(prefix!=null)
+                    return prefix;
             }
-
-            while (node.getNodeType() != DOCUMENT_NODE) {
-                // Is ns declaration on this element?
-                NamedNodeMap namedNodeMap = node.getAttributes();
-                for( int i=namedNodeMap.getLength()-1; i>=0; i-- ) {
-                    Attr attr = (Attr)namedNodeMap.item(i);
-
-                    String attrName = attr.getNodeName();
-                    if (attrName.startsWith("xmlns:") || attrName.equals("xmlns")) {     // NS decl?
-                        if(attr.getValue().equals(nsUri)) {
-                            if(attrName.equals("xmlns"))
-                                return "";
-                            String localName = attr.getLocalName();
-                            return (localName != null) ? localName :
-                                QName.valueOf(attrName).getLocalPart();
-                        }
-                    }
-                }
-                node = node.getParentNode();
-            }
-            return null;
+            node = node.getParentNode();
         }
+        return null;
+    }
+
+    /**
+     * Finds the root element node of the traversal.
+     */
+    private Node findRootElement() {
+        int type;
+
+        Node node = _start;
+        while ((type = node.getNodeType()) != DOCUMENT_NODE
+                && type != ELEMENT_NODE) {
+            node = node.getParentNode();
+        }
+        return node;
+    }
+
+    /**
+     * If the given attribute is a namespace declaration for the given namespace URI,
+     * return its prefix. Otherwise null.
+     */
+    private static String getPrefixForAttr(Attr attr, String nsUri) {
+        String attrName = attr.getNodeName();
+        if (!attrName.startsWith("xmlns:") && !attrName.equals("xmlns"))
+            return null;    // not nsdecl
+
+        if(attr.getValue().equals(nsUri)) {
+            if(attrName.equals("xmlns"))
+                return "";
+            String localName = attr.getLocalName();
+            return (localName != null) ? localName :
+                QName.valueOf(attrName).getLocalPart();
+        }
+
+        return null;
     }
 
     public Iterator getPrefixes(String nsUri) {
@@ -428,7 +627,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
     public String getPrefix() {
         if (_state == START_ELEMENT || _state == END_ELEMENT) {
             String prefix = _current.getPrefix();
-            return prefix != null ? prefix : "";
+            return fixNull(prefix);
         }
         return null;
     }
@@ -568,6 +767,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
                     return (_state = mapNodeTypeToState(_current.getNodeType()));
                 }
             case START_ELEMENT:
+                depth++;
                 /*
                  * SAAJ tree may contain multiple adjacent text nodes.  Normalization 
                  * is very expensive, so we should think about changing SAAJ instead!
@@ -582,12 +782,14 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
                     _current = child;
                     return (_state = mapNodeTypeToState(_current.getNodeType()));
                 }
+            case END_ELEMENT:
+                depth--;
+                // fall through next
             case CHARACTERS:
             case COMMENT:
             case CDATA:
             case ENTITY_REFERENCE:
             case PROCESSING_INSTRUCTION:
-            case END_ELEMENT:
                 // If at the end of this fragment, then terminate traversal
                 if (_current == _start) {
                     return (_state = END_DOCUMENT);
@@ -679,7 +881,7 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
 
                 if (node.getNodeType() == ATTRIBUTE_NODE) return;
 
-                NamedNodeMap attrs = ((Element) node).getAttributes();
+                NamedNodeMap attrs = node.getAttributes();
                 for (int i = 0; i < attrs.getLength(); i++) {
                     verifyDOMIntegrity(attrs.item(i));
                 }
@@ -691,21 +893,9 @@ public class DOMStreamReader implements XMLStreamReader, NamespaceContext {
         }
     }
 
-    static public void main(String[] args) throws Exception {
-        String sample = "<?xml version='1.0' encoding='UTF-8'?><env:Envelope xmlns:env='http://schemas.xmlsoap.org/soap/envelope/'><env:Body><env:Fault><faultcode>env:Server</faultcode><faultstring>Internal server error</faultstring></env:Fault></env:Body></env:Envelope>";
-        javax.xml.parsers.DocumentBuilderFactory dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        javax.xml.parsers.DocumentBuilder db = dbf.newDocumentBuilder();
-        Document dd = db.parse(new java.io.ByteArrayInputStream(sample.getBytes("UTF-8")));
 
-        DOMStreamReader dsr = new DOMStreamReader(dd);
-        while (dsr.hasNext()) {
-            System.out.println("dsr.next() = " + dsr.next());
-            if (dsr.getEventType() == START_ELEMENT || dsr.getEventType() == END_ELEMENT) {
-                System.out.println("dsr.getName = " + dsr.getName());
-                if (dsr.getEventType() == START_ELEMENT)
-                    System.out.println("dsr.getAttributeCount() = " + dsr.getAttributeCount());
-            }
-        }
+    private static String fixNull(String s) {
+        if(s==null) return "";
+        else        return s;
     }
 }
