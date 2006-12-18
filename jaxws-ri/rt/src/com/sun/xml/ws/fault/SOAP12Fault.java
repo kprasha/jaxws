@@ -70,11 +70,11 @@ import javax.xml.ws.soap.SOAPFaultException;
 @XmlRootElement(name = "Fault", namespace = "http://www.w3.org/2003/05/soap-envelope")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "Code",
-    "Reason",
-    "Node",
-    "Role",
-    "Detail"
+    "code",
+    "reason",
+    "node",
+    "role",
+    "detail"
 })
 class SOAP12Fault extends SOAPFaultBuilder {
     @XmlTransient
