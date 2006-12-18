@@ -23,6 +23,7 @@
 package com.sun.xml.ws.fault;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import javax.xml.bind.annotation.XmlAnyElement;
 import java.util.ArrayList;
@@ -58,6 +59,17 @@ class DetailType {
     @NotNull
     List<Object> getDetails() {
         return detailEntry;
+    }
+
+    /**
+     * Gets the n-th detail object, or null if no such item exists.
+     */
+    @Nullable
+    Object getDetail(int n) {
+        if(n < detailEntry.size())
+            return detailEntry.get(n);
+        else
+            return null;
     }
 
     DetailType(Object detailObject) {
