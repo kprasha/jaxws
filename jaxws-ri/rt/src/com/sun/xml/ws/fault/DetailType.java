@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.fault;
 
+import com.sun.istack.NotNull;
+
 import javax.xml.bind.annotation.XmlAnyElement;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,7 @@ class DetailType {
     @XmlAnyElement(lax=true)
     private final List<Object> detailEntry = new ArrayList<Object>();
 
+    @NotNull
     List<Object> getDetails() {
         return detailEntry;
     }
