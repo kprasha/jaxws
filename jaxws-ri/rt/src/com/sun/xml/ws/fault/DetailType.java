@@ -37,11 +37,6 @@ import java.util.List;
  */
 class DetailType {
     /**
-     * TODO: annotate 0 or more attriubtes
-     */
-    private List<Object> attributes;
-
-    /**
      * The detail entry could be 0 or more elements. Perhaps some elements may be
      * known to JAXB while others can be handled using DOMHandler.
      *
