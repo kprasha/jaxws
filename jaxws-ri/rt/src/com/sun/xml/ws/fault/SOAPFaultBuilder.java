@@ -77,7 +77,7 @@ public abstract class SOAPFaultBuilder {
      */
     public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions) throws JAXBException {
         DetailType dt = getDetail();
-        Object detail = null;
+        Node detail = null;
         if(dt != null)  detail = dt.getDetail(0);
 
         //return ProtocolException if the detail is not present or there is no checked exception
@@ -89,8 +89,7 @@ public abstract class SOAPFaultBuilder {
 
         //check if the detail is a checked exception, if not throw a ProtocolException
         // TODO: this cast looks like a bug but I don't know how to fix this.
-        Node jaxbDetail = (Node)detail;
-        QName detailName = new QName(jaxbDetail.getNamespaceURI(), jaxbDetail.getLocalName());
+        QName detailName = new QName(detail.getNamespaceURI(), detail.getLocalName());
         CheckedExceptionImpl ce = exceptions.get(detailName);
         if (ce == null) {
             //No Checked exception for the received detail QName, throw a SOAPFault exception
@@ -105,7 +104,7 @@ public abstract class SOAPFaultBuilder {
         Class exceptionClass = ce.getExceptionClass();
         try {
             Constructor constructor = exceptionClass.getConstructor(String.class, (Class) ce.getDetailType().type);
-            Object exception = constructor.newInstance(getFaultString(), getJAXBObject(jaxbDetail, ce));
+            Object exception = constructor.newInstance(getFaultString(), getJAXBObject(detail, ce));
             return (Exception) exception;
         } catch (Exception e) {
             throw new WebServiceException(e);
@@ -217,7 +216,7 @@ public abstract class SOAPFaultBuilder {
         try {
             Constructor constructor = exceptionClass.getConstructor(String.class);
             Object exception = constructor.newInstance(getFaultString());
-            Node detail = (Node) getDetail().getDetails().get(0);
+            Node detail = getDetail().getDetails().get(0);
             Object jaxbDetail = getJAXBObject(detail, ce);
             Field[] fields = jaxbDetail.getClass().getFields();
             for (Field f : fields) {

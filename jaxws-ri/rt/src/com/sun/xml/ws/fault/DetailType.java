@@ -24,6 +24,7 @@ package com.sun.xml.ws.fault;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlAnyElement;
 import java.util.ArrayList;
@@ -53,11 +54,11 @@ class DetailType {
      * TODO: For now detailEntry would be List of Node isntead of Object and it needs to be changed to
      * {@link Object} once we have better solution that working thru {@link com.sun.xml.bind.api.Bridge}
      */
-    @XmlAnyElement(lax=true)
-    private final List<Object> detailEntry = new ArrayList<Object>();
+    @XmlAnyElement
+    private final List<Node> detailEntry = new ArrayList<Node>();
 
     @NotNull
-    List<Object> getDetails() {
+    List<Node> getDetails() {
         return detailEntry;
     }
 
@@ -65,14 +66,14 @@ class DetailType {
      * Gets the n-th detail object, or null if no such item exists.
      */
     @Nullable
-    Object getDetail(int n) {
+    Node getDetail(int n) {
         if(n < detailEntry.size())
             return detailEntry.get(n);
         else
             return null;
     }
 
-    DetailType(Object detailObject) {
+    DetailType(Node detailObject) {
         if(detailObject != null)
             detailEntry.add(detailObject);
     }

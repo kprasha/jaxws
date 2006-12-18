@@ -97,7 +97,7 @@ class SOAP11Fault extends SOAPFaultBuilder {
      * @param actor
      * @param detailObject
      */
-    SOAP11Fault(QName code, String reason, String actor, Object detailObject) {
+    SOAP11Fault(QName code, String reason, String actor, Node detailObject) {
         this.faultcode = code;
         this.faultstring = reason;
         this.faultactor = actor;
@@ -158,8 +158,8 @@ class SOAP11Fault extends SOAPFaultBuilder {
     protected Throwable getProtocolException() {
         try {
             SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault(faultstring, faultcode);
-            if(detail != null && detail.getDetail(0) instanceof Node) {
-                Node n = fault.getOwnerDocument().importNode((Node)detail.getDetail(0), true);
+            if(detail != null && detail.getDetail(0) != null) {
+                Node n = fault.getOwnerDocument().importNode(detail.getDetail(0), true);
                 Detail d = fault.addDetail();
                 d.appendChild(n);
             }
