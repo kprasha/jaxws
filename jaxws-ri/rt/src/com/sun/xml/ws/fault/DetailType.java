@@ -51,17 +51,15 @@ class DetailType {
      * {@link Object} once we have better solution that working thru {@link com.sun.xml.bind.api.Bridge}
      */
     @XmlAnyElement(lax=true)
-    private List<Object> detailEntry;
+    private final List<Object> detailEntry = new ArrayList<Object>();
 
     List<Object> getDetails() {
         return detailEntry;
     }
 
     DetailType(Object detailObject) {
-        if(detailObject != null){
-            detailEntry = new ArrayList<Object>();
+        if(detailObject != null)
             detailEntry.add(detailObject);
-        }
     }
 
     DetailType() {
