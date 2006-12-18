@@ -86,13 +86,13 @@ class SOAP12Fault extends SOAPFaultBuilder {
     @XmlElement(namespace=ns, name="Reason")
     private ReasonType reason;
 
-    @XmlElement(namespace = ns, name="Node")
+    @XmlElement(namespace=ns, name="Node")
     private String node;
 
-    @XmlElement(namespace = ns, name="Role")
+    @XmlElement(namespace=ns, name="Role")
     private String role;
 
-    @XmlElement(namespace = ns, name="Detail")
+    @XmlElement(namespace=ns, name="Detail")
     private DetailType detail;
 
     SOAP12Fault() {
@@ -108,12 +108,10 @@ class SOAP12Fault extends SOAPFaultBuilder {
 
     SOAP12Fault(SOAPFault fault) {
         code = new CodeType(fault.getFaultCodeAsQName());
-        if (code != null) {
-            try {
-                fillFaultSubCodes(fault, code.getSubcode());
-            } catch (SOAPException e) {
-                throw new WebServiceException(e);
-            }
+        try {
+            fillFaultSubCodes(fault, code.getSubcode());
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
         }
 
         reason = new ReasonType(fault.getFaultString());
@@ -182,7 +180,6 @@ class SOAP12Fault extends SOAPFaultBuilder {
             fault.appendFaultSubcode(subcode.getValue());
             fillFaultSubCodes(fault, subcode.getSubcode());
         }
-        return;
     }
 }
 
