@@ -80,19 +80,19 @@ class SOAP12Fault extends SOAPFaultBuilder {
     @XmlTransient
     private static final String ns = "http://www.w3.org/2003/05/soap-envelope";
 
-    @XmlElement(namespace = ns)
+    @XmlElement(namespace=ns, name="Code")
     private CodeType code;
 
-    @XmlElement(namespace = ns)
+    @XmlElement(namespace=ns, name="Reason")
     private ReasonType reason;
 
-    @XmlElement(namespace = ns)
+    @XmlElement(namespace = ns, name="Node")
     private String node;
 
-    @XmlElement(namespace = ns)
+    @XmlElement(namespace = ns, name="Role")
     private String role;
 
-    @XmlElement(namespace = ns)
+    @XmlElement(namespace = ns, name="Detail")
     private DetailType detail;
 
     SOAP12Fault() {
