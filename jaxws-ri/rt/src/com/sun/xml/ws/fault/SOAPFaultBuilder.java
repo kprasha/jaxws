@@ -78,9 +78,7 @@ public abstract class SOAPFaultBuilder {
     public Throwable createException(Map<QName, CheckedExceptionImpl> exceptions) throws JAXBException {
         DetailType dt = getDetail();
         Object detail = null;
-        if(dt != null && dt.getDetails() != null && dt.getDetails().size() > 0){
-            detail = dt.getDetails().get(0);
-        }
+        if(dt != null)  detail = dt.getDetail(0);
 
         //return ProtocolException if the detail is not present or there is no checked exception
         if(detail == null || exceptions == null){
@@ -90,7 +88,8 @@ public abstract class SOAPFaultBuilder {
         }
 
         //check if the detail is a checked exception, if not throw a ProtocolException
-        Node jaxbDetail = (Node)dt.getDetails().get(0);
+        // TODO: this cast looks like a bug but I don't know how to fix this.
+        Node jaxbDetail = (Node)detail;
         QName detailName = new QName(jaxbDetail.getNamespaceURI(), jaxbDetail.getLocalName());
         CheckedExceptionImpl ce = exceptions.get(detailName);
         if (ce == null) {

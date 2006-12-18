@@ -158,8 +158,8 @@ class SOAP11Fault extends SOAPFaultBuilder {
     protected Throwable getProtocolException() {
         try {
             SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault(faultstring, faultcode);
-            if(detail != null && !detail.getDetails().isEmpty() && detail.getDetails().get(0) instanceof Node){
-                Node n = fault.getOwnerDocument().importNode((Node)detail.getDetails().get(0), true);
+            if(detail != null && detail.getDetail(0) instanceof Node) {
+                Node n = fault.getOwnerDocument().importNode((Node)detail.getDetail(0), true);
                 Detail d = fault.addDetail();
                 d.appendChild(n);
             }

@@ -23,6 +23,7 @@
 package com.sun.xml.ws.fault;
 
 
+import com.sun.xml.ws.api.SOAPVersion;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,12 +33,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPException;
-import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
-
-import com.sun.xml.ws.api.SOAPVersion;
+import javax.xml.ws.soap.SOAPFaultException;
 
 /**
  * SOAP 1.2 Fault class that can be marshalled/unmarshalled by JAXB
@@ -157,7 +156,7 @@ class SOAP12Fault extends SOAPFaultBuilder {
      protected Throwable getProtocolException() {
         try {
             SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(Reason.texts().get(0).getText(), (Code != null)?Code.getValue():null);
-            if(Detail != null && Detail.getDetails() != null && Detail.getDetails().size() > 0 && Detail.getDetails().get(0) instanceof Node){
+            if(Detail != null && Detail.getDetail(0) instanceof Node){
                 javax.xml.soap.Detail detail = fault.addDetail();
                 for(Object obj:Detail.getDetails()){
                     if(!(obj instanceof Node))
