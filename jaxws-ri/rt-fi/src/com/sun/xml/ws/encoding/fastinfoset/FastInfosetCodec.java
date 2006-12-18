@@ -81,7 +81,8 @@ public class FastInfosetCodec implements Codec {
     }
 
     public ContentType encode(Packet packet, OutputStream out) {
-        if (packet.getMessage() != null) {
+        Message message = packet.getMessage();
+        if (message != null && message.hasPayload()) {
             final XMLStreamWriter writer = getXMLStreamWriter(out);
             try {
                 writer.writeStartDocument();
