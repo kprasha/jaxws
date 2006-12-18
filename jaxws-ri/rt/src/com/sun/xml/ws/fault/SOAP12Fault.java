@@ -81,92 +81,92 @@ class SOAP12Fault extends SOAPFaultBuilder {
     private static final String ns = "http://www.w3.org/2003/05/soap-envelope";
 
     @XmlElement(namespace = ns)
-    private CodeType Code;
+    private CodeType code;
 
     @XmlElement(namespace = ns)
-    private ReasonType Reason;
+    private ReasonType reason;
 
     @XmlElement(namespace = ns)
-    private String Node;
+    private String node;
 
     @XmlElement(namespace = ns)
-    private String Role;
+    private String role;
 
     @XmlElement(namespace = ns)
-    private DetailType Detail;
+    private DetailType detail;
 
     SOAP12Fault() {
     }
 
     SOAP12Fault(CodeType code, ReasonType reason, String node, String role, DetailType detail) {
-        Code = code;
-        Reason = reason;
-        Node = node;
-        Role = role;
-        Detail = detail;
+        this.code = code;
+        this.reason = reason;
+        this.node = node;
+        this.role = role;
+        this.detail = detail;
     }
 
     SOAP12Fault(SOAPFault fault) {
-        Code = new CodeType(fault.getFaultCodeAsQName());
-        if (Code != null) {
+        code = new CodeType(fault.getFaultCodeAsQName());
+        if (code != null) {
             try {
-                fillFaultSubCodes(fault, Code.getSubcode());
+                fillFaultSubCodes(fault, code.getSubcode());
             } catch (SOAPException e) {
                 throw new WebServiceException(e);
             }
         }
 
-        Reason = new ReasonType(fault.getFaultString());
-        Role = fault.getFaultRole();
-        Detail = new DetailType(fault.getDetail());
+        reason = new ReasonType(fault.getFaultString());
+        role = fault.getFaultRole();
+        detail = new DetailType(fault.getDetail());
     }
 
     SOAP12Fault(QName code, String reason, String actor, Node detailObject) {
-        Code = new CodeType(code);
-        Reason = new ReasonType(reason);
+        this.code = new CodeType(code);
+        this.reason = new ReasonType(reason);
         if(detailObject != null)
-            Detail = new DetailType(detailObject);
+            detail = new DetailType(detailObject);
     }
 
     CodeType getCode() {
-        return Code;
+        return code;
     }
 
     ReasonType getReason() {
-        return Reason;
+        return reason;
     }
 
     String getNode() {
-        return Node;
+        return node;
     }
 
     String getRole() {
-        return Role;
+        return role;
     }
 
     @Override
     DetailType getDetail() {
-        return Detail;
+        return detail;
     }
     @Override
     String getFaultString() {
-        return Reason.texts().get(0).getText();
+        return reason.texts().get(0).getText();
     }
 
      protected Throwable getProtocolException() {
         try {
-            SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(Reason.texts().get(0).getText(), (Code != null)?Code.getValue():null);
-            if(Detail != null && Detail.getDetail(0) instanceof Node){
+            SOAPFault fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault(reason.texts().get(0).getText(), (code != null)? code.getValue():null);
+            if(detail != null && detail.getDetail(0) instanceof Node){
                 javax.xml.soap.Detail detail = fault.addDetail();
-                for(Object obj:Detail.getDetails()){
+                for(Object obj: this.detail.getDetails()){
                     if(!(obj instanceof Node))
                         continue;
                     Node n = fault.getOwnerDocument().importNode((Node)obj, true);
                     detail.appendChild(n);
                 }
             }
-            if(Code != null)
-                fillFaultSubCodes(fault, Code.getSubcode());
+            if(code != null)
+                fillFaultSubCodes(fault, code.getSubcode());
 
             return new SOAPFaultException(fault);
         } catch (SOAPException e) {
