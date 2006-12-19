@@ -475,9 +475,11 @@ public abstract class SOAPFaultBuilder {
      */
     public static boolean captureStackTrace;
 
+    /*package*/ static final String CAPTURE_STACK_TRACE_PROPERTY = SOAPFaultBuilder.class.getName()+".disableCaptureStackTrace";
+
     static {
         try {
-            captureStackTrace = System.getProperty(SOAPFaultBuilder.class.getName()+".disableCaptureStackTrace")==null;
+            captureStackTrace = System.getProperty(CAPTURE_STACK_TRACE_PROPERTY)==null;
         } catch (SecurityException e) {
             // ignore
         }
