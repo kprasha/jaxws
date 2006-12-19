@@ -22,7 +22,11 @@
 package com.sun.xml.ws.client;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Attachment;
 
+import javax.xml.ws.handler.MessageContext;
+import javax.activation.DataHandler;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
@@ -93,7 +97,20 @@ public class ResponseContext extends AbstractMap<String,Object> {
         if(packet.getHandlerScopePropertyNames(true).contains(key))
             return null;            // no such application-scope property
 
-        return packet.invocationProperties.get(key);
+        Object value =  packet.invocationProperties.get(key);
+
+        //add the attachments from the Message to the corresponding attachment property
+        if(key.equals(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)){
+            Map<String, DataHandler> atts = (Map<String, DataHandler>) value;
+            if(atts == null)
+                atts = new HashMap<String, DataHandler>();
+            AttachmentSet attSet = packet.getMessage().getAttachments();
+            for(Attachment att : attSet){
+                atts.put(att.getContentId(), att.asDataHandler());
+            }
+            return atts;
+        }
+        return value;
     }
 
     public Object put(String key, Object value) {
