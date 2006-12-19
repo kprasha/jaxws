@@ -23,7 +23,7 @@ public final class XMLCodec implements Codec {
 
     public static final String XML_TEXT_MIME_TYPE = "text/xml";
 
-    private static final ContentType contentType = new ContentTypeImpl(XML_APPLICATION_MIME_TYPE);
+    private static final ContentType contentType = new ContentTypeImpl(XML_TEXT_MIME_TYPE);
 
     public String getMimeType() {
         return XML_APPLICATION_MIME_TYPE;
