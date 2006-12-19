@@ -39,6 +39,7 @@ import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.StringUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
@@ -90,7 +91,7 @@ public abstract class SOAPFaultBuilder {
         if(detail == null || exceptions == null){
             // No soap detail, doesnt look like its a checked exception
             // throw a protocol exception
-            return getProtocolException();
+            return attachServerException(getProtocolException());
         }
 
         //check if the detail is a checked exception, if not throw a ProtocolException
@@ -98,19 +99,19 @@ public abstract class SOAPFaultBuilder {
         CheckedExceptionImpl ce = exceptions.get(detailName);
         if (ce == null) {
             //No Checked exception for the received detail QName, throw a SOAPFault exception
-            return getProtocolException();
+            return attachServerException(getProtocolException());
 
         }
 
         if (ce.getExceptionType().equals(ExceptionType.UserDefined)) {
-            return createUserDefinedException(ce);
+            return attachServerException(createUserDefinedException(ce));
 
         }
         Class exceptionClass = ce.getExceptionClass();
         try {
             Constructor constructor = exceptionClass.getConstructor(String.class, (Class) ce.getDetailType().type);
-            Object exception = constructor.newInstance(getFaultString(), getJAXBObject(detail, ce));
-            return (Exception) exception;
+            Exception exception = (Exception) constructor.newInstance(getFaultString(), getJAXBObject(detail, ce));
+            return attachServerException(exception);
         } catch (Exception e) {
             throw new WebServiceException(e);
         }
@@ -198,7 +199,7 @@ public abstract class SOAPFaultBuilder {
         }
     }
 
-    private static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode, Node detail) {
+    private static Message createSOAPFaultMessage(SOAPVersion soapVersion, String faultString, QName faultCode, Element detail) {
         switch (soapVersion) {
             case SOAP_11:
                 return JAXBMessage.create(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
@@ -229,6 +230,28 @@ public abstract class SOAPFaultBuilder {
             // this should never happen
             logger.log(Level.WARNING, "Unable to capture the stack trace into XML",e);
         }
+    }
+
+    /**
+     * Initialize the cause of this exception by attaching the server side exception.
+     */
+    private <T extends Throwable> T attachServerException(T t) {
+        DetailType detail = getDetail();
+        if(detail==null)        return t;   // no details
+
+        for (Element n : detail.getDetails()) {
+            if(ExceptionBean.isStackTraceXml(n)) {
+                try {
+                    t.initCause(ExceptionBean.unmarshal(n));
+                } catch (JAXBException e) {
+                    // perhaps incorrectly formatted XML.
+                    logger.log(Level.WARNING, "Unable to read the capture stack trace in the fault",e);
+                }
+                return t;
+            }
+        }
+
+        return t;
     }
 
     abstract protected Throwable getProtocolException();
@@ -325,14 +348,14 @@ public abstract class SOAPFaultBuilder {
                 faultString = e.toString();
             }
         }
-        Node detailNode = null;
+        Element detailNode = null;
         if (detail == null && soapFaultException != null) {
             detailNode = soapFaultException.getFault().getDetail();
         } else if(ce != null){
             try {
                 DOMResult dr = new DOMResult();
                 ce.getBridge().marshal(detail,dr);
-                detailNode = dr.getNode().getFirstChild();
+                detailNode = (Element)dr.getNode().getFirstChild();
             } catch (JAXBException e1) {
                 //Should we throw Internal Server Error???
                 faultString = e.getMessage();
@@ -396,14 +419,14 @@ public abstract class SOAPFaultBuilder {
         }
 
         ReasonType reason = new ReasonType(faultString);
-        Node detailNode = null;
+        Element detailNode = null;
         if (detail == null && soapFaultException != null) {
             detailNode = soapFaultException.getFault().getDetail();
         } else if(detail != null){
             try {
                 DOMResult dr = new DOMResult();
                 ce.getBridge().marshal(detail, dr);
-                detailNode = dr.getNode().getFirstChild();
+                detailNode = (Element)dr.getNode().getFirstChild();
             } catch (JAXBException e1) {
                 //Should we throw Internal Server Error???
                 faultString = e.getMessage();

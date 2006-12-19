@@ -2,6 +2,7 @@ package com.sun.xml.ws.fault;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 import com.sun.xml.ws.developer.ServerSideException;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
@@ -23,7 +24,7 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-@XmlRootElement(namespace=ExceptionBean.NS,name="exception")
+@XmlRootElement(namespace=ExceptionBean.NS,name=ExceptionBean.LOCAL_NAME)
 final class ExceptionBean {
     /**
      * Converts the given {@link Throwable} into an XML representation
@@ -36,7 +37,7 @@ final class ExceptionBean {
     }
 
     /**
-     * Does the reverse operation of {@link #unmarshal(Node)}. Constructs an
+     * Does the reverse operation of {@link #marshal(Throwable, Node)}. Constructs an
      * {@link Exception} object from the XML.
      */
     public static ServerSideException unmarshal( Node xml ) throws JAXBException {
@@ -129,9 +130,21 @@ final class ExceptionBean {
         }
     }
 
+    /**
+     * Checks if the given element is the XML representation of {@link ExceptionBean}.
+     */
+    public static boolean isStackTraceXml(Element n) {
+        return n.getLocalName().equals(LOCAL_NAME) && n.getNamespaceURI().equals(NS);
+    }
+
     private static final JAXBContext JAXB_CONTEXT;
 
+    /**
+     * Namespace URI.
+     */
     /*package*/ static final String NS = "http://jax-ws.dev.java.net/";
+
+    /*package*/ static final String LOCAL_NAME = "exception";
 
     static {
         try {

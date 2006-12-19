@@ -23,6 +23,7 @@
 package com.sun.xml.ws.fault;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -95,7 +96,7 @@ class SOAP11Fault extends SOAPFaultBuilder {
      * @param actor
      * @param detailObject
      */
-    SOAP11Fault(QName code, String reason, String actor, Node detailObject) {
+    SOAP11Fault(QName code, String reason, String actor, Element detailObject) {
         this.faultcode = code;
         this.faultstring = reason;
         this.faultactor = actor;

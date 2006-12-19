@@ -24,6 +24,7 @@ package com.sun.xml.ws.fault;
 
 
 import com.sun.xml.ws.api.SOAPVersion;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -119,7 +120,7 @@ class SOAP12Fault extends SOAPFaultBuilder {
         detail = new DetailType(fault.getDetail());
     }
 
-    SOAP12Fault(QName code, String reason, String actor, Node detailObject) {
+    SOAP12Fault(QName code, String reason, String actor, Element detailObject) {
         this.code = new CodeType(code);
         this.reason = new ReasonType(reason);
         if(detailObject != null)

@@ -24,6 +24,7 @@ package com.sun.xml.ws.fault;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -50,10 +51,10 @@ class DetailType {
      * {@link Object} once we have better solution that working thru {@link com.sun.xml.bind.api.Bridge}
      */
     @XmlAnyElement
-    private final List<Node> detailEntry = new ArrayList<Node>();
+    private final List<Element> detailEntry = new ArrayList<Element>();
 
     @NotNull
-    List<Node> getDetails() {
+    List<Element> getDetails() {
         return detailEntry;
     }
 
@@ -68,7 +69,7 @@ class DetailType {
             return null;
     }
 
-    DetailType(Node detailObject) {
+    DetailType(Element detailObject) {
         if(detailObject != null)
             detailEntry.add(detailObject);
     }
