@@ -29,6 +29,8 @@ import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamHeader12;
 
 import javax.xml.stream.XMLStreamReader;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * {@link StreamSOAPCodec} for SOAP 1.2.
@@ -38,6 +40,8 @@ import javax.xml.stream.XMLStreamReader;
 final class StreamSOAP12Codec extends StreamSOAPCodec {
     public static final String SOAP12_MIME_TYPE = "application/soap+xml";
     public static final String SOAP12_CONTENT_TYPE = SOAP12_MIME_TYPE+"; charset=\"utf-8\"";
+
+    private static final List<String> expectedContentTypes = Collections.singletonList(SOAP12_MIME_TYPE);
 
     /*package*/ StreamSOAP12Codec() {
         super(SOAPVersion.SOAP_12);
@@ -63,5 +67,9 @@ final class StreamSOAP12Codec extends StreamSOAPCodec {
         } else {
             return new ContentTypeImpl(SOAP12_CONTENT_TYPE + ";action=\""+soapAction+"\"");
         }
+    }
+
+    protected List<String> getExpectedContentTypes() {
+        return expectedContentTypes;
     }
 }

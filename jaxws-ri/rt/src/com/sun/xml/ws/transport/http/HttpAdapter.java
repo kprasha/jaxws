@@ -45,6 +45,7 @@ import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.server.ServerRtException;
+import com.sun.xml.ws.server.UnsupportedMediaException;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -89,15 +90,6 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     public final Map<SDDocument,String> revWsdls;
 
     public final HttpAdapterList<? extends HttpAdapter> owner;
-
-    //TODO: This is not inclusive of different media type that might be expected
-    //in case of XML/HTTP case. There might be better way to handle it - probably
-    // at the codec level to allow any kind of media type, if there is codec that
-    // can understand it we should let it go.
-    private static final String[] contentTypes = {
-            "text/xml", "application/soap+xml", "application/xop+xml",
-            "application/fastinfoset", "application/soap+fastinfoset", "application/xml",
-            "application/x-www-form-urlencoded"};
 
     /**
      * Creates a lone {@link HttpAdapter} that does not know of any other
@@ -193,6 +185,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * @return
      * @throws IOException
      *         ExceptionHasMessage exception that contains particular fault message
+     *         UnsupportedMediaException to indicate to send 415 error code
      */
     private Packet decodePacket(@NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
         String ct = con.getRequestHeader("Content-Type");
@@ -210,25 +203,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             dump(buf, "HTTP request", con.getRequestHeaders());
             in = buf.newInputStream();
         }
-        if (ct != null && !isContentTypeSupported(ct)) {
-            con.setStatus(WSHTTPConnection.UNSUPPORTED_MEDIA);
-            throw new ServerRtException(ServerMessages.UNSUPPORTED_CONTENT_TYPE(ct));
-        }
         codec.decode(in, ct, packet);
         return packet;
     }
 
-    /*
-     * Checks against known Content-Type headers
-     */
-    private boolean isContentTypeSupported(String ct) {
-        for(String contentType : contentTypes) {
-            if (ct.indexOf(contentType) != -1) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 
 
     private void encodePacket(@NotNull Packet packet, @NotNull WSHTTPConnection con, @NotNull Codec codec) throws IOException {
@@ -294,6 +273,14 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             Packet response = new Packet();
             response.setMessage(e.getFaultMessage());
+            encodePacket(response, con, tk.codec);
+            pool.recycle(tk);
+            con.close();
+            return;
+        } catch(UnsupportedMediaException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            Packet response = new Packet();
+            con.setStatus(WSHTTPConnection.UNSUPPORTED_MEDIA);
             encodePacket(response, con, tk.codec);
             pool.recycle(tk);
             con.close();
@@ -376,7 +363,10 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 } catch(ExceptionHasMessage e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
                     packet.setMessage(e.getFaultMessage());
-                } catch (ServerRtException e) {
+                } catch(UnsupportedMediaException e) {
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                    con.setStatus(WSHTTPConnection.UNSUPPORTED_MEDIA);
+                } catch(ServerRtException e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }
                 if (packet.getMessage() != null && !packet.getMessage().isFault()) {

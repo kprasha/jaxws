@@ -53,6 +53,8 @@ import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.resources.StreamingMessages;
 import com.sun.xml.ws.server.ServerRtException;
+import com.sun.xml.ws.server.UnsupportedMediaException;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 /**
  * SOAP binding {@link Codec} that can handle MTOM, SwA, and SOAP messages 
@@ -298,6 +300,9 @@ public class SOAPBindingCodec extends MimeCodec {
     }
 
     public void decode(ReadableByteChannel in, String contentType, Packet packet) {
+        if (contentType == null) {
+            throw new UnsupportedMediaException();
+        }
         /**
          * Reset the encoding state when on the server side for each
          * decode/encode step.

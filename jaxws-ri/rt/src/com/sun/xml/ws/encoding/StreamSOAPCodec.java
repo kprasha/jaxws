@@ -37,6 +37,7 @@ import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.protocol.soap.VersionMismatchException;
+import com.sun.xml.ws.server.UnsupportedMediaException;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
@@ -52,6 +53,7 @@ import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -104,9 +106,32 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
         throw new UnsupportedOperationException();
     }
 
+    protected abstract List<String> getExpectedContentTypes();
+
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
+        List<String> expectedContentTypes = getExpectedContentTypes();
+        if (contentType != null && !isContentTypeSupported(contentType,expectedContentTypes)) {
+            throw new UnsupportedMediaException(contentType, expectedContentTypes);
+        }
         XMLStreamReader reader = createXMLStreamReader(in);
         packet.setMessage(decode(reader));
+    }
+
+    /*
+     * Checks against expected Content-Type headers that is handled by a codec
+     *
+     * @param ct the Content-Type of the request
+     * @param expected expected Content-Types for a codec
+     * @return true if the codec supports this Content-Type
+     *         false otherwise
+     */
+    private static boolean isContentTypeSupported(String ct, List<String> expected) {
+        for(String contentType : expected) {
+            if (ct.indexOf(contentType) != -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
