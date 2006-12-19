@@ -216,6 +216,7 @@ public abstract class SOAPFaultBuilder {
      */
     final void captureStackTrace(@Nullable Throwable t) {
         if(t==null)     return;
+        if(!captureStackTrace)  return;     // feature disabled
 
         try {
             Document d = DOMUtil.createDom();
@@ -469,7 +470,18 @@ public abstract class SOAPFaultBuilder {
 
     private static final Logger logger = Logger.getLogger(SOAPFaultBuilder.class.getName());
 
+    /**
+     * Set to false if you don't want the generated faults to have stack trace in it.
+     */
+    public static boolean captureStackTrace;
+
     static {
+        try {
+            captureStackTrace = System.getProperty(SOAPFaultBuilder.class.getName()+".disableCaptureStackTrace")==null;
+        } catch (SecurityException e) {
+            // ignore
+        }
+
         try {
             JAXB_CONTEXT = (JAXBRIContext)JAXBContext.newInstance(SOAP11Fault.class, SOAP12Fault.class);
         } catch (JAXBException e) {

@@ -55,6 +55,10 @@ final class ExceptionBean {
     @XmlElement(namespace=NS,name="cause")
     public ExceptionBean cause;
 
+    // so that people noticed this fragment can turn it off
+    @XmlAttribute
+    public String note = "To disable this feature, set "+SOAPFaultBuilder.CAPTURE_STACK_TRACE_PROPERTY+" system property to false";
+
     ExceptionBean() {// for JAXB
     }
 
