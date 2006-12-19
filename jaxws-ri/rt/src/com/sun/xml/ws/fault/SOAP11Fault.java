@@ -79,9 +79,7 @@ class SOAP11Fault extends SOAPFaultBuilder {
 
     @XmlElement(namespace = "")
     private String faultactor;
-    /**
-     * detail is a choice between {@link javax.xml.soap.Detail} and a JAXB object. Lets keep it as T or can be {@link Object} as well
-     */
+
     @XmlElement(namespace = "")
     private DetailType detail;
 
@@ -141,16 +139,13 @@ class SOAP11Fault extends SOAPFaultBuilder {
     }
 
     /**
-     * returns a java type T - this could be a {@link javax.xml.soap.Detail} or a JAXB object
+     * returns the object that represents detail.
      */
     @Override
     DetailType getDetail() {
         return detail;
     }
 
-    /**
-     * @param detail could be {@link javax.xml.soap.Detail} or a JAXB object
-     */
     void setDetail(DetailType detail) {
         this.detail = detail;
     }

@@ -146,6 +146,12 @@ class SOAP12Fault extends SOAPFaultBuilder {
     DetailType getDetail() {
         return detail;
     }
+
+    @Override
+    void setDetail(DetailType detail) {
+        this.detail = detail;
+    }
+
     @Override
     String getFaultString() {
         return reason.texts().get(0).getText();

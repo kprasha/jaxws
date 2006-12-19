@@ -36,7 +36,9 @@ import com.sun.xml.ws.encoding.soap.SerializationException;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
+import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.StringUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBContext;
@@ -52,6 +54,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class that represents SOAP 1.1 or SOAP 1.2 fault. This class can be used by the invocation handlers to create
@@ -66,6 +70,8 @@ public abstract class SOAPFaultBuilder {
      * a protocol specific exception
      */
     abstract DetailType getDetail();
+
+    abstract void setDetail(DetailType detailType);
 
     /**
      * gives the fault string that can be used to create an {@link Exception}
@@ -204,6 +210,28 @@ public abstract class SOAPFaultBuilder {
         }
     }
 
+    /**
+     * Creates a DOM node that represents the complete stack trace of the exception,
+     * and attach that to {@link DetailType}.
+     */
+    final void captureStackTrace(@Nullable Throwable t) {
+        if(t==null)     return;
+
+        try {
+            Document d = DOMUtil.createDom();
+            ExceptionBean.marshal(t,d);
+
+            DetailType detail = getDetail();
+            if(detail==null)
+            setDetail(detail=new DetailType());
+
+            detail.getDetails().add(d.getDocumentElement());
+        } catch (JAXBException e) {
+            // this should never happen
+            logger.log(Level.WARNING, "Unable to capture the stack trace into XML",e);
+        }
+    }
+
     abstract protected Throwable getProtocolException();
 
     private Object getJAXBObject(Node jaxbBean, CheckedException ce) throws JAXBException {
@@ -312,7 +340,10 @@ public abstract class SOAPFaultBuilder {
                 faultCode = getDefaultFaultCode(soapVersion);
             }
         }
-        return JAXBMessage.create(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, faultActor, detailNode), soapVersion);
+        SOAP11Fault soap11Fault = new SOAP11Fault(faultCode, faultString, faultActor, detailNode);
+        soap11Fault.captureStackTrace(e);
+
+        return JAXBMessage.create(JAXB_CONTEXT, soap11Fault, soapVersion);
     }
 
     private static Message createSOAP12Fault(SOAPVersion soapVersion, Throwable e, Object detail, CheckedExceptionImpl ce, QName faultCode) {
@@ -383,7 +414,10 @@ public abstract class SOAPFaultBuilder {
         DetailType detailType = null;
         if(detailNode != null)
             detailType = new DetailType(detailNode);
-        return JAXBMessage.create(JAXB_CONTEXT, new SOAP12Fault(code, reason, null, faultRole, detailType), soapVersion);
+        SOAP12Fault soap12Fault = new SOAP12Fault(code, reason, null, faultRole, detailType);
+        soap12Fault.captureStackTrace(e);
+
+        return JAXBMessage.create(JAXB_CONTEXT, soap12Fault, soapVersion);
     }
 
     private static SubcodeType fillSubcodes(SubcodeType parent, QName value){
@@ -410,6 +444,8 @@ public abstract class SOAPFaultBuilder {
      * This {@link JAXBContext} can handle SOAP 1.1/1.2 faults.
      */
     private static final JAXBRIContext JAXB_CONTEXT;
+
+    private static final Logger logger = Logger.getLogger(SOAPFaultBuilder.class.getName());
 
     static {
         try {
