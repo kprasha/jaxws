@@ -94,7 +94,6 @@ public abstract class SOAPFaultBuilder {
         }
 
         //check if the detail is a checked exception, if not throw a ProtocolException
-        // TODO: this cast looks like a bug but I don't know how to fix this.
         QName detailName = new QName(detail.getNamespaceURI(), detail.getLocalName());
         CheckedExceptionImpl ce = exceptions.get(detailName);
         if (ce == null) {
