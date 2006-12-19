@@ -251,6 +251,10 @@ public final class WsaServerTube extends WsaTube {
         if (wbo == null)
             return;
 
+        // if no wsa:To header is found
+        if (!foundTo)
+            throw new MapRequiredException(addressingVersion.toTag);
+        
         // if two-way and no wsa:MessageID is found
         if (!wbo.getOperation().isOneWay() && !foundMessageId)
             throw new MapRequiredException(addressingVersion.messageIDTag);

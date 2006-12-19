@@ -328,9 +328,5 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         // if no wsa:Action header is found
         if (!foundAction)
             throw new MapRequiredException(addressingVersion.actionTag);
-
-        // if no wsa:To header is found
-        if (!foundTo)
-            throw new MapRequiredException(addressingVersion.toTag);
     }
 }
