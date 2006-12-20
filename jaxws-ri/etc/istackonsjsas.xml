@@ -44,6 +44,7 @@
 
     <target name="init">
         <mkdir dir="${backup.dir}"/>
+        <mkdir dir="${backup.dir}/bin"/>
         <mkdir dir="${as.lib.endorsed.dir}"/>
     </target>
 
@@ -133,7 +134,7 @@
         <antcall target="create.classpath.prefix-8.X" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>       
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/resolver.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}${com.sun.aas.installRoot}/lib/FastInfoset.jar${path.separator}]]></replacevalue>       
         </replace>
     </target>
 
@@ -145,28 +146,52 @@
         <antcall target="create.classpath.prefix" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-libs.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}]]></replacevalue>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/resolver.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}${com.sun.aas.installRoot}/lib/FastInfoset.jar${path.separator}]]></replacevalue>
         </replace>
     </target>
 
     <target name="install-tools" depends="install-on-windows, install-on-unix">
         <echo message="Installed JAX-WS tools (wsimport, wsgen) to ${as.bin.home}"/>
     </target>
-    <target name="install-on-unix" if="isNotWindows">
-        <copy toDir="${as.bin.home}" overwrite="true">
-            <fileset dir="bin">
-                <include name="*.sh"/>
+     <target name="install-on-unix" if="isNotWindows">
+        <copy toDir="${backup.dir}/bin">
+            <fileset dir="${as.bin.home}">
+                <include name="wsgen"/>
+                <include name="wsimport"/>
             </fileset>
         </copy>
-        <chmod perm="+x" file="${as.bin.home}/wsimport.sh" />
-        <chmod perm="+x" file="${as.bin.home}/wsgen.sh" />
+	<chmod dir="${backup.dir}/bin" perm="775" includes="*"/>
+	<replace file="${as.bin.home}/wsimport" >
+	    <replacetoken><![CDATA[CLASSPATH="]]></replacetoken>
+	    <replacevalue><![CDATA[CLASSPATH="$AS_WEBSERVICES_LIB"/jaxws-tools.jar:"]]></replacevalue>
+	</replace>
+	<chmod file="${as.bin.home}/wsimport" perm="775"/>
+	<replace file="${as.bin.home}/wsgen" >
+	    <replacetoken><![CDATA[CLASSPATH="]]></replacetoken>
+	    <replacevalue><![CDATA[CLASSPATH="$AS_WEBSERVICES_LIB"/jaxws-tools.jar:"]]></replacevalue>
+	</replace>
+	<chmod file="${as.bin.home}/wsgen" perm="775"/>
     </target>
     <target name="install-on-windows" unless="isNotWindows">
-        <copy toDir="${as.bin.home}" overwrite="true">
-			<fileset dir="bin">
-				<include name="*.bat"/>
-			</fileset>
-		</copy>
+        <copy toDir="${backup.dir}/bin">
+            <fileset dir="${as.bin.home}">
+                <include name="wsgen.bat"/>
+                <include name="wsimport.bat"/>
+            </fileset>
+        </copy>
+        <chmod dir="${backup.dir}/bin" perm="775" includes="*"/>
+	<replace file="${as.bin.home}/wsimport.bat" >
+   <replacetoken><![CDATA[CLASSPATH=]]></replacetoken>
+	    <replacevalue><![CDATA[CLASSPATH=%AS_WEBSERVICES_LIB%/jaxws-tools.jar;]]></replacevalue>
+  
+	</replace>
+	<chmod file="${as.bin.home}/wsimport.bat" perm="775"/>
+	<replace file="${as.bin.home}/wsgen.bat" >
+   <replacetoken><![CDATA[CLASSPATH=]]></replacetoken>
+	    <replacevalue><![CDATA[CLASSPATH=%AS_WEBSERVICES_LIB%/jaxws-tools.jar;]]></replacevalue>
+	   
+	</replace>
+	<chmod file="${as.bin.home}/wsgen.bat" perm="775"/>
     </target>
 
     <target name="help">
