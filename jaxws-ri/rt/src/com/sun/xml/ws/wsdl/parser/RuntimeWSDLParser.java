@@ -348,6 +348,13 @@ public class RuntimeWSDLParser {
                 try {
                     WSEndpointReference wsepr = new WSEndpointReference(reader, AddressingVersion.W3C);
                     port.setEPR(wsepr);
+                    /** XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader) called from inside WSEndpointReference()
+                     *  consumes the complete EPR infoset and moves to the next element. This breaks the normal wsdl parser
+                     *  processing where it expects anyone reading the infoset to move to the end of the element that its reading
+                     *  and not to the next element.
+                     */
+                    if(reader.getEventType() == XMLStreamConstants.END_ELEMENT && reader.getName().equals(WSDLConstants.QNAME_PORT))
+                        break;
                 } catch (XMLStreamException e) {
                     throw new WebServiceException(e);
                 }
