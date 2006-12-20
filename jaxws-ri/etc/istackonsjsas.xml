@@ -150,49 +150,28 @@
         </replace>
     </target>
 
+
+
     <target name="install-tools" depends="install-on-windows, install-on-unix">
         <echo message="Installed JAX-WS tools (wsimport, wsgen) to ${as.bin.home}"/>
     </target>
-     <target name="install-on-unix" if="isNotWindows">
-        <copy toDir="${backup.dir}/bin">
-            <fileset dir="${as.bin.home}">
-                <include name="wsgen"/>
-                <include name="wsimport"/>
+    <target name="install-on-unix" if="isNotWindows">
+        <copy toDir="${as.bin.home}" overwrite="true">
+            <fileset dir="bin">
+                <include name="*.sh"/>
             </fileset>
         </copy>
-	<chmod dir="${backup.dir}/bin" perm="775" includes="*"/>
-	<replace file="${as.bin.home}/wsimport" >
-	    <replacetoken><![CDATA[CLASSPATH="]]></replacetoken>
-	    <replacevalue><![CDATA[CLASSPATH="$AS_WEBSERVICES_LIB"/jaxws-tools.jar:"]]></replacevalue>
-	</replace>
-	<chmod file="${as.bin.home}/wsimport" perm="775"/>
-	<replace file="${as.bin.home}/wsgen" >
-	    <replacetoken><![CDATA[CLASSPATH="]]></replacetoken>
-	    <replacevalue><![CDATA[CLASSPATH="$AS_WEBSERVICES_LIB"/jaxws-tools.jar:"]]></replacevalue>
-	</replace>
-	<chmod file="${as.bin.home}/wsgen" perm="775"/>
+        <chmod perm="+x" file="${as.bin.home}/wsimport.sh" />
+        <chmod perm="+x" file="${as.bin.home}/wsgen.sh" />
     </target>
     <target name="install-on-windows" unless="isNotWindows">
-        <copy toDir="${backup.dir}/bin">
-            <fileset dir="${as.bin.home}">
-                <include name="wsgen.bat"/>
-                <include name="wsimport.bat"/>
-            </fileset>
-        </copy>
-        <chmod dir="${backup.dir}/bin" perm="775" includes="*"/>
-	<replace file="${as.bin.home}/wsimport.bat" >
-   <replacetoken><![CDATA[CLASSPATH=]]></replacetoken>
-	    <replacevalue><![CDATA[CLASSPATH=%AS_WEBSERVICES_LIB%/jaxws-tools.jar;]]></replacevalue>
-  
-	</replace>
-	<chmod file="${as.bin.home}/wsimport.bat" perm="775"/>
-	<replace file="${as.bin.home}/wsgen.bat" >
-   <replacetoken><![CDATA[CLASSPATH=]]></replacetoken>
-	    <replacevalue><![CDATA[CLASSPATH=%AS_WEBSERVICES_LIB%/jaxws-tools.jar;]]></replacevalue>
-	   
-	</replace>
-	<chmod file="${as.bin.home}/wsgen.bat" perm="775"/>
+        <copy toDir="${as.bin.home}" overwrite="true">
+			<fileset dir="bin">
+				<include name="*.bat"/>
+			</fileset>
+		</copy>
     </target>
+
 
     <target name="help">
         <echo message="install-AS8.X (Appserver 8.1, 8.2) "/>    
