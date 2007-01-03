@@ -157,6 +157,12 @@ public final class Fiber implements Runnable {
     private @Nullable CompletionCallback completionCallback;
 
     /**
+     * Set to true if this fiber is started asynchronously, to avoid
+     * doubly-invoking completion code.
+     */
+    private boolean started;
+
+    /**
      * Callback to be invoked when a {@link Fiber} finishs execution.
      */
     public interface CompletionCallback {
@@ -210,6 +216,7 @@ public final class Fiber implements Runnable {
         next = tubeline;
         this.packet = request;
         this.completionCallback = completionCallback;
+        this.started = true;
         owner.addRunnable(this);
     }
 
@@ -409,7 +416,8 @@ public final class Fiber implements Runnable {
                 Thread.currentThread().interrupt();
                 interrupted = false;
             }
-            completionCheck();
+            if(!started)
+                completionCheck();
         }
     }
 
