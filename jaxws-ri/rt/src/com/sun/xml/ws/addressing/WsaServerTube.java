@@ -199,7 +199,14 @@ public final class WsaServerTube extends WsaTube {
             return;
         }
 
-        EndpointAddress adrs = new EndpointAddress(URI.create(target.getAddress()));
+        EndpointAddress adrs = null;
+        try {
+             adrs = new EndpointAddress(URI.create(target.getAddress()));
+        } catch (NullPointerException e) {
+            throw new WebServiceException(e);
+        } catch (IllegalArgumentException e) {
+            throw new WebServiceException(e);
+        }
 
         // we need to assemble a pipeline to talk to this endpoint.
         // TODO: what to pass as WSService?
