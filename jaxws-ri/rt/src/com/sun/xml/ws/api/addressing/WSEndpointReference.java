@@ -651,15 +651,6 @@ public final class WSEndpointReference {
     }
 
     /**
-     * @deprecated
-     *      Use {@link #writeTo(String, ContentHandler, ErrorHandler, boolean)}
-     *      To be removed before FCS. 
-     */
-    public void writeTo(@NotNull String localName, ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        writeTo(localName,contentHandler,errorHandler,true);
-    }
-
-    /**
      * Writes this EPR to the given {@link ContentHandler}.
      *
      * @param localName
