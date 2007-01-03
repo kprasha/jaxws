@@ -223,7 +223,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
             private boolean isPrefixDeclared(String prefix, String namespaceURI ) {
                 return prefix.equals(getNamespaceContext().getPrefix(namespaceURI));
             }
-        });
+        },true);
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
