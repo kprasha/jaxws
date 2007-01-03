@@ -37,15 +37,15 @@ public final class MimeMultipartParser {
 
     private final BitSet lastPartFound = new BitSet(1);
     // current stream position, set to -1 on EOF
-    int b = 0;
+    private int b = 0;
     private final int[] bcs = new int[256];
-    int[] gss;
+    private int[] gss;
     private static final int BUFFER_SIZE = 4096;
     private byte[] buffer = new byte[BUFFER_SIZE];
     private byte[] prevBuffer = new byte[BUFFER_SIZE];
     private boolean firstPart = true;
 
-    private final Map<String, StreamAttachment> attachments = new HashMap<String, StreamAttachment>();;
+    private final Map<String, StreamAttachment> attachments = new HashMap<String, StreamAttachment>();
     private StreamAttachment root;
     
     private int cidCounter = 0;
@@ -144,7 +144,7 @@ public final class MimeMultipartParser {
             if (firstPart) {
                 compileBoundaryPattern();
                 // skip the first boundary of the MIME package
-                if (!skipPreamble(in, boundaryBytes)) {
+                if (!skipPreamble()) {
                     throw new WebServiceException("Missing Start Boundary, or boundary does not start on a new line");
                 }
             }
@@ -159,7 +159,7 @@ public final class MimeMultipartParser {
             }
 
             ByteArrayBuffer bos = new ByteArrayBuffer();
-            b = readBody(in, boundaryBytes, bos);
+            b = readBody(bos);
             StreamAttachment as = new StreamAttachment(bos, contentId, contentType);
             if (start == null && firstPart) {
                 root = as;      // Taking first part as root part
@@ -180,7 +180,7 @@ public final class MimeMultipartParser {
         }
     }
 
-    private int readBody(InputStream in, byte[] pattern, ByteArrayBuffer baos) throws IOException {
+    private int readBody(ByteArrayBuffer baos) throws IOException {
         if (!findMimeBody(baos)) {
             //TODO: i18n
             throw new WebServiceException("Missing boundary delimitier ");
@@ -192,10 +192,9 @@ public final class MimeMultipartParser {
         int i;
         int l = boundaryBytes.length;
         int lx = l - 1;
-        int bufferLength = 0;
+        int bufferLength;
         int s = 0;
-        long endPos = -1;
-        byte[] tmp = null;
+        byte[] tmp;
 
         boolean first = true;
         BitSet eof = new BitSet(1);
@@ -207,7 +206,7 @@ public final class MimeMultipartParser {
                 prevBuffer = buffer;
                 buffer = tmp;
             }
-            bufferLength = readNext(in, buffer, l, eof);
+            bufferLength = readNext(in, l, eof);
 
             if (bufferLength == -1) {
                 b = -1;
@@ -264,7 +263,7 @@ public final class MimeMultipartParser {
                 if (prevBuffer[s - 1] == (byte) 13) {
                     // if buffer[0] == (byte)10
                     if (buffer[0] == (byte) 10) {
-                        int j = lx - 1;
+                        int j;
                         for (j = lx - 1; j > 0; j--) {
                             if (buffer[j + 1] != boundaryBytes[j]) {
                                 break;
@@ -337,7 +336,7 @@ public final class MimeMultipartParser {
         gss[l - 1] = 1;
     }
 
-    private boolean skipPreamble(InputStream is, byte[] pattern) throws IOException {
+    private boolean skipPreamble() throws IOException {
         if (!findBoundary()) {
             return false;
         }
@@ -351,13 +350,11 @@ public final class MimeMultipartParser {
         int i;
         int l = boundaryBytes.length;
         int lx = l - 1;
-        int bufferLength = 0;
         BitSet eof = new BitSet(1);
-        long[] posVector = new long[1];
 
         while (true) {
             in.mark(l);
-            bufferLength = readNext(in, buffer, l, eof);
+            readNext(in, l, eof);
             if (eof.get(0)) {
                 // End of stream
                 return false;
@@ -435,14 +432,13 @@ public final class MimeMultipartParser {
     }
 
 
-    private int readNext(InputStream is, byte[] buff, int patternLength, BitSet eof) throws IOException {
+    private int readNext(InputStream is, int patternLength, BitSet eof) throws IOException {
         int bufferLength = is.read(buffer, 0, patternLength);
         if (bufferLength == -1) {
             eof.flip(0);
         } else if (bufferLength < patternLength) {
             //repeatedly read patternLength - bufferLength
-            int temp = 0;
-            long pos = 0;
+            int temp ;
             int i = bufferLength;
             for (; i < patternLength; i++) {
                 temp = is.read();
