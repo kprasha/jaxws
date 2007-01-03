@@ -46,6 +46,7 @@ public class MemberSubmissionAddressingFeature extends WebServiceFeature {
      * The instance created will be enabled.
      */
     public MemberSubmissionAddressingFeature() {
+        this.enabled = true;
     }
 
     /**
