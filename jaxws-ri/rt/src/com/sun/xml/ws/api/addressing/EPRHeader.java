@@ -80,6 +80,6 @@ final class EPRHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
-        epr.writeTo(localName,contentHandler,errorHandler);
+        epr.writeTo(localName,contentHandler,errorHandler,true);
     }
 }
