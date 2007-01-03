@@ -730,5 +730,5 @@ public final class Fiber implements Runnable {
      * Set this boolean to true to execute fibers sequentially one by one.
      * See class javadoc.
      */
-    public static boolean serializeExecution = Boolean.getBoolean(Fiber.class.getName()+".serialize");
+    public static volatile boolean serializeExecution = Boolean.getBoolean(Fiber.class.getName()+".serialize");
 }
