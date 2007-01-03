@@ -264,7 +264,7 @@ public interface Header {
     public @NotNull WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException;
 
     /**
-     * Writes out the header.
+     * Writes out the header as a fragment.
      *
      * @throws XMLStreamException
      *      if the operation fails for some reason. This leaves the
