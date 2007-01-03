@@ -387,6 +387,7 @@ public final class Fiber implements Runnable {
         // save the current continuation, so that we return runSync() without executing them.
         final Tube[] oldCont = conts;
         final int oldContSize = contsSize;
+        final boolean oldSynchronous = synchronous;
 
         if(oldContSize>0) {
             conts = new Tube[16];
@@ -411,7 +412,7 @@ public final class Fiber implements Runnable {
         } finally {
             conts = oldCont;
             contsSize = oldContSize;
-            synchronous = false;
+            synchronous = oldSynchronous;
             if(interrupted) {
                 Thread.currentThread().interrupt();
                 interrupted = false;
@@ -644,7 +645,7 @@ public final class Fiber implements Runnable {
                     if (isTraceEnabled()) {
                         LOGGER.fine(getName()+" is blocking thread "+Thread.currentThread().getName());
                     }
-                    wait();
+                    wait(); // the synchronized block is the whole runSync method.
                 } catch (InterruptedException e) {
                     // remember that we are interrupted, but don't respond to it
                     // right away. This behavior is in line with what happens
