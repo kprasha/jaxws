@@ -438,7 +438,7 @@ public final class Fiber implements Runnable {
 
     /**
      * Invokes all registered {@link InterceptorHandler}s and then call into
-     * {@link Fiber#_doRun(Tube)}.
+     * {@link Fiber#__doRun(Tube)}.
      */
     private class InterceptorHandler implements FiberContextSwitchInterceptor.Work<Tube,Tube> {
         /**
@@ -447,7 +447,7 @@ public final class Fiber implements Runnable {
         private int idx;
 
         /**
-         * Initiate the interception, and eventually invokes {@link Fiber#_doRun(Tube)}.
+         * Initiate the interception, and eventually invokes {@link Fiber#__doRun(Tube)}.
          */
         Tube invoke(Tube next) {
             idx=0;
@@ -456,7 +456,7 @@ public final class Fiber implements Runnable {
 
         public Tube execute(Tube next) {
             if(idx==interceptors.size()) {
-                return _doRun(next);
+                return __doRun(next);
             } else {
                 FiberContextSwitchInterceptor interceptor = interceptors.get(idx++);
                 return interceptor.execute(Fiber.this,next,this);
@@ -483,8 +483,20 @@ public final class Fiber implements Runnable {
         if(isTraceEnabled())
             LOGGER.fine(getName()+" running by "+currentThread.getName());
 
-        if(serializeExecution)
+        if(serializeExecution) {
             serializedExecutionLock.lock();
+            try {
+                return _doRun(next);
+            } finally {
+                serializedExecutionLock.unlock();
+            }
+        } else {
+            return _doRun(next);
+        }
+    }
+
+    private Tube _doRun(Tube next) {
+        Thread currentThread = Thread.currentThread();
 
         ClassLoader old = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(contextClassLoader);
@@ -494,7 +506,7 @@ public final class Fiber implements Runnable {
 
                 // if interceptors are set, go through the interceptors.
                 if(interceptorHandler ==null)
-                    next = _doRun(next);
+                    next = __doRun(next);
                 else
                     next = interceptorHandler.invoke(next);
             } while(needsToReenter);
@@ -502,8 +514,6 @@ public final class Fiber implements Runnable {
             return next;
         } finally {
             currentThread.setContextClassLoader(old);
-            if(serializeExecution)
-                serializedExecutionLock.unlock();
         }
     }
 
@@ -512,7 +522,7 @@ public final class Fiber implements Runnable {
      *
      * @see #doRun(Tube)
      */
-    private Tube _doRun(Tube next) {
+    private Tube __doRun(Tube next) {
         final Fiber old = CURRENT_FIBER.get();
         CURRENT_FIBER.set(this);
 
