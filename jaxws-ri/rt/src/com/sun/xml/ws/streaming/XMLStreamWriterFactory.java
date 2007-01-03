@@ -61,11 +61,6 @@ public class XMLStreamWriterFactory {
      */
     static Method fiStAXDocumentSerializer_setEncoding;
     
-    /**
-     * FI stream writer for each thread.
-     */
-    static ThreadLocal fiStreamWriter = new ThreadLocal();
-    
     static {
         // Use StAX pluggability layer to get factory instance
         xmlOutputFactory = XMLOutputFactory.newInstance();
@@ -132,11 +127,7 @@ public class XMLStreamWriterFactory {
         }
         
         try {
-            Object sds = fiStreamWriter.get();
-            if (sds == null) {
-                // Do not use StAX pluggable layer for FI
-                fiStreamWriter.set(sds = fiStAXDocumentSerializer_new.newInstance());
-            }            
+            Object sds = fiStAXDocumentSerializer_new.newInstance();          
             fiStAXDocumentSerializer_setOutputStream.invoke(sds, out);
             fiStAXDocumentSerializer_setEncoding.invoke(sds, encoding);
             return (XMLStreamWriter) sds;

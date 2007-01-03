@@ -781,7 +781,7 @@ public class RuntimeWSDLParser {
      */
     private XMLStreamReader createReader(URL wsdlLoc) throws IOException {
         InputStream stream = wsdlLoc.openStream();
-        return new TidyXMLStreamReader(XMLStreamReaderFactory.createFreshXMLStreamReader(wsdlLoc.toExternalForm(), stream), stream);
+        return new TidyXMLStreamReader(XMLStreamReaderFactory.createXMLStreamReader(wsdlLoc.toExternalForm(), stream, true), stream);
     }
 
     private XMLStreamReader createReader(Source src) {

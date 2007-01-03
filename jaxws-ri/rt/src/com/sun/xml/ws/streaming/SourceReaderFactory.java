@@ -41,12 +41,6 @@ import java.net.URL;
  * @author Santiago.PericasGeertsen@sun.com
  */
 public class SourceReaderFactory {
-       
-    /**
-     * Thread variable used to store DOMStreamReader for current thread.
-     */
-    static ThreadLocal<DOMStreamReader> domStreamReader = 
-        new ThreadLocal<DOMStreamReader>();
     
     /**
      * FI FastInfosetSource class.
@@ -109,10 +103,7 @@ public class SourceReaderFactory {
                     fastInfosetSource_getInputStream.invoke(source));
             }
             else if (source instanceof DOMSource) {
-                DOMStreamReader dsr = domStreamReader.get();
-                if (dsr == null) {
-                    domStreamReader.set(dsr = new DOMStreamReader());
-                } 
+                DOMStreamReader dsr =  new DOMStreamReader();
                 dsr.setCurrentNode(((DOMSource) source).getNode());
                 return dsr;
             }

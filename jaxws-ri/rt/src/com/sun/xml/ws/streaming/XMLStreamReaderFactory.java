@@ -43,17 +43,7 @@ public class XMLStreamReaderFactory {
      * StAX input factory shared by all threads.
      */
     static final XMLInputFactory xmlInputFactory;
-            
-    /**
-     * FI stream reader for each thread.
-     */
-    static final ThreadLocal fiStreamReader = new ThreadLocal();
-    
-    /**
-     * Zephyr's stream reader for each thread.
-     */
-    static final ThreadLocal<XMLStreamReader> xmlStreamReader = new ThreadLocal<XMLStreamReader>();
-    
+
     static {
         // Use StAX pluggability layer to get factory instance
         xmlInputFactory = XMLInputFactory.newInstance();
@@ -79,19 +69,17 @@ public class XMLStreamReaderFactory {
     public static XMLStreamReader createFreshXMLStreamReader(InputSource source,
         boolean rejectDTDs) {
         try {
-            synchronized (xmlInputFactory) {
-                // Char stream available?
-                if (source.getCharacterStream() != null) {
-                    return xmlInputFactory.createXMLStreamReader(
-                        source.getSystemId(), source.getCharacterStream());
-                }
-                
-                // Byte stream available?
-                if (source.getByteStream() != null) {
-                    return xmlInputFactory.createXMLStreamReader(
-                        source.getSystemId(), source.getByteStream());
-                }
+            // Char stream available?
+            if (source.getCharacterStream() != null) {
+                return createXMLStreamReader(source.getSystemId(), source.getCharacterStream(), rejectDTDs);
+            }
 
+            // Byte stream available?
+            if (source.getByteStream() != null) {
+                return createXMLStreamReader(source.getSystemId(), source.getByteStream(), rejectDTDs);
+            }
+            
+            synchronized (xmlInputFactory) {
                 // Otherwise, open URI                
                 return xmlInputFactory.createXMLStreamReader(source.getSystemId(),
                     new URL(source.getSystemId()).openStream());
@@ -101,40 +89,6 @@ public class XMLStreamReaderFactory {
             throw new XMLReaderException("stax.cantCreate",e);
         }
     }
-
-    /**
-     * This factory method would be used for example when caller wants to close the stream.
-     */
-    public static XMLStreamReader createFreshXMLStreamReader(String systemId, InputStream stream) {
-        try {
-            synchronized (xmlInputFactory) {
-                // Otherwise, open URI
-                return xmlInputFactory.createXMLStreamReader(systemId,
-                    stream);
-            }
-        }
-        catch (Exception e) {
-            throw new XMLReaderException("stax.cantCreate",e);
-        }
-    }
-
-    /**
-     * This factory method would be used for example when caller wants to close the stream.
-     */
-    public static XMLStreamReader createFreshXMLStreamReader(String systemId, Reader reader) {
-        try {
-            synchronized (xmlInputFactory) {
-                // Otherwise, open URI
-                return xmlInputFactory.createXMLStreamReader(systemId,
-                    reader);
-            }
-        }
-        catch (Exception e) {
-            throw new XMLReaderException("stax.cantCreate",e);
-        }
-    }
-
-
     
     /**
      * Returns a StAX parser from an InputStream.
@@ -143,7 +97,7 @@ public class XMLStreamReaderFactory {
      */
     public static XMLStreamReader createXMLStreamReader(InputStream in,
         boolean rejectDTDs) {
-        return createXMLStreamReader(null, in, rejectDTDs);        
+        return createXMLStreamReader(null, in, rejectDTDs);
     }
     
     /**
@@ -155,27 +109,10 @@ public class XMLStreamReaderFactory {
     public static XMLStreamReader createXMLStreamReader(String systemId, 
         InputStream in, boolean rejectDTDs) {
         try {
-            // If using Zephyr, try re-using the last instance
-            if (SunStAXReflection.XMLReaderImpl_setInputSource != null) {
-                XMLStreamReader xsr = xmlStreamReader.get();
-                if (xsr == null) {
-                    synchronized (xmlInputFactory) {
-                        xmlStreamReader.set(
-                            xsr = xmlInputFactory.createXMLStreamReader(systemId, in));
-                    }
-                }              
-                else {
-                    SunStAXReflection.XMLReaderImpl_reset.invoke(xsr);
-                    InputSource inputSource = new InputSource(in);
-                    inputSource.setSystemId(systemId);
-                    SunStAXReflection.XMLReaderImpl_setInputSource.invoke(xsr, inputSource);
-                }
-                return xsr;
-            }
-            else {
-                synchronized (xmlInputFactory) {
-                    return xmlInputFactory.createXMLStreamReader(systemId, in);
-                }                
+            synchronized (xmlInputFactory) {
+                // Otherwise, open URI
+                return xmlInputFactory.createXMLStreamReader(systemId,
+                    in);
             }
         } catch (Exception e) {
             throw new XMLReaderException("stax.cantCreate",e);
@@ -190,32 +127,14 @@ public class XMLStreamReaderFactory {
      */
     public static XMLStreamReader createXMLStreamReader(String systemId, Reader reader, boolean rejectDTDs) {
         try {
-            // If using Zephyr, try re-using the last instance
-            if (SunStAXReflection.XMLReaderImpl_setInputSource != null) {
-                XMLStreamReader xsr = xmlStreamReader.get();
-                if (xsr == null) {
-                    synchronized (xmlInputFactory) {
-                        xmlStreamReader.set(
-                            xsr = xmlInputFactory.createXMLStreamReader(reader));
-                    }
-                }              
-                else {
-                    SunStAXReflection.XMLReaderImpl_reset.invoke(xsr);
-                    InputSource in = new InputSource(reader);
-                    in.setSystemId(systemId);
-                    SunStAXReflection.XMLReaderImpl_setInputSource.invoke(xsr, in);
-                }                
-                return xsr;
+            synchronized (xmlInputFactory) {
+                // Otherwise, open URI
+                return xmlInputFactory.createXMLStreamReader(systemId,reader);
             }
-            else {
-                synchronized (xmlInputFactory) {
-                    return xmlInputFactory.createXMLStreamReader(reader);
-                }                
-            }
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new XMLReaderException("stax.cantCreate",e);
         }
+
     }
     
     // -- Fast Infoset ---------------------------------------------------
@@ -234,16 +153,12 @@ public class XMLStreamReaderFactory {
         }
         
         try {
-            Object sdp = fiStreamReader.get();
-            if (sdp == null) {
-                // Do not use StAX pluggable layer for FI
-                fiStreamReader.set(sdp = FastInfosetReflection.fiStAXDocumentParser_new.newInstance());
-                FastInfosetReflection.fiStAXDocumentParser_setStringInterning.invoke(sdp, Boolean.TRUE);
-            } 
+            // Do not use StAX pluggable layer for FI
+            Object sdp = FastInfosetReflection.fiStAXDocumentParser_new.newInstance();
+            FastInfosetReflection.fiStAXDocumentParser_setStringInterning.invoke(sdp, Boolean.TRUE);
             FastInfosetReflection.fiStAXDocumentParser_setInputStream.invoke(sdp, in);
             return (XMLStreamReader) sdp;
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new XMLStreamReaderException(e);
         }
     }
