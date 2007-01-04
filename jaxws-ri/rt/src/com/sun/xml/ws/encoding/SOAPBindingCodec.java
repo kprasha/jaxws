@@ -415,13 +415,13 @@ public class SOAPBindingCodec extends MimeCodec {
         // Note: Using FI with MTOM does not make sense
         if (useFastInfosetForEncoding) {
             final Message m = p.getMessage();
-            if(m==null || m.getAttachments().isEmpty() || binding.isMTOMEnabled())
+            if(m==null || m.getAttachments().isEmpty() || binding.isFeatureEnabled(MTOMFeature.class))
                 return fiSoapCodec;
             else
                 return fiSwaCodec;
         } 
                 
-        if(binding.isMTOMEnabled())
+        if(binding.isFeatureEnabled(MTOMFeature.class))
             return xmlMtomCodec;
         
         Message m = p.getMessage();

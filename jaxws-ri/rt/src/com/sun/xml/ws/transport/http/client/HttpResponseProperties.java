@@ -2,12 +2,9 @@ package com.sun.xml.ws.transport.http.client;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.PropertySet;
-import com.sun.xml.ws.client.BindingProviderProperties;
 import com.sun.xml.ws.client.ResponseContext;
 
 import javax.xml.ws.handler.MessageContext;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
@@ -32,15 +29,6 @@ final class HttpResponseProperties extends PropertySet {
     @Property(MessageContext.HTTP_RESPONSE_CODE)
     public int getResponseCode() {
         return deferedCon.statusCode;
-    }
-
-    /**
-     * Use {@link #getResponseCode()}.
-     */
-    @Deprecated
-    @Property(BindingProviderProperties.HTTP_STATUS_CODE)
-    public int getStatusCode() {
-        return getResponseCode();
     }
 
     @Override

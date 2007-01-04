@@ -117,8 +117,8 @@ public class SourceReaderFactory {
                     rejectDTDs);
             }
             else {
-                throw new XMLReaderException("sourceReader.invalidSource", 
-                    new Object[] { source.getClass().getName() });
+                throw new XMLReaderException("sourceReader.invalidSource",
+                        source.getClass().getName());
             }        
         }
         catch (Exception e) {

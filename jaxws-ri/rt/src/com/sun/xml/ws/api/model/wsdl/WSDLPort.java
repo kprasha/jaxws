@@ -40,13 +40,6 @@ public interface WSDLPort extends WSDLFeaturedObject, WSDLExtensible {
     QName getName();
 
     /**
-     * Gets wsdl:service/wsdl:port@binding attribute value as (@link QName}. This name can be used to find a
-     * {@link WSDLBoundPortType} from {@link WSDLModel#getBinding(javax.xml.namespace.QName)}
-     */
-    @Deprecated // redundant?
-    QName getBindingName();
-
-    /**
      * Gets {@link WSDLBoundPortType} associated with the {@link WSDLPort}.
      */
     @NotNull

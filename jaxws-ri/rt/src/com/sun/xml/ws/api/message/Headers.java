@@ -23,7 +23,6 @@
 package com.sun.xml.ws.api.message;
 
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.bind.v2.runtime.MarshallerImpl;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -101,14 +100,6 @@ public abstract class Headers {
      * Creates a {@link Header} backed a by a JAXB bean.
      */
     public static Header create(Bridge bridge, Object jaxbObject) {
-        return new JAXBHeader(bridge, jaxbObject);
-    }
-
-    /**
-     * @deprecated
-     *      Use {@link #create(Bridge, Object)} instead. To be removed after JavaOne.
-     */
-    public static Header create(SOAPVersion soapVersion, Bridge bridge, BridgeContext bridgeInfo, Object jaxbObject) {
         return new JAXBHeader(bridge, jaxbObject);
     }
 

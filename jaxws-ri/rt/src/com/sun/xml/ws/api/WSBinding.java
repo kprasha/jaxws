@@ -33,7 +33,6 @@ import com.sun.xml.ws.api.pipe.Tube;
 import javax.xml.ws.Binding;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.handler.Handler;
-import javax.xml.ws.soap.MTOMFeature;
 import java.util.List;
 
 /**
@@ -44,7 +43,7 @@ import java.util.List;
  *
  * <p>
  * Binding conceptually includes the on-the-wire format of the message,
- * this this object owns {@link Codec} and {@link Decoder}.
+ * this this object owns {@link Codec}.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -97,57 +96,12 @@ public interface WSBinding extends Binding {
     @NotNull List<Handler> getHandlerChain();
 
     /**
-     * Tells whether MTOM is enabled or disabled.
-     *
-     * @deprecated
-     *      Use {@link #isFeatureEnabled(Class)} with {@link MTOMFeature}.
-     */
-    boolean isMTOMEnabled();
-
-
-    /**
-     * Call it to enabled/disable MTOM.
-     */
-    void setMTOMEnabled(boolean value);
-
-    /**
-     * This method is called when Binding is created with WebServiceFeatures
-     * @param features WebServiceFeatures that should be enabled or disabled.
-     *        A feature is disabled if isenabled() returns false;
-     *
-     *      This will be method will removed soon as it is not supposed to be
-     *      used outside of RI. I don't see a use case where others want to set
-     *      features on WSBinding directly. If you do, send us the usecase.
-     */
-    @Deprecated
-    void setFeatures(WebServiceFeature... features);
-
-    /**
-     * Find out if a particular {@link WebServiceFeature} is enabled or not
-     * @param featureId
-     * @return true if feature is enabled, false otherwise
-     * @deprecated
-     *      Use {@link #isFeatureEnabled(Class)} 
-     */
-    boolean isFeatureEnabled(String featureId);
-
-    /**
      * Checks if a particular {@link WebServiceFeature} is enabled.
      *
      * @return
      *      true if enabled.
      */
     boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature);
-
-
-    /**
-     * @param featureId
-     * @return WebServiceFeature if the feature is enabled.
-     *         null if is is not enabled, or not present.
-     * @deprecated
-     *      Use {@link #getFeature(Class)} 
-     */
-    WebServiceFeature getFeature(String featureId);
 
     /**
      * Gets a {@link WebServiceFeature} of the specific type.

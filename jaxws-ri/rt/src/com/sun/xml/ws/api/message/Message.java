@@ -24,7 +24,6 @@ package com.sun.xml.ws.api.message;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -470,15 +469,6 @@ public abstract class Message {
      *      If JAXB reports an error during the processing.
      */
     public abstract <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException;
-
-    /**
-     * @deprecated
-     *      Use {@link #readPayloadAsJAXB(Bridge)}.
-     */
-    public final <T> T readPayloadAsJAXB(Bridge<T> bridge, BridgeContext context) throws JAXBException {
-        return readPayloadAsJAXB(bridge);
-    }
-
 
     /**
      * Reads the payload as a {@link XMLStreamReader}

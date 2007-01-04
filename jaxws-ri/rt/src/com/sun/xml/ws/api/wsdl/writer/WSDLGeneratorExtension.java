@@ -61,8 +61,6 @@ public abstract class WSDLGeneratorExtension {
      * @deprecated
      */
     public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
-        // for backward compatibility
-        start(root, model, binding);
     }
 
     /**
@@ -85,17 +83,6 @@ public abstract class WSDLGeneratorExtension {
      * @param ctxt Provides the context for the generator extensions
      */
     public void start(WSDLGenExtnContext ctxt) {
-        // for backward compatibility
-        start(ctxt.getRoot(), ctxt.getModel(), ctxt.getBinding(), ctxt.getContainer());
-    }
-
-    /**
-     * Use {@link #start(TypedXmlWriter, SEIModel, WSBinding, Container)}.
-     * <p/>
-     * To be removed after JavaOne.
-     */
-    @Deprecated
-    public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding) {
     }
 
     /**

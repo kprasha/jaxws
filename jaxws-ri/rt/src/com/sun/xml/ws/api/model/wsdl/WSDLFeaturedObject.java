@@ -19,16 +19,6 @@ import javax.xml.ws.WebServiceFeature;
  * @author Kohsuke Kawaguchi
  */
 public interface WSDLFeaturedObject extends WSDLObject {
-    /**
-     * Returns the {@link WebServiceFeature} that matches the given <code>id</code>.
-     *
-     * @param id unique id of the feature
-     * @return WebServiceFeature matching the id
-     * @deprecated
-     *      Use {@link #getFeature( Class)}
-     */
-    @Nullable
-    WebServiceFeature getFeature(String id);
 
     @Nullable
     <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType);

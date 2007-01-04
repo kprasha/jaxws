@@ -28,7 +28,6 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.message.Message;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.soap.MTOMFeature;
 
 /**
  * {@link WSDLPortType} bound with a specific binding.
@@ -101,24 +100,4 @@ public interface WSDLBoundPortType extends WSDLFeaturedObject, WSDLExtensible {
      *      null if no operation with the given tag name is found.
      */
     @Nullable WSDLBoundOperation getOperation(String namespaceUri, String localName);
-
-    /**
-     * Enables  Mtom as per mtom policy assertion. This method would be called during WSDL parsing to enable MTOM for a
-     * WSDL operation.
-     *
-     * @deprecated
-     *      Set {@link MTOMFeature} to {@link #getFeatures()}.
-     */
-    void enableMTOM();
-
-    /**
-     * Tells if MTOM is enabled for this WSDL operation.
-     * @return by default returns false unless enabled by {@link #enableMTOM()}
-     *
-     * @deprecated
-     *      Use {@link #getFeature(Class)} with {@link MTOMFeature}. 
-     */
-    @Deprecated
-    boolean isMTOMEnabled();
-
 }

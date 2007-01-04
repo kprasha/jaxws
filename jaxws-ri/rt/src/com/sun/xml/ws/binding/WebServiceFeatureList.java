@@ -158,14 +158,6 @@ public final class WebServiceFeatureList implements WSFeatureList {
         return wsfeatures.values().toArray(new WebServiceFeature[]{});
     }
 
-    public boolean isEnabled(String featureId) {
-        WebServiceFeature ftr = get(featureId);
-        if(ftr == null) {
-            return false;
-        }
-        return ftr.isEnabled();
-    }
-
     public boolean isEnabled(@NotNull Class<? extends WebServiceFeature> feature){
         WebServiceFeature ftr = get(feature);
         if(ftr == null) {
@@ -248,7 +240,7 @@ public final class WebServiceFeatureList implements WSFeatureList {
                     add(wsdlFtr);
                 }
             } else if(reportConflicts) {
-                if(isEnabled(wsdlFtr.getID()) != wsdlFtr.isEnabled()) {
+                if(isEnabled(wsdlFtr.getClass()) != wsdlFtr.isEnabled()) {
                     LOGGER.warning(ModelerMessages.RUNTIME_MODELER_FEATURE_CONFLICT(
                             get(wsdlFtr.getClass()),wsdlFtr));
              }

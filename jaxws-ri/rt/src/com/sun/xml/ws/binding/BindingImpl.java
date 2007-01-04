@@ -141,29 +141,12 @@ public abstract class BindingImpl implements WSBinding {
         return new SOAPBindingImpl(BindingID.SOAP11_HTTP);
     }
 
-    public boolean isMTOMEnabled() {
-        return false;//default
-    }
-
-    public void setMTOMEnabled(boolean value) {
-    }
-
     public String getBindingID() {
         return bindingId.toString();
     }
 
-    public WebServiceFeature getFeature(String featureId) {
-        if (featureId == null)
-            return null;
-        return features.get(featureId);
-    }
-
     public @Nullable <F extends WebServiceFeature> F getFeature(@NotNull Class<F> featureType){
         return features.get(featureType);
-    }
-
-    public boolean isFeatureEnabled(String featureId) {
-        return features.isEnabled(featureId);
     }
 
     public boolean isFeatureEnabled(@NotNull Class<? extends WebServiceFeature> feature){

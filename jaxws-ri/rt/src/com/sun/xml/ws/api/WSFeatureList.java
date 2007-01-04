@@ -10,15 +10,6 @@ import javax.xml.ws.WebServiceFeature;
  */
 public interface WSFeatureList extends Iterable<WebServiceFeature> {
     /**
-     * Find out if a particular {@link WebServiceFeature} is enabled or not
-     * @param featureId
-     * @return true if feature is enabled, false otherwise
-     * @deprecated
-     *      Use {@link #isEnabled(Class)}
-     */
-    boolean isEnabled(String featureId);
-
-    /**
      * Checks if a particular {@link WebServiceFeature} is enabled.
      *
      * @return

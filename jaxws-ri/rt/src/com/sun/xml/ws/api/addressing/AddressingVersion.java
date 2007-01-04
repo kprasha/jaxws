@@ -447,9 +447,9 @@ public enum AddressingVersion {
         if (port == null)
             return null;
 
-        WebServiceFeature wsf = port.getFeature(AddressingFeature.ID);
+        WebServiceFeature wsf = port.getFeature(AddressingFeature.class);
         if (wsf == null) {
-            wsf = port.getFeature(MemberSubmissionAddressingFeature.ID);
+            wsf = port.getFeature(MemberSubmissionAddressingFeature.class);
         }
         if (wsf == null)
             return null;

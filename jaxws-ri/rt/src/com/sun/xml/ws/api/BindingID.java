@@ -153,25 +153,6 @@ public abstract class BindingID {
     }
 
     /**
-     * Returns tri state.
-     *
-     * null - the mtom is not set explicitly using @BindingType annotation
-     *
-     * true | false - The value is set explicitly using a @BindingType annotation
-     *
-     * <p>
-     * Note that MTOM can be enabled/disabled at runtime through
-     * {@link WSBinding}, so this value merely controls how things
-     * are configured by default.
-     *
-     * @deprecated
-     *      Use {@link WSBinding#isMTOMEnabled()}.
-     */
-    public Boolean isMTOMEnabled() {
-        return null;
-    }
-
-    /**
      * Returns true if this binding can generate WSDL.
      *
      * <p>
@@ -408,7 +389,7 @@ public abstract class BindingID {
             return new SOAPBindingCodec(binding);
         }
 
-        public Boolean isMTOMEnabled() {
+        private Boolean isMTOMEnabled() {
             String mtom = parameters.get(MTOM_PARAM);
             return mtom==null?null:Boolean.valueOf(mtom);
         }
