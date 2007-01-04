@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.api.fastinfoset;
 
+import com.sun.xml.ws.api.FeatureConstructor;
+
 import javax.xml.ws.WebServiceFeature;
 
 /**
@@ -59,6 +61,7 @@ public class FastInfosetFeature extends WebServiceFeature {
      * @param enabled specifies whether this feature should
      *                be enabled or not.
      */
+    @FeatureConstructor
     public FastInfosetFeature(boolean enabled) {
         this.enabled = enabled;
     }

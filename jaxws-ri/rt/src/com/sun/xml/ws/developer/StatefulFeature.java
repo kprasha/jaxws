@@ -19,6 +19,8 @@
  */
 package com.sun.xml.ws.developer;
 
+import com.sun.xml.ws.api.FeatureConstructor;
+
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceFeature;
 
@@ -39,6 +41,7 @@ public class StatefulFeature extends WebServiceFeature {
      * Create an <code>StatefulFeature</code>.
      * The instance created will be enabled.
      */
+    @FeatureConstructor
     public StatefulFeature() {
         this.enabled = true;
     }

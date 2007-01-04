@@ -23,6 +23,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSFeatureList;
+import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.developer.MemberSubmissionAddressing;
@@ -45,6 +46,7 @@ import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -89,9 +91,6 @@ public final class WebServiceFeatureList implements WSFeatureList {
             } else if (a instanceof Addressing) {
                 Addressing addAnn = (Addressing) a;
                 ftr = new AddressingFeature(addAnn.enabled(), addAnn.required());
-            } else if (a instanceof MemberSubmissionAddressing) {
-                MemberSubmissionAddressing addAnn = (MemberSubmissionAddressing) a;
-                ftr = new MemberSubmissionAddressingFeature(addAnn.enabled(), addAnn.required());
             } else if (a instanceof MTOM) {
                 MTOM mtomAnn = (MTOM) a;
                 ftr = new MTOMFeature(mtomAnn.enabled(), mtomAnn.threshold());
@@ -107,15 +106,50 @@ public final class WebServiceFeatureList implements WSFeatureList {
             } else if (a instanceof RespectBinding) {
                 RespectBinding rbAnn = (RespectBinding) a;
                 ftr = new RespectBindingFeature(rbAnn.enabled());
-            } else if (a instanceof Stateful) {
-                ftr = new StatefulFeature();
             } else {
-                throw new WebServiceException("Unrecognized annotation:" + a);
+                ftr = getWebServiceFeatureBean(a);
             }
             add(ftr);
         }
     }
 
+    private static WebServiceFeature getWebServiceFeatureBean(Annotation a) {
+        WebServiceFeatureAnnotation wsfa = a.annotationType().getAnnotation(WebServiceFeatureAnnotation.class);
+        Class<? extends WebServiceFeature> beanClass = wsfa.bean();
+        WebServiceFeature bean;
+
+        Constructor ftrCtr = null;
+        String[] paramNames = null;
+        for (Constructor con : beanClass.getConstructors()) {
+            FeatureConstructor ftrCtrAnn = (FeatureConstructor) con.getAnnotation(FeatureConstructor.class);
+            if (ftrCtrAnn != null) {
+                if (ftrCtr == null) {
+                    ftrCtr = con;
+                    paramNames = ftrCtrAnn.value();
+                } else {
+                    throw new WebServiceException(ModelerMessages.RUNTIME_MODELER_WSFEATURE_MORETHANONE_FTRCONSTRUCTOR(a,beanClass));
+                }
+            }
+        }
+        if (ftrCtr == null) {
+            throw new WebServiceException(ModelerMessages.RUNTIME_MODELER_WSFEATURE_NO_FTRCONSTRUCTOR(a,beanClass));
+        }
+        if(ftrCtr.getParameterTypes().length != paramNames.length) {
+            throw new WebServiceException(ModelerMessages.RUNTIME_MODELER_WSFEATURE_ILLEGAL_FTRCONSTRUCTOR(a,beanClass));
+        }
+
+        try {
+            Object[] params = new Object[paramNames.length];
+            for (int i = 0; i < paramNames.length; i++) {
+                Method m = a.annotationType().getDeclaredMethod(paramNames[i]);
+                params[i] = m.invoke(a);
+            }
+            bean = (WebServiceFeature) ftrCtr.newInstance(params);
+        } catch (Exception e) {
+            throw new WebServiceException(e);
+        }
+        return bean;
+    }
     public Iterator<WebServiceFeature> iterator() {
         return wsfeatures.values().iterator();
     }

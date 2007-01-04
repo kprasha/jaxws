@@ -19,6 +19,8 @@
  */
 package com.sun.xml.ws.developer;
 
+import com.sun.xml.ws.api.FeatureConstructor;
+
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.WebServiceFeature;
 
@@ -68,6 +70,7 @@ public class MemberSubmissionAddressingFeature extends WebServiceFeature {
      * for the <code>required</code> attribute on the
      * <code>wsaw:UsingAddressing</code> element.
      */
+    @FeatureConstructor
     public MemberSubmissionAddressingFeature(boolean enabled, boolean required) {
         this.enabled = enabled;
         this.required = required;

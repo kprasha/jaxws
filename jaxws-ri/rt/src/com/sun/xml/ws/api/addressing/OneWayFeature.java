@@ -25,6 +25,7 @@ package com.sun.xml.ws.api.addressing;
 import javax.xml.ws.WebServiceFeature;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.FeatureConstructor;
 
 /**
  * This feature allows ReplyTo, From and RelatesTo Message Addressing Properties
@@ -84,6 +85,7 @@ public class OneWayFeature extends WebServiceFeature {
      * @param from specifies the {@link WSEndpointReference} of wsa:From header.
      * @param relatesTo specifies the MessageID to be used for wsa:RelatesTo header.
      */
+    @FeatureConstructor
     public OneWayFeature(boolean enabled, WSEndpointReference replyTo, WSEndpointReference from, String relatesTo) {
         this.enabled = enabled;
         this.replyTo = replyTo;

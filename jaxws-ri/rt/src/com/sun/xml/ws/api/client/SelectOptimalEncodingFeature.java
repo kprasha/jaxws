@@ -22,6 +22,8 @@
 
 package com.sun.xml.ws.api.client;
 
+import com.sun.xml.ws.api.FeatureConstructor;
+
 import javax.xml.ws.WebServiceFeature;
 
 /**
@@ -70,6 +72,7 @@ public class SelectOptimalEncodingFeature extends WebServiceFeature {
      * @param enabled specifies whether this feature should
      *                be enabled or not.
      */
+    @FeatureConstructor
     public SelectOptimalEncodingFeature(boolean enabled) {
         this.enabled = enabled;
     }
