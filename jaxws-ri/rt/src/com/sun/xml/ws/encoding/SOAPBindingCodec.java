@@ -260,42 +260,8 @@ public class SOAPBindingCodec extends MimeCodec {
         } else
             xmlSoapCodec.decode(in, contentType, packet);
 
-//        checkDuplicateKnownHeaders(packet);
         if (!useFastInfosetForEncoding) {
             useFastInfosetForEncoding = isFastInfosetAcceptable(packet.acceptableMimeTypes);
-        }
-    }
-
-    private void checkDuplicateKnownHeaders(Packet packet) {
-        HeaderList hl = packet.getMessage().getHeaders();
-        if (hl == null)
-            return;
-
-        for (QName header : binding.getHandlerConfig().getKnownHeaders()) {
-            boolean found = false;
-            for (Header h : hl) {
-                // skip WS-Addressing headers as they'll be processed by
-                // WS-A tube later and an WS-Addressing specific fault
-                // will then be thrown
-                if (binding.getAddressingVersion() != null &&
-                        h.getNamespaceURI().equals(binding.getAddressingVersion().nsUri)) {
-                        continue;
-                }
-
-                if (found && h.getNamespaceURI().equals(header.getNamespaceURI()) && h.getLocalPart().equals(header.getLocalPart())) {
-                    // duplicate port known header
-                    try {
-                        SOAPFault fault = binding.getSOAPFactory().createFault(ServerMessages.DUPLICATE_PORT_KNOWN_HEADER(header.toString()), binding.getSOAPVersion().faultCodeClient);
-                        packet.setMessage(Messages.create(fault));
-                        return;
-                    } catch (SOAPException f) {
-                        throw new ServerRtException(f);
-                    }
-                }
-                if (!found && h.getNamespaceURI().equals(header.getNamespaceURI()) && h.getLocalPart().equals(header.getLocalPart())) {
-                    found = true;
-                }
-            }
         }
     }
 

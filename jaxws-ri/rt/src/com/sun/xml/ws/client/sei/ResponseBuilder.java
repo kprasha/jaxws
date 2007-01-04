@@ -29,11 +29,14 @@ import com.sun.xml.bind.api.RawAccessor;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
+import com.sun.xml.ws.resources.ServerMessages;
 
 import java.awt.Image;
 import java.io.IOException;
@@ -49,10 +52,14 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -359,8 +366,11 @@ abstract class ResponseBuilder {
         private final Bridge<?> bridge;
         private final ValueSetter setter;
         private final QName headerName;
+        private final SOAPVersion soapVersion;
 
         /**
+         * @param soapVersion
+         *      SOAP1.1 or 1.2
          * @param name
          *      The name of the header element.
          * @param bridge
@@ -368,23 +378,41 @@ abstract class ResponseBuilder {
          * @param setter
          *      specifies how the obtained value is returned to the client.
          */
-        public Header(QName name, Bridge<?> bridge, ValueSetter setter) {
+        public Header(SOAPVersion soapVersion, QName name, Bridge<?> bridge, ValueSetter setter) {
+            this.soapVersion = soapVersion;
             this.headerName = name;
             this.bridge = bridge;
             this.setter = setter;
         }
 
-        public Header(ParameterImpl param, ValueSetter setter) {
-            this(
+        public Header(SOAPVersion soapVersion, ParameterImpl param, ValueSetter setter) {
+            this(soapVersion,
                 param.getTypeReference().tagName,
                 param.getBridge(),
                 setter);
             assert param.getOutBinding()== ParameterBinding.HEADER;
         }
 
+        private SOAPFaultException createDuplicateHeaderException() {
+            try {
+                SOAPFault fault = soapVersion.saajSoapFactory.createFault(
+                        ServerMessages.DUPLICATE_PORT_KNOWN_HEADER(headerName), soapVersion.faultCodeServer);
+                return new SOAPFaultException(fault);
+            } catch(SOAPException e) {
+                throw new WebServiceException(e);
+            }
+        }
+
         public Object readResponse(Message msg, Object[] args) throws JAXBException {
-            com.sun.xml.ws.api.message.Header header =
-                msg.getHeaders().get(headerName.getNamespaceURI(), headerName.getLocalPart(),true);
+            com.sun.xml.ws.api.message.Header header = null;
+            Iterator<com.sun.xml.ws.api.message.Header> it =
+                msg.getHeaders().getHeaders(headerName,true);
+            if (it.hasNext()) {
+                header = it.next();
+                if (it.hasNext()) {
+                    throw createDuplicateHeaderException();
+                }
+            }
 
             if(header!=null)
                 return setter.put( header.readAsJAXB(bridge), args );

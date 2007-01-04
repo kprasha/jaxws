@@ -176,7 +176,7 @@ final class SyncMethodHandler extends MethodHandler {
                     }
                     break;
                 case HEADER:
-                    builders.add(new ResponseBuilder.Header(param, setter));
+                    builders.add(new ResponseBuilder.Header(owner.soapVersion, param, setter));
                     break;
                 case ATTACHMENT:
                     builders.add(ResponseBuilder.AttachmentBuilder.createAttachmentBuilder(param, setter));

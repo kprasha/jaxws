@@ -128,7 +128,7 @@ final class EndpointMethodHandler {
                 }
                 break;
             case HEADER:
-                builders.add(new EndpointArgumentsBuilder.Header(param, setter));
+                builders.add(new EndpointArgumentsBuilder.Header(soapVersion, param, setter));
                 break;
             case ATTACHMENT:
                 builders.add(EndpointArgumentsBuilder.AttachmentBuilder.createAttachmentBuilder(param, setter));
