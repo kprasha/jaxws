@@ -29,7 +29,7 @@ import javax.xml.ws.WebServiceFeature;
  * A service class that has this feature on will behave as a stateful web service.
  *
  * @since 2.1
- * @ses StatefulWebServiceManager
+ * @see StatefulWebServiceManager
  */
 public class StatefulFeature extends WebServiceFeature {
     /**
