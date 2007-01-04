@@ -61,7 +61,7 @@ public class FastInfosetFeature extends WebServiceFeature {
      * @param enabled specifies whether this feature should
      *                be enabled or not.
      */
-    @FeatureConstructor
+    @FeatureConstructor({"enabled"})
     public FastInfosetFeature(boolean enabled) {
         this.enabled = enabled;
     }

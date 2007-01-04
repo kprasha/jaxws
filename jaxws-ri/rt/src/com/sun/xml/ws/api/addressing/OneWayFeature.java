@@ -85,7 +85,7 @@ public class OneWayFeature extends WebServiceFeature {
      * @param from specifies the {@link WSEndpointReference} of wsa:From header.
      * @param relatesTo specifies the MessageID to be used for wsa:RelatesTo header.
      */
-    @FeatureConstructor
+    @FeatureConstructor({"enabled","replyTo","from","relatesTo"})
     public OneWayFeature(boolean enabled, WSEndpointReference replyTo, WSEndpointReference from, String relatesTo) {
         this.enabled = enabled;
         this.replyTo = replyTo;

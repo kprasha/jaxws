@@ -72,7 +72,7 @@ public class SelectOptimalEncodingFeature extends WebServiceFeature {
      * @param enabled specifies whether this feature should
      *                be enabled or not.
      */
-    @FeatureConstructor
+    @FeatureConstructor({"enabled"})
     public SelectOptimalEncodingFeature(boolean enabled) {
         this.enabled = enabled;
     }

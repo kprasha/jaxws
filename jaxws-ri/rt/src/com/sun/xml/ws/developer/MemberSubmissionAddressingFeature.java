@@ -70,7 +70,7 @@ public class MemberSubmissionAddressingFeature extends WebServiceFeature {
      * for the <code>required</code> attribute on the
      * <code>wsaw:UsingAddressing</code> element.
      */
-    @FeatureConstructor
+    @FeatureConstructor({"enabled","required"})
     public MemberSubmissionAddressingFeature(boolean enabled, boolean required) {
         this.enabled = enabled;
         this.required = required;
