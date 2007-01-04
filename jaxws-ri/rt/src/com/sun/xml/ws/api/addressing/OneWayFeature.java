@@ -22,20 +22,26 @@
 
 package com.sun.xml.ws.api.addressing;
 
-import javax.xml.ws.WebServiceFeature;
-
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.FeatureConstructor;
 
+import javax.xml.ws.WebServiceFeature;
+
 /**
- * This feature allows ReplyTo, From and RelatesTo Message Addressing Properties
- * to be added for a one-way message. This feature should be used for one-way
- * operations only. If a non-null ReplyTo is specified, then MessageID property is
- * also added.
- * <p/><p/>
- * This feature is not meant to be used by a common Web service developer as there
+ * Unsupported RI extension to work around an issue in WSIT.
+ *
+ * <p>
+ * <b>This feature is not meant to be used by a common Web service developer</b> as there
  * is no need to send the above mentioned header for a one-way operation. But these
  * properties may need to be sent in certain middleware Web services.
+ *
+ * <p>
+ * This feature allows ReplyTo, From and RelatesTo Message Addressing Properties
+ * to be added for all messages that are sent from the port configured with
+ * this annotation. All operations are assumed to be one-way, and
+ * this feature should be used for one-way
+ * operations only.
+ * 
+ * If a non-null ReplyTo is specified, then MessageID property is also added.
  *
  * @author Arun Gupta
  */
