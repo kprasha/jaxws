@@ -195,9 +195,8 @@ public class WsimportTool {
         return true;
     }
 
-    private EntityResolver entityResolver;
     public void setEntityResolver(EntityResolver resolver){
-        this.entityResolver = resolver;
+        this.options.entityResolver = resolver;
     }
 
     protected boolean compileGeneratedClasses(ErrorReceiver receiver){

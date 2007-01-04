@@ -48,6 +48,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.io.IOException;
 
 /**
  * @author Vivek Pandey
@@ -64,11 +65,19 @@ public final class MetadataFinder extends DOMForest{
 
     }
 
-    public void parseWSDL() throws SAXException {
+    public void parseWSDL() throws SAXException, IOException {
         // parse source grammars
         for (InputSource value : options.getWSDLs()) {
             String systemID = value.getSystemId();
             errorReceiver.pollAbort();
+
+            //if there is entity resolver use it
+            if (options.entityResolver != null)
+                value = options.entityResolver.resolveEntity(null, systemID);
+            if (value == null)
+                value = new InputSource(systemID);
+
+
             Document dom = parse(value, true);
             if (dom == null)
                 continue;
