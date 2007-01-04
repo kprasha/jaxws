@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.io.IOException;
 
 /**
  * A parser for WSDL documents. This parser is used only at the tool time.
@@ -121,7 +122,7 @@ public class WSDLParser {
         listeners.add(l);
     }
 
-    public WSDLDocument parse() throws SAXException {
+    public WSDLDocument parse() throws SAXException, IOException {
         forest = new MetadataFinder(new WSDLInternalizationLogic(), options, errReceiver);
         forest.parseWSDL();
 

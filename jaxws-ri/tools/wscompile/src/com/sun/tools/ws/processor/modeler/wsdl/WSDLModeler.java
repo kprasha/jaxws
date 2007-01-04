@@ -60,6 +60,7 @@ import org.xml.sax.helpers.LocatorImpl;
 import javax.jws.WebParam.Mode;
 import javax.xml.namespace.QName;
 import java.util.*;
+import java.io.IOException;
 
 
 /**
@@ -164,6 +165,8 @@ public class WSDLModeler extends WSDLModelerBase {
         } catch (ValidationException e) {
             errReceiver.error(e.getMessage(), e);
         } catch (SAXException e) {
+            errReceiver.error(e);
+        } catch (IOException e) {
             errReceiver.error(e);
         }
         //should never reach here

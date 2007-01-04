@@ -137,10 +137,6 @@ public class WsimportTool {
             if(options.debugMode)
                 listener.enableDebugging();
             options.parseBindings(receiver);
-            //set the entityResolver passed form tool
-            if(options.entityResolver == null){
-                options.entityResolver = entityResolver;
-            }
 
             try {
                 if( !options.quiet )
