@@ -23,18 +23,13 @@
 package com.sun.xml.ws.message.jaxb;
 
 import com.sun.xml.bind.api.Bridge;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
+import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
-import java.io.IOException;
 
 /**
  * Wraps a bridge and JAXB object into a pseudo-{@link Source}.
@@ -104,7 +99,10 @@ final class JAXBBridgeSource extends SAXSource {
             // SAX events will be sent to the repeater, and the repeater
             // will further forward it to an appropriate component.
             try {
+                startDocument();
+                // this method only writes a fragment, so need start/end document
                 bridge.marshal( contentObject, this );
+                endDocument();
             } catch( JAXBException e ) {
                 // wrap it to a SAXException
                 SAXParseException se =
