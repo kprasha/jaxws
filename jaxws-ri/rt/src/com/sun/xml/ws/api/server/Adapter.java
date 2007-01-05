@@ -22,7 +22,6 @@
 
 package com.sun.xml.ws.api.server;
 
-import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.WSBinding;
@@ -48,7 +47,7 @@ import com.sun.xml.ws.util.Pool;
  *
  * <li>
  * To manage thread-unsafe resources, such as {@link WSEndpoint.PipeHead},
- * {@link Codec}, and {@link Decoder}.
+ * and {@link Codec}.
  * </ol>
  *
  * <p>

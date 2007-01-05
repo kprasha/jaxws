@@ -27,7 +27,6 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Codec;
-import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Tube;
 
 import javax.xml.ws.Binding;

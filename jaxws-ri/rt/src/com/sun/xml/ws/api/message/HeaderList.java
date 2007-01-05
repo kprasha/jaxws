@@ -31,8 +31,8 @@ import com.sun.xml.ws.api.addressing.OneWayFeature;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Decoder;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.protocol.soap.ClientMUTube;
@@ -60,7 +60,7 @@ import java.util.Set;
  *
  * <p>
  * Following the SOAP convention, the order among headers
- * are not significant. However, {@link Decoder}s are
+ * are not significant. However, {@link Codec}s are
  * expected to preserve the order of headers in the input
  * message as much as possible.
  *

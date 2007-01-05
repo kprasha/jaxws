@@ -181,7 +181,7 @@ public interface Codec {
      * The design encourages lazy decoding of a {@link Message}, where
      * a {@link Message} is returned even before the whole message is parsed,
      * and additional parsing is done as the {@link Message} body is read along.
-     * A {@link Decoder} is most likely have its own implementation of {@link Message}
+     * A {@link Codec} is most likely have its own implementation of {@link Message}
      * for this purpose.
      *
      * @param in
@@ -193,7 +193,7 @@ public interface Codec {
      *      Some transports, such as SMTP, may 'encode' data into another format
      *      (such as uuencode, base64, etc.) It is the caller's responsibility to
      *      'decode' these transport-level encoding before it passes data into
-     *      {@link Decoder}.
+     *      {@link Codec}.
      *
      * @param contentType
      *      The MIME content type (like "application/xml") of this byte stream.
@@ -204,7 +204,7 @@ public interface Codec {
      *
      * @param response
      *      The parsed {@link Message} will be set to this {@link Packet}.
-     *      {@link Decoder} may add additional properties to this {@link Packet}.
+     *      {@link Codec} may add additional properties to this {@link Packet}.
      *      On a successful method completion, a {@link Packet} must contain a
      *      {@link Message}.
      *
