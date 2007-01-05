@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.12 2006-10-26 18:31:23 ramapulavarthi Exp $
+ $Id: W3CAddressingWSDLGeneratorExtension.java,v 1.1.2.13 2007-01-05 00:15:29 vivekp Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.wsdl.writer.WSDLGeneratorExtension;
+import com.sun.xml.ws.api.wsdl.writer.WSDLGenExtnContext;
 
 /**
  * @author Arun Gupta
@@ -48,8 +49,9 @@ public class W3CAddressingWSDLGeneratorExtension extends WSDLGeneratorExtension 
     private boolean required = false;
 
     @Override
-    public void start(@NotNull TypedXmlWriter root, @NotNull SEIModel model, @NotNull WSBinding binding, @NotNull Container container) {
-
+    public void start(WSDLGenExtnContext ctxt) {
+        WSBinding binding = ctxt.getBinding();
+        TypedXmlWriter root = ctxt.getRoot();
         enabled = binding.isFeatureEnabled(AddressingFeature.class);
         if (!enabled)
             return;
