@@ -156,14 +156,11 @@ public abstract class BindingID {
      * Returns true if this binding can generate WSDL.
      *
      * <p>
-     * I'm simply "transcoding" the old code and it had this notion.
-     * SOAP 1.1 and "XSOAP 1.2" (whatever that is) is supposed to return true
-     * from this method, but nobody else should.
+     * For e.g.: SOAP 1.1 and "XSOAP 1.2" is supposed to return true
+     * from this method. For SOAP1.2, there is no standard WSDL, so the
+     * runtime is not generating one and it expects the WSDL is packaged.
      *
-     * <p>
-     * Someone please explain to me what this property is all about!
      */
-    @Deprecated
     public boolean canGenerateWSDL() {
         return false;
     }
