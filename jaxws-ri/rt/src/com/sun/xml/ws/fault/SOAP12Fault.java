@@ -38,6 +38,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
+import java.util.Iterator;
 
 /**
  * SOAP 1.2 Fault class that can be marshalled/unmarshalled by JAXB
@@ -110,7 +111,7 @@ class SOAP12Fault extends SOAPFaultBuilder {
     SOAP12Fault(SOAPFault fault) {
         code = new CodeType(fault.getFaultCodeAsQName());
         try {
-            fillFaultSubCodes(fault, code.getSubcode());
+            fillFaultSubCodes(fault);
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
@@ -120,7 +121,7 @@ class SOAP12Fault extends SOAPFaultBuilder {
         detail = new DetailType(fault.getDetail());
     }
 
-    SOAP12Fault(QName code, String reason, String actor, Element detailObject) {
+    SOAP12Fault(QName code, String reason, Element detailObject) {
         this.code = new CodeType(code);
         this.reason = new ReasonType(reason);
         if(detailObject != null)
@@ -186,5 +187,25 @@ class SOAP12Fault extends SOAPFaultBuilder {
             fillFaultSubCodes(fault, subcode.getSubcode());
         }
     }
+
+    /**
+     * Adds Fault subcodes from {@link SOAPFault} to {@link #code}
+     */
+    private void fillFaultSubCodes(SOAPFault fault) throws SOAPException {
+        Iterator subcodes = fault.getFaultSubcodes();
+        SubcodeType firstSct = null;
+        while(subcodes.hasNext()){
+            QName subcode = (QName)subcodes.next();
+            if(firstSct == null){
+                firstSct = new SubcodeType(subcode);
+                code.setSubcode(firstSct);
+                continue;
+            }
+            SubcodeType nextSct = new SubcodeType(subcode);
+            firstSct.setSubcode(nextSct);
+            firstSct = nextSct;
+        }
+    }
+
 }
 

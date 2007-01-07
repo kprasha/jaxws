@@ -204,7 +204,7 @@ public abstract class SOAPFaultBuilder {
             case SOAP_11:
                 return JAXBMessage.create(JAXB_CONTEXT, new SOAP11Fault(faultCode, faultString, null, detail), soapVersion);
             case SOAP_12:
-                return JAXBMessage.create(JAXB_CONTEXT, new SOAP12Fault(faultCode, faultString, null, detail), soapVersion);
+                return JAXBMessage.create(JAXB_CONTEXT, new SOAP12Fault(faultCode, faultString, detail), soapVersion);
             default:
                 throw new AssertionError();
         }
