@@ -3,12 +3,12 @@
  * of the Common Development and Distribution License
  * (the License).  You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the license at
  * https://glassfish.dev.java.net/public/CDDLv1.0.html.
  * See the License for the specific language governing
  * permissions and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
@@ -16,7 +16,7 @@
  * with the fields enclosed by brackets [] replaced by
  * you own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * 
+ *
  * Copyright 2006 Sun Microsystems Inc. All Rights Reserved
  */
 package com.sun.xml.ws.encoding.fastinfoset;
@@ -32,6 +32,7 @@ import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.ContentTypeImpl;
+import java.io.BufferedInputStream;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -62,24 +63,24 @@ public class FastInfosetCodec implements Codec {
     
     private final ContentType _contentType;
     
-    /* package */ FastInfosetCodec(boolean retainState) {        
+    /* package */ FastInfosetCodec(boolean retainState) {
         _retainState = retainState;
         _contentType = (retainState) ? new ContentTypeImpl(FastInfosetMIMETypes.STATEFUL_INFOSET) :
             new ContentTypeImpl(FastInfosetMIMETypes.INFOSET);
     }
-
+    
     public String getMimeType() {
         return _contentType.getContentType();
     }
-
-    public Codec copy() { 
+    
+    public Codec copy() {
         return new FastInfosetCodec(_retainState);
     }
     
     public ContentType getStaticContentType(Packet packet) {
         return _contentType;
     }
-
+    
     public ContentType encode(Packet packet, OutputStream out) {
         Message message = packet.getMessage();
         if (message != null && message.hasPayload()) {
@@ -96,18 +97,27 @@ public class FastInfosetCodec implements Codec {
         
         return _contentType;
     }
-
+    
     public ContentType encode(Packet packet, WritableByteChannel buffer) {
         //TODO: not yet implemented
         throw new UnsupportedOperationException();
     }
-
+    
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
-        Message message = Messages.createUsingPayload(new FastInfosetSource(in), 
-                SOAPVersion.SOAP_11);
+        /* Implements similar logic as the XMLMessage.create(String, InputStream).
+         * But it's faster, as we know the InputStream has FastInfoset content*/
+        Message message = null;
+        in = hasSomeData(in);
+        if (in != null) {
+            message = Messages.createUsingPayload(new FastInfosetSource(in),
+                    SOAPVersion.SOAP_11);
+        } else {
+            message = Messages.createEmpty(SOAPVersion.SOAP_11);
+        }
+        
         packet.setMessage(message);
     }
-
+    
     public void decode(ReadableByteChannel in, String contentType, Packet response) {
         throw new UnsupportedOperationException();
     }
@@ -120,7 +130,7 @@ public class FastInfosetCodec implements Codec {
             return _serializer = createNewStreamWriter(out, _retainState);
         }
     }
-
+    
     private XMLStreamReader getXMLStreamReader(InputStream in) {
         if (_parser != null) {
             _parser.setInputStream(in);
@@ -129,7 +139,7 @@ public class FastInfosetCodec implements Codec {
             return _parser = createNewStreamReader(in, _retainState);
         }
     }
-
+    
     /**
      * Creates a new {@link FastInfosetCodec} instance.
      *
@@ -157,8 +167,8 @@ public class FastInfosetCodec implements Codec {
      * @param retainState if true the serializer should retain the state of
      *        vocabulary tables for multiple serializations.
      * @return a new {@link StAXDocumentSerializer} instance.
-     */ 
-    /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out, boolean retainState) {        
+     */
+    /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out, boolean retainState) {
         return createNewStreamWriter(out, retainState, DEFAULT_INDEXED_STRING_SIZE_LIMIT, DEFAULT_INDEXED_STRING_MEMORY_LIMIT);
     }
     
@@ -169,8 +179,8 @@ public class FastInfosetCodec implements Codec {
      * @param retainState if true the serializer should retain the state of
      *        vocabulary tables for multiple serializations.
      * @return a new {@link StAXDocumentSerializer} instance.
-     */ 
-    /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out, 
+     */
+    /* package */ static StAXDocumentSerializer createNewStreamWriter(OutputStream out,
             boolean retainState, int indexedStringSizeLimit, int stringsMemoryLimit) {
         StAXDocumentSerializer serializer = new StAXDocumentSerializer(out);
         if (retainState) {
@@ -189,7 +199,7 @@ public class FastInfosetCodec implements Codec {
         }
         return serializer;
     }
-
+    
     /**
      * Create a new (@link StAXDocumentParser} instance.
      *
@@ -197,7 +207,7 @@ public class FastInfosetCodec implements Codec {
      * @param retainState if true the parser should retain the state of
      *        vocabulary tables for multiple parses.
      * @return a new {@link StAXDocumentParser} instance.
-     */ 
+     */
     /* package */ static StAXDocumentParser createNewStreamReader(InputStream in, boolean retainState) {
         StAXDocumentParser parser = new StAXDocumentParser(in);
         parser.setStringInterning(true);
@@ -211,6 +221,32 @@ public class FastInfosetCodec implements Codec {
             ParserVocabulary vocabulary = new ParserVocabulary();
             parser.setVocabulary(vocabulary);
         }
-        return parser;        
+        return parser;
+    }
+    
+    /**
+     * Method is copied from com.sun.xml.ws.encoding.xml.XMLMessage
+     * @TODO method should be public in some util package?
+     *
+     * Finds if the stream has some content or not
+     *
+     * @return null if there is no data
+     *         else stream to be used
+     */
+    private static InputStream hasSomeData(InputStream in) throws IOException {
+        if (in != null) {
+            if (in.available() < 1) {
+                if (!in.markSupported()) {
+                    in = new BufferedInputStream(in);
+                }
+                in.mark(1);
+                if (in.read() != -1) {
+                    in.reset();
+                } else {
+                    in = null;          // No data
+                }
+            }
+        }
+        return in;
     }
 }
