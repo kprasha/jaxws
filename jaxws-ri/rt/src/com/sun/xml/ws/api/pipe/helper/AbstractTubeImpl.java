@@ -18,10 +18,6 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
  * @author Kohsuke Kawaguchi
  */
 public abstract class AbstractTubeImpl implements Tube, Pipe {
-    /**
-     * Instance resued for better performance.
-     */
-    private final NextAction na = new NextAction();
 
     /**
      * Default constructor.
@@ -37,26 +33,31 @@ public abstract class AbstractTubeImpl implements Tube, Pipe {
     }
 
     protected final NextAction doInvoke(Tube next, Packet packet) {
+        NextAction na = new NextAction();
         na.invoke(next,packet);
         return na;
     }
 
     protected final NextAction doInvokeAndForget(Tube next, Packet packet) {
+        NextAction na = new NextAction();
         na.invokeAndForget(next,packet);
         return na;
     }
 
     protected final NextAction doReturnWith(Packet response) {
+        NextAction na = new NextAction();
         na.returnWith(response);
         return na;
     }
 
     protected final NextAction doSuspend() {
+        NextAction na = new NextAction();
         na.suspend();
         return na;
     }
 
     protected final NextAction doThrow(Throwable t) {
+        NextAction na = new NextAction();
         na.throwException(t);
         return na;
     }
