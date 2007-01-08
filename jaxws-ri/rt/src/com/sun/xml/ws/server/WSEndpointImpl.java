@@ -121,7 +121,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         this.masterCodec = context.getCodec();
         tubePool = new TubePool(masterTubeline);
         terminalTube.setEndpoint(this);
-        engine = new Engine();
+        engine = new Engine(toString());
     }
 
     public @NotNull Class<T> getImplementationClass() {

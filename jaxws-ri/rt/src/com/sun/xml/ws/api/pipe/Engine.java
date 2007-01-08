@@ -16,12 +16,15 @@ import com.sun.xml.ws.api.message.Packet;
  */
 public class Engine {
     private volatile Executor threadPool;
+    public final String id;
 
-    public Engine(Executor threadPool) {
+    public Engine(String id, Executor threadPool) {
+        this(id);
         this.threadPool = threadPool;
     }
 
-    public Engine() {
+    public Engine(String id) {
+        this.id = id;
     }
 
     public void setExecutor(Executor threadPool) {

@@ -543,7 +543,6 @@ public final class Fiber implements Runnable {
                 try {
                     NextAction na;
                     Tube last;
-
                     if(throwable!=null) {
                         if(contsSize==0) {
                             // nothing else to execute. we are done.
@@ -659,7 +658,11 @@ public final class Fiber implements Runnable {
     }
 
     private String getName() {
-        return "fiber"+id;
+        return "engine-"+owner.id+"fiber-"+id;
+    }
+
+    public String toString() {
+        return getName();
     }
 
     /**

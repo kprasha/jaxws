@@ -130,7 +130,7 @@ public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvide
             this.requestContext.setEndPointAddressString(epr.getAddress());
         else
             this.requestContext.setEndpointAddress(defaultEndPointAddress);
-        this.engine = new Engine();
+        this.engine = new Engine(toString());
         this.endpointReference = epr;
     }
 
