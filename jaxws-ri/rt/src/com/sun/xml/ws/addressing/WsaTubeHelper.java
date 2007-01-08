@@ -122,6 +122,31 @@ public abstract class WsaTubeHelper {
         return action;
     }
 
+    /**
+     * This method gives the Input addressing Action for a message.
+     * It gives the Action set in the wsdl operation for the corresponding payload.
+     * If it is not explicitly set, it gives the soapAction
+     * @param packet
+     * @return input Action
+     */
+    public String getEffectiveInputAction(Packet packet) {
+        String action = null;
+
+        if (wsdlPort != null) {
+            WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(packet.getMessage().getPayloadNamespaceURI(), packet.getMessage().getPayloadLocalPart());
+            if (wbo != null) {
+                WSDLOperation op = wbo.getOperation();
+                if(((WSDLOperationImpl) op).getInput().isDefaultAction()&& (packet.soapAction != null && !packet.soapAction.equals("")))
+                    action = packet.soapAction;
+                else
+                    action = op.getInput().getAction();
+            }
+        } else {
+            action = packet.soapAction;
+        }
+        return action;
+    }
+
     public boolean isInputActionDefault(Packet packet) {
         if (wsdlPort == null)
             return false;

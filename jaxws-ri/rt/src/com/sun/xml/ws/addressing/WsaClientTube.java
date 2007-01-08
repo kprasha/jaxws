@@ -38,6 +38,10 @@ import com.sun.xml.ws.resources.AddressingMessages;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * WsaClientTube appears in the Tubeline only if addressing is enabled.
+ * This tube checks the validity of addressing headers in the incoming messages
+ * based on the WSDL model.
+ *
  * @author Arun Gupta
  */
 public final class WsaClientTube extends WsaTube {
@@ -54,10 +58,6 @@ public final class WsaClientTube extends WsaTube {
     }
 
     public @NotNull NextAction processRequest(Packet request) {
-        // populate request WS-Addressing headers
-        HeaderList headerList = request.getMessage().getHeaders();
-        headerList.fillRequestAddressingHeaders(wsdlPort, binding, request);
-
         return doInvoke(next,request);
    }
 

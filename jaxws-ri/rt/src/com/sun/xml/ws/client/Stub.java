@@ -96,6 +96,11 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
 
     protected final BindingImpl binding;
 
+    /**
+     * represents AddressingVersion on binding if enabled, otherwise null;
+     */
+    protected final AddressingVersion addrVersion;
+
     public final RequestContext requestContext = new RequestContext();
 
     /**
@@ -126,6 +131,7 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         this.tubes = new TubePool(master);
         this.wsdlPort = wsdlPort;
         this.binding = binding;
+        addrVersion = binding.getAddressingVersion();
         // if there is an EPR, EPR's address should be used for invocation instead of default address
         if(epr != null)
             this.requestContext.setEndPointAddressString(epr.getAddress());
@@ -190,12 +196,16 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
             packet.proxy = this;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
-            
-            // Spec is not clear on if ReferenceParameters are to be added when addressing is not enabled,
-            // but the EPR has ReferenceParameters.
-            // Current approach: Add ReferenceParameters only if addressing enabled.
-            if (AddressingVersion.isEnabled(binding)) {
-                if(endpointReference!=null)
+            if (addrVersion != null) {
+                // populate request WS-Addressing headers
+                HeaderList headerList = packet.getMessage().getHeaders();
+                headerList.fillRequestAddressingHeaders(wsdlPort, binding, packet);
+
+
+                // Spec is not clear on if ReferenceParameters are to be added when addressing is not enabled,
+                // but the EPR has ReferenceParameters.
+                // Current approach: Add ReferenceParameters only if addressing enabled.
+                if (endpointReference != null)
                     endpointReference.addReferenceParameters(packet.getMessage().getHeaders());
             }
 
