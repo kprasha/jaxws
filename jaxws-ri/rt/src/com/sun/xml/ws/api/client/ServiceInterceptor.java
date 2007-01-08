@@ -6,6 +6,7 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSFeatureList;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.developer.WSBindingProvider;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
@@ -61,16 +62,8 @@ public abstract class ServiceInterceptor {
      * @param serviceEndpointInterface SEI of the endpoint
      */
     public void postCreateProxy(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
-        // backward compatibility
-        postCreateProxy((WSBindingProvider)bp,serviceEndpointInterface);
     }
 
-    /**
-     * @deprecated
-     *      Use {@link #postCreateProxy(com.sun.xml.ws.developer.WSBindingProvider, Class<?>)}
-     */
-    public void postCreateProxy(@NotNull WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
-    }
 
     /**
      * A callback to notify that a {@link Dispatch} object is created. The callback
@@ -79,15 +72,6 @@ public abstract class ServiceInterceptor {
      * @param bp BindingProvider of dispatch object
      */
     public void postCreateDispatch(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp) {
-        // backward compatibility
-        postCreateDispatch((WSBindingProvider)bp);
-    }
-
-    /**
-     * @deprecated
-     *      Use {@link #postCreateDispatch(WSBindingProvider)} 
-     */
-    public void postCreateDispatch(@NotNull WSBindingProvider bp) {
     }
 
     /**

@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
@@ -65,7 +66,7 @@ import java.util.concurrent.Executor;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Stub implements com.sun.xml.ws.api.client.WSBindingProvider, ResponseContextReceiver, Closeable {
+public abstract class Stub implements WSBindingProvider, ResponseContextReceiver, Closeable {
 
     /**
      * Reuse pipelines as it's expensive to create.
