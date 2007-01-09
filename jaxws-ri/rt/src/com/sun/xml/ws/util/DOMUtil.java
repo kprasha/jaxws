@@ -40,6 +40,8 @@ import javax.xml.namespace.NamespaceContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -234,5 +236,16 @@ public class DOMUtil {
             }
         }
         return null;
+    }
+
+    public static @NotNull
+    List<Element> getChildElements(Node parent){
+        List<Element> elements = new ArrayList<Element>();
+        for (Node n = parent.getFirstChild(); n != null; n = n.getNextSibling()) {
+            if (n.getNodeType() == Node.ELEMENT_NODE) {
+                elements.add((Element)n);
+            }
+        }
+        return elements;
     }
 }

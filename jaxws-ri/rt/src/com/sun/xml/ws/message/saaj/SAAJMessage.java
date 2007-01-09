@@ -45,13 +45,7 @@ import org.xml.sax.SAXException;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -64,6 +58,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -76,6 +71,7 @@ public class SAAJMessage extends Message {
     private HeaderList headers;
     private String payloadLocalName;
     private String payloadNamspace;
+    private List<Element> bodyParts;
     private Element payload;
 
     private boolean parsedHeader;
@@ -85,7 +81,11 @@ public class SAAJMessage extends Message {
 
         try {
             Node body = sm.getSOAPBody();
-            payload = DOMUtil.getFirstElementChild(body);
+            //cature all the body elements
+            bodyParts = DOMUtil.getChildElements(body);
+
+            //we treat payload as the first body part
+            payload = bodyParts.size() > 0? bodyParts.get(0):null;
             // hope this is correct. Caching the localname and namespace of the payload should be fine
             // but what about if a Handler replaces the payload with something else? Weel, may be it
             // will be error condition anyway
@@ -189,6 +189,10 @@ public class SAAJMessage extends Message {
 
     /**
      * Returns the payload as a {@link javax.xml.transform.Source} object.
+     *
+     * Can't really give all the body parts inside soapenv:Body as Source
+     * cant take only one part.
+     *
      * <p/>
      * This consumes the message.
      */
@@ -257,8 +261,8 @@ public class SAAJMessage extends Message {
      */
     public void writePayloadTo(XMLStreamWriter sw) {
         try {
-            if (payload != null)
-                DOMUtil.serializeNode(payload, sw);
+            for(Element part: bodyParts)
+                DOMUtil.serializeNode(part, sw);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
@@ -296,8 +300,8 @@ public class SAAJMessage extends Message {
             SOAPBody sb = sm.getSOAPPart().getEnvelope().getBody();
             SOAPMessage msg = SOAPVersion.fromNsUri(sb.getNamespaceURI()).saajMessageFactory.createMessage();
             SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
-            if(payload != null){
-                Node n = newBody.getOwnerDocument().importNode(payload, true);
+            for(Element part: bodyParts){
+                Node n = newBody.getOwnerDocument().importNode(part, true);
                 newBody.appendChild(n);
             }
             return new SAAJMessage(getHeaders(), getAttachments(), msg);

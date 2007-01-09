@@ -21,13 +21,11 @@
  */
 package com.sun.xml.ws.message.stream;
 
-import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
-import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
-
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Header;
@@ -48,11 +46,9 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.Location;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.*;
+import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
 
@@ -223,7 +219,28 @@ public final class StreamMessage extends AbstractMessageImpl {
         if(payloadLocalName==null)
             return; // no body
         assert unconsumed();
-        new XMLStreamReaderToXMLStreamWriter().bridge(reader,writer);
+        XMLStreamReaderToXMLStreamWriter conv = new XMLStreamReaderToXMLStreamWriter();
+        while(reader.getEventType() != XMLStreamConstants.END_DOCUMENT){
+            String name = reader.getLocalName();
+            String nsUri = reader.getNamespaceURI();
+
+            //after previous conv.bridge() call the cursor will be at
+            //END_ELEMENT. Check if its not soapenv:Body then move to next
+            // ELEMENT
+            if(reader.getEventType() == XMLStreamConstants.END_ELEMENT){
+                if(!name.equals("Body") || !nsUri.equals(soapVersion.nsUri)){
+                    XMLStreamReaderUtil.nextElementContent(reader);
+                    if(reader.getEventType() == XMLStreamConstants.END_DOCUMENT)
+                        break;
+                    name = reader.getLocalName();
+                    nsUri = reader.getNamespaceURI();
+                }
+            }
+            if(name.equals("Body") && nsUri.equals(soapVersion.nsUri) || (reader.getEventType() == XMLStreamConstants.END_DOCUMENT))
+                break;
+            conv.bridge(reader,writer);
+        }
+        reader.close();
     }
 
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException{
@@ -263,7 +280,26 @@ public final class StreamMessage extends AbstractMessageImpl {
 
             XMLStreamReaderToContentHandler conv =
                 new XMLStreamReaderToContentHandler(reader,contentHandler,true,fragment);
-            conv.bridge();
+
+            while(reader.getEventType() != XMLStreamConstants.END_DOCUMENT){
+                String name = reader.getLocalName();
+                String nsUri = reader.getNamespaceURI();
+
+                //after previous conv.bridge() call the cursor will be at
+                //END_ELEMENT. Check if its not soapenv:Body then move to next
+                // ELEMENT
+                if(reader.getEventType() == XMLStreamConstants.END_ELEMENT){
+                    if(!name.equals("Body") || !nsUri.equals(soapVersion.nsUri)){
+                        XMLStreamReaderUtil.nextElementContent(reader);
+                        name = reader.getLocalName();
+                        nsUri = reader.getNamespaceURI();
+                    }
+                }
+                if(name.equals("Body") && nsUri.equals(soapVersion.nsUri) || (reader.getEventType() == XMLStreamConstants.END_DOCUMENT))
+                    break;
+
+                conv.bridge();
+            }
             reader.close();
         } catch (XMLStreamException e) {
             Location loc = e.getLocation();
@@ -273,7 +309,7 @@ public final class StreamMessage extends AbstractMessageImpl {
                 e.getMessage(),loc.getPublicId(),loc.getSystemId(),loc.getLineNumber(),loc.getColumnNumber(),e);
             errorHandler.error(x);
         }
-    }
+    }        
 
     public Message copy() {
         try {
@@ -282,7 +318,19 @@ public final class StreamMessage extends AbstractMessageImpl {
             if(hasPayload()) {
                 assert unconsumed();
                 consumedAt = null; // but we don't want to mark it as consumed
-                XMLStreamBuffer xsb = XMLStreamBuffer.createNewBufferFromXMLStreamReader(reader);
+                MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
+
+                //the boolean value tells the first body part is written.
+                //based on this we do the right thing
+                StreamReaderBufferCreator c = new StreamReaderBufferCreator(xsb);
+                while(reader.getEventType() != XMLStreamConstants.END_DOCUMENT){
+                    String name = reader.getLocalName();
+                    String nsUri = reader.getNamespaceURI();
+                    if(name.equals("Body") && nsUri.equals(soapVersion.nsUri) || (reader.getEventType() == XMLStreamConstants.END_DOCUMENT))
+                        break;
+                    c.create(reader);                    
+                }
+
                 reader = xsb.readAsXMLStreamReader();
                 clone = xsb.readAsXMLStreamReader();
                 // advance to the start tag of the first element
