@@ -166,8 +166,11 @@ public class HttpTransportPipe extends AbstractTubeImpl {
         Boolean useAction = (Boolean) packet.invocationProperties.get(BindingProvider.SOAPACTION_USE_PROPERTY);
         String sAction = null;
         boolean use = (useAction != null) ? useAction.booleanValue() : false;
-        if (use)
-            sAction = (String) packet.invocationProperties.get(BindingProvider.SOAPACTION_URI_PROPERTY);
+
+        if (use) {
+            //TODO check if it needs to be quoted
+            sAction = packet.soapAction;
+        }
         //request Property soapAction overrides wsdl
         if (sAction != null)
             reqHeaders.put("SOAPAction", Collections.singletonList(sAction));

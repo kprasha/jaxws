@@ -405,7 +405,7 @@ public final class Packet extends DistributedPropertySet {
      * header is present (See {@BP R2744} and {@BP R2745}.) For SOAP 1.2,
      * this is moved to the parameter of the "application/soap+xml".
      */
-    @Property(BindingProviderProperties.SOAP_ACTION_PROPERTY)
+    @Property(BindingProvider.SOAPACTION_URI_PROPERTY)
     public String soapAction;
 
     /**

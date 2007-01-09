@@ -85,11 +85,7 @@ public interface BindingProviderProperties extends JAXWSProperties{
      */
     public static final String CONTENT_TYPE_PROPERTY = "Content-Type";
     
-    /**
-     * HTTP Content-Type entity-header field.
-     */
-    public static final String SOAP_ACTION_PROPERTY = "SOAPAction";
-    /**
+   /**
      * HTTP SOAPAction request-header field.
      */
     public static final String ACCEPT_PROPERTY = "Accept";

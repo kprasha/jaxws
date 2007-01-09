@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -170,6 +171,44 @@ public final class RequestContext extends PropertySet {
             }
         }
     }
+    /**
+     * The value of the SOAPAction header associated with the message.
+     *
+     * <p>
+     * For outgoing messages, the transport may sends out this value.
+     * If this field is null, the transport may choose to send <tt>""</tt>
+     * (quoted empty string.)
+     *
+     * For incoming messages, the transport will set this field.
+     * If the incoming message did not contain the SOAPAction header,
+     * the transport sets this field to null.
+     *
+     * <p>
+     * If the value is non-null, it must be always in the quoted form.
+     * The value can be null.
+     *
+     * <p>
+     * Note that the way the transport sends this value out depends on
+     * transport and SOAP version.
+     *
+     * For HTTP transport and SOAP 1.1, BP requires that SOAPAction
+     * header is present (See {@BP R2744} and {@BP R2745}.) For SOAP 1.2,
+     * this is moved to the parameter of the "application/soap+xml".
+     */
+
+    private String soapAction;
+
+    @Property(BindingProvider.SOAPACTION_URI_PROPERTY)
+    public String getSoapAction(){
+        return soapAction;
+    }
+    public void setSoapAction(String sAction){
+        if(sAction == null) {
+            throw new IllegalArgumentException("SOAPAction value cannot be null");
+        }
+        soapAction = sAction;
+    }
+
 
     /**
      * {@link Map} exposed to the user application.
@@ -228,9 +267,12 @@ public final class RequestContext extends PropertySet {
      */
     public void fill(Packet packet) {
         if(mapView.fallbackMap==null) {
-            if(endpointAddress!=null)
+            if (endpointAddress != null)
                 packet.endpointAddress = endpointAddress;
             packet.contentNegotiation = contentNegotiation;
+            if (soapAction != null) {
+                packet.soapAction = soapAction;
+            }
             if(!others.isEmpty()) {
                 packet.invocationProperties.putAll(others);
                 //if it is not standard property it deafults to Scope.HANDLER
