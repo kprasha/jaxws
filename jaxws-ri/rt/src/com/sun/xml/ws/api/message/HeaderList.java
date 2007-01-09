@@ -644,7 +644,7 @@ public final class HeaderList extends ArrayList<Header> {
         if (action == null || action.equals("")) {
             throw new WebServiceException(ClientMessages.INVALID_SOAP_ACTION());
         }
-        boolean oneway = packet.expectReply;
+        boolean oneway = !packet.expectReply;
         if (wsdlPort != null) {
             // if WSDL has <wsaw:Anonymous>prohibited</wsaw:Anonymous>, then throw an error
             // as anonymous ReplyTo MUST NOT be added in that case. BindingProvider need to
