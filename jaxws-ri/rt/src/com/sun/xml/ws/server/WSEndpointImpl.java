@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
+import com.sun.xml.ws.resources.HandlerMessages;
 import org.w3c.dom.Element;
 
 import javax.annotation.PreDestroy;
@@ -61,6 +62,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * {@link WSEndpoint} implementation.
@@ -234,9 +236,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 try {
                     method.invoke(handler);
                 } catch (Exception e) {
-                    logger.warning("exception ignored from handler " +
-                        "@PreDestroy method: " +
-                        e.getMessage());
+                    logger.log(Level.WARNING, HandlerMessages.HANDLER_PREDESTROY_IGNORE(e.getMessage()), e);
                 }
                 break;
             }
