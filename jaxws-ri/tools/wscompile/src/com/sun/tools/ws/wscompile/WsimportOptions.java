@@ -36,8 +36,8 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.LocatorImpl;
 
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -289,12 +289,15 @@ public class WsimportOptions extends Options {
 
 
     /**
+     * Exposing it as a public method to allow external tools such as NB to read from wsdl model and work on it.
+     * TODO: WSDL model needs to be exposed - basically at tool time we need to use the runtimw wsdl model
+     *
      * Binding files could be jaxws or jaxb. This method identifies jaxws and jaxb binding files and keeps them separately. jaxb binding files are given separately
      * to JAXB in {@link com.sun.tools.ws.processor.modeler.wsdl.JAXBModelBuilder}
      *
      * @param receiver {@link ErrorReceiver}
      */
-    void parseBindings(ErrorReceiver receiver){
+    public final void parseBindings(ErrorReceiver receiver){
         for (InputSource is : bindingFiles) {
             XMLStreamReader reader =
                     XMLStreamReaderFactory.createFreshXMLStreamReader(is, true);
@@ -314,8 +317,5 @@ public class WsimportOptions extends Options {
             }
         }
     }
-
-    private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
-
 
 }
