@@ -140,7 +140,8 @@ public abstract class WsaTubeHelper {
                     action = packet.soapAction;
                 else
                     action = op.getInput().getAction();
-            }
+            } else
+                action = packet.soapAction;
         } else {
             action = packet.soapAction;
         }
