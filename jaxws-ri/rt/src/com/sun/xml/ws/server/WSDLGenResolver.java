@@ -92,8 +92,10 @@ final class WSDLGenResolver implements WSDLResolver {
      * @return Result the generated concrete WSDL
      */
     public Result getWSDL(String filename) {
+        URL url = createURL(filename);
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-        concreteWsdlSource = SDDocumentSource.create(createURL(filename),xsb);
+        xsb.setSystemId(url.toExternalForm());
+        concreteWsdlSource = SDDocumentSource.create(url,xsb);
         newDocs.add(concreteWsdlSource);
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename);
@@ -130,9 +132,10 @@ final class WSDLGenResolver implements WSDLResolver {
             filename.value = abstractWsdl.getURL().toString();
             return null;                // Don't generate abstract WSDL
         }
-
+        URL url = createURL(filename.value);
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-        SDDocumentSource abstractWsdlSource = SDDocumentSource.create(createURL(filename.value),xsb);
+        xsb.setSystemId(url.toExternalForm());
+        SDDocumentSource abstractWsdlSource = SDDocumentSource.create(url,xsb);
         newDocs.add(abstractWsdlSource);
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
         r.setSystemId(filename.value);
@@ -158,8 +161,10 @@ final class WSDLGenResolver implements WSDLResolver {
             return null;            // Don't generate schema
         }
 
+        URL url = createURL(filename.value);
         MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
-        SDDocumentSource sd = SDDocumentSource.create(createURL(filename.value),xsb);
+        xsb.setSystemId(url.toExternalForm());
+        SDDocumentSource sd = SDDocumentSource.create(url,xsb);
         newDocs.add(sd);
 
         XMLStreamBufferResult r = new XMLStreamBufferResult(xsb);
