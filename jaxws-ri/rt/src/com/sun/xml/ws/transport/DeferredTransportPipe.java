@@ -69,7 +69,7 @@ public final class DeferredTransportPipe extends AbstractTubeImpl {
             context.getService(),
             context.getBinding(),
             context.getContainer(),
-            context.getCodec()
+            context.getCodec().copy()
         );
 
         address = request.endpointAddress;
