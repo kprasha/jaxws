@@ -451,6 +451,19 @@ public abstract class Message {
     public abstract SOAPMessage readAsSOAPMessage() throws SOAPException ;
 
     /**
+     * Creates the equivalent {@link SOAPMessage} from this message. It also uses
+     * transport specific headers from Packet during the SOAPMessage construction
+     * so that {@link SOAPMessage#getMimeHeaders()} gives meaningful transport
+     * headers.
+     *
+     * This consumes the message.
+     *
+     * @throws SOAPException
+     *      if there's any error while creating a {@link SOAPMessage}.
+     */
+    public abstract SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException ;
+
+    /**
      * Reads the payload as a JAXB object by using the given unmarshaller.
      *
      * This consumes the message.

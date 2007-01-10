@@ -59,6 +59,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import javax.xml.soap.SOAPMessage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -168,6 +169,8 @@ public final class Packet extends DistributedPropertySet {
         this.handlerScopePropertyNames = that.handlerScopePropertyNames;
         this.contentNegotiation = that.contentNegotiation;
         this.wasTransportSecure = that.wasTransportSecure;
+        this.inboundTransportHeaders = that.inboundTransportHeaders;
+        this.outboundTransportHeaders = that.outboundTransportHeaders;
         // copy other properties that need to be copied. is there any?
     }
 
@@ -203,6 +206,20 @@ public final class Packet extends DistributedPropertySet {
      */
     // TODO: expose this as a property
     public boolean wasTransportSecure;
+
+    /**
+     * Inbound transport headers are captured in a transport neutral way.
+     * Transports are expected to fill this data after creating a Packet.
+     * <p>
+     * {@link SOAPMessage#getMimeHeaders()} would return these headers.
+     *
+     */
+    public Map<String, List<String>> inboundTransportHeaders;
+
+    /**
+     * Outbound transport headers are captured in a transport neutral way.
+     */
+    public Map<String, List<String>> outboundTransportHeaders;
 
     /**
      * This property holds the snapshot of HandlerConfiguration

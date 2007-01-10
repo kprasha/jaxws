@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import javax.xml.soap.AttachmentPart;
 import org.xml.sax.ContentHandler;
@@ -39,10 +40,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.MimeHeader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Partial {@link Message} implementation.
@@ -181,6 +185,20 @@ public abstract class AbstractMessageImpl extends Message {
             part.setDataHandler(att.asDataHandler());
             part.setContentId('<'+att.getContentId()+'>');
             msg.addAttachmentPart(part);
+        }
+        return msg;
+    }
+
+    /**
+     *
+     */
+    public SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException {
+        SOAPMessage msg = readAsSOAPMessage();
+        Map<String, List<String>> headers = null;   // TODO
+        for(Map.Entry<String, List<String>> e : headers.entrySet()) {
+            for(String value : e.getValue()) {
+                msg.getMimeHeaders().addHeader(e.getKey(), value);
+            }
         }
         return msg;
     }

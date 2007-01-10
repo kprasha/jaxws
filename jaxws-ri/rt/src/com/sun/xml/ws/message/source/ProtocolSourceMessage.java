@@ -26,6 +26,7 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.streaming.SourceReaderFactory;
 import javax.xml.bind.JAXBException;
@@ -105,6 +106,10 @@ public class ProtocolSourceMessage extends Message {
 
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
         return sm.readAsSOAPMessage();
+    }
+
+    public SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException {
+        return sm.readAsSOAPMessage(packet, inbound);
     }
 
     public <T> T readPayloadAsJAXB(Unmarshaller unmarshaller) throws JAXBException {
