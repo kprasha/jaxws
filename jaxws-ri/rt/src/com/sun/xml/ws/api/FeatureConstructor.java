@@ -27,7 +27,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME)
 @Target(ElementType.CONSTRUCTOR)
-@Documented
+
 public @interface FeatureConstructor {
     /**
      * The name of the parameter.
