@@ -291,6 +291,8 @@ public final class StreamMessage extends AbstractMessageImpl {
                 if(reader.getEventType() == XMLStreamConstants.END_ELEMENT){
                     if(!name.equals("Body") || !nsUri.equals(soapVersion.nsUri)){
                         XMLStreamReaderUtil.nextElementContent(reader);
+                        if(reader.getEventType() == XMLStreamConstants.END_DOCUMENT)
+                            break;
                         name = reader.getLocalName();
                         nsUri = reader.getNamespaceURI();
                     }
