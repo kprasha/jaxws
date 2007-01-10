@@ -461,7 +461,9 @@ public abstract class Message {
      * @throws SOAPException
      *      if there's any error while creating a {@link SOAPMessage}.
      */
-    public abstract SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException ;
+    public SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException {
+        return readAsSOAPMessage();
+    }
 
     /**
      * Reads the payload as a JAXB object by using the given unmarshaller.
