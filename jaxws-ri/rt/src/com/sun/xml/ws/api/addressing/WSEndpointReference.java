@@ -19,6 +19,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.resources.AddressingMessages;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
@@ -34,7 +35,6 @@ import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -127,7 +127,7 @@ public final class WSEndpointReference {
      * Creates a {@link WSEndpointReference} by parsing an infoset.
      */
     public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException {
-        this(XMLInputFactory.newInstance().createXMLStreamReader(infoset),version);
+        this(XMLStreamReaderFactory.createXMLStreamReader(infoset,false),version);
     }
 
     /**
