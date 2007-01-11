@@ -100,6 +100,9 @@ public abstract class XMLStreamReaderFactory {
      * possibly reusable instances. So the caller should always consider the effort
      * it takes to recycle vs the possible performance gain by doing so.
      *
+     * <p>
+     * This method may be invked by multiple threads concurrently.
+     *
      * @param r
      *      The {@link XMLStreamReader} instance that the caller finished using.
      *      This could be any {@link XMLStreamReader} implementation, not just
