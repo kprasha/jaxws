@@ -34,6 +34,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.encoding.TagInfoset;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
@@ -46,9 +47,13 @@ import org.xml.sax.SAXParseException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.*;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamConstants;
 import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
 
@@ -198,6 +203,7 @@ public final class StreamMessage extends AbstractMessageImpl {
             return unmarshaller.unmarshal(reader);
         } finally{
             unmarshaller.setAttachmentUnmarshaller(null);
+            XMLStreamReaderFactory.recycle(reader);
         }
     }
 
@@ -205,8 +211,10 @@ public final class StreamMessage extends AbstractMessageImpl {
         if(!hasPayload())
             return null;
         assert unconsumed();
-        return bridge.unmarshal(reader,
-            hasAttachments()? new AttachmentUnmarshallerImpl(getAttachments()) : null );
+        T r = bridge.unmarshal(reader,
+            hasAttachments() ? new AttachmentUnmarshallerImpl(getAttachments()) : null);
+        XMLStreamReaderFactory.recycle(reader);
+        return r;
     }
 
     public XMLStreamReader readPayload() {
@@ -241,6 +249,7 @@ public final class StreamMessage extends AbstractMessageImpl {
             conv.bridge(reader,writer);
         }
         reader.close();
+        XMLStreamReaderFactory.recycle(reader);
     }
 
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException{
@@ -303,6 +312,7 @@ public final class StreamMessage extends AbstractMessageImpl {
                 conv.bridge();
             }
             reader.close();
+            XMLStreamReaderFactory.recycle(reader);
         } catch (XMLStreamException e) {
             Location loc = e.getLocation();
             if(loc==null)   loc = DummyLocation.INSTANCE;
