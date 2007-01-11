@@ -102,13 +102,45 @@ public class DOMUtil {
     public static void serializeNode(Element node, XMLStreamWriter writer) throws XMLStreamException {
         String nodePrefix = fixNull(node.getPrefix());
         String nodeNS = fixNull(node.getNamespaceURI());
+        
+        writer.writeStartElement(nodePrefix, node.getLocalName(), nodeNS);
+
+        writeAttributes(node, writer);
+
+        if (node.hasChildNodes()) {
+            NodeList children = node.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                Node child = children.item(i);
+                switch (child.getNodeType()) {
+                    case Node.PROCESSING_INSTRUCTION_NODE:
+                        writer.writeProcessingInstruction(child.getNodeValue());
+                    case Node.DOCUMENT_TYPE_NODE:
+                        break;
+                    case Node.CDATA_SECTION_NODE:
+                        writer.writeCData(child.getNodeValue());
+                        break;
+                    case Node.COMMENT_NODE:
+                        writer.writeComment(child.getNodeValue());
+                        break;
+                    case Node.TEXT_NODE:
+                        writer.writeCharacters(child.getNodeValue());
+                        break;
+                    case Node.ELEMENT_NODE:
+                        serializeNode((Element) child, writer);
+                        break;
+                }
+            }
+        }
+        writer.writeEndElement();
+    }
+
+    public static void writeAttributes(Element node, XMLStreamWriter writer) throws XMLStreamException {
+        String nodePrefix = fixNull(node.getPrefix());
+        String nodeNS = fixNull(node.getNamespaceURI());
 
         // See if nodePrefix:nodeNS is declared in writer's NamespaceContext before writing start element
         // Writing start element puts nodeNS in NamespaceContext even though namespace declaration not written
         boolean prefixDecl = isPrefixDeclared(writer, nodeNS, nodePrefix);
-
-        writer.writeStartElement(nodePrefix, node.getLocalName(), nodeNS);
-
         if (node.hasAttributes()) {
             NamedNodeMap attrs = node.getAttributes();
             int numOfAttributes = attrs.getLength();
@@ -162,32 +194,6 @@ public class DOMUtil {
                 }
             }
         }
-
-        if (node.hasChildNodes()) {
-            NodeList children = node.getChildNodes();
-            for (int i = 0; i < children.getLength(); i++) {
-                Node child = children.item(i);
-                switch (child.getNodeType()) {
-                    case Node.PROCESSING_INSTRUCTION_NODE:
-                        writer.writeProcessingInstruction(child.getNodeValue());
-                    case Node.DOCUMENT_TYPE_NODE:
-                        break;
-                    case Node.CDATA_SECTION_NODE:
-                        writer.writeCData(child.getNodeValue());
-                        break;
-                    case Node.COMMENT_NODE:
-                        writer.writeComment(child.getNodeValue());
-                        break;
-                    case Node.TEXT_NODE:
-                        writer.writeCharacters(child.getNodeValue());
-                        break;
-                    case Node.ELEMENT_NODE:
-                        serializeNode((Element) child, writer);
-                        break;
-                }
-            }
-        }
-        writer.writeEndElement();
     }
 
     private static boolean isPrefixDeclared(XMLStreamWriter writer, String nsUri, String prefix) {

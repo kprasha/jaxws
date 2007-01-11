@@ -50,6 +50,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
+import javax.xml.XMLConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -474,7 +475,7 @@ public class SAAJMessage extends Message {
             env = sm.getSOAPPart().getEnvelope();
 
             writer.writeStartElement(env.getPrefix(),"Envelope", env.getNamespaceURI());
-            writeAttributes(env.getAttributes(),writer);
+            DOMUtil.writeAttributes(env, writer);
             if(hasHeaders()) {
                 writer.writeStartElement(env.getPrefix(),"Header",env.getNamespaceURI());
                 int len = headers.size();
@@ -493,23 +494,6 @@ public class SAAJMessage extends Message {
             //for now. ask jaxws team what to do.
         }
 
-    }
-
-    private void writeAttributes(@Nullable NamedNodeMap attrs , XMLStreamWriter writer)throws XMLStreamException{
-        if (attrs != null) {
-            for(int i=0;i< attrs.getLength();i++){
-                Attr attr = (Attr)attrs.item(i);
-                String nsUri = attr.getNamespaceURI();
-                if (nsUri == null) {
-                    writer.writeAttribute(attr.getLocalName(),attr.getValue());
-                } else if (nsUri.equals("http://www.w3.org/2000/xmlns/")){
-                    writer.setPrefix(attr.getLocalName(),attr.getValue());
-                    writer.writeNamespace(attr.getLocalName(),attr.getValue());
-                } else {
-                    writer.writeAttribute(attr.getPrefix(),nsUri,attr.getLocalName(),attr.getValue());
-                }
-            }
-        }
     }
 
 }
