@@ -94,8 +94,26 @@ public final class WsaServerTube extends WsaTube {
         // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.
 
         HeaderList hl = request.getMessage().getHeaders();
+        try {
         replyTo = hl.getReplyTo(addressingVersion, soapVersion);
         faultTo = hl.getFaultTo(addressingVersion, soapVersion);
+        } catch (InvalidMapException e) {
+            SOAPFault soapFault = helper.newInvalidMapFault(e, addressingVersion);
+            // WS-A fault processing for one-way methods
+            if (request.getMessage().isOneWay(wsdlPort)) {
+                request.createServerResponse(null, wsdlPort, binding);
+                return doInvoke(next, request);
+            }
+
+            Message m = Messages.create(soapFault);
+            if (soapVersion == SOAPVersion.SOAP_11) {
+                FaultDetailHeader s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
+                m.getHeaders().add(s11FaultDetailHeader);
+            }
+
+            Packet response = request.createServerResponse(m, wsdlPort, binding);
+            return doReturnWith(response);
+        }
         String messageId = hl.getMessageID(addressingVersion, soapVersion);
 
         // TODO: This is probably not a very good idea.
