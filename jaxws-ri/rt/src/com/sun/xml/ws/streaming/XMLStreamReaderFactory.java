@@ -10,6 +10,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -142,18 +143,46 @@ public abstract class XMLStreamReaderFactory {
         private final ThreadLocal<XMLStreamReader> pool = new ThreadLocal<XMLStreamReader>();
 
         /**
+         * Sun StAX impl <code>XMLReaderImpl.setInputSource()</code> method via reflection.
+         */
+        private final Method setInputSourceMethod;
+
+        /**
+         * Sun StAX impl <code>XMLReaderImpl.reset()</code> method via reflection.
+         */
+        private final Method resetMethod;
+
+        /**
+         * The Sun StAX impl's {@link XMLStreamReader} implementation clas.
+         */
+        private final Class zephyrClass;
+
+        /**
          * Creates {@link Zephyr} instance if the given {@link XMLInputFactory} is the one
          * from Zephyr.
          */
         public static @Nullable
         XMLStreamReaderFactory newInstance(XMLInputFactory xif) {
-            if(!allIsGood)  return null;
-            if(false /*TODO: if xif belongs to Zephyr*/)
-                return new Zephyr(xif);
-            return null;
+            // check if this is from Zephyr
+            try {
+                Class<?> clazz = xif.createXMLStreamReader(new StringReader("<foo/>")).getClass();
+
+                if(!clazz.getName().startsWith("com.sun.xml.stream."))
+                    return null;    // nope
+
+                return new Zephyr(xif,clazz);
+            } catch (NoSuchMethodException e) {
+                return null;    // this factory is not for zephyr
+            } catch (XMLStreamException e) {
+                return null;    // impossible to fail to parse <foo/>, but anyway
+            }
         }
 
-        public Zephyr(XMLInputFactory xif) {
+        public Zephyr(XMLInputFactory xif, Class clazz) throws NoSuchMethodException {
+            zephyrClass = clazz;
+            setInputSourceMethod = clazz.getMethod("setInputSource", InputSource.class);
+            resetMethod = clazz.getMethod("reset");
+
             try {
                 // Turn OFF internal factory caching in Zephyr -- not thread safe
                 xif.setProperty("reuse-instance", false);
@@ -174,7 +203,7 @@ public abstract class XMLStreamReaderFactory {
         }
 
         public void doRecycle(XMLStreamReader r) {
-            if(ZEPHYR_XMLREADER_CLASS.isInstance(r))
+            if(zephyrClass.isInstance(r))
                 pool.set(r);
             if(r instanceof RecycleAware)
                 ((RecycleAware)r).onRecycled();
@@ -221,45 +250,8 @@ public abstract class XMLStreamReaderFactory {
         }
 
         private void reuse(XMLStreamReader xsr, InputSource in) throws IllegalAccessException, InvocationTargetException {
-            XMLReaderImpl_reset.invoke(xsr);
-            XMLReaderImpl_setInputSource.invoke(xsr,in);
-        }
-
-
-        /**
-         * Sun StAX impl <code>XMLReaderImpl.setInputSource()</code> method via reflection.
-         */
-        private static Method XMLReaderImpl_setInputSource;
-
-        /**
-         * Sun StAX impl <code>XMLReaderImpl.reset()</code> method via reflection.
-         */
-        private static Method XMLReaderImpl_reset;
-
-        /**
-         * The Sun StAX impl's {@link XMLStreamReader} implementation clas.
-         */
-        private static Class ZEPHYR_XMLREADER_CLASS;
-
-        private static boolean allIsGood;
-
-        static {
-            try {
-                try {
-                    ZEPHYR_XMLREADER_CLASS = Class.forName("com.sun.xml.stream.XMLReaderImpl");
-                } catch (ClassNotFoundException e) {
-                    // Are we running on top of JAXP 1.4?
-                    ZEPHYR_XMLREADER_CLASS = Class.forName("com.sun.xml.stream.XMLStreamReaderImpl");
-                }
-                if(ZEPHYR_XMLREADER_CLASS!=null) {
-                    XMLReaderImpl_setInputSource =
-                        ZEPHYR_XMLREADER_CLASS.getMethod("setInputSource", InputSource.class);
-                    XMLReaderImpl_reset = ZEPHYR_XMLREADER_CLASS.getMethod("reset");
-                }
-                allIsGood = true;
-            } catch (Exception e) {
-                // falls through
-            }
+            resetMethod.invoke(xsr);
+            setInputSourceMethod.invoke(xsr,in);
         }
     }
 
