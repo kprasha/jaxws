@@ -127,7 +127,7 @@ public class DeploymentDescriptorParser<A> {
         XMLStreamReader reader = null;
         try {
             reader =
-                XMLStreamReaderFactory.createXMLStreamReader(systemId,is,true);
+                XMLStreamReaderFactory.create(systemId,is,true);
             XMLStreamReaderUtil.nextElementContent(reader);
             return parseAdapters(reader);
         } finally {

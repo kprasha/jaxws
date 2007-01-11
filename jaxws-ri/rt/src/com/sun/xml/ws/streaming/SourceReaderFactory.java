@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.streaming;
 
+import com.sun.xml.ws.util.FastInfosetUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 
 import javax.xml.stream.XMLStreamReader;
@@ -78,28 +79,28 @@ public class SourceReaderFactory {
                 if (is != null) {
                     // Wrap input stream in Reader if charset is specified
                     if (charsetName != null) {
-                        return XMLStreamReaderFactory.createXMLStreamReader(
+                        return XMLStreamReaderFactory.create(
                             source.getSystemId(), new InputStreamReader(is, charsetName), rejectDTDs);                    
                     }
                     else {
-                        return XMLStreamReaderFactory.createXMLStreamReader(
+                        return XMLStreamReaderFactory.create(
                             source.getSystemId(), is, rejectDTDs);
                     }
                 }
                 else {
                     Reader reader = streamSource.getReader();
                     if (reader != null) {
-                        return XMLStreamReaderFactory.createXMLStreamReader(
+                        return XMLStreamReaderFactory.create(
                             source.getSystemId(), reader, rejectDTDs);
                     }
                     else {
-                        return XMLStreamReaderFactory.createXMLStreamReader(
+                        return XMLStreamReaderFactory.create(
                             source.getSystemId(), new URL(source.getSystemId()).openStream(), rejectDTDs );
                     }
                 }
             }
             else if (source.getClass() == fastInfosetSourceClass) {
-                return XMLStreamReaderFactory.createFIStreamReader((InputStream) 
+                return FastInfosetUtil.createFIStreamReader((InputStream)
                     fastInfosetSource_getInputStream.invoke(source));
             }
             else if (source instanceof DOMSource) {

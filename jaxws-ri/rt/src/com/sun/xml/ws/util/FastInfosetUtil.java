@@ -22,19 +22,17 @@
 
 package com.sun.xml.ws.util;
 
+import com.sun.xml.ws.streaming.XMLReaderException;
+import com.sun.xml.ws.streaming.XMLStreamReaderException;
+import com.sun.xml.ws.util.xml.XmlUtil;
+import org.xml.sax.InputSource;
+
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.List;
 import java.util.StringTokenizer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPException;
-
-import com.sun.xml.messaging.saaj.soap.MessageImpl;
-import com.sun.xml.ws.util.xml.XmlUtil;
-
-import static com.sun.xml.ws.developer.JAXWSProperties.CONTENT_NEGOTIATION_PROPERTY;
 
 public class FastInfosetUtil {
     
@@ -85,4 +83,27 @@ public class FastInfosetUtil {
         }
     }
 
+    public static XMLStreamReader createFIStreamReader(InputSource source) {
+        return createFIStreamReader(source.getByteStream());
+    }
+
+    /**
+     * Returns the FI parser allocated for this thread.
+     */
+    public static XMLStreamReader createFIStreamReader(InputStream in) {
+        // Check if compatible implementation of FI was found
+        if (FastInfosetReflection.fiStAXDocumentParser_new == null) {
+            throw new XMLReaderException("fastinfoset.noImplementation");
+        }
+
+        try {
+            // Do not use StAX pluggable layer for FI
+            Object sdp = FastInfosetReflection.fiStAXDocumentParser_new.newInstance();
+            FastInfosetReflection.fiStAXDocumentParser_setStringInterning.invoke(sdp, Boolean.TRUE);
+            FastInfosetReflection.fiStAXDocumentParser_setInputStream.invoke(sdp, in);
+            return (XMLStreamReader) sdp;
+        } catch (Exception e) {
+            throw new XMLStreamReaderException(e);
+        }
+    }
 }

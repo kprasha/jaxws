@@ -31,8 +31,8 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
-import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.message.MimeAttachmentSet;
+import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
@@ -224,7 +224,7 @@ public class MtomCodec extends MimeCodec {
         // before the decoded message is completely used.
 
         XMLStreamReader mtomReader = new MtomXMLStreamReaderEx( mpp,
-            XMLStreamReaderFactory.createXMLStreamReader(mpp.getRootPart().asInputStream(), true)
+            XMLStreamReaderFactory.create(null, mpp.getRootPart().asInputStream(), true)
         );
 
         //TODO: remove this code after {@link StreamSOAPCodec#decode} is modified to

@@ -22,8 +22,8 @@
 
 package com.sun.xml.ws.wsdl.parser;
 
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -55,6 +55,6 @@ final class EntityResolverWrapper implements XMLEntityResolver {
             systemId = source.getSystemId();
 
         return new Parser(new URL(systemId),
-            XMLStreamReaderFactory.createFreshXMLStreamReader(source,true));
+            XMLStreamReaderFactory.create(source,true));
     }
 }

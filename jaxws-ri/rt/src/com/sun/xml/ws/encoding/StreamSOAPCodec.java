@@ -269,7 +269,7 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
     protected XMLStreamReader createXMLStreamReader(InputStream in) {
         // TODO: we should definitely let Decode owns one XMLStreamReader instance
         // instead of going to this generic factory
-        return XMLStreamReaderFactory.createXMLStreamReader(in,true);
+        return XMLStreamReaderFactory.create(null,in,true);
     }
 
     private MutableXMLStreamBuffer createXMLStreamBuffer() {

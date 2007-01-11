@@ -127,7 +127,7 @@ public final class WSEndpointReference {
      * Creates a {@link WSEndpointReference} by parsing an infoset.
      */
     public WSEndpointReference(InputStream infoset, AddressingVersion version) throws XMLStreamException {
-        this(XMLStreamReaderFactory.createXMLStreamReader(infoset,false),version);
+        this(XMLStreamReaderFactory.create(null,infoset,false),version);
     }
 
     /**

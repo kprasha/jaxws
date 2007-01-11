@@ -330,7 +330,7 @@ public final class XMLMessage {
 
         public XMLStreamReader readPayload() throws XMLStreamException {
             convertDataSourceToMessage();
-            return XMLStreamReaderFactory.createXMLStreamReader(
+            return XMLStreamReaderFactory.create( null,
                     mpp.getRootPart().asInputStream(), true);
         }
 

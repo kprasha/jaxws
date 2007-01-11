@@ -24,16 +24,16 @@ package com.sun.xml.ws.util;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.handler.HandlerChainsModel;
+import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import com.sun.xml.ws.server.EndpointFactory;
 
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPMessageHandlers;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.Provider;
 import javax.xml.ws.Service;
 import java.io.IOException;
@@ -102,7 +102,7 @@ public class HandlerAnnotationProcessor {
         }
         InputStream iStream = getFileAsStream(clazz, handlerChain);
         XMLStreamReader reader =
-            XMLStreamReaderFactory.createXMLStreamReader(iStream, true);
+            XMLStreamReaderFactory.create(null,iStream, true);
         XMLStreamReaderUtil.nextElementContent(reader);
         HandlerAnnotationInfo handlerAnnInfo = HandlerChainsModel.parseHandlerFile(reader, clazz.getClassLoader(),
             serviceName, portName, binding);
@@ -129,7 +129,7 @@ public class HandlerAnnotationProcessor {
             return null;
         InputStream iStream = getFileAsStream(clazz, handlerChain);
         XMLStreamReader reader =
-            XMLStreamReaderFactory.createXMLStreamReader(iStream, true);
+            XMLStreamReaderFactory.create(null,iStream, true);
         XMLStreamReaderUtil.nextElementContent(reader);
         HandlerChainsModel handlerChainsModel = HandlerChainsModel.parseHandlerConfigFile(clazz, reader);
         try {
