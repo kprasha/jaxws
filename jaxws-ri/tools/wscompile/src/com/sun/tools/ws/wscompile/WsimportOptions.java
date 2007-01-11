@@ -300,7 +300,7 @@ public class WsimportOptions extends Options {
     public final void parseBindings(ErrorReceiver receiver){
         for (InputSource is : bindingFiles) {
             XMLStreamReader reader =
-                    XMLStreamReaderFactory.createFreshXMLStreamReader(is, true);
+                    XMLStreamReaderFactory.create(is,true);
             XMLStreamReaderUtil.nextElementContent(reader);
             if (reader.getName().equals(JAXWSBindingsConstants.JAXWS_BINDINGS)) {
                 jaxwsCustomBindings.add(is);
