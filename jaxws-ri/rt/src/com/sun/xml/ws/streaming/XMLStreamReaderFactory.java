@@ -213,7 +213,9 @@ public abstract class XMLStreamReaderFactory {
             try {
                 XMLStreamReader xsr = fetch();
                 if(xsr==null)
-                    return xif.createXMLStreamReader(systemId,in);
+                    synchronized (xif) {
+                        return xif.createXMLStreamReader(systemId,in);
+                    }
 
                 // try re-using this instance.
                 InputSource is = new InputSource(systemId);
@@ -233,7 +235,9 @@ public abstract class XMLStreamReaderFactory {
             try {
                 XMLStreamReader xsr = fetch();
                 if(xsr==null)
-                    return xif.createXMLStreamReader(systemId,in);
+                    synchronized (xif) {
+                        return xif.createXMLStreamReader(systemId,in);
+                    }
 
                 // try re-using this instance.
                 InputSource is = new InputSource(systemId);
