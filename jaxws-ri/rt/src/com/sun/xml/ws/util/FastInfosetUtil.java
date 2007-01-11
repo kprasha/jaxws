@@ -24,10 +24,12 @@ package com.sun.xml.ws.util;
 
 import com.sun.xml.ws.streaming.XMLReaderException;
 import com.sun.xml.ws.streaming.XMLStreamReaderException;
+import com.sun.xml.ws.streaming.XMLStreamWriterException;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.InputSource;
 
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -106,4 +108,34 @@ public class FastInfosetUtil {
             throw new XMLStreamReaderException(e);
         }
     }
+
+    // -- Fast Infoset ---------------------------------------------------
+
+    public static XMLStreamWriter createFIStreamWriter(OutputStream out) {
+        return createFIStreamWriter(out, "UTF-8");
+    }
+
+    public static XMLStreamWriter createFIStreamWriter(OutputStream out, String encoding) {
+        return createFIStreamWriter(out, encoding, true);
+    }
+
+    public static XMLStreamWriter createFIStreamWriter(OutputStream out,
+        String encoding, boolean declare)
+    {
+        // Check if compatible implementation of FI was found
+        if (FastInfosetReflection.fiStAXDocumentSerializer_new == null) {
+            throw new XMLReaderException("fastinfoset.noImplementation");
+        }
+
+        try {
+            Object sds = FastInfosetReflection.fiStAXDocumentSerializer_new.newInstance();
+            FastInfosetReflection.fiStAXDocumentSerializer_setOutputStream.invoke(sds, out);
+            FastInfosetReflection.fiStAXDocumentSerializer_setEncoding.invoke(sds, encoding);
+            return (XMLStreamWriter) sds;
+        }  catch (Exception e) {
+            throw new XMLStreamWriterException(e);
+        }
+    }
+
+
 }

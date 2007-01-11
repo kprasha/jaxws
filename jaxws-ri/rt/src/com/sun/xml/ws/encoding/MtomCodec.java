@@ -31,10 +31,10 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.message.MimeAttachmentSet;
 import com.sun.xml.ws.message.stream.StreamAttachment;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
 import org.jvnet.staxex.Base64Data;
@@ -128,7 +128,6 @@ public class MtomCodec extends MimeCodec {
         //get the current boundary thaat will be reaturned from this method
         mtomAttachmentStream.clear();
         ContentType contentType = getContentType(packet);
-        MtomStreamWriter writer = new MtomStreamWriter(XMLStreamWriterFactory.createXMLStreamWriter(out));
 
         osWriter = new UTF8OutputStreamWriter(out);
         if(packet.getMessage() != null){
@@ -137,7 +136,9 @@ public class MtomCodec extends MimeCodec {
                 OutputUtil.writeln("Content-Type: "+ soapXopContentType,  out);
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
                 OutputUtil.writeln(out);
+                MtomStreamWriter writer = new MtomStreamWriter(XMLStreamWriterFactory.create(out));
                 packet.getMessage().writeTo(writer);
+                XMLStreamWriterFactory.recycle(writer);
                 OutputUtil.writeln(out);
 
                 for(ByteArrayBuffer bos : mtomAttachmentStream){

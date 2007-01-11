@@ -22,8 +22,8 @@
 
 package com.sun.xml.ws.wsdl.parser;
 
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

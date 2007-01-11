@@ -1,6 +1,6 @@
 package com.sun.xml.ws.util.xml;
 
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;

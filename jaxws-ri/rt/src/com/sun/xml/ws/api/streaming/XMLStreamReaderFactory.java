@@ -1,7 +1,8 @@
-package com.sun.xml.ws.streaming;
+package com.sun.xml.ws.api.streaming;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.streaming.XMLReaderException;
 import org.xml.sax.InputSource;
 
 import javax.xml.stream.XMLInputFactory;
@@ -184,7 +185,8 @@ public abstract class XMLStreamReaderFactory {
             resetMethod = clazz.getMethod("reset");
 
             try {
-                // Turn OFF internal factory caching in Zephyr -- not thread safe
+                // Turn OFF internal factory caching in Zephyr.
+                // Santiago told me that this makes it thread-safe.
                 xif.setProperty("reuse-instance", false);
             } catch (IllegalArgumentException e) {
                 // falls through
@@ -213,9 +215,7 @@ public abstract class XMLStreamReaderFactory {
             try {
                 XMLStreamReader xsr = fetch();
                 if(xsr==null)
-                    synchronized (xif) {
-                        return xif.createXMLStreamReader(systemId,in);
-                    }
+                    return xif.createXMLStreamReader(systemId,in);
 
                 // try re-using this instance.
                 InputSource is = new InputSource(systemId);
@@ -235,9 +235,7 @@ public abstract class XMLStreamReaderFactory {
             try {
                 XMLStreamReader xsr = fetch();
                 if(xsr==null)
-                    synchronized (xif) {
-                        return xif.createXMLStreamReader(systemId,in);
-                    }
+                    return xif.createXMLStreamReader(systemId,in);
 
                 // try re-using this instance.
                 InputSource is = new InputSource(systemId);

@@ -27,7 +27,7 @@ import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
 import com.sun.tools.xjc.reader.Util;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.xml.XmlUtil;

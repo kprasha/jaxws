@@ -23,9 +23,9 @@ package com.sun.xml.ws.util;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.server.AsyncProvider;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.handler.HandlerChainsModel;
 import com.sun.xml.ws.server.EndpointFactory;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 
 import javax.jws.HandlerChain;

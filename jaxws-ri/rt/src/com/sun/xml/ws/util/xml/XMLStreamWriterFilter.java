@@ -1,9 +1,11 @@
 package com.sun.xml.ws.util.xml;
 
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory.RecycleAware;
+
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * {@link XMLStreamWriter} that delegates to another {@link XMLStreamWriter}.
@@ -14,7 +16,7 @@ import javax.xml.namespace.NamespaceContext;
  *
  * @author Kohsuke Kawaguchi
  */
-public class XMLStreamWriterFilter implements XMLStreamWriter {
+public class XMLStreamWriterFilter implements XMLStreamWriter, RecycleAware {
     protected XMLStreamWriter writer;
 
     public XMLStreamWriterFilter(XMLStreamWriter writer) {
@@ -147,5 +149,10 @@ public class XMLStreamWriterFilter implements XMLStreamWriter {
 
     public void writeAttribute(String prefix, String namespaceURI, String localName, String value) throws XMLStreamException {
         writer.writeAttribute(prefix, namespaceURI, localName, value);
+    }
+
+    public void onRecycled() {
+        XMLStreamWriterFactory.recycle(writer);
+        writer = null;
     }
 }

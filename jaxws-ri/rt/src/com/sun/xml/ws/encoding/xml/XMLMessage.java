@@ -35,12 +35,12 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.encoding.MimeMultipartParser;
 import com.sun.xml.ws.encoding.XMLHTTPBindingCodec;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.EmptyMessageImpl;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -515,7 +515,7 @@ public final class XMLMessage {
                 
             } else {
                 final ByteOutputStream bos = new ByteOutputStream();
-                XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(bos);
+                XMLStreamWriter writer = XMLStreamWriterFactory.create(bos);
                 try {
                     msg.writePayloadTo(writer);
                     writer.flush();

@@ -33,14 +33,14 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.protocol.soap.VersionMismatchException;
 import com.sun.xml.ws.server.UnsupportedMediaException;
-import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
-import com.sun.xml.ws.streaming.XMLStreamWriterFactory;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -88,13 +88,14 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
 
     public ContentType encode(Packet packet, OutputStream out) {
         if (packet.getMessage() != null) {
-            XMLStreamWriter writer = XMLStreamWriterFactory.createXMLStreamWriter(out);
+            XMLStreamWriter writer = XMLStreamWriterFactory.create(out);
             try {
                 packet.getMessage().writeTo(writer);
                 writer.flush();
             } catch (XMLStreamException e) {
                 throw new WebServiceException(e);
             }
+            XMLStreamWriterFactory.recycle(writer);
         }
         return getContentType(packet.soapAction);
     }
