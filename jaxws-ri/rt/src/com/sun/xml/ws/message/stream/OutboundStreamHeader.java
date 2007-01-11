@@ -91,7 +91,7 @@ public final class OutboundStreamHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        infoset.writeToXMLStreamWriter(w);
+        infoset.writeToXMLStreamWriter(w,true);
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {
