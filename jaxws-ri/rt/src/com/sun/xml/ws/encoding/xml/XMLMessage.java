@@ -337,7 +337,9 @@ public final class XMLMessage {
         public void writePayloadTo(XMLStreamWriter sw) {
             XMLStreamReaderToXMLStreamWriter c = new XMLStreamReaderToXMLStreamWriter();
             try {
-                c.bridge(readPayload(), sw);
+                XMLStreamReader r = readPayload();
+                c.bridge(r, sw);
+                XMLStreamReaderFactory.recycle(r);
             } catch(Exception e) {
                 throw new RuntimeException(e);
             }

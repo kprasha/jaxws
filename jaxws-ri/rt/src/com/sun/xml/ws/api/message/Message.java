@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.XMLStreamWriterEx;
 import org.xml.sax.ContentHandler;
@@ -488,7 +489,9 @@ public abstract class Message {
     /**
      * Reads the payload as a {@link XMLStreamReader}
      *
-     * This consumes the message.
+     * This consumes the message. The caller is encouraged to call
+     * {@link XMLStreamReaderFactory#recycle(XMLStreamReader)} when finished using
+     * the instance.
      *
      * @return
      *      If there's no payload, this method returns null.

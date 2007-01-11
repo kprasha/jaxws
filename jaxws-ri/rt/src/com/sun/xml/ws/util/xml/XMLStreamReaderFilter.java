@@ -1,10 +1,12 @@
 package com.sun.xml.ws.util.xml;
 
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.Location;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * {@link XMLStreamReader} that delegates to another {@link XMLStreamReader}.
@@ -15,7 +17,7 @@ import javax.xml.namespace.QName;
  *
  * @author Kohsuke Kawaguchi
  */
-public class XMLStreamReaderFilter {
+public class XMLStreamReaderFilter implements XMLStreamReaderFactory.RecycleAware {
     /**
      * The underlying {@link XMLStreamReader} that does the parsing of the root part.
      */
@@ -23,6 +25,11 @@ public class XMLStreamReaderFilter {
 
     public XMLStreamReaderFilter(XMLStreamReader core) {
         this.reader = core;
+    }
+
+    public void onRecycled() {
+        XMLStreamReaderFactory.recycle(reader);
+        reader = null;
     }
 
     public int getAttributeCount() {

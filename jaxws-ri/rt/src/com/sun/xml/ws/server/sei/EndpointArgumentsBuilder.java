@@ -25,24 +25,35 @@ import com.sun.xml.bind.api.AccessorException;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.RawAccessor;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.message.Attachment;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.ParameterBinding;
+import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
+import com.sun.xml.ws.resources.ServerMessages;
+import com.sun.xml.ws.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+
+import javax.activation.DataHandler;
+import javax.imageio.ImageIO;
+import javax.jws.WebParam.Mode;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
-import javax.jws.WebParam.Mode;
-import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.Holder;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPFaultException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,18 +61,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.activation.DataHandler;
-import javax.imageio.ImageIO;
-import javax.xml.transform.Source;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPException;
-
-import com.sun.xml.ws.api.message.Attachment;
-import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
-import com.sun.xml.ws.resources.ServerMessages;
 
 /**
  * Reads a request {@link Message}, disassembles it, and moves obtained Java values
@@ -508,6 +507,7 @@ abstract class EndpointArgumentsBuilder {
 
             // we are done with the body
             reader.close();
+            XMLStreamReaderFactory.recycle(reader);
         }
 
         /**
@@ -588,6 +588,7 @@ abstract class EndpointArgumentsBuilder {
 
             // we are done with the body
             reader.close();
+            XMLStreamReaderFactory.recycle(reader);
         }
 
         /**

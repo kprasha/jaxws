@@ -113,7 +113,9 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
         if (contentType != null && !isContentTypeSupported(contentType,expectedContentTypes)) {
             throw new UnsupportedMediaException(contentType, expectedContentTypes);
         }
-        XMLStreamReader reader = createXMLStreamReader(in);
+        // TODO: we should definitely let Decode owns one XMLStreamReader instance
+        // instead of going to this generic factory
+        XMLStreamReader reader = XMLStreamReaderFactory.create(null, in, true);
         packet.setMessage(decode(reader));
     }
 
@@ -265,12 +267,6 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
     }
 
     protected abstract StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark);
-
-    protected XMLStreamReader createXMLStreamReader(InputStream in) {
-        // TODO: we should definitely let Decode owns one XMLStreamReader instance
-        // instead of going to this generic factory
-        return XMLStreamReaderFactory.create(null,in,true);
-    }
 
     private MutableXMLStreamBuffer createXMLStreamBuffer() {
         // TODO: Decode should own one MutableXMLStreamBuffer for reuse
