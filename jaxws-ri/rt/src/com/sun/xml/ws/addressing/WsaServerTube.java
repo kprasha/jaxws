@@ -67,6 +67,11 @@ public final class WsaServerTube extends WsaTube {
     private WSEndpointReference replyTo;
     private WSEndpointReference faultTo;
     private boolean isAnonymousRequired = false;
+    /**
+     * WSDLBoundOperation calculated on the Request payload.
+     * Used for determining ReplyTo or Fault Action for non-anonymous responses     * 
+     */
+    private WSDLBoundOperationImpl wbo;
     public WsaServerTube(@NotNull WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
@@ -89,26 +94,8 @@ public final class WsaServerTube extends WsaTube {
         // These properties are used if a fault is thrown from the subsequent Pipe/Tubes.
 
         HeaderList hl = request.getMessage().getHeaders();
-        try {
-            replyTo = hl.getReplyTo(addressingVersion, soapVersion);
-            faultTo = hl.getFaultTo(addressingVersion, soapVersion);
-        } catch (InvalidMapException e) {
-            SOAPFault soapFault = helper.newInvalidMapFault(e, addressingVersion);
-            // WS-A fault processing for one-way methods
-            if (request.getMessage().isOneWay(wsdlPort)) {
-                request.createServerResponse(null, wsdlPort, binding);
-                return doInvoke(next, request);
-            }
-
-            Message m = Messages.create(soapFault);
-            if (soapVersion == SOAPVersion.SOAP_11) {
-                FaultDetailHeader s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
-                m.getHeaders().add(s11FaultDetailHeader);
-            }
-
-            Packet response = request.createServerResponse(m, wsdlPort, binding);
-            return doReturnWith(response);
-        }
+        replyTo = hl.getReplyTo(addressingVersion, soapVersion);
+        faultTo = hl.getFaultTo(addressingVersion, soapVersion);
         String messageId = hl.getMessageID(addressingVersion, soapVersion);
 
         // TODO: This is probably not a very good idea.
@@ -121,7 +108,8 @@ public final class WsaServerTube extends WsaTube {
         // defaulting
         if (replyTo == null)    replyTo = addressingVersion.anonymousEpr;
         if (faultTo == null)    faultTo = replyTo;
-        WSDLBoundOperationImpl wbo = (WSDLBoundOperationImpl) getWSDLBoundOperation(request);
+
+        wbo = (WSDLBoundOperationImpl) getWSDLBoundOperation(request);
         if(wbo != null && wbo.getAnonymous()== WSDLBoundOperationImpl.ANONYMOUS.required)
             isAnonymousRequired = true;
         Packet p = validateInboundHeaders(request);
@@ -143,7 +131,7 @@ public final class WsaServerTube extends WsaTube {
         // close the transportBackChannel if we know that
         // we'll never use them
         if (!(isAnonymousRequired) &&
-                !replyTo.isAnonymous() && !faultTo.isAnonymous() && 
+                !replyTo.isAnonymous() && !faultTo.isAnonymous() &&
                 request.transportBackChannel != null)
             request.transportBackChannel.close();
         return doInvoke(next,p);
@@ -181,7 +169,7 @@ public final class WsaServerTube extends WsaTube {
      *
      * <p>
      * TODO: ideally we should be doing this by creating a new fiber.
-     * 
+     *
      * @param packet
      *      The response from our server, which will be delivered to the destination.
      * @param target
@@ -214,6 +202,11 @@ public final class WsaServerTube extends WsaTube {
             new ClientTubeAssemblerContext(adrs, wsdlPort, null, binding));
 
         packet.endpointAddress = adrs;
+        String action = packet.getMessage().isFault() ?
+                helper.getFaultAction(wbo, packet) :
+                helper.getOutputAction(wbo);
+        //set the SOAPAction, as its got to be same as wsa:Action
+        packet.soapAction = action;
         Fiber.current().runSync(transport, packet);
     }
 
@@ -261,7 +254,7 @@ public final class WsaServerTube extends WsaTube {
         // if no wsa:To header is found
         if (!foundTo)
             throw new MapRequiredException(addressingVersion.toTag);
-        
+
         // if two-way and no wsa:MessageID is found
         if (!wbo.getOperation().isOneWay() && !foundMessageId)
             throw new MapRequiredException(addressingVersion.messageIDTag);

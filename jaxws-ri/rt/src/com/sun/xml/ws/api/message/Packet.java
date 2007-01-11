@@ -668,19 +668,12 @@ public final class Packet extends DistributedPropertySet {
 
         // wsa:To
         WSEndpointReference replyTo;
-        try {
-            replyTo = message.getHeaders().getReplyTo(av, sv);
-            if (replyTo != null)
-                hl.add(new StringHeader(av.toTag, replyTo.getAddress()));
-        } catch (InvalidMapException e) {
-            replyTo = null;
-        }
+        replyTo = message.getHeaders().getReplyTo(av, sv);
+        if (replyTo != null)
+            hl.add(new StringHeader(av.toTag, replyTo.getAddress()));
 
         // wsa:Action
         hl.add(new StringHeader(av.actionTag, action));
-
-        //set the SOAPAction, as its got to be same as wsa:Action
-        responsePacket.soapAction = action;
 
         // wsa:MessageID
         hl.add(new StringHeader(av.messageIDTag, responsePacket.getMessage().getID(av, sv)));

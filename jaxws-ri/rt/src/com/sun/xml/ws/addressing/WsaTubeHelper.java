@@ -34,6 +34,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.model.wsdl.WSDLOperationImpl;
+import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.Marshaller;
@@ -63,8 +65,15 @@ public abstract class WsaTubeHelper {
 
     public String getFaultAction(Packet requestPacket, Packet responsePacket) {
         String action = addVer.getDefaultFaultAction();
-
         if (wsdlPort == null)
+            return action;
+        WSDLBoundOperation wbo = requestPacket.getMessage().getOperation(wsdlPort);
+        return getFaultAction(wbo,responsePacket);
+    }
+
+    String getFaultAction(@Nullable WSDLBoundOperation wbo, Packet responsePacket) {
+        String action = addVer.getDefaultFaultAction();
+        if (wbo == null)
             return action;
 
         try {
@@ -85,10 +94,6 @@ public abstract class WsaTubeHelper {
             String ns = detail.getFirstChild().getNamespaceURI();
             String name = detail.getFirstChild().getLocalName();
 
-            WSDLBoundOperation wbo = requestPacket.getMessage().getOperation(wsdlPort);
-            if (wbo == null)
-                return action;
-            
             WSDLOperation o = wbo.getOperation();
 
             WSDLFault fault = o.getFault(new QName(ns, name));
@@ -181,19 +186,22 @@ public abstract class WsaTubeHelper {
 
     public String getOutputAction(Packet packet) {
         String action = AddressingVersion.UNSET_OUTPUT_ACTION;
-
         if (wsdlPort != null) {
             WSDLBoundOperation wbo = wsdlPort.getBinding().getOperation(packet.getMessage().getPayloadNamespaceURI(), packet.getMessage().getPayloadLocalPart());
-            if (wbo != null) {
-                WSDLOutput op = wbo.getOperation().getOutput();
-                if(op!=null)
-                    action = op.getAction();
-            }
+            return getOutputAction(wbo);
         }
-
         return action;
     }
 
+    String getOutputAction(@Nullable WSDLBoundOperation wbo) {
+        String action = AddressingVersion.UNSET_OUTPUT_ACTION;
+        if (wbo != null) {
+            WSDLOutput op = wbo.getOperation().getOutput();
+            if (op != null)
+                action = op.getAction();
+        }
+        return action;
+    }
     public SOAPFault newInvalidMapFault(InvalidMapException e, AddressingVersion av) {
         QName name = e.getMapQName();
         QName subsubcode = e.getSubsubcode();
