@@ -470,12 +470,8 @@ public class SAAJMessage extends Message {
     public void writeTo( XMLStreamWriter writer ) throws XMLStreamException {
         try {
             writer.writeStartDocument();
-            SOAPEnvelope env;
-
-            env = sm.getSOAPPart().getEnvelope();
-
-            writer.writeStartElement(env.getPrefix(),"Envelope", env.getNamespaceURI());
-            DOMUtil.writeAttributes(env, writer);
+            SOAPEnvelope env = sm.getSOAPPart().getEnvelope();
+            DOMUtil.writeTagWithAttributes(env, writer);
             if(hasHeaders()) {
                 writer.writeStartElement(env.getPrefix(),"Header",env.getNamespaceURI());
                 int len = headers.size();

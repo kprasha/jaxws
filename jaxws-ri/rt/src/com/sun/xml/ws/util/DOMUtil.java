@@ -100,12 +100,7 @@ public class DOMUtil {
      * @param writer
      */
     public static void serializeNode(Element node, XMLStreamWriter writer) throws XMLStreamException {
-        String nodePrefix = fixNull(node.getPrefix());
-        String nodeNS = fixNull(node.getNamespaceURI());
-        
-        writer.writeStartElement(nodePrefix, node.getLocalName(), nodeNS);
-
-        writeAttributes(node, writer);
+        writeTagWithAttributes(node, writer);
 
         if (node.hasChildNodes()) {
             NodeList children = node.getChildNodes();
@@ -134,13 +129,15 @@ public class DOMUtil {
         writer.writeEndElement();
     }
 
-    public static void writeAttributes(Element node, XMLStreamWriter writer) throws XMLStreamException {
+    public static void writeTagWithAttributes(Element node, XMLStreamWriter writer) throws XMLStreamException {
         String nodePrefix = fixNull(node.getPrefix());
         String nodeNS = fixNull(node.getNamespaceURI());
 
         // See if nodePrefix:nodeNS is declared in writer's NamespaceContext before writing start element
         // Writing start element puts nodeNS in NamespaceContext even though namespace declaration not written
         boolean prefixDecl = isPrefixDeclared(writer, nodeNS, nodePrefix);
+        writer.writeStartElement(nodePrefix, node.getLocalName(), nodeNS);
+
         if (node.hasAttributes()) {
             NamedNodeMap attrs = node.getAttributes();
             int numOfAttributes = attrs.getLength();
