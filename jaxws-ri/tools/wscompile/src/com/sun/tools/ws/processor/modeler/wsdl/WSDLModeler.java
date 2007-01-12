@@ -2335,9 +2335,15 @@ public class WSDLModeler extends WSDLModelerBase {
         for (Parameter param : parameterOrder) {
             JavaType parameterType = param.getType().getJavaType();
             String name = (param.getCustomName() != null) ? param.getCustomName() : param.getName();
+            name = JAXBRIContext.mangleNameToVariableName(name);
+            //if its a java keyword after name mangling, then we simply put underscore as there is no
+            //need to ask user to customize the parameter name if its java keyword
+            if(Names.isJavaReservedWord(name)){
+                name = "_"+name;
+            }
             JavaParameter javaParameter =
                     new JavaParameter(
-                            JAXBRIContext.mangleNameToVariableName(name),
+                            name,
                             parameterType,
                             param,
                             param.isINOUT() || param.isOUT());
