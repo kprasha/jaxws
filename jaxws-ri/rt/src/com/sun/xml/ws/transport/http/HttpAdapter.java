@@ -196,6 +196,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         packet.addSatellite(con);
         packet.transportBackChannel = new Oneway(con);
         packet.webServiceContextDelegate = con.getWebServiceContextDelegate();
+        packet.inboundTransportHeaders = con.getRequestHeaders();
 
         if (dump) {
             ByteArrayBuffer buf = new ByteArrayBuffer();
