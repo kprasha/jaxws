@@ -65,7 +65,7 @@ public abstract class PropertySet {
      *
      * <p>
      * To make the runtime processing easy, this annotation
-     * must be on a public field (since the property value
+     * must be on a public field (since the property name
      * can be set through {@link Map} anyway, you won't be
      * losing abstraction by doing so.)
      *
@@ -83,7 +83,7 @@ public abstract class PropertySet {
         /**
          * Name of the property.
          */
-        String value();
+        String[] value();
     }
 
     /**
@@ -121,7 +121,7 @@ public abstract class PropertySet {
     // * (such as, say, "javax.xml.ws.http."), then return it.
     // *
     // * <p>
-    // * Returning a non-null value from this method allows methods like
+    // * Returning a non-null name from this method allows methods like
     // * {@link #get(Object)} and {@link #put(String, Object)} to work faster.
     // * This is especially so with {@link DistributedPropertySet}, so implementations
     // * are encouraged to set a common prefix, as much as possible.
@@ -148,8 +148,11 @@ public abstract class PropertySet {
                 for( Class c=clazz; c!=null; c=c.getSuperclass()) {
                     for (Field f : c.getDeclaredFields()) {
                         Property cp = f.getAnnotation(Property.class);
-                        if(cp!=null)
-                            props.put(cp.value(), new FieldAccessor(f, cp));
+                        if(cp!=null) {
+                            for(String value : cp.value()) {
+                                props.put(value, new FieldAccessor(f, value));
+                            }
+                        }
                     }
                     for (Method m : c.getDeclaredMethods()) {
                         Property cp = m.getAnnotation(Property.class);
@@ -164,7 +167,9 @@ public abstract class PropertySet {
                             } catch (NoSuchMethodException e) {
                                 setter = null; // no setter
                             }
-                            props.put(cp.value(), new MethodAccessor(m,setter,cp));
+                            for(String value : cp.value()) {
+                                props.put(value, new MethodAccessor(m, setter, value));
+                            }
                         }
                     }
                 }
@@ -191,18 +196,18 @@ public abstract class PropertySet {
         private final Field f;
 
         /**
-         * {@link Property} annotation on {@link #f}.
+         * One of the values in {@link Property} annotation on {@link #f}.
          */
-        final Property annotation;
+        private final String name;
 
-        protected FieldAccessor(Field f, Property annotation) {
+        protected FieldAccessor(Field f, String name) {
             this.f = f;
             f.setAccessible(true);
-            this.annotation = annotation;
+            this.name = name;
         }
 
         public String getName() {
-            return annotation.value();
+            return name;
         }
 
         public boolean hasValue(PropertySet props) {
@@ -238,21 +243,21 @@ public abstract class PropertySet {
         private final @Nullable Method setter;
 
         /**
-         * {@link Property} annotation on {@link #getter}.
+         * One of the values in {@link Property} annotation on {@link #getter}.
          */
-        final Property annotation;
+        private final String name;
 
-        protected MethodAccessor(Method getter, Method setter, Property annotation) {
+        protected MethodAccessor(Method getter, Method setter, String value) {
             this.getter = getter;
             this.setter = setter;
-            this.annotation = annotation;
+            this.name = value;
             getter.setAccessible(true);
             if(setter!=null)
                 setter.setAccessible(true);
         }
 
         public String getName() {
-            return annotation.value();
+            return name;
         }
 
         public boolean hasValue(PropertySet props) {
@@ -303,7 +308,7 @@ public abstract class PropertySet {
     }
 
     /**
-     * Gets the value of the property.
+     * Gets the name of the property.
      *
      * @param key
      *      This field is typed as {@link Object} to follow the {@link Map#get(Object)}
@@ -326,7 +331,7 @@ public abstract class PropertySet {
      *
      * @throws ReadOnlyPropertyException
      *      if the given key is an alias of a strongly-typed field,
-     *      and if the value object given is not assignable to the field.
+     *      and if the name object given is not assignable to the field.
      *
      * @see Property
      */
