@@ -31,6 +31,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.WebServiceException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -286,8 +287,15 @@ public abstract class XMLStreamWriterFactory {
         }
 
         public void doRecycle(XMLStreamWriter r) {
-            if(zephyrClass.isInstance(r))
+            if(zephyrClass.isInstance(r)) {
+                // this flushes the underlying stream, so it might cause chunking issue 
+                try {
+                    r.close();
+                } catch (XMLStreamException e) {
+                    throw new WebServiceException(e);
+                }
                 pool.set(r);
+            }
             if(r instanceof RecycleAware)
                 ((RecycleAware)r).onRecycled();
         }
