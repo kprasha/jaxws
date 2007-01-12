@@ -35,7 +35,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.api.pipe.ServerPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
@@ -48,9 +47,9 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.resources.HandlerMessages;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
-import com.sun.xml.ws.resources.HandlerMessages;
 import org.w3c.dom.Element;
 
 import javax.annotation.PreDestroy;
@@ -61,8 +60,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * {@link WSEndpoint} implementation.
@@ -115,7 +114,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         }
 
         TubelineAssembler assembler = TubelineAssemblerFactory.create(
-                Thread.currentThread().getContextClassLoader(), binding.getBindingId());
+                Thread.currentThread().getContextClassLoader(), binding.getBindingId(), container);
         assert assembler!=null;
 
         ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalTube, isSynchronous);

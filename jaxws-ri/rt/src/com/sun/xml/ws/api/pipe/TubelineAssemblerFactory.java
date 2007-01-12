@@ -1,8 +1,10 @@
 package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.pipe.StandaloneTubeAssembler;
 
@@ -33,14 +35,36 @@ public abstract class TubelineAssemblerFactory {
     public abstract TubelineAssembler doCreate(BindingID bindingId);
 
     /**
+     * @deprecated
+     *      Use {@link #create(ClassLoader, BindingID, Container)}
+     */
+    public static TubelineAssembler create(ClassLoader classLoader, BindingID bindingId) {
+        return create(classLoader,bindingId,null);
+    }
+
+    /**
      * Locates {@link TubelineAssemblerFactory}s and create
      * a suitable {@link TubelineAssembler}.
      *
      * @param bindingId The binding ID string for which the new {@link TubelineAssembler}
      *                  is created. Must not be null.
+     * @param container
+     *      if specified, the container is given a chance to specify a {@link TubelineAssembler}
+     *      instance. This parameter should be always given on the server, but can be null.
      * @return Always non-null, since we fall back to our default {@link TubelineAssembler}.
      */
-    public static TubelineAssembler create(ClassLoader classLoader, BindingID bindingId) {
+    public static TubelineAssembler create(ClassLoader classLoader, BindingID bindingId, @Nullable Container container) {
+
+        if(container!=null) {
+            // first allow the container to control pipeline for individual endpoint.
+            TubelineAssemblerFactory taf = container.getSPI(TubelineAssemblerFactory.class);
+            if(taf!=null) {
+                TubelineAssembler a = taf.doCreate(bindingId);
+                if(a!=null)
+                    return a;
+            }
+        }
+
         for (TubelineAssemblerFactory factory : ServiceFinder.find(TubelineAssemblerFactory.class, classLoader)) {
             TubelineAssembler assembler = factory.doCreate(bindingId);
             if (assembler != null) {
