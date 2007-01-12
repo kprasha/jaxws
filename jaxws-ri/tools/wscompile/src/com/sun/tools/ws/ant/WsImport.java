@@ -31,7 +31,11 @@ import org.apache.tools.ant.taskdefs.Execute;
 import org.apache.tools.ant.taskdefs.LogOutputStream;
 import org.apache.tools.ant.taskdefs.LogStreamHandler;
 import org.apache.tools.ant.taskdefs.MatchingTask;
-import org.apache.tools.ant.types.*;
+import org.apache.tools.ant.types.Commandline;
+import org.apache.tools.ant.types.CommandlineJava;
+import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.types.Path;
+import org.apache.tools.ant.types.XMLCatalog;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,7 +178,7 @@ public class WsImport extends MatchingTask {
         Options.Target targetVersion = Options.Target.parse(version);
         if(targetVersion==null)
             throw new BuildException(version+" is not a valid version number");
-        target = Options.Target.getVersion(targetVersion);
+        target = targetVersion.getVersion();
     }
 
 

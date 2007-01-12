@@ -31,10 +31,11 @@ import com.sun.tools.ws.processor.util.ClassNameCollector;
 import com.sun.tools.ws.wscompile.AbortException;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.WsimportOptions;
-import com.sun.tools.ws.wscompile.Options;
 import com.sun.tools.ws.wsdl.parser.DOMForestScanner;
 import com.sun.tools.ws.wsdl.parser.MetadataFinder;
-import com.sun.tools.xjc.api.*;
+import com.sun.tools.xjc.api.S2JJAXBModel;
+import com.sun.tools.xjc.api.SchemaCompiler;
+import com.sun.tools.xjc.api.TypeAndAnnotation;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.LocatorImpl;
@@ -70,11 +71,9 @@ public class JAXBModelBuilder {
 
     private void internalBuildJAXBModel(){
         try {
-            schemaCompiler = XJC.createSchemaCompiler();
-            schemaCompiler.setTargetVersion(SpecVersion.parse(Options.Target.getVersion(options.target)));
+            schemaCompiler =  options.getSchemaCompiler();
             schemaCompiler.setClassNameAllocator(_classNameAllocator);
             schemaCompiler.setErrorListener(errReceiver);
-            schemaCompiler.setEntityResolver(options.entityResolver);
             int schemaElementCount = 1;
 
             for (Element element : forest.getInlinedSchemaElement()) {

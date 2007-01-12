@@ -26,6 +26,9 @@ import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.ws.util.ForkEntityResolver;
 import com.sun.tools.ws.wsdl.document.jaxws.JAXWSBindingsConstants;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
+import com.sun.tools.xjc.api.SchemaCompiler;
+import com.sun.tools.xjc.api.SpecVersion;
+import com.sun.tools.xjc.api.XJC;
 import com.sun.tools.xjc.reader.Util;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
@@ -67,10 +70,22 @@ public class WsimportOptions extends Options {
      */
     public String defaultPackage = null;
 
+    /**
+     * JAXB's {@link SchemaCompiler} to be used for handling the schema portion.
+     * This object is also configured through options.
+     */
+    private SchemaCompiler schemaCompiler = XJC.createSchemaCompiler();
+
     public JCodeModel getCodeModel() {
         if(codeModel == null)
             codeModel = new JCodeModel();
         return codeModel;
+    }
+
+    public SchemaCompiler getSchemaCompiler() {
+        schemaCompiler.setTargetVersion(SpecVersion.parse(target.getVersion()));
+        schemaCompiler.setEntityResolver(entityResolver);
+        return schemaCompiler;
     }
 
     public void setCodeModel(JCodeModel codeModel) {
@@ -89,6 +104,8 @@ public class WsimportOptions extends Options {
     @Override
     public int parseArguments(String[] args, int i) throws BadCommandLineException {
         int j = super.parseArguments(args ,i);
+        if(j>0) return j;   // understood by the super class
+
         if (args[i].equals("-b")) {
             addBindings(requireArgument("-b", args, ++i));
             return 2;
@@ -128,11 +145,29 @@ public class WsimportOptions extends Options {
                 System.setProperty("proxyPort", value.substring(index + 1));
             }
             return 1;
-        }else if (args[i].equals("-Xno-addressing-databinding")) {
+        } else if (args[i].equals("-Xno-addressing-databinding")) {
             noAddressingBbinding = true;
             return 1;
+        } else if (args[i].startsWith("-B")) {
+            // JAXB option pass through.
+            String[] subCmd = new String[args.length-i];
+            System.arraycopy(args,i,subCmd,0,subCmd.length);
+            subCmd[0] = subCmd[0].substring(2); // trim off the first "-B"
+
+            com.sun.tools.xjc.Options jaxbOptions = schemaCompiler.getOptions();
+            try {
+                int r = jaxbOptions.parseArgument(subCmd, 0);
+                if(r==0) {
+                    //Driver.usage(jaxbOptions,false);
+                    throw new BadCommandLineException(WscompileMessages.WSIMPORT_NO_SUCH_JAXB_OPTION(subCmd[0]));
+                }
+            } catch (com.sun.tools.xjc.BadCommandLineException e) {
+                //Driver.usage(jaxbOptions,false);
+                throw new BadCommandLineException(e.getMessage(),e);
+            }
         }
-        return j;
+
+        return 0; // what's this option?
     }
 
     public void validate() throws BadCommandLineException {

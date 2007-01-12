@@ -22,14 +22,26 @@
 
 package com.sun.tools.ws.processor.generator;
 
-import com.sun.codemodel.*;
+import com.sun.codemodel.ClassType;
+import com.sun.codemodel.JAnnotationUse;
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
 import com.sun.tools.ws.ToolVersion;
-import com.sun.tools.ws.processor.model.*;
+import com.sun.tools.ws.processor.model.Block;
+import com.sun.tools.ws.processor.model.Fault;
+import com.sun.tools.ws.processor.model.Model;
+import com.sun.tools.ws.processor.model.ModelVisitor;
+import com.sun.tools.ws.processor.model.Operation;
+import com.sun.tools.ws.processor.model.Parameter;
+import com.sun.tools.ws.processor.model.Port;
+import com.sun.tools.ws.processor.model.Request;
+import com.sun.tools.ws.processor.model.Response;
+import com.sun.tools.ws.processor.model.Service;
 import com.sun.tools.ws.processor.util.DirectoryUtil;
 import com.sun.tools.ws.processor.util.IndentingWriter;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.WsimportOptions;
-import com.sun.tools.ws.wscompile.Options;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -69,7 +81,7 @@ public abstract class GeneratorBase
         this.destDir = options.destDir;
         this.receiver = receiver;
         this.wsdlLocation = options.wsdlLocation;
-        this.targetVersion = Options.Target.getVersion(options.target);
+        this.targetVersion = options.target.getVersion();
         this.cm = options.getCodeModel();
     }
 

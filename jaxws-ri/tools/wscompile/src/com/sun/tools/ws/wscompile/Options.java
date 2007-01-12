@@ -99,14 +99,14 @@ public class Options {
         /**
          * Gives the String representation of the {@link Target}
          */
-        public static String getVersion(Target t){
-            switch(t){
-                case V2_0:
-                    return "2.0";
-                case V2_1:
-                    return "2.1";
-                default:
-                    return null;
+        public String getVersion(){
+            switch(this){
+            case V2_0:
+                return "2.0";
+            case V2_1:
+                return "2.1";
+            default:
+                return null;
             }
         }
     }
@@ -148,7 +148,7 @@ public class Options {
 
     private final List<File> generatedFiles = new ArrayList<File>();
     private ClassLoader classLoader;
-    
+
 
     /**
      * Remember info on  generated source file generated so that it
