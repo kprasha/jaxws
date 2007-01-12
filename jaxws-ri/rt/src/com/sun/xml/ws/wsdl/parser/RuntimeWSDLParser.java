@@ -342,6 +342,14 @@ public class RuntimeWSDLParser {
             QName name = reader.getName();
             if (SOAPConstants.QNAME_ADDRESS.equals(name) || SOAPConstants.QNAME_SOAP12ADDRESS.equals(name)) {
                 location = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_LOCATION);
+                if (location != null) {
+                    try {
+                        port.setAddress(new EndpointAddress(location));
+                    } catch (URISyntaxException e) {
+                        //Lets not throw any exception, latter on it should be thrown when invocation happens. At this
+                        // time user has option to set the endopint address using request contexxt property.
+                    }
+                }
                 XMLStreamReaderUtil.next(reader);
             } else if (AddressingVersion.W3C.nsUri.equals(name.getNamespaceURI()) &&
                     "EndpointReference".equals(name.getLocalPart())) {
@@ -363,12 +371,12 @@ public class RuntimeWSDLParser {
                 extensionFacade.portElements(port, reader);
             }
         }
-        if (location != null) {
+        if (port.getAddress() == null) {
             try {
-                port.setAddress(new EndpointAddress(location));
+                port.setAddress(new EndpointAddress(""));
             } catch (URISyntaxException e) {
-                //TODO:i18nify
-                throw new WebServiceException("Malformed URL: " + location, e);
+                //Lets not throw any exception, latter on it should be thrown when invocation happens. At this
+                //time user has option to set the endopint address using request contexxt property.
             }
         }
         service.put(portQName, port);

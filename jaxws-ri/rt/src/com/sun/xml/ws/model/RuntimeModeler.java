@@ -22,10 +22,12 @@
 package com.sun.xml.ws.model;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.ParameterBinding;
@@ -105,63 +107,20 @@ public class RuntimeModeler {
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
 
     /**
-     * creates an instance of RunTimeModeler given a <code>portClass</code> and <code>bindingId</code>
-     * @param portClass The SEI class to be modeled.
-     * @param serviceName The ServiceName to use instead of one calculated from the implementation class
-     * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
-     */
-    public RuntimeModeler(Class portClass, QName serviceName, BindingID bindingId) {
-        this.portClass = portClass;
-        this.serviceName = serviceName;
-        this.binding = null;
-        this.bindingId = bindingId;
-    }
-
-    /**
      *
      * creates an instance of RunTimeModeler given a <code>sei</code> and <code>binding</code>
      * @param sei The SEI class to be modeled.
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
-     * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
+     * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
+     * @param wsdlPort {@link com.sun.xml.ws.api.model.wsdl.WSDLPort}
      */
-    public RuntimeModeler(Class sei, QName serviceName, WSDLPortImpl binding){
+    public RuntimeModeler(@NotNull Class sei, @NotNull QName serviceName, @Nullable BindingID bindingId, @Nullable WSDLPortImpl wsdlPort){
         this.portClass = sei;
         this.serviceName = serviceName;
-        this.bindingId = binding.getBinding().getBindingId();
-        this.binding = binding;
+        //set the binding id passed in if the wsdl has no binding id. This will be used to create default binding id
+        this.bindingId = (wsdlPort.getBinding().getBindingId() == null)?bindingId:wsdlPort.getBinding().getBindingId();
+        this.binding = wsdlPort;
     }
-
-    /**
-     * creates an instance of RunTimeModeler given a <code>portClass</code> and <code>bindingId</code>
-     * implementor object's class may not be portClass, as it could be proxy to
-     * portClass webmethods.
-     *
-     * @param portClass The SEI class to be modeled.
-     * @param implementor The object on which service methods are invoked
-     * @param serviceName The ServiceName to use instead of one calculated from the implementation class
-     * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
-     *
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, BindingID bindingId) {
-        this(portClass, serviceName, bindingId);
-        this.implementor = implementor;
-    }
-     */
-
-    /**
-     * creates an instance of RunTimeModeler given a <code>sei</code> class and <code>binding</code>
-     * implementor object's class may not be sei Class, as it could be proxy to
-     * sei webmethods.
-     *
-     * @param portClass The SEI class to be modeled.
-     * @param implementor The object on which service methods are invoked
-     * @param binding The Binding representing WSDL Binding for the given port to be used when modeling the
-     *
-    public RuntimeModeler(Class portClass, Object implementor, QName serviceName, WSDLPortImpl binding) {
-        this(portClass, serviceName, binding);
-        this.implementor = implementor;
-    }
-     */
-
 
     /**
      * sets the classloader to be used when loading classes by the <code>RuntimeModeler</code>.
@@ -378,11 +337,8 @@ public class RuntimeModeler {
             declHasWebService) {
             return true;
         }
-        if (declHasWebService &&
-            !classUsesWebMethod.get(declClass)) {
-            return true;
-        }
-        return false;
+        return declHasWebService &&
+                !classUsesWebMethod.get(declClass);
     }
 
     /**
@@ -395,7 +351,9 @@ public class RuntimeModeler {
             new com.sun.xml.ws.model.soap.SOAPBindingImpl();
         Style style = soapBinding!=null ? soapBinding.style() : Style.DOCUMENT;
         rtSOAPBinding.setStyle(style);
-        rtSOAPBinding.setSOAPVersion(bindingId.getSOAPVersion());
+        assert bindingId != null;
+        SOAPVersion soapVersion = bindingId.getSOAPVersion();
+        rtSOAPBinding.setSOAPVersion(soapVersion);
         return rtSOAPBinding;
     }
 
@@ -1005,7 +963,7 @@ public class RuntimeModeler {
         if (!exception.isAnnotationPresent(WebFault.class))
             return null;
         try {
-            return exception.getMethod("getFaultInfo", new Class[0]);
+            return exception.getMethod("getFaultInfo");
         } catch (NoSuchMethodException e) {
             return null;
         }

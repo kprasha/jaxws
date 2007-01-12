@@ -579,7 +579,7 @@ public class WSServiceDelegate extends WSService {
         SEIPortInfo spi = seiContext.get(portName);
         if (spi != null) return;
         WSDLPortImpl wsdlPort = getPortModel(portName);
-        RuntimeModeler modeler = new RuntimeModeler(portInterface, serviceName, wsdlPort);
+        RuntimeModeler modeler = new RuntimeModeler(portInterface, serviceName, null, wsdlPort);
         modeler.setPortName(portName);
         AbstractSEIModelImpl model = modeler.buildRuntimeModel();
 
