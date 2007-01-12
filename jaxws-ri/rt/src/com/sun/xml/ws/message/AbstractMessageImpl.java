@@ -194,12 +194,14 @@ public abstract class AbstractMessageImpl extends Message {
      */
     public SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException {
         SOAPMessage msg = readAsSOAPMessage();
+        /*
         Map<String, List<String>> headers = null;   // TODO
         for(Map.Entry<String, List<String>> e : headers.entrySet()) {
             for(String value : e.getValue()) {
                 msg.getMimeHeaders().addHeader(e.getKey(), value);
             }
         }
+        */
         return msg;
     }
 

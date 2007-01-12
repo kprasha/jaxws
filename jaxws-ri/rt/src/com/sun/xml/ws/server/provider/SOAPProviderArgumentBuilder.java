@@ -36,18 +36,17 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
             super(soapVersion);
         }
 
-        public Source getParameter(Message msg) {
-            return msg.readPayloadAsSource();
+        protected Source getParameter(Packet packet) {
+            return packet.getMessage().readPayloadAsSource();
         }
 
-        public Message getResponse(Source source) {
+        protected Message getResponseMessage(Source source,Packet packet) {
             return Messages.createUsingPayload(source, soapVersion);
         }
 
-        public Message getResponseMessage(Exception e) {
+        protected Message getResponseMessage(Exception e, Packet packet) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
-
 
     }
 
@@ -56,15 +55,15 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
             super(soapVersion);
         }
 
-        public Source getParameter(Message msg) {
-            return msg.readEnvelopeAsSource();
+        protected Source getParameter(Packet packet) {
+            return packet.getMessage().readEnvelopeAsSource();
         }
 
-        public Message getResponse(Source source) {
+        protected Message getResponseMessage(Source source, Packet packet) {
             return Messages.create(source, soapVersion);
         }
 
-        protected Message getResponseMessage(Exception e) {
+        protected Message getResponseMessage(Exception e, Packet packet) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
     }
@@ -74,19 +73,19 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
             super(soapVersion);
         }
 
-        public SOAPMessage getParameter(Message msg) {
+        protected SOAPMessage getParameter(Packet packet) {
             try {
-                return msg.readAsSOAPMessage();
+                return packet.getMessage().readAsSOAPMessage(packet, true);
             } catch (SOAPException se) {
                 throw new WebServiceException(se);
             }
         }
 
-        public Message getResponse(SOAPMessage soapMsg) {
+        protected Message getResponseMessage(SOAPMessage soapMsg, Packet packet) {
             return Messages.create(soapMsg);
         }
 
-        protected Message getResponseMessage(Exception e) {
+        protected Message getResponseMessage(Exception e, Packet packet) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
     }

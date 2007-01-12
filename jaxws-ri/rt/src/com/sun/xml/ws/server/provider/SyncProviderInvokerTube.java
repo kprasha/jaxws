@@ -1,16 +1,14 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
-import javax.xml.ws.http.HTTPException;
-import javax.xml.ws.handler.MessageContext;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.xml.ws.Provider;
 
 /**
@@ -20,7 +18,7 @@ import javax.xml.ws.Provider;
  */
 class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
-    private static final Logger logger = Logger.getLogger(
+    private static final Logger LOGGER = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.SyncProviderInvokerTube");
 
     public SyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
@@ -34,18 +32,18 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     * through the Pipeline to transport.
     */
     public NextAction processRequest(Packet request) {
-        T param = argsBuilder.getParameter(request.getMessage());
+        WSDLPort port = getEndpoint().getPort();
+        WSBinding binding = getEndpoint().getBinding();
+        T param = argsBuilder.getParameter(request);
 
-        SyncProviderInvokerTube.logger.fine("Invoking Provider Endpoint");
+        LOGGER.fine("Invoking Provider Endpoint");
 
         T returnValue;
         try {
             returnValue = getInvoker(request).invokeProvider(request, param);
         } catch(Exception e) {
-            e.printStackTrace();
-            Message responseMessage = argsBuilder.getResponseMessage(e);
-            Packet response = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
-            argsBuilder.updateResponse(response, e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            Packet response = argsBuilder.getResponse(request,e,port,binding);
             return doReturnWith(response);
         }
         if (returnValue == null) {
@@ -54,10 +52,9 @@ class SyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
             if (request.transportBackChannel != null) {
                 request.transportBackChannel.close();
             }
-            return doReturnWith(request.createServerResponse(null,getEndpoint().getPort(),getEndpoint().getBinding()));
-        } else {
-            return doReturnWith(request.createServerResponse(argsBuilder.getResponse(returnValue),getEndpoint().getPort(),getEndpoint().getBinding()));
         }
+        Packet response = argsBuilder.getResponse(request,returnValue,port,binding);
+        return doReturnWith(response);
     }
 
     public NextAction processResponse(Packet response) {

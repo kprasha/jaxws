@@ -32,31 +32,32 @@ abstract class XMLProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T>
     }
 
     private static final class PayloadSource extends XMLProviderArgumentBuilder<Source> {
-        public Source getParameter(Message msg) {
-            return msg.readPayloadAsSource();
+        public Source getParameter(Packet packet) {
+            return packet.getMessage().readPayloadAsSource();
         }
 
-        public Message getResponse(Source source) {
+        public Message getResponseMessage(Source source, Packet packet) {
             return Messages.createUsingPayload(source, SOAPVersion.SOAP_11);
         }
 
-        protected Message getResponseMessage(Exception e) {
+        protected Message getResponseMessage(Exception e, Packet packet) {
             return XMLMessage.create(e);
         }
     }
 
     private static final class DataSourceParameter extends XMLProviderArgumentBuilder<DataSource> {
-        public DataSource getParameter(Message msg) {
+        public DataSource getParameter(Packet packet) {
+            Message msg = packet.getMessage();
             return (msg instanceof XMLMessage.MessageDataSource)
                     ? ((XMLMessage.MessageDataSource) msg).getDataSource()
                     : XMLMessage.getDataSource(msg);
         }
 
-        public Message getResponse(DataSource ds) {
+        public Message getResponseMessage(DataSource ds, Packet packet) {
             return XMLMessage.create(ds);
         }
 
-        protected Message getResponseMessage(Exception e) {
+        protected Message getResponseMessage(Exception e, Packet packet) {
             return XMLMessage.create(e);
         }
     }

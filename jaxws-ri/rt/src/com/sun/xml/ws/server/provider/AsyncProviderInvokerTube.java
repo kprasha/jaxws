@@ -2,7 +2,6 @@ package com.sun.xml.ws.server.provider;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -14,6 +13,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.server.AbstractWebServiceContext;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * This {@link Tube} is used to invoke the {@link AsyncProvider} endpoints.
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
 
-    private static final Logger logger = Logger.getLogger(
+    private static final Logger LOGGER = Logger.getLogger(
         com.sun.xml.ws.util.Constants.LoggingDomain + ".server.AsyncProviderInvokerTube");
 
     public AsyncProviderInvokerTube(Invoker invoker, ProviderArgumentsBuilder<T> argsBuilder) {
@@ -36,15 +36,15 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     * through the Pipeline to transport.
     */
     public @NotNull NextAction processRequest(@NotNull Packet request) {
-        T param = argsBuilder.getParameter(request.getMessage());
+        T param = argsBuilder.getParameter(request);
         AsyncProviderCallback callback = new AsyncProviderInvokerTube.AsyncProviderCallbackImpl(request);
         AsyncWebServiceContext ctxt = new AsyncWebServiceContext(getEndpoint(),request);
 
-        AsyncProviderInvokerTube.logger.fine("Invoking AsyncProvider Endpoint");
+        AsyncProviderInvokerTube.LOGGER.fine("Invoking AsyncProvider Endpoint");
         try {
             getInvoker(request).invokeAsyncProvider(request, param, callback, ctxt);
         } catch(Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
             return doThrow(e);
         }
         // Suspend the Fiber. AsyncProviderCallback will resume the Fiber after
@@ -62,16 +62,12 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
         }
 
         public void send(@Nullable T param) {
-            Message responseMessage;
             if (param == null) {
                 if (request.transportBackChannel != null) {
                     request.transportBackChannel.close();
                 }
-                responseMessage = null;
-            } else {
-                responseMessage = argsBuilder.getResponse(param);
             }
-            Packet packet = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
+            Packet packet = argsBuilder.getResponse(request, param, getEndpoint().getPort(), getEndpoint().getBinding());
             fiber.resume(packet);
         }
 
@@ -82,8 +78,7 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
             } else {
                 e = new RuntimeException(t);
             }
-            Message responseMessage = argsBuilder.getResponseMessage(e);
-            Packet packet = request.createServerResponse(responseMessage,getEndpoint().getPort(),getEndpoint().getBinding());
+            Packet packet = argsBuilder.getResponse(request, e, getEndpoint().getPort(), getEndpoint().getBinding());
             fiber.resume(packet);
         }
     }
