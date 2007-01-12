@@ -48,4 +48,10 @@ public final class AttachmentUnmarshallerImpl extends AttachmentUnmarshaller {
             cid = cid.substring(4);
         return cid;
     }
+
+    // TODO fix the hack
+    // So that SAAJ registers DCHs for MIME types
+    static {
+        new com.sun.xml.messaging.saaj.soap.AttachmentPartImpl();
+    }
 }
