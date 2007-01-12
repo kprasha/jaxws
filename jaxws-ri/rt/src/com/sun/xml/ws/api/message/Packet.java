@@ -169,8 +169,6 @@ public final class Packet extends DistributedPropertySet {
         this.handlerScopePropertyNames = that.handlerScopePropertyNames;
         this.contentNegotiation = that.contentNegotiation;
         this.wasTransportSecure = that.wasTransportSecure;
-        this.inboundTransportHeaders = that.inboundTransportHeaders;
-        this.outboundTransportHeaders = that.outboundTransportHeaders;
         // copy other properties that need to be copied. is there any?
     }
 
@@ -214,12 +212,13 @@ public final class Packet extends DistributedPropertySet {
      * {@link SOAPMessage#getMimeHeaders()} would return these headers.
      *
      */
-    public Map<String, List<String>> inboundTransportHeaders;
+    public static final String INBOUND_TRANSPORT_HEADERS = "com.sun.xml.ws.api.message.packet.inbound.transport.headers";
 
     /**
      * Outbound transport headers are captured in a transport neutral way.
      */
-    public Map<String, List<String>> outboundTransportHeaders;
+    public static final String OUTBOUND_TRANSPORT_HEADERS = "com.sun.xml.ws.api.message.packet.outbound.transport.headers";
+
 
     /**
      * This property holds the snapshot of HandlerConfiguration

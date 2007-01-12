@@ -63,7 +63,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     @Override
-    @Property(MessageContext.HTTP_REQUEST_HEADERS)
+    @Property(value = {MessageContext.HTTP_REQUEST_HEADERS, Packet.INBOUND_TRANSPORT_HEADERS})
     public @NotNull Map<String,List<String>> getRequestHeaders() {
         return httpExchange.getRequestHeaders();
     }
@@ -89,7 +89,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
         }
     }
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    @Property({MessageContext.HTTP_RESPONSE_HEADERS,Packet.OUTBOUND_TRANSPORT_HEADERS})
     public Map<String,List<String>> getResponseHeaders() {
         return httpExchange.getResponseHeaders();
     }

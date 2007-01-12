@@ -68,7 +68,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
-    @Property(MessageContext.HTTP_REQUEST_HEADERS)
+    @Property({MessageContext.HTTP_REQUEST_HEADERS, Packet.INBOUND_TRANSPORT_HEADERS})
     public @NotNull Map<String,List<String>> getRequestHeaders() {
         if (requestHeaders == null) {
             requestHeaders = new Headers();
@@ -110,7 +110,7 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
 
     }
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    @Property({MessageContext.HTTP_RESPONSE_HEADERS, Packet.OUTBOUND_TRANSPORT_HEADERS})
     public Map<String,List<String>> getResponseHeaders() {
         return responseHeaders;
     }

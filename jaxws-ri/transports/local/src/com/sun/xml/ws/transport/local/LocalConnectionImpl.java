@@ -136,12 +136,12 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
     }
 
     @Override
-    @Property(MessageContext.HTTP_RESPONSE_HEADERS)
+    @Property({MessageContext.HTTP_RESPONSE_HEADERS, Packet.OUTBOUND_TRANSPORT_HEADERS})
     public @Nullable Map<String, List<String>> getResponseHeaders() {
         return rspHeaders;
     }
 
-    @Property(MessageContext.HTTP_REQUEST_HEADERS)
+    @Property({MessageContext.HTTP_REQUEST_HEADERS,Packet.INBOUND_TRANSPORT_HEADERS})
     public @NotNull Map<String, List<String>> getRequestHeaders () {
         return reqHeaders;
     }
