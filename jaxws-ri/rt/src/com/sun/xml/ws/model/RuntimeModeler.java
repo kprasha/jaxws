@@ -117,8 +117,14 @@ public class RuntimeModeler {
     public RuntimeModeler(@NotNull Class sei, @NotNull QName serviceName, @Nullable BindingID bindingId, @Nullable WSDLPortImpl wsdlPort){
         this.portClass = sei;
         this.serviceName = serviceName;
+
+        if(wsdlPort != null)
+            this.bindingId = wsdlPort.getBinding().getBindingId();
+
         //set the binding id passed in if the wsdl has no binding id. This will be used to create default binding id
-        this.bindingId = (wsdlPort.getBinding().getBindingId() == null)?bindingId:wsdlPort.getBinding().getBindingId();
+        if(this.bindingId == null)
+            this.bindingId = bindingId;
+
         this.binding = wsdlPort;
     }
 
