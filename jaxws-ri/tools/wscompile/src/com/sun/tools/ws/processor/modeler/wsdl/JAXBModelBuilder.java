@@ -73,6 +73,7 @@ public class JAXBModelBuilder {
         try {
             schemaCompiler =  options.getSchemaCompiler();
             schemaCompiler.resetSchema();
+            schemaCompiler.setEntityResolver(options.entityResolver);
             schemaCompiler.setClassNameAllocator(_classNameAllocator);
             schemaCompiler.setErrorListener(errReceiver);
             int schemaElementCount = 1;
