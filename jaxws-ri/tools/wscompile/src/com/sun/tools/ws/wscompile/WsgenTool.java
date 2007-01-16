@@ -178,7 +178,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
             if (!options.protocolSet) {
                 bindingID = BindingID.parse(endpointClass);
             }
-            RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, options.serviceName, bindingID, null);
+            RuntimeModeler rtModeler = new RuntimeModeler(endpointClass, options.serviceName, bindingID);
             rtModeler.setClassLoader(classLoader);
             if (options.portName != null)
                 rtModeler.setPortName(options.portName);

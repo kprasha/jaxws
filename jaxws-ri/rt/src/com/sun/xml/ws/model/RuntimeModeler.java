@@ -107,23 +107,35 @@ public class RuntimeModeler {
     public static final Class<RemoteException> REMOTE_EXCEPTION_CLASS = RemoteException.class;
 
     /**
+     * creates an instance of RunTimeModeler given a <code>portClass</code> and <code>bindingId</code>
+     * @param portClass The SEI class to be modeled.
+     * @param serviceName The ServiceName to use instead of one calculated from the implementation class
+     * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
+     */
+    public RuntimeModeler(@NotNull Class portClass, @NotNull QName serviceName, @NotNull BindingID bindingId) {
+        this.portClass = portClass;
+        this.serviceName = serviceName;
+        this.binding = null;
+        this.bindingId = bindingId;
+    }
+
+    /**
      *
      * creates an instance of RunTimeModeler given a <code>sei</code> and <code>binding</code>
      * @param sei The SEI class to be modeled.
      * @param serviceName The ServiceName to use instead of one calculated from the implementation class
-     * @param bindingId The binding identifier to be used when modeling the <code>portClass</code>.
      * @param wsdlPort {@link com.sun.xml.ws.api.model.wsdl.WSDLPort}
      */
-    public RuntimeModeler(@NotNull Class sei, @NotNull QName serviceName, @Nullable BindingID bindingId, @Nullable WSDLPortImpl wsdlPort){
+    public RuntimeModeler(@NotNull Class sei, @NotNull QName serviceName, @NotNull WSDLPortImpl wsdlPort){
         this.portClass = sei;
         this.serviceName = serviceName;
+        this.bindingId = wsdlPort.getBinding().getBindingId();
 
-        if(wsdlPort != null)
-            this.bindingId = wsdlPort.getBinding().getBindingId();
-
-        //set the binding id passed in if the wsdl has no binding id. This will be used to create default binding id
+        //If the bindingId is null lets default to SOAP 1.1 binding id. As it looks like this bindingId
+        //is used latter on from model to generate binding on the WSDL. So defaulting to SOAP 1.1 maybe
+        // safe to do.
         if(this.bindingId == null)
-            this.bindingId = bindingId;
+            this.bindingId = BindingID.SOAP11_HTTP;
 
         this.binding = wsdlPort;
     }
