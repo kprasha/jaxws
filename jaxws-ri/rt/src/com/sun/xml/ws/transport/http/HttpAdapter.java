@@ -142,7 +142,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
             revWsdls = new HashMap<SDDocument,String>();    // Doc --> wsdl=1
             for (Entry<String,SDDocument> e : wsdls.entrySet()) {
-                revWsdls.put(e.getValue(),e.getKey());
+                if (!e.getKey().equals("WSDL")) {           // map Doc --> wsdl, not WSDL
+                    revWsdls.put(e.getValue(),e.getKey());
+                }
             }
         }
     }
