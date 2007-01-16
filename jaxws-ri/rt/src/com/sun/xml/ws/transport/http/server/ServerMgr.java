@@ -27,6 +27,7 @@ import com.sun.xml.ws.server.ServerRtException;
 
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -77,8 +78,9 @@ final class ServerMgr {
                     logger.fine("Creating new HTTP Server at "+inetAddress);
                     server = HttpServer.create(inetAddress, 5);
                     server.setExecutor(Executors.newFixedThreadPool(5));
-                    logger.fine("Creating HTTP Context at = "+url.getPath());
-                    HttpContext context = server.createContext(url.getPath());
+                    String path = url.toURI().getPath();
+                    logger.fine("Creating HTTP Context at = "+path);
+                    HttpContext context = server.createContext(path);
                     server.start();
                     logger.fine("HTTP server started = "+inetAddress);
                     state = new ServerState(server);
