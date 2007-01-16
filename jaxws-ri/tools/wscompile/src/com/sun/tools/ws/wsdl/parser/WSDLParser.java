@@ -176,7 +176,7 @@ public class WSDLParser {
         if(root == null)
             return null;
 
-        WSDLDocument document = new WSDLDocument();
+        WSDLDocument document = new WSDLDocument(forest, errReceiver);
         document.setSystemId(location);
         TWSDLParserContextImpl context = new TWSDLParserContextImpl(forest, document, listeners, errReceiver);
 
