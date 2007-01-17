@@ -440,7 +440,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
         OutputStream os = con.getOutput();
         final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
-        final String address = portAddressResolver.getAddressFor(endpoint.getPortName().getLocalPart());
+        final String address = portAddressResolver.getAddressFor(endpoint.getServiceName(), endpoint.getPortName().getLocalPart());
         assert address != null;
         DocumentAddressResolver resolver = new DocumentAddressResolver() {
             public String getRelativeAddressFor(@NotNull SDDocument current, @NotNull SDDocument referenced) {
