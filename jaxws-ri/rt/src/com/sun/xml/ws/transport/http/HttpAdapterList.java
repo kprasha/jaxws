@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.istack.NotNull;
 
+import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -47,11 +48,11 @@ import java.util.AbstractList;
  * Concrete implementations of this class need to override {@link #createHttpAdapter}
  * method to create implementations of {@link HttpAdapter}.
  *
- * @author Jitu
+ * @author Jitendra Kotamraju
  */
 public abstract class HttpAdapterList<T extends HttpAdapter> extends AbstractList<T> implements AdapterFactory<T> {
     private final List<T> adapters = new ArrayList<T>();
-    private final Map<String, String> addressMap = new HashMap<String, String>();
+    private final Map<PortInfo, String> addressMap = new HashMap<PortInfo, String>();
 
     // TODO: documented because it's used by AS
     public T createAdapter(String name, String urlPattern, WSEndpoint<?> endpoint) {
@@ -59,7 +60,8 @@ public abstract class HttpAdapterList<T extends HttpAdapter> extends AbstractLis
         adapters.add(t);
         WSDLPort port = endpoint.getPort();
         if (port != null) {
-            addressMap.put(port.getName().getLocalPart(), getValidPath(urlPattern));
+            PortInfo portInfo = new PortInfo(port.getOwner().getName(),port.getName().getLocalPart());
+            addressMap.put(portInfo, getValidPath(urlPattern));
         }
         return t;
     }
@@ -86,8 +88,8 @@ public abstract class HttpAdapterList<T extends HttpAdapter> extends AbstractLis
      */
     public PortAddressResolver createPortAddressResolver(final String baseAddress) {
         return new PortAddressResolver() {
-            public String getAddressFor(@NotNull String portName) {
-                String urlPattern = addressMap.get(portName);
+            public String getAddressFor(@NotNull QName serviceName, @NotNull String portName) {
+                String urlPattern = addressMap.get(new PortInfo(serviceName,portName));
                 return (urlPattern == null) ? null : baseAddress+urlPattern;
             }
         };
@@ -100,5 +102,29 @@ public abstract class HttpAdapterList<T extends HttpAdapter> extends AbstractLis
 
     public int size() {
         return adapters.size();
+    }
+
+    private static class PortInfo {
+        private final QName serviceName;
+        private final String portName;
+
+        PortInfo(@NotNull QName serviceName, @NotNull String portName) {
+            this.serviceName = serviceName;
+            this.portName = portName;
+        }
+
+        @Override
+        public boolean equals(Object portInfo) {
+            if (portInfo instanceof PortInfo) {
+                PortInfo that = (PortInfo)portInfo;
+                return this.serviceName.equals(that.serviceName) && this.portName.equals(that.portName);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return serviceName.hashCode()+portName.hashCode();
+        }
     }
 }

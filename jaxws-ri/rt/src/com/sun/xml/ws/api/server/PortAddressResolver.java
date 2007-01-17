@@ -25,6 +25,8 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 
+import javax.xml.namespace.QName;
+
 /**
  * Resolves port address for an endpoint. A WSDL may contain multiple
  * endpoints, and some of the endpoints may be packaged in a single WAR file.
@@ -40,15 +42,18 @@ import com.sun.istack.Nullable;
  *
  * @author Jitendra Kotamraju
  */
-public interface PortAddressResolver {
+public abstract class PortAddressResolver {
     /**
      * Gets the endpoint address for a WSDL port
      *
+     * @param serviceName
+     *       WSDL service name(wsd:service in WSDL) for which address is needed. Always non-null.
      * @param portName
-     *       WSDL port name for which address is needed. Always non-null.
+     *       WSDL port name(wsdl:port in WSDL) for which address is needed. Always non-null.
      * @return
      *      The address needs to be put in WSDL for port element's location
-     *      attribute. Can be null.
+     *      attribute. Can be null. If it is null, existing port address
+     *      is written as it is (without any patching).
      */
-    @Nullable String getAddressFor(@NotNull String portName);
+    public abstract @Nullable String getAddressFor(@NotNull QName serviceName, @NotNull String portName);
 }

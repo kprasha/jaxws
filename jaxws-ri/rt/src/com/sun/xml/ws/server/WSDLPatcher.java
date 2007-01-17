@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * Patches WSDL with the correct endpoint address and the relative paths
  * to other documents.
  *
- * @author Jitu
+ * @author Jitendra Kotamraju
  * @author Kohsuke Kawaguchi
  */
 final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
@@ -237,11 +237,7 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      * @return returns the resolved endpoint address
      */
     private String getAddressLocation() {
-        WSDLPort port = endpoint.getPort();
-        if(port.getOwner().getName().equals(serviceName)) {
-            return (portAddressResolver == null) ? null :portAddressResolver.getAddressFor(portName.getLocalPart());
-        }
-        return null;
+        return (portAddressResolver == null) ? null : portAddressResolver.getAddressFor(serviceName, portName.getLocalPart());
     }
 }
     
