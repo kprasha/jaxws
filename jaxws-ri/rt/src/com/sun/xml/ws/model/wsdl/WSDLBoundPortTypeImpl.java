@@ -105,6 +105,8 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     }
 
     public BindingID getBindingId() {
+        //Should the default be SOAP1.1/HTTP binding? For now lets keep it for
+        //JBI bug 6509800 
         return (bindingId==null)?BindingID.SOAP11_HTTP:bindingId;
     }
 
