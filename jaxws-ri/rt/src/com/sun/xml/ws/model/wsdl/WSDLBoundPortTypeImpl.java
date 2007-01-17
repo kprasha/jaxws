@@ -197,7 +197,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     }
 
     public SOAPVersion getSOAPVersion(){
-        return bindingId.getSOAPVersion();
+        return getBindingId().getSOAPVersion();
     }
 
     void freeze() {
