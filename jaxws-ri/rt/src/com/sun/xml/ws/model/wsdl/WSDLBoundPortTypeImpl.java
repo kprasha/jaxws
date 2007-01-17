@@ -105,8 +105,7 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     }
 
     public BindingID getBindingId() {
-
-        return bindingId;
+        return (bindingId==null)?BindingID.SOAP11_HTTP:bindingId;
     }
 
     public void setBindingId(BindingID bindingId) {
