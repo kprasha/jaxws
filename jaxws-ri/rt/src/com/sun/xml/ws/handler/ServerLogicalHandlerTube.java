@@ -21,17 +21,22 @@ package com.sun.xml.ws.handler;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.message.DataHandlerAttachment;
 
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceException;
+import javax.activation.DataHandler;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  *
@@ -165,6 +170,14 @@ public class ServerLogicalHandlerTube extends HandlerTube {
     }
 
     void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault) {
+        //Lets copy all the MessageContext.OUTBOUND_ATTACHMENT_PROPERTY to the message
+        Map<String, DataHandler> atts = (Map<String, DataHandler>) context.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
+        AttachmentSet attSet = packet.getMessage().getAttachments();
+        for(String cid : atts.keySet()){
+            Attachment att = new DataHandlerAttachment(cid, atts.get(cid));
+            attSet.add(att);
+        }
+
         try {
             //SERVER-SIDE
             processor.callHandlersResponse(HandlerProcessor.Direction.OUTBOUND, context, handleFault);
