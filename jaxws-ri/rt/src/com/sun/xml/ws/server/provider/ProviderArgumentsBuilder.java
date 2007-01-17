@@ -13,25 +13,16 @@ abstract class ProviderArgumentsBuilder<T> {
     /**
      * Creates a fault {@link Message} from method invocation's exception
      */
-    protected abstract Message getResponseMessage(Exception e, Packet packet);
+    protected abstract Message getResponseMessage(Exception e);
 
     /**
      * Creates {@link Message} from method invocation's return value
      */
     protected Packet getResponse(Packet request, Exception e, WSDLPort port, WSBinding binding) {
-        Packet response = request.createServerResponse(null,port,binding);
-        Message message = getResponseMessage(e, response);
-        response.setMessage(message);
-        updateResponse(response, e);
+        Message message = getResponseMessage(e);
+        Packet response = request.createServerResponse(message,port,binding);
         return response;
     }
-
-    /**
-     * Sets various properties on the response packet.
-     * <p>
-     * for e.g sets a HTTP status code from method invocation's HTTPException
-     */
-    protected abstract void updateResponse(Packet p, Exception e);
 
     /**
      * Binds {@link com.sun.xml.ws.api.message.Message} to method invocation parameter
@@ -39,17 +30,17 @@ abstract class ProviderArgumentsBuilder<T> {
      */
     protected abstract T getParameter(Packet packet);
 
-    protected abstract Message getResponseMessage(T returnValue, Packet packet);
+    protected abstract Message getResponseMessage(T returnValue);
 
     /**
-     * Creates {@link Message} from method invocation's return value
+     * Creates {@link Packet} from method invocation's return value
      */
     protected Packet getResponse(Packet request, @Nullable T returnValue, WSDLPort port, WSBinding binding) {
-        Packet response = request.createServerResponse(null,port,binding);
+        Message message = null;
         if (returnValue != null) {
-            Message message = getResponseMessage(returnValue, response);
-            response.setMessage(message);
+            message = getResponseMessage(returnValue);
         }
+        Packet response = request.createServerResponse(message,port,binding);
         return response;
     }
 

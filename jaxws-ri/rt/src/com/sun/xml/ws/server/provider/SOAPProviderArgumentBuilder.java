@@ -1,16 +1,22 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.istack.Nullable;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.MimeHeader;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import java.util.*;
 
 abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T> {
     protected final SOAPVersion soapVersion;
@@ -19,11 +25,7 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
         this.soapVersion = soapVersion;
     }
 
-    protected void updateResponse(Packet p, Exception e) {
-        // Nothing to do in SOAP binding
-    }
-
-    static SOAPProviderArgumentBuilder create(ProviderEndpointModel model, SOAPVersion soapVersion) {
+    static  SOAPProviderArgumentBuilder create(ProviderEndpointModel model, SOAPVersion soapVersion) {
         if (model.getServiceMode() == Service.Mode.PAYLOAD) {
             return new PayloadSource(soapVersion);
         } else {
@@ -40,11 +42,11 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
             return packet.getMessage().readPayloadAsSource();
         }
 
-        protected Message getResponseMessage(Source source,Packet packet) {
+        protected Message getResponseMessage(Source source) {
             return Messages.createUsingPayload(source, soapVersion);
         }
 
-        protected Message getResponseMessage(Exception e, Packet packet) {
+        protected Message getResponseMessage(Exception e) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
 
@@ -59,11 +61,11 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
             return packet.getMessage().readEnvelopeAsSource();
         }
 
-        protected Message getResponseMessage(Source source, Packet packet) {
+        protected Message getResponseMessage(Source source) {
             return Messages.create(source, soapVersion);
         }
 
-        protected Message getResponseMessage(Exception e, Packet packet) {
+        protected Message getResponseMessage(Exception e) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
     }
@@ -81,13 +83,36 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
             }
         }
 
-        protected Message getResponseMessage(SOAPMessage soapMsg, Packet packet) {
+        protected Message getResponseMessage(SOAPMessage soapMsg) {
             return Messages.create(soapMsg);
         }
 
-        protected Message getResponseMessage(Exception e, Packet packet) {
+        protected Message getResponseMessage(Exception e) {
             return SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
+
+        @Override
+        protected Packet getResponse(Packet request, @Nullable SOAPMessage returnValue, WSDLPort port, WSBinding binding) {
+            Packet response = super.getResponse(request, returnValue, port, binding);
+            // Populate SOAPMessage's transport headers
+            if (returnValue != null && response.supports(Packet.OUTBOUND_TRANSPORT_HEADERS)) {
+                MimeHeaders hdrs = returnValue.getMimeHeaders();
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                Iterator i = hdrs.getAllHeaders();
+                while(i.hasNext()) {
+                    MimeHeader header = (MimeHeader)i.next();
+                    List<String> list = headers.get(header.getName());
+                    if (list == null) {
+                        list = new ArrayList<String>();
+                        headers.put(header.getName(), list);
+                    }
+                    list.add(header.getValue());
+                }
+                response.put(Packet.OUTBOUND_TRANSPORT_HEADERS, headers);
+            }
+            return response;
+        }
+
     }
 
 }

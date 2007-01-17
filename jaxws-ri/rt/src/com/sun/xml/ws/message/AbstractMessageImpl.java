@@ -201,11 +201,14 @@ public abstract class AbstractMessageImpl extends Message {
         }
         if (headers != null) {
             for(Map.Entry<String, List<String>> e : headers.entrySet()) {
-                for(String value : e.getValue()) {
-                    msg.getMimeHeaders().addHeader(e.getKey(), value);
+                if (!e.getKey().equalsIgnoreCase("Content-Type")) {
+                    for(String value : e.getValue()) {
+                        msg.getMimeHeaders().addHeader(e.getKey(), value);
+                    }
                 }
             }
         }
+        msg.saveChanges();
         return msg;
     }
 

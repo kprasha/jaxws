@@ -1,6 +1,8 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -15,12 +17,15 @@ import javax.xml.ws.http.HTTPException;
 
 abstract class XMLProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T> {
 
-    protected void updateResponse(Packet response, Exception e) {
+    @Override
+    protected Packet getResponse(Packet request, Exception e, WSDLPort port, WSBinding binding) {
+        Packet response = super.getResponse(request, e, port, binding);
         if (e instanceof HTTPException) {
             if (response.supports(MessageContext.HTTP_RESPONSE_CODE)) {
                 response.put(MessageContext.HTTP_RESPONSE_CODE, ((HTTPException)e).getStatusCode());
             }
         }
+        return response;
     }
 
     static XMLProviderArgumentBuilder create(ProviderEndpointModel model) {
@@ -36,11 +41,11 @@ abstract class XMLProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T>
             return packet.getMessage().readPayloadAsSource();
         }
 
-        public Message getResponseMessage(Source source, Packet packet) {
+        public Message getResponseMessage(Source source) {
             return Messages.createUsingPayload(source, SOAPVersion.SOAP_11);
         }
 
-        protected Message getResponseMessage(Exception e, Packet packet) {
+        protected Message getResponseMessage(Exception e) {
             return XMLMessage.create(e);
         }
     }
@@ -53,11 +58,11 @@ abstract class XMLProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T>
                     : XMLMessage.getDataSource(msg);
         }
 
-        public Message getResponseMessage(DataSource ds, Packet packet) {
+        public Message getResponseMessage(DataSource ds) {
             return XMLMessage.create(ds);
         }
 
-        protected Message getResponseMessage(Exception e, Packet packet) {
+        protected Message getResponseMessage(Exception e) {
             return XMLMessage.create(e);
         }
     }
