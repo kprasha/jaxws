@@ -53,6 +53,7 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.soap.SOAPFault;
 import java.net.URI;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
 /**
@@ -267,10 +268,10 @@ public final class WsaServerTube extends WsaTube {
     private void checkNonAnonymousAddresses(WSEndpointReference replyTo, WSEndpointReference faultTo) {
         if (!replyTo.isAnonymous()) {
             try {
-                new EndpointAddress(URI.create(replyTo.getAddress()));
-            } catch (IllegalArgumentException e) {
+                new URL(replyTo.getAddress());
+            } catch (Exception e) {
                 throw new InvalidMapException(addressingVersion.replyToTag, addressingVersion.invalidAddressTag);
-            }
+            } 
         }
         //for now only validate ReplyTo
         /*
