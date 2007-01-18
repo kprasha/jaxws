@@ -17,16 +17,6 @@ public interface WSFeatureList extends Iterable<WebServiceFeature> {
      */
     boolean isEnabled(@NotNull Class<? extends WebServiceFeature> feature);
 
-
-    /**
-     * @param featureId
-     * @return WebServiceFeature if the feature is enabled.
-     *         null if is is not enabled, or not present.
-     * @deprecated
-     *      Use {@link #get(Class)}
-     */
-    @Nullable WebServiceFeature get(String featureId);
-
     /**
      * Gets a {@link WebServiceFeature} of the specific type.
      *

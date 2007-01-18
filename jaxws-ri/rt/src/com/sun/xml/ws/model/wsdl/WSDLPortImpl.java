@@ -26,7 +26,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.resources.ClientMessages;
-import com.sun.xml.ws.resources.WsdlmodelMessages;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import com.sun.xml.ws.binding.WebServiceFeatureList;
@@ -35,7 +34,6 @@ import com.sun.istack.NotNull;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceException;
 
 /**
  * Implementation of {@link WSDLPort}
@@ -110,10 +108,9 @@ public final class WSDLPortImpl extends AbstractFeaturedObjectImpl implements WS
             throw new LocatableWebServiceException(
                 ClientMessages.UNDEFINED_BINDING(bindingName), getLocation());
         }
-
         if(features == null)
             features =  new WebServiceFeatureList();
-        features.addAll(boundPortType.getFeatures());
+        features.setParentFeaturedObject(boundPortType);
         notUnderstoodExtensions.addAll(boundPortType.notUnderstoodExtensions);
     }
 }
