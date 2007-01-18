@@ -210,6 +210,19 @@ public class FastInfosetCodec implements Codec {
      */
     /* package */ static StAXDocumentParser createNewStreamReader(InputStream in, boolean retainState) {
         StAXDocumentParser parser = new StAXDocumentParser(in);
+        initiateStreamReader(parser, retainState);
+        return parser;
+    }
+    
+    /**
+     * Initiates (@link StAXDocumentParser} instance.
+     *
+     * @param in the InputStream to parse from.
+     * @param retainState if true the parser should retain the state of
+     *        vocabulary tables for multiple parses.
+     * @return a new {@link StAXDocumentParser} instance.
+     */
+    /* package */ static void initiateStreamReader(StAXDocumentParser parser, boolean retainState) {
         parser.setStringInterning(true);
         if (retainState) {
             /**
@@ -221,9 +234,8 @@ public class FastInfosetCodec implements Codec {
             ParserVocabulary vocabulary = new ParserVocabulary();
             parser.setVocabulary(vocabulary);
         }
-        return parser;
     }
-    
+
     /**
      * Method is copied from com.sun.xml.ws.encoding.xml.XMLMessage
      * @TODO method should be public in some util package?
