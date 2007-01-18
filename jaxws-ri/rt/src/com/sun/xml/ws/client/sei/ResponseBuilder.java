@@ -496,7 +496,8 @@ abstract class ResponseBuilder {
             if(parts.length>0) {
                 XMLStreamReader reader = msg.readPayload();
                 XMLStreamReaderUtil.verifyTag(reader,wrapperName);
-                Object wrapperBean = wrapper.unmarshal(reader);
+                Object wrapperBean = wrapper.unmarshal(reader, (msg.getAttachments() != null) ?
+                    new AttachmentUnmarshallerImpl(msg.getAttachments()): null);
 
                 try {
                     for (PartBuilder part : parts) {
