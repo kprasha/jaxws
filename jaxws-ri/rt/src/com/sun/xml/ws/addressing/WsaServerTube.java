@@ -52,6 +52,7 @@ import com.sun.xml.ws.message.FaultDetailHeader;
 import javax.xml.ws.WebServiceException;
 import javax.xml.soap.SOAPFault;
 import java.net.URI;
+import java.net.URL;
 import java.util.logging.Logger;
 
 /**
@@ -259,6 +260,29 @@ public final class WsaServerTube extends WsaTube {
         // wsaw:Anonymous validation
         WSDLBoundOperation wbo = getWSDLBoundOperation(packet);
         checkAnonymousSemantics(wbo, replyTo, faultTo);
+         // check if addresses are valid
+        checkNonAnonymousAddresses(replyTo,faultTo);
+    }
+
+    private void checkNonAnonymousAddresses(WSEndpointReference replyTo, WSEndpointReference faultTo) {
+        if (!replyTo.isAnonymous()) {
+            try {
+                new EndpointAddress(URI.create(replyTo.getAddress()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidMapException(addressingVersion.replyToTag, addressingVersion.invalidAddressTag);
+            }
+        }
+        //for now only validate ReplyTo
+        /*
+        if (!faultTo.isAnonymous()) {
+            try {
+                new EndpointAddress(URI.create(faultTo.getAddress()));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidMapException(addressingVersion.faultToTag, addressingVersion.invalidAddressTag);
+            }
+        }
+        */
+
     }
 
     protected void checkMandatoryHeaders(

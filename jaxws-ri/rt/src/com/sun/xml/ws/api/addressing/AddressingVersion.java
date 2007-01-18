@@ -85,6 +85,10 @@ public enum AddressingVersion {
             return "A required header representing a Message Addressing Property is not present";
         }
 
+        /* package */ String getInvalidAddressLocalName() {
+            return "InvalidAddress";
+        }
+
         @Override
         /* package */ String getInvalidMapLocalName() {
             return "InvalidAddressingHeader";
@@ -156,6 +160,10 @@ public enum AddressingVersion {
         @Override
         public String getMapRequiredText() {
             return "A required message information header, To, MessageID, or Action, is not present.";
+        }
+
+        /* package */ String getInvalidAddressLocalName() {
+            return getInvalidMapLocalName();
         }
 
         @Override
@@ -298,6 +306,12 @@ public enum AddressingVersion {
     public final QName invalidCardinalityTag;
 
     /**
+     * Represents the QName of the fault code when a header representing an
+     * address is not valid.
+     */
+    public final QName invalidAddressTag;
+
+    /**
      * Represents the QName of the element that conveys additional information
      * on the pre-defined WS-Addressing faults.
      */
@@ -375,6 +389,7 @@ public enum AddressingVersion {
         actionNotSupportedTag = new QName(nsUri,"ActionNotSupported");
         actionNotSupportedText = "The \"%s\" cannot be processed at the receiver";
         invalidMapTag = new QName(nsUri,getInvalidMapLocalName());
+        invalidAddressTag = new QName(nsUri,getInvalidAddressLocalName());
         invalidCardinalityTag = new QName(nsUri,getInvalidCardinalityLocalName());
         faultDetailTag = new QName(nsUri,"FaultDetail");
 
@@ -531,6 +546,13 @@ public enum AddressingVersion {
      * @return description text
      */
     public abstract String getMapRequiredText();
+
+    /**
+         * Gets the local name of the fault when a header representing anaddress is invalid.
+         * @return local name
+         */
+    /* package */ abstract String getInvalidAddressLocalName();
+
 
     /**
      * Gets the local name of the fault when a header representing a WS-Addressing Message
