@@ -268,7 +268,7 @@ public final class WsaServerTube extends WsaTube {
     private void checkNonAnonymousAddresses(WSEndpointReference replyTo, WSEndpointReference faultTo) {
         if (!replyTo.isAnonymous()) {
             try {
-                new URL(replyTo.getAddress());
+                new EndpointAddress(URI.create(replyTo.getAddress()));
             } catch (Exception e) {
                 throw new InvalidMapException(addressingVersion.replyToTag, addressingVersion.invalidAddressTag);
             } 
