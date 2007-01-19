@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import org.jvnet.fastinfoset.FastInfosetSource;
+import org.jvnet.fastinfoset.stax.FastInfosetStreamReader;
 
 /**
  * A codec for encoding/decoding XML infosets to/from fast
@@ -210,19 +211,6 @@ public class FastInfosetCodec implements Codec {
      */
     /* package */ static StAXDocumentParser createNewStreamReader(InputStream in, boolean retainState) {
         StAXDocumentParser parser = new StAXDocumentParser(in);
-        initiateStreamReader(parser, retainState);
-        return parser;
-    }
-    
-    /**
-     * Initiates (@link StAXDocumentParser} instance.
-     *
-     * @param in the InputStream to parse from.
-     * @param retainState if true the parser should retain the state of
-     *        vocabulary tables for multiple parses.
-     * @return a new {@link StAXDocumentParser} instance.
-     */
-    /* package */ static void initiateStreamReader(StAXDocumentParser parser, boolean retainState) {
         parser.setStringInterning(true);
         if (retainState) {
             /**
@@ -234,6 +222,31 @@ public class FastInfosetCodec implements Codec {
             ParserVocabulary vocabulary = new ParserVocabulary();
             parser.setVocabulary(vocabulary);
         }
+        return parser;
+    }
+    
+    /**
+     * Create a new (@link StAXDocumentParser} recyclable instance.
+     *
+     * @param in the InputStream to parse from.
+     * @param retainState if true the parser should retain the state of
+     *        vocabulary tables for multiple parses.
+     * @return a new recyclable {@link StAXDocumentParser} instance.
+     */
+    /* package */ static StAXDocumentParser createNewStreamReaderRecyclable(InputStream in, boolean retainState) {
+        StAXDocumentParser parser = new FastInfosetStreamReaderRecyclable(in);
+        parser.setStringInterning(true);
+        if (retainState) {
+            /**
+             * Create a parser vocabulary external to the parser.
+             * This will ensure that the vocabulary will never be cleared
+             * for each parse and will be retained (and will grow)
+             * for each parse.
+             */
+            ParserVocabulary vocabulary = new ParserVocabulary();
+            parser.setVocabulary(vocabulary);
+        }
+        return parser;
     }
 
     /**

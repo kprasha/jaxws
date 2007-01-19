@@ -54,10 +54,9 @@ import java.nio.channels.ReadableByteChannel;
  * @author Paul Sandoz
  */
 public abstract class FastInfosetStreamSOAPCodec implements Codec {
-    private static final FastInfosetXMLInputFactory FI_XML_INPUT_FACTORY = new FastInfosetXMLInputFactory();
-    
+    private static final FastInfosetStreamReaderFactory READER_FACTORY = FastInfosetStreamReaderFactory.getInstance();
+
     private StAXDocumentParser _statefulParser;
-    
     private StAXDocumentSerializer _serializer;
     
     private final StreamSOAPCodec _soapCodec;
@@ -67,7 +66,6 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
     protected final ContentType _defaultContentType;
     
     /* package */ FastInfosetStreamSOAPCodec(SOAPVersion soapVersion, boolean retainState, String mimeType) {
-        XMLStreamReaderFactory.get().registerXMLInputFactory(StAXDocumentParser.class, FI_XML_INPUT_FACTORY);
         _soapCodec = StreamSOAPCodec.create(soapVersion);
         _retainState = retainState;
         _defaultContentType = new ContentTypeImpl(mimeType);
@@ -128,6 +126,7 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
     }
     
     private XMLStreamReader getXMLStreamReader(InputStream in) {
+        // If the _retainState is true (FI stateful) then pick up Codec assiciated XMLStreamReader
         if (_retainState) {
             if (_statefulParser != null) {
                 _statefulParser.setInputStream(in);
@@ -137,10 +136,8 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
             }
         }
         
-        final StAXDocumentParser parser = (StAXDocumentParser) XMLStreamReaderFactory.get().doCreate(null, in, true, StAXDocumentParser.class);
-        parser.setInputStream(in);
-        FastInfosetCodec.initiateStreamReader(parser, false);
-        return parser;
+        // Otherwise thread assiciated XMLStreamReader
+        return READER_FACTORY.doCreate(null, in, false);
     }
     
     /**
@@ -174,5 +171,5 @@ public abstract class FastInfosetStreamSOAPCodec implements Codec {
             default:
                 throw new AssertionError();
         }
-    }    
+    }
 }
