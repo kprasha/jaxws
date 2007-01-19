@@ -436,7 +436,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         }
 
         con.setStatus(HttpURLConnection.HTTP_OK);
-        con.setContentTypeResponseHeader("text/xml");
+        con.setContentTypeResponseHeader("text/xml;charset=utf-8");
 
         OutputStream os = con.getOutput();
         final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
