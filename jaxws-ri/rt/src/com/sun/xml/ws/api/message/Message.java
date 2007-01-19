@@ -501,6 +501,15 @@ public abstract class Message {
     public abstract XMLStreamReader readPayload() throws XMLStreamException;
 
     /**
+     * Marks the message as consumed, without actually reading the contents.
+     *
+     * <p>
+     * This method provides an opportunity for implementations to reuse
+     * any reusable resources needed for representing the payload.
+     */
+    public void consume() {}
+
+    /**
      * Writes the payload to StAX.
      *
      * This method writes just the payload of the message to the writer.

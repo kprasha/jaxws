@@ -90,6 +90,7 @@ abstract class EndpointArgumentsBuilder {
         private None(){
         }
         public void readRequest(Message msg, Object[] args) {
+            msg.consume();
         }
     }
 

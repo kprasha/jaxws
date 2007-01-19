@@ -217,6 +217,12 @@ public final class StreamMessage extends AbstractMessageImpl {
         return r;
     }
 
+    @Override
+    public void consume() {
+        assert unconsumed();
+        XMLStreamReaderFactory.recycle(reader);
+    }
+
     public XMLStreamReader readPayload() {
         // TODO: What about access at and beyond </soap:Body>
         assert unconsumed();
@@ -342,6 +348,7 @@ public final class StreamMessage extends AbstractMessageImpl {
                         break;
                     c.create(reader);                    
                 }
+                XMLStreamReaderFactory.recycle(reader);
 
                 reader = xsb.readAsXMLStreamReader();
                 clone = xsb.readAsXMLStreamReader();
