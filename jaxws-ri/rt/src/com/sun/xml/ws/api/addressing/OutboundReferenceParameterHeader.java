@@ -221,7 +221,7 @@ final class OutboundReferenceParameterHeader extends AbstractHeaderImpl {
             }
 
             private boolean isPrefixDeclared(String prefix, String namespaceURI ) {
-                return prefix.equals(getNamespaceContext().getPrefix(namespaceURI));
+                return namespaceURI.equals(getNamespaceContext().getNamespaceURI(prefix));
             }
         },true);
     }
