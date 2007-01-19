@@ -69,7 +69,7 @@ final class ActionBasedDispatcher implements EndpointMethodDispatcher {
         actionMethodHandlers = new HashMap<String, EndpointMethodHandler>();
 
         for( JavaMethodImpl m : model.getJavaMethods() ) {
-            EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,model,m,binding);
+            EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,m,binding);
             String action = m.getOperation().getOperation().getInput().getAction();
             if (action != null)
                 actionMethodHandlers.put(action, handler);

@@ -24,7 +24,6 @@ package com.sun.xml.ws.client.sei;
 
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.client.RequestContext;
 import com.sun.xml.ws.client.ResponseContextReceiver;
 import com.sun.xml.ws.encoding.soap.DeserializationException;
@@ -34,10 +33,8 @@ import com.sun.xml.ws.model.CheckedExceptionImpl;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.util.Pool;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
@@ -75,8 +72,6 @@ final class SyncMethodHandler extends MethodHandler {
     private final String soapAction;
 
     private final boolean isOneWay;
-
-    private final SEIModel seiModel;
     
     private final JavaMethodImpl javaMethod;
 
@@ -100,7 +95,6 @@ final class SyncMethodHandler extends MethodHandler {
         }
 
         this.soapAction = method.getBinding().getSOAPAction();
-        this.seiModel = owner.seiModel;
         this.javaMethod = method;
 
         {// prepare objects for creating messages
@@ -222,40 +216,31 @@ final class SyncMethodHandler extends MethodHandler {
      *      handling, which requires a separate copy.
      */
     public Object invoke(Object proxy, Object[] args, RequestContext rc, ResponseContextReceiver receiver) throws Throwable {
+        Packet req = new Packet(createRequestMessage(args));
 
-        Pool.Marshaller pool = seiModel.getMarshallerPool();
+        req.soapAction = soapAction;
+        req.expectReply = !isOneWay;
+        req.getMessage().assertOneWay(isOneWay);
 
-        Marshaller m = pool.take();
+        // process the message
+        Packet reply = owner.doProcess(req,rc,receiver);
+
+        Message msg = reply.getMessage();
+        if(msg ==null)
+            // no reply. must have been one-way
+            return null;
 
         try {
-            Packet req = new Packet(createRequestMessage(args));
-
-            req.soapAction = soapAction;
-            req.expectReply = !isOneWay;
-            req.getMessage().assertOneWay(isOneWay);
-
-            // process the message
-            Packet reply = owner.doProcess(req,rc,receiver);
-
-            Message msg = reply.getMessage();
-            if(msg ==null)
-                // no reply. must have been one-way
-                return null;
-
-            try {
-                if(msg.isFault()) {
-                    SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
-                    throw faultBuilder.createException(checkedExceptions);
-                } else {
-                    return responseBuilder.readResponse(msg,args);
-                }
-            } catch (JAXBException e) {
-                throw new DeserializationException("failed.to.read.response",e);
-            } catch (XMLStreamException e) {
-                throw new DeserializationException("failed.to.read.response",e);
+            if(msg.isFault()) {
+                SOAPFaultBuilder faultBuilder = SOAPFaultBuilder.create(msg);
+                throw faultBuilder.createException(checkedExceptions);
+            } else {
+                return responseBuilder.readResponse(msg,args);
             }
-        } finally {
-            pool.recycle(m);
+        } catch (JAXBException e) {
+            throw new DeserializationException("failed.to.read.response",e);
+        } catch (XMLStreamException e) {
+            throw new DeserializationException("failed.to.read.response",e);
         }
     }
 

@@ -55,7 +55,7 @@ final class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
         this.binding = binding;
         methodHandlers = new QNameMap<EndpointMethodHandler>();
         for( JavaMethodImpl m : model.getJavaMethods() ) {
-            EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,model,m,binding);
+            EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,m,binding);
             QName payloadName = model.getQNameForJM(m);     // TODO need a new method on JavaMethodImpl
             methodHandlers.put(payloadName.getNamespaceURI(), payloadName.getLocalPart(), handler);
         }

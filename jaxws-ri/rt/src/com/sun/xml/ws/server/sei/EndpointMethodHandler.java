@@ -33,11 +33,9 @@ import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.ParameterImpl;
 import com.sun.xml.ws.model.WrapperParameter;
-import com.sun.xml.ws.util.Pool;
 
 import javax.jws.WebParam.Mode;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.Holder;
 import java.lang.reflect.InvocationTargetException;
@@ -70,7 +68,6 @@ import java.util.logging.Logger;
  */
 final class EndpointMethodHandler {
 
-    private final SEIModel seiModel;
     private final SOAPVersion soapVersion;
     private final Method method;
     private final int noOfArgs;
@@ -86,11 +83,9 @@ final class EndpointMethodHandler {
     private final MessageFiller[] outFillers;
 
     private final SEIInvokerTube owner;
-    private WSBinding binding;
 
-    public EndpointMethodHandler(SEIInvokerTube owner, SEIModel seiModel, JavaMethodImpl method, WSBinding binding) {
+    public EndpointMethodHandler(SEIInvokerTube owner, JavaMethodImpl method, WSBinding binding) {
         this.owner = owner;
-        this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
         this.method = method.getMethod();
         this.javaMethodModel = method;
@@ -100,7 +95,6 @@ final class EndpointMethodHandler {
         this.outFillers = fillers.toArray(new MessageFiller[fillers.size()]);
         this.isOneWay = method.getMEP().isOneWay();
         this.noOfArgs = this.method.getParameterTypes().length;
-        this.binding = binding;
     }
 
     /**
@@ -234,42 +228,35 @@ final class EndpointMethodHandler {
             req.transportBackChannel.close();
         }
         Message reqMsg = req.getMessage();
-        Pool.Marshaller pool = seiModel.getMarshallerPool();
-        Marshaller m = pool.take();
-
+        Object[] args = new Object[noOfArgs];
         try {
-            Object[] args = new Object[noOfArgs];
-            try {
-                argumentsBuilder.readRequest(reqMsg,args);
-            } catch (JAXBException e) {
-                throw new DeserializationException("failed.to.read.response",e);
-            } catch (XMLStreamException e) {
-                throw new DeserializationException("failed.to.read.response",e);
-            }
-            Message responseMessage;
-            try {
-                Object ret = owner.getInvoker(req).invoke(req, method, args);
-                responseMessage = isOneWay ? null : createResponseMessage(args, ret);
-            } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
-
-                if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
-                    // Service specific exception
-                    LOGGER.log(Level.INFO, cause.getMessage(), cause);
-                    responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion,
-                            javaMethodModel.getCheckedException(cause.getClass()), cause);
-                } else {
-                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                    responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
-            }
-            return req.createServerResponse(responseMessage, req.endpoint.getPort(), req.endpoint.getBinding());
-        } finally {
-            pool.recycle(m);
+            argumentsBuilder.readRequest(reqMsg,args);
+        } catch (JAXBException e) {
+            throw new DeserializationException("failed.to.read.response",e);
+        } catch (XMLStreamException e) {
+            throw new DeserializationException("failed.to.read.response",e);
         }
+        Message responseMessage;
+        try {
+            Object ret = owner.getInvoker(req).invoke(req, method, args);
+            responseMessage = isOneWay ? null : createResponseMessage(args, ret);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+
+            if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
+                // Service specific exception
+                LOGGER.log(Level.INFO, cause.getMessage(), cause);
+                responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion,
+                        javaMethodModel.getCheckedException(cause.getClass()), cause);
+            } else {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
+        }
+        return req.createServerResponse(responseMessage, req.endpoint.getPort(), req.endpoint.getBinding());
     }
 
     /**
