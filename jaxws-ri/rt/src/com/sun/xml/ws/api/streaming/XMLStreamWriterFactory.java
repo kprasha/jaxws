@@ -278,9 +278,7 @@ public abstract class XMLStreamWriterFactory {
 
             // create a new instance
             try {
-                synchronized(xof) {
-                    return xof.createXMLStreamWriter(out,encoding);
-                }
+                return xof.createXMLStreamWriter(out,encoding);
             } catch (XMLStreamException e) {
                 throw new XMLReaderException("stax.cantCreate",e);
             }
