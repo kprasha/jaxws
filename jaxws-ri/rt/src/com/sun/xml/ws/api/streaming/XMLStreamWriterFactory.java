@@ -269,6 +269,7 @@ public abstract class XMLStreamWriterFactory {
                 try {
                     resetMethod.invoke(xsw);
                     setOutputMethod.invoke(xsw,new StreamResult(out),encoding);
+                    return xsw;
                 } catch (IllegalAccessException e) {
                     throw new XMLReaderException("stax.cantCreate",e);
                 } catch (InvocationTargetException e) {
