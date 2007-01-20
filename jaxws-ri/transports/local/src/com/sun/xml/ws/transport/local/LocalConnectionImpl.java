@@ -157,12 +157,17 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
     }
 
     public void setResponseHeaders(Map<String,List<String>> headers) {
-        this.rspHeaders = new HashMap<String, List<String>>(headers);
+        if(headers==null)
+            // be defensive
+            this.rspHeaders = new HashMap<String,List<String>>();
+        else {
+            this.rspHeaders = new HashMap<String, List<String>>(headers);
 
-        for (Iterator<String> itr = rspHeaders.keySet().iterator(); itr.hasNext();) {
-            String key = itr.next();
-            if(key.equalsIgnoreCase("Content-Type") || key.equalsIgnoreCase("Content-Length"))
-                itr.remove();
+            for (Iterator<String> itr = rspHeaders.keySet().iterator(); itr.hasNext();) {
+                String key = itr.next();
+                if(key.equalsIgnoreCase("Content-Type") || key.equalsIgnoreCase("Content-Length"))
+                    itr.remove();
+            }
         }
     }
 
