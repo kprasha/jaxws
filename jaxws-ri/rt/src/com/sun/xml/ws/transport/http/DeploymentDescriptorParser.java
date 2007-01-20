@@ -38,6 +38,7 @@ import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.streaming.Attributes;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -126,8 +127,8 @@ public class DeploymentDescriptorParser<A> {
     public @NotNull List<A> parse(String systemId, InputStream is) {
         XMLStreamReader reader = null;
         try {
-            reader =
-                XMLStreamReaderFactory.create(systemId,is,true);
+            reader = new TidyXMLStreamReader(
+                XMLStreamReaderFactory.create(systemId,is,true), is);
             XMLStreamReaderUtil.nextElementContent(reader);
             return parseAdapters(reader);
         } finally {
