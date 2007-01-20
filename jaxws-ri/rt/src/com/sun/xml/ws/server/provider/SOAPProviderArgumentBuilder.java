@@ -1,22 +1,26 @@
 package com.sun.xml.ws.server.provider;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import com.sun.istack.Nullable;
 
+import javax.xml.soap.MimeHeader;
+import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.MimeHeader;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T> {
     protected final SOAPVersion soapVersion;
@@ -101,6 +105,11 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
                 Iterator i = hdrs.getAllHeaders();
                 while(i.hasNext()) {
                     MimeHeader header = (MimeHeader)i.next();
+                    if(header.getName().equalsIgnoreCase("SOAPAction"))
+                        // SAAJ sets this header automatically, but it interferes with the correct operation of JAX-WS.
+                        // so ignore this header.
+                        continue;
+
                     List<String> list = headers.get(header.getName());
                     if (list == null) {
                         list = new ArrayList<String>();

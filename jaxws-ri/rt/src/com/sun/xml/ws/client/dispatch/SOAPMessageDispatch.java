@@ -65,15 +65,20 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
            throw new WebServiceException(DispatchMessages.INVALID_NULLARG_SOAP_MSGMODE(mode.name(), Service.Mode.PAYLOAD.toString()));
 
         MimeHeaders mhs = arg.getMimeHeaders();
+        // TODO: these two lines seem dangerous. It should be left up to the transport and codec
+        // to decide how they are sent. remove after 2.1 FCS - KK.
         mhs.addHeader("Content-Type", "text/xml");
         mhs.addHeader("Content-Transfer-Encoding", "binary");
         Map<String, List<String>> ch = new HashMap<String, List<String>>();
         for (Iterator iter = arg.getMimeHeaders().getAllHeaders(); iter.hasNext();)
         {
-            List<String> h = new ArrayList<String>();
             MimeHeader mh = (MimeHeader) iter.next();
+            if(mh.getName().equalsIgnoreCase("SOAPAction"))
+                // SAAJ sets this header automatically, but it interferes with the correct operation of JAX-WS.
+                // so ignore this header.
+                continue;
 
-            h.clear();
+            List<String> h = new ArrayList<String>();
             h.add(mh.getValue());
             ch.put(mh.getName(), h);
         }
