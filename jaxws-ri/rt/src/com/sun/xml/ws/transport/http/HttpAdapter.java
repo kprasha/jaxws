@@ -29,7 +29,6 @@ import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.ExceptionHasMessage;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.server.AbstractServerAsyncTransport;
@@ -42,10 +41,9 @@ import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.resources.WsservletMessages;
-import com.sun.xml.ws.resources.ServerMessages;
-import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.server.UnsupportedMediaException;
+import com.sun.xml.ws.util.ByteArrayBuffer;
 
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -60,8 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * {@link Adapter} that receives messages in HTTP.
@@ -504,7 +502,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     /**
      * Dumps what goes across HTTP transport.
      */
-    private static final boolean dump;
+    public static boolean dump;
 
     static {
         boolean b;

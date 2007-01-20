@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * {@link Pipe} and {@link com.sun.xml.ws.api.pipe.Tube} that sends a request to a remote HTTP server.
+ * {@link Pipe} and {@link Tube} that sends a request to a remote HTTP server.
  *
  * @author Jitendra Kotamraju
  */
@@ -216,7 +216,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     /**
      * Dumps what goes across HTTP transport.
      */
-    private static final boolean dump;
+    public static boolean dump;
 
     static {
         boolean b;
