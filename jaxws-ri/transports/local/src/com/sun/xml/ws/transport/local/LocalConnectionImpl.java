@@ -21,12 +21,13 @@
  */
 
 package com.sun.xml.ws.transport.local;
+
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 
@@ -37,6 +38,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -155,7 +157,13 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
     }
 
     public void setResponseHeaders(Map<String,List<String>> headers) {
-        this.rspHeaders = headers; // we are lazy
+        this.rspHeaders = new HashMap<String, List<String>>(headers);
+
+        for (Iterator<String> itr = rspHeaders.keySet().iterator(); itr.hasNext();) {
+            String key = itr.next();
+            if(key.equalsIgnoreCase("Content-Type") || key.equalsIgnoreCase("Content-Length"))
+                itr.remove();
+        }
     }
 
     public void setContentTypeResponseHeader(@NotNull String value) {

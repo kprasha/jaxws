@@ -27,6 +27,7 @@ import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 
+import javax.xml.ws.WebServiceContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -75,13 +76,18 @@ public abstract class WSHTTPConnection extends PropertySet {
      * <p>
      * Initially, no header is set.
      *
+     * <p>
+     * This parameter is usually exposed to {@link WebServiceContext}
+     * as {@link Packet#OUTBOUND_TRANSPORT_HEADERS}, and thus it
+     * should ignore <tt>Content-Type</tt> and <tt>Content-Length</tt> headers.
+     *
      * @param headers
      *      See {@link HttpURLConnection#getHeaderFields()} for the format.
      *      This parameter may not be null, but since the user application
      *      code may invoke this method, a graceful error checking with
      *      an helpful error message should be provided if it's actually null.
+     * @see #setContentTypeResponseHeader(String) 
      */
-
     public abstract void setResponseHeaders(@NotNull Map<String,List<String>> headers);
 
     /**

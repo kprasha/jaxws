@@ -21,6 +21,7 @@
  */
 
 package com.sun.xml.ws.transport.http.servlet;
+
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.PortAddressResolver;
@@ -103,6 +104,8 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
 
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             String name = entry.getKey();
+            if(name.equalsIgnoreCase("Content-Type") || name.equalsIgnoreCase("Content-Length"))
+                continue;   // ignore headers that interfere with the operation
             for (String value : entry.getValue()) {
                 response.addHeader(name, value);
             }

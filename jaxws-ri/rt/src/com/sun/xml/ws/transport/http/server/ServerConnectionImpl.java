@@ -29,8 +29,8 @@ import com.sun.net.httpserver.HttpsExchange;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
-import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.transport.http.HttpAdapter;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
@@ -53,7 +53,6 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
 
     private final HttpExchange httpExchange;
     private int status;
-    private int responseContentLength = 0;
     private HttpAdapter adapter;
     private boolean outputWritten;
 
@@ -80,9 +79,8 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
         for(Map.Entry <String, List<String>> entry : headers.entrySet()) {
             String name = entry.getKey();
             List<String> values = entry.getValue();
-            if (name.equalsIgnoreCase("Content-Length")) {
-                // No need to add this header
-                responseContentLength = Integer.parseInt(values.get(0));
+            if (name.equalsIgnoreCase("Content-Length") || name.equalsIgnoreCase("Content-Type")) {
+                continue;  // ignore headers that interfere with our correct operations
             } else {
                 r.put(name,new ArrayList<String>(values));
             }
@@ -118,7 +116,7 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
         assert !outputWritten;
         outputWritten = true;
 
-        httpExchange.sendResponseHeaders(getStatus(), responseContentLength);
+        httpExchange.sendResponseHeaders(getStatus(),0);
 
         return httpExchange.getResponseBody();
     }

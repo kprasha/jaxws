@@ -52,6 +52,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceContext;
@@ -59,7 +60,6 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import javax.xml.soap.SOAPMessage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -216,6 +216,11 @@ public final class Packet extends DistributedPropertySet {
 
     /**
      * Outbound transport headers are captured in a transport neutral way.
+     *
+     * <p>
+     * Transports may choose to ignore certain headers that interfere with
+     * its correct operation, such as
+     * <tt>Content-Type</tt> and <tt>Content-Length</tt>. 
      */
     public static final String OUTBOUND_TRANSPORT_HEADERS = "com.sun.xml.ws.api.message.packet.outbound.transport.headers";
 

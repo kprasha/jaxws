@@ -173,6 +173,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" exported="" name="junit" level="application" />
+    <orderEntry type="library" name="Tomcat 5" level="application" />
     <orderEntryProperties />
   </component>
   <component name="org.mevenide.idea.module.ModuleSettings">
