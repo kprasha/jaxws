@@ -73,11 +73,6 @@ public class SOAPMessageDispatch extends com.sun.xml.ws.client.dispatch.Dispatch
         for (Iterator iter = arg.getMimeHeaders().getAllHeaders(); iter.hasNext();)
         {
             MimeHeader mh = (MimeHeader) iter.next();
-            if(mh.getName().equalsIgnoreCase("SOAPAction"))
-                // SAAJ sets this header automatically, but it interferes with the correct operation of JAX-WS.
-                // so ignore this header.
-                continue;
-
             List<String> h = new ArrayList<String>();
             h.add(mh.getValue());
             ch.put(mh.getName(), h);
