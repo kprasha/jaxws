@@ -49,17 +49,9 @@ public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
             smc.get (MessageContext.MESSAGE_OUTBOUND_PROPERTY);
         
         if (outboundProperty.booleanValue()) {
-            out.println("\nOutbound message:");
+            out.println("\nHandler Log -> Outbound message:");
         } else {
-            out.println("\nInbound message:");
-        }
-        
-        SOAPMessage message = smc.getMessage();
-        try {
-            message.writeTo(out);
-            out.println("");   // just to add a newline
-        } catch (Exception e) {
-            out.println("Exception in handler: " + e);
+            out.println("\nHandler Log -> Inbound message:");
         }
     }
 }

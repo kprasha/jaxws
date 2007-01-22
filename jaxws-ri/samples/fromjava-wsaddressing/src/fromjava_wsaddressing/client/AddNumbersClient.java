@@ -28,13 +28,14 @@ public class AddNumbersClient {
 
     public void addNumbersFault() {
         System.out.printf("addNumbersFault: fault caused by out of bounds parameter value\n");
-        AddNumbersImpl stub = null;
+        AddNumbersImpl stub;
 
         try {
             stub = createStub();
-            int result = stub.addNumbers(negativeNumber, number2);
+            stub.addNumbers(negativeNumber, number2);
             assert false;
         } catch (AddNumbersException_Exception ex) {
+            //This is expected exception
         } catch (Exception e) {
             e.printStackTrace();
             assert false;
@@ -56,14 +57,12 @@ public class AddNumbersClient {
     }
 
     public void addNumbers3Fault() {
-        AddNumbersImpl stub = null;
-
         System.out.printf("addNumbers3Fault: custom fault mapping\n");
         try {
-            stub = createStub();
-            int result = stub.addNumbers3(negativeNumber, number2);
+            createStub().addNumbers3(negativeNumber, number2);
             assert false;
-        } catch (AddNumbersException_Exception ex) {
+        } catch (AddNumbersException_Exception e) {
+            //This is expected exception
         } catch (Exception e) {
             e.printStackTrace();
             assert false;
@@ -72,8 +71,6 @@ public class AddNumbersClient {
     }
 
     private AddNumbersImpl createStub() throws Exception {
-        AddNumbersImpl stub = new AddNumbersImplService().getAddNumbersImplPort();
-
-        return stub;
+        return new AddNumbersImplService().getAddNumbersImplPort();
     }
 }
