@@ -1,6 +1,5 @@
 package fromjava_wsaddressing.server;
 
-import javax.annotation.Resource;
 import javax.jws.WebService;
 import javax.xml.ws.*;
 import javax.xml.ws.soap.Addressing;
@@ -8,9 +7,6 @@ import javax.xml.ws.soap.Addressing;
 @Addressing
 @WebService
 public class AddNumbersImpl {
-
-    @Resource
-    WebServiceContext wsc;
 
     @Action(
             input = "http://example.com/input",

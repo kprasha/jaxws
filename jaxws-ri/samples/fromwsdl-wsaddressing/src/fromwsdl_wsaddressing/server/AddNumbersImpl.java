@@ -1,14 +1,10 @@
 package fromwsdl_wsaddressing.server;
 
-import javax.annotation.Resource;
 import javax.jws.WebService;
-import javax.xml.ws.WebServiceContext;
 
 @WebService(endpointInterface = "fromwsdl_wsaddressing.server.AddNumbersPortType")
 public class AddNumbersImpl implements AddNumbersPortType {
 
-    @Resource
-    WebServiceContext wsc;
 
     public int addNumbers(int number1, int number2)
             throws AddNumbersFault_Exception {
