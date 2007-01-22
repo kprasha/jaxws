@@ -76,11 +76,7 @@
         <echo message="... done."/>
     </target>
 
-    <target name="install-AS9">
-        <antcall target="install-glassfish"/>
-    </target>
-
-    <target name="install-glassfish" depends="init">
+    <target name="install" depends="init">
         <echo message="Installing JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on ${as.home} ..." />
 
         <copy toDir="${as.lib.home}" overwrite="true">
@@ -210,14 +206,9 @@
     </target>
 
     <target name="help">
-        <echo message="install-AS8.X (Appserver 8.1, 8.2) "/>
-        <echo message="install-AS9 (Appserver 9.0, 9.0 UR1)"/>
-        <echo message="install-glassfish (Glassfish V1, V2,M1, V2,M2)"/>
+        <echo message="Installs JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on the Application Server (Glassfish v1, v2 and Sun One AS 9.x)"/>
         <echo message=""/>
-        <echo message="Installs JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on the Application Server"/>
-        <echo message="Usage: ANT_HOME/bin/ant install-glassfish"/>
-        <echo message="       ANT_HOME/bin/ant install-AS9"/>
-        <echo message="       ANT_HOME/bin/ant install-AS8.X"/>
+        <echo message="Usage: $ANT_HOME/bin/ant install"/>
     </target>
 
 </project>
