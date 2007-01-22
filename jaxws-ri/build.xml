@@ -370,7 +370,16 @@ major-version=${release.impl.version}
     <mkdir dir="${dist20.home}/docs"/>
     <mkdir dir="${dist20.home}/samples"/>
 
-    <copy tofile="${dist20.home}/build.xml" file="${build.home}/../etc/istackonsjsas.xml"/>
+    <copy tofile="${dist20.home}/build.xml" file="${build.home}/../etc/istackonsjsas.xml">
+        <filterset begintoken="@@" endtoken="@@">
+          <filter token="SPEC_VERSION"
+                  value="${release.spec.version}" />
+          <filter token="IMPL_VERSION"
+                  value="${release.impl.version}"/>
+          <filter token="IMPL_VERSION_SUFFIX"
+                  value="${release.impl.version.suffix}"/>
+        </filterset>
+    </copy>
     <copy    todir="${dist20.home}/bin">
       <fileset dir="${build.home}/bin"
           includes="wsimport.*, wsgen.*"/>
@@ -399,10 +408,6 @@ major-version=${release.impl.version}
                   value="${release.impl.version}"/>
           <filter token="IMPL_VERSION_SUFFIX"
                   value="${release.impl.version.suffix}"/>
-          <!--filter token="@@JWSDP_VERSION@@"
-                  value="${jwsdp.impl.version}"/>
-          <filter token="@@JWSDP_ROOTDIR@@" 
-                  value="${jwsdp.root.directory}"/-->
         </filterset>
 	</copy>
 

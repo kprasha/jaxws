@@ -22,14 +22,14 @@
  Copyright 2006 Sun Microsystems Inc. All Rights Reserved
 -->
 
-<project name="JAX-WS 2.1 EA3 On Sun Java System App Server 8.1/8.2/9.0/9.0 U1, GF v1, GF v2 M1, M2" default="help" basedir=".">
+<project name="JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI On Sun Java System App Server 8.1/8.2/9.0/9.0 U1, GF v1, GF v2 M1, M2" default="help" basedir=".">
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
     <property name="as.lib.endorsed.dir" value="${as.home}/lib/endorsed"/>
     <property name="as.bin.home" value="${as.home}/bin"/>
     <property name="domain" value="domain1"/>
-    <property name="backup.dir" value="${as.home}/.jaxws21ea3"/>
+    <property name="backup.dir" value="${as.home}/.jaxws21"/>
     <condition property="isNotWindows">
       <not>
         <os family="windows" />
@@ -38,7 +38,7 @@
 
     <condition property="notInstalled">
         <not>
-            <available file="${as.home}/.jaxws21ea3/${domain}-domain.xml"/>
+            <available file="${as.home}/.jaxws21/${domain}-domain.xml"/>
         </not>
     </condition>
             
@@ -49,7 +49,7 @@
     </target>
 
     <target name="install-AS8.X" depends="init">
-        <echo message="Installing JAX-WS 2.1 EA3 on ${as.home} ..." />
+        <echo message="Installing JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on ${as.home} ..." />
         <copy toDir="${backup.dir}">
             <fileset dir="${as.lib.home}">
                 <include name="saaj-*.jar"/>
@@ -81,7 +81,7 @@
     </target>
 
     <target name="install-glassfish" depends="init">
-        <echo message="Installing JAX-WS 2.1 EA3 on ${as.home} ..." />
+        <echo message="Installing JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on ${as.home} ..." />
 
         <copy toDir="${as.lib.home}" overwrite="true">
             <fileset dir="lib">
@@ -128,7 +128,7 @@
 
     <target name="update-classpath-8.X" if="notInstalled">
 
-        <!-- Add the JAX-WS 2.1 and JAXB 2.1 jars to classpath-prefix -->
+        <!-- Add the JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ and dependent jars to classpath-prefix -->
         <copy file="${as.home}/domains/${domain}/config/domain.xml" tofile="${backup.dir}/${domain}-domain.xml"/>
         <!-- Add classpath-prefix, if not exists -->
         <antcall target="create.classpath.prefix-8.X" />
@@ -140,7 +140,7 @@
 
     <target name="update-classpath" if="notInstalled">
 
-        <!-- Add the JAX-WS 2.1 and JAXB 2.1 jars to classpath-prefix -->
+        <!-- Add the JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ and dependent jars to classpath-prefix -->
         <copy file="${as.home}/domains/${domain}/config/domain.xml" tofile="${backup.dir}/${domain}-domain.xml"/>
         <!-- Add classpath-prefix, if not exists -->
         <antcall target="create.classpath.prefix" />
@@ -151,7 +151,7 @@
     </target>
 
     <target name="install-tools" depends="install-on-windows, install-on-unix">
-        <echo message="Installed JAX-WS tools (wsimport, wsgen) to ${as.bin.home}"/>
+        <echo message="Installed JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI tools (wsimport, wsgen) to ${as.bin.home}"/>
     </target>
     <target name="install-on-unix" if="isNotWindows">
         <copy toDir="${as.bin.home}" overwrite="true">
@@ -171,7 +171,7 @@
     </target>
 
     <target name="update-tools" depends="update-on-windows, update-on-unix">
-        <echo message="Updated JAX-WS tools (wsimport, wsgen) in ${as.bin.home}"/>
+        <echo message="Updated JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI tools (wsimport, wsgen) in ${as.bin.home}"/>
     </target>
     <target name="update-on-unix" if="isNotWindows">
         <copy toDir="${backup.dir}/bin">
@@ -214,10 +214,10 @@
         <echo message="install-AS9 (Appserver 9.0, 9.0 UR1)"/>
         <echo message="install-glassfish (Glassfish V1, V2,M1, V2,M2)"/>
         <echo message=""/>
-        <echo message="Installs JAX-WS 2.1 EA3 on the Application Server"/>
-        <echo message="            Usage: ANT_HOME/bin/ant install-glassfish"/>
-        <echo message="                   ANT_HOME/bin/ant install-AS9"/>
-        <echo message="                   ANT_HOME/bin/ant install-AS8.X"/>
+        <echo message="Installs JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on the Application Server"/>
+        <echo message="Usage: ANT_HOME/bin/ant install-glassfish"/>
+        <echo message="       ANT_HOME/bin/ant install-AS9"/>
+        <echo message="       ANT_HOME/bin/ant install-AS8.X"/>
     </target>
 
 </project>
