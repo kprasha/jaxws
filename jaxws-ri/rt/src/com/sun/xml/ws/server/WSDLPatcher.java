@@ -237,7 +237,8 @@ final class WSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      * @return returns the resolved endpoint address
      */
     private String getAddressLocation() {
-        return (portAddressResolver == null) ? null : portAddressResolver.getAddressFor(serviceName, portName.getLocalPart());
+        return (portAddressResolver == null || portName == null)
+                ? null : portAddressResolver.getAddressFor(serviceName, portName.getLocalPart());
     }
 }
     
