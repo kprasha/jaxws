@@ -2,8 +2,9 @@ This sample will build, deploy an invoke a simple Web service.
 
 This sample demonstrates the use of annotations to customize the parameter 
 name, operation name, targetNamespace, and other similar features when 
-developing a Web service when starting from Java.  The annotations
-are contained in the src/annotations/server/AddNumbersImpl.java and
+developing a Web service when starting from Java.
+
+The annotations are contained in the src/annotations/server/AddNumbersImpl.java and
 src/annotations/server/AddNumbersIF.java.  The src/annotations/server/
 AddNumbersImpl.java containes one @WebService annotation with an 
 endpointInterface element pointing to the annotations.server.AddNumbersIF

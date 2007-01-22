@@ -3,8 +3,6 @@
 
     <import file="etc/deploy-targets.xml"/>
 
-    <property file="etc/build.properties"/>
-
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <pathelement location="${lib.sample.home}/jaxwsSampleUtils.jar"/>
@@ -33,7 +31,7 @@
     <target name="build-server-java" depends="setup">
         <apt
                 fork="true"
-                debug="${debug}"
+                debug="true"
                 verbose="${verbose}"
                 destdir="${build.classes.home}"
                 sourcedestdir="${build.classes.home}"
@@ -73,18 +71,18 @@
 
     <target name="generate-client" depends="setup">
         <wsimport
-                debug="${debug}"
+                debug="true"
                 verbose="${verbose}"
-                keep="${keep}"
+                keep="true"
                 package="annotations.client"
-                extension="${extension}"
                 destdir="${build.classes.home}"
-                wsdl="${client.wsdl}">
+                wsdl="http://localhost:8080/jaxws-annotations/addnumbers?wsdl">
         </wsimport>
     </target>
 
     <target name="client" depends="generate-client">
         <javac
+                debug="true"
                 fork="true"
                 srcdir="${basedir}/src"
                 destdir="${build.classes.home}"
@@ -94,14 +92,15 @@
     </target>
 
     <target name="run">
-        <java fork="true" classname="${client}">
+        <java fork="true" classname="annotations.client.AddNumbersClient">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
-            <sysproperty key="wsmonitor" value="${wsmonitor}"/>
-            <sysproperty key="com.sun.xml.ws.client.ContentNegotiation" value="${fi}"/>
+
+            <!-- uncomment the line below to see the message dump -->
+            <!-- jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/ -->
         </java>
     </target>
 
