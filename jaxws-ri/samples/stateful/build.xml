@@ -123,4 +123,8 @@
 
         <antcall target="deploy"/>
     </target>
+    <!-- If you are running behind firewall, you would need to provide the proxy info.
+         Uncomment the line below and put your proxy server and the port number. 
+    -->
+    <!--setproxy proxyhost="your-proxy-server" proxyport="8080"/-->
 </project>

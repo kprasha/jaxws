@@ -51,6 +51,10 @@ wsiap:swaRef to refer to an attachment in the message.
     * ant clean client run - runs wsimport on the published wsdl by the deployed
       endpoint, compiles the generated artifacts and the client application
       then executes it.
+    * This sample imports a remote schema. If you are running this sample from
+      behind a firewall you need to provide the proxy server information. Simply
+      scroll down to the bottom of build.xml file and uncomment the <setproxy.../>
+      element and provide your proxy server information and then do 'ant run'.
 
 * Prerequisite
 
