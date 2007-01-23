@@ -24,11 +24,13 @@ package com.sun.xml.ws.wsdl.parser;
 
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
+import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -54,7 +56,9 @@ final class EntityResolverWrapper implements XMLEntityResolver {
         if(source.getSystemId()!=null)
             systemId = source.getSystemId();
 
-        return new Parser(new URL(systemId),
-            XMLStreamReaderFactory.create(source,true));
+        URL url = new URL(systemId);
+        InputStream stream = url.openStream();
+        return new Parser(url,
+                new TidyXMLStreamReader(XMLStreamReaderFactory.create(url.toExternalForm(), stream, true), stream));
     }
 }

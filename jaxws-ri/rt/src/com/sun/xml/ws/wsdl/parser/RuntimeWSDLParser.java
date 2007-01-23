@@ -190,6 +190,8 @@ public class RuntimeWSDLParser {
         //currently we fail only if we dont find a WSDL
         if (parser.errors.get(parser.NOT_A_WSDL) && wsdlException != null)
             throw wsdlException;
+        else if(wsdlException != null)
+            throw wsdlException;
 
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.context);
@@ -249,9 +251,15 @@ public class RuntimeWSDLParser {
     }
 
     private void parseWSDL(URL url, Source wsdlLoc) throws XMLStreamException, IOException, SAXException {
-        XMLStreamReader reader = createReader(wsdlLoc);
+        String systemId = wsdlLoc.getSystemId();
+        Parser parser = resolver.resolveEntity(null, systemId);
+        if(parser == null){
+            parser = resolver.resolveEntity(null, url.toExternalForm());
+        }
+        if(parser == null){
+            throw new WebServiceException(ClientMessages.WSDL_NOT_FOUND(wsdlLoc.getSystemId()));
+        }
         importedWSDLs.clear();
-        Parser parser = new Parser(url, reader);
         parseWSDL(parser, false);
     }
 
