@@ -53,8 +53,11 @@ import java.util.Set;
 public class WsImport extends MatchingTask {
 
     private CommandlineJava cmd = new CommandlineJava();
-    /*************************  -d option *************************/
+    /** -d option. */
     private File destDir = null;
+
+    /** Additional command line arguments for XJC. The equivalent of the -B option. */
+    private final Commandline xjcCmdLine = new Commandline();
 
     /** Gets the base directory to output generated class. **/
     public File getDestdir() {
@@ -104,6 +107,13 @@ public class WsImport extends MatchingTask {
      */
     public Commandline.Argument createJvmarg() {
         return cmd.createVmArgument();
+    }
+
+    /**
+     * Adds XJC argument.
+     */
+    public Commandline.Argument createXjcArg() {
+        return xjcCmdLine.createArgument();
     }
 
     /********************* failonerror option  ***********************/
@@ -506,6 +516,14 @@ public class WsImport extends MatchingTask {
             for(File binding : bindingFiles){
                 cmd.createArgument().setValue("-b");
                 cmd.createArgument().setFile(binding);
+            }
+        }
+
+        for( String a : xjcCmdLine.getArguments() ) {
+            if(a.startsWith("-")) {
+                cmd.createArgument().setValue("-B"+a);
+            } else {
+                cmd.createArgument().setValue(a);
             }
         }
     }
