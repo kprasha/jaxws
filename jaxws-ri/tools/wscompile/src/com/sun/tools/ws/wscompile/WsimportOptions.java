@@ -161,6 +161,7 @@ public class WsimportOptions extends Options {
                     //Driver.usage(jaxbOptions,false);
                     throw new BadCommandLineException(WscompileMessages.WSIMPORT_NO_SUCH_JAXB_OPTION(subCmd[0]));
                 }
+                return r;
             } catch (com.sun.tools.xjc.BadCommandLineException e) {
                 //Driver.usage(jaxbOptions,false);
                 throw new BadCommandLineException(e.getMessage(),e);
