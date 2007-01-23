@@ -8,8 +8,8 @@ import javax.xml.ws.BindingType;
 public class AddNumbersImpl {
     
     /**
-     * @param number1
-     * @param number2
+     * @param number1 must be > 0
+     * @param number2 must be > 0
      * @return The sum
      * @throws AddNumbersException
      *             if any of the numbers to be added is negative.
