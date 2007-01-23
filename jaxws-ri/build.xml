@@ -324,7 +324,7 @@ major-version=${release.impl.version}
     <!-- should I copy local transport jar to the build.home?  -->
 
     <copy todir="${build.home}">
-        <fileset dir="." includes="ThirdPartyLicense.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
+        <fileset dir="." includes="ThirdPartyLicense.txt, CDDL-1.0-license.txt, distributionREADME_WMforJava2.0.txt" />
     </copy>
   </target>
 
@@ -333,7 +333,7 @@ major-version=${release.impl.version}
 
   <target name="docs" depends="prepare">
       <copy todir="${build.home}/docs">
-          <fileset dir="." includes="ThirdPartyLicense.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
+          <fileset dir="." includes="ThirdPartyLicense.txt, CDDL-1.0-license.txt, distributionREADME_WMforJava2.0.txt" />
           <filterset begintoken="@@" endtoken="@@">
             <filter token="SPEC_VERSION"
                     value="${release.spec.version}" />
@@ -421,7 +421,7 @@ major-version=${release.impl.version}
 
     <!-- add a copy of the license and README files to the top level -->
     <copy todir="${dist20.home}">
-        <fileset dir="." includes="ThirdPartyLicense.txt, license.txt, distributionREADME_WMforJava2.0.txt" />
+        <fileset dir="." includes="ThirdPartyLicense.txt, CDDL-1.0-license.txt, distributionREADME_WMforJava2.0.txt" />
     </copy>
 
     <copy todir="${dist20.home}"
@@ -629,7 +629,7 @@ major-version=${release.impl.version}
       <tstamp/>
       <!-- generate the class -->
       <installerBuilder classFile="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_${DSTAMP}.jar"
-          licenseFile="${basedir}/license.txt"
+          licenseFile="${basedir}/CDDL-1.0-license.txt"
           zipFile="${build.home}/jaxws-ri.zip" />
     </target>
     
@@ -689,7 +689,7 @@ major-version=${release.impl.version}
             <zipfileset dir="servlet/lib" includes="*.jar" prefix="${source.dist.dir.name}/lib"/>
 
             <!-- license files -->
-            <zipfileset dir="." includes="ThirdPartyLicense.txt, license.txt, distributionREADME_WMforJava2.0.txt"
+            <zipfileset dir="." includes="ThirdPartyLicense.txt, CDDL-1.0-license.txt, distributionREADME_WMforJava2.0.txt"
                         prefix="${source.dist.dir.name}"/>
 
         </zip>
@@ -711,7 +711,7 @@ major-version=${release.impl.version}
 
       <!-- generate the installer -->
       <installerBuilder classFile="${build.home}/JAXWS${release.impl.version}${release.impl.version.suffix}_source_${DSTAMP}.jar"
-          licenseFile="${basedir}/license.txt"
+          licenseFile="${basedir}/CDDL-1.0-license.txt"
           zipFile="${source.drop.dir}/jaxws-src-installer.zip"/>
       <delete dir="${source.drop.dir}"/>
     </target>
