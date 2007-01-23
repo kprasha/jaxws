@@ -509,6 +509,14 @@ public class WsImport extends MatchingTask {
             cmd.createArgument().setFile(new File (getBinding()));
         }
 
+        for( String a : xjcCmdLine.getArguments() ) {
+            if(a.startsWith("-")) {
+                cmd.createArgument().setValue("-B"+a);
+            } else {
+                cmd.createArgument().setValue(a);
+            }
+        }
+        
         if((wsdlLocation != null) && (wsdlLocation.length() != 0)){
             cmd.createArgument().setValue("-wsdllocation");
             cmd.createArgument().setValue(wsdlLocation);
@@ -518,14 +526,6 @@ public class WsImport extends MatchingTask {
             for(File binding : bindingFiles){
                 cmd.createArgument().setValue("-b");
                 cmd.createArgument().setFile(binding);
-            }
-        }
-
-        for( String a : xjcCmdLine.getArguments() ) {
-            if(a.startsWith("-")) {
-                cmd.createArgument().setValue("-B"+a);
-            } else {
-                cmd.createArgument().setValue(a);
             }
         }
     }
