@@ -52,7 +52,7 @@ import java.util.Set;
  */
 public class WsImport extends MatchingTask {
 
-    private CommandlineJava cmd = new CommandlineJava();
+    private final CommandlineJava cmd = new CommandlineJava();
     /** -d option. */
     private File destDir = null;
 
