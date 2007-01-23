@@ -111,8 +111,10 @@ public class WsImport extends MatchingTask {
 
     /**
      * Adds XJC argument.
+     *
+     * @since 2.1
      */
-    public Commandline.Argument createXjcArg() {
+    public Commandline.Argument createXjcarg() {
         return xjcCmdLine.createArgument();
     }
 
