@@ -251,7 +251,7 @@ public class RuntimeWSDLParser {
     private void parseWSDL(URL url, Source wsdlLoc) throws XMLStreamException, IOException, SAXException {
         String systemId = wsdlLoc.getSystemId();
         Parser parser = resolver.resolveEntity(null, systemId);
-        if(parser == null){
+        if(parser == null && url != null){
             parser = resolver.resolveEntity(null, url.toExternalForm());
         }
         if(parser == null){
