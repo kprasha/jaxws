@@ -91,6 +91,7 @@
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
+            <!-- uncomment the line below to see the message dump -->            
             <!-- jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/ -->
         </java>
     </target>

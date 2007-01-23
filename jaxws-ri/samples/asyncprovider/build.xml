@@ -6,8 +6,6 @@
 
     <property environment="env"/>
 
-    <property file="etc/build.properties"/>    
-
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <pathelement location="${lib.sample.home}/jaxwsSampleUtils.jar"/>
@@ -18,7 +16,6 @@
     </path>
 
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
-
         <classpath refid="jaxws.classpath"/>
     </taskdef>
 
@@ -34,13 +31,12 @@
 
     <target name="build-server-wsdl" depends="setup">
         <wsimport
-                debug="${debug}"
+                debug="true"
                 verbose="${verbose}"
-                keep="${keep}"
-                extension="${extension}"
+                keep="true"
                 destdir="${build.classes.home}"
                 package="asyncprovider.server"
-                wsdl="${server.wsdl}">
+                wsdl="${basedir}/etc/hello_literal.wsdl">
         </wsimport>
         <javac
                 fork="true"
@@ -64,13 +60,12 @@
 
     <target name="generate-client" depends="setup">
         <wsimport
-                debug="${debug}"
+                debug="true"
                 verbose="${verbose}"
-                keep="${keep}"
-                extension="${extension}"
+                keep="true"
                 destdir="${build.classes.home}"
                 package="asyncprovider.client"
-                wsdl="${client.wsdl}">
+                wsdl="http://localhost:8080/jaxws-asyncprovider/hello?wsdl">
         </wsimport>
     </target>
 
@@ -85,12 +80,14 @@
     </target>
 
     <target name="run">
-        <java fork="true" classname="${client}">
+        <java fork="true" classname="asyncprovider.client.AsyncClient">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
+            <!-- uncomment the line below to see the message dump -->
+            <!-- jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/ -->
         </java>
     </target>
 
