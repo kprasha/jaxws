@@ -2,11 +2,6 @@
 <project basedir="." default="help" name="type_substitution">
 
     <import file="etc/deploy-targets.xml"/>
-
-    <property environment="env"/>
-
-    <property file="etc/build.properties"/>
-
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <pathelement location="${lib.sample.home}/jaxwsSampleUtils.jar"/>
@@ -35,7 +30,7 @@
     <target name="build-server-java" depends="setup">
         <apt
                 fork="true"
-                debug="${debug}"
+                debug="true"
                 verbose="${verbose}"
                 destdir="${build.classes.home}"
                 sourcedestdir="${build.classes.home}"
@@ -75,14 +70,12 @@
 
     <target name="generate-client" depends="setup">
         <wsimport
-                debug="${debug}"
+                debug="true"
                 verbose="${verbose}"
-                keep="${keep}"
-                extension="${extension}"
+                keep="true"
                 destdir="${build.classes.home}"
                 package="type_substitution.client"
-                wsdl="${client.wsdl}">
-            <binding dir="${basedir}/etc" includes="${client.binding}"/>
+                wsdl="http://localhost:9090/jaxws-type_substitution/cardealer?wsdl">
         </wsimport>
     </target>
 
@@ -98,13 +91,13 @@
     </target>
 
     <target name="run">
-        <java fork="true" classname="${client}">
+        <java fork="true" classname="type_substitution.client.CarBuyerApp">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
-             <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=true"/>
+             <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/>
         </java>
     </target>
 
@@ -112,9 +105,6 @@
         <echo message="server:            Builds and deploy the service endpoint WAR"/>
         <echo message="client:            Builds the client"/>
         <echo message="run:               Runs the client"/>
-        <echo message="server-j2se:       Builds and deploy the Endpoint API based service"/>
-        <echo message="server-j2se-stop:  Stops Endpoint API based service"/>
-
     </target>
 
     <target name="server" depends="setup">
@@ -127,26 +117,5 @@
 
         <antcall target="deploy"/>
     </target>
-
-    <target name="server-j2se" depends="setup">
-        <antcall target="clean"/>
-
-        <antcall target="build-server-java"/>
-
-        <echo message="Starting endpoint... To stop: ant server-j2se-stop "/>
-
-        <java fork="true" classname="${j2se.sei}">
-            <classpath>
-                <path refid="jaxws.classpath"/>
-                <pathelement location="${build.classes.home}"/>
-            </classpath>
-        </java>
-    </target>
-
-    <target name="server-j2se-stop" depends="setup">
-        <get src="http://localhost:9090/stop" dest="stop.status"/>
-    </target>
-
-
 
 </project>

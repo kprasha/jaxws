@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project basedir="." default="runclient" name="wsimport_catalog">
-
     <property environment="env"/>
 
-    <property name="as.home" value="${env.AS_HOME}"/>
     <property name="lib.home" value="${env.JAXWS_HOME}/lib"/>
-    <property name="lib.sample.home" value="${basedir}/../lib"/>
     <property name="build.home" value="${basedir}/build"/>
     <property name="build.classes.home" value="${build.home}"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
-        <pathelement location="${lib.sample.home}/jaxwsSampleUtils.jar"/>
         <fileset dir="${lib.home}" includes="*.jar"/>
     </path>
 
@@ -54,7 +50,7 @@
         <wsimport
                 debug="true"
                 extension="true"
-                keep="${keep}"
+                keep="true"
                 destdir="${build.home}/"
                 verbose="false"
                 catalog="wsdlcatalog.xml"

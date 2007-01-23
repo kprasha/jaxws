@@ -3,9 +3,6 @@
 
     <import file="etc/deploy-targets.xml"/>
 
-    <property environment="env"/>
-    <property file="etc/build.properties"/>
-
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <pathelement location="${lib.sample.home}/jaxwsSampleUtils.jar"/>
@@ -62,22 +59,24 @@
     </target>
 
     <target name="run-url">
-        <java fork="true" classname="${client}">
+        <java fork="true" classname="restful.client.AddNumbersClient">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
+            <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/>
         </java>
     </target>
 
     <target name="run-dispatch">
-        <java fork="true" classname="${dispatch.client}">
+        <java fork="true" classname="restful.client.DispatchAddNumbersClient">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${build.classes.home}"/>
                 <pathelement location="${basedir}/etc"/>
             </classpath>
+            <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/>
         </java>
     </target>
 
@@ -104,5 +103,4 @@
 
         <antcall target="deploy"/>
     </target>
-
 </project>
