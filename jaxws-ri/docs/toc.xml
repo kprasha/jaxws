@@ -6,11 +6,11 @@
   </banner>
   <!-- this portion is excuted as the footer -->
   <footer>
-    $Revision: 1.1.4.5 $<br/>      $Date: 2006-10-21 06:59:44 $<br/>
+    $Revision: 1.1.4.6 $<br/>      $Date: 2007-01-24 00:22:13 $<br/>
     <a href="Copyright.html">Copyright&#169; 2006 Sun Microsystems, Inc. All rights reserved.</a>
   </footer>
     
-  <chapter name="JAXWS 2.1 EA">
+  <chapter name="JAXWS 2.1">
     <document name="Overview"
               url="index.html"/>
     <document name="Release Notes"
@@ -48,11 +48,15 @@
   <chapter name="Tools">
     <document name="Overview"
               url="jaxws-tools.html"/>
-    <document name="wsimport"
+    <document name="Wsimport"
               url="wsimport.html"/>
-    <document name="wsgen"
+    <document name="Wsimport Ant Task"
+              url="wsimportant.html"/>
+    <document name="Wsgen"
               url="wsgen.html"/>
-    <document name="apt"
+    <document name="Wsgen Ant Task"
+              url="wsgenant.html"/>
+    <document name="Apt Ant Task"
               url="apt.html"/>
   </chapter>
 

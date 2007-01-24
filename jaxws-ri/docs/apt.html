@@ -6,7 +6,7 @@
 
 <body dir="ltr" lang="en-US">
 
-<h1>apt</h1>
+<h2>Apt</h2>
 <p>The <code>apt</code> tool provides a facility for programmatically
 processing the annotations added to Java by <a
  href="http://www.jcp.org/en/jsr/detail?id=175">JSR 175</a>, <i>Metadata
@@ -15,14 +15,16 @@ Language</i>. In brief, JSR 175 allows programmers to declare new kinds
 of structured modifiers that can be associated with program elements,
 fields, methods, classes, etc.</p>
 <p>The <code>apt</code> tool generates the portable artifacts used in
-JAX-WS services. <br>
+JAX-WS services.
+</p>
+<p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">
+instructions</a>.</b><br>
 </p>
 <h3><a class="mozTocH3" name="mozTocId798307"></a>Command-line<br>
 </h3>
 <h3><a class="mozTocH3" name="mozTocId408933"></a>Syntax</h3>
 <pre>apt &lt;apt and javac options&gt; &lt;source files&gt;<br></pre>
 <p>The following table lists the <code>apt</code> options.</p>
-<p align="center">Table 1-1 apt Options</p>
 <table border="1" cellpadding="2" cellspacing="3" width="847">
   <col width="220"> <col width="608"> <tbody>
     <tr>
@@ -35,7 +37,7 @@ JAX-WS services. <br>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-classpath &lt;path&gt;</code></p>
+      <p align="left"><b><code>-classpath &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Specifies where to find user class files and
@@ -44,7 +46,7 @@ annotation processor factories</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-cp &lt;path&gt;</code></p>
+      <p align="left"><b><code>-cp &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Same as <code>-classpath &lt;path&gt;</code></p>
@@ -52,7 +54,7 @@ annotation processor factories</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-d &lt;path&gt;</code></p>
+      <p align="left"><b><code>-d &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Specifies where to place processor and <code>javac</code>
@@ -61,7 +63,7 @@ generated class files</p>
     </tr>
     <tr>
       <td width="220">
-      <p><code>-s &lt;path&gt;</code></p>
+      <p><b><code>-s &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p>Specifies where to place processor generated source files</p>
@@ -69,7 +71,7 @@ generated class files</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-source &lt;release&gt;</code></p>
+      <p align="left"><b><code>-source &lt;release&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Provide source compatibility with the specified
@@ -78,7 +80,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p><code>-version</code></p>
+      <p><b><code>-version</code></b></p>
       </td>
       <td width="608">
       <p>Version information</p>
@@ -86,7 +88,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-help</code></p>
+      <p align="left"><b><code>-help</code></b></p>
       </td>
       <td width="608">
       <p align="left">Print a synopsis of standard options; use <code>javac
@@ -95,7 +97,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-X</code></p>
+      <p align="left"><b><code>-X</code></b></p>
       </td>
       <td width="608">
       <p align="left">Print a synopsis of non-standard options</p>
@@ -103,7 +105,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-J&lt;flag&gt;</code></p>
+      <p align="left"><b><code>-J&lt;flag&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Pass &lt;flag&gt; directly to the runtime system</p>
@@ -111,7 +113,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-A[key[=value]]</code></p>
+      <p align="left"><b><code>-A[key[=value]]</code></b></p>
       </td>
       <td width="608">
       <p align="left">Options to pass to annotation processors</p>
@@ -119,7 +121,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>nocompile</code></p>
+      <p align="left"><b><code>nocompile</code></b></p>
       </td>
       <td width="608">
       <p align="left">Do not compile source files to class files</p>
@@ -127,7 +129,7 @@ release</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-print</code></p>
+      <p align="left"><b><code>-print</code></b></p>
       </td>
       <td width="608">
       <p align="left">Print out a textual representation of the
@@ -136,7 +138,7 @@ specified types</p>
     </tr>
     <tr>
       <td width="220">
-      <p><code>-factorypath &lt;path&gt;</code></p>
+      <p><b><code>-factorypath &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p>Specify where to find annotation processor factories</p>
@@ -144,7 +146,7 @@ specified types</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-factory &lt;class&gt;</code></p>
+      <p align="left"><b><code>-factory &lt;class&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Name of <code>AnnotationProcessorFactory</code>
@@ -153,7 +155,7 @@ to use; bypasses default discovery process</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-g</code></p>
+      <p align="left"><b><code>-g</code></b></p>
       </td>
       <td width="608">
       <p align="left">Generate all debugging info</p>
@@ -161,7 +163,7 @@ to use; bypasses default discovery process</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-g:none</code></p>
+      <p align="left"><b><code>-g:none</code></b></p>
       </td>
       <td width="608">
       <p align="left">Generate no debugging info</p>
@@ -169,7 +171,7 @@ to use; bypasses default discovery process</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-g:{lines,vars,source}</code></p>
+      <p align="left"><b><code>-g:{lines,vars,source}</code></b></p>
       </td>
       <td width="608">
       <p align="left">Generate only some debugging info</p>
@@ -177,7 +179,7 @@ to use; bypasses default discovery process</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-nowarn</code></p>
+      <p align="left"><b><code>-nowarn</code></b></p>
       </td>
       <td width="608">
       <p align="left">Generate no warnings</p>
@@ -185,7 +187,7 @@ to use; bypasses default discovery process</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-verbose</code></p>
+      <p align="left"><b><code>-verbose</code></b></p>
       </td>
       <td width="608">
       <p align="left">Output messages about what <code>apt</code> and <code>javac</code>
@@ -194,7 +196,7 @@ are doing</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-deprecation</code></p>
+      <p align="left"><b><code>-deprecation</code></b></p>
       </td>
       <td width="608">
       <p align="left">Output source locations where deprecated APIs are
@@ -203,7 +205,7 @@ used</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-sourcepath &lt;path&gt;</code></p>
+      <p align="left"><b><code>-sourcepath &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Specify where to find input source files</p>
@@ -211,7 +213,7 @@ used</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-bootclasspath &lt;path&gt;</code></p>
+      <p align="left"><b><code>-bootclasspath &lt;path&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Override location of bootstrap class files</p>
@@ -219,7 +221,7 @@ used</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-endorseddirs &lt;dirs&gt;</code></p>
+      <p align="left"><b><code>-endorseddirs &lt;dirs&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Override location of endorsed standards path</p>
@@ -227,7 +229,7 @@ used</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-encoding &lt;encoding&gt;</code></p>
+      <p align="left"><b><code>-encoding &lt;encoding&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Specify character encoding used by source files</p>
@@ -235,7 +237,7 @@ used</p>
     </tr>
     <tr>
       <td width="220">
-      <p align="left"><code>-target &lt;release&gt;</code></p>
+      <p align="left"><b><code>-target &lt;release&gt;</code></b></p>
       </td>
       <td width="608">
       <p align="left">Generate class files for a specific virtual
