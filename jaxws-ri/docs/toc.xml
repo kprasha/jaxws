@@ -6,7 +6,7 @@
   </banner>
   <!-- this portion is excuted as the footer -->
   <footer>
-    $Revision: 1.1.4.6 $<br/>      $Date: 2007-01-24 00:22:13 $<br/>
+    $Revision: 1.1.4.7 $<br/>      $Date: 2007-01-24 00:33:11 $<br/>
     <a href="Copyright.html">Copyright&#169; 2006 Sun Microsystems, Inc. All rights reserved.</a>
   </footer>
     
@@ -56,7 +56,7 @@
               url="wsgen.html"/>
     <document name="Wsgen Ant Task"
               url="wsgenant.html"/>
-    <document name="Apt Ant Task"
+    <document name="Apt"
               url="apt.html"/>
   </chapter>
 
