@@ -344,7 +344,7 @@ major-version=${release.impl.version}
           </filterset>
       </copy>
       <copy todir="${build.home}/docs">
-          <fileset dir="${docs.home}" includes="style/*" />
+          <fileset dir="${docs.home}" includes="style/*, Copyright.txt" />
       </copy>
 
       <taskdef name="htmlmacro" classname="com.sun.wts.tools.htmlmacro.HtmlMacroTask">
@@ -443,11 +443,9 @@ major-version=${release.impl.version}
       <fileset dir="${basedir}/rt-fi/src" />
       <fileset dir="${basedir}/servlet/src"/>
       <fileset dir="${basedir}/transports/local/src"/>
-      <fileset dir="${basedir}/rt/build/gen-src/"/>
     </zip>
     <zip file="${dist20.home}/lib/jaxws-tools.src.zip">
       <fileset dir="${basedir}/tools/wscompile/src" />
-      <fileset dir="${basedir}/tools/wscompile/build/gen-src/"/>  
     </zip>
     <zip file="${dist20.home}/lib/jaxws-libs.src.zip">
       <fileset dir="${basedir}/lib" includes="*src.zip" />
