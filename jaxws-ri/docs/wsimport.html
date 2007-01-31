@@ -3,10 +3,10 @@
     <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
 
-<body>
+<body><content>
 
-<h2>wsimport<br>
-</h2>
+<section title="Overview">
+
 
 <p>The <code>wsimport</code>
     tool
@@ -25,12 +25,12 @@
 </ul>
 
 <p>These artifacts can be packaged in a WAR file with the WSDL and
-    schema documents along with the endpoint implementation to be deployed. JAX-WS 
-${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} RI also provides wsimport ant task, see <a href="wsimportant.html">Wsimport ant
+    schema documents along with the endpoint implementation to be deployed. JAX-WS&nbsp; ${IMPL_VERSION}&nbsp; ${IMPL_VERSION_SUFFIX} RI  also provides wsimport ant task, see <a href="wsimportant.html">Wsimport ant
 task</a>.<br>
 </p>
+</section>
 
-<h3>Launching wsimport</h3>
+<section title="Launching wsimport">
 <ul>
 	<li><b>Solaris/Linux</b><ul>
 		<li>export JAXWS_HOME=/pathto/jaxws-ri</li>
@@ -43,16 +43,18 @@ task</a>.<br>
 	</ul>
 	</li>
 </ul>
+</section>
 
-<p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">
-instructions</a>.</b></p>
-<h3>Syntax</h3>
+<section title="Running on JDK 6">
+<p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">instructions</a>.</b></p>
+</section> 
+
+<section title="Syntax">
 <pre>wsimport [options] &lt;wsdl&gt;<br></pre>
 
 <p>The following table lists the <code>wsimport</code> options.<code></code><code></code><code></code><br>
 </p>
 
-<p align="center">Table 1-1 wsimport Options</p>
 <table border="1" cellpadding="2" cellspacing="2">
 <tbody>
 <tr>
@@ -91,8 +93,9 @@ instructions</a>.</b></p>
     </td>
     <td style="vertical-align: top;" width="999">Specify catalog file to resolve
         external entity references, it supports TR9401, XCatalog, and OASIS XML
-        Catalog format. Please read the <a href="catalog.html">XML Entity and
-        URI Resolvers</a> document or see <span style="font-weight: bold;">wsimport_catalog</span>
+        Catalog format. Please read the documentation of
+	<a href="catalog-support.html">catalog</a> and see
+	<span style="font-weight: 700">catalog</span>
         sample. </td>
 </tr>
 <tr>
@@ -187,11 +190,13 @@ instructions</a>.</b></p>
     names, bean names, etc. More information on JAX-WS and JAXB binding
     files can be found in the <a href="customizations.html">customization
     documentation</a>.</p>
-<h3>Example</h3>
+
+</section>    
+<section title="Example">
 <p><b>wsimport -p stockquote <a href="http://stockquote.org/quote?wsdl">http://stockquote.xyz/quote?wsdl</a></b></p>
 <p>This will generate the Java artifacts and compile them by importing the
 <a href="http://stockquote.org/quote?wsdl">http://stockquote.xyz/quote?wsdl</a>.<br>
 </p>
-
+</section>
 </body>
 </html>

@@ -3,11 +3,10 @@
     <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
 
-<body>
+<body><content>
 
-</p>
 
-<h2>Wsgen</h2>
+<section title="Overview">
 
 <p>The <code>wsgen</code> tool generates JAX-WS portable artifacts
     used in JAX-WS web
@@ -15,8 +14,9 @@
     generates all the required artifacts for web service deployment, and
     invocation. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} RI also provides a
 wsgen ant task, see <a href="wsgenant.html">Wsgen ant task</a> for details.</p>
+</section>
 
-<h3>Launching wsgen</h3>
+<section title="Launching wsgen">
 <ul>
 	<li><b>Solaris/Linux</b><ul>
 		<li>export JAXWS_HOME=/pathto/jaxws-ri</li>
@@ -29,9 +29,12 @@ wsgen ant task, see <a href="wsgenant.html">Wsgen ant task</a> for details.</p>
 	</ul>
 	</li>
 </ul>
-<p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">
-instructions</a>.</b></p>
-<h3>Syntax</h3>
+</section>
+<section title="Running on JDK 6">
+<p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">instructions</a>.</b></p>
+</section> 
+
+<section title="Syntax">
 <pre>wsgen [options] &lt;SEI&gt;<br></pre>
 
 <p>The following table lists the <code>wsgen</code> options. <br>
@@ -171,7 +174,8 @@ instructions</a>.</b></p>
     </td>
 </tr></tbody>
 </table>
-<h3>Example</h3>
+</section>
+<section title="Example">
 <p><b>wsgen -d stock -cp myclasspath stock.StockService</b></p>
 <p>This will generate the wrapper classes needed for StockService annotated with 
 @WebService annotation inside <b>stock </b>directory.</p>
@@ -183,8 +187,6 @@ stock.StockService annotated with @WebService annotation.
 <p>Will generate a SOAP 1.2 WSDL.</p>
 <p>Note that you dont have to generate WSDL at the development time as JAXWS 
 runtime will automatically generate a WSDL for you when you deploy your service.</p>
-<p>&nbsp;</p>
-<p><br>
-</p>
+</section>
 </body>
 </html>

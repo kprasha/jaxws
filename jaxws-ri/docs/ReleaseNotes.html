@@ -3,35 +3,46 @@
     <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
 
-<body>
+<body><content>
+<section title="Overview">
 <p>
-JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}&nbsp; is a Web Services framework 
+JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}&nbsp; is a Web Services framework 
 that provides tools and infrastructure to develop Web Services solutions for the 
 end users and middleware developers. </p>
-<h2>Features in this release</h2>
+</section>
+
+<section title="Features in this release">
 <ul>
-	<li>Reference Implementation (RI) of JAXWS ${SPEC_VERSION} API. Full JAXWS 
-	${SPEC_VERSION} compliance</li>
-	<li>Development Tools<ul>
-		<li><a href="wsimport.html">wsimport</a>
-		<ul>
-			<li>WSDL to Java generator</li>
-		</ul>
-		</li>
-		<li><a href="wsgen.html">wsgen</a><ul>
-			<li>Java to WSDL generator</li>
-		</ul>
-		</li>
-	</ul>
-	</li>
-	<li>Standards<ul>
-		<li><a href="http://www.w3.org/TR/2006/REC-ws-addr-core-20060509/">Web 
-		Services Addressing 1.0 - Core</a></li>
-		<li><a href="http://www.w3.org/TR/2006/REC-ws-addr-soap-20060509/">Web 
-		Services Addressing 1.0 - SOAP Binding</a></li>
-		<li><a href="http://www.w3.org/TR/2006/CR-ws-addr-wsdl-20060529/">Web 
-		Services Addressing 1.0 - WSDL Binding</a></li>
-		<li>WS-Addressing&nbsp; - Member Submission </li>
+	<li>Reference Implementation (RI) of JAXWS ${SPEC_VERSION} API. Full 
+	<a href="http://jcp.org/en/jsr/detail?id=224">JAX-WS 
+	${SPEC_VERSION}</a> compliance</li>
+				<li>Development Tools
+        		<ul>
+					<li>WSDL to Java generator<ul>
+						<li>Wsimport
+						<a href="wsimport.html">comman line tool</a>,
+						<a href="wsimportant.html">ant task</a> 
+						and
+						<a href="http://mojo.codehaus.org/jaxws-maven-plugin/index.html">
+						Maven2 plugin</a></li>
+					</ul></li>
+					<li>Java to WSDL generator<ul>
+						<li>Wsgen
+						<a href="wsgen.html">command line tool</a>,<a href="wsgenant.html"> ant Task</a>&nbsp; 
+						and
+						<a href="http://mojo.codehaus.org/jaxws-maven-plugin/index.html">
+						Maven2 plugin</a></li>
+					</ul></li>
+					<li>Integrated with
+					<a href="http://www.netbeans.info/downloads/dev.php">NetBeans&nbsp; 
+			5.5.1 </a></li>
+				</ul></li>
+	<li>Standards 
+	<ul>
+		<li>Web Services Addressing 1.0 - Core </li>
+		<li>Web Services Addressing 1.0 - SOAP Binding </li>
+		<li>Web Services Addressing 1.0 - WSDL Binding </li>
+		<li>WS-Addressing&nbsp; - Member Submission</li>
 		<li>SOAP 1.1 and 1.2</li>
 		<li>REST and XML/HTTP</li>
 		<li>WS-I Basic Profile 1.1</li>
@@ -40,11 +51,11 @@ end users and middleware developers. </p>
 		<li>MTOM</li>
 	</ul>
 	</li>
-	<li>Extensions<ul>
-		<li>Web Services Interoperable Technologies (<a href="https://wsit.dev.java.net">WSIT</a>) 
-		- achieves complete Microsoft
-		<a href="http://msdn2.microsoft.com/en-us/netframework/aa663324.aspx">
-		WCF</a> interoperability<ul>
+	<li>Extensions (May not be final unless says so)<ul>
+		<li>Web Services Interoperable Technologies (
+		<a href="https://wsit.dev.java.net/index.html#downloads">WSIT</a>) - 
+		enables .NET 3.0 interoperability 
+		<ul>
 			<li>WS-ReliableMessaging</li>
 			<li>WS-Policy</li>
 			<li>WS-MEX</li>
@@ -54,108 +65,118 @@ end users and middleware developers. </p>
 			<li>SOAP/TCP</li>
 		</ul>
 		</li>
-		<li><a href="https://jax-ws-commons.dev.java.net/nonav/spring/">Spring 
-		support</a></li>
+		<li><a href="https://jax-ws-commons.dev.java.net/spring/">Spring support</a> 
+		</li>
 		<li><a href="https://jax-ws.dev.java.net/transport.html">Pluggable 
-		Transport</a><ul>
-			<li>In-VM transport </li>
-			<li>Servlet transport (bundled with the RI) </li>
-			<li><a href="http://jms-ws-transport.dev.java.net/">JMS transport</a>
+		Transport</a> 
+		<ul>
+			<li>In-VM transport</li>
+			<li>Servlet transport (bundled with the RI)</li>
+			<li><a href="http://jms-ws-transport.dev.java.net/">JMS transport</a> 
 			</li>
 			<li>SOAP over TCP transport (part of
-			<a href="https://wsit.dev.java.net">WSIT</a>)</li>
+			<a href="https://wsit.dev.java.net">WSIT</a>) </li>
 		</ul>
 		</li>
-		<li><a href="https://fi.dev.java.net/">FastInfoset</a></li>
-		<li>JBI Service Engine (part of Glassfish)</li>
+		<li><a href="https://fi.dev.java.net/">FastInfoset (bundled with JAXWS 
+		2.1 RI)</a></li>
+		<li>JBI Service Engine and Binding Component(part of Glassfish v2)</li>
+		<li><a href="http://www.glassfishwiki.org/jbiwiki/Wiki.jsp?page=HTTPBC">
+		HTTP Binding Component</a>, used by
+		<a href="https://open-jbi-components.dev.java.net/">Open JBI component</a></li>
 	</ul>
 	</li>
-	<li>Data binding - <a href="https://jaxb.dev.java.net/2.1.2/">JAXB 2.1.2 RI</a></li>
-	<li>Server Side Asynchrony - <a href="asyncprovider.html">AsyncProvider</a></li>
-	<li><a href="statefulWebservice.html">Stateful Web Services</a></li>
-	<li>Containers<ul>
-		<li><a href="https://glassfish.dev.java.net">Glassfish</a>
-		<ul>
-			<li>Tightly integrated with Glassfish</li>
-			<li>Supports EJB and Web endpoints</li>
-			<li>109 based deployment support for better portability</li>
-			<li>JAXWS RI specific deployment descriptor support</li>
-		</ul>
-		</li>
-		<li>Sun One Application Server 9.0 ur1<ul>
-			<li>Only web container support</li>
-		</ul>
-		</li>
-		<li>Tomcat 5.5.x<ul>
-			<li>Web endpoint support</li>
-			<li>Deployment supported using JAXWS RI specific deployment 
-			descriptor</li>
-		</ul>
-		</li>
-		<li>Light weight HTTP server<ul>
-			<li>On JDK 1.5 through http.jar distributed with the JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX}
+	<li>Data binding - <a href="https://jaxb.dev.java.net/2.1.2/">JAXB 2.1.2 RI</a> 
+	</li>
+	<li>Server Side Asynchrony -
+	<a href="https://jax-ws.dev.java.net/nonav/21/docs/asyncprovider.html">
+	AsyncProvider</a> </li>
+	<li>
+	<a href="https://jax-ws.dev.java.net/nonav/21/docs/statefulWebservice.html">
+	Stateful Web Services</a></li>
+	<li>Support for
+	<a href="http://weblogs.java.net/blog/ramapulavarthi/archive/2007/01/extending_jaxws.html">
+	custom WebServiceFeature</a></li>
+				<li><font size="3">
+				<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/index.html?com/sun/xml/ws/api/server/package-summary.html">
+				Hosting API</a> </font>
+			<ul>
+				<li>These APIs can be used b<font size="3">y a J2EE application server to integrate JAX-WS 2.1 RI for hosting JAX-WS 
+				services</font></li>
+			</ul>
+				</li>
+				<li>Endpoint Deployment<ul>
+					<li><a href="https://glassfish.dev.java.net">Glassfish v2</a><ul>
+						<li>Tightly integrated with Glassfish</li>
+						<li>Supports EJB and Web endpoints</li>
+						<li>109 based deployment support for better portability</li>
+						<li>JAXWS RI specific deployment descriptor support</li>
+					</ul></li>
+					<li>
+					<a href="http://www.sun.com/software/products/appsrvr_pe/index.xml">Sun One Application Server 9.0 ur1 
+					</a></li>
+					<li>Light weight HTTP server 
+					<ul>
+						<li>On JDK 1.5 through http.jar distributed with the JAXWS 2.1 FCS&nbsp; 
 			RI bundle</li>
-			<li>Bundled with JDK 6</li>
-		</ul>
-		</li>
-	</ul>
-	</li>
+						<li>Bundled with JDK 6</li>
+					</ul></li>
+					<li>Any other container that supports Servlet 2.4, such as Tomcat, 
+		Jetty, Geronimo, JBoss, Resin, ... You name it! </li>
+				</ul></li>
 </ul>
+
 <p>
 This release brings in the highly pluggable framework through abstractions such as 
-Tube and Message. Refer to the latest <span style="background-color: #FFFFFF">
+<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/com/sun/xml/ws/api/pipe/Tube.html">Tube</a> and 
+<a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/com/sun/xml/ws/api/message/Message.html">Message</a>. Refer to the latest <span style="background-color: #FFFFFF">
 <a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/?jaxws/package-summary.html">architecture document</a></span>. 
 This architecture document is a glorified javadoc which includes all the JAXWS 
-RI specific APIs. JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
-has many bug fixes made for interoperability with .NET 3.0. This is made mostly 
+RI specific APIs. JAXWS&nbsp; ${IMPL_VERSION}&nbsp; ${IMPL_VERSION_SUFFIX}&nbsp; has many bug fixes made for interoperability with .NET 3.0. This is made mostly 
 possible due to WSIT, which uses JAXWS plugabble architecture to plug in support 
 for WS-Metadata, WS-Policy, WS-ReliableMessaging, WS-Transaction, WS-SecureConversation 
 and WS-Security.</p>
 <p>
 If you
-wish to use JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} RI in a Java EE container in a Java EE portable manner you need to use the
+wish to use JAX-WS&nbsp; ${IMPL_VERSION}&nbsp; ${IMPL_VERSION_SUFFIX}&nbsp; RI in a Java EE container in a Java EE portable manner you need to use the
 standard Java EE 5 deployment descriptor; please refer to the
 <a href="http://java.sun.com/javaee/index.jsp">Java EE 5</a> or <a href="https://glassfish.dev.java.net/">Glassfish</a>
 documentation/samples. The majority of the documentation included with JAX-WS is
 valid with Java EE 5 as well.
 </p>
-<h2>Online Documentation</h2>
+</section>
 
-<p>The documentation for JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} as well as the sample applications
-    will be periodically updated in the JAX-WS project on Java.net.</p>
+<section title="Online Documentation">
 
-<p>The architecture document describing the latest JAXWS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
-can be found <span style="background-color: #FFFFFF">
+<p>The documentation for JAX-WS&nbsp; ${IMPL_VERSION}&nbsp; ${IMPL_VERSION_SUFFIX}&nbsp; as well as the sample applications
+    will be periodically updated in the JAX-WS
+<a href="https://jax-ws.dev.java.net">project</a>.</p>
+
+<p>The architecture document describing the latest JAXWS&nbsp; ${IMPL_VERSION}&nbsp; ${IMPL_VERSION_SUFFIX}&nbsp; can be found <span style="background-color: #FFFFFF">
 <a href="https://jax-ws-architecture-document.dev.java.net/nonav/doc21/?jaxws/package-summary.html">here</a></span>.</p>
 <p>Please go to <a href="http://jax-ws.dev.java.net/">http://jax-ws.dev.java.net</a>
     for the
     latest documentation and samples.</p>
+</section>
 
-<h2>Required Software</h2>
+<section title="Required Software">
 <ul>
     <li>
-        <p>Requires <a href="http://java.sun.com/j2se/1.5.0/download.jsp">JDK
+        <p>Requires 
+		<a href="http://java.sun.com/products/archive/j2se/5.0_02/index.html">JDK
             5.0 Update 2</a> or later</p>
     </li>
     <li>
         <p>Requires <a href="http://ant.apache.org/bindownload.cgi">Ant 1.6.2</a> or
-            later</p>
+            later </p>
     </li>
     <li>
         <p>Tested to work with 
 		<a href="https://glassfish.dev.java.net/downloads/v2-b33.html">Glassfish v2 Milestone4</a> and Apache Tomcat 5.x</p>
     </li>
 </ul>
-
-<h2>What This Release Includes</h2>
-
-<p>This release implements the <a
-        href="http://jcp.org/en/jsr/detail?id=224">Java<sup>TM</sup>for XML Web 
-Services ${SPEC_VERSION} Specification</a>.</p>
-<!--<h2>What's New in This Release</h2>
-<ul>
-</ul> -->
-<h2>Installation Instructions</h2>
+</section>
+<section title="Installation Instructions">
 
 <p>The following applies to the JAX-WS standalone bundles.</p>
 
@@ -179,7 +200,10 @@ Services ${SPEC_VERSION} Specification</a>.</p>
 <p>If you intend to only invoke an already existing Web service, then
     alternatively you can use the <code>wsimport</code> and <code>wsgen</code>
     scripts in the <code>bin</code> directory of the JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} bundle.</p>
-<h3>Running on top of JDK 6</h3>
+    
+</section>
+
+<section title="Running on top of JDK 6">
 <p>JDK 6 includes JAXWS 2.0 and JAXB 2.0 API and RI. JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
 includes newer and enhanced APIs of JAXWS/JAXB 2.0. In order to run JAX-WS ${IMPL_VERSION} ${IMPL_VERSION_SUFFIX} 
 you would need to do the following:</p>
@@ -193,25 +217,49 @@ you would need to do the following:</p>
 <a href="http://java.sun.com/j2se/1.5.0/docs/guide/standards/">Endorsed 
 Directory Mechanism</a>. Above, JAXWS_HOME points to the root directory of the 
 extracted JAXWS RI bundle. JDK6_HOME points to JDK 6 installation directory.</p>
+</section>
 
-<h2>Current Limitations</h2>
+<section title="Jar dependency">
+<table border="1" width="100%" id="table1">
+	<tr>
+		<td>Runtime Jars</td>
+		<td>FastInfoset.jar, activation.jar, http.jar, jaxb-api.jar, jaxb-impl.jar, jaxws-api.jar, jaxws-rt.jar, jsr173_api.jar, jsr181-api.jar, jsr250-api.jar, resolver.jar, saaj-api.jar, saaj-impl.jar, sjsxp.jar, stax-ex.jar, streambuffer.jar</td>
+	</tr>
+	<tr>
+		<td>Tooltime Jars</td>
+		<td>All the runtime jars + jaxb-xjc.jar, jaxws-tools.jar</td>
+	</tr>
+</table>
+</section>
+
+<section title="Current Limitations">
+</p>
+</p>
 <ul>
     <li>
         The <code>java.util.Collection</code> classes cannot be used with rpc/literal or document/literal BARE style
         due to a limitation in JAXB. However, they do work in the default document/literal WRAPPED style.
     </li>
 </ul>
-
-<h2>Bugs Fixed in this release</h2>
+</section>
+<section title="Bugs Fixed in this release">
 <ul>
 	<li>
-	<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?resort=1&;issue_type=DEFECT;issue_type=ENHANCEMENT;issue_type=FEATURE;issue_type=TASK;component=jax-ws;issue_status=RESOLVED;resolution=FIXED;priority=P1;priority=P2;priority=P3;priority=P4;email1=;emailtype1=">Bug fixes</a></li>
+	<a href="https://jax-ws.dev.java.net/issues/buglist.cgi?Submit+query=Submit+query&issue_type=DEFECT&issue_type=ENHANCEMENT&issue_type=FEATURE&component=jax-ws&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&target_milestone=2.1&email1=&emailtype1=ex">Bug fixes</a></li>
 </ul>
+</section>
+<section title="Changes from JAXWS 2.0 RI">
+<p><a href="changelog.html">Changes from JAXWS 2.0 RI</a></p>
+</section>
 
-<h2><a href="changelog.html">Changes from JAXWS 2.0 RI</a></h2>
-
-<h2>Known Bugs/Issues</h2>
+<section title="Known Bugs/Issues">
 <ul>
+	<li>
+        <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6475032">Bug 
+		6475032</a> This bug was introduced in JDK 1.5_07 and the fix will be 
+		available in JDK 1.5_12 in second quarter 2007. You should not see if 
+		you are using 
+		<a href="http://java.sun.com/products/archive/j2se/5.0_06/index.html">JDK 1.5_06</a>.</li>
 	<li>
         Although JAX-WS customizations are portable across implementations, the names of
         WSDL and schema files generated are not specified. Therefore each vendor may and
@@ -225,8 +273,8 @@ extracted JAXWS RI bundle. JDK6_HOME points to JDK 6 installation directory.</p>
         the new file names.
     </li>
 </ul>
-
-<h2>For More Information</h2>
+</section>
+<section title="For More Information">
 
 <p>Go
     to <a href="http://jax-ws.dev.java.net/">http://jax-ws.dev.java.net</a>.</p>
@@ -236,5 +284,6 @@ users@jaxws.dev.java.net</a> or use the <a
         href="http://forums.java.net/jive/forum.jspa?forumID=46&amp;start=0">JAXB
     2.0
     and JAXWS 2.0</a> forum.</p>
+</section>    
 </body>
 </html>

@@ -6,7 +6,7 @@
   </banner>
   <!-- this portion is excuted as the footer -->
   <footer>
-    $Revision: 1.1.4.10 $<br/>      $Date: 2007-01-26 00:29:46 $<br/>
+    $Revision: 1.1.4.11 $<br/>      $Date: 2007-01-31 01:33:36 $<br/>
     <a href="Copyright.html">Copyright&#169; 2006 Sun Microsystems, Inc. All rights reserved.</a>
   </footer>
     
@@ -46,6 +46,8 @@
                   url="statefulWebservice.html"/>
         <document name="Interoperability"
               url="interop.html"/>
+        <document name="Catalog"
+              url="catalog-support.html"/>
     </chapter>
 
 

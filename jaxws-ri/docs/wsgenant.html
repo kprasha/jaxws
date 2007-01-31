@@ -3,21 +3,19 @@
     <link rel="stylesheet" type="text/css" href="style/default.css"/>
 </head>
 
-<body>
+<body><content>
 
-</p>
+<section title="Overview">
 
-<h2>Wsgen Ant Task</h2>
-
-<p>The <code>wsgen</code> tool generates JAX-WS portable artifacts
+<p><code>wsgen</code> generates JAX-WS portable artifacts
     used in JAX-WS web
     services. The tool reads a web service endpoint class and
     generates all the required artifacts for web service deployment, and
     invocation. </p>
+</section>
+<section title="Wsimport Task Attributes">
 
-<p>An Ant task for the <code>wsgen</code> tool is provided along
-    with the <a href="wsgen.html">command line wsgen tool</a>. The attributes
-    and elements supported by the Ant task are listed below:</p>
+The attributes and elements supported by the Ant task are listed below:</p>
 <pre>
     &lt;wsgen
     sei="..."
@@ -35,8 +33,6 @@
     &lt;classpath refid="..."/&gt;
     &lt;/wsgen&gt;<br>&nbsp;</pre>
 
-<b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">instructions</a>.<br></b><br>
-
 <table style="width: 90%;" border="0" cellpadding="2" cellspacing="2">
 <tbody>
 <tr valign="top">
@@ -50,29 +46,6 @@
         <p><b>Command line</b></p>
     </td>
 </tr>
-<!--    <tr valign="top">
-      <td width="15%">
-      <p><code>fork</code></p>
-      </td>
-      <td width="70%">
-      <p>Forks the <code>wsgen</code> process into another virtual
-machine</p>
-      </td>
-      <td width="15%">
-      <p>n/a</p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-      <p><code>jvmargs</code></p>
-      </td>
-      <td>
-      <p>Arguments to pass to the forked virtual machine</p>
-      </td>
-      <td>
-      <p>n/a</p>
-      </td>
-    </tr>-->
 <tr valign="top">
     <td width="15%">
         <p><code>sei</code></p>
@@ -248,15 +221,23 @@ machine</p>
         style="font-family: monospace;"> </span>elements. Before this
     task can be used, a <code>&lt;taskdef&gt;</code> element needs to be
     added to the project as given below:</p>
-<pre>  &lt;taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen"&gt;<br> &lt;classpath path="jaxws.classpath"/&gt;
-    <br> &lt;/taskdef&gt;<br><br><br></pre>
+<pre>
+&lt;taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen"&gt;<br> &lt;classpath path="jaxws.classpath"/&gt;
+    <br>&lt;/taskdef&gt;
+</pre>
 
 <p>where <code>jaxws.classpath</code> is a reference to a <a
         href="http://ant.apache.org/manual/using.html#path">path-like structure</a>,
     defined elsewhere in the build environment, and contains the list of
     classes required by the JAX-WS tools.</p>
+    
+</section>
 
-<h3>Example<br>
+<section title="Running on JDK 6">
+<p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">instructions</a>.</b></p>
+</section> 
+
+<section title="Example">
 </h3>
 <pre>
     &lt;wsgen
@@ -265,5 +246,6 @@ machine</p>
     &lt;classpath refid="compile.classpath"/>
     &lt;/wsgen&gt;
 </pre>
+</section>
 </body>
 </html>
