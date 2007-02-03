@@ -30,6 +30,7 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.istack.Nullable;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -136,8 +137,6 @@ final class HttpClientTransport {
             }
             throw new ClientTransportException(ClientMessages.localizableHTTP_CLIENT_FAILED(e),e);
         }
-        httpConnection = null;
-
         return in;
     }
 
@@ -145,7 +144,6 @@ final class HttpClientTransport {
         if (respHeaders != null) {
             return respHeaders;
         }
-        isFailure = checkResponseCode();
 
         respHeaders = collectResponseMimeHeaders();
 
@@ -191,8 +189,7 @@ final class HttpClientTransport {
      * return message to be processed (i.e., in the case of an UNAUTHORIZED
      * response from the servlet or 404 not found)
      */
-    protected boolean checkResponseCode() {
-        boolean isFailure = false;
+    /*package*/void checkResponseCode() {
         try {
 
             statusCode = httpConnection.getResponseCode();
@@ -241,8 +238,6 @@ final class HttpClientTransport {
 //                throw e;
 //            }
         }
-
-        return isFailure;
     }
 
     private String getStatusMessage() throws IOException {
@@ -421,6 +416,10 @@ final class HttpClientTransport {
 
     public HttpURLConnection getConnection() {
         return httpConnection;
+    }
+
+    public @Nullable String getContentType() {
+        return httpConnection.getContentType();
     }
 
     // overide default SSL HttpClientVerifier to always return true

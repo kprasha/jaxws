@@ -131,12 +131,14 @@ public class HttpTransportPipe extends AbstractTubeImpl {
 
             con.closeOutput();
 
-            Map<String, List<String>> respHeaders = con.getHeaders();
-
             if (con.statusCode== WSHTTPConnection.ONEWAY) {
                 return request.createClientResponse(null);    // one way. no response given.
             }
-            String contentType = getContentType(respHeaders);
+            String contentType = con.getContentType();
+            if (contentType == null) {
+                throw new WebServiceException("No Content-type in the header!");
+            }
+            con.checkResponseCode();
             // TODO check if returned MIME type is the same as that which was sent
             // or is acceptable if an Accept header was used
             Packet reply = request.createClientResponse(null);
@@ -146,7 +148,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             if(dump) {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 buf.write(response);
-                dump(buf,"HTTP response "+con.statusCode, respHeaders);
+                dump(buf,"HTTP response "+con.statusCode, con.getHeaders());
                 response = buf.newInputStream();
             }
             codec.decode(response, contentType, reply);
@@ -176,15 +178,6 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             reqHeaders.put("SOAPAction", Collections.singletonList(sAction));
         else if (soapAction != null)
             reqHeaders.put("SOAPAction", Collections.singletonList(soapAction));
-    }
-
-    private String getContentType(Map<String, List<String>> headers) {
-        List<String> keys = headers.get("Content-type");
-        if (keys == null) {
-            //the response is invalid
-            throw new WebServiceException("No Content-type in the header!");
-        }
-        return keys.get(0);
     }
 
     public void preDestroy() {
