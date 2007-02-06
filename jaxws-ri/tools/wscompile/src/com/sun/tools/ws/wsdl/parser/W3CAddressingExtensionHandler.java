@@ -18,7 +18,7 @@
  [name of copyright owner]
 */
 /*
- $Id: W3CAddressingExtensionHandler.java,v 1.1.2.8 2006-10-31 19:52:05 vivekp Exp $
+ $Id: W3CAddressingExtensionHandler.java,v 1.1.2.9 2007-02-06 00:33:38 kohsuke Exp $
 
  Copyright (c) 2006 Sun Microsystems, Inc.
  All rights reserved.
@@ -36,7 +36,7 @@ import com.sun.tools.ws.wsdl.document.Input;
 import com.sun.tools.ws.wsdl.document.Output;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import org.w3c.dom.Element;
-import org.xml.sax.helpers.LocatorImpl;
+import org.xml.sax.Locator;
 
 import javax.xml.namespace.QName;
 import java.util.Map;
@@ -89,7 +89,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleInputExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
-            return warnEmptyAction(parent);
+            return warnEmptyAction(parent, context.getLocation(e));
         }
 
         context.push();
@@ -103,7 +103,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleOutputExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
-            return warnEmptyAction(parent);
+            return warnEmptyAction(parent,context.getLocation(e));
         }
 
         context.push();
@@ -117,7 +117,7 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
     public boolean handleFaultExtension(TWSDLParserContext context, TWSDLExtensible parent, Element e) {
         String actionValue = XmlUtil.getAttributeNSOrNull(e, getActionQName());
         if (actionValue == null || actionValue.equals("")) {
-            errReceiver.warning(NULL_LOCATOR, WsdlMessages.WARNING_FAULT_EMPTY_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+            errReceiver.warning(context.getLocation(e), WsdlMessages.WARNING_FAULT_EMPTY_ACTION(parent.getNameValue(), parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
             return false; // keep compiler happy
         }
 
@@ -133,10 +133,8 @@ public class W3CAddressingExtensionHandler extends AbstractExtensionHandler {
         return handleBindingExtension(context, parent, e);
     }
 
-    private boolean warnEmptyAction(TWSDLExtensible parent) {
-        errReceiver.warning(NULL_LOCATOR, WsdlMessages.WARNING_INPUT_OUTPUT_EMPTY_ACTION(parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
+    private boolean warnEmptyAction(TWSDLExtensible parent, Locator pos) {
+        errReceiver.warning(pos, WsdlMessages.WARNING_INPUT_OUTPUT_EMPTY_ACTION(parent.getWSDLElementName().getLocalPart(), parent.getParent().getNameValue()));
         return false; // keep compiler happy
     }
-
-    private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }
