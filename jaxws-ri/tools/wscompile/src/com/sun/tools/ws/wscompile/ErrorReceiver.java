@@ -20,6 +20,7 @@
 
 package com.sun.tools.ws.wscompile;
 
+import com.sun.istack.Nullable;
 import com.sun.istack.SAXParseException2;
 import com.sun.tools.ws.resources.ModelMessages;
 import com.sun.tools.xjc.api.ErrorListener;
@@ -77,10 +78,9 @@ public abstract class ErrorReceiver  implements ErrorHandler, ErrorListener {
     }
 
     /**
-     * @param loc
-     *      can be null if the location is unknown
+     * Reports a warning.
      */
-    public final void warning( Locator loc, String msg ) {
+    public final void warning( @Nullable Locator loc, String msg ) {
         warning( new SAXParseException(msg,loc) );
     }
 
