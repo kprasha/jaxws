@@ -22,7 +22,20 @@
 
 package com.sun.tools.ws.processor.generator;
 
-import com.sun.codemodel.*;
+import com.sun.codemodel.ClassType;
+import com.sun.codemodel.JAnnotationUse;
+import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JFieldRef;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JType;
+import com.sun.codemodel.JVar;
 import com.sun.tools.ws.processor.model.Fault;
 import com.sun.tools.ws.processor.model.Model;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
@@ -75,7 +88,7 @@ public class CustomExceptionGenerator extends GeneratorBase {
          try {
             write(fault);
             faults.put(fault.getJavaException().getName(), fault.getExceptionClass()); 
-        } catch (Exception e) {
+        } catch (JClassAlreadyExistsException e) {
             throw new GeneratorException("generator.nestedGeneratorError",e);
         }
     }
