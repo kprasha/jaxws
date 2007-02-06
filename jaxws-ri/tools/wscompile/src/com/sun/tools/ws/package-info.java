@@ -66,11 +66,11 @@
  *  <dt>{@link com.sun.tools.ws.ant.Apt Apt}
  *  <dd>An ANT task to invoke <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/apt.html">APT</a>.
 
- *  <dt>{@link com.sun.tools.ws.ant.WsGen WsGen}
+ *  <dt>{@link com.sun.tools.ws.ant.WsGen2 WsGen}
  *  <dd>
  *    An ANT task to invoke {@link com.sun.tools.ws.WsGen WsGen}
  
- *  <dt>{@link com.sun.tools.ws.ant.WsImport WsImport}
+ *  <dt>{@link com.sun.tools.ws.ant.WsImport2 WsImport}
  *  <dd>
  *    An ANT task to invoke {@link com.sun.tools.ws.WsImport WsImport}
  * 
@@ -87,7 +87,7 @@
  *  <dd>Tool to process a compiled javax.jws.WebService annotated class and to generate the necessary classes to make 
  *  it a Web service.  
  
- *  <dt>{@link com.sun.tools.ws.ant.WsImport WsImport}
+ *  <dt>{@link com.sun.tools.ws.ant.WsImport2 WsImport}
  *  <dd>
  *    Tool to import a WSDL and to generate an SEI (a javax.jws.WebService) interface that can be either implemented 
  *    on the server to build a web service, or can be used on the client to invoke the web service.

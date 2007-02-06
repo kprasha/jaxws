@@ -35,7 +35,7 @@ public class WsGen {
      * load tools.jar
      */
     public static void main(String[] args) throws Throwable {
-        System.exit(Invoker.WsgenMain(args));
+        System.exit(Invoker.invoke("com.sun.tools.ws.wscompile.WsgenTool", args));
     }
 
     /**

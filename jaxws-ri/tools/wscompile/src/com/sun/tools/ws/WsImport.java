@@ -35,7 +35,7 @@ public class WsImport {
      * load tools.jar
      */
     public static void main(String[] args) throws Throwable {
-        System.exit(Invoker.WsimportMain(args));
+        System.exit(Invoker.invoke("com.sun.tools.ws.wscompile.WsimportTool", args));
     }
 
     /**
