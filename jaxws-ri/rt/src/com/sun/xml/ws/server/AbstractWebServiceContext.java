@@ -29,16 +29,26 @@ public abstract class AbstractWebServiceContext implements WSWebServiceContext {
     }
 
     public MessageContext getMessageContext() {
-        return new EndpointMessageContextImpl(getRequestPacket());
+        Packet packet = getRequestPacket();
+        if (packet == null) {
+            throw new IllegalStateException("getMessageContext() can only be called while servicing a request");
+        }
+        return new EndpointMessageContextImpl(packet);
     }
 
     public Principal getUserPrincipal() {
         Packet packet = getRequestPacket();
+        if (packet == null) {
+            throw new IllegalStateException("getUserPrincipal() can only be called while servicing a request");
+        }
         return packet.webServiceContextDelegate.getUserPrincipal(packet);
     }
 
     public boolean isUserInRole(String role) {
         Packet packet = getRequestPacket();
+        if (packet == null) {
+            throw new IllegalStateException("getUserInRole() can only be called while servicing a request");
+        }
         return packet.webServiceContextDelegate.isUserInRole(packet,role);
     }
 
@@ -48,6 +58,9 @@ public abstract class AbstractWebServiceContext implements WSWebServiceContext {
 
     public <T extends EndpointReference> T getEndpointReference(Class<T> clazz, Element...referenceParameters) {
         Packet packet = getRequestPacket();
+        if (packet == null) {
+            throw new IllegalStateException("getEndpointReference() can only be called while servicing a request");
+        }
         String address = packet.webServiceContextDelegate.getEPRAddress(packet, endpoint);
         String wsdlAddress = null;
         if(endpoint.getServiceDefinition() != null) {

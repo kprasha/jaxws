@@ -1,6 +1,6 @@
 package com.sun.xml.ws.api.server;
 
-import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Packet;
 
 import javax.xml.ws.WebServiceContext;
@@ -21,6 +21,7 @@ import javax.xml.ws.WebServiceContext;
 public interface WSWebServiceContext extends WebServiceContext {
     /**
      * Obtains the request packet that is being processed.
+     * @return Packet for the request
      */
-    @NotNull Packet getRequestPacket();
+    @Nullable Packet getRequestPacket();
 }
