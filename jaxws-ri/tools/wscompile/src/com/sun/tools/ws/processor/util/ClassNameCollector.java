@@ -225,7 +225,7 @@ public class ClassNameCollector extends ExtendedModelVisitor
     private Set<String> _exceptionClassNames;
     boolean doneVisitingJAXBModel = false;
     public void visit(JAXBType type) throws Exception {
-        if(!doneVisitingJAXBModel){
+        if(!doneVisitingJAXBModel && type.getJaxbModel() != null){
             Set<String> classNames = type.getJaxbModel().getGeneratedClassNames();
             for(String className : classNames){
                 addJAXBGeneratedClassName(className);
