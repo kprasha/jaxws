@@ -88,7 +88,7 @@ import java.util.logging.Logger;
 public class RuntimeWSDLParser {
 
     private final BitSet errors = new BitSet();
-    private final int NOT_A_WSDL = 0;
+    private final int RETRY_WITH_MEX = 0;
     private final WSDLModelImpl wsdlDoc;
     /**
      * Target namespace URI of the WSDL that we are currently parsing.
@@ -136,7 +136,7 @@ public class RuntimeWSDLParser {
         }
 
         // Check to see if the obtained WSDL was a WSDL document. If not then try running with MEX else append with "?wsdl" if it doesn't end with one
-        if (parser.errors.get(parser.NOT_A_WSDL)) {
+        if (parser.errors.get(parser.RETRY_WITH_MEX)) {
             //try MEX
             MetaDataResolver mdResolver;
             ServiceDescriptor serviceDescriptor = null;
@@ -156,11 +156,11 @@ public class RuntimeWSDLParser {
             if (serviceDescriptor != null) {
                 List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
                 parser = new RuntimeWSDLParser(wsdlLoc, new MexEntityResolver(wsdls), isClientSide, extensions);
-                parser.errors.clear(parser.NOT_A_WSDL);
+                parser.errors.clear(parser.RETRY_WITH_MEX);
 
                 //now parse the first WSDL in the list
                 if(wsdls.size() > 0){
-                    parser.errors.clear(parser.NOT_A_WSDL);
+                    parser.errors.clear(parser.RETRY_WITH_MEX);
                     try{
                         String systemId = wsdls.get(0).getSystemId();
                         Parser wsdlParser = parser.resolver.resolveEntity(null, systemId);
@@ -173,13 +173,13 @@ public class RuntimeWSDLParser {
             }
             //Incase that mex is not present or it couldn't get the metadata, try by appending ?wsdl and give
             // it a last shot else fail
-            if (parser.errors.get(parser.NOT_A_WSDL) && wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)) {
+            if (parser.errors.get(parser.RETRY_WITH_MEX) && wsdlLoc.getProtocol().equals("http") && (wsdlLoc.getQuery() == null)) {
                 String urlString = wsdlLoc.toExternalForm();
                 urlString += "?wsdl";
                 wsdlLoc = new URL(urlString);
 
-                //clear the NOT_A_WSDL error bit
-                parser.errors.clear(parser.NOT_A_WSDL);
+                //clear the RETRY_WITH_MEX error bit
+                parser.errors.clear(parser.RETRY_WITH_MEX);
                 try {
                     parser.parseWSDL(wsdlLoc);
                 } catch (WebServiceException e) {
@@ -188,7 +188,7 @@ public class RuntimeWSDLParser {
             }
         }
         //currently we fail only if we dont find a WSDL
-        if (parser.errors.get(parser.NOT_A_WSDL) && wsdlException != null)
+        if (parser.errors.get(parser.RETRY_WITH_MEX) && wsdlException != null)
             throw wsdlException;
 
         parser.wsdlDoc.freeze();
@@ -255,7 +255,13 @@ public class RuntimeWSDLParser {
             parser = resolver.resolveEntity(null, url.toExternalForm());
         }
         if(parser == null){
-            XMLStreamReader reader = createReader(wsdlLoc);
+            XMLStreamReader reader=null;
+            try{
+            reader = createReader(wsdlLoc);
+            }catch(WebServiceException e){
+                this.errors.set(this.RETRY_WITH_MEX);
+                throw e;
+            }
             parser = new Parser(url, reader);
         }
         importedWSDLs.clear();
@@ -281,7 +287,7 @@ public class RuntimeWSDLParser {
                     reader.close();
                     return;
                 }
-                errors.set(NOT_A_WSDL);
+                errors.set(RETRY_WITH_MEX);
                 throw new WebServiceException(ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(parser.systemId,
                         WSDLConstants.QNAME_DEFINITIONS, reader.getName(), reader.getLocation()));
             }
