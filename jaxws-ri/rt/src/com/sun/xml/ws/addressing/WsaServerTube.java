@@ -29,14 +29,14 @@ import com.sun.xml.ws.addressing.model.ActionNotSupportedException;
 import com.sun.xml.ws.addressing.model.InvalidMapException;
 import com.sun.xml.ws.addressing.model.MapRequiredException;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -45,15 +45,12 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TransportTubeFactory;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.resources.AddressingMessages;
 import com.sun.xml.ws.message.FaultDetailHeader;
+import com.sun.xml.ws.resources.AddressingMessages;
 
-import javax.xml.ws.WebServiceException;
 import javax.xml.soap.SOAPFault;
+import javax.xml.ws.WebServiceException;
 import java.net.URI;
-import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
 /**
@@ -73,7 +70,7 @@ public final class WsaServerTube extends WsaTube {
      * WSDLBoundOperation calculated on the Request payload.
      * Used for determining ReplyTo or Fault Action for non-anonymous responses     * 
      */
-    private WSDLBoundOperationImpl wbo;
+    private WSDLBoundOperation wbo;
     public WsaServerTube(@NotNull WSDLPort wsdlPort, WSBinding binding, Tube next) {
         super(wsdlPort, binding, next);
     }
@@ -129,8 +126,8 @@ public final class WsaServerTube extends WsaTube {
         if (replyTo == null)    replyTo = addressingVersion.anonymousEpr;
         if (faultTo == null)    faultTo = replyTo;
 
-        wbo = (WSDLBoundOperationImpl) getWSDLBoundOperation(request);
-        if(wbo != null && wbo.getAnonymous()== WSDLBoundOperationImpl.ANONYMOUS.required)
+        wbo = getWSDLBoundOperation(request);
+        if(wbo != null && wbo.getAnonymous()== WSDLBoundOperation.ANONYMOUS.required)
             isAnonymousRequired = true;
         Packet p = validateInboundHeaders(request);
         // if one-way message and WS-A header processing fault has occurred,
@@ -207,7 +204,7 @@ public final class WsaServerTube extends WsaTube {
             return;
         }
 
-        EndpointAddress adrs = null;
+        EndpointAddress adrs;
         try {
              adrs = new EndpointAddress(URI.create(target.getAddress()));
         } catch (NullPointerException e) {
@@ -312,8 +309,7 @@ public final class WsaServerTube extends WsaTube {
         if (wbo == null)
             return;
 
-        WSDLBoundOperationImpl impl = (WSDLBoundOperationImpl)wbo;
-        WSDLBoundOperationImpl.ANONYMOUS anon = impl.getAnonymous();
+        WSDLBoundOperation.ANONYMOUS anon = wbo.getAnonymous();
 
         String replyToValue = null;
         String faultToValue = null;
