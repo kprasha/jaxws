@@ -490,7 +490,7 @@ public class EndpointFactory {
                     false, ServiceFinder.find(WSDLParserExtension.class).toArray());
             WSDLPortImpl wsdlPort = wsdlDoc.getService(serviceName).get(portName);
             if (wsdlPort == null) {
-                throw new ServerRtException("runtime.parser.wsdl.incorrectserviceport", serviceName, portName, wsdlUrl);
+                throw new ServerRtException(ServerMessages.localizableRUNTIME_PARSER_WSDL_INCORRECTSERVICEPORT(serviceName, portName, wsdlUrl));
             }
             return wsdlPort;
         } catch (IOException e) {
