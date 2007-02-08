@@ -255,8 +255,6 @@ public abstract class AbstractSEIModelImpl implements SEIModel {
         if(wsdlBinding == null)
             return;
 
-        if(wsdlBinding.isRpcLit())
-            wsdlBinding.finalizeRpcLitBinding();
         for(JavaMethodImpl method : javaMethods){
             if(method.isAsync())
                 continue;

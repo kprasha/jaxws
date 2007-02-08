@@ -171,16 +171,6 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
             return op.getMimeTypeForOutputPart(part);
     }
 
-    /**
-     * This method is called to apply binings in case when a specific port is required
-     */
-    public void finalizeRpcLitBinding() {
-        if (!finalized) {
-            owner.finalizeRpcLitBinding(this);
-            finalized = true;
-        }
-    }
-
     public WSDLBoundOperationImpl getOperation(String namespaceUri, String localName) {
         if(namespaceUri==null && localName == null)
             return emptyPayloadOperation;
@@ -210,6 +200,9 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
         }
 
         freezePayloadMap();
+        if(style == Style.RPC){
+            owner.finalizeRpcLitBinding(this);
+        }
     }
 
     private void freezePayloadMap() {

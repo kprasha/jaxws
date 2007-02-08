@@ -727,7 +727,6 @@ public class RuntimeModeler {
         String respNamespace = targetNamespace;
 
         if(binding != null && binding.getBinding().isRpcLit()){
-            binding.getBinding().finalizeRpcLitBinding();
             QName opQName = new QName(binding.getBinding().getPortTypeName().getNamespaceURI(), operationName);
             WSDLBoundOperationImpl op = binding.getBinding().get(opQName);
             if(op != null){
