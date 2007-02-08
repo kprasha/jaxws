@@ -47,7 +47,7 @@ public abstract class AbstractWebServiceContext implements WSWebServiceContext {
     public boolean isUserInRole(String role) {
         Packet packet = getRequestPacket();
         if (packet == null) {
-            throw new IllegalStateException("getUserInRole() can only be called while servicing a request");
+            throw new IllegalStateException("isUserInRole() can only be called while servicing a request");
         }
         return packet.webServiceContextDelegate.isUserInRole(packet,role);
     }
