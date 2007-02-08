@@ -66,5 +66,5 @@ class JavaCompilerHelper{
         return false;
     }
     
-    private static final Class[] compileMethodSignature = {(new String[0]).getClass(), PrintWriter.class};
+    private static final Class[] compileMethodSignature = {String[].class, PrintWriter.class};
 }
