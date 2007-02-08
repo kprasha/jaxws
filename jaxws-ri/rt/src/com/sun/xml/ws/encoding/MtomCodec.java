@@ -244,7 +244,7 @@ public class MtomCodec extends MimeCodec {
 
         public void writeBinary(byte[] data, int start, int len, String contentType) throws XMLStreamException {
             //check threshold and if less write as base64encoded value
-            if(mtomFeature.getThreshold() > (len-start)){
+            if(mtomFeature.getThreshold() > len){
                 writeCharacters(DatatypeConverterImpl._printBase64Binary(data, start, len));
                 return;
             }
