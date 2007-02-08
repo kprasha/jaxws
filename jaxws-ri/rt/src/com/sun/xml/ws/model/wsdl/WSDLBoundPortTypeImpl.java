@@ -174,8 +174,9 @@ public final class WSDLBoundPortTypeImpl extends AbstractFeaturedObjectImpl impl
     public WSDLBoundOperationImpl getOperation(String namespaceUri, String localName) {
         if(namespaceUri==null && localName == null)
             return emptyPayloadOperation;
-        else
-            return payloadMap.get(namespaceUri,localName);
+        else{
+            return payloadMap.get((namespaceUri==null)?"":namespaceUri,localName);
+        }
     }
 
     public void enableMTOM() {
