@@ -147,7 +147,7 @@ final class HttpClientTransport {
 
         respHeaders = collectResponseMimeHeaders();
 
-        saveCookieAsNeeded(cookieJar);
+        //saveCookieAsNeeded(cookieJar);
         return respHeaders;
     }
 
@@ -238,6 +238,8 @@ final class HttpClientTransport {
 //                throw e;
 //            }
         }
+        // Hack for now
+        saveCookieAsNeeded(cookieJar);
     }
 
     private String getStatusMessage() throws IOException {
