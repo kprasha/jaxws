@@ -22,6 +22,7 @@ package com.sun.tools.ws.wscompile;
 
 import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.writer.ProgressCodeWriter;
+import com.sun.istack.tools.ParallelWorldClassLoader;
 import com.sun.tools.ws.ToolVersion;
 import com.sun.tools.ws.api.TJavaGeneratorExtension;
 import com.sun.tools.ws.processor.generator.CustomExceptionGenerator;
@@ -38,10 +39,14 @@ import com.sun.xml.ws.util.ServiceFinder;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXParseException;
 
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.ws.EndpointReference;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,6 +200,19 @@ public class WsimportTool {
         this.options.entityResolver = resolver;
     }
 
+    private File getJarFile(Class clazz) {
+        try {
+            URL url = ParallelWorldClassLoader.toJarUrl(clazz.getResource('/'+clazz.getName().replace('.','/')+".class"));
+            return new File(url.getPath());   // this code is assuming that url is a file URL
+        } catch (ClassNotFoundException e) {
+            // if we can't figure out where JAXB/JAX-WS API are, we couldn't have been executing this code.
+            throw new Error(e);
+        } catch (MalformedURLException e) {
+            // if we can't figure out where JAXB/JAX-WS API are, we couldn't have been executing this code.
+            throw new Error(e);
+        }
+    }
+
     protected boolean compileGeneratedClasses(ErrorReceiver receiver){
         List<String> sourceFiles = new ArrayList<String>();
 
@@ -207,13 +225,14 @@ public class WsimportTool {
         if (sourceFiles.size() > 0) {
             String classDir = options.destDir.getAbsolutePath();
             String classpathString = createClasspathString();
-            String[] args = new String[4 + (options.debug ? 1 : 0)
+            String[] args = new String[5 + (options.debug ? 1 : 0)
                     + sourceFiles.size()];
             args[0] = "-d";
             args[1] = classDir;
             args[2] = "-classpath";
             args[3] = classpathString;
-            int baseIndex = 4;
+            args[4] = "-Xbootclasspath/p:"+getJarFile(EndpointReference.class)+File.pathSeparator+getJarFile(XmlSeeAlso.class);
+            int baseIndex = 5;
             if (options.debug) {
                 args[baseIndex++] = "-g";
             }
