@@ -61,7 +61,7 @@ public abstract class ServiceInterceptor {
      * @param bp created proxy instance
      * @param serviceEndpointInterface SEI of the endpoint
      */
-    public void postCreateProxy(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
+    public void postCreateProxy(@NotNull WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
     }
 
 
@@ -71,7 +71,7 @@ public abstract class ServiceInterceptor {
      *
      * @param bp BindingProvider of dispatch object
      */
-    public void postCreateDispatch(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp) {
+    public void postCreateDispatch(@NotNull WSBindingProvider bp) {
     }
 
     /**
@@ -88,12 +88,12 @@ public abstract class ServiceInterceptor {
                 return r;
             }
 
-            public void postCreateProxy(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp, @NotNull Class<?> serviceEndpointInterface) {
+            public void postCreateProxy(@NotNull WSBindingProvider bp, @NotNull Class<?> serviceEndpointInterface) {
                 for (ServiceInterceptor si : interceptors)
                     si.postCreateProxy(bp,serviceEndpointInterface);
             }
 
-            public void postCreateDispatch(@NotNull com.sun.xml.ws.developer.WSBindingProvider bp) {
+            public void postCreateDispatch(@NotNull WSBindingProvider bp) {
                 for (ServiceInterceptor si : interceptors)
                     si.postCreateDispatch(bp);
             }
