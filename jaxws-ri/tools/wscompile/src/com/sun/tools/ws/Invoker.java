@@ -160,6 +160,7 @@ public final class Invoker {
         "com.sun.codemodel.",
         "com.sun.relaxng.",
         "com.sun.xml.xsom.",
-        "com.sun.xml.bind."
+        "com.sun.xml.bind.",
+        "com.sun.xml.ws."
     };
 }
