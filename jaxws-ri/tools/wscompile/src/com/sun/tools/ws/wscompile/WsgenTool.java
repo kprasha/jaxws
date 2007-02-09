@@ -46,16 +46,29 @@ import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 import com.sun.xml.ws.wsdl.writer.WSDLResolver;
 import org.xml.sax.SAXParseException;
 
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Holder;
-import java.io.*;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Vivek Pandey
@@ -146,7 +159,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
         context = new AnnotationProcessorContext();
         webServiceAP = new WebServiceAP(options, context, errReceiver, out);
 
-        String[] args = new String[8];
+        String[] args = new String[9];
         args[0] = "-d";
         args[1] = options.destDir.getAbsolutePath();
         args[2] = "-classpath";
@@ -155,6 +168,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
         args[5] = options.sourceDir.getAbsolutePath();
         args[6] = "-XclassesAsDecls";
         args[7] = endpoint;
+        args[8] = "-Xbootclasspath/p:"+JavaCompilerHelper.getJarFile(EndpointReference.class)+File.pathSeparator+JavaCompilerHelper.getJarFile(XmlSeeAlso.class);
 
         // Workaround for bug 6499165: issue with javac debug option
         workAroundJavacDebug();
@@ -193,7 +207,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
                             return new File(options.nonclassDestDir, suggestedFilename);
                         }
                         private Result toResult(File file) {
-                            Result result = new StreamResult();
+                            Result result;
                             try {
                                 result = new StreamResult(new FileOutputStream(file));
                                 result.setSystemId(file.getPath().replace('\\', '/'));
@@ -223,7 +237,7 @@ public class WsgenTool implements AnnotationProcessorFactory {
                             return getSchemaOutput(namespace, filename.value);
                         }
                         // TODO pass correct impl's class name
-                    }, wsfeatures == null ? bindingID.createBinding() : bindingID.createBinding(wsfeatures.toArray()), container, endpointClass, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
+                    }, bindingID.createBinding(wsfeatures.toArray()), container, endpointClass, ServiceFinder.find(WSDLGeneratorExtension.class).toArray());
             wsdlGenerator.doGeneration();
 
             if(options.wsgenReport!=null)

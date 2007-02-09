@@ -22,12 +22,16 @@
 
 package com.sun.tools.ws.wscompile;
 
+import com.sun.istack.tools.ParallelWorldClassLoader;
 import com.sun.tools.ws.resources.JavacompilerMessages;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * A helper class to invoke javac.
@@ -35,6 +39,18 @@ import java.lang.reflect.Method;
  * @author WS Development Team
  */
 class JavaCompilerHelper{
+    static File getJarFile(Class clazz) {
+        try {
+            URL url = ParallelWorldClassLoader.toJarUrl(clazz.getResource('/'+clazz.getName().replace('.','/')+".class"));
+            return new File(url.getPath());   // this code is assuming that url is a file URL
+        } catch (ClassNotFoundException e) {
+            // if we can't figure out where JAXB/JAX-WS API are, we couldn't have been executing this code.
+            throw new Error(e);
+        } catch (MalformedURLException e) {
+            // if we can't figure out where JAXB/JAX-WS API are, we couldn't have been executing this code.
+            throw new Error(e);
+        }
+    }
 
     static boolean compile(String[] args, OutputStream out, ErrorReceiver receiver){
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
