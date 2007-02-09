@@ -31,7 +31,7 @@ public abstract class ContainerResolver {
 
     /**
      * Sets the custom container resolver which can be used to get client's
-     * {@link com.sun.xml.ws.api.server.Container}.
+     * {@link Container}.
      *
      * @param resolver container resolver
      */
@@ -42,7 +42,7 @@ public abstract class ContainerResolver {
     }
 
     /**
-     * Returns the container resolver which can be used to get client's {@link com.sun.xml.ws.api.server.Container}.
+     * Returns the container resolver which can be used to get client's {@link Container}.
      *
      * @return container resolver instance
      */
@@ -51,7 +51,7 @@ public abstract class ContainerResolver {
     }
 
     /**
-     * Returns the default container resolver which can be used to get {@link com.sun.xml.ws.api.server.Container}.
+     * Returns the default container resolver which can be used to get {@link Container}.
      *
      * @return default container resolver
      */
@@ -60,7 +60,7 @@ public abstract class ContainerResolver {
     }
 
     /**
-     * Returns the {@link com.sun.xml.ws.api.server.Container} context in which client is running.
+     * Returns the {@link Container} context in which client is running.
      *
      * @return container instance for the client
      */
