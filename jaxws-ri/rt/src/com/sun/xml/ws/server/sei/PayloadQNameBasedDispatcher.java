@@ -75,11 +75,11 @@ final class PayloadQNameBasedDispatcher implements EndpointMethodDispatcher {
         } else {
             nsUri = message.getPayloadNamespaceURI();
         }
-        String dispatchKey = "{" + nsUri + "}" + localPart;
 
         EndpointMethodHandler h = methodHandlers.get(nsUri, localPart);
 
-        if(h==null) {
+        if (h==null) {
+            String dispatchKey = "{" + nsUri + "}" + localPart;
             String faultString = ServerMessages.DISPATCH_CANNOT_FIND_METHOD(dispatchKey, "Payload QName-based Dispatcher");
             throw new DispatchException(SOAPFaultBuilder.createSOAPFaultMessage(
                 binding.getSOAPVersion(), faultString, binding.getSOAPVersion().faultCodeClient));
