@@ -40,32 +40,30 @@ import java.util.Set;
  */
 
 class MessageContextImpl implements MessageContext {
-
-    private Map<String,Object> internalMap = new HashMap<String,Object>();
+    private Map<String,Object> fallbackMap = null;
     private Set<String> handlerScopeProps;
     Packet packet;
-    boolean packetPropsAccessed = false;
 
-    void populateMap() {
-        if(!packetPropsAccessed) {
-            packetPropsAccessed = true;
-            handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
-            internalMap.putAll(packet.createMapView());
-            internalMap.putAll(packet.invocationProperties);
+
+    void fallback() {
+        if(fallbackMap == null) {
+            fallbackMap = new HashMap<String,Object>();
+            fallbackMap.putAll(packet.createMapView());
+            fallbackMap.putAll(packet.invocationProperties);
         }
     }
     /** Creates a new instance of MessageContextImpl */
     public MessageContextImpl(Packet packet) {
         this.packet = packet;
+        handlerScopeProps =  packet.getHandlerScopePropertyNames(false);
     }
     protected void updatePacket() {
         throw new UnsupportedOperationException("wrong call");
     }
-    public void setScope(String name, Scope scope) {
-        populateMap();
-        if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
 
-        //TODO: check in intrenalMap
+    public void setScope(String name, Scope scope) {
+        if(!containsKey(name))
+            throw new IllegalArgumentException("Property " + name + " does not exist.");
         if(scope == Scope.APPLICATION) {
             handlerScopeProps.remove(name);
         } else {
@@ -75,9 +73,8 @@ class MessageContextImpl implements MessageContext {
     }
 
     public Scope getScope(String name) {
-        populateMap();
-        if (!keyExists(name)) throw new IllegalArgumentException("Property " + name + " does not exist.");
-
+        if(!containsKey(name))
+            throw new IllegalArgumentException("Property " + name + " does not exist.");
         if(handlerScopeProps.contains(name)) {
             return Scope.HANDLER;
         } else {
@@ -86,40 +83,65 @@ class MessageContextImpl implements MessageContext {
     }
 
     public int size() {
-        populateMap();
-        return internalMap.size();
+        fallback();
+        return fallbackMap.size();
     }
 
     public boolean isEmpty() {
-        populateMap();
-        return internalMap.isEmpty();
+        fallback();
+        return fallbackMap.isEmpty();
     }
 
     public boolean containsKey(Object key) {
-        populateMap();
-        return internalMap.containsKey(key);
+        if(fallbackMap == null) {
+            if(packet.supports(key))
+                return true;
+            return packet.invocationProperties.containsKey(key);
+        } else {
+            fallback();
+            return fallbackMap.containsKey(key);
+        }
     }
 
     public boolean containsValue(Object value) {
-        populateMap();
-        return internalMap.containsValue(value);
+        fallback();
+        return fallbackMap.containsValue(value);
     }
 
     public Object put(String key, Object value) {
-        populateMap();
-        if(!keyExists(key)) {
-            //new property, default to Scope.HANDLER
-            handlerScopeProps.add(key);
+        if (fallbackMap == null) {
+            if (packet.supports(key)) {
+                return packet.put(key, value);     // strongly typed
+            }
+            if (!packet.invocationProperties.containsKey(key)) {
+                //New property, default to Scope.HANDLER
+                handlerScopeProps.add(key);
+            }
+            return packet.invocationProperties.put(key, value);
+
+        } else {
+            fallback();
+            if (!fallbackMap.containsKey(key)) {
+                //new property, default to Scope.HANDLER
+                handlerScopeProps.add(key);
+            }
+            return fallbackMap.put(key, value);
         }
-        return internalMap.put(key,value);
     }
     public Object get(Object key) {
         if(key == null)
             return null;
-
-        populateMap();
-        Object value = internalMap.get(key);
-
+        Object value;
+        if(fallbackMap == null) {
+            if (packet.supports(key)) {
+                value =  packet.get(key);    // strongly typed
+            } else {
+                value = packet.invocationProperties.get(key);
+            }
+        } else {
+            fallback();
+            value = fallbackMap.get(key);
+        }
         //add the attachments from the Message to the corresponding attachment property
         if(key.equals(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS) ||
             key.equals(MessageContext.INBOUND_MESSAGE_ATTACHMENTS)){
@@ -136,48 +158,45 @@ class MessageContextImpl implements MessageContext {
     }
 
     public void putAll(Map<? extends String, ? extends Object> t) {
-        populateMap();
+        fallback();
         for(String key: t.keySet()) {
-            if(!keyExists(key)) {
+            if(!fallbackMap.containsKey(key)) {
                 //new property, default to Scope.HANDLER
                 handlerScopeProps.add(key);
             }
         }
-        internalMap.putAll(t);
+        fallbackMap.putAll(t);
     }
 
     public void clear() {
-        populateMap();
-        internalMap.clear();
+        fallback();
+        fallbackMap.clear();
     }
     public Object remove(Object key){
-        populateMap();
+        fallback();
         handlerScopeProps.remove(key);
-        return internalMap.remove(key);
+        return fallbackMap.remove(key);
     }
     public Set<String> keySet() {
-        populateMap();
-        return internalMap.keySet();
+        fallback();
+        return fallbackMap.keySet();
     }
     public Set<Map.Entry<String, Object>> entrySet(){
-        populateMap();
-        return internalMap.entrySet();
+        fallback();
+        return fallbackMap.entrySet();
     }
     public Collection<Object> values() {
-        populateMap();
-        return internalMap.values();
+        fallback();
+        return fallbackMap.values();
     }
 
-    private boolean keyExists(String name){
-        return keySet().contains(name);
-    }
 
     /**
      * Fill a {@link Packet} with values of this {@link MessageContext}.
      */
     void fill(Packet packet) {
-        if(packetPropsAccessed) {
-            for (Entry<String, Object> entry : internalMap.entrySet()) {
+        if(fallbackMap != null) {
+            for (Entry<String, Object> entry : fallbackMap.entrySet()) {
                 String key = entry.getKey();
                 if (packet.supports(key)) {
                     try {
@@ -191,8 +210,8 @@ class MessageContextImpl implements MessageContext {
             }
 
             //Remove properties which are removed by user.
-            packet.createMapView().keySet().retainAll(internalMap.keySet());
-            packet.invocationProperties.keySet().retainAll(internalMap.keySet());
+            packet.createMapView().keySet().retainAll(fallbackMap.keySet());
+            packet.invocationProperties.keySet().retainAll(fallbackMap.keySet());
         }
     }
 
