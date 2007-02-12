@@ -30,6 +30,7 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.istack.Nullable;
 
 import javax.net.ssl.HostnameVerifier;
@@ -76,6 +77,12 @@ final class HttpClientTransport {
 
     private OutputStream outputStream;
     private boolean https;
+    private HttpURLConnection httpConnection = null;
+    private EndpointAddress endpoint = null;
+    private Packet context = null;
+    private CookieJar cookieJar = null;
+    private boolean isFailure = false;
+
 
     public HttpClientTransport(Packet packet, Map<String,List<String>> reqHeaders) {
         endpoint = packet.endpointAddress;
@@ -88,16 +95,15 @@ final class HttpClientTransport {
      */
     public OutputStream getOutput() {
         try {
-            httpConnection = createHttpConnection();
-            cookieJar = sendCookieAsNeeded();
+            createHttpConnection();
+            sendCookieAsNeeded();
 
-            // how to incorporate redirect processing: message dispatcher does not seem to tbe right place
-            //if (!httpConnection.getRequestMethod().equalsIgnoreCase("GET"))
-            if (requiresOutputStream())
+            // for "GET" request no need to get outputStream
+            if (requiresOutputStream()) {
                 outputStream = httpConnection.getOutputStream();
-            //if use getOutputStream method set as "POST"
-            //but for "Get" request no need to get outputStream
-            connectForResponse();
+            }
+
+            httpConnection.connect();
 
         } catch (Exception ex) {
             throw new ClientTransportException(
@@ -144,10 +150,8 @@ final class HttpClientTransport {
         if (respHeaders != null) {
             return respHeaders;
         }
-
-        respHeaders = collectResponseMimeHeaders();
-
-        //saveCookieAsNeeded(cookieJar);
+        respHeaders = new Headers();
+        respHeaders.putAll(httpConnection.getHeaderFields());
         return respHeaders;
     }
 
@@ -170,18 +174,6 @@ final class HttpClientTransport {
                 : httpConnection.getContentLength();
 
         return bab.newInputStream(0, length);
-    }
-
-    public Map<String, List<String>> collectResponseMimeHeaders() {
-        Map<String, List<String>> headers = new Headers();
-        headers.putAll(httpConnection.getHeaderFields());
-        return headers;
-    }
-
-    protected void connectForResponse()
-        throws IOException {
-
-        httpConnection.connect();
     }
 
     /*
@@ -230,16 +222,9 @@ final class HttpClientTransport {
             }
         } catch (IOException e) {
             throw new WebServiceException(e);
-            // on JDK1.3.1_01, we end up here, but then getResponseCode() succeeds!
-//            if (httpConnection.getResponseCode()
-//                    == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-//                isFailure = true;
-//            } else {
-//                throw e;
-//            }
         }
         // Hack for now
-        saveCookieAsNeeded(cookieJar);
+        saveCookieAsNeeded();
     }
 
     private String getStatusMessage() throws IOException {
@@ -256,14 +241,11 @@ final class HttpClientTransport {
         return message;
     }
 
-    protected CookieJar sendCookieAsNeeded() {
+    protected void sendCookieAsNeeded() {
         Boolean shouldMaintainSessionProperty =
             (Boolean) context.invocationProperties.get(SESSION_MAINTAIN_PROPERTY);
-        if (shouldMaintainSessionProperty == null) {
-            return null;
-        }
-        if (shouldMaintainSessionProperty) {
-            CookieJar cookieJar = (CookieJar) context.invocationProperties.get(HTTP_COOKIE_JAR);
+        if (shouldMaintainSessionProperty != null && shouldMaintainSessionProperty) {
+            cookieJar = (CookieJar) context.invocationProperties.get(HTTP_COOKIE_JAR);
             if (cookieJar == null) {
                 cookieJar = new CookieJar();
 
@@ -271,21 +253,17 @@ final class HttpClientTransport {
                 context.proxy.getRequestContext().put(HTTP_COOKIE_JAR, cookieJar);
             }
             cookieJar.applyRelevantCookies(httpConnection);
-            return cookieJar;
-        } else {
-            return null;
         }
     }
 
-    protected void saveCookieAsNeeded(CookieJar cookieJar) {
+    private void saveCookieAsNeeded() {
         if (cookieJar != null) {
             cookieJar.recordAnyCookies(httpConnection);
         }
     }
 
 
-    protected HttpURLConnection createHttpConnection()
-            throws IOException {
+    private void createHttpConnection() throws IOException {
 
         boolean verification = false;
         // does the client want client hostname verification by the service
@@ -306,7 +284,7 @@ final class HttpClientTransport {
 
         checkEndpoints();
 
-        HttpURLConnection httpConnection = createConnection();
+        httpConnection = (HttpURLConnection) endpoint.openConnection();
         if (httpConnection instanceof HttpsURLConnection) {
             https = true;
         }
@@ -318,27 +296,18 @@ final class HttpClientTransport {
             }
         }
 
-       writeBasicAuthAsNeeded(context, reqHeaders);
-
+        writeBasicAuthAsNeeded(context, reqHeaders);
 
         // allow interaction with the web page - user may have to supply
         // username, password id web page is accessed from web browser
-
         httpConnection.setAllowUserInteraction(true);
+
         // enable input, output streams
-
-
         httpConnection.setDoOutput(true);
         httpConnection.setDoInput(true);
-        // the soap message is always sent as a Http POST
-        // HTTP Get is disallowed by BP 1.0
-        // *needed for XML/HTTPBinding and SOAP12Binding*
-        // for xml/http binding other methods are allowed.
-        // for Soap 1.2 "GET" is allowed.
-        String method = "POST";
 
         String requestMethod = (String) context.invocationProperties.get(MessageContext.HTTP_REQUEST_METHOD);
-        method = (requestMethod != null)?requestMethod:method;
+        String method = (requestMethod != null) ? requestMethod : "POST";
         httpConnection.setRequestMethod(method);
 
         //this code or something similiar needs t be moved elsewhere for error checking
@@ -354,23 +323,23 @@ final class HttpClientTransport {
         if (reqTimeout != null) {
             httpConnection.setReadTimeout(reqTimeout);
         }
-        // set the properties on HttpURLConnection
-        for (Map.Entry entry : reqHeaders.entrySet()) {
-            httpConnection.addRequestProperty((String) entry.getKey(), ((List<String>) entry.getValue()).get(0));
+
+        Boolean streaming = (Boolean)context.invocationProperties.get(JAXWSProperties.HTTP_CLIENT_STREAMING);
+        if (streaming != null && streaming) {
+            httpConnection.setChunkedStreamingMode(4096);
         }
 
-        return httpConnection;
+        // set the properties on HttpURLConnection
+        for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
+            httpConnection.addRequestProperty(entry.getKey(), entry.getValue().get(0));
+        }
     }
 
     public boolean isSecure() {
         return https;
     }
 
-    private HttpURLConnection createConnection() throws IOException {
-        return (HttpURLConnection) endpoint.openConnection();
-    }
-
-//    private void redirectRequest(HttpURLConnection httpConnection, SOAPMessageContext context) {
+    //    private void redirectRequest(HttpURLConnection httpConnection, SOAPMessageContext context) {
 //        String redirectEndpoint = httpConnection.getHeaderField("Location");
 //        if (redirectEndpoint != null) {
 //            httpConnection.disconnect();
@@ -392,9 +361,7 @@ final class HttpClientTransport {
 
 
     private void writeBasicAuthAsNeeded(Packet context, Map<String, List<String>> reqHeaders) {
-
         String user = (String) context.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
-
         if (user != null) {
             String pw = (String) context.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
             if (pw != null) {
@@ -408,16 +375,9 @@ final class HttpClientTransport {
     }
 
     private boolean requiresOutputStream() {
-        if (!(httpConnection.getRequestMethod().equalsIgnoreCase("GET") ||
+        return !(httpConnection.getRequestMethod().equalsIgnoreCase("GET") ||
                 httpConnection.getRequestMethod().equalsIgnoreCase("HEAD") ||
-                httpConnection.getRequestMethod().equalsIgnoreCase("DELETE"))) {
-            return true;
-        }
-        return false;
-    }
-
-    public HttpURLConnection getConnection() {
-        return httpConnection;
+                httpConnection.getRequestMethod().equalsIgnoreCase("DELETE"));
     }
 
     public @Nullable String getContentType() {
@@ -426,16 +386,11 @@ final class HttpClientTransport {
 
     // overide default SSL HttpClientVerifier to always return true
     // effectively overiding Hostname client verification when using SSL
-    static class HttpClientVerifier implements HostnameVerifier {
+    private static class HttpClientVerifier implements HostnameVerifier {
         public boolean verify(String s, SSLSession sslSession) {
             return true;
         }
     }
 
-    HttpURLConnection httpConnection = null;
-    EndpointAddress endpoint = null;
-    Packet context = null;
-    CookieJar cookieJar = null;
-    boolean isFailure = false;
 }
 

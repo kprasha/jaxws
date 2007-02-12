@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
+import java.net.HttpURLConnection;
 
 public interface JAXWSProperties {
     // Content negotiation property: values "none", "pessimistic" and "optimistic"
@@ -32,6 +33,15 @@ public interface JAXWSProperties {
     public static final String CONTENT_NEGOTIATION_PROPERTY = "com.sun.xml.ws.client.ContentNegotiation";
     public static final String MTOM_THRESHOLOD_VALUE =  "com.sun.xml.ws.common.MtomThresholdValue";
     public static final String HTTP_EXCHANGE = "com.sun.xml.ws.http.exchange";
+
+    /**
+     * Set this property on the {@link BindingProvider#getRequestContext()} to
+     * enable {@link HttpURLConnection#setChunkedStreamingMode(int)}
+     *
+     * <p>
+     * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
+     */
+    public static final String HTTP_CLIENT_STREAMING = "com.sun.xml.ws.transport.http.client.streaming";
 
     /**
      * Acccess the list of SOAP headers in the SOAP message.
