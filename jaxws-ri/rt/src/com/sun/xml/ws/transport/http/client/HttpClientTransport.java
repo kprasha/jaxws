@@ -115,8 +115,8 @@ final class HttpClientTransport {
 
     public void closeOutput() throws IOException {
         if (outputStream != null) {
-            outputStream.flush();
             outputStream.close();
+            outputStream = null;
         }
     }
 
@@ -155,25 +155,10 @@ final class HttpClientTransport {
         return respHeaders;
     }
 
-    protected InputStream readResponse()
-        throws IOException {
-        InputStream contentIn =
-            (isFailure
+    protected InputStream readResponse() throws IOException {
+        return (isFailure
                 ? httpConnection.getErrorStream()
                 : httpConnection.getInputStream());
-
-        ByteArrayBuffer bab = new ByteArrayBuffer();
-        if (contentIn != null) { // is this really possible?
-            bab.write(contentIn);
-            bab.close();
-        }
-
-        int length =
-            httpConnection.getContentLength() == -1
-                ? bab.size()
-                : httpConnection.getContentLength();
-
-        return bab.newInputStream(0, length);
     }
 
     /*
