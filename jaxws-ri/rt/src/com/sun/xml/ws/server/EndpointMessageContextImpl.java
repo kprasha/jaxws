@@ -148,14 +148,14 @@ public final class EndpointMessageContextImpl extends AbstractMap<String,Object>
         public Iterator<Map.Entry<String, Object>> iterator() {
             final Iterator<Map.Entry<String, Object>> it = createBackupMap().entrySet().iterator();
 
-            return new Iterator() {
+            return new Iterator<Map.Entry<String, Object>>() {
                 Map.Entry<String, Object> cur;
 
                 public boolean hasNext() {
                     return it.hasNext();
                 }
 
-                public Object next() {
+                public Map.Entry<String, Object> next() {
                     cur = it.next();
                     return cur;
                 }
