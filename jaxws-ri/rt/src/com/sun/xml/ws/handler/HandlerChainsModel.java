@@ -116,7 +116,7 @@ public class HandlerChainsModel {
                 // handler class
                 ensureProperName(reader, QNAME_HANDLER_CLASS);
                 String handlerClass =
-                        XMLStreamReaderUtil.getElementText(reader);
+                        XMLStreamReaderUtil.getElementText(reader).trim();
                 handler.setHandlerClass(handlerClass);
                 XMLStreamReaderUtil.nextContent(reader);
 
@@ -250,7 +250,7 @@ public class HandlerChainsModel {
                 ensureProperName(reader, QNAME_HANDLER_CLASS);
                 try {
                     handler = (Handler) loadClass(classLoader,
-                            XMLStreamReaderUtil.getElementText(reader)).newInstance();
+                            XMLStreamReaderUtil.getElementText(reader).trim()).newInstance();
                 } catch (InstantiationException ie){
                     throw new RuntimeException(ie);
                 } catch (IllegalAccessException e) {
