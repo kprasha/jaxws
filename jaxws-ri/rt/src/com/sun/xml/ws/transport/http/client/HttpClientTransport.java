@@ -66,6 +66,7 @@ final class HttpClientTransport {
             // Nothing much can be done. Intentionally left empty
         }
     }
+    private static final int CHUNK_SIZE = 4096;
     private static String LAST_ENDPOINT = "";
     private static boolean redirect = true;
     private static final int START_REDIRECT_COUNT = 3;
@@ -82,12 +83,16 @@ final class HttpClientTransport {
     private Packet context = null;
     private CookieJar cookieJar = null;
     private boolean isFailure = false;
+    private final boolean streaming;
 
 
     public HttpClientTransport(Packet packet, Map<String,List<String>> reqHeaders) {
         endpoint = packet.endpointAddress;
         context = packet;
         this.reqHeaders = reqHeaders;
+
+        Boolean streamingProp = (Boolean)context.invocationProperties.get(JAXWSProperties.HTTP_CLIENT_STREAMING);
+        streaming = (streamingProp != null) ? streamingProp : false;
     }
 
     /**
@@ -97,14 +102,14 @@ final class HttpClientTransport {
         try {
             createHttpConnection();
             sendCookieAsNeeded();
-
             // for "GET" request no need to get outputStream
             if (requiresOutputStream()) {
                 outputStream = httpConnection.getOutputStream();
+                if (streaming) {
+                    outputStream = new WSChunkedOuputStream(outputStream);
+                }
             }
-
             httpConnection.connect();
-
         } catch (Exception ex) {
             throw new ClientTransportException(
                 ClientMessages.localizableHTTP_CLIENT_FAILED(ex),ex);
@@ -309,9 +314,8 @@ final class HttpClientTransport {
             httpConnection.setReadTimeout(reqTimeout);
         }
 
-        Boolean streaming = (Boolean)context.invocationProperties.get(JAXWSProperties.HTTP_CLIENT_STREAMING);
-        if (streaming != null && streaming) {
-            httpConnection.setChunkedStreamingMode(4096);
+        if (streaming) {
+            httpConnection.setChunkedStreamingMode(CHUNK_SIZE);
         }
 
         // set the properties on HttpURLConnection
@@ -374,6 +378,54 @@ final class HttpClientTransport {
     private static class HttpClientVerifier implements HostnameVerifier {
         public boolean verify(String s, SSLSession sslSession) {
             return true;
+        }
+    }
+
+    /**
+     * HttpURLConnection.getOuputStream() returns sun.net.www.http.ChunkedOuputStream in chunked
+     * streaming mode. If you call ChunkedOuputStream.write(byte[20MB], int, int), then the whole data
+     * is kept in memory. This wraps the ChunkedOuputStream so that it writes only small
+     * chunks.
+     */
+    private static final class WSChunkedOuputStream extends OutputStream {
+        final OutputStream actual;
+
+        WSChunkedOuputStream(OutputStream actual) {
+            this.actual = actual;
+        }
+
+        @Override
+        public void write(byte b[], int off, int len) throws IOException {
+            int sent = 0;
+            while(sent < len) {
+                int chunk = len-sent;
+                if (chunk > CHUNK_SIZE) {
+                    chunk = CHUNK_SIZE;
+                }
+                actual.write(b, off, chunk);
+                off += chunk;
+                sent += chunk;
+            }
+        }
+
+        @Override
+        public void write(byte b[]) throws IOException {
+            write(b, 0, b.length);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            actual.write(b);
+        }
+
+        @Override
+        public void flush() throws IOException {
+            actual.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            actual.close();
         }
     }
 
