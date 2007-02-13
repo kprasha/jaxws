@@ -37,6 +37,8 @@ import com.sun.xml.ws.message.MimeAttachmentSet;
 import com.sun.xml.ws.message.stream.StreamAttachment;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
+import com.sun.xml.ws.util.ByteArrayDataSource;
+import com.sun.istack.NotNull;
 import org.jvnet.staxex.Base64Data;
 import org.jvnet.staxex.NamespaceContextEx;
 import org.jvnet.staxex.XMLStreamReaderEx;
@@ -162,25 +164,20 @@ public class MtomCodec extends MimeCodec {
     }
 
     private class ByteArrayBuffer{
-        private  final byte[] buff;
-        private  final int off;
-        private  final int len;
-        private  final String contentType;
         final String contentId;
 
-        ByteArrayBuffer(byte[] buff, int off, int len, String contentType) {
-            this.buff = buff;
-            this.off = off;
-            this.len = len;
-            this.contentType = contentType;
+        private DataHandler dh;
+
+        ByteArrayBuffer(@NotNull DataHandler dh) {
+            this.dh = dh;
             this.contentId = encodeCid();
         }
 
         void write(OutputStream os) throws IOException {
             //build attachment frame
             OutputUtil.writeln("--"+boundary, os);
-            writeMimeHeaders(contentType, contentId, os);
-            os.write(buff, off, len);
+            writeMimeHeaders(dh.getContentType(), contentId, os);
+            dh.writeTo(os);
             OutputUtil.writeln(os);
         }
     }
@@ -248,29 +245,14 @@ public class MtomCodec extends MimeCodec {
                 writeCharacters(DatatypeConverterImpl._printBase64Binary(data, start, len));
                 return;
             }
-
-            try {
-                ByteArrayBuffer bos = new ByteArrayBuffer(data, start, len, contentType);
-                mtomAttachmentStream.add(bos);
-
-                //flush the underlying writer to write-out any cached data to the underlying
-                // stream before writing directly to it
-                writer.flush();
-
-                //write out the xop reference
-                writer.writeCharacters("");
-                osWriter.write(XOP_PREF +bos.contentId+XOP_SUFF);
-            } catch (IOException e) {
-                throw new WebServiceException(e);
-            } catch (XMLStreamException e) {
-                throw new WebServiceException(e);
-            }
+            ByteArrayBuffer bab = new ByteArrayBuffer(new DataHandler(new ByteArrayDataSource(data, start, len, contentType)));
+            writeBinary(bab);
         }
 
         public void writeBinary(DataHandler dataHandler) throws XMLStreamException {
             Base64Data data  = new Base64Data();
             data.set(dataHandler);
-            writePCDATA(data);
+            writeBinary(new ByteArrayBuffer(data.getDataHandler()));
         }
 
         public OutputStream writeBinary(String contentType) throws XMLStreamException {
@@ -282,10 +264,28 @@ public class MtomCodec extends MimeCodec {
                 return;
             if(data instanceof Base64Data){
                 Base64Data binaryData = (Base64Data)data;
-                writeBinary(binaryData.getExact(), 0, binaryData.getDataLen(), binaryData.getMimeType());
+                writeBinary(binaryData.getDataHandler());
                 return;
             }
             writeCharacters(data.toString());
+        }
+
+        private void writeBinary(ByteArrayBuffer bab) {
+            try {
+                mtomAttachmentStream.add(bab);
+
+                //flush the underlying writer to write-out any cached data to the underlying
+                // stream before writing directly to it
+                writer.flush();
+
+                //write out the xop reference
+                writer.writeCharacters("");
+                osWriter.write(XOP_PREF +bab.contentId+XOP_SUFF);
+            } catch (IOException e) {
+                throw new WebServiceException(e);
+            } catch (XMLStreamException e) {
+                throw new WebServiceException(e);
+            }
         }
 
         private class MtomNamespaceContextEx implements NamespaceContextEx {
