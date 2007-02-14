@@ -53,11 +53,12 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
 
     private final HttpExchange httpExchange;
     private int status;
-    private HttpAdapter adapter;
+    private final HttpAdapter adapter;
     private boolean outputWritten;
 
 
     public ServerConnectionImpl(@NotNull HttpAdapter adapter, @NotNull HttpExchange httpExchange) {
+        this.adapter = adapter;
         this.httpExchange = httpExchange;
     }
 
