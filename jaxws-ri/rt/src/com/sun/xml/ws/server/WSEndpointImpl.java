@@ -50,6 +50,7 @@ import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.resources.HandlerMessages;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
+import com.sun.xml.ws.model.wsdl.WSDLProperties;
 import org.w3c.dom.Element;
 
 import javax.annotation.PreDestroy;
@@ -94,6 +95,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
     private boolean disposed;
 
     private final Class<T> implementationClass;
+    private final @Nullable WSDLProperties wsdlProperties;
 
     WSEndpointImpl(@NotNull QName serviceName, @NotNull QName portName, WSBinding binding,
                    Container container, SEIModel seiModel, WSDLPort port,
@@ -123,6 +125,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
         tubePool = new TubePool(masterTubeline);
         terminalTube.setEndpoint(this);
         engine = new Engine(toString());
+        wsdlProperties = (port==null) ? null : new WSDLProperties(port);
     }
 
     public @NotNull Class<T> getImplementationClass() {
@@ -163,6 +166,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
     public void schedule(final Packet request, final CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
         request.endpoint = WSEndpointImpl.this;
+        if (wsdlProperties != null) {
+            request.addSatellite(wsdlProperties);
+        }
         Fiber fiber = engine.createFiber();
         if (interceptor != null) {
             fiber.addInterceptor(interceptor);
@@ -202,6 +208,9 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 request.webServiceContextDelegate = wscd;
                 request.transportBackChannel = tbc;
                 request.endpoint = WSEndpointImpl.this;
+                if (wsdlProperties != null) {
+                    request.addSatellite(wsdlProperties);
+                }
                 Fiber fiber = engine.createFiber();
                 Packet response;
                 try {
