@@ -241,6 +241,10 @@ public class SOAPBindingCodec extends MimeCodec {
     }
     
     public void decode(InputStream in, String contentType, Packet packet) throws IOException {
+        if (contentType == null) {
+            throw new UnsupportedMediaException();
+        }
+
         /**
          * Reset the encoding state when on the server side for each
          * decode/encode step.
