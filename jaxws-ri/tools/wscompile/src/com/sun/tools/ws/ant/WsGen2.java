@@ -452,7 +452,7 @@ public class WsGen2 extends MatchingTask {
                     log("command line: "+"wsgen "+cmd.toString());
                 }
                 int status = run(cmd.getCommandline());
-                ok = (status == 0) ? true : false;
+                ok = (status == 0);
             } else {
                 if (verbose) {                // Fix for CR 6444561
                     log("command line: "+"wsgen "+cmd.getJavaCommand().toString());
