@@ -22,6 +22,7 @@
 package com.sun.tools.ws.ant;
 
 import com.sun.tools.ws.wscompile.WsgenTool;
+import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Execute;
@@ -71,7 +72,7 @@ public class WsGen2 extends MatchingTask {
      */
     public Path createClasspath() {
         if (compileClasspath == null) {
-            compileClasspath = new Path(project);
+            compileClasspath = new Path(getProject());
         }
         return compileClasspath.createPath();
     }
@@ -351,9 +352,16 @@ public class WsGen2 extends MatchingTask {
     }
 
     private void setupWscompileForkCommand() {
-        
-        Path classpath = getClasspath();
-        cmd.createClasspath(getProject()).append(classpath);
+
+        ClassLoader loader = this.getClass().getClassLoader();
+        while(loader!=null && !(loader instanceof AntClassLoader)) {
+            loader = loader.getParent();
+        }
+
+        if(loader!=null)
+            cmd.createClasspath(getProject()).append(new Path(getProject(), ((AntClassLoader)loader).getClasspath()));
+
+        cmd.createClasspath(getProject()).append(getClasspath());
         cmd.setClassname("com.sun.tools.ws.WsGen");
         setupWscompileArgs();
         //cmd.createArgument(true).setLine(forkCmd.toString());

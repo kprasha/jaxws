@@ -425,11 +425,11 @@ public class WsImport2 extends MatchingTask {
 
     private void setupWsimportForkCommand() {
         ClassLoader loader = this.getClass().getClassLoader();
-
-        Path classpath = new Path(project);
-        if (loader instanceof AntClassLoader) {
-           classpath = new Path(project, ((AntClassLoader)loader).getClasspath());
+        while(loader!=null && !(loader instanceof AntClassLoader)) {
+            loader = loader.getParent();
         }
+
+        Path classpath = new Path(project, ((AntClassLoader)loader).getClasspath());
         cmd.createClasspath(getProject()).append(classpath);
         cmd.setClassname("com.sun.tools.ws.WsImport");
         //setupWsimportArgs();
