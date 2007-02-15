@@ -17,7 +17,7 @@ import javax.xml.stream.XMLStreamReader;
  *
  * @author Kohsuke Kawaguchi
  */
-public class XMLStreamReaderFilter implements XMLStreamReaderFactory.RecycleAware {
+public class XMLStreamReaderFilter implements XMLStreamReaderFactory.RecycleAware, XMLStreamReader {
     /**
      * The underlying {@link XMLStreamReader} that does the parsing of the root part.
      */
