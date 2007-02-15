@@ -175,7 +175,12 @@ public class WSServiceDelegate extends WSService {
 
         // load interceptor
         ServiceInterceptor interceptor = ServiceInterceptorFactory.load(this, Thread.currentThread().getContextClassLoader());
+        ServiceInterceptor si = container.getSPI(ServiceInterceptor.class);
+        if (si != null) {
+            interceptor = ServiceInterceptor.aggregate(interceptor, si);
+        }
         this.serviceInterceptor = interceptor;
+
 
         WSDLServiceImpl service=null;
         if (wsdl != null) {
