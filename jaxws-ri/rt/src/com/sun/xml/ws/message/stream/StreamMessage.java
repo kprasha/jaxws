@@ -203,6 +203,7 @@ public final class StreamMessage extends AbstractMessageImpl {
             return unmarshaller.unmarshal(reader);
         } finally{
             unmarshaller.setAttachmentUnmarshaller(null);
+            XMLStreamReaderUtil.close(reader);
             XMLStreamReaderFactory.recycle(reader);
         }
     }
@@ -213,6 +214,7 @@ public final class StreamMessage extends AbstractMessageImpl {
         assert unconsumed();
         T r = bridge.unmarshal(reader,
             hasAttachments() ? new AttachmentUnmarshallerImpl(getAttachments()) : null);
+        XMLStreamReaderUtil.close(reader);
         XMLStreamReaderFactory.recycle(reader);
         return r;
     }

@@ -41,6 +41,7 @@ import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.ws.protocol.soap.VersionMismatchException;
 import com.sun.xml.ws.server.UnsupportedMediaException;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -116,7 +117,7 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
         }
         // TODO: we should definitely let Decode owns one XMLStreamReader instance
         // instead of going to this generic factory
-        XMLStreamReader reader = XMLStreamReaderFactory.create(null, in, true);
+        XMLStreamReader reader = new TidyXMLStreamReader(XMLStreamReaderFactory.create(null, in, true), in);
         packet.setMessage(decode(reader));
     }
 
