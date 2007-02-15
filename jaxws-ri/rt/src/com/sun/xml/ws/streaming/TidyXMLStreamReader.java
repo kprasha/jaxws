@@ -2,10 +2,10 @@ package com.sun.xml.ws.streaming;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.ws.WebServiceException;
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.io.IOException;
  *
  * @author Vivek Pandey
  */
-public class TidyXMLStreamReader extends StreamReaderDelegate {
+public class TidyXMLStreamReader extends XMLStreamReaderFilter {
     private final Closeable closeableSource;
 
     public TidyXMLStreamReader(@NotNull XMLStreamReader reader, @Nullable Closeable closeableSource) {
