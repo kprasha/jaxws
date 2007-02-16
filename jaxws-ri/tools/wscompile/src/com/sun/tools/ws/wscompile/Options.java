@@ -244,6 +244,9 @@ public class Options {
         } else if (args[i].equals("-Xdebug")) {
             debugMode = true;
             return 1;
+        } else if (args[i].equals("-Xendorsed")) {
+            // this option is processed much earlier, so just ignore.
+            return 1;
         } else if (args[i].equals("-verbose")) {
             verbose = true;
             return 1;

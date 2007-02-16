@@ -57,7 +57,9 @@ public final class Invoker {
 
         ClassLoader oldcc = Thread.currentThread().getContextClassLoader();
         try {
-            ClassLoader cl = createClassLoader(Invoker.class.getClassLoader());
+            ClassLoader cl = Invoker.class.getClassLoader();
+            if(Arrays.asList(args).contains("-Xendorsed"))
+                cl = createClassLoader(cl); // perform JDK6 workaround hack
             Thread.currentThread().setContextClassLoader(cl);
 
             Class compileTool = cl.loadClass(mainClass);
