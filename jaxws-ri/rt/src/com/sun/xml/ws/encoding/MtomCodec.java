@@ -277,12 +277,11 @@ public class MtomCodec extends MimeCodec {
             try {
                 mtomAttachmentStream.add(bab);
 
+                writer.writeCharacters("");   // Force completion of open elems
+                writer.flush();
                 //flush the underlying writer to write-out any cached data to the underlying
                 // stream before writing directly to it
-                writer.flush();
-
                 //write out the xop reference
-                writer.writeCharacters("");
                 out.write(XOP_PREF);
                 encoded.set(bab.contentId);
                 out.write(encoded.buf,0,encoded.len);
