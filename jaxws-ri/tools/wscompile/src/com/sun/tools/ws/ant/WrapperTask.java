@@ -2,8 +2,13 @@ package com.sun.tools.ws.ant;
 
 import com.sun.istack.tools.ProtectedTask;
 import com.sun.tools.ws.Invoker;
+import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.xjc.api.util.ToolsJarNotFoundException;
+import com.sun.xml.bind.util.Which;
+import org.apache.tools.ant.BuildException;
 
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceFeature;
 import java.io.IOException;
 
 /**
@@ -12,7 +17,7 @@ import java.io.IOException;
  *
  * @author Kohsuke Kawaguchi
  */
-abstract class WrapperTask extends ProtectedTask {
+public abstract class WrapperTask extends ProtectedTask {
 
     private boolean doEndorsedMagic = false;
 
@@ -32,9 +37,22 @@ abstract class WrapperTask extends ProtectedTask {
         try {
             ClassLoader cl = getClass().getClassLoader();
             if(doEndorsedMagic) {
-                cl = Invoker.createClassLoader(cl);
+                return Invoker.createClassLoader(cl);
+            } else {
+                // check if we are indeed loading JAX-WS 2.1 API
+                try {
+                    Service.class.getMethod("getPort",Class.class, WebServiceFeature[].class);
+                    // yup. things look good.
+                    return cl;
+                } catch (NoSuchMethodException e) {
+                } catch (LinkageError e) {
+                }
+
+                if(Service.class.getClassLoader()==null)
+                    throw new BuildException(WscompileMessages.WRAPPER_TASK_NEED_ENDORSED(getTaskName()));
+                else
+                    throw new BuildException(WscompileMessages.WRAPPER_TASK_LOADING_20_API(Which.which(Service.class)));
             }
-            return cl;
         } catch (ToolsJarNotFoundException e) {
             throw new ClassNotFoundException(e.getMessage(),e);
         }
