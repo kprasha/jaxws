@@ -255,9 +255,12 @@ public class RuntimeWSDLParser {
             parser = resolver.resolveEntity(null, url.toExternalForm());
         }
         if(parser == null){
-            XMLStreamReader reader=null;
+            XMLStreamReader reader;
             try{
-            reader = createReader(wsdlLoc);
+            if(url != null)
+                reader = createReader(url);
+            else
+                reader = createReader(wsdlLoc);
             }catch(WebServiceException e){
                 this.errors.set(this.RETRY_WITH_MEX);
                 throw e;
