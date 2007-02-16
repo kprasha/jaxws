@@ -36,6 +36,7 @@ import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.FilterInputStream;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -110,7 +111,15 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
     }
 
     public @NotNull InputStream getInput() {
-        return httpExchange.getRequestBody();
+        // Light weight http server's InputStream.close() throws exception if
+        // all the bytes are not read. Work around until it is fixed.
+        return new FilterInputStream(httpExchange.getRequestBody()) {
+            @Override
+            public void close() throws IOException {
+                while (read() != -1);
+                super.close();
+            }
+        };
     }
 
     public @NotNull OutputStream getOutput() throws IOException {
