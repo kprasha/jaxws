@@ -24,9 +24,12 @@ package com.sun.tools.ws;
 
 import com.sun.istack.tools.MaskingClassLoader;
 import com.sun.istack.tools.ParallelWorldClassLoader;
+import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.xjc.api.util.ToolsJarNotFoundException;
+import com.sun.xml.bind.util.Which;
 
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceFeature;
 import java.io.File;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
@@ -60,6 +63,15 @@ public final class Invoker {
             ClassLoader cl = Invoker.class.getClassLoader();
             if(Arrays.asList(args).contains("-Xendorsed"))
                 cl = createClassLoader(cl); // perform JDK6 workaround hack
+            else {
+                if(!checkIfLoading21API()) {
+                    if(Service.class.getClassLoader()==null)
+                        System.err.println(WscompileMessages.INVOKER_NEED_ENDORSED());
+                    else
+                        System.err.println(WscompileMessages.WRAPPER_TASK_LOADING_20_API(Which.which(Service.class)));
+                    return -1;
+                }
+            }
             Thread.currentThread().setContextClassLoader(cl);
 
             Class compileTool = cl.loadClass(mainClass);
@@ -77,6 +89,21 @@ public final class Invoker {
         }
 
         return -1;
+    }
+
+    /**
+     * Returns true if the RI appears to be loading the JAX-WS 2.1 API.
+     */
+    public static boolean checkIfLoading21API() {
+        try {
+            Service.class.getMethod("getPort",Class.class, WebServiceFeature[].class);
+            // yup. things look good.
+            return true;
+        } catch (NoSuchMethodException e) {
+        } catch (LinkageError e) {
+        }
+        // nope
+        return false;
     }
 
     /**

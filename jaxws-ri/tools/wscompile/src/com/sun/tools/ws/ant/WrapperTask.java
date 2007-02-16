@@ -8,7 +8,6 @@ import com.sun.xml.bind.util.Which;
 import org.apache.tools.ant.BuildException;
 
 import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceFeature;
 import java.io.IOException;
 
 /**
@@ -40,13 +39,8 @@ public abstract class WrapperTask extends ProtectedTask {
                 return Invoker.createClassLoader(cl);
             } else {
                 // check if we are indeed loading JAX-WS 2.1 API
-                try {
-                    Service.class.getMethod("getPort",Class.class, WebServiceFeature[].class);
-                    // yup. things look good.
+                if(Invoker.checkIfLoading21API())
                     return cl;
-                } catch (NoSuchMethodException e) {
-                } catch (LinkageError e) {
-                }
 
                 if(Service.class.getClassLoader()==null)
                     throw new BuildException(WscompileMessages.WRAPPER_TASK_NEED_ENDORSED(getTaskName()));
