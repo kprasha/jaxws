@@ -14,13 +14,27 @@ import java.io.IOException;
  */
 abstract class WrapperTask extends ProtectedTask {
 
+    private boolean doEndorsedMagic = false;
+
+    /**
+     * Set to true to perform the endorsed directory override so that
+     * Ant tasks can run on JavaSE 6. 
+     */
+    public void setXendorsed(boolean f) {
+        this.doEndorsedMagic = f;
+    }
+
     protected String getCoreClassName() {
         return getClass().getName()+'2';
     }
 
     protected ClassLoader createClassLoader() throws ClassNotFoundException, IOException {
         try {
-            return Invoker.createClassLoader(getClass().getClassLoader());
+            ClassLoader cl = getClass().getClassLoader();
+            if(doEndorsedMagic) {
+                cl = Invoker.createClassLoader(cl);
+            }
+            return cl;
         } catch (ToolsJarNotFoundException e) {
             throw new ClassNotFoundException(e.getMessage(),e);
         }
