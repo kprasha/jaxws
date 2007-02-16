@@ -22,9 +22,10 @@
 
 package com.sun.xml.ws.encoding;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.bind.DatatypeConverterImpl;
+import com.sun.xml.bind.v2.runtime.output.Encoded;
 import com.sun.xml.messaging.saaj.packaging.mime.util.OutputUtil;
-import com.sun.xml.stream.writers.UTF8OutputStreamWriter;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.AttachmentSet;
@@ -35,10 +36,9 @@ import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.message.MimeAttachmentSet;
 import com.sun.xml.ws.message.stream.StreamAttachment;
+import com.sun.xml.ws.util.ByteArrayDataSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderFilter;
 import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
-import com.sun.xml.ws.util.ByteArrayDataSource;
-import com.sun.istack.NotNull;
 import org.jvnet.staxex.Base64Data;
 import org.jvnet.staxex.NamespaceContextEx;
 import org.jvnet.staxex.XMLStreamReaderEx;
@@ -58,6 +58,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +78,6 @@ public class MtomCodec extends MimeCodec {
     private String boundary;
     private final String soapXopContentType;
     private String messageContentType;
-    private UTF8OutputStreamWriter osWriter;
     private final MTOMFeature mtomFeature;
 
     //This is the mtom attachment stream, we should write it just after the root part for decoder
@@ -131,14 +131,13 @@ public class MtomCodec extends MimeCodec {
         mtomAttachmentStream.clear();
         ContentType contentType = getContentType(packet);
 
-        osWriter = new UTF8OutputStreamWriter(out);
         if(packet.getMessage() != null){
             try {
                 OutputUtil.writeln("--"+boundary, out);
                 OutputUtil.writeln("Content-Type: "+ soapXopContentType,  out);
                 OutputUtil.writeln("Content-Transfer-Encoding: binary", out);
                 OutputUtil.writeln(out);
-                MtomStreamWriter writer = new MtomStreamWriter(XMLStreamWriterFactory.create(out));
+                MtomStreamWriter writer = new MtomStreamWriter(XMLStreamWriterFactory.create(out),out);
                 packet.getMessage().writeTo(writer);
                 XMLStreamWriterFactory.recycle(writer);
                 OutputUtil.writeln(out);
@@ -235,8 +234,12 @@ public class MtomCodec extends MimeCodec {
     }
 
     private class MtomStreamWriter extends XMLStreamWriterFilter implements XMLStreamWriterEx {
-        public MtomStreamWriter(XMLStreamWriter w) {
+        private final OutputStream out;
+        private final Encoded encoded = new Encoded();
+
+        public MtomStreamWriter(XMLStreamWriter w, OutputStream out) {
             super(w);
+            this.out = out;
         }
 
         public void writeBinary(byte[] data, int start, int len, String contentType) throws XMLStreamException {
@@ -280,7 +283,10 @@ public class MtomCodec extends MimeCodec {
 
                 //write out the xop reference
                 writer.writeCharacters("");
-                osWriter.write(XOP_PREF +bab.contentId+XOP_SUFF);
+                out.write(XOP_PREF);
+                encoded.set(bab.contentId);
+                out.write(encoded.buf,0,encoded.len);
+                out.write(XOP_SUFF);
             } catch (IOException e) {
                 throw new WebServiceException(e);
             } catch (XMLStreamException e) {
@@ -533,8 +539,20 @@ public class MtomCodec extends MimeCodec {
         }
     }
 
-    private static final String XOP_PREF ="<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:";
-    private static final String XOP_SUFF ="\"/>";
+    private static final byte[] XOP_PREF = encode("<Include xmlns=\"http://www.w3.org/2004/08/xop/include\" href=\"cid:");
+
+    private static byte[] encode(String str) {
+        try {
+            return str.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new Error(e);
+        }
+    }
+
+    private static final byte[] XOP_SUFF = encode("\"/>");
     private static final String XOP_LOCALNAME = "Include";
     private static final String XOP_NAMESPACEURI = "http://www.w3.org/2004/08/xop/include";
+
+
+    private static final Charset UTF8 = Charset.forName("UTF-8");
 }
