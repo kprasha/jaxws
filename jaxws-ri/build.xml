@@ -334,6 +334,7 @@ major-version=${release.impl.version}
   <target name="docs" depends="prepare">
       <copy todir="${build.home}/docs">
           <fileset dir="." includes="ThirdPartyLicense.txt, CDDL-1.0-license.txt, distributionREADME_WMforJava2.0.txt" />
+          <fileset dir="docs" includes="sun-jaxws.xsd" />
           <filterset begintoken="@@" endtoken="@@">
             <filter token="SPEC_VERSION"
                     value="${release.spec.version}" />
@@ -353,7 +354,7 @@ major-version=${release.impl.version}
           </classpath>
       </taskdef>
       <htmlmacro  destdir="${build.home}/docs">
-      <documents dir="${docs.home}" includes="*.html *.xsd"/>
+      <documents dir="${docs.home}" includes="*.html *.xsd" excludes="sun-jaxws.xsd"/>
       <tags dir="${docs.home}/tags" includes="**/*.tag" />
       <property key="SPEC_VERSION" value="${release.spec.version}"/>
       <property key="IMPL_VERSION" value="${release.impl.version}"/>
