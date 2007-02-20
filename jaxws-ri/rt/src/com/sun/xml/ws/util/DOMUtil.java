@@ -153,9 +153,13 @@ public class DOMUtil {
                     if (local.equals(nodePrefix) && attr.getNodeValue().equals(nodeNS)) {
                         prefixDecl = true;
                     }
-                    // this is a namespace declaration, not an attribute
-                    writer.setPrefix(attr.getLocalName(), attr.getNodeValue());
-                    writer.writeNamespace(attr.getLocalName(), attr.getNodeValue());
+                    if (local.equals("")) {
+                        writer.writeDefaultNamespace(attr.getNodeValue());
+                    } else {
+                        // this is a namespace declaration, not an attribute
+                        writer.setPrefix(attr.getLocalName(), attr.getNodeValue());
+                        writer.writeNamespace(attr.getLocalName(), attr.getNodeValue());
+                    }
                 }
             }
         }
