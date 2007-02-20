@@ -147,7 +147,7 @@ public class Internalizer {
 
 
         boolean hasNode = true;        
-        if(isJAXWSBindings(bindings) && bindings.getAttributeNode("node")!=null ) {
+        if((isJAXWSBindings(bindings) || isJAXBBindings(bindings)) && bindings.getAttributeNode("node")!=null ) {
             target = evaluateXPathNode(bindings, target, bindings.getAttribute("node"), new NamespaceContextImpl(bindings));
         }else if(isJAXWSBindings(bindings) && (bindings.getAttributeNode("node")==null) && !isTopLevelBinding(bindings)) {
             hasNode = false;
@@ -165,7 +165,7 @@ public class Internalizer {
             result.put( bindings, target );
 
         // look for child <JAXWS:bindings> and process them recursively
-        Element[] children = getChildElements( bindings, JAXWSBindingsConstants.NS_JAXWS_BINDINGS);
+        Element[] children = getChildElements( bindings);
         for (Element child : children)
             buildTargetNodeMap(child, target, result);
     }
@@ -202,6 +202,10 @@ public class Internalizer {
         return (bindings.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXWS_BINDINGS) && bindings.getLocalName().equals("bindings"));
     }
 
+    private boolean isJAXBBindings(Node bindings){
+        return (bindings.getNamespaceURI().equals(JAXWSBindingsConstants.NS_JAXB_BINDINGS) && bindings.getLocalName().equals("bindings"));
+    }
+
     private boolean isGlobalBinding(Node bindings){
         if(bindings.getNamespaceURI() == null){
             errorReceiver.warning(forest.locatorTable.getStartLocation((Element) bindings), WsdlMessages.INVALID_CUSTOMIZATION_NAMESPACE(bindings.getLocalName()));
@@ -215,14 +219,15 @@ public class Internalizer {
                 bindings.getLocalName().equals("enableMIMEContent")));
     }
 
-    private static Element[] getChildElements(Element parent, String nsUri) {
+    private static Element[] getChildElements(Element parent) {
         ArrayList<Element> a = new ArrayList<Element>();
         NodeList children = parent.getChildNodes();
         for( int i=0; i<children.getLength(); i++ ) {
             Node item = children.item(i);
             if(!(item instanceof Element ))     continue;
 
-            if(nsUri.equals(item.getNamespaceURI()))
+            if(JAXWSBindingsConstants.NS_JAXWS_BINDINGS.equals(item.getNamespaceURI()) ||
+                    JAXWSBindingsConstants.NS_JAXB_BINDINGS.equals(item.getNamespaceURI()))
                 a.add((Element)item);
         }
         return a.toArray(new Element[a.size()]);
