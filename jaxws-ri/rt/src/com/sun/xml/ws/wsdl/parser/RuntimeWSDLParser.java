@@ -187,9 +187,6 @@ public class RuntimeWSDLParser {
                 }
             }
         }
-        //currently we fail only if we dont find a WSDL
-        if (parser.errors.get(parser.RETRY_WITH_MEX) && wsdlException != null)
-            throw wsdlException;
 
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.context);
