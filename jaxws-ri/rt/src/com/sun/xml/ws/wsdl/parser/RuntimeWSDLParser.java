@@ -284,7 +284,6 @@ public class RuntimeWSDLParser {
                 if (imported) {
                     // wsdl:import could be a schema. Relaxing BP R2001 requirement.
                     LOGGER.warning(WsdlmodelMessages.WSDL_IMPORT_SHOULD_BE_WSDL(parser.systemId));
-                    reader.close();
                     return;
                 }
                 errors.set(RETRY_WITH_MEX);
