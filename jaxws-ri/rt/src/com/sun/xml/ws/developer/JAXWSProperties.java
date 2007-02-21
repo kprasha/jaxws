@@ -25,6 +25,10 @@ import com.sun.xml.ws.api.message.HeaderList;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.net.HttpURLConnection;
 
 public interface JAXWSProperties {
@@ -42,6 +46,38 @@ public interface JAXWSProperties {
      * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
      */
     public static final String HTTP_CLIENT_STREAMING = "com.sun.xml.ws.transport.http.client.streaming";
+
+
+    /**
+     * Set this property on the {@link BindingProvider#getRequestContext()} to
+     * enable {@link HttpsURLConnection#setHostnameVerifier(HostnameVerifier)}}. The property
+     * is set as follows:
+     *
+     * <p>
+     * HostNameVerifier hostNameVerifier = ...;
+     * Map<String, Object> ctxt = (BindingProvider)proxy).getRequestContext();
+     * ctxt.put(HOSTNAME_VERIFIER, hostNameVerifier);
+     *
+     * <p>
+     * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
+     */
+    public static final String HOSTNAME_VERIFIER = "com.sun.xml.ws.transport.https.client.hostname.verifier";
+
+    /**
+     * Set this property on the {@link BindingProvider#getRequestContext()} to
+     * enable {@link HttpsURLConnection#setSSLSocketFactory(SSLSocketFactory)}. {@link SSLSocketFactory}
+     * is got from {@link SSLContext#getSocketFactory()}. The property is set
+     * as follows:
+     *
+     * <p>
+     * SSLContext sslContext = ...;
+     * Map<String, Object> ctxt = (BindingProvider)proxy).getRequestContext();
+     * ctxt.put(SSL_CONTEXT, sslContext);
+     *
+     * <p>
+     * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
+     */
+    public static final String SSL_CONTEXT = "com.sun.xml.ws.transport.https.client.sslcontext";
 
     /**
      * Acccess the list of SOAP headers in the SOAP message.

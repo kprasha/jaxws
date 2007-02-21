@@ -36,6 +36,7 @@ import com.sun.istack.Nullable;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLContext;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -255,15 +256,6 @@ final class HttpClientTransport {
 
     private void createHttpConnection() throws IOException {
 
-        boolean verification = false;
-        // does the client want client hostname verification by the service
-        String verificationProperty =
-            (String) context.invocationProperties.get(HOSTNAME_VERIFICATION_PROPERTY);
-        if (verificationProperty != null) {
-            if (verificationProperty.equalsIgnoreCase("true"))
-                verification = true;
-        }
-
         // does the client want request redirection to occur
         String redirectProperty =
             (String) context.invocationProperties.get(REDIRECT_REQUEST_PROPERTY);
@@ -277,14 +269,35 @@ final class HttpClientTransport {
         httpConnection = (HttpURLConnection) endpoint.openConnection();
         if (httpConnection instanceof HttpsURLConnection) {
             https = true;
-        }
 
-        if (!verification) {
-            // for https hostname verification  - turn off by default
-            if (httpConnection instanceof HttpsURLConnection) {
+            boolean verification = false;
+            // does the client want client hostname verification by the service
+            String verificationProperty =
+                (String) context.invocationProperties.get(HOSTNAME_VERIFICATION_PROPERTY);
+            if (verificationProperty != null) {
+                if (verificationProperty.equalsIgnoreCase("true"))
+                    verification = true;
+            }
+            if (!verification) {
                 ((HttpsURLConnection) httpConnection).setHostnameVerifier(new HttpClientVerifier());
             }
+
+            // Set application's HostNameVerifier for this connection
+            HostnameVerifier verifier =
+                (HostnameVerifier) context.invocationProperties.get(JAXWSProperties.HOSTNAME_VERIFIER);
+            if (verifier != null) {
+                ((HttpsURLConnection) httpConnection).setHostnameVerifier(verifier);
+            }
+
+            // Set application's SocketFactory for this connection
+            SSLContext sslContext =
+                (SSLContext) context.invocationProperties.get(JAXWSProperties.SSL_CONTEXT);
+            if (sslContext != null) {
+                ((HttpsURLConnection) httpConnection).setSSLSocketFactory(sslContext.getSocketFactory());
+            }
+
         }
+
 
         writeBasicAuthAsNeeded(context, reqHeaders);
 
