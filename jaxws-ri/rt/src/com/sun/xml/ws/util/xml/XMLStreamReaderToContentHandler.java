@@ -214,11 +214,15 @@ public class XMLStreamReaderToContentHandler {
         QName qName = staxStreamReader.getName();
 
         try {
+            String pfix = qName.getPrefix();
+            String rawname = (pfix == null || pfix.length() == 0)
+                    ? qName.getLocalPart()
+                    : pfix + ':' + qName.getLocalPart();
             // fire endElement
             saxHandler.endElement(
                 qName.getNamespaceURI(),
                 qName.getLocalPart(),
-                qName.toString());
+                rawname);
 
             // end namespace bindings
             int nsCount = staxStreamReader.getNamespaceCount();
