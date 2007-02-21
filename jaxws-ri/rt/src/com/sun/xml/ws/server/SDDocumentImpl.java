@@ -216,11 +216,10 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         try {
             //generate the WSDL with utf-8 encoding and XML version 1.0
             XMLStreamWriter w = xof.createXMLStreamWriter(os, "UTF-8");
-            w.writeStartDocument();
+            w.writeStartDocument("UTF-8", "1.0");
             writeTo(portAddressResolver,resolver,w);
             w.writeEndDocument();
-            w.flush();
-            //w.close();
+            w.close();
         } catch (XMLStreamException e) {
             e.printStackTrace();
             IOException ioe = new IOException(e.getMessage());
