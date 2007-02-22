@@ -32,6 +32,7 @@ import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.istack.Nullable;
+import com.sun.istack.NotNull;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -51,6 +52,8 @@ import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * TODO: this class seems to be pointless. Just merge it with {@link HttpTransportPipe}.
@@ -87,7 +90,7 @@ final class HttpClientTransport {
     private final boolean streaming;
 
 
-    public HttpClientTransport(Packet packet, Map<String,List<String>> reqHeaders) {
+    public HttpClientTransport(@NotNull Packet packet, @NotNull Map<String,List<String>> reqHeaders) {
         endpoint = packet.endpointAddress;
         context = packet;
         this.reqHeaders = reqHeaders;
@@ -108,6 +111,11 @@ final class HttpClientTransport {
                 outputStream = httpConnection.getOutputStream();
                 if (streaming) {
                     outputStream = new WSChunkedOuputStream(outputStream);
+                }
+                List<String> contentEncoding = reqHeaders.get("Content-Encoding");
+                // TODO need to find out correct encoding based on q value - RFC 2616
+                if (contentEncoding != null && contentEncoding.get(0).contains("gzip")) {
+                    outputStream = new GZIPOutputStream(outputStream);
                 }
             }
             httpConnection.connect();
@@ -135,6 +143,10 @@ final class HttpClientTransport {
         InputStream in;
         try {
             in = readResponse();
+            String contentEncoding = httpConnection.getContentEncoding();
+            if (contentEncoding != null && contentEncoding.contains("gzip")) {
+                in = new GZIPInputStream(in);
+            }
         } catch (IOException e) {
             if (statusCode == HttpURLConnection.HTTP_NO_CONTENT
                 || (isFailure
