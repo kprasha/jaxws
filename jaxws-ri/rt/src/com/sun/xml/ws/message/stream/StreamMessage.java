@@ -23,6 +23,7 @@ package com.sun.xml.ws.message.stream;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.istack.XMLStreamReaderToContentHandler;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
@@ -38,7 +39,6 @@ import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.StAXSource;
-import com.sun.xml.ws.util.xml.XMLStreamReaderToContentHandler;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;

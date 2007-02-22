@@ -22,15 +22,14 @@
 
 package com.sun.xml.ws.encoding;
 
+import com.sun.istack.XMLStreamException2;
 import com.sun.xml.ws.util.ByteArrayBuffer;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
-
-import javax.xml.stream.XMLStreamException;
-import javax.activation.DataHandler;
-import java.io.OutputStream;
-import java.io.IOException;
-
 import org.jvnet.staxex.XMLStreamWriterEx;
+
+import javax.activation.DataHandler;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Partial default implementation of {@link XMLStreamWriterEx}.

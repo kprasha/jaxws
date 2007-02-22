@@ -24,7 +24,7 @@ package com.sun.xml.ws.streaming;
 
 import com.sun.istack.FinalArrayList;
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
+import com.sun.istack.XMLStreamException2;
 import com.sun.xml.ws.util.xml.DummyLocation;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Attr;

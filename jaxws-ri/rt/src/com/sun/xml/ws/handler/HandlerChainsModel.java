@@ -22,13 +22,13 @@
 
 package com.sun.xml.ws.handler;
 
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.UtilException;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.transport.http.DeploymentDescriptorParser;
 
 import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
@@ -36,10 +36,12 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.PortInfo;
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 
@@ -62,11 +64,11 @@ public class HandlerChainsModel {
         return handlerChains;
     }
     
-    public java.lang.String getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(java.lang.String value) {
+    public void setId(String value) {
         this.id = value;
     }
     /**
@@ -108,7 +110,7 @@ public class HandlerChainsModel {
                 XMLStreamReaderUtil.nextContent(reader);
                 if (reader.getName().equals(QNAME_HANDLER_NAME)) {
                     String handlerName =
-                            XMLStreamReaderUtil.getElementText(reader);
+                            XMLStreamReaderUtil.getElementText(reader).trim();
                     handler.setHandlerName(handlerName);
                     XMLStreamReaderUtil.nextContent(reader);
                 }

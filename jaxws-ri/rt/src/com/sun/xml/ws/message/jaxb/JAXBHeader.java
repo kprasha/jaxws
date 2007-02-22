@@ -22,6 +22,7 @@
 package com.sun.xml.ws.message.jaxb;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.XMLStreamException2;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
@@ -29,7 +30,6 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.message.AbstractHeaderImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
-import com.sun.xml.ws.util.exception.XMLStreamException2;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;

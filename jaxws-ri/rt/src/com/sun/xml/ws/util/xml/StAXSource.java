@@ -22,6 +22,7 @@
 
 package com.sun.xml.ws.util.xml;
 
+import com.sun.istack.XMLStreamReaderToContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
 import org.xml.sax.EntityResolver;
