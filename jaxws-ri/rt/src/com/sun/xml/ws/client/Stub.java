@@ -25,6 +25,7 @@ package com.sun.xml.ws.client;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.Closeable;
+import com.sun.xml.ws.model.wsdl.WSDLProperties;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -115,6 +116,8 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
      */
     @Nullable private volatile Header[] userOutboundHeaders;
 
+    private final @Nullable WSDLProperties wsdlProperties;
+
     /**
      * @param master                 The created stub will send messages to this pipe.
      * @param binding                As a {@link BindingProvider}, this object will
@@ -139,6 +142,7 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
             this.requestContext.setEndpointAddress(defaultEndPointAddress);
         this.engine = new Engine(toString());
         this.endpointReference = epr;
+        wsdlProperties = (wsdlPort==null) ? null : new WSDLProperties(wsdlPort);
     }
 
     /**
@@ -196,6 +200,9 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
             packet.proxy = this;
             packet.handlerConfig = binding.getHandlerConfig();
             requestContext.fill(packet);
+            if (wsdlProperties != null) {
+                packet.addSatellite(wsdlProperties);
+            }
             if (addrVersion != null) {
                 // populate request WS-Addressing headers
                 HeaderList headerList = packet.getMessage().getHeaders();
@@ -262,6 +269,9 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         request.proxy = this;
         request.handlerConfig = binding.getHandlerConfig();
         requestContext.fill(request);
+        if (wsdlProperties != null) {
+            request.addSatellite(wsdlProperties);
+        }
         if (AddressingVersion.isEnabled(binding)) {
             if(endpointReference!=null)
                 endpointReference.addReferenceParameters(request.getMessage().getHeaders());
