@@ -364,10 +364,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
     }
 
     private TypeMirror getSafeType(TypeMirror type) {
-//        System.out.println("type: "+type+" type.getClass(): "+type.getClass());
-        TypeMirror retType = makeSafeVisitor.apply(type, builder.getAPEnv().getTypeUtils());
-//        System.out.println("retType: "+retType+" retType.getClass(): "+retType.getClass());
-        return retType;
+        return makeSafeVisitor.apply(type, builder.getAPEnv().getTypeUtils());
     }
 
     private JType getType(TypeMirror typeMirror) {
@@ -403,6 +400,9 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
                     JAnnotationUse xmlElementAnn = field.annotate(XmlElement.class);
                     xmlElementAnn.param("name", elementName.getLocalPart());
                     xmlElementAnn.param("namespace", elementName.getNamespaceURI());
+                    if(memInfo.getParamType() instanceof ArrayType){
+                        xmlElementAnn.param("nillable", true);
+                    }
                 } else {
                     field.annotate(XmlValue.class);
                 }
@@ -543,9 +543,7 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         WebFault webFault = thrownDecl.getAnnotation(WebFault.class);
         if (webFault == null)
             return false;
-        if (map.size() != 2 || map.get(FAULT_INFO) == null)
-            return false;
-        return true;
+        return !(map.size() != 2 || map.get(FAULT_INFO) == null);
     }
 
     private void writeXmlElementDeclaration(JDefinedClass cls, String elementName, String namespaceUri) {
