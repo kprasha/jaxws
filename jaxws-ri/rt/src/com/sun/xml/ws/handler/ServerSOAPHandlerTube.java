@@ -120,7 +120,7 @@ public class ServerSOAPHandlerTube extends HandlerTube {
             //Close only invoked handlers in the chain
             //SERVER-SIDE
             processor.closeHandlers(msgContext, processor.getIndex(), soapHandlers.size() - 1);
-
+            processor.setIndex(-1);
             //reset remedyActionTaken
             remedyActionTaken = false;
         } else {

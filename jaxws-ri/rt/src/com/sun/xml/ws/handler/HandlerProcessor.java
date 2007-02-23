@@ -82,7 +82,7 @@ abstract class HandlerProcessor<C extends MessageUpdatableContext> {
     /**
      * This is called when a handler returns false or throws a RuntimeException
      */
-    private void setIndex(int i) {
+    void setIndex(int i) {
         index = i;
     }
 

@@ -110,6 +110,7 @@ public class ClientLogicalHandlerTube extends HandlerTube {
 
             //CLIENT-SIDE
             processor.closeHandlers(msgContext, processor.getIndex(), 0);
+            processor.setIndex(-1);
             //reset remedyActionTaken
             remedyActionTaken = false;
         } else {
