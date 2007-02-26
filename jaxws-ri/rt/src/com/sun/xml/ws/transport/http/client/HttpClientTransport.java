@@ -29,15 +29,14 @@ import static com.sun.xml.ws.client.BindingProviderProperties.*;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.resources.ClientMessages;
 import com.sun.xml.ws.transport.Headers;
-import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.istack.Nullable;
 import com.sun.istack.NotNull;
 
-import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLContext;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -96,7 +95,7 @@ final class HttpClientTransport {
         this.reqHeaders = reqHeaders;
 
         Boolean streamingProp = (Boolean)context.invocationProperties.get(JAXWSProperties.HTTP_CLIENT_STREAMING);
-        streaming = (streamingProp != null) ? streamingProp : false;
+        streaming = (streamingProp != null) && streamingProp;
     }
 
     /**
@@ -302,10 +301,10 @@ final class HttpClientTransport {
             }
 
             // Set application's SocketFactory for this connection
-            SSLContext sslContext =
-                (SSLContext) context.invocationProperties.get(JAXWSProperties.SSL_CONTEXT);
-            if (sslContext != null) {
-                ((HttpsURLConnection) httpConnection).setSSLSocketFactory(sslContext.getSocketFactory());
+            SSLSocketFactory sslSocketFactory =
+                (SSLSocketFactory) context.invocationProperties.get(JAXWSProperties.SSL_SOCKET_FACTORY);
+            if (sslSocketFactory != null) {
+                ((HttpsURLConnection) httpConnection).setSSLSocketFactory(sslSocketFactory);
             }
 
         }

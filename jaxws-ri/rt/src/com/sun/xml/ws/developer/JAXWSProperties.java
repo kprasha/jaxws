@@ -28,7 +28,6 @@ import javax.xml.ws.WebServiceContext;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
 import java.net.HttpURLConnection;
 
 public interface JAXWSProperties {
@@ -65,19 +64,18 @@ public interface JAXWSProperties {
 
     /**
      * Set this property on the {@link BindingProvider#getRequestContext()} to
-     * enable {@link HttpsURLConnection#setSSLSocketFactory(SSLSocketFactory)}. {@link SSLSocketFactory}
-     * is got from {@link SSLContext#getSocketFactory()}. The property is set
+     * enable {@link HttpsURLConnection#setSSLSocketFactory(SSLSocketFactory)}. The property is set
      * as follows:
      *
      * <p>
-     * SSLContext sslContext = ...;
+     * SSLSocketFactory sslFactory = ...;
      * Map<String, Object> ctxt = (BindingProvider)proxy).getRequestContext();
-     * ctxt.put(SSL_CONTEXT, sslContext);
+     * ctxt.put(SSL_SOCKET_FACTORY, sslFactory);
      *
      * <p>
      * <b>THIS PROPERTY IS EXPERIMENTAL AND IS SUBJECT TO CHANGE WITHOUT NOTICE IN FUTURE.</b>
      */
-    public static final String SSL_CONTEXT = "com.sun.xml.ws.transport.https.client.sslcontext";
+    public static final String SSL_SOCKET_FACTORY = "com.sun.xml.ws.transport.https.client.SSLSocketFactory";
 
     /**
      * Acccess the list of SOAP headers in the SOAP message.
