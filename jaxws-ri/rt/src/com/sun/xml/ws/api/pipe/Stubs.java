@@ -33,6 +33,7 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.client.dispatch.DataSourceDispatch;
 import com.sun.xml.ws.client.dispatch.DispatchImpl;
 import com.sun.xml.ws.client.dispatch.JAXBDispatch;
+import com.sun.xml.ws.client.dispatch.MessageDispatch;
 import com.sun.xml.ws.client.sei.SEIStub;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -45,6 +46,7 @@ import javax.xml.transform.Source;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
+import javax.xml.ws.Service.Mode;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Proxy;
 
@@ -163,6 +165,11 @@ public abstract class Stubs {
             return (Dispatch<T>) createSourceDispatch(portName, owner, binding, mode, next, epr);
         } else if (clazz == DataSource.class) {
             return (Dispatch<T>) createDataSourceDispatch(portName, owner, binding, mode, next, epr);
+        } else if (clazz == Message.class) {
+            if(mode==Mode.MESSAGE)
+                return (Dispatch<T>) createMessageDispatch(portName, owner, binding, next, epr);
+            else
+                throw new WebServiceException(mode+" not supported with Dispatch<Message>");
         } else
             throw new WebServiceException("Unknown class type " + clazz.getName());
     }
@@ -185,14 +192,33 @@ public abstract class Stubs {
      *      see <a href="#param">common parameters</a>
      * @param epr
      *      see <a href="#param">common parameters</a>
-     * 
-     * TODO: are these parameters making sense?
      */
     public static Dispatch<Object> createJAXBDispatch(
                                            QName portName, WSService owner, WSBinding binding,
                                            JAXBContext jaxbContext, Service.Mode mode, Tube next,
                                            @Nullable WSEndpointReference epr) {
         return new JAXBDispatch(portName, jaxbContext, mode, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
+    }
+
+    /**
+     * Creates a new {@link Message}-based {@link Dispatch} stub that connects to the given pipe.
+     * The returned dispatch is always {@link Service.Mode#MESSAGE}.
+     *
+     * @param portName
+     *      see {@link Service#createDispatch(QName, Class, Service.Mode)}.
+     * @param owner
+     *      see <a href="#param">common parameters</a>
+     * @param binding
+     *      see <a href="#param">common parameters</a>
+     * @param next
+     *      see <a href="#param">common parameters</a>
+     * @param epr
+     *      see <a href="#param">common parameters</a>
+     */
+    public static Dispatch<Message> createMessageDispatch(
+                                           QName portName, WSService owner, WSBinding binding,
+                                           Tube next, @Nullable WSEndpointReference epr) {
+        return new MessageDispatch(portName, (WSServiceDelegate)owner, next, (BindingImpl)binding, epr);
     }
 
     /**
