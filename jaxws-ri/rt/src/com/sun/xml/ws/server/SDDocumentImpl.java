@@ -28,6 +28,7 @@ import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.wsdl.parser.ParserUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
@@ -216,7 +217,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         XMLStreamWriter w = null;
         try {
             //generate the WSDL with utf-8 encoding and XML version 1.0
-            w = xof.createXMLStreamWriter(os, "UTF-8");
+            w = XMLStreamWriterFactory.create(os, "UTF-8");
             w.writeStartDocument("UTF-8", "1.0");
             writeTo(portAddressResolver,resolver,w);
             w.writeEndDocument();
@@ -301,5 +302,4 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
     }
 
     private static final XMLInputFactory xif = XMLInputFactory.newInstance();
-    private static final XMLOutputFactory xof = XMLOutputFactory.newInstance();
 }
