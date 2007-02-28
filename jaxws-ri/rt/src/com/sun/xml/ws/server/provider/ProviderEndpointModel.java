@@ -92,7 +92,7 @@ final class ProviderEndpointModel<T> {
     }
 
     /**
-     * Is it Provider<Source> ? Finds whether the parameterized type is
+     * Is it Provider&lt;Source> ? Finds whether the parameterized type is
      * Source.class or not.
      *
      * @param provider Provider.class or AsyncProvider.class
@@ -101,7 +101,7 @@ final class ProviderEndpointModel<T> {
      * @return true if c's parameterized type is Source
      *         false otherwise
      * @throws IllegalArgumentException if it is not
-     *         Provider<Source> or Provider<otherClass>
+     *         Provider&lt;Source> or Provider&lt;otherClass>
      *
      */
     private static boolean isSource(Class provider, Class c, Class otherClass) {
