@@ -29,6 +29,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import org.xml.sax.helpers.AttributesImpl;
 
 import javax.xml.bind.JAXBException;
@@ -79,7 +80,10 @@ public abstract class AbstractHeaderImpl implements Header {
      * Default implementation that copies the infoset. Not terribly efficient.
      */
     public WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException {
-        return new WSEndpointReference(readHeader(),expected);
+        XMLStreamReader xsr = readHeader();
+        WSEndpointReference epr = new WSEndpointReference(xsr, expected);
+        XMLStreamReaderFactory.recycle(xsr);
+        return epr;
     }
 
     public boolean isIgnorable(@NotNull SOAPVersion soapVersion, @NotNull Set<String> roles) {

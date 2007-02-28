@@ -136,7 +136,6 @@ public final class WSEndpointReference {
      */
     public WSEndpointReference(XMLStreamReader in, AddressingVersion version) throws XMLStreamException {
         this(XMLStreamBuffer.createNewBufferFromXMLStreamReader(in), version);
-        XMLStreamReaderFactory.recycle(in);
     }
 
     /**
