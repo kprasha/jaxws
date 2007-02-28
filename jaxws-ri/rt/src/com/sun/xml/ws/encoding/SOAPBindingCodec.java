@@ -195,12 +195,11 @@ public class SOAPBindingCodec extends MimeCodec {
                 /**
                  * This feature will only be present on the client side.
                  *
-                 * Fast Infoset is enabled on the client iff the service
+                 * Fast Infoset is enabled on the client if the service
                  * explicitly supports Fast Infoset.
                  */
                 WebServiceFeature select = binding.getFeature(SelectOptimalEncodingFeature.class);
-                if (select != null && select.isEnabled() && 
-                        fi != null && fi.isEnabled()) {
+                if (select != null && select.isEnabled()) {
                     useFastInfosetForEncoding = true;
                     ignoreContentNegotiationProperty = true;
                 }
