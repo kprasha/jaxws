@@ -43,10 +43,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 
 /**
- * TODO: Use sandbox classes, update javadoc
- */
-
-/**
  * The <code>JAXBDispatch</code> class provides support
  * for the dynamic invocation of a service endpoint operation using
  * JAXB objects. The <code>javax.xml.ws.Service</code>
@@ -56,8 +52,7 @@ import javax.xml.ws.WebServiceException;
  * @author WS Development Team
  * @version 1.0
  */
-
-public class JAXBDispatch extends com.sun.xml.ws.client.dispatch.DispatchImpl<Object> {
+public class JAXBDispatch extends DispatchImpl<Object> {
 
     private final JAXBContext jaxbcontext;
 
