@@ -240,7 +240,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
             ContentType contentType = codec.getStaticContentType(packet);
             if (contentType != null) {
                 con.setContentTypeResponseHeader(contentType.getContentType());
-                OutputStream os = con.getOutput();
+                OutputStream os = con.getProtocol().contains("1.1") ? con.getOutput() : new Http10OutputStream(con);
                 if (dump) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
                     codec.encode(packet, buf);
@@ -436,7 +436,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         con.setStatus(HttpURLConnection.HTTP_OK);
         con.setContentTypeResponseHeader("text/xml;charset=utf-8");
 
-        OutputStream os = con.getOutput();
+        OutputStream os = con.getProtocol().contains("1.1") ? con.getOutput() : new Http10OutputStream(con);
+
         final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(baseAddress);
         final String address = portAddressResolver.getAddressFor(endpoint.getServiceName(), endpoint.getPortName().getLocalPart());
         assert address != null;
@@ -450,6 +451,27 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
         doc.writeTo(portAddressResolver, resolver, os);
         os.close();
+    }
+
+    /**
+     * HTTP/1.0 connections require Content-Length. So just buffer to find out
+     * the length.
+     */
+    private final static class Http10OutputStream extends ByteArrayBuffer {
+        private final WSHTTPConnection con;
+
+        Http10OutputStream(WSHTTPConnection con) {
+            this.con = con;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            con.setContentLengthResponseHeader(size());
+            OutputStream os = con.getOutput();
+            writeTo(os);
+            os.close();
+        }
     }
 
     private void writeNotFoundErrorPage(WSHTTPConnection con, String message) throws IOException {

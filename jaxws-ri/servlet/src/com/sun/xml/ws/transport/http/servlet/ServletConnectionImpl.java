@@ -221,6 +221,16 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         return request;
     }
 
+    @Override
+    public String getProtocol() {
+        return request.getProtocol();
+    }
+
+    @Override
+    public void setContentLengthResponseHeader(int value) {
+        response.setContentLength(value);
+    }    
+
     protected PropertyMap getPropertyMap() {
         return model;
     }

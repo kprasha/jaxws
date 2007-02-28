@@ -126,8 +126,9 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
         assert !outputWritten;
         outputWritten = true;
 
-        httpExchange.sendResponseHeaders(getStatus(),0);
-
+        List<String> lenHeader = httpExchange.getResponseHeaders().get("Content-Length");
+        int length = (lenHeader != null) ? Integer.parseInt(lenHeader.get(0)) : 0;
+        httpExchange.sendResponseHeaders(getStatus(), length);
         return httpExchange.getResponseBody();
     }
 
@@ -186,6 +187,16 @@ final class ServerConnectionImpl extends WSHTTPConnection implements WebServiceC
             return reqPath.substring(ctxtPath.length());
         }
         return null;
+    }
+
+    @Override
+    public String getProtocol() {
+        return httpExchange.getProtocol();
+    }
+
+    @Override
+    public void setContentLengthResponseHeader(int value) {
+        httpExchange.getResponseHeaders().set("Content-Length", ""+value);
     }
 
     protected PropertyMap getPropertyMap() {

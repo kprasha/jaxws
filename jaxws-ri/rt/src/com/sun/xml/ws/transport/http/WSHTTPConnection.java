@@ -233,4 +233,22 @@ public abstract class WSHTTPConnection extends PropertySet {
     public boolean isClosed() {
         return closed;
     }
+
+    /**
+     * Subclasses are expected to override
+     *
+     * @return
+     */
+    public String getProtocol() {
+        return "HTTP/1.1";
+    }
+
+    /**
+     * Subclasses are expected to override
+     *
+     * @return
+     */
+    public void setContentLengthResponseHeader(int value) {
+    }
+    
 }
