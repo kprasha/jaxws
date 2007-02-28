@@ -37,8 +37,8 @@ import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.EndpointFactory;
 import com.sun.xml.ws.server.ServerRtException;
 import com.sun.xml.ws.streaming.Attributes;
-import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
+import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.util.HandlerAnnotationInfo;
 import com.sun.xml.ws.util.exception.LocatableWebServiceException;
 import com.sun.xml.ws.util.xml.XmlUtil;
@@ -138,6 +138,11 @@ public class DeploymentDescriptorParser<A> {
                 } catch (XMLStreamException e) {
                     throw new ServerRtException("runtime.parser.xmlReader",e);
                 }
+            }
+            try {
+                is.close();
+            } catch (IOException e) {
+                // ignore
             }
         }
     }
