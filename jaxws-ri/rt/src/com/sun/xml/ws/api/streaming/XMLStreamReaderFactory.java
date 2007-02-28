@@ -42,6 +42,13 @@ public abstract class XMLStreamReaderFactory {
         // in case someone hits an issue with pooling in the production system.
         if(!Boolean.getBoolean(XMLStreamReaderFactory.class.getName()+".noPool"))
             f = Zephyr.newInstance(xif);
+
+        if(f==null) {
+            // is this Woodstox?
+            if(xif.getClass().getName().equals("com.ctc.wstx.stax.WstxInputFactory"))
+                f = new Woodstox(xif);
+        }
+
         if(f==null)
             f = new Default(xif);
 
@@ -310,6 +317,25 @@ public abstract class XMLStreamReaderFactory {
 
         public void doRecycle(XMLStreamReader r) {
             // there's no way to recycle with the default StAX API.
+        }
+    }
+
+    /**
+     * Handles Woodstox's XIF but set properties to do the string interning.
+     * Woodstox {@link XMLInputFactory} is thread safe.
+     */
+    public static final class Woodstox extends NoLock {
+        public Woodstox(XMLInputFactory xif) {
+            super(xif);
+            xif.setProperty("org.codehaus.stax2.internNsUris",true);
+        }
+
+        public XMLStreamReader doCreate(String systemId, InputStream in, boolean rejectDTDs) {
+            return super.doCreate(systemId, in, rejectDTDs);
+        }
+
+        public XMLStreamReader doCreate(String systemId, Reader in, boolean rejectDTDs) {
+            return super.doCreate(systemId, in, rejectDTDs);
         }
     }
 }
