@@ -121,7 +121,10 @@ public abstract class InstanceResolver<T> {
      */
     public static <T> InstanceResolver<T> createSingleton(T singleton) {
         assert singleton!=null;
-        return new SingletonResolver<T>(singleton);
+        InstanceResolver ir = createFromInstanceResolverAnnotation(singleton.getClass());
+        if(ir==null)
+            ir = new SingletonResolver<T>(singleton);
+        return ir;
     }
 
     /**
@@ -138,7 +141,17 @@ public abstract class InstanceResolver<T> {
      * Creates a default {@link InstanceResolver} that serves the given class.
      */
     public static <T> InstanceResolver<T> createDefault(@NotNull Class<T> clazz) {
-        // check for InstanceResolverAnnotation
+        InstanceResolver<T> ir = createFromInstanceResolverAnnotation(clazz);
+        if(ir==null)
+            ir = new SingletonResolver<T>(createNewInstance(clazz));
+        return ir;
+    }
+
+    /**
+     * Checks for {@link InstanceResolverAnnotation} and creates an instance resolver from it if any.
+     * Otherwise null.
+     */
+    private static <T> InstanceResolver<T> createFromInstanceResolverAnnotation(@NotNull Class<T> clazz) {
         for( Annotation a : clazz.getAnnotations() ) {
             InstanceResolverAnnotation ira = a.annotationType().getAnnotation(InstanceResolverAnnotation.class);
             if(ira==null)   continue;
@@ -160,7 +173,7 @@ public abstract class InstanceResolver<T> {
             }
         }
 
-        return createSingleton(createNewInstance(clazz));
+        return null;
     }
 
     protected static <T> T createNewInstance(Class<T> cl) {
