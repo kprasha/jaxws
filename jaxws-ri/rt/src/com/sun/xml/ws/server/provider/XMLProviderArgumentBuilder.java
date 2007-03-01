@@ -2,15 +2,17 @@ package com.sun.xml.ws.server.provider;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.encoding.xml.XMLMessage;
+import com.sun.xml.ws.resources.ServerMessages;
 
 import javax.activation.DataSource;
 import javax.xml.transform.Source;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.http.HTTPException;
 
@@ -29,10 +31,14 @@ abstract class XMLProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T>
     }
 
     static XMLProviderArgumentBuilder create(ProviderEndpointModel model) {
-        if (model.getServiceMode() == Service.Mode.PAYLOAD) {
+        if (model.mode == Service.Mode.PAYLOAD) {
             return new PayloadSource();
         } else {
-            return model.isSource() ? new PayloadSource() : new DataSourceParameter();
+            if(model.datatype==Source.class)
+                return new PayloadSource();
+            if(model.datatype== DataSource.class)
+                return new DataSourceParameter();
+            throw new WebServiceException(ServerMessages.PROVIDER_INVALID_PARAMETER_TYPE(model.implClass,model.datatype));
         }
     }
 

@@ -1,10 +1,10 @@
 package com.sun.xml.ws.server.provider;
 
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 import javax.xml.ws.soap.SOAPBinding;
 

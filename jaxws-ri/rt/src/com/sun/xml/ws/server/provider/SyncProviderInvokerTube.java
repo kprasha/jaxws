@@ -1,15 +1,15 @@
 package com.sun.xml.ws.server.provider;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.WSBinding;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import javax.xml.ws.Provider;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This tube is used to invoke the {@link Provider} endpoints.

@@ -8,6 +8,7 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.resources.ServerMessages;
 
 import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
@@ -29,11 +30,17 @@ abstract class SOAPProviderArgumentBuilder<T> extends ProviderArgumentsBuilder<T
         this.soapVersion = soapVersion;
     }
 
-    static  SOAPProviderArgumentBuilder create(ProviderEndpointModel model, SOAPVersion soapVersion) {
-        if (model.getServiceMode() == Service.Mode.PAYLOAD) {
+    static ProviderArgumentsBuilder create(ProviderEndpointModel model, SOAPVersion soapVersion) {
+        if (model.mode == Service.Mode.PAYLOAD) {
             return new PayloadSource(soapVersion);
         } else {
-            return model.isSource() ? new MessageSource(soapVersion) : new SOAPMessageParameter(soapVersion);
+            if(model.datatype==Source.class)
+                return new MessageSource(soapVersion);
+            if(model.datatype==SOAPMessage.class)
+                return new SOAPMessageParameter(soapVersion);
+            if(model.datatype==Message.class)
+                return new MessageProviderArgumentBuilder(soapVersion);
+            throw new WebServiceException(ServerMessages.PROVIDER_INVALID_PARAMETER_TYPE(model.implClass,model.datatype));
         }
     }
 
