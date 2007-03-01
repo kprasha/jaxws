@@ -30,6 +30,7 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.Codecs;
 import com.sun.xml.ws.encoding.StreamSOAPCodec;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
 import com.sun.xml.ws.message.AttachmentSetImpl;
@@ -225,7 +226,7 @@ public abstract class Messages {
 
         SOAPVersion ver = SOAPVersion.fromNsUri(reader.getNamespaceURI());
 
-        return StreamSOAPCodec.create(ver).decode(reader);
+        return Codecs.createSOAPEnvelopeXmlCodec(ver).decode(reader);
     }
 
     /**

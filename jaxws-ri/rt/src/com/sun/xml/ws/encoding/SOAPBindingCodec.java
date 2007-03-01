@@ -48,6 +48,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
+import com.sun.xml.ws.api.pipe.Codecs;
 import com.sun.xml.ws.binding.SOAPBindingImpl;
 import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.resources.ServerMessages;
@@ -166,7 +167,7 @@ public class SOAPBindingCodec extends MimeCodec {
     private AcceptContentType _adaptingContentType = new AcceptContentType();
     
     public SOAPBindingCodec(WSBinding binding) {
-        this(binding, com.sun.xml.ws.encoding.StreamSOAPCodec.create(binding.getSOAPVersion()));
+        this(binding, Codecs.createSOAPEnvelopeXmlCodec(binding.getSOAPVersion()));
     }
     
     public SOAPBindingCodec(WSBinding binding, StreamSOAPCodec xmlSoapCodec) {
