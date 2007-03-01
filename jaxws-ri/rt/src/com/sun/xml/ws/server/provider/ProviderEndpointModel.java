@@ -44,7 +44,9 @@ import java.lang.reflect.Type;
  * about Provider endpoint. It proccess annotations to find about Service.Mode
  * It also finds about parameterized type(e.g. Source, SOAPMessage, DataSource)
  * of endpoint class.
- * 
+ *
+ * @author Jitendra Kotamraju
+ * @author Kohsuke Kawaguchi
  */
 final class ProviderEndpointModel<T> {
     /**
@@ -59,8 +61,7 @@ final class ProviderEndpointModel<T> {
     /**
      * T of {@link Provider}&lt;T>.
      */
-    @NotNull
-    final Class datatype;
+    @NotNull final Class datatype;
     /**
      * User class that extends {@link Provider}.
      */
@@ -100,12 +101,12 @@ final class ProviderEndpointModel<T> {
 
     /**
      * Is it PAYLOAD or MESSAGE ??
+     *
+     * @param c endpoint class
+     * @return Service.Mode.PAYLOAD or Service.Mode.MESSAGE
      */
     private static Service.Mode getServiceMode(Class<?> c) {
         ServiceMode mode = c.getAnnotation(ServiceMode.class);
-        if (mode == null) {
-            return Service.Mode.PAYLOAD;
-        }
-        return mode.value();
+        return (mode == null) ? Service.Mode.PAYLOAD : mode.value();
     }
 }
