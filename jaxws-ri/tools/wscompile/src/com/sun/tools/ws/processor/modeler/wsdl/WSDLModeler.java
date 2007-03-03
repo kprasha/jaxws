@@ -818,16 +818,16 @@ public class WSDLModeler extends WSDLModelerBase {
     }
 
     private boolean validateParameterName(List<Parameter> params) {
+        if (options.isExtensionMode())
+            return true;
+
         Message msg = getInputMessage();
         for (Parameter param : params) {
             if (param.isOUT())
                 continue;
             if (param.getCustomName() != null) {
                 if (Names.isJavaReservedWord(param.getCustomName())) {
-                    if (options.isExtensionMode())
-                        warning(param.getEntity(), ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_CUSTOM_NAME(info.operation.getName(), param.getCustomName()));
-                    else
-                        error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_CUSTOM_NAME(info.operation.getName(), param.getCustomName()));
+                    error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_CUSTOM_NAME(info.operation.getName(), param.getCustomName()));
                     return false;
                 }
                 return true;
@@ -835,19 +835,13 @@ public class WSDLModeler extends WSDLModelerBase {
             //process doclit wrapper style
             if (param.isEmbedded() && !(param.getBlock().getType() instanceof RpcLitStructure)) {
                 if (Names.isJavaReservedWord(param.getName())) {
-                    if (options.isExtensionMode())
-                        warning(param.getEntity(), ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_WRAPPER_STYLE(info.operation.getName(), param.getName(), param.getBlock().getName()));
-                    else
-                        error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_WRAPPER_STYLE(info.operation.getName(), param.getName(), param.getBlock().getName()));
+                    error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_WRAPPER_STYLE(info.operation.getName(), param.getName(), param.getBlock().getName()));
                     return false;
                 }
             } else {
                 //non-wrapper style and rpclit
                 if (Names.isJavaReservedWord(param.getName())) {
-                    if (options.isExtensionMode())
-                        warning(param.getEntity(), ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_NON_WRAPPER_STYLE(info.operation.getName(), msg.getName(), param.getName()));
-                    else
-                        error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_NON_WRAPPER_STYLE(info.operation.getName(), msg.getName(), param.getName()));
+                    error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_NON_WRAPPER_STYLE(info.operation.getName(), msg.getName(), param.getName()));
                     return false;
                 }
             }
@@ -861,10 +855,7 @@ public class WSDLModeler extends WSDLModelerBase {
                     continue;
                 if (param.getCustomName() != null) {
                     if (Names.isJavaReservedWord(param.getCustomName())) {
-                        if (options.isExtensionMode())
-                            warning(param.getEntity(), ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_CUSTOM_NAME(info.operation.getName(), param.getCustomName()));
-                        else
-                            error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_CUSTOM_NAME(info.operation.getName(), param.getCustomName()));
+                        error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_CUSTOM_NAME(info.operation.getName(), param.getCustomName()));
                         return false;
                     }
                     return true;
@@ -874,10 +865,7 @@ public class WSDLModeler extends WSDLModelerBase {
                     if (param.isReturn())
                         continue;
                     if (!param.getName().equals("return") && Names.isJavaReservedWord(param.getName())) {
-                        if (options.isExtensionMode())
-                            warning(param.getEntity(), ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_WRAPPER_STYLE(info.operation.getName(), param.getName(), param.getBlock().getName()));
-                        else
-                            error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_WRAPPER_STYLE(info.operation.getName(), param.getName(), param.getBlock().getName()));
+                        error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_WRAPPER_STYLE(info.operation.getName(), param.getName(), param.getBlock().getName()));
                         return false;
                     }
                 } else {
@@ -886,10 +874,7 @@ public class WSDLModeler extends WSDLModelerBase {
 
                     //non-wrapper style and rpclit
                     if (Names.isJavaReservedWord(param.getName())) {
-                        if (options.isExtensionMode())
-                            warning(param.getEntity(), ModelerMessages.WSDLMODELER_WARNING_IGNORING_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_NON_WRAPPER_STYLE(info.operation.getName(), msg.getName(), param.getName()));
-                        else
-                            error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_NON_WRAPPER_STYLE(info.operation.getName(), msg.getName(), param.getName()));
+                        error(param.getEntity(), ModelerMessages.WSDLMODELER_INVALID_OPERATION_JAVA_RESERVED_WORD_NOT_ALLOWED_NON_WRAPPER_STYLE(info.operation.getName(), msg.getName(), param.getName()));
                         return false;
                     }
                 }
