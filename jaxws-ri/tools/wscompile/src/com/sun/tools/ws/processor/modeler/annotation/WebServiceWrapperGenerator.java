@@ -279,13 +279,10 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         WebParam webParam;
         TypeMirror paramType;
         String paramName;
+
         String paramNamespace;
         TypeMirror holderType;
         int paramIndex = -1;
-//        System.out.println("method: "+method.toString());
-//        System.out.println("returnType: "+ method.getReturnType());
-
-//        TypeMirror typeMirror = apEnv.getTypeUtils().getErasure(method.getReturnType());
         TypeMirror typeMirror = getSafeType(method.getReturnType());
 
         if (!(method.getReturnType() instanceof VoidType) && !isResultHeader) {
@@ -297,10 +294,8 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             List<Annotation> jaxbAnnotation = collectJAXBAnnotations(param);
             WebParam.Mode mode = null;
             paramIndex++;
-//            System.out.println("param.getType(): "+param.getType());
             holderType = builder.getHolderValueType(param.getType());
             webParam = param.getAnnotation(WebParam.class);
-//            typeMirror = apEnv.getTypeUtils().getErasure(param.getType());            
             typeMirror =  getSafeType(param.getType());
             paramType = typeMirror;
             paramNamespace = wrapped ? EMTPY_NAMESPACE_ID : typeNamespace;
@@ -314,15 +309,17 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
             if (webParam != null) {
                 mode = webParam.mode();
                 if (webParam.name().length() > 0)
-                    paramName = JAXBRIContext.mangleNameToVariableName(webParam.name());
-
-                    //We wont have to do this if JAXBRIContext.mangleNameToVariableName() takes
-                    //care of mangling java identifiers
-                    paramName = Names.getJavaReserverVarialbeName(paramName);
+                    paramName = webParam.name();
                 if (webParam.targetNamespace().length() > 0)
                     paramNamespace = webParam.targetNamespace();
             }
-            MemberInfo memInfo = new MemberInfo(paramType, paramName,
+
+            String propertyName = JAXBRIContext.mangleNameToVariableName(paramName);
+            //We wont have to do this if JAXBRIContext.mangleNameToVariableName() takes
+            //care of mangling java identifiers
+            propertyName = Names.getJavaReserverVarialbeName(propertyName);
+
+            MemberInfo memInfo = new MemberInfo(paramType, propertyName,
                 new QName(paramNamespace, paramName), param, jaxbAnnotation.toArray(new Annotation[jaxbAnnotation.size()]));
             if (holderType != null) {
                 if (mode == null || mode.equals(WebParam.Mode.INOUT)) {
