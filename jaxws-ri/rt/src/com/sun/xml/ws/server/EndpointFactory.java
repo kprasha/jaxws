@@ -26,10 +26,10 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.AsyncProvider;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.api.server.SDDocument;
@@ -68,7 +68,11 @@ import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -365,7 +369,9 @@ public class EndpointFactory {
      * Returns the wsdl from @WebService, or @WebServiceProvider annotation using
      * wsdlLocation element.
      *
-     * @param implType endpoint implementation class
+     * @param implType
+     *      endpoint implementation class
+     *      make sure that you called {@link #verifyImplementorClass} on it.
      * @return wsdl if there is wsdlLocation, else null
      */
     public static @Nullable String getWsdlLocation(Class<?> implType) {
