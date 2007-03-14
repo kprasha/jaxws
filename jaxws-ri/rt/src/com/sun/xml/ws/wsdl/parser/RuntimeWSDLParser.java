@@ -44,9 +44,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
 
 import javax.jws.soap.SOAPBinding.Style;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -58,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -775,20 +771,8 @@ public class RuntimeWSDLParser {
      * to parse a WSDL file.
      */
     private static XMLStreamReader createReader(URL wsdlLoc) throws IOException, XMLStreamException {
-        URLConnection connection = wsdlLoc.openConnection();
-        if(connection instanceof HttpsURLConnection){
-            ((HttpsURLConnection)connection).setHostnameVerifier(new HostnameVerifier(){
-                public boolean verify(String string, SSLSession sslSession) {
-                    return true;
-                }
-            });
-        }
         InputStream stream = wsdlLoc.openStream();
         return new TidyXMLStreamReader(XMLInputFactory.newInstance().createXMLStreamReader(wsdlLoc.toExternalForm(), stream), stream);
-    }
-
-    private static XMLStreamReader createReader(Source src) throws XMLStreamException {
-        return new TidyXMLStreamReader(XMLInputFactory.newInstance().createXMLStreamReader(src), null);
     }
 
     private void register(WSDLParserExtension e) {
