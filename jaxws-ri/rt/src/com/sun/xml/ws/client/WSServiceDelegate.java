@@ -186,7 +186,7 @@ public class WSServiceDelegate extends WSService {
         if (wsdl != null) {
             try {
                 URL url = wsdl.getSystemId()==null ? null : new URL(wsdl.getSystemId());
-                WSDLModelImpl model = parseWSDL(url, wsdl);
+                WSDLModelImpl model = parseWSDL(url);
                 service = model.getService(this.serviceName);
                 if (service == null)
                     throw new WebServiceException(
@@ -220,11 +220,10 @@ public class WSServiceDelegate extends WSService {
      * @param wsdlDocumentLocation
      *      Either this or <tt>wsdl</tt> parameter must be given.
      *      Null location means the system won't be able to resolve relative references in the WSDL,
-     *      So think twice before passing in null.
      */
-    private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdl) {
+    private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation) {
         try {
-            return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdl, createDefaultCatalogResolver(),
+            return RuntimeWSDLParser.parse(wsdlDocumentLocation, createDefaultCatalogResolver(),
                 true, ServiceFinder.find(WSDLParserExtension.class).toArray());
         } catch (IOException e) {
             throw new WebServiceException(e);
@@ -478,7 +477,7 @@ public class WSServiceDelegate extends WSService {
                 throw new WebServiceException(ProviderApiMessages.NULL_WSDL());
             }
             try {
-                WSDLModelImpl eprWsdlMdl = parseWSDL(new URL(wsepr.getAddress()), eprWsdlSource);
+                WSDLModelImpl eprWsdlMdl = parseWSDL(new URL(wsepr.getAddress()));
                 wsdlService = eprWsdlMdl.getService(serviceName);
                 if (wsdlService == null)
                     throw new WebServiceException(ClientMessages.INVALID_SERVICE_NAME(serviceName,

@@ -52,9 +52,7 @@ import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.List;
-import java.awt.*;
 
 /**
  * The entry point to the JAX-WS RI from the JAX-WS API.
@@ -157,7 +155,7 @@ public class ProviderImpl extends Provider {
                 EntityResolver er = XmlUtil.createDefaultCatalogResolver();
 
                 URL wsdlLoc = new URL(wsdlDocumentLocation);
-                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(wsdlLoc, null, er,
+                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(wsdlLoc, er,
                         false, ServiceFinder.find(WSDLParserExtension.class).toArray());
                 if (serviceName != null) {
                     WSDLService wsdlService = wsdlDoc.getService(serviceName);
