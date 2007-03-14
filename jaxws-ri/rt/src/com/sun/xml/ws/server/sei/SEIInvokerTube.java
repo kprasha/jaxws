@@ -48,14 +48,15 @@ public class SEIInvokerTube extends InvokerTube {
     private final SOAPVersion soapVersion;
     private final WSBinding binding;
     private final AbstractSEIModelImpl model;
-    private final EndpointMethodDispatcherGetter methodDispatcherGetter;
+    private final List<EndpointMethodDispatcher> dispatcherList;
 
     public SEIInvokerTube(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
         super(invoker);
         this.soapVersion = binding.getSOAPVersion();
         this.binding = binding;
         this.model = model;
-        methodDispatcherGetter = new EndpointMethodDispatcherGetter(model, binding, this);
+        EndpointMethodDispatcherGetter methodDispatcherGetter = new EndpointMethodDispatcherGetter(model, binding, this);
+        dispatcherList = methodDispatcherGetter.getDispatcherList();
     }
 
     /**
@@ -64,8 +65,6 @@ public class SEIInvokerTube extends InvokerTube {
      * that traverses through the Pipeline to transport.
      */
     public @NotNull NextAction processRequest(@NotNull Packet req) {
-        List<EndpointMethodDispatcher> dispatcherList = methodDispatcherGetter.getDispatcherList();
-
         Packet res = null;
 
         try {
