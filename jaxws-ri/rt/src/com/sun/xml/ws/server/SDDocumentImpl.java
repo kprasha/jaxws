@@ -35,7 +35,6 @@ import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -242,8 +241,12 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
             out = f.filter(this,out);
         }
 
-        new WSDLPatcher(owner.owner,this,portAddressResolver,resolver).bridge(
-            source.read(xif), out );
+        XMLStreamReader xsr = source.read(xif);
+        try {
+            new WSDLPatcher(owner.owner,this,portAddressResolver,resolver).bridge(xsr,out);
+        } finally {
+            xsr.close();
+        }
     }
 
 
