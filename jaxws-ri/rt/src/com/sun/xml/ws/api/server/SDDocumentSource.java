@@ -25,9 +25,9 @@ package com.sun.xml.ws.api.server;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -51,6 +51,8 @@ public abstract class SDDocumentSource {
      * @param xif
      *      The implementation may choose to use this object when it wants to
      *      create a new parser (or it can just ignore this parameter completely.)
+     * @return
+     *      The caller is responsible for closing the reader to avoid resource leak.
      *
      * @throws XMLStreamException
      *      if something goes wrong while creating a parser.
