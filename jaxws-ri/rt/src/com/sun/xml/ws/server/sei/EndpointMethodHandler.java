@@ -243,13 +243,13 @@ final class EndpointMethodHandler {
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
 
-            if (cause != null && !(cause instanceof RuntimeException) && cause instanceof Exception) {
+            if (!(cause instanceof RuntimeException) && cause instanceof Exception) {
                 // Service specific exception
                 LOGGER.log(Level.INFO, cause.getMessage(), cause);
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion,
                         javaMethodModel.getCheckedException(cause.getClass()), cause);
             } else {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                LOGGER.log(Level.SEVERE, cause.getMessage(), cause);
                 responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, cause);
             }
         } catch (Exception e) {
