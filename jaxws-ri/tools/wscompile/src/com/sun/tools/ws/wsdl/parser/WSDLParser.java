@@ -1081,7 +1081,7 @@ public class WSDLParser {
 
     private void checkNotWsdlElement(Element e) {
         // possible extensibility element -- must live outside the WSDL namespace
-        if (e.getNamespaceURI().equals(Constants.NS_WSDL))
+        if (e.getNamespaceURI() != null && e.getNamespaceURI().equals(Constants.NS_WSDL))
             errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_INVALID_WSDL_ELEMENT(e.getTagName()));
     }
 
@@ -1098,7 +1098,7 @@ public class WSDLParser {
                 e,
                 Constants.ATTR_REQUIRED,
                 Constants.NS_WSDL);
-        if (required != null && required.equals(Constants.TRUE)) {
+        if (required != null && required.equals(Constants.TRUE) && !options.isExtensionMode()) {
             errReceiver.error(forest.locatorTable.getStartLocation(e), WsdlMessages.PARSING_REQUIRED_EXTENSIBILITY_ELEMENT(e.getTagName(),
                 e.getNamespaceURI()));
         }
