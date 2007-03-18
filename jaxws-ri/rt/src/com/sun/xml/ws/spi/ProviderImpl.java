@@ -47,6 +47,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.*;
 import javax.xml.ws.spi.Provider;
 import javax.xml.ws.spi.ServiceDelegate;
@@ -155,7 +156,7 @@ public class ProviderImpl extends Provider {
                 EntityResolver er = XmlUtil.createDefaultCatalogResolver();
 
                 URL wsdlLoc = new URL(wsdlDocumentLocation);
-                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(wsdlLoc, er,
+                WSDLModelImpl wsdlDoc = RuntimeWSDLParser.parse(wsdlLoc, new StreamSource(wsdlLoc.toExternalForm()), er,
                         false, ServiceFinder.find(WSDLParserExtension.class).toArray());
                 if (serviceName != null) {
                     WSDLService wsdlService = wsdlDoc.getService(serviceName);
