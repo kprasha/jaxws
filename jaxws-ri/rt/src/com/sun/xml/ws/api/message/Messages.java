@@ -37,6 +37,7 @@ import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.DOMMessage;
 import com.sun.xml.ws.message.EmptyMessageImpl;
 import com.sun.xml.ws.message.ProblemActionHeader;
+import com.sun.xml.ws.message.stream.PayloadStreamReaderMessage;
 import com.sun.xml.ws.message.jaxb.JAXBMessage;
 import com.sun.xml.ws.message.saaj.SAAJMessage;
 import com.sun.xml.ws.message.source.PayloadSourceMessage;
@@ -137,6 +138,22 @@ public abstract class Messages {
      */
     public static Message createUsingPayload(Source payload, SOAPVersion ver) {
         return new PayloadSourceMessage(payload, ver);
+    }
+
+    /**
+     * Creates a {@link Message} using {@link XMLStreamReader} as payload.
+     *
+     * @param payload
+     *      XMLStreamReader payload is {@link Message}'s payload
+     *      Must not be null. Once this method is invoked, the created
+     *      {@link Message} will own the {@link XMLStreamReader}, so it shall
+     *      never be touched directly.
+     *
+     * @param ver
+     *      The SOAP version of the message. Must not be null.
+     */
+    public static Message createUsingPayload(XMLStreamReader payload, SOAPVersion ver) {
+        return new PayloadStreamReaderMessage(payload, ver);
     }
 
     /**
