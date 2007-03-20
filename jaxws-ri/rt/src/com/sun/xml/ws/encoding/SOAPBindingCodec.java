@@ -73,7 +73,7 @@ import com.sun.xml.ws.transport.http.WSHTTPConnection;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-public class SOAPBindingCodec extends MimeCodec {
+public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pipe.SOAPBindingCodec {
     /**
      * Base HTTP Accept request-header.
      */
@@ -136,7 +136,11 @@ public class SOAPBindingCodec extends MimeCodec {
      * The Accept header for Fast Infoset and XML encodings
      */
     private final String connegXmlAccept;
-    
+
+    public StreamSOAPCodec getXMLCodec() {
+        return xmlSoapCodec;
+    }
+
     private class AcceptContentType implements ContentType {
         private ContentType _c;
         private String _accept;
