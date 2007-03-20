@@ -148,7 +148,7 @@ public class RuntimeWSDLParser {
 
     private WSDLModelImpl parseUsingMex(@NotNull URL wsdlLoc, @NotNull EntityResolver resolver, boolean isClientSide, WSDLParserExtension[] extensions) throws IOException, SAXException, XMLStreamException, URISyntaxException {
         //try MEX
-        MetaDataResolver mdResolver;
+        MetaDataResolver mdResolver = null;
         ServiceDescriptor serviceDescriptor = null;
         RuntimeWSDLParser wsdlParser = null;
 
@@ -173,7 +173,7 @@ public class RuntimeWSDLParser {
         }
         //Incase that mex is not present or it couldn't get the metadata, try by appending ?wsdl and give
         // it a last shot else fail
-        if ((wsdlLoc.getProtocol().equals("http") || wsdlLoc.getProtocol().equals("https")) && (wsdlLoc.getQuery() == null)) {
+        if (mdResolver == null && (wsdlLoc.getProtocol().equals("http") || wsdlLoc.getProtocol().equals("https")) && (wsdlLoc.getQuery() == null)) {
             String urlString = wsdlLoc.toExternalForm();
             urlString += "?wsdl";
             wsdlLoc = new URL(urlString);
