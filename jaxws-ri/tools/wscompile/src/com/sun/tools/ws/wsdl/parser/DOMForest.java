@@ -144,12 +144,6 @@ public class DOMForest {
 
         systemId = normalizeSystemId(systemId);
 
-        if (core.containsKey(systemId)) {
-            // this document has already been parsed. Just ignore.
-            return core.get(systemId);
-        }
-
-
         InputSource is = null;
 
         // allow entity resolver to find the actual byte stream.
@@ -157,6 +151,16 @@ public class DOMForest {
             is = options.entityResolver.resolveEntity(null, systemId);
         if (is == null)
             is = new InputSource(systemId);
+        else
+            systemId=is.getSystemId();
+
+        if (core.containsKey(systemId)) {
+            // this document has already been parsed. Just ignore.
+            return core.get(systemId);
+        }        
+
+        if(!root)
+            addExternalReferences(systemId);
 
         // but we still use the original system Id as the key.
         return parse(systemId, is, root);
