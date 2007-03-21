@@ -199,7 +199,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
             // no WS-A headers are found
             if (addressingRequired)
                 // if WS-A is required, then throw an exception looking for wsa:Action header
-                throw new InvalidMapException(addressingVersion.actionTag, addressingVersion.invalidCardinalityTag);
+                throw new MapRequiredException(addressingVersion.actionTag);
             else
                 // else no need to process
                 return;
