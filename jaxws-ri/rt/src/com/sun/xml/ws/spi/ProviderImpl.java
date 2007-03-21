@@ -174,9 +174,11 @@ public class ProviderImpl extends Provider {
                 throw new IllegalStateException(ProviderApiMessages.ERROR_WSDL(wsdlDocumentLocation),e);
             }
         }
+        // Supress writing ServiceName and EndpointName in W3C EPR,
+        // Until the ns for those metadata elements is resolved.
         return new WSEndpointReference(
             AddressingVersion.fromSpecClass(W3CEndpointReference.class),
-            address, serviceName, portName, null, metadata, wsdlDocumentLocation, referenceParameters).toSpec(W3CEndpointReference.class);
+            address, null /*serviceName*/, null /*portName*/, null, metadata, null /*wsdlDocumentLocation*/, referenceParameters).toSpec(W3CEndpointReference.class);
     }
 
     private static JAXBContext getEPRJaxbContext() {
