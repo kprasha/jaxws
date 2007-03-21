@@ -583,6 +583,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
 
     protected boolean isLegalMethod(MethodDeclaration method, TypeDeclaration typeDecl) {
         WebMethod webMethod = method.getAnnotation(WebMethod.class);
+        //SEI cannot have methods with @WebMethod(exclude=true)
+        if (typeDecl instanceof InterfaceDeclaration && webMethod != null && webMethod.exclude())
+            builder.onError(method.getPosition(), WebserviceapMessages.localizableWEBSERVICEAP_INVALID_SEI_ANNOTATION_ELEMENT_EXCLUDE("exclude=true", typeDecl.getQualifiedName(), method.toString()));
+        
         if (hasWebMethods && (webMethod == null))
             return true;
         if (!hasWebMethods && (webMethod !=null) && webMethod.exclude()) {
