@@ -256,7 +256,7 @@ final class EndpointMethodHandler {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             responseMessage = SOAPFaultBuilder.createSOAPFaultMessage(soapVersion, null, e);
         }
-        return req.createServerResponse(responseMessage, req.endpoint.getPort(), req.endpoint.getBinding());
+        return req.createServerResponse(responseMessage, req.endpoint.getPort(), javaMethodModel.getOwner(), req.endpoint.getBinding());
     }
 
     /**

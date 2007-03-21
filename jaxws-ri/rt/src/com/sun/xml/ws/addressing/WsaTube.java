@@ -101,9 +101,10 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
 
     protected WsaTubeHelper getTubeHelper() {
         if(binding.isFeatureEnabled(AddressingFeature.class)) {
-            return new WsaTubeHelperImpl(wsdlPort, binding);
+            return new WsaTubeHelperImpl(wsdlPort, null, binding);
         } else if(binding.isFeatureEnabled(MemberSubmissionAddressingFeature.class)) {
-            return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, binding);
+            //seiModel is null as it is not needed.
+            return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, null, binding);
         } else {
             // Addressing is not enabled, WsaTube should not be included in the pipeline
             throw new WebServiceException(AddressingMessages.ADDRESSING_NOT_ENABLED(this.getClass().getSimpleName()));
@@ -134,7 +135,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         if (soapFault != null) {
             // WS-A fault processing for one-way methods
             if (packet.getMessage().isOneWay(wsdlPort)) {
-                return packet.createServerResponse(null, wsdlPort, binding);
+                return packet.createServerResponse(null, wsdlPort, null, binding);
             }
 
             Message m = Messages.create(soapFault);
@@ -142,7 +143,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
                 m.getHeaders().add(s11FaultDetailHeader);
             }
 
-            Packet response = packet.createServerResponse(m, wsdlPort, binding);
+            Packet response = packet.createServerResponse(m, wsdlPort, null,  binding);
             return response;
         }
 

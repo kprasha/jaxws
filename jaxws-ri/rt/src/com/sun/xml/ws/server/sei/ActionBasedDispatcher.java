@@ -60,9 +60,15 @@ final class ActionBasedDispatcher implements EndpointMethodDispatcher {
 
         for( JavaMethodImpl m : model.getJavaMethods() ) {
             EndpointMethodHandler handler = new EndpointMethodHandler(invokerTube,m,binding);
-            String action = m.getOperation().getOperation().getInput().getAction();
-            if (action != null)
+            String action = m.getInputAction();
+            //first look at annotations and then in wsdlmodel
+            if(action != null && !action.equals("")) {
                 actionMethodHandlers.put(action, handler);
+            } else {
+                action = m.getOperation().getOperation().getInput().getAction();
+                if (action != null)
+                    actionMethodHandlers.put(action, handler);
+            }    
         }
     }
 

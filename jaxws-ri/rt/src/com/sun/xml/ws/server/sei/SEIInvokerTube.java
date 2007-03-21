@@ -76,7 +76,7 @@ public class SEIInvokerTube extends InvokerTube {
                 }
             }
         } catch (DispatchException e) {
-            return doReturnWith(req.createServerResponse(e.fault, model.getPort(), binding));
+            return doReturnWith(req.createServerResponse(e.fault, model.getPort(), null, binding));
         }
 
         // PayloadQNameBasedDispatcher should throw DispatchException

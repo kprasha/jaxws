@@ -45,7 +45,7 @@ abstract class ProviderArgumentsBuilder<T> {
      */
     protected Packet getResponse(Packet request, Exception e, WSDLPort port, WSBinding binding) {
         Message message = getResponseMessage(e);
-        Packet response = request.createServerResponse(message,port,binding);
+        Packet response = request.createServerResponse(message,port,null,binding);
         return response;
     }
 
@@ -65,7 +65,7 @@ abstract class ProviderArgumentsBuilder<T> {
         if (returnValue != null) {
             message = getResponseMessage(returnValue);
         }
-        Packet response = request.createServerResponse(message,port,binding);
+        Packet response = request.createServerResponse(message,port,null,binding);
         return response;
     }
 

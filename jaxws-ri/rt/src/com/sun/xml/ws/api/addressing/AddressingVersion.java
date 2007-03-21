@@ -31,6 +31,7 @@ import com.sun.xml.ws.addressing.v200408.MemberSubmissionAddressingConstants;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.message.stream.OutboundStreamHeader;
@@ -71,8 +72,8 @@ public enum AddressingVersion {
         }
 
         @Override
-        public WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
-            return new com.sun.xml.ws.addressing.WsaTubeHelperImpl(wsdlPort, binding);
+        public WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, SEIModel seiModel, WSBinding binding) {
+            return new com.sun.xml.ws.addressing.WsaTubeHelperImpl(wsdlPort, seiModel, binding);
         }
 
         @Override
@@ -148,8 +149,8 @@ public enum AddressingVersion {
         }
 
         @Override
-        public WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding) {
-            return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, binding);
+        public WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, SEIModel seiModel, WSBinding binding) {
+            return new com.sun.xml.ws.addressing.v200408.WsaTubeHelperImpl(wsdlPort, seiModel, binding);
         }
 
         @Override
@@ -499,7 +500,7 @@ public enum AddressingVersion {
      *
      * @return WS-A version specific helper
      */
-    public abstract WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, WSBinding binding);
+    public abstract WsaTubeHelper getWsaHelper(WSDLPort wsdlPort, SEIModel seiModel, WSBinding binding);
 
     /**
      * Gets the none URI value associated with this WS-Addressing version.

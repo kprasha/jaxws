@@ -191,7 +191,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                 // TODO XML/HTTP binding
                 Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
                         soapVersion, null, error);
-                Packet response = request.createServerResponse(faultMsg, request.endpoint.getPort(),
+                Packet response = request.createServerResponse(faultMsg, request.endpoint.getPort(), null,
                         request.endpoint.getBinding());
                 if (callback!=null) {
                     callback.onCompletion(response);
@@ -222,7 +222,7 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
                     re.printStackTrace();
                     Message faultMsg = SOAPFaultBuilder.createSOAPFaultMessage(
                             soapVersion, null, re);
-                    response = request.createServerResponse(faultMsg, request.endpoint.getPort(), request.endpoint.getBinding());
+                    response = request.createServerResponse(faultMsg, request.endpoint.getPort(), null, request.endpoint.getBinding());
                 }
                 return response;
             }
