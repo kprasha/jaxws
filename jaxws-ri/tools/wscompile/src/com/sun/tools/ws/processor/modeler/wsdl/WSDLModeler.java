@@ -533,6 +533,10 @@ public class WSDLModeler extends WSDLModelerBase {
             response = new Response(null, errReceiver);
         }
 
+        //set the style based on heuristic that message has either all parts defined
+        // using type(RPC) or element(DOCUMENT)       
+        setNonSoapStyle(inputMessage, outputMessage);
+
         // Process parameterOrder and get the parameterList
         List<MessagePart> parameterList = getParameterOrder();
 
@@ -585,6 +589,36 @@ public class WSDLModeler extends WSDLModelerBase {
             warning(portType, "Can not generate Async methods for non-soap binding!");
         }
         return info.operation;
+    }
+
+    /**
+     * This method is added to fix one of the use case for j2ee se folks, so that we determine
+     * for non_soap wsdl what could be the style - rpc or document based on parts in the message.
+     *
+     * We assume that the message parts could have either all of them with type attribute (RPC)
+     * or element (DOCUMENT)
+     * 
+     * Shall this check if parts are mixed and throw error message?
+     */
+    private void setNonSoapStyle(Message inputMessage, Message outputMessage) {
+        SOAPStyle style = SOAPStyle.DOCUMENT;
+        for(MessagePart part:inputMessage.getParts()){
+            if(part.getDescriptorKind() == SchemaKinds.XSD_TYPE)
+                style = SOAPStyle.RPC;
+            else
+                style = SOAPStyle.DOCUMENT;
+        }
+
+        //check the outputMessage parts
+        if(outputMessage != null){
+            for(MessagePart part:outputMessage.getParts()){
+                if(part.getDescriptorKind() == SchemaKinds.XSD_TYPE)
+                    style = SOAPStyle.RPC;
+                else
+                    style = SOAPStyle.DOCUMENT;
+            }
+        }
+        info.modelPort.setStyle(style);
     }
 
     /* (non-Javadoc)
