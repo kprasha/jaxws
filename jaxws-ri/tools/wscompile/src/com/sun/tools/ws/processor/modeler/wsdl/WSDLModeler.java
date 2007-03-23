@@ -114,9 +114,6 @@ public class WSDLModeler extends WSDLModelerBase {
             document.validateLocally();
             forest = parser.getDOMForest();
 
-            //build the jaxbModel to be used latter
-            buildJAXBModel(document);
-
             Model model = internalBuildModel(document);
             if(model == null || errReceiver.hadError())
                 return null;                    
@@ -169,6 +166,9 @@ public class WSDLModeler extends WSDLModelerBase {
 
     private Model internalBuildModel(WSDLDocument document) {
         numPasses++;
+
+        //build the jaxbModel to be used latter
+        buildJAXBModel(document);
 
         QName modelName =
                 new QName(
@@ -2156,7 +2156,8 @@ public class WSDLModeler extends WSDLModelerBase {
         //set the java package where wsdl artifacts will be generated
         //if user provided package name  using -p switch (or package property on wsimport ant task)
         //ignore the package customization in the wsdl and schema bidnings
-        if (options.defaultPackage != null) {
+        //formce the -p option only in the first pass
+        if (numPasses == 1 && options.defaultPackage != null) {
             jaxbModelBuilder.getJAXBSchemaCompiler().forcePackageName(options.defaultPackage);
         } else {
             options.defaultPackage = getJavaPackage();
