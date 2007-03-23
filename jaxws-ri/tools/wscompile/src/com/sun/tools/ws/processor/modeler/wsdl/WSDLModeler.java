@@ -74,10 +74,12 @@ public class WSDLModeler extends WSDLModelerBase {
     private final Map<QName, QName> uniqueBodyBlocks = new HashMap<QName, QName>();
     private final QName VOID_BODYBLOCK = new QName("");
     private ClassNameCollector classNameCollector;
+    private final String explicitDefaultPackage;
 
     public WSDLModeler(WsimportOptions options, ErrorReceiver receiver) {
         super(options, receiver);
         this.classNameCollector = new ClassNameCollector();
+        this.explicitDefaultPackage = options.defaultPackage;
     }
 
 
@@ -2157,7 +2159,7 @@ public class WSDLModeler extends WSDLModelerBase {
         //if user provided package name  using -p switch (or package property on wsimport ant task)
         //ignore the package customization in the wsdl and schema bidnings
         //formce the -p option only in the first pass
-        if (numPasses == 1 && options.defaultPackage != null) {
+        if (explicitDefaultPackage != null) {
             jaxbModelBuilder.getJAXBSchemaCompiler().forcePackageName(options.defaultPackage);
         } else {
             options.defaultPackage = getJavaPackage();
