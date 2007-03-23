@@ -86,7 +86,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
                 QName rootName = reader.getName();
                 if(rootName.equals(WSDLConstants.QNAME_SCHEMA)) {
                     String tns = ParserUtil.getMandatoryNonEmptyAttribute(reader, WSDLConstants.ATTR_TNS);
-                    Set<URL> importedDocs = new HashSet<URL>();
+                    Set<String> importedDocs = new HashSet<String>();
                     while (XMLStreamReaderUtil.nextContent(reader) != XMLStreamConstants.END_DOCUMENT) {
                          if (reader.getEventType() != XMLStreamConstants.START_ELEMENT)
                             continue;
@@ -94,7 +94,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
                         if (SCHEMA_INCLUDE_QNAME.equals(name) || SCHEMA_IMPORT_QNAME.equals(name)) {
                             String importedDoc = reader.getAttributeValue(null, "schemaLocation");
                             if (importedDoc != null) {
-                                importedDocs.add(new URL(src.getSystemId(), importedDoc));
+                                importedDocs.add(new URL(src.getSystemId(), importedDoc).toString());
                             }
                         }
                     }
@@ -104,7 +104,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
 
                     boolean hasPortType = false;
                     boolean hasService = false;
-                    Set<URL> importedDocs = new HashSet<URL>();
+                    Set<String> importedDocs = new HashSet<String>();
 
                     // if WSDL, parse more
                     while (XMLStreamReaderUtil.nextContent(reader) != XMLStreamConstants.END_DOCUMENT) {
@@ -128,12 +128,12 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
                         } else if (WSDLConstants.QNAME_IMPORT.equals(name)) {
                             String importedDoc = reader.getAttributeValue(null, "location");
                             if (importedDoc != null) {
-                                importedDocs.add(new URL(src.getSystemId(), importedDoc));
+                                importedDocs.add(new URL(src.getSystemId(), importedDoc).toString());
                             }
                         } else if (SCHEMA_INCLUDE_QNAME.equals(name) || SCHEMA_IMPORT_QNAME.equals(name)) {
                             String importedDoc = reader.getAttributeValue(null, "schemaLocation");
                             if (importedDoc != null) {
-                                importedDocs.add(new URL(src.getSystemId(), importedDoc));
+                                importedDocs.add(new URL(src.getSystemId(), importedDoc).toString());
                             }
                         }
                     }
@@ -170,13 +170,13 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
      * Must not be null.
      */
     private final URL url;
-    private final Set<URL> imports;
+    private final Set<String> imports;
 
     protected SDDocumentImpl(QName rootName, URL url, SDDocumentSource source) {
-        this(rootName, url, source, new HashSet<URL>());
+        this(rootName, url, source, new HashSet<String>());
     }
 
-    protected SDDocumentImpl(QName rootName, URL url, SDDocumentSource source, Set<URL> imports) {
+    protected SDDocumentImpl(QName rootName, URL url, SDDocumentSource source, Set<String> imports) {
         assert url!=null;
         this.rootName = rootName;
         this.source = source;
@@ -208,7 +208,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         return url;
     }
 
-    public Set<URL> getImports() {
+    public Set<String> getImports() {
         return imports;
     }
 
@@ -259,7 +259,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         private final String targetNamespace;
 
         public SchemaImpl(QName rootName, URL url, SDDocumentSource source, String targetNamespace,
-                          Set<URL> imports) {
+                          Set<String> imports) {
             super(rootName, url, source, imports);
             this.targetNamespace = targetNamespace;
         }
@@ -280,7 +280,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         private final boolean hasService;
 
         public WSDLImpl(QName rootName, URL url, SDDocumentSource source, String targetNamespace, boolean hasPortType,
-                        boolean hasService, Set<URL> imports) {
+                        boolean hasService, Set<String> imports) {
             super(rootName, url, source, imports);
             this.targetNamespace = targetNamespace;
             this.hasPortType = hasPortType;

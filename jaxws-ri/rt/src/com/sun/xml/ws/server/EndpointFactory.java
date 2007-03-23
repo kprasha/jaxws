@@ -214,18 +214,18 @@ public class EndpointFactory {
      */
     private static List<SDDocumentImpl> findMetadataClosure(SDDocumentImpl primaryDoc, List<SDDocumentImpl> docList) {
         // create a map for old metadata
-        Map<URL, SDDocumentImpl> oldMap = new HashMap<URL, SDDocumentImpl>();
+        Map<String, SDDocumentImpl> oldMap = new HashMap<String, SDDocumentImpl>();
         for(SDDocumentImpl doc : docList) {
-            oldMap.put(doc.getSystemId(), doc);
+            oldMap.put(doc.getSystemId().toString(), doc);
         }
         // create a map for new metadata
-        Map<URL, SDDocumentImpl> newMap = new HashMap<URL, SDDocumentImpl>();
-        newMap.put(primaryDoc.getSystemId(), primaryDoc);
+        Map<String, SDDocumentImpl> newMap = new HashMap<String, SDDocumentImpl>();
+        newMap.put(primaryDoc.getSystemId().toString(), primaryDoc);
 
-        List<URL> remaining = new ArrayList<URL>();
+        List<String> remaining = new ArrayList<String>();
         remaining.addAll(primaryDoc.getImports());
         while(!remaining.isEmpty()) {
-            URL url = remaining.remove(0);
+            String url = remaining.remove(0);
             SDDocumentImpl doc = oldMap.get(url);
             if (doc == null) {
                 // old metadata doesn't have this imported doc, may be external
