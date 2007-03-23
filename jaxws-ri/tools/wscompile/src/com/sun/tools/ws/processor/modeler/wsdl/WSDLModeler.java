@@ -87,15 +87,6 @@ public class WSDLModeler extends WSDLModelerBase {
 
     private JAXBModelBuilder jaxbModelBuilder;
 
-//    /**
-//     * @param modelInfo
-//     * @param options
-//     */
-//    public WSDLModeler(WSDLModelInfo modelInfo, Properties options, ErrorReceiver receiver) {
-//        super(modelInfo, options, receiver);
-//        this.classNameCollector = new ClassNameCollector();
-//    }
-
     public Model buildModel() {
         try {
 
@@ -122,6 +113,10 @@ public class WSDLModeler extends WSDLModelerBase {
 
             document.validateLocally();
             forest = parser.getDOMForest();
+
+            //build the jaxbModel to be used latter
+            buildJAXBModel(document);
+
             Model model = internalBuildModel(document);
             if(model == null || errReceiver.hadError())
                 return null;                    
@@ -134,6 +129,7 @@ public class WSDLModeler extends WSDLModelerBase {
             }
             // do another pass, this time with conflict resolution enabled
             model = internalBuildModel(document);
+            
             classNameCollector.process(model);
             if (classNameCollector.getConflictingClassNames().isEmpty()) {
                 // we're done
@@ -173,8 +169,6 @@ public class WSDLModeler extends WSDLModelerBase {
 
     private Model internalBuildModel(WSDLDocument document) {
         numPasses++;
-        //build the jaxbModel to be used latter
-        buildJAXBModel(document);
 
         QName modelName =
                 new QName(
