@@ -28,6 +28,7 @@ import com.sun.tools.ws.resources.WsdlMessages;
 import com.sun.tools.ws.util.xml.XmlUtil;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.WsimportOptions;
+import com.sun.tools.ws.wscompile.ErrorReceiverFilter;
 import com.sun.tools.ws.wsdl.document.Binding;
 import com.sun.tools.ws.wsdl.document.BindingFault;
 import com.sun.tools.ws.wsdl.document.BindingInput;
@@ -82,7 +83,7 @@ import java.io.IOException;
  * @author WS Development Team
  */
 public class WSDLParser {
-    private final ErrorReceiver errReceiver;
+    private final ErrorReceiverFilter errReceiver;
     private WsimportOptions options;
     private MetadataFinder forest;
 
@@ -91,7 +92,7 @@ public class WSDLParser {
 
     private ArrayList<ParserListener> listeners;
 
-    public WSDLParser(WsimportOptions options, ErrorReceiver errReceiver) {
+    public WSDLParser(WsimportOptions options, ErrorReceiverFilter errReceiver) {
         this.extensionHandlers = new HashMap();
         this.options = options;
         this.errReceiver = errReceiver;
@@ -125,6 +126,8 @@ public class WSDLParser {
     public WSDLDocument parse() throws SAXException, IOException {
         forest = new MetadataFinder(new WSDLInternalizationLogic(), options, errReceiver);
         forest.parseWSDL();
+        if(forest.isMexMetadata)
+            errReceiver.reset();
 
         // parse external binding files
         for (InputSource value : options.getWSDLBindings()) {

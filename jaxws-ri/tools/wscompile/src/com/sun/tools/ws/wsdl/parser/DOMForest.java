@@ -212,7 +212,6 @@ public class DOMForest {
         }
 
         if (exception != null) {
-            errorReceiver.error(exception.getMessage(), exception);
             core.remove(systemId);
             rootDocuments.remove(systemId);
         }
