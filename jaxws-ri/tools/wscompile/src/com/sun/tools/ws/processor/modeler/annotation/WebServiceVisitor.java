@@ -574,7 +574,8 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
                 return false;
         }
         ClassType superClass = classDecl.getSuperclass();
-        if (superClass != null && !methodsAreLegal(superClass.getDeclaration())) {
+        
+        if (!superClass.getDeclaration().getQualifiedName().equals(JAVA_LANG_OBJECT) && superClass != null && !methodsAreLegal(superClass.getDeclaration())) {
             return false;
         }
         return true;

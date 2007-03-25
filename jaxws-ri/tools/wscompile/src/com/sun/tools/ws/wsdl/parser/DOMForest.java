@@ -23,6 +23,7 @@ package com.sun.tools.ws.wsdl.parser;
 import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.tools.ws.wsdl.document.schema.SchemaConstants;
+import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.xjc.reader.internalizer.LocatorTable;
 import com.sun.xml.bind.marshaller.DataWriter;
 import org.w3c.dom.Document;
@@ -208,10 +209,10 @@ public class DOMForest {
             exception = e;
         } catch (SAXException e) {
             exception = e;
-
         }
 
         if (exception != null) {
+            errorReceiver.error(WscompileMessages.WSIMPORT_NO_WSDL(systemId), exception);
             core.remove(systemId);
             rootDocuments.remove(systemId);
         }
