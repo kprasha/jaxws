@@ -40,6 +40,11 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
         head = context.createMonitoringTube(head);
         head = context.createServerMUTube(head);
         head = context.createWsaTube(head);
+        if (dump) {
+            // for debugging inject a dump pipe. this is left in the production code,
+            // as it would be very handy for a trouble-shooting at the production site.
+            head = context.createDumpTube("server", System.out, head);
+        }
         head = context.createSecurityTube(head);
         return head;
     }
