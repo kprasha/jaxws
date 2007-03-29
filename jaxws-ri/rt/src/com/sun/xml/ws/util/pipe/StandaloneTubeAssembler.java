@@ -1,7 +1,10 @@
 package com.sun.xml.ws.util.pipe;
 
-import com.sun.xml.ws.api.pipe.*;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubelineAssembler;
 
 /**
  * Default Pipeline assembler for JAX-WS client and server side runtimes. It
@@ -44,7 +47,7 @@ public class StandaloneTubeAssembler implements TubelineAssembler {
     /**
      * Are we going to dump the message to System.out?
      */
-    private static final boolean dump;
+    public static final boolean dump;
 
     static {
         boolean b = false;
