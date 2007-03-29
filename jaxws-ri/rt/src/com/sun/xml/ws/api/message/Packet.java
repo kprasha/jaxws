@@ -628,6 +628,15 @@ public final class Packet extends DistributedPropertySet {
     public Packet createServerResponse(@Nullable Message responseMessage, @Nullable WSDLPort wsdlPort, @Nullable SEIModel seiModel, @NotNull WSBinding binding) {
         Packet r = createClientResponse(responseMessage);
 
+        AddressingVersion av = binding.getAddressingVersion();
+        // populate WS-A headers only if WS-A is enabled
+        if (av == null)
+            return r;
+        //populate WS-A headers only if the request has addressing headers
+        String inputAction = this.getMessage().getHeaders().getAction(av, binding.getSOAPVersion());
+        if (inputAction == null) {
+            return r;
+        }
         // if one-way, then dont populate any WS-A headers
         if (message == null || (wsdlPort != null && message.isOneWay(wsdlPort)))
             return r;
@@ -656,10 +665,19 @@ public final class Packet extends DistributedPropertySet {
     public Packet createServerResponse(@Nullable Message responseMessage, @NotNull AddressingVersion addressingVersion, @NotNull SOAPVersion soapVersion, @NotNull String action) {
         Packet responsePacket = createClientResponse(responseMessage);
 
+        // populate WS-A headers only if WS-A is enabled
+        if (addressingVersion == null)
+            return responsePacket;
+        //populate WS-A headers only if the request has addressing headers
+        String inputAction = this.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
+        if (inputAction == null) {
+            return responsePacket;
+        }
+
         return populateAddressingHeaders(responsePacket,
-                                         addressingVersion,
-                                         soapVersion,
-                                         action);
+                addressingVersion,
+                soapVersion,
+                action);
     }
 
     private Packet populateAddressingHeaders(Packet responsePacket, AddressingVersion av, SOAPVersion sv, String action) {
