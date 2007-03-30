@@ -125,7 +125,10 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                         buf.writeTo(out);
                     }
                 } else {
-                    codec.encode(request, con.getOutput());
+                    OutputStream os = con.getOutput();
+                    if (os != null) {
+                        codec.encode(request, os);
+                    }
                 }
             }
 
