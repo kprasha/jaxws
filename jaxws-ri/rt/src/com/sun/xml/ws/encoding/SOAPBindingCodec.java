@@ -136,17 +136,17 @@ public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pi
      * The Accept header for Fast Infoset and XML encodings
      */
     private final String connegXmlAccept;
-
+    
     public StreamSOAPCodec getXMLCodec() {
         return xmlSoapCodec;
     }
-
+    
     private class AcceptContentType implements ContentType {
         private ContentType _c;
         private String _accept;
         
         public AcceptContentType set(Packet p, ContentType c) {
-            if (p.contentNegotiation != ContentNegotiation.none) {
+            if (!ignoreContentNegotiationProperty && p.contentNegotiation != ContentNegotiation.none) {
                 _accept = connegXmlAccept;
             } else {
                 _accept = xmlAccept;
@@ -184,7 +184,7 @@ public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pi
         
         xmlSwaCodec = new SwACodec(version, xmlSoapCodec);
         
-        xmlAccept = xmlSoapCodec.getMimeType() + ", " +
+        String clientAcceptedContentTypes = xmlSoapCodec.getMimeType() + ", " +
                 xmlMtomCodec.getMimeType() + ", " +
                 BASE_ACCEPT_VALUE;
         
@@ -195,7 +195,7 @@ public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pi
             if (fiSoapCodec != null) {
                 fiMimeType = fiSoapCodec.getMimeType();
                 fiSwaCodec = new SwACodec(version, fiSoapCodec);
-                connegXmlAccept = fiMimeType + ", " + xmlAccept;
+                connegXmlAccept = fiMimeType + ", " + clientAcceptedContentTypes;
                 
                 /**
                  * This feature will only be present on the client side.
@@ -204,25 +204,36 @@ public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pi
                  * explicitly supports Fast Infoset.
                  */
                 WebServiceFeature select = binding.getFeature(SelectOptimalEncodingFeature.class);
-                if (select != null && select.isEnabled()) {
-                    useFastInfosetForEncoding = true;
+                if (select != null) { // if the client FI feature is set - ignore negotiation property
                     ignoreContentNegotiationProperty = true;
+                    if (select.isEnabled()) {
+                        // If the client's FI encoding feature is enabled, and server's is not disabled
+                        if (fi != null) {  // if server's FI feature also enabled
+                            useFastInfosetForEncoding = true;
+                        }
+                        
+                        clientAcceptedContentTypes = connegXmlAccept;
+                    } else {  // If client FI feature is disabled
+                        isFastInfosetDisabled = true;
+                    }
                 }
             } else {
                 // Fast Infoset could not be loaded by the runtime
                 isFastInfosetDisabled = true;
                 fiSwaCodec = null;
                 fiMimeType = "";
-                connegXmlAccept = xmlAccept;
+                connegXmlAccept = clientAcceptedContentTypes;
                 ignoreContentNegotiationProperty = true;
             }
         } else {
             // Fast Infoset is explicitly not supported by the service
             fiSoapCodec = fiSwaCodec = null;
             fiMimeType = "";
-            connegXmlAccept = xmlAccept;
+            connegXmlAccept = clientAcceptedContentTypes;
             ignoreContentNegotiationProperty = true;
         }
+        
+        xmlAccept = clientAcceptedContentTypes;
         
         this.binding = (SOAPBindingImpl)binding;
     }
