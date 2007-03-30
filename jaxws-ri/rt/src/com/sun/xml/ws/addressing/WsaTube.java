@@ -318,6 +318,15 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         return packet.getMessage().getOperation(wsdlPort);
     }
 
+    protected void validateSOAPAction(Packet packet) {
+        String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
+        if (gotA == null)
+            throw new WebServiceException(AddressingMessages.VALIDATION_SERVER_NULL_ACTION());
+        if(packet.soapAction != null && !packet.soapAction.equals("") && !packet.soapAction.equals(gotA)) {
+            throw new InvalidMapException(addressingVersion.actionTag, addressingVersion.actionMismatchTag);
+        }
+    }
+
     protected abstract void validateAction(Packet packet);
     protected void checkMandatoryHeaders(
         Packet packet, boolean foundAction, boolean foundTo, boolean foundMessageId, boolean foundRelatesTo) {
@@ -325,9 +334,10 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         // no need to check for for non-application messages
         if (wbo == null)
             return;
-        
+
         // if no wsa:Action header is found
         if (!foundAction)
             throw new MapRequiredException(addressingVersion.actionTag);
+        validateSOAPAction(packet);
     }
 }

@@ -66,6 +66,10 @@ public enum AddressingVersion {
                     new QName("http://www.w3.org/2005/08/addressing","Metadata"),
                     "ReferenceParameters",
                     null )) {
+
+        /* package */  String getActionMismatchLocalName() {
+            return "ActionMismatch";
+        }
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters");
@@ -143,6 +147,9 @@ public enum AddressingVersion {
                     MemberSubmissionAddressingConstants.MEX_METADATA,
                     "ReferenceParameters",
                     "ReferenceProperties")) {
+        /* package */  String getActionMismatchLocalName() {
+            return "InvalidMessageInformationHeader";
+        }
         @Override
         public boolean isReferenceParameter(String localName) {
             return localName.equals("ReferenceParameters") || localName.equals("ReferenceProperties");
@@ -287,6 +294,11 @@ public enum AddressingVersion {
     /**
      * Represents the QName of the fault code when Action is not supported at this endpoint.
      */
+    public final QName actionMismatchTag;
+
+    /**
+     * Represents the QName of the fault code when Action is not supported at this endpoint.
+     */
     public final QName actionNotSupportedTag;
 
     /**
@@ -387,6 +399,7 @@ public enum AddressingVersion {
         relatesToTag = new QName(nsUri,"RelatesTo");
 
         mapRequiredTag = new QName(nsUri,getMapRequiredLocalName());
+        actionMismatchTag = new QName(nsUri,getActionMismatchLocalName());
         actionNotSupportedTag = new QName(nsUri,"ActionNotSupported");
         actionNotSupportedText = "The \"%s\" cannot be processed at the receiver";
         invalidMapTag = new QName(nsUri,getInvalidMapLocalName());
@@ -412,6 +425,13 @@ public enum AddressingVersion {
         }
         this.eprType = eprType;
     }
+
+    /**
+     * Gets the local name of the fault when a header representing a WS-Addressing Action is not same as SOAPAction
+     *
+     * @return local name
+     */
+    /* package */ abstract String getActionMismatchLocalName();
 
     /**
      * Returns {@link AddressingVersion} whose {@link #nsUri} equals to
