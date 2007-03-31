@@ -322,7 +322,7 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
         String gotA = packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
         if (gotA == null)
             throw new WebServiceException(AddressingMessages.VALIDATION_SERVER_NULL_ACTION());
-        if(packet.soapAction != null && !packet.soapAction.equals("\"\"") && !packet.soapAction.equals(gotA)) {
+        if(packet.soapAction != null && !packet.soapAction.equals("\"\"") && !packet.soapAction.equals("\""+gotA+"\"")) {
             throw new InvalidMapException(addressingVersion.actionTag, addressingVersion.actionMismatchTag);
         }
     }
