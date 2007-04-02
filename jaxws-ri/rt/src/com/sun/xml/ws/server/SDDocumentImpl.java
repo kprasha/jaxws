@@ -39,6 +39,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -145,6 +146,8 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
             } finally {
                 reader.close();
             }
+        } catch (WebServiceException e) {
+            throw new ServerRtException("runtime.parser.wsdl", systemId,e);
         } catch (IOException e) {
             throw new ServerRtException("runtime.parser.wsdl", systemId,e);
         } catch (XMLStreamException e) {
