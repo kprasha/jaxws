@@ -80,7 +80,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
 
         try {
             // RuntimeWSDLParser parser = new RuntimeWSDLParser(null);
-            XMLStreamReader reader = src.read(xif);
+            XMLStreamReader reader = src.read();
             try {
                 XMLStreamReaderUtil.nextElementContent(reader);
 
@@ -207,6 +207,10 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         return source.read(xif);
     }
 
+    public XMLStreamReader read() throws IOException, XMLStreamException {
+        return source.read();
+    }
+
     public URL getSystemId() {
         return url;
     }
@@ -244,7 +248,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
             out = f.filter(this,out);
         }
 
-        XMLStreamReader xsr = source.read(xif);
+        XMLStreamReader xsr = source.read();
         try {
             new WSDLPatcher(owner.owner,this,portAddressResolver,resolver).bridge(xsr,out);
         } finally {
@@ -307,5 +311,4 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
         }
     }
 
-    private static final XMLInputFactory xif = XMLInputFactory.newInstance();
 }

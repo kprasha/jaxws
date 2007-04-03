@@ -24,6 +24,7 @@ package com.sun.xml.ws.api.server;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -62,6 +63,22 @@ public abstract class SDDocumentSource {
     public abstract XMLStreamReader read(XMLInputFactory xif) throws IOException, XMLStreamException;
 
     /**
+     * Returns the {@link XMLStreamReader} that reads the document.
+     *
+     * <p>
+     * This method maybe invoked multiple times concurrently.
+     *
+     * @return
+     *      The caller is responsible for closing the reader to avoid resource leak.
+     *
+     * @throws XMLStreamException
+     *      if something goes wrong while creating a parser.
+     * @throws IOException
+     *      if something goes wrong trying to read the document.
+     */
+    public abstract XMLStreamReader read() throws IOException, XMLStreamException;
+
+    /**
      * System ID of this document.
      */
     public abstract URL getSystemId();
@@ -79,6 +96,12 @@ public abstract class SDDocumentSource {
                     xif.createXMLStreamReader(systemId.toExternalForm(),is), is);
             }
 
+            public XMLStreamReader read() throws IOException, XMLStreamException {
+                InputStream is = url.openStream();
+                return new TidyXMLStreamReader(
+                   XMLStreamReaderFactory.create(systemId.toExternalForm(),is,false), is);
+            }
+
             public URL getSystemId() {
                 return systemId;
             }
@@ -91,6 +114,10 @@ public abstract class SDDocumentSource {
     public static SDDocumentSource create(final URL systemId, final XMLStreamBuffer xsb) {
         return new SDDocumentSource() {
             public XMLStreamReader read(XMLInputFactory xif) throws XMLStreamException {
+                return xsb.readAsXMLStreamReader();
+            }
+
+            public XMLStreamReader read() throws XMLStreamException {
                 return xsb.readAsXMLStreamReader();
             }
 

@@ -26,6 +26,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.ParameterBinding;
@@ -46,7 +47,6 @@ import org.xml.sax.SAXException;
 
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -783,7 +783,7 @@ public class RuntimeWSDLParser {
      */
     private static XMLStreamReader createReader(URL wsdlLoc) throws IOException, XMLStreamException {
         InputStream stream = wsdlLoc.openStream();
-        return new TidyXMLStreamReader(XMLInputFactory.newInstance().createXMLStreamReader(wsdlLoc.toExternalForm(), stream), stream);
+        return new TidyXMLStreamReader(XMLStreamReaderFactory.create(wsdlLoc.toExternalForm(), stream, false), stream);
     }
 
     private void register(WSDLParserExtension e) {
