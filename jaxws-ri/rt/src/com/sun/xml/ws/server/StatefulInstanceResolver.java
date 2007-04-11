@@ -1,5 +1,6 @@
 package com.sun.xml.ws.server;
 
+import com.sun.istack.FragmentContentHandler;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.stream.buffer.XMLStreamBufferSource;
@@ -15,7 +16,7 @@ import com.sun.xml.ws.developer.EPRRecipe;
 import com.sun.xml.ws.developer.StatefulWebServiceManager;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.spi.ProviderImpl;
-import com.sun.xml.ws.util.xml.StAXResult;
+import com.sun.xml.ws.util.xml.ContentHandlerToXMLStreamWriter;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -300,7 +301,8 @@ public final class StatefulInstanceResolver<T> extends AbstractMultiInstanceReso
                     Transformer t = XmlUtil.newTransformer();
                     for (Source s : metadata)
                         try {
-                            t.transform(s,new StAXResult(w));
+                            t.transform(s,
+                                new SAXResult(new FragmentContentHandler(new ContentHandlerToXMLStreamWriter(w))));
                         } catch (TransformerException e) {
                             throw new IllegalArgumentException("Unable to write EPR metadata "+s,e);
                         }
