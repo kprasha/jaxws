@@ -32,6 +32,7 @@ import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
 import com.sun.xml.ws.wsdl.parser.ParserUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
+import com.sun.xml.ws.util.RuntimeVersion;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -62,6 +63,8 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
     private static final String NS_XSD = "http://www.w3.org/2001/XMLSchema";
     private static final QName SCHEMA_INCLUDE_QNAME = new QName(NS_XSD, "include");
     private static final QName SCHEMA_IMPORT_QNAME = new QName(NS_XSD, "import");
+    private static final String VERSION_COMMENT =
+        " Published by "+RuntimeVersion.VERSION+". ";
 
     /**
      * Creates {@link SDDocument} from {@link SDDocumentSource}.
@@ -250,6 +253,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
 
         XMLStreamReader xsr = source.read();
         try {
+            out.writeComment(VERSION_COMMENT);
             new WSDLPatcher(owner.owner,this,portAddressResolver,resolver).bridge(xsr,out);
         } finally {
             xsr.close();
@@ -310,5 +314,6 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
             return true;
         }
     }
+
 
 }
