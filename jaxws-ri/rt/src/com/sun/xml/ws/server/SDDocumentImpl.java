@@ -64,7 +64,7 @@ class SDDocumentImpl extends SDDocumentSource implements SDDocument {
     private static final QName SCHEMA_INCLUDE_QNAME = new QName(NS_XSD, "include");
     private static final QName SCHEMA_IMPORT_QNAME = new QName(NS_XSD, "import");
     private static final String VERSION_COMMENT =
-        " Published by "+RuntimeVersion.VERSION+". ";
+        " Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is "+RuntimeVersion.VERSION+". ";
 
     /**
      * Creates {@link SDDocument} from {@link SDDocumentSource}.
