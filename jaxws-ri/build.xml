@@ -229,7 +229,7 @@ major-version=${release.impl.version}
       </fileset>
     </copy>
 
-    <versionProp file="${basedir}/rt/build/classes/com/sun/xml/ws/version.properties" />
+    <versionProp file="${basedir}/rt/build/classes/com/sun/xml/ws/util/version.properties" />
 
     <!-- Copying the manifest -->
     <copy file="${basedir}/rt/etc/manifest" todir="${basedir}/rt/build"/>
