@@ -43,14 +43,15 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.EndpointAwareCodec;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.model.wsdl.WSDLProperties;
 import com.sun.xml.ws.resources.HandlerMessages;
 import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
-import com.sun.xml.ws.model.wsdl.WSDLProperties;
 import org.w3c.dom.Element;
 
 import javax.annotation.PreDestroy;
@@ -121,7 +122,15 @@ public final class WSEndpointImpl<T> extends WSEndpoint<T> {
 
         ServerTubeAssemblerContext context = new ServerPipeAssemblerContext(seiModel, port, this, terminalTube, isSynchronous);
         this.masterTubeline = assembler.createServer(context);
-        this.masterCodec = context.getCodec();
+
+        Codec c = context.getCodec();
+        if(c instanceof EndpointAwareCodec) {
+            // create a copy to avoid sharing the codec between multiple endpoints 
+            c = c.copy();
+            ((EndpointAwareCodec)c).setEndpoint(this);
+        }
+        this.masterCodec = c;
+
         tubePool = new TubePool(masterTubeline);
         terminalTube.setEndpoint(this);
         engine = new Engine(toString());

@@ -25,6 +25,7 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.server.EndpointAwareCodec;
 
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
@@ -60,6 +61,7 @@ import java.nio.channels.WritableByteChannel;
  * {@link BindingID} determines the {@link Codec}. See {@link BindingID#createEncoder(WSBinding)}.
  *
  * @author Kohsuke Kawaguchi
+ * @see EndpointAwareCodec
  */
 public interface Codec {
 
