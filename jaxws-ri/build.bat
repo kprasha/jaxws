@@ -1,7 +1,7 @@
 @echo off  
 
 REM
-REM $Id: build.bat,v 1.4.12.1 2006-04-12 00:06:24 ofung Exp $
+REM $Id: build.bat,v 1.4.12.1.4.1 2007-05-31 23:40:28 ofung Exp $
 REM
 REM This script is optional and for convenience only.
 
@@ -24,7 +24,7 @@ REM with the fields enclosed by brackets [] replaced by
 REM you own identifying information:
 REM "Portions Copyrighted [year] [name of copyright owner]"
 REM 
-REM Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+REM Copyright 2007 Sun Microsystems Inc. All Rights Reserved
 REM
 
 echo JAX-WS-RI Builder

@@ -19,7 +19,7 @@ REM with the fields enclosed by brackets [] replaced by
 REM you own identifying information:
 REM "Portions Copyrighted [year] [name of copyright owner]"
 REM 
-REM Copyright 2006 Sun Microsystems Inc. All Rights Reserved
+REM Copyright 2007 Sun Microsystems Inc. All Rights Reserved
 REM
 
 
