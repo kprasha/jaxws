@@ -28,7 +28,7 @@
 
 
 <project name="JAXWS-RI" default="main" basedir=".">
-
+  <import file="build-j2se.xml"/>
   <property name="Name" value="JAX-WS RI"/>
       
   <property name="build.home" value="${basedir}/build"/>  
