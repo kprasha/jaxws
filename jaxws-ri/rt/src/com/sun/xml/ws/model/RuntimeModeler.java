@@ -22,7 +22,6 @@
 package com.sun.xml.ws.model;
 
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.CompositeStructure;
 import com.sun.xml.bind.api.TypeReference;
 import com.sun.xml.bind.v2.model.nav.Navigator;
@@ -30,11 +29,12 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.ExceptionType;
 import com.sun.xml.ws.api.model.MEP;
-import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.Parameter;
+import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPart;
 import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
+import com.sun.xml.ws.model.wsdl.WSDLInputImpl;
 import com.sun.xml.ws.resources.ModelerMessages;
 import com.sun.xml.ws.util.localization.Localizable;
 
@@ -48,7 +48,14 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.namespace.QName;
-import javax.xml.ws.*;
+import javax.xml.ws.Action;
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.FaultAction;
+import javax.xml.ws.Holder;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.Response;
+import javax.xml.ws.ResponseWrapper;
+import javax.xml.ws.WebFault;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -407,8 +414,17 @@ public class RuntimeModeler {
      */
     protected void processMethod(Method method, WebService webService) {
         int mods = method.getModifiers();
-        if (!Modifier.isPublic(mods) || Modifier.isStatic(mods))
+        if (!Modifier.isPublic(mods) || Modifier.isStatic(mods)) {
+            if(method.getAnnotation(WebMethod.class)!=null) {
+                // if the user put @WebMethod on these non-qualifying method,
+                // it's an error
+                if(Modifier.isStatic(mods))
+                    throw new RuntimeModelerException(ModelerMessages.localizableRUNTIME_MODELER_WEBMETHOD_MUST_BE_NONSTATIC(method));
+                else
+                    throw new RuntimeModelerException(ModelerMessages.localizableRUNTIME_MODELER_WEBMETHOD_MUST_BE_PUBLIC(method));
+            }
             return;
+        }
 
         WebMethod webMethod = getPrivMethodAnnotation(method, WebMethod.class);
         if (webMethod != null && webMethod.exclude())
@@ -455,8 +471,14 @@ public class RuntimeModeler {
         //override the @WebMethod.action value by the one from the WSDL
         if(binding != null){
             WSDLBoundOperationImpl bo = binding.getBinding().get(new QName(targetNamespace, operationName));
-            if(bo != null)
-                action = bo.getSOAPAction();
+            if(bo != null){
+                WSDLInputImpl wsdlInput = bo.getOperation().getInput();
+                String wsaAction = wsdlInput.getAction();
+                if(wsaAction != null && !wsdlInput.isDefaultAction())
+                    action = wsaAction;
+                else
+                    action = bo.getSOAPAction();
+            }
         }
 
         javaMethod.setOperationName(operationName);
