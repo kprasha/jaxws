@@ -66,7 +66,10 @@ public class XMLStreamWriterUtil {
                 writer.flush();
                 return (OutputStream)obj;
             }
-        } catch(IllegalArgumentException ie) {
+        } catch(Exception ie) {
+            //Above property lookup causes NPE on JDK6u1, should be ignored.
+            // We should not fail due to such lookups.
+
             // nothing to do here
         }
         return null;
