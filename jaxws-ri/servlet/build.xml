@@ -24,7 +24,6 @@
 
 
 <project name="JAXWS-RI Servlet Support" default="compile" basedir=".">
-
   <property name="build.dir" value="${basedir}/build"/>
   <property file="../project.properties"/>
 
@@ -44,7 +43,58 @@
     </javac>
   </target>
 
+  <target name="jar" depends="compile">
+    <jar file="build/jaxws-http-transport.jar">
+      <manifest>
+        <attribute name="Build-Id" value="${build.id}" />
+        <attribute name="Build-Version" value="${build.version}" />
+        <attribute name="Major-Version" value="${release.impl.version}" />
+      </manifest>
+      <fileset dir="build/classes" />
+      <fileset dir="src" includes="META-INF/**/*" />
+    </jar>
+  </target>
+
+    <target name="jar-j2se" depends="compile-j2se">
+    <jar file="build/jaxws-http-transport.jar">
+      <manifest>
+        <attribute name="Build-Id" value="${build.id}" />
+        <attribute name="Build-Version" value="${build.version}" />
+        <attribute name="Major-Version" value="${release.impl.version}" />
+      </manifest>
+      <fileset dir="build/classes" />
+      <fileset dir="src" includes="META-INF/**/*" />
+    </jar>
+  </target>
+
+  <target name="src-zip">
+    <zip file="build/jaxws-http-transport-src.zip">
+      <fileset dir="src" />
+    </zip>
+  </target>
+
   <target name="clean">
     <delete dir="${build.dir}"/>
   </target>
-</project> 
+
+
+
+    <target name="compile-j2se">
+    <mkdir dir="${build.dir}/classes"/>
+    <javac srcdir="../build/j2se-servlet/src"
+        destdir="${basedir}/build/classes"
+        debug="${compile.debug}"
+        deprecation="${compile.deprecation}"
+        optimize="${compile.optimize}"
+        bootclasspath="/export/tools/j2sdk-image/jre/lib/rt.jar"
+        source="1.5">
+      <classpath>
+        <!--path refid="runtime.compile.classpath"/-->
+        <fileset dir="lib" includes="*.jar" />
+        <!--pathelement path="../rt/build/classes" /-->
+      </classpath>
+    </javac>
+  </target>
+
+
+</project>

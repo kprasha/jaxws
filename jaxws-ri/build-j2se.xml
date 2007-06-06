@@ -84,4 +84,15 @@
           todir="j2se-integration/tools/src/com/sun/tools/internal/ws"/>
   </target>
 
+    <!-- target to rename everything in the servlet except classes in com.sun.xml.ws.transport.http.servlet.
+    This is to allow tests to deploy run on tomcat on top of jdk6u3, which has JAXWS/JAXB 2.1 -->
+   <target name="rename-j2se-servlet">
+        <!--package-rename srcdir="servlet/src" destdir="build/j2se-servlet/src" /-->
+       <prename srcdir="servlet/src" destdir="build/j2se-servlet/src">
+           <pattern from="com.sun.xml.ws" to="com.sun.xml.internal.ws" excludes="com.sun.xml.ws.transport.http.servlet" />
+           <pattern from="com.sun.istack" to="com.sun.istack.internal" />
+       </prename>
+
+    </target>
+
 </project>
