@@ -86,7 +86,7 @@
         debug="${compile.debug}"
         deprecation="${compile.deprecation}"
         optimize="${compile.optimize}"
-        bootclasspath="/export/tools/j2sdk-image/jre/lib/rt.jar"
+        bootclasspath="${java.home}/lib/rt.jar"
         source="1.5">
       <classpath>
         <!--path refid="runtime.compile.classpath"/-->
