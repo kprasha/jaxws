@@ -184,7 +184,7 @@ public class EndpointImpl extends Endpoint {
     }
 
     public void setProperties(Map<String, Object> map) {
-        this.properties = new HashMap<String, Object>(map);
+        this.properties = map;
     }
 
     /*
