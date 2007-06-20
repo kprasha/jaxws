@@ -25,7 +25,7 @@
 </ul>
 
 <p>These artifacts can be packaged in a WAR file with the WSDL and
-    schema documents along with the endpoint implementation to be deployed. JAX-WS&nbsp; ${IMPL_VERSION}&nbsp; ${IMPL_VERSION_SUFFIX} RI  also provides wsimport ant task, see <a href="wsimportant.html">Wsimport ant
+    schema documents along with the endpoint implementation to be deployed. ${PRODUCT_NAME} also provides wsimport ant task, see <a href="wsimportant.html">Wsimport ant
 task</a>.<br>
 </p>
 </section>
@@ -33,13 +33,11 @@ task</a>.<br>
 <section title="Launching wsimport">
 <ul>
 	<li><b>Solaris/Linux</b><ul>
-		<li>export JAXWS_HOME=/pathto/jaxws-ri</li>
-		<li>$JAXWS_HOME/bin/wsimport.sh -help</li>
+		<li>${HOME}/bin/wsimport.sh -help</li>
 	</ul>
 	</li>
 	<li><b>Windows</b><ul>
-		<li>set JAXWS_HOME=c:\pathto\jaxws-ri</li>
-		<li>%JAXWS_HOME%\bin\wsimport.bat -help</li>
+		<li>${HOME}\bin\wsimport.bat -help</li>
 	</ul>
 	</li>
 </ul>
@@ -47,7 +45,7 @@ task</a>.<br>
 
 <section title="Running on JDK 6">
 <p><b>To run on JDK 6 follow these <a href="jaxws-tools.html#running_on_jdk6">instructions</a>.</b></p>
-</section> 
+</section>
 
 <section title="Syntax">
 <pre>wsimport [options] &lt;wsdl&gt;<br></pre>
@@ -84,7 +82,7 @@ task</a>.<br>
 </tr>
 <tr>
     <td style="vertical-align: top;"><b>-B &lt;jaxbOption&gt;</b></td>
-    <td style="vertical-align: top;" width="999">Pass this option to JAXB schema 
+    <td style="vertical-align: top;" width="999">Pass this option to JAXB schema
 	compiler</td>
 </tr>
 <tr>
@@ -174,13 +172,13 @@ task</a>.<br>
     </td>
 </tr>
 <tr>
-    <td style="vertical-align: top;"><b><code>target</code></b></td>
-    <td style="vertical-align: top;" width="999">Generate code as per the given JAXWS 
-	specification version. version 2.0 will generate compliant code for JAXWS 
+    <td style="vertical-align: top;"><b><code>-target</code></b></td>
+    <td style="vertical-align: top;" width="999">Generate code as per the given JAX-WS
+	specification version. version 2.0 will generate compliant code for JAX-WS
 	2.0 spec.</td>
 </tr>
 <tr>
-    <td style="vertical-align: top;"><b><code>quiet</code></b></td>
+    <td style="vertical-align: top;"><b><code>-quiet</code></b></td>
     <td style="vertical-align: top;" width="999">Suppress wsimport output</td>
 </tr>
 </tbody>
@@ -191,7 +189,7 @@ task</a>.<br>
     files can be found in the <a href="customizations.html">customization
     documentation</a>.</p>
 
-</section>    
+</section>
 <section title="Example">
 <p><b>wsimport -p stockquote <a href="http://stockquote.org/quote?wsdl">http://stockquote.xyz/quote?wsdl</a></b></p>
 <p>This will generate the Java artifacts and compile them by importing the
