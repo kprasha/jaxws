@@ -595,7 +595,7 @@
 
             <!-- license files -->
             <zipfileset dir="."
-                        includes="ThirdPartyLicense.txt, distributionREADME_WMforJava2.0.txt, build-j2se.xml, project.properties"
+                        includes="build-j2se.xml, project.properties"
                         prefix="${source.dist.dir.name}"/>
         </zip>        
     </target>
