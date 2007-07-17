@@ -62,13 +62,15 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.AddressingFeature;
 import java.util.Iterator;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * WS-Addressing processing code shared between client and server.
  *
  * <p>
  * This tube is used only when WS-Addressing is enabled.
- *
+ * @author Rama Pulavarthi
  * @author Arun Gupta
  */
 abstract class WsaTube extends AbstractFilterTubeImpl {
@@ -139,9 +141,11 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
 
             return packet;
         } catch (InvalidMapException e) {
+            LOGGER.log(Level.WARNING,addressingVersion.getInvalidMapText(),e);
             soapFault = helper.newInvalidMapFault(e, addressingVersion);
             s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
         } catch (MapRequiredException e) {
+            LOGGER.log(Level.WARNING,addressingVersion.getMapRequiredText(),e);
             soapFault = helper.newMapRequiredFault(e, addressingVersion);
             s11FaultDetailHeader = new FaultDetailHeader(addressingVersion, addressingVersion.problemHeaderQNameTag.getLocalPart(), e.getMapQName());
         }
@@ -354,4 +358,6 @@ abstract class WsaTube extends AbstractFilterTubeImpl {
             throw new MapRequiredException(addressingVersion.actionTag);
         validateSOAPAction(packet);
     }
+
+    private static final Logger LOGGER = Logger.getLogger(WsaTube.class.getName());
 }
