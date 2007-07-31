@@ -62,6 +62,7 @@ import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.FilterInputStream;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
@@ -172,7 +173,23 @@ final class HttpClientTransport {
             }
             throw new ClientTransportException(ClientMessages.localizableHTTP_CLIENT_FAILED(e),e);
         }
-        return in;
+        // Since StreamMessage doesn't read </s:Body></s:Envelope>, there
+        // are some bytes left in the InputStream. This confuses JDK and may
+        // not reuse underlying sockets. Hopefully JDK fixes it in its code !
+        final InputStream temp = in;
+        return new FilterInputStream(temp) {
+            // Workaround for "SJSXP XMLStreamReader.next() closes stream".
+            // So it doesn't read from the closed stream
+            boolean closed;
+            @Override
+            public void close() throws IOException {
+                if (!closed) {
+                    closed = true;
+                    while(temp.read() != -1);
+                    super.close();
+                }
+            }
+        };
     }
 
     public Map<String, List<String>> getHeaders() {
