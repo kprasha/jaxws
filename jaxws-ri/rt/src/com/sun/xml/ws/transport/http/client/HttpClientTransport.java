@@ -173,6 +173,9 @@ final class HttpClientTransport {
             }
             throw new ClientTransportException(ClientMessages.localizableHTTP_CLIENT_FAILED(e),e);
         }
+        if (in == null) {
+            return in;
+        }
         // Since StreamMessage doesn't read </s:Body></s:Envelope>, there
         // are some bytes left in the InputStream. This confuses JDK and may
         // not reuse underlying sockets. Hopefully JDK fixes it in its code !
