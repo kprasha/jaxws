@@ -716,8 +716,12 @@ public final class Packet extends DistributedPropertySet {
         }
 
         // wsa:Action
-        hl.add(new StringHeader(av.actionTag, action));
-
+        // action can be null when there is no SEIModel or WSDL Model, ex: Provider with no wsdl
+        // Expects User to set the coresponding header on the Message.
+        if(action != null) {
+            hl.add(new StringHeader(av.actionTag, action));
+        }
+        
         // wsa:MessageID
         hl.add(new StringHeader(av.messageIDTag, responsePacket.getMessage().getID(av, sv)));
 
