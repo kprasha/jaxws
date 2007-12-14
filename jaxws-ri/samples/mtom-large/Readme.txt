@@ -26,23 +26,16 @@ the data binding framework(JAXB in this case).
 
 
 * It has the follwoing operations
-    * detail - shows mapping of xs:base64Binary with  
-      xmime:expectedContentTypes="image/jpeg" to Java type java.awt.image
-    * echoData - shows how xs:base64Binary is encoded using MTOM/XOP encoding 
-      instead of inlining in the SOAP message.
+    * testUpload() - shows streaming upload of large binary data (about 123 MB) to the web service endpoint
+      using MTOM
 
 * etc - configuration files
-    * hello.wsdl wsdl file
-    * custom-client.xml client customization file
-    * custom-server.xml server customization file
-    * build.properties, deploy-targets.xml ant script to deploy the endpoint
-      war file
+    * mtomsample.wsdl wsdl file
     * sun-jaxws.xml deployment descriptor for web container
 
 * src source files
     * client/MtomApp.java - client application
-    * client/AttachmentHelper - utility class for handling attachments.
-    * server/HelloImpl.java - server implementation
+    * server/MtomSampleImpl.java - server implementation
 
 * wsimport ant task is run to compile etc/AddNumbers.wsdl
     * generates
@@ -61,6 +54,6 @@ the data binding framework(JAXB in this case).
 
 * Prerequisite
 
-Refer to the Prerequisites defined in samples/docs/index.html. 
+Refer to the Prerequisites defined in samples/docs/index.html.
 
 We appreciate your feedback, please send it to users@jax-ws.dev.java.net.

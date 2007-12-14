@@ -65,7 +65,7 @@
     </target>
 
 
-    <target name="install" depends="uninstall,update-catalina-props" description="Install JAX-WS RI @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ jars">
+    <target name="install" depends="update-catalina-props" description="Install JAX-WS RI @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ jars">
         <echo message="Installing JAX-WS RI @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ for ${catalina.home} ..."/>
 
         <mkdir dir="${catalina.lib.home}"/>

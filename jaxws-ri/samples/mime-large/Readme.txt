@@ -18,22 +18,14 @@ enable/disable mime:content mapping. This sample also shows how one can use
 wsiap:swaRef to refer to an attachment in the message.
 
 * It has the follwoing operations
-    * echoData - enableMIMEContent is false
-    * echoDataWithEnableMIMEContent - enableMIMEContent is false
-    * detail - Mapping of XML schema element to javax.xml.transform.Source
-    * claimForm - wsiap:swaRef example
-
+    * testSwaref() - shows streaming upload of large binary data (120 MB) to the web service endpoint using
+      wsi:swaref
 * etc - configuration files
     * hello.wsdl wsdl file
-    * custom-client.xml client customization file
-    * custom-server.xml server customization file
-    * build.properties, deploy-targets.xml ant script to deploy the endpoint
-      war file
     * sun-jaxws.xml deployment descriptor for web container
 
 * src source files
     * client/MimeApp.java - client application
-    * client/AttachmentHelper - utility class for handling attachments.
     * server/HelloImpl.java - server implementation
 
 * wsimport ant task is run to compile etc/AddNumbers.wsdl
