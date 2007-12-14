@@ -89,6 +89,34 @@
         <antcall target="install-tools"/>
         <echo message="... done."/>
     </target>
+    <condition property="jdk6">
+    	<contains string="${java.version}" substring="1.6.0"/>
+    </condition>
+
+
+    <target name="jdk6-message" if="jdk6">
+        <echo message="NOTE: JAX-WS RI @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ is being installed using JDK6."/>
+        <echo/>
+        <echo message="  The file 'jaxws-api.jar and jaxb-api.jar' must be installed"/>
+        <echo message="  into $JAVA_HOME/lib/endorsed for JAX-WS RI @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ to prevent"/>
+        <echo message="  conflicts between the JAX-WS 2.0 classes"/>
+        <echo message="  bundled with JDK 6 and JAX-WS 2.1 bundled with JAX-WS RI @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@."/>
+        <echo/>
+        <echo message="  You must have write-permissions on the JDK 6 directory."/>
+        <echo message="  This is a concern when using a system-wide JDK installation."/>
+        <echo/>
+        <echo message="  Invoke 'ant install-api' to install only"/>
+        <echo message="  jaxws-api.jar and jaxb-api.jar into the 'endorsed' directory."/>
+        <echo/>
+    </target>
+
+    <target name="install-api" description="Installs 'jaxws-api.jar and jaxb-api.jar' into $JAVA_HOME/lib/endorsed" if="jdk6">
+        <mkdir dir="${java.home}/lib/endorsed"/>
+        <copy toDir="${java.home}/lib/endorsed" overwrite="true">
+            <fileset dir="${basedir}/lib" includes="jaxws-api.jar, jaxb-api.jar"/>
+        </copy>
+    </target>
+
 
     <target name="install" depends="init">
         <echo message="Installing JAX-WS @@IMPL_VERSION@@ @@IMPL_VERSION_SUFFIX@@ RI on ${as.home} ..." />
@@ -108,6 +136,7 @@
 
         <antcall target="update-classpath"/>
         <antcall target="update-tools"/>
+        <antcall target="jdk6-message"/>
         <echo message="... done."/>
     </target>
 
@@ -144,7 +173,7 @@
         <antcall target="create.classpath.prefix-8.X" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/resolver.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}${com.sun.aas.installRoot}/lib/FastInfoset.jar${path.separator}]]></replacevalue>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/mimepull.jar${path.separator}${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/resolver.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}${com.sun.aas.installRoot}/lib/FastInfoset.jar${path.separator}]]></replacevalue>
         </replace>
     </target>
 
@@ -156,7 +185,7 @@
         <antcall target="create.classpath.prefix" />
         <replace file="${as.home}/domains/${domain}/config/domain.xml" >
             <replacetoken><![CDATA[classpath-prefix="]]></replacetoken>
-            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/resolver.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}${com.sun.aas.installRoot}/lib/FastInfoset.jar${path.separator}]]></replacevalue>
+            <replacevalue><![CDATA[classpath-prefix="${com.sun.aas.installRoot}/lib/mimepull.jar${path.separator}${com.sun.aas.installRoot}/lib/sjsxp.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-rt.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxws-tools.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/resolver.jar${path.separator}${com.sun.aas.installRoot}/lib/jaxb-xjc.jar${path.separator}${com.sun.aas.installRoot}/lib/saaj-impl.jar${path.separator}${com.sun.aas.installRoot}/lib/streambuffer.jar${path.separator}${com.sun.aas.installRoot}/lib/stax-ex.jar${path.separator}${com.sun.aas.installRoot}/lib/FastInfoset.jar${path.separator}]]></replacevalue>
         </replace>
     </target>
 

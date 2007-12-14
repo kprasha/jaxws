@@ -72,8 +72,14 @@
         <copy toDir="${catalina.lib.home}" overwrite="true">
             <fileset dir="${basedir}/lib" includes="*.jar"/>
         </copy>
-	<antcall target="jdk6-message"/>
+        <antcall target="install-api-on-tomcat"/>
+        <antcall target="jdk6-message"/>
 
+    </target>
+    
+    <target name="install-api-on-tomcat" if="jdk6">
+        <antcall target="install-api-on-tomcat6"/>
+        <antcall target="install-api-on-tomcat5"/>
     </target>
 
     <target name="install-api" description="Installs 'jaxws-api.jar and jaxb-api.jar' into $JAVA_HOME/lib/endorsed" if="jdk6">
@@ -81,8 +87,6 @@
         <copy toDir="${java.home}/lib/endorsed" overwrite="true">
             <fileset dir="${basedir}/lib" includes="jaxws-api.jar, jaxb-api.jar"/>
         </copy>
-        <antcall target="install-api-on-tomcat6"/>
-        <antcall target="install-api-on-tomcat5"/>
     </target>
 
     <target name="install-api-on-tomcat6" unless="tomcat5">
