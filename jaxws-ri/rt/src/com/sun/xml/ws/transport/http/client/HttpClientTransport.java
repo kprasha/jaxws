@@ -241,7 +241,7 @@ final class HttpClientTransport {
         saveCookieAsNeeded();
     }
 
-    private String getStatusMessage() throws IOException {
+    String getStatusMessage() throws IOException {
         int statusCode = httpConnection.getResponseCode();
         String message = httpConnection.getResponseMessage();
         if (statusCode == HttpURLConnection.HTTP_CREATED

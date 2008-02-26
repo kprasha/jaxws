@@ -43,6 +43,8 @@ import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.ByteArrayBuffer;
+import com.sun.xml.ws.client.ClientTransportException;
+import com.sun.xml.ws.resources.ClientMessages;
 
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
@@ -156,6 +158,9 @@ public class HttpTransportPipe extends AbstractTubeImpl {
             }
             
             if (con.statusCode== WSHTTPConnection.ONEWAY || (request.expectReply != null && !request.expectReply)) {
+                if (con.statusCode != WSHTTPConnection.ONEWAY && con.statusCode != WSHTTPConnection.OK) {
+                    throw new ClientTransportException(ClientMessages.localizableHTTP_STATUS_CODE(con.statusCode,con.getStatusMessage()));
+                }
                 return request.createClientResponse(null);    // one way. no response given.
             }
             String contentType = con.getContentType();
