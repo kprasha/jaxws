@@ -1,8 +1,0 @@
-<!-- Spec limitation. Generated schema doesn't capture @XmlMimeType -->
-<descriptor skip="true">
-  <description>mtom rpc/lit</description>
-    
-  <service basedir="./server">
-  </service>
-
-</descriptor>
