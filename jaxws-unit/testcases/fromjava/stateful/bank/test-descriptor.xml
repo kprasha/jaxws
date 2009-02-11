@@ -1,7 +1,0 @@
-<descriptor since="2.1" uses="multi-endpoint">
-  <description>
-    Test stateful web service behavior.
-  </description>
-  <client href ="*.bsh" />
-  <service />
-</descriptor>
