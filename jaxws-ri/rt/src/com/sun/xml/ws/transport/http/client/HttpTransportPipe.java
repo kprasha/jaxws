@@ -47,6 +47,7 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.resources.ClientMessages;
 
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,7 +165,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                 return request.createClientResponse(null);    // one way. no response given.
             }
             String contentType = con.getContentType();
-            if (contentType == null) {
+            if (contentType == null && binding instanceof SOAPBinding) {
                 throw new WebServiceException("No Content-type in the header!");
             }
 
