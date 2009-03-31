@@ -165,10 +165,6 @@ public class HttpTransportPipe extends AbstractTubeImpl {
                 return request.createClientResponse(null);    // one way. no response given.
             }
             String contentType = con.getContentType();
-            if (contentType == null && binding instanceof SOAPBinding) {
-                throw new WebServiceException("No Content-type in the header!");
-            }
-
             // TODO check if returned MIME type is the same as that which was sent
             // or is acceptable if an Accept header was used
             Packet reply = request.createClientResponse(null);
