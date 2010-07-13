@@ -1,6 +1,0 @@
-<!-- Not yet fixed in 2.2.1 -->
-<descriptor since="2.2.2">
-  <description>This is a JAXWS 563 test</description>
-  <service basedir="./server">
-  </service>
-</descriptor>

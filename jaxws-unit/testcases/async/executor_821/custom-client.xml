@@ -1,4 +1,0 @@
-<bindings xmlns="http://java.sun.com/xml/ns/jaxws"
-          xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-  <enableAsyncMapping>true</enableAsyncMapping>
-</bindings>
