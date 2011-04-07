@@ -1,7 +1,0 @@
-<descriptor since="2.1.8">
-  <description>dynamic_775</description>
-
-  <service basedir="./server">
-  </service>
-
-</descriptor>

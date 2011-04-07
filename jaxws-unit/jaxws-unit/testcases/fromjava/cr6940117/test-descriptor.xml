@@ -1,5 +1,0 @@
-<descriptor since="2.2.1">
-  <description>test</description>
-  <service basedir="./pak2">
-  </service>
-</descriptor>
