@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,6 +47,7 @@ import com.sun.xml.ws.api.ha.StickyFeature;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.developer.HttpConfigFeature;
 import com.sun.xml.ws.transport.Headers;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.client.ClientTransportException;
@@ -65,7 +66,6 @@ import javax.xml.ws.handler.MessageContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
 import java.net.CookieHandler;
 import java.util.Collections;
 import java.util.List;
@@ -89,42 +89,6 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     private final CookieHandler cookieJar;      // shared object among the tubes
     private final boolean sticky;
 
-    private static final Constructor cookieManagerConstructor;
-    private static final Object cookiePolicy;
-    static {
-        Constructor tempConstructor;
-        Object tempPolicy;
-        try {
-            /*
-             * Using reflection to create CookieManger so that RI would continue to
-             * work with JDK 5.
-             */
-            Class policyClass = Class.forName("java.net.CookiePolicy");
-            Class storeClass = Class.forName("java.net.CookieStore");
-            tempConstructor = Class.forName("java.net.CookieManager").getConstructor(storeClass, policyClass);
-            // JDK's default policy is ACCEPT_ORIGINAL_SERVER, but ACCEPT_ALL
-            // is used for backward compatibility
-            tempPolicy = policyClass.getField("ACCEPT_ALL").get(null);
-        } catch(Exception e) {
-            try {
-                /*
-                 * Using reflection so that these classes won't have to be
-                 * integrated in JDK 6.
-                 */
-                Class policyClass = Class.forName("com.sun.xml.ws.transport.http.client.CookiePolicy");
-                Class storeClass = Class.forName("com.sun.xml.ws.transport.http.client.CookieStore");
-                tempConstructor = Class.forName("com.sun.xml.ws.transport.http.client.CookieManager").getConstructor(storeClass, policyClass);
-                // JDK's default policy is ACCEPT_ORIGINAL_SERVER, but ACCEPT_ALL
-                // is used for backward compatibility
-                tempPolicy = policyClass.getField("ACCEPT_ALL").get(null);
-            } catch(Exception ce) {
-                throw new WebServiceException(ce);
-            }
-        }
-        cookieManagerConstructor = tempConstructor;
-        cookiePolicy = tempPolicy;
-    }
-
     // Need to use JAXB first to register DatatypeConverter
     static {
         try {
@@ -134,26 +98,15 @@ public class HttpTransportPipe extends AbstractTubeImpl {
         }
     }
 
-    private static CookieHandler getCookieHandler() {
-        try {
-            return (CookieHandler)cookieManagerConstructor.newInstance(null, cookiePolicy);
-        } catch(Exception e) {
-            throw new WebServiceException(e);
-        }
-    }
-
     public HttpTransportPipe(Codec codec, WSBinding binding) {
-        // TODO Rather than creating a new instance, CookieJar should be got
-        // TODO from a feature ideally. That way CookieJar can be shared across
-        // TODO multiple proxies
-        this(codec, binding, getCookieHandler(), isSticky(binding));
-    }
-
-    private HttpTransportPipe(Codec codec, WSBinding binding, CookieHandler cookieJar, boolean sticky) {
         this.codec = codec;
         this.binding = binding;
-        this.sticky = sticky;
-        this.cookieJar = cookieJar;
+        this.sticky = isSticky(binding);
+        HttpConfigFeature configFeature = binding.getFeature(HttpConfigFeature.class);
+        if (configFeature == null) {
+            configFeature = new HttpConfigFeature();
+        }
+        this.cookieJar = configFeature.getCookieHandler();
     }
 
     private static boolean isSticky(WSBinding binding) {
@@ -172,7 +125,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
      * Copy constructor for {@link Tube#copy(TubeCloner)}.
      */
     private HttpTransportPipe(HttpTransportPipe that, TubeCloner cloner) {
-        this(that.codec.copy(), that.binding, that.cookieJar, that.sticky);
+        this(that.codec.copy(), that.binding);
         cloner.add(that,this);
     }
 
@@ -373,8 +326,14 @@ public class HttpTransportPipe extends AbstractTubeImpl {
         }
         if (sticky || (shouldMaintainSessionProperty != null && shouldMaintainSessionProperty)) {
             Map<String, List<String>> cookies = cookieJar.get(context.endpointAddress.getURI(),reqHeaders);
-            reqHeaders.putAll(cookies);
-            //cookieJar.applyRelevantCookies(context.endpointAddress.getURL(), reqHeaders);
+            List<String> cookieList = cookies.get("Cookie");
+            if (cookieList != null && !cookieList.isEmpty()) {
+                reqHeaders.put("Cookie", cookieList);
+            }
+            cookieList = cookies.get("Cookie2");
+            if (cookieList != null && !cookieList.isEmpty()) {
+                reqHeaders.put("Cookie2", cookieList);
+            }
         }
     }
 
@@ -428,15 +387,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     private void dump(ByteArrayBuffer buf, String caption, Map<String, List<String>> headers) throws IOException {
         System.out.println("---["+caption +"]---");
         for (Entry<String,List<String>> header : headers.entrySet()) {
-            if(header.getValue().isEmpty()) {
-                // I don't think this is legal, but let's just dump it,
-                // as the point of the dump is to uncover problems.
-                System.out.println(header.getValue());
-            } else {
-                for (String value : header.getValue()) {
-                    System.out.println(header.getKey()+": "+value);
-                }
-            }
+            System.out.println(header.getKey()+": "+header.getValue());
         }
 
         buf.writeTo(System.out);
