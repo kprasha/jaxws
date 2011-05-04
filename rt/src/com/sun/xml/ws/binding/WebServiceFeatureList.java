@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -287,6 +287,19 @@ public final class WebServiceFeatureList implements WSFeatureList {
             }
         }
     }
+    
+	public void mergeFeatures(WebServiceFeature[] features, boolean reportConflicts) {
+        for (WebServiceFeature wsdlFtr : features) {
+            if (get(wsdlFtr.getClass()) == null) {
+                add(wsdlFtr);
+            } else if (reportConflicts) {
+                if (isEnabled(wsdlFtr.getClass()) != wsdlFtr.isEnabled()) {
+                    LOGGER.warning(ModelerMessages.RUNTIME_MODELER_FEATURE_CONFLICT(
+                            get(wsdlFtr.getClass()), wsdlFtr));
+                }
+            }
+        }		
+	}
 
     /**
      * Set the parent features. Basically the parent feature list will be overriden
