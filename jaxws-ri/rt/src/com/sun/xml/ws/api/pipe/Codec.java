@@ -123,7 +123,7 @@ public interface Codec {
      * (from &lt;soap:Envelope> to &lt;/soap:Envelope>).
      *
      * <p>
-     * Internally, this method is most likely invoke {@link Message#writeTo(XMLStreamWriter)}
+     * Internally, this method is most likely invoke {@link Message#writeTo(Packet, XMLStreamWriter)}
      * to turn the message into infoset.
      *
      * @param packet

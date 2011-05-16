@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,17 +51,11 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.server.Invoker;
 import com.sun.xml.ws.client.sei.MethodHandler;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
-import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.server.InvokerTube;
-import com.sun.xml.ws.server.WSEndpointImpl;
 import com.sun.xml.ws.resources.ServerMessages;
 import com.sun.xml.ws.fault.SOAPFaultBuilder;
-import com.sun.xml.ws.wsdl.DispatchException;
-import com.sun.xml.ws.util.QNameMap;
 
-import javax.xml.namespace.QName;
 import java.util.List;
-import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
@@ -76,19 +70,15 @@ public class SEIInvokerTube extends InvokerTube {
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
      */
+    private final SOAPVersion soapVersion;
     private final WSBinding binding;
     private final AbstractSEIModelImpl model;
 
-    //store WSDL Operation to EndpointMethodHandler map
-//    private final QNameMap<EndpointMethodHandler> wsdlOpMap;
     public SEIInvokerTube(AbstractSEIModelImpl model,Invoker invoker, WSBinding binding) {
         super(invoker);
+        this.soapVersion = binding.getSOAPVersion();
         this.binding = binding;
         this.model = model;
-//        wsdlOpMap = new QNameMap<EndpointMethodHandler>();
-//        for(JavaMethodImpl jm: model.getJavaMethods()) {
-//            wsdlOpMap.put(jm.getOperation().getName(),new EndpointMethodHandler(this,jm,binding));
-//        }
     }
 
     /**
@@ -97,8 +87,6 @@ public class SEIInvokerTube extends InvokerTube {
      * that traverses through the Pipeline to transport.
      */
     public @NotNull NextAction processRequest(@NotNull Packet req) {
-//        try {
-//        	EndpointCallBridge handler =  model.getDatabinding().getEndpointBridge(req);
         	JavaCallInfo call = model.getDatabinding().deserializeRequest(req);
         	if (call.getException() == null) {
 	        	try {
@@ -119,9 +107,6 @@ public class SEIInvokerTube extends InvokerTube {
 			res = req.relateServerResponse(res, req.endpoint.getPort(), model, req.endpoint.getBinding());
             assert res != null;
             return doReturnWith(res);
-//        } catch (DispatchException e) {
-//            return doReturnWith(req.createServerResponse(e.fault, model.getPort(), null, binding));
-//        }
     }
 
     public @NotNull NextAction processResponse(@NotNull Packet response) {

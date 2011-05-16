@@ -194,11 +194,11 @@ public final class SOAPBindingImpl extends BindingImpl implements SOAPBinding {
     }
 
     public SOAPFactory getSOAPFactory() {
-        return soapVersion.saajSoapFactory;
+        return soapVersion.getSOAPFactory();
     }
 
     public MessageFactory getMessageFactory() {
-        return soapVersion.saajMessageFactory;
+        return soapVersion.getMessageFactory();
     }
 
 }

@@ -111,20 +111,22 @@ public class ClientLogicalHandlerTube extends HandlerTube {
     }
 
     void setUpProcessor() {
-        // Take a snapshot, User may change chain after invocation, Same chain
-        // should be used for the entire MEP
-        handlers = new ArrayList<Handler>();
-        List<LogicalHandler> logicalSnapShot= ((BindingImpl) binding).getHandlerConfig().getLogicalHandlers();
-        if (!logicalSnapShot.isEmpty()) {
-            handlers.addAll(logicalSnapShot);
-            if (binding.getSOAPVersion() == null) {
-                processor = new XMLHandlerProcessor(this, binding,
-                        handlers);
-            } else {
-                processor = new SOAPHandlerProcessor(true, this, binding,
-                        handlers);
-            }
-        }
+    	if (handlers == null) {
+	        // Take a snapshot, User may change chain after invocation, Same chain
+	        // should be used for the entire MEP
+	        handlers = new ArrayList<Handler>();
+	        List<LogicalHandler> logicalSnapShot= ((BindingImpl) binding).getHandlerConfig().getLogicalHandlers();
+	        if (!logicalSnapShot.isEmpty()) {
+	            handlers.addAll(logicalSnapShot);
+	            if (binding.getSOAPVersion() == null) {
+	                processor = new XMLHandlerProcessor(this, binding,
+	                        handlers);
+	            } else {
+	                processor = new SOAPHandlerProcessor(true, this, binding,
+	                        handlers);
+	            }
+	        }
+    	}
     }
 
 

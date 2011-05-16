@@ -41,6 +41,8 @@
 package com.sun.xml.ws.api;
 
 import com.sun.xml.bind.util.Which;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.encoding.soap.SOAP12Constants;
 
 import javax.xml.namespace.QName;
@@ -127,16 +129,8 @@ public enum SOAPVersion {
      */
     public final QName faultCodeMustUnderstand;
 
-    /**
-     * SAAJ {@link MessageFactory} for this SOAP version.
-     */
-    public final MessageFactory saajMessageFactory;
-
-    /**
-     * SAAJ {@link SOAPFactory} for this SOAP version.
-     */
-    public final SOAPFactory saajSoapFactory;
-
+    private final String saajFactoryString;
+    
     /**
      * If the actor/role attribute is absent, this SOAP version assumes this value.
      */
@@ -176,9 +170,19 @@ public enum SOAPVersion {
         this.implicitRole = implicitRole;
         this.implicitRoleSet = Collections.singleton(implicitRole);
         this.roleAttributeName = roleAttributeName;
-        try {
-            saajMessageFactory = MessageFactory.newInstance(saajFactoryString);
-            saajSoapFactory = SOAPFactory.newInstance(saajFactoryString);
+        this.saajFactoryString = saajFactoryString;
+        this.faultCodeMustUnderstand = faultCodeMustUnderstand;
+        this.requiredRoles = requiredRoles;
+        this.faultCodeClient = new QName(nsUri,faultCodeClientLocalName);
+        this.faultCodeServer = new QName(nsUri,faultCodeServerLocalName);
+    }
+
+    public SOAPFactory getSOAPFactory() {
+    	try {
+	    	Container c = ContainerResolver.getInstance().getContainer();
+	    	SAAJFactory s = (c != null) ? c.getSPI(SAAJFactory.class) : null;
+	        return (s != null) ? s.createSOAPFactory(saajFactoryString) : 
+	        	SOAPFactory.newInstance(saajFactoryString);
         } catch (SOAPException e) {
             throw new Error(e);
         } catch (NoSuchMethodError e) {
@@ -187,12 +191,23 @@ public enum SOAPVersion {
             x.initCause(e);
             throw x;
         }
-        this.faultCodeMustUnderstand = faultCodeMustUnderstand;
-        this.requiredRoles = requiredRoles;
-        this.faultCodeClient = new QName(nsUri,faultCodeClientLocalName);
-        this.faultCodeServer = new QName(nsUri,faultCodeServerLocalName);
     }
 
+    public MessageFactory getMessageFactory() {
+    	try {
+	    	Container c = ContainerResolver.getInstance().getContainer();
+	    	SAAJFactory s = (c != null) ? c.getSPI(SAAJFactory.class) : null;
+            return (s != null) ? s.createMessageFactory(saajFactoryString) : 
+            	MessageFactory.newInstance(saajFactoryString); 
+        } catch (SOAPException e) {
+            throw new Error(e);
+        } catch (NoSuchMethodError e) {
+            // SAAJ 1.3 is not in the classpath
+            LinkageError x = new LinkageError("You are loading old SAAJ from "+ Which.which(MessageFactory.class));
+            x.initCause(e);
+            throw x;
+        }
+    }
 
     public String toString() {
         return httpBindingId;

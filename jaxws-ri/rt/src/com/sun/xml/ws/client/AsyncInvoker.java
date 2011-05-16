@@ -43,6 +43,7 @@ package com.sun.xml.ws.client;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 
 import javax.xml.ws.WebServiceException;
 
@@ -54,17 +55,35 @@ import javax.xml.ws.WebServiceException;
  * @author Jitendra Kotamraju
  */
 public abstract class AsyncInvoker implements Runnable {
+
     /**
      * Because of the object instantiation order,
      * we can't take this as a constructor parameter.
      */
     protected AsyncResponseImpl responseImpl;
-
+    protected boolean nonNullAsyncHandlerGiven;
+    
     public void setReceiver(AsyncResponseImpl responseImpl) {
         this.responseImpl = responseImpl;
     }
-    
-    public void run () {
+
+  public AsyncResponseImpl getResponseImpl() {
+    return responseImpl;
+  }
+
+  public void setResponseImpl(AsyncResponseImpl responseImpl) {
+    this.responseImpl = responseImpl;
+  }
+
+  public boolean isNonNullAsyncHandlerGiven() {
+    return nonNullAsyncHandlerGiven;
+  }
+
+  public void setNonNullAsyncHandlerGiven(boolean nonNullAsyncHandlerGiven) {
+    this.nonNullAsyncHandlerGiven = nonNullAsyncHandlerGiven;
+  }
+
+  public void run () {
         try {
             do_run();
         }catch(WebServiceException e) {
@@ -76,5 +95,28 @@ public abstract class AsyncInvoker implements Runnable {
     }
 
     public abstract void do_run();
+
+    protected static final String FIBER_CONTEXTSWITCHINTERCEPTOR_KEY = "Fiber.ContextSwitchInterceptor";
+    static Class<FiberContextSwitchInterceptor> interceptor_class;
+
+    static {
+        try {
+            interceptor_class = (Class<FiberContextSwitchInterceptor>) Class.forName("weblogic.wsee.jaxws.spi.FiberContextSwitchInterceptorImpl");
+        } catch (Throwable e) {
+            //ingore
+        }
+    }
+
+    protected static FiberContextSwitchInterceptor getFiberContextSwitchInterceptor(){
+        if(interceptor_class==null) return null;
+        else try {
+            return interceptor_class.newInstance();
+        } catch (Throwable e) {
+            //ingore
+            return null;
+        }
+    }
+
+
 
 }

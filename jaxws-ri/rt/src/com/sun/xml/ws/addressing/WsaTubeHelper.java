@@ -45,6 +45,7 @@ import com.sun.xml.ws.addressing.model.MissingAddressingHeaderException;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
@@ -128,11 +129,13 @@ public abstract class WsaTubeHelper {
 
             QName wsdlOp = requestPacket.getWSDLOperation();
             JavaMethodImpl jm = (JavaMethodImpl) seiModel.getJavaMethodForWsdlOperation(wsdlOp);
-            for (CheckedExceptionImpl ce : jm.getCheckedExceptions()) {
-                if (ce.getDetailType().tagName.getLocalPart().equals(name) &&
-                        ce.getDetailType().tagName.getNamespaceURI().equals(ns)) {
-                    return ce.getFaultAction();
-                }
+            if (jm != null) {
+              for (CheckedExceptionImpl ce : jm.getCheckedExceptions()) {
+                  if (ce.getDetailType().tagName.getLocalPart().equals(name) &&
+                          ce.getDetailType().tagName.getNamespaceURI().equals(ns)) {
+                      return ce.getFaultAction();
+                  }
+              }
             }
             return action;
         } catch (SOAPException e) {
@@ -141,12 +144,16 @@ public abstract class WsaTubeHelper {
     }
 
     String getFaultAction(@Nullable WSDLBoundOperation wbo, Packet responsePacket) {
+        return getFaultAction(wbo, responsePacket.getMessage());
+    }
+
+    public String getFaultAction(@Nullable WSDLBoundOperation wbo, Message responseMessage) {
         String action = addVer.getDefaultFaultAction();
         if (wbo == null)
             return action;
 
         try {
-            SOAPMessage sm = responsePacket.getMessage().copy().readAsSOAPMessage();
+            SOAPMessage sm = responseMessage.copy().readAsSOAPMessage();
             if (sm == null)
                 return action;
 
@@ -269,7 +276,7 @@ public abstract class WsaTubeHelper {
         return action;
     }
 
-    String getOutputAction(@Nullable WSDLBoundOperation wbo) {
+    public String getOutputAction(@Nullable WSDLBoundOperation wbo) {
         String action = AddressingVersion.UNSET_OUTPUT_ACTION;
         if (wbo != null) {
             WSDLOutput op = wbo.getOperation().getOutput();
@@ -288,14 +295,14 @@ public abstract class WsaTubeHelper {
             SOAPFactory factory;
             SOAPFault fault;
             if (soapVer == SOAPVersion.SOAP_12) {
-                factory = SOAPVersion.SOAP_12.saajSoapFactory;
+                factory = SOAPVersion.SOAP_12.getSOAPFactory();
                 fault = factory.createFault();
                 fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
                 fault.appendFaultSubcode(subcode);
                 fault.appendFaultSubcode(subsubcode);
                 getInvalidMapDetail(name, fault.addDetail());
             } else {
-                factory = SOAPVersion.SOAP_11.saajSoapFactory;
+                factory = SOAPVersion.SOAP_11.getSOAPFactory();
                 fault = factory.createFault();
                 fault.setFaultCode(subsubcode);
             }
@@ -317,14 +324,14 @@ public abstract class WsaTubeHelper {
             SOAPFactory factory;
             SOAPFault fault;
             if (soapVer == SOAPVersion.SOAP_12) {
-                factory = SOAPVersion.SOAP_12.saajSoapFactory;
+                factory = SOAPVersion.SOAP_12.getSOAPFactory();
                 fault = factory.createFault();
                 fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
                 fault.appendFaultSubcode(subcode);
                 fault.appendFaultSubcode(subsubcode);
                 getMapRequiredDetail(e.getMissingHeaderQName(), fault.addDetail());
             } else {
-                factory = SOAPVersion.SOAP_11.saajSoapFactory;
+                factory = SOAPVersion.SOAP_11.getSOAPFactory();
                 fault = factory.createFault();
                 fault.setFaultCode(subsubcode);
             }

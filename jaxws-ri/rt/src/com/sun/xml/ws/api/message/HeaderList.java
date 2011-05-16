@@ -63,6 +63,8 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.AddressingFeature;
+import javax.xml.ws.soap.SOAPBinding;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
@@ -128,7 +130,7 @@ import java.util.NoSuchElementException;
  *
  * @see Message#getHeaders()
  */
-public final class HeaderList extends ArrayList<Header> {
+public class HeaderList extends ArrayList<Header> {
 
     private static final long serialVersionUID = -6358045781349627237L;
     /**
@@ -557,6 +559,22 @@ public final class HeaderList extends ArrayList<Header> {
     }
 
     /**
+     * Clears any cached value for ReplyTo and allows the next call to
+     * getReplyTo to interrogate the headers on the message.
+     */
+    public void clearCachedReplyTo() {
+      replyTo = null;
+    }
+
+    /**
+     * Clears any cached value for MessageID and allows the next call to
+     * getMessageID to interrogate the headers on the message.
+     */
+    public void clearCachedMessageID() {
+      messageId = null;
+    }
+
+    /**
      * Returns the value of WS-Addressing <code>ReplyTo</code> header. The <code>version</code>
      * identifies the WS-Addressing version and the header returned is targeted at
      * the current implicit role. Caches the value for subsequent invocation.
@@ -677,6 +695,47 @@ public final class HeaderList extends ArrayList<Header> {
         return relatesTo;
     }
 
+    public static boolean
+    isPacketToSslEndpointAddress(Packet packet,
+                           AddressingVersion av,
+                           SOAPVersion sv) {
+        boolean ssl = false;
+        if (packet != null && packet.endpointAddress != null &&
+            packet.endpointAddress.getURL() != null &&
+            isUsingSsl(packet.endpointAddress.getURL())) {
+            ssl = true;
+        } else if (packet != null && packet.getMessage() != null) {
+            String to =
+                packet.getMessage().getHeaders().getTo(av, sv);
+          ssl = isUsingSsl(to);
+        }
+        return ssl;
+    }
+
+    public static boolean isUsingSsl(WSEndpointReference to) {
+      if (to != null && to.getAddress() != null) {
+        return isUsingSsl(to.getAddress());
+      }
+      return false;
+    }
+
+    public static boolean isUsingSsl(String to) {
+      boolean ssl = false;
+      if (to != null) {
+          try {
+              URL url = new URL(to);
+              ssl = isUsingSsl(url);
+          } catch (Exception e) {
+              throw new RuntimeException(e);
+          }
+      }
+      return ssl;
+    }
+
+    public static boolean isUsingSsl(@NotNull URL url) {
+        return url.getProtocol().equalsIgnoreCase("https");
+    }
+    
     /**
      * Creates a set of outbound WS-Addressing headers on the client with the
      * specified Action Message Addressing Property value.
@@ -701,11 +760,20 @@ public final class HeaderList extends ArrayList<Header> {
         // null or "true" is equivalent to request/response MEP
         if (!oneway) {
             WSEndpointReference epr = av.anonymousEpr;
-            add(epr.createHeader(av.replyToTag));
+            if (get(av.replyToTag, false) == null) {
+              add(epr.createHeader(av.replyToTag));
+            }
+
+            // wsa:FaultTo
+            if (get(av.faultToTag, false) == null) {
+              add(epr.createHeader(av.faultToTag));
+            }
 
             // wsa:MessageID
-            Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
-            add(h);
+            if (get(av.messageIDTag, false) == null) {
+              Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
+              add(h);
+            }
         }
     }
 
@@ -749,7 +817,7 @@ public final class HeaderList extends ArrayList<Header> {
 
         // wsa:Action
         String effectiveInputAction = wsaHelper.getEffectiveInputAction(packet);
-        if (effectiveInputAction == null || effectiveInputAction.equals("")) {
+        if (effectiveInputAction == null || effectiveInputAction.equals("") && binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
             throw new WebServiceException(ClientMessages.INVALID_SOAP_ACTION());
         }
         boolean oneway = !packet.expectReply;
@@ -758,7 +826,7 @@ public final class HeaderList extends ArrayList<Header> {
             // as anonymous ReplyTo MUST NOT be added in that case. BindingProvider need to
             // disable AddressingFeature and MemberSubmissionAddressingFeature and hand-craft
             // the SOAP message with non-anonymous ReplyTo/FaultTo.
-            if (!oneway && packet.getMessage() != null)
+            if (!oneway && packet.getMessage() != null && packet.getWSDLOperation() != null)
             {
                 WSDLBoundOperation wbo = wsdlPort.getBinding().get(packet.getWSDLOperation());
                 if (wbo != null && wbo.getAnonymous() == WSDLBoundOperation.ANONYMOUS.prohibited) {
@@ -771,31 +839,56 @@ public final class HeaderList extends ArrayList<Header> {
             fillRequestAddressingHeaders(packet, addressingVersion, binding.getSOAPVersion(), oneway, effectiveInputAction,addressingVersion.isRequired(binding));
         } else {
             // custom oneway
-            fillRequestAddressingHeaders(packet, addressingVersion, binding.getSOAPVersion(), binding.getFeature(OneWayFeature.class), effectiveInputAction);
+            fillRequestAddressingHeaders(packet, addressingVersion, binding.getSOAPVersion(), binding.getFeature(OneWayFeature.class), oneway, effectiveInputAction);
         }
     }
 
-    private void fillRequestAddressingHeaders(@NotNull Packet packet, @NotNull AddressingVersion av, @NotNull SOAPVersion sv, @NotNull OneWayFeature of, @NotNull String action) {
-        fillCommonAddressingHeaders(packet, av, sv, action, false);
+    private void fillRequestAddressingHeaders(@NotNull Packet packet, @NotNull AddressingVersion av, @NotNull SOAPVersion sv, @NotNull OneWayFeature of, boolean oneway, @NotNull String action) {
+    	if (!oneway&&!of.isUseAsyncWithSyncInvoke() && Boolean.TRUE.equals(packet.isSynchronousMEP))
+    		fillRequestAddressingHeaders(packet, av, sv, oneway, action);
+    	else {
+	        fillCommonAddressingHeaders(packet, av, sv, action, false);
+	
+        boolean ssl = isPacketToSslEndpointAddress(packet, av, sv);
 
-        // wsa:ReplyTo
-        if (of.getReplyTo() != null) {
-            add(of.getReplyTo().createHeader(av.replyToTag));
+	        // wsa:ReplyTo
+	        // wsa:ReplyTo (add it if it doesn't already exist and OnewayFeature
+	        //              requests a specific ReplyTo)
+	        if (get(av.replyToTag, false) == null) {
+	        	WSEndpointReference replyToEpr = of.getReplyTo(ssl);
+	        	if (replyToEpr != null) {
+	        		add(replyToEpr.createHeader(av.replyToTag));
+	        		// add wsa:MessageID only for non-null ReplyTo
+	        		if (get(av.messageIDTag, false) == null) {
+	        			add(new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv)));
+	              }
+	        	}
+	        }
 
-            // add wsa:MessageID only for non-null ReplyTo
-            Header h = new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv));
-            add(h);
-        }
+          // wsa:FaultTo
+	        // wsa:FaultTo (add it if it doesn't already exist and OnewayFeature
+	        //              requests a specific FaultTo)
+	        if (get(av.faultToTag, false) == null) {
+	        	WSEndpointReference faultToEpr = of.getFaultTo(ssl);
+	        	if (faultToEpr != null) {
+	        		add(faultToEpr.createHeader(av.faultToTag));
+	        		// add wsa:MessageID only for non-null FaultTo
+	        		if (get(av.messageIDTag, false) == null) {
+	        			add(new StringHeader(av.messageIDTag, packet.getMessage().getID(av, sv)));
+	              }
+	        	}
+	        }
 
-        // wsa:From
-        if (of.getFrom() != null) {
-            add(of.getFrom().createHeader(av.fromTag));
-        }
-
-        // wsa:RelatesTo
-        if (of.getRelatesToID() != null) {
-            add(new RelatesToHeader(av.relatesToTag, of.getRelatesToID()));
-        }
+          // wsa:From
+	        if (of.getFrom() != null) {
+	            addOrReplace(of.getFrom().createHeader(av.fromTag));
+	        }
+	
+	        // wsa:RelatesTo
+	        if (of.getRelatesToID() != null) {
+	            addOrReplace(new RelatesToHeader(av.relatesToTag, of.getRelatesToID()));
+	        }
+    	}
     }
 
     /**
@@ -820,20 +913,26 @@ public final class HeaderList extends ArrayList<Header> {
             throw new IllegalArgumentException(AddressingMessages.NULL_SOAP_VERSION());
         }
 
-        if (action == null) {
+        if (action == null && !sv.httpBindingId.equals(SOAPBinding.SOAP12HTTP_BINDING)) {
             throw new IllegalArgumentException(AddressingMessages.NULL_ACTION());
         }
 
         // wsa:To
-        StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
-        add(h);
+        if (get(av.toTag, false) == null) {
+          StringHeader h = new StringHeader(av.toTag, packet.endpointAddress.toString());
+          add(h);
+        }
 
         // wsa:Action
-        packet.soapAction = action;
-        //As per WS-I BP 1.2/2.0, if one of the WSA headers is MU, then all WSA headers should be treated as MU.,
-        // so just set MU on action header
-        h = new StringHeader(av.actionTag, action, sv, mustUnderstand);
-        add(h);
+        if (action != null) {
+	        packet.soapAction = action;
+	        if (get(av.actionTag, false) == null) {
+	            //As per WS-I BP 1.2/2.0, if one of the WSA headers is MU, then all WSA headers should be treated as MU.,
+	            // so just set MU on action header
+	          StringHeader h = new StringHeader(av.actionTag, action, sv, mustUnderstand);
+	          add(h);
+	        }
+        }
     }
 
     /**
@@ -854,7 +953,6 @@ public final class HeaderList extends ArrayList<Header> {
 
     /**
      * Removes the first {@link Header} of the specified name.
-     *
      * @param nsUri namespace URI of the header to remove
      * @param localName local part of the FQN of the header to remove
      *
@@ -872,7 +970,41 @@ public final class HeaderList extends ArrayList<Header> {
         }
         return null;
     }
+    
+    /**
+     * Replaces an existing {@link Header} or adds a new {@link Header}.
+     *
+     * <p>
+     * Order doesn't matter in headers, so this method
+     * does not make any guarantee as to where the new header
+     * is inserted.
+     *
+     * @return
+     *      always true. Don't use the return value.
+     */
+    public boolean addOrReplace(Header header) {
+        for (int i=0; i < size(); i++) {
+          Header hdr = get(i);
+          if (hdr.getNamespaceURI().equals(header.getNamespaceURI()) &&
+              hdr.getLocalPart().equals(header.getLocalPart())) {
+            // Put the new header in the old position. Call super versions
+            // internally to avoid UnsupportedOperationException
+            removeInternal(i);
+            addInternal(i, header);
+            return true;
+          }
+        }
+        return add(header);
+    }
 
+    protected void addInternal(int index, Header header) {
+    	super.add(index, header);
+    }
+    
+    protected Header removeInternal(int index) {
+    	return super.remove(index);
+    }
+    
     /**
      * Removes the first {@link Header} of the specified name.
      *

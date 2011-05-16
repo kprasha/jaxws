@@ -42,12 +42,18 @@ package com.sun.xml.ws.api.pipe;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.Component;
+import com.sun.xml.ws.api.ComponentRegistry;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.server.Adapter;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -109,7 +115,41 @@ import java.util.logging.Logger;
  * @author Kohsuke Kawaguchi
  * @author Jitendra Kotamraju
  */
-public final class Fiber implements Runnable {
+public final class Fiber implements Runnable, ComponentRegistry {
+
+    public interface Listener {
+        public void fiberSuspended(Fiber fiber);
+        public void fiberResumed(Fiber fiber);
+    }
+
+    private List<Listener> _listeners = new ArrayList<Listener>();
+
+    public void addListener(Listener listener) {
+        synchronized(_listeners) {
+            if (!_listeners.contains(listener)) {
+                _listeners.add(listener);
+            }
+        }
+    }
+
+    public void removeListener(Listener listener) {
+        synchronized(_listeners) {
+            _listeners.remove(listener);
+        }
+    }
+
+    private List<Listener> getCurrentListeners() {
+      synchronized(_listeners) {
+         return new ArrayList<Listener>(_listeners);
+      }
+    }
+
+    private void clearListeners() {
+        synchronized(_listeners) {
+            _listeners.clear();
+        }
+    }
+
     /**
      * {@link Tube}s whose {@link Tube#processResponse(Packet)} method needs
      * to be invoked on the way back.
@@ -130,6 +170,8 @@ public final class Fiber implements Runnable {
 
     public final Engine owner;
 
+	private Map<Class<? extends Component>, Component> componentRegistry = null;
+
     /**
      * Is this thread suspended? 0=not suspended, 1=suspended.
      *
@@ -148,7 +190,7 @@ public final class Fiber implements Runnable {
      * </ol>
      *
      * <p>
-     * Using int, this will work OK because {@link #suspendedCount} becomes -1 when
+     * Using int, this will work OK because suspendedCount becomes -1 when
      * {@link #resume(Packet)} occurs before {@link #suspend()}.
      *
      * <p>
@@ -197,10 +239,23 @@ public final class Fiber implements Runnable {
     private @Nullable CompletionCallback completionCallback;
 
     /**
+     * The thread on which this Fiber is currently executing, if applicable.
+     */
+    private Thread currentThread;
+    
+    private volatile boolean isCanceled;
+    
+    /**
      * Set to true if this fiber is started asynchronously, to avoid
      * doubly-invoking completion code.
      */
     private boolean started;
+
+    /**
+     * Set to true if this fiber is started sync but allowed to run async, to
+     * avoid doubly-invoking completion code.
+     */
+    private boolean startedSync;
 
     /**
      * Callback to be invoked when a {@link Fiber} finishs execution.
@@ -237,6 +292,14 @@ public final class Fiber implements Runnable {
     }
 
     /**
+     * Access the throwable that was last seen by this fiber.
+     * @return The throwable or null if the fiber completed with no throwable.
+     */
+    public Throwable getLastThrowable() {
+      return throwable;
+    }
+
+    /**
      * Starts the execution of this fiber asynchronously.
      *
      * <p>
@@ -257,6 +320,7 @@ public final class Fiber implements Runnable {
         this.packet = request;
         this.completionCallback = completionCallback;
         this.started = true;
+        dumpFiberContext("starting (async)");
         owner.addRunnable(this);
     }
 
@@ -265,6 +329,78 @@ public final class Fiber implements Runnable {
         this.packet = request;
         this.completionCallback = completionCallback;
         this.started = true;
+        run();
+    }
+
+    private void dumpFiberContext(String desc) {
+        if(isTraceEnabled()) {
+            String action = null;
+            String msgId = null;
+            if (packet != null) {
+                for (SOAPVersion sv: SOAPVersion.values()) {
+                    for (AddressingVersion av: AddressingVersion.values()) {
+                        action = packet.getMessage() != null ? packet.getMessage().getHeaders().getAction(av, sv) : null;
+                        msgId = packet.getMessage() != null ? packet.getMessage().getHeaders().getMessageID(av, sv) : null;
+                        if (action != null || msgId != null) {
+                           break;
+                        }
+                    }
+                    if (action != null || msgId != null) {
+                        break;
+                    }
+                }
+            }
+            String actionAndMsgDesc;
+            if (action == null && msgId == null) {
+                actionAndMsgDesc = "NO ACTION or MSG ID";
+            } else {
+                actionAndMsgDesc = "'" + action + "' and msgId '" + msgId + "'";
+            }
+
+            String tubeDesc;
+            if (next != null) {
+                tubeDesc = next.toString() + ".processRequest()";
+            } else {
+                tubeDesc = peekCont() + ".processResponse()";
+            }
+
+            LOGGER.fine(getName() + " " + desc + " with " + actionAndMsgDesc  + " and 'current' tube " + tubeDesc + " from thread " + Thread.currentThread().getName() + " with Packet: " + (packet != null ? packet.toShortString() : null));
+        }
+    }
+
+    /**
+     * Starts the execution of this fiber for an ostensibly async invocation,
+     * but allows for some portion of the tubeline to run sync with the calling
+     * client instance (Port/Dispatch instance). This allows tubes that enforce
+     * ordering to see requests in the order they were sent at the point the
+     * client invoked them.
+     * <p>
+     * This method is called only when the caller (e.g. AsyncInvoker or
+     * SEIStub) knows one or more tubes need to enforce ordering and thus need
+     * to run sync with the client. Such tubes can return
+     * NextAction.INVOKE_ASYNC to indicate that the next tube in the tubeline
+     * should be invoked async to the current thread.
+     *
+     * <p>
+     * This method works like {@link Thread#start()}.
+     *
+     * @param tubeline
+     *      The first tube of the tubeline that will act on the packet.
+     * @param request
+     *      The request packet to be passed to <tt>startPoint.processRequest()</tt>.
+     * @param completionCallback
+     *      The callback to be invoked when the processing is finished and the
+     *      final response packet is available.
+     *
+     * @see #start(Tube,Packet,CompletionCallback)
+     * @see #runSync(Tube,Packet)
+     */
+    public void startSync(@NotNull Tube tubeline, @NotNull Packet request, @Nullable CompletionCallback completionCallback) {
+        next = tubeline;
+        this.packet = request;
+        this.completionCallback = completionCallback;
+        this.startedSync = true;    
+        dumpFiberContext("startSync");
         run();
     }
 
@@ -291,19 +427,70 @@ public final class Fiber implements Runnable {
      * 
      * @param resumePacket packet used in the resumed processing
      */
-    public synchronized void resume(@NotNull Packet resumePacket) {
-        if(isTraceEnabled())
-            LOGGER.fine(getName()+" resumed");
-        packet = resumePacket;
-        if( --suspendedCount == 0 ) {
-            if(synchronous) {
-                notifyAll();
+    public void resume(@NotNull Packet resumePacket) {
+        resume(resumePacket, false);
+    }
+
+    /**
+     * Similar to resume(Packet) but allowing the Fiber to be resumed
+     * synchronously (in the current Thread). If you want to know when the
+     * fiber completes (not when this method returns) then add/wrap a
+     * CompletionCallback on this Fiber.
+     */
+    public synchronized void resume(@NotNull Packet resumePacket,
+                                    boolean forceSync) {
+      resume(resumePacket, forceSync, null);
+    }
+
+    /**
+     * Similar to resume(Packet, boolean) but allowing the Fiber to be resumed
+     * and at the same time atomically assign a new CompletionCallback to it.
+     */
+    public void resume(@NotNull Packet resumePacket,
+                       boolean forceSync,
+                       CompletionCallback callback) {
+
+       synchronized(this) {
+           if (callback != null) {
+             setCompletionCallback(callback);
+           }
+           if(isTraceEnabled())
+                LOGGER.fine(getName()+" resuming. Will have suspendedCount=" + (suspendedCount-1));
+            packet = resumePacket;
+            if( --suspendedCount == 0 ) {
+
+                if(synchronous) {
+                    notifyAll();
+                } else if (forceSync || startedSync) {
+                    run();
+                } else {
+                    dumpFiberContext("resuming (async)");
+                    owner.addRunnable(this);
+                }
             } else {
-                owner.addRunnable(this);
+                if (isTraceEnabled()) {
+                    LOGGER.fine(getName() + " taking no action on resume because suspendedCount != 0: " + suspendedCount);
+                }
+            }
+        }
+
+        List<Listener> listeners = getCurrentListeners();
+        for (Listener listener: listeners) {
+            try {
+                listener.fiberResumed(this);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
+    public synchronized void resumeAndReturn(@NotNull Packet resumePacket,
+                                             boolean forceSync) {
+        if(isTraceEnabled())
+            LOGGER.fine(getName()+" resumed with Return Packet");
+        next = null;
+        resume(resumePacket, forceSync);
+    }
 
     /**
      * Wakes up a suspended fiber with an exception.
@@ -322,30 +509,55 @@ public final class Fiber implements Runnable {
      * @param throwable exception that is used in the resumed processing
      */
     public synchronized void resume(@NotNull Throwable throwable) {
-        if(isTraceEnabled()) {
-            LOGGER.fine(getName()+" resumed");
-        }
-
-        this.throwable = throwable;
-        if( --suspendedCount == 0 ) {
-            if(synchronous) {
-                notifyAll();
-            } else {
-                owner.addRunnable(this);
-            }
-        }
+        resume(throwable, false);
     }
 
+    public synchronized void resume(@NotNull Throwable error,
+                                            boolean forceSync) {
+        if(isTraceEnabled())
+            LOGGER.fine(getName()+" resumed with Return Throwable");
+        next = null;
+        throwable = error;
+        resume(packet, forceSync);
+    }
+
+    public void cancel(boolean mayInterrupt) {
+    	isCanceled = true;
+    	if (mayInterrupt) {
+    		synchronized(this) {
+    			if (currentThread != null)
+    				currentThread.interrupt();
+    		}
+    	}
+    }
+    
+    
     /**
      * Suspends this fiber's execution until the resume method is invoked.
      *
      * The call returns immediately, and when the fiber is resumed
      * the execution picks up from the last scheduled continuation.
      */
-    private synchronized void suspend() {
-        if(isTraceEnabled())
-            LOGGER.fine(getName()+" suspended");
-        suspendedCount++;
+    private void suspend() {
+
+        synchronized(this) {
+            if(isTraceEnabled()) {
+                LOGGER.fine(getName()+" suspending. Will have suspendedCount=" + (suspendedCount+1));
+                if (suspendedCount > 0) {
+                    LOGGER.fine("WARNING - " + getName()+" suspended more than resumed. Will require more than one resume to actually resume this fiber.");
+                }
+            }
+            suspendedCount++;
+        }
+
+        List<Listener> listeners = getCurrentListeners();
+        for (Listener listener: listeners) {
+            try {
+                listener.fiberSuspended(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -431,8 +643,18 @@ public final class Fiber implements Runnable {
     @Deprecated
     public void run() {
         assert !synchronous;
-        next = doRun(next);
-        completionCheck();
+        doRun();
+        if (startedSync && suspendedCount == 0 &&
+            (next != null || contsSize > 0)) {
+            // We bailed out of running this fiber we started as sync, and now
+            // want to finish running it async
+            startedSync = false;
+            // Start back up as an async fiber
+            dumpFiberContext("restarting (async) after startSync");
+            owner.addRunnable(this);
+        } else {
+            completionCheck();
+        }
     }
 
     /**
@@ -470,6 +692,7 @@ public final class Fiber implements Runnable {
         final Tube[] oldCont = conts;
         final int oldContSize = contsSize;
         final boolean oldSynchronous = synchronous;
+        final Tube oldNext = next;
 
         if(oldContSize>0) {
             conts = new Tube[16];
@@ -479,7 +702,8 @@ public final class Fiber implements Runnable {
         try {
             synchronous = true;
             this.packet = request;
-            doRun(tubeline);
+            next = tubeline;
+            doRun();
             if(throwable!=null) {
                 if (throwable instanceof RuntimeException) {
                     throw (RuntimeException) throwable;
@@ -495,20 +719,23 @@ public final class Fiber implements Runnable {
             conts = oldCont;
             contsSize = oldContSize;
             synchronous = oldSynchronous;
+            next = oldNext;
             if(interrupted) {
                 Thread.currentThread().interrupt();
                 interrupted = false;
             }
-            if(!started)
+            if(!started && !startedSync)
                 completionCheck();
         }
     }
 
     private synchronized void completionCheck() {
-        if(contsSize==0) {
+        // Don't trigger completion and callbacks if fiber is suspended
+        if(!isCanceled && contsSize==0 && suspendedCount == 0) {
             if(isTraceEnabled())
                 LOGGER.fine(getName()+" completed");
             completed = true;
+            clearListeners();
             notifyAll();
             if(completionCallback!=null) {
                 if(throwable!=null)
@@ -529,7 +756,7 @@ public final class Fiber implements Runnable {
 
     /**
      * Invokes all registered {@link InterceptorHandler}s and then call into
-     * {@link Fiber#__doRun(Tube)}.
+     * {@link Fiber#__doRun()}.
      */
     private class InterceptorHandler implements FiberContextSwitchInterceptor.Work<Tube,Tube> {
         /**
@@ -538,7 +765,7 @@ public final class Fiber implements Runnable {
         private int idx;
 
         /**
-         * Initiate the interception, and eventually invokes {@link Fiber#__doRun(Tube)}.
+         * Initiate the interception, and eventually invokes {@link Fiber#__doRun()}.
          */
         Tube invoke(Tube next) {
             idx=0;
@@ -547,73 +774,94 @@ public final class Fiber implements Runnable {
 
         public Tube execute(Tube next) {
             if(idx==interceptors.size()) {
-                return __doRun(next);
+                Fiber.this.next = next;
+                __doRun();
             } else {
                 FiberContextSwitchInterceptor interceptor = interceptors.get(idx++);
                 return interceptor.execute(Fiber.this,next,this);
             }
+            return Fiber.this.next;
         }
     }
 
     /**
      * Executes the fiber as much as possible.
      *
-     * @param next
-     *      The next tube whose {@link Tube#processRequest(Packet)} is to be invoked. If null,
-     *      that means we'll just call {@link Tube#processResponse(Packet)} on the continuation.
-     *
-     * @return
-     *      If non-null, the next time execution resumes, it should resume from calling
-     *      the {@link Tube#processRequest(Packet)}. Otherwise it means just finishing up
-     *      the continuation.
      */
     @SuppressWarnings({"LoopStatementThatDoesntLoop"}) // IntelliJ reports this bogus error
-    private Tube doRun(Tube next) {
-        Thread currentThread = Thread.currentThread();
+    private void doRun() {
 
-        if(isTraceEnabled())
-            LOGGER.fine(getName()+" running by "+currentThread.getName());
+        dumpFiberContext("running");
 
         if(serializeExecution) {
             serializedExecutionLock.lock();
             try {
-                return _doRun(next);
+                _doRun(next);
             } finally {
                 serializedExecutionLock.unlock();
             }
         } else {
-            return _doRun(next);
+            _doRun(next);
         }
     }
 
-    private Tube _doRun(Tube next) {
-        Thread currentThread = Thread.currentThread();
+    private String currentThreadMonitor = "CurrentThreadMonitor";
 
-        ClassLoader old = currentThread.getContextClassLoader();
-        currentThread.setContextClassLoader(contextClassLoader);
+    private void _doRun(Tube next) {
+        Thread thread;
+        synchronized(currentThreadMonitor) {
+          if (currentThread != null && !synchronous) {
+            if (LOGGER.isLoggable(Level.FINE)) {
+              LOGGER.fine("Attempt to run Fiber ['" + this + "'] in more than one thread. Current Thread: " + currentThread + " Attempted Thread: " + Thread.currentThread());
+            }
+            while (currentThread != null) {
+              try {
+                currentThreadMonitor.wait();
+              } catch (Exception e) {
+                // ignore
+              }
+            }
+          }
+          currentThread = Thread.currentThread();
+          thread = currentThread;
+          if (LOGGER.isLoggable(Level.FINE)) {
+            LOGGER.fine("Thread entering _doRun(): " + thread);
+          }
+        }
+
+        ClassLoader old = thread.getContextClassLoader();
+        thread.setContextClassLoader(contextClassLoader);
         try {
             do {
                 needsToReenter = false;
 
                 // if interceptors are set, go through the interceptors.
-                if(interceptorHandler ==null)
-                    next = __doRun(next);
+                if(interceptorHandler ==null) {
+                    this.next = next;
+                    __doRun();
+                }
                 else
                     next = interceptorHandler.invoke(next);
             } while(needsToReenter);
 
-            return next;
         } finally {
-            currentThread.setContextClassLoader(old);
+            thread.setContextClassLoader(old);
+            synchronized(currentThreadMonitor) {
+            	currentThread = null;
+              if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine("Thread leaving _doRun(): " + thread);
+              }
+              currentThreadMonitor.notify();
+            }
         }
     }
 
     /**
-     * To be invoked from {@link #doRun(Tube)}.
+     * To be invoked from {@link #doRun()}.
      *
-     * @see #doRun(Tube)
+     * @see #doRun()
      */
-    private Tube __doRun(Tube next) {
+    private void __doRun() {
         final Fiber old = CURRENT_FIBER.get();
         CURRENT_FIBER.set(this);
 
@@ -621,14 +869,17 @@ public final class Fiber implements Runnable {
         final boolean traceEnabled = LOGGER.isLoggable(Level.FINER);
 
         try {
-            while(!isBlocking() && !needsToReenter) {
+            boolean abortResponse = false;
+            boolean justSuspended = false;
+            while(!isCanceled && !isBlocking(justSuspended) && !needsToReenter) {
                 try {
                     NextAction na;
                     Tube last;
                     if(throwable!=null) {
-                        if(contsSize==0) {
+                        if(contsSize==0 || abortResponse) {
+                            contsSize = 0; // abortResponse case
                             // nothing else to execute. we are done.
-                            return null;
+                            return;
                         }
                         last = popCont();
                         if(traceEnabled)
@@ -637,17 +888,18 @@ public final class Fiber implements Runnable {
                     } else {
                         if(next!=null) {
                             if(traceEnabled)
-                                LOGGER.finer(getName()+' '+next+".processRequest("+packet+')');
+                                LOGGER.finer(getName()+' '+next+".processRequest("+(packet != null ? "Packet@"+Integer.toHexString(packet.hashCode()) : "null")+')');
                             na = next.processRequest(packet);
                             last = next;
                         } else {
-                            if(contsSize==0) {
+                            if(contsSize==0 || abortResponse) {
                                 // nothing else to execute. we are done.
-                                return null;
+                                contsSize = 0;
+                                return;
                             }
                             last = popCont();
                             if(traceEnabled)
-                                LOGGER.finer(getName()+' '+last+".processResponse("+packet+')');
+                                LOGGER.finer(getName()+' '+last+".processResponse("+(packet != null ? "Packet@"+Integer.toHexString(packet.hashCode()) : "null")+')');
                             na = last.processResponse(packet);
                         }
                     }
@@ -658,25 +910,45 @@ public final class Fiber implements Runnable {
                     // If resume is called before suspend, then make sure
 					// resume(Packet) is not lost
                     if (na.kind != NextAction.SUSPEND) {
-                        packet = na.packet;
+                    	// preserve in-flight packet so that processException may inspect
+                    	if (na.kind != NextAction.THROW &&
+                          na.kind != NextAction.THROW_ABORT_RESPONSE)
+                    		packet = na.packet;
                         throwable = na.throwable;
                     }
 
                     switch(na.kind) {
                     case NextAction.INVOKE:
+                    case NextAction.INVOKE_ASYNC:
                         pushCont(last);
                         // fall through next
                     case NextAction.INVOKE_AND_FORGET:
                         next = na.next;
+                        if (na.kind == NextAction.INVOKE_ASYNC
+                            && startedSync) {
+                          // Break out here
+                          return;
+                        }
                         break;
+                    case NextAction.THROW_ABORT_RESPONSE:
+                    case NextAction.ABORT_RESPONSE:
+                        abortResponse = true;
+                        if (LOGGER.isLoggable(Level.FINE)) {
+                          LOGGER.fine("Fiber " + this + " is aborting a response due to exception: " + na.throwable);
+                        }
                     case NextAction.RETURN:
                     case NextAction.THROW:
                         next = null;
                         break;
                     case NextAction.SUSPEND:
-                        pushCont(last);
+                        if (next != null) {
+                          // Only store the 'last' tube when we're processing
+                          // a request, since conts array is for processResponse
+                          pushCont(last);
+                        }
                         next = na.next;
                         suspend();
+                        justSuspended = true;
                         break;
                     default:
                         throw new AssertionError();
@@ -690,10 +962,19 @@ public final class Fiber implements Runnable {
                         LOGGER.log(Level.FINER,getName()+" Caught "+t+". Start stack unwinding",t);
                     throwable = t;
                 }
+
+                dumpFiberContext("After tube execution");
             }
+            
+            if (isCanceled) {
+            	next = null;
+            	throwable = null;
+            	contsSize = 0;
+            }
+            
             // there's nothing we can execute right away.
             // we'll be back when this fiber is resumed.
-            return next;
+
         } finally {
             CURRENT_FIBER.set(old);
         }
@@ -715,11 +996,25 @@ public final class Fiber implements Runnable {
         return conts[--contsSize];
     }
 
+    private Tube peekCont() {
+        int index = contsSize - 1;
+        if (index >= 0 && index < conts.length) {
+          return conts[index];
+        } else {
+          return null;
+        }
+    }
+    
+    void resetCont(Tube[] conts, int contsSize) {
+    	this.conts = conts;
+    	this.contsSize = contsSize;
+    }
+
     /**
      * Returns true if the fiber needs to block its execution.
      */
     // TODO: synchronization on synchronous case is wrong.
-    private boolean isBlocking() {
+    private boolean isBlocking(boolean justSuspended) {
         if(synchronous) {
             while(suspendedCount==1)
                 try {
@@ -736,7 +1031,7 @@ public final class Fiber implements Runnable {
             return false;
         }
         else
-            return suspendedCount==1;
+            return justSuspended || suspendedCount==1;
     }
 
     private String getName() {
@@ -758,6 +1053,22 @@ public final class Fiber implements Runnable {
         return packet;
     }
 
+	public Map<Class<? extends Component>, Component> getComponentRegistry() {
+		if (componentRegistry == null)
+			componentRegistry = new IdentityHashMap<Class<? extends Component>, Component>();
+		return componentRegistry;
+	}
+	
+	public @Nullable <T> T getSPI(@NotNull Class<T> spiType) {
+		if (componentRegistry != null)
+			for (Component c : componentRegistry.values()) {
+				T t = c.getSPI(spiType);
+				if (t != null)
+					return t;
+			}
+		return null;
+	}
+
     /**
      * Returns true if this fiber is still running or suspended.
      */
@@ -765,6 +1076,14 @@ public final class Fiber implements Runnable {
         return !completed;
     }
 
+    public CompletionCallback getCompletionCallback() {
+    	return completionCallback;
+    }
+    
+    public void setCompletionCallback(CompletionCallback completionCallback) {
+    	this.completionCallback = completionCallback;
+    }
+    
     /**
      * (ADVANCED) Returns true if the current fiber is being executed synchronously.
      *
@@ -792,6 +1111,18 @@ public final class Fiber implements Runnable {
     }
 
     /**
+     * Returns true if the current Fiber on the current thread was started
+     * via startSync. Note, this is not strictly the same as being synchronous
+     * because the assumption is that the Fiber will ultimately be dispatched
+     * async, possibly have a completion callback associated with it, etc.
+     * Note, the 'startedSync' flag is cleared once the current Fiber is
+     * converted to running async.
+     */
+    public boolean isStartedSync() {
+        return startedSync;
+    }
+
+    /**
      * Gets the current fiber that's running.
      *
      * <p>
@@ -803,6 +1134,13 @@ public final class Fiber implements Runnable {
         if(fiber==null)
             throw new IllegalStateException("Can be only used from fibers");
         return fiber;
+    }
+
+    /**
+     * Gets the current fiber that's running, if set.
+     */
+    public static Fiber getCurrentIfSet() {
+        return CURRENT_FIBER.get();
     }
 
     private static final ThreadLocal<Fiber> CURRENT_FIBER = new ThreadLocal<Fiber>();

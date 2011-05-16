@@ -67,7 +67,7 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
+public abstract class AbstractInstanceResolver<T> extends InstanceResolver<T> {
 
     /**
      * Encapsulates which field/method the injection is done,

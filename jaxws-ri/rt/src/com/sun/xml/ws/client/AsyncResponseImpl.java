@@ -65,6 +65,7 @@ public final class AsyncResponseImpl<T> extends FutureTask<T> implements Respons
     private final AsyncHandler<T> handler;
     private ResponseContext responseContext;
     private final Runnable callable;
+    private Cancelable cancelable;
 
     /**
      *
@@ -137,5 +138,19 @@ public final class AsyncResponseImpl<T> extends FutureTask<T> implements Respons
         } else {
             super.set(v);
         }
+    }
+    
+    public void setCancelable(Cancelable cancelable) {
+    	this.cancelable = cancelable;
+    }
+    
+    public boolean cancel(boolean mayInterruptIfRunning) {
+    	if (cancelable != null)
+    		cancelable.cancel(mayInterruptIfRunning);
+    	return super.cancel(mayInterruptIfRunning);
+    }
+    
+    public interface Cancelable {
+    	public void cancel(boolean mayInterruptIfRunning);
     }
 }

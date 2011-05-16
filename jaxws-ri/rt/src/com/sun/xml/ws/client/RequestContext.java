@@ -44,6 +44,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.developer.JAXWSProperties;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.io.Serializable;
 
 /**
  * Request context implementation.
@@ -143,6 +145,24 @@ public final class RequestContext extends PropertySet {
     private @NotNull EndpointAddress endpointAddress;
 
     /**
+     * A map of properties the client wants to have persisted between async
+     * request and response.
+     */
+    private @NotNull Map<String, Serializable> persistentContext;
+
+    @Property(JAXWSProperties.PERSISTENT_CONTEXT)
+    public Map<String, Serializable> getPersistentContext() {
+      return persistentContext;
+    }
+
+    public void setPersistentContext(Map<String, Serializable> context) {
+      if (context == null) {
+        throw new IllegalArgumentException("PersistentContext map cannot be null");
+      }
+      persistentContext = context;
+    }
+
+    /**
      * Creates {@link BindingProvider#ENDPOINT_ADDRESS_PROPERTY} view
      * on top of {@link #endpointAddress}.
      *
@@ -151,7 +171,7 @@ public final class RequestContext extends PropertySet {
      */
     @Property(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
     public String getEndPointAddressString() {
-        return endpointAddress.toString();
+        return endpointAddress != null ? endpointAddress.toString() : null;
     }
 
     public void setEndPointAddressString(String s) {
@@ -256,6 +276,9 @@ public final class RequestContext extends PropertySet {
      */
     /*package*/ RequestContext() {
         others = new HashMap<String, Object>();
+        // TODO: Not sure if Ryan has a better idea of where to put this, but
+        //       good enough for now.
+        persistentContext = new HashMap<String, Serializable>();
     }
 
     /**
@@ -263,9 +286,14 @@ public final class RequestContext extends PropertySet {
      */
     private RequestContext(RequestContext that) {
         others = new HashMap<String,Object>(that.others);
+        mapView.fallbackMap = that.mapView.fallbackMap != null ?
+          new HashMap<String, Object>(that.mapView.fallback()) : null;
         endpointAddress = that.endpointAddress;
         soapAction = that.soapAction;
         contentNegotiation = that.contentNegotiation;
+        // Make a copy of persistentContext to avoid linkage between the source
+        // and new objects.
+        persistentContext = new HashMap<String, Serializable>(that.persistentContext);
         // this is fragile, but it works faster
     }
 
@@ -318,10 +346,14 @@ public final class RequestContext extends PropertySet {
                     packet.soapAction = soapAction;
                 }
             }
+
             if((!isAddressingEnabled && (soapActionUse == null || !soapActionUse)) && soapAction != null) {
                 LOGGER.warning("BindingProvider.SOAPACTION_URI_PROPERTY is set in the RequestContext but is ineffective," +
                         " Either set BindingProvider.SOAPACTION_USE_PROPERTY to true or enable AddressingFeature"); 
             }
+
+            packet.persistentContext = persistentContext;
+
             if(!others.isEmpty()) {
                 packet.invocationProperties.putAll(others);
                 //if it is not standard property it deafults to Scope.HANDLER

@@ -43,10 +43,7 @@ package com.sun.tools.ws.processor.modeler.annotation;
 import static com.sun.codemodel.ClassType.CLASS;
 import com.sun.codemodel.*;
 import com.sun.codemodel.writer.ProgressCodeWriter;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.InterfaceDeclaration;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.*;
 import com.sun.tools.jxc.apt.InlineAnnotationReaderImpl;
@@ -401,7 +398,135 @@ public class WebServiceWrapperGenerator extends WebServiceVisitor {
         } catch (com.sun.codemodel.JClassAlreadyExistsException e){
             cls = cm._getClass(className);
         }
+        addNestedClasses(className, cls);
         return cls;
+    }
+    
+    private void addNestedClasses(String parentClassName, JDefinedClass parentClass) {
+      TypeDeclaration td = builder.getTypeDeclaration(parentClassName);
+      if (td == null) {
+        return;
+      }
+      for (TypeDeclaration nestedType: td.getNestedTypes()) {
+      	int mod = getModifiers(nestedType.getModifiers());
+      	JDefinedClass inner;
+				try {
+					inner = parentClass._class(mod, nestedType.getSimpleName());
+				} catch (JClassAlreadyExistsException e) {
+					inner = cm._getClass(nestedType.getQualifiedName());
+				}
+				addNestedClassAnnotations(nestedType, inner);
+				addFields(inner);
+				addNestedClasses(inner.fullName(), inner);
+      }                    	
+    }
+    
+		private void addNestedClassAnnotations(TypeDeclaration nestedType, JDefinedClass inner) {
+			for (AnnotationMirror am: nestedType.getAnnotationMirrors()) {
+				AnnotationType at = am.getAnnotationType();
+				// String name = at.getDeclaration().getQualifiedName();
+				JAnnotationUse au = inner.annotate(getType(at).boxify());
+				Map<AnnotationTypeElementDeclaration, AnnotationValue> map = am.getElementValues();
+				addAnnotationElements(au, map);
+			}
+		}
+		
+		private void addAnnotationElements(JAnnotationUse au, 
+				Map<AnnotationTypeElementDeclaration, AnnotationValue> map) 
+		{
+			for (AnnotationTypeElementDeclaration ated : map.keySet()) {					
+				String elementName = ated.getSimpleName();
+				AnnotationValue av = map.get(ated);				
+				addAnnotationElement(au, elementName, av);
+			}
+		}
+		
+		private void addAnnotationElement(JAnnotationUse au, 
+				String elementName, 
+				AnnotationValue av) 
+		{
+			Object value = av.getValue();
+			if (value instanceof EnumConstantDeclaration) {
+				EnumConstantDeclaration enumDecl = (EnumConstantDeclaration) value;
+				String sn = enumDecl.getSimpleName();
+				String tp = enumDecl.getType().toString();
+				try {
+					Class enumClz = Class.forName(tp);
+					au.param(elementName, Enum.valueOf(enumClz, sn));
+				} catch (ClassNotFoundException e) {
+					return;
+				}
+			} else if (value instanceof String) {
+				au.param(elementName, value.toString());
+			} else if (value instanceof Boolean) {
+				au.param(elementName, ((Boolean)value).booleanValue());
+			} else if (value instanceof Integer) {
+				au.param(elementName, ((Integer)value).intValue());
+			} else if (value instanceof Collection) {
+				Collection<AnnotationValue> values = (Collection<AnnotationValue>) value;
+				JAnnotationArrayMember array = au.paramArray(elementName);
+				for (AnnotationValue av1: values) {
+					Object v1 = av1.getValue();
+					if (v1 instanceof String) {
+						array.param((String)v1);
+					} else if (v1 instanceof Boolean) {
+						array.param(((Boolean)value).booleanValue());
+					} else if (v1 instanceof Integer) {
+						array.param(((Integer)value).intValue());
+					} else if (v1 instanceof Float) {
+						array.param(((Float)value).floatValue());
+					} else if (v1 instanceof Class) {
+						array.param(((Class)value));
+					} else if (v1 instanceof JType) {
+						array.param(((JType)value));
+					}
+				}
+			} else if (value instanceof TypeMirror) {
+				au.param(elementName, getType((TypeMirror)value));
+			}			
+		}
+
+		private void addFields(JDefinedClass cls) {
+    	String innerClassName = cls.fullName();
+    	TypeDeclaration td = builder.getTypeDeclaration(innerClassName);
+    	for (FieldDeclaration field : td.getFields()){
+        int mods = getModifiers(field.getModifiers());
+      	JType ft = getType(field.getType());
+        String fieldName = field.getSimpleName();
+      	JFieldVar fldVar = cls.field(mods, ft, fieldName);
+      	writeMember(cls, field.getType(), fieldName);
+  			for (AnnotationMirror am: field.getAnnotationMirrors()) {
+  				AnnotationType at = am.getAnnotationType();
+  				// String name = at.getDeclaration().getQualifiedName();
+  				JAnnotationUse au = fldVar.annotate(getType(at).boxify());
+  				Map<AnnotationTypeElementDeclaration, AnnotationValue> map = am.getElementValues();
+  				addAnnotationElements(au, map);
+  			}
+    	}
+    }
+
+		private int getModifiers(Collection<Modifier> modifiers) {
+    	int result = 0;
+    	for (Modifier m: modifiers) {
+    		if (m.equals(Modifier.ABSTRACT)) {
+    			result = result | JMod.ABSTRACT;
+    		} else if (m.equals(Modifier.FINAL)) {
+    			result = result | JMod.FINAL;
+    		} else if (m.equals(Modifier.PRIVATE)) {
+    			result = result | JMod.PRIVATE;
+    		} else if (m.equals(Modifier.PROTECTED)) {
+    			result = result | JMod.PROTECTED;
+    		} else if (m.equals(Modifier.PUBLIC)) {
+    			result = result | JMod.PUBLIC;
+    		} else if (m.equals(Modifier.STATIC)) {
+    			result = result | JMod.STATIC;
+    		} else if (m.equals(Modifier.SYNCHRONIZED)) {
+    			result = result | JMod.SYNCHRONIZED;
+    		} else if (m.equals(Modifier.TRANSIENT)) {
+    			result = result | JMod.TRANSIENT;
+    		}    
+    	}
+    	return result;
     }
 
     private boolean generateExceptionBean(ClassDeclaration thrownDecl, String beanPackage) {

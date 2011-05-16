@@ -43,7 +43,9 @@ package com.sun.xml.ws.api.server;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.ComponentRegistry;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.ManagedEndpointFactory;
 import com.sun.xml.ws.api.message.Message;
@@ -65,12 +67,17 @@ import org.glassfish.gmbal.ManagedObjectManager;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Binding;
+import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.Service.Mode;
+
 import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 /**
@@ -124,7 +131,7 @@ import java.util.concurrent.Executor;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class WSEndpoint<T> {
+public abstract class WSEndpoint<T> implements ComponentRegistry {
 
     /**
      * Gets the Endpoint's codec that is used to encode/decode {@link Message}s. This is a
@@ -372,23 +379,14 @@ public abstract class WSEndpoint<T> {
     public abstract @Nullable ServiceDefinition getServiceDefinition();
 
     /**
-     * Gets the list of {@link EndpointComponent} that are associated
+     * Gets the list of {@link BoundEndpoint} that are associated
      * with this endpoint.
-     *
-     * <p>
-     * Components (such as codec, tube, handler, etc) who wish to provide
-     * some service to other components in the endpoint can iterate the
-     * registry and call its {@link EndpointComponent#getSPI(Class)} to
-     * establish a private contract between components.
-     * <p>
-     * Components who wish to subscribe to such a service can add itself
-     * to this set.
      *
      * @return
      *      always return the same set.
      */
-    public abstract @NotNull Set<EndpointComponent> getComponentRegistry();
-
+    public abstract @NotNull Set<BoundEndpoint> getBoundEndpoints();
+    
     /**
      * Gets the {@link com.sun.xml.ws.api.model.SEIModel} that represents the relationship
      * between WSDL and Java SEI.
@@ -417,6 +415,29 @@ public abstract class WSEndpoint<T> {
      * Get the ManagedObjectManager for this endpoint.
      */
     public abstract @NotNull ManagedObjectManager getManagedObjectManager();
+
+    /*
+     * Get a Dispatch instance suitable for sending new requests to a target
+     * endpoint that is 'implied' by the current endpoint's service definition.
+     * For example, if used to send RM protocol messages, the target endpoint
+     * is implied to have the same policy as this endpoint.
+     */
+    public abstract <T> Dispatch<T> createDispatch(Class<T> type, Mode mode);
+
+    /**
+     * Get a Dispatch instance suitable for sending new requests to a target
+     * endpoint that is 'implied' by the current endpoint's service definition.
+     * For example, if used to send RM protocol messages, the target endpoint
+     * is implied to have the same policy as this endpoint.
+     */
+    public abstract Dispatch<Message> createMessageDispatch();
+
+    /**
+     * Get a Dispatch instance suitable for use in sending an async response
+     * that has been persisted and rehydrated. Note, the returned Dispatch
+     * will not support doing an invoke with a response of any kind.
+     */
+    public abstract <T> Dispatch<T> createResponseDispatch(Class<T> type, Mode mode, @Nullable WSEndpointReference epr);
 
     /**
      * Close the ManagedObjectManager for this endpoint.
@@ -498,6 +519,21 @@ public abstract class WSEndpoint<T> {
      *      if the endpoint set up fails.
      */
     public static <T> WSEndpoint<T> create(
+            @NotNull Class<T> implType,
+            boolean processHandlerAnnotation,
+            @Nullable Invoker invoker,
+            @Nullable QName serviceName,
+            @Nullable QName portName,
+            @Nullable Container container,
+            @Nullable WSBinding binding,
+            @Nullable SDDocumentSource primaryWsdl,
+            @Nullable Collection<? extends SDDocumentSource> metadata,
+            @Nullable EntityResolver resolver,
+            boolean isTransportSynchronous) {
+    	return create(implType, processHandlerAnnotation, invoker, serviceName, portName, container, binding, primaryWsdl, metadata, resolver, isTransportSynchronous, true);
+    }
+    
+    public static <T> WSEndpoint<T> create(
         @NotNull Class<T> implType,
         boolean processHandlerAnnotation,
         @Nullable Invoker invoker,
@@ -508,11 +544,16 @@ public abstract class WSEndpoint<T> {
         @Nullable SDDocumentSource primaryWsdl,
         @Nullable Collection<? extends SDDocumentSource> metadata,
         @Nullable EntityResolver resolver,
-        boolean isTransportSynchronous) 
+        boolean isTransportSynchronous,
+        boolean isStandard) 
     {
-	final WSEndpoint<T> endpoint = 
-            EndpointFactory.createEndpoint(
-                implType,processHandlerAnnotation, invoker,serviceName,portName,container,binding,primaryWsdl,metadata,resolver,isTransportSynchronous);
+    	EndpointFactory factory = container != null ? container.getSPI(EndpointFactory.class) : null;
+    	if (factory == null)
+    		factory = EndpointFactory.getInstance();
+
+    	final WSEndpoint<T> endpoint = 
+            factory.createEndpoint(
+                implType,processHandlerAnnotation, invoker,serviceName,portName,container,binding,primaryWsdl,metadata,resolver,isTransportSynchronous,isStandard);
         endpoint.getManagedObjectManager().resumeJMXRegistration();
 
         final Iterator<ManagedEndpointFactory> managementFactories = ServiceFinder.find(ManagedEndpointFactory.class).iterator();
@@ -574,13 +615,50 @@ public abstract class WSEndpoint<T> {
      * Gives the wsdl:service default name computed from the endpoint implementaiton class
      */
     public static @NotNull QName getDefaultServiceName(Class endpointClass){
-        return EndpointFactory.getDefaultServiceName(endpointClass);
+        return getDefaultServiceName(endpointClass, true);
+    }
+
+    public static @NotNull QName getDefaultServiceName(Class endpointClass, boolean isStandard){
+        return EndpointFactory.getDefaultServiceName(endpointClass, isStandard);
     }
 
     /**
      * Gives the wsdl:service/wsdl:port default name computed from the endpoint implementaiton class
      */
     public static @NotNull QName getDefaultPortName(@NotNull QName serviceName, Class endpointClass){
-        return EndpointFactory.getDefaultPortName(serviceName, endpointClass);
+    	return getDefaultPortName(serviceName, endpointClass, true);
     }
+    
+    public static @NotNull QName getDefaultPortName(@NotNull QName serviceName, Class endpointClass, boolean isStandard){
+        return EndpointFactory.getDefaultPortName(serviceName, endpointClass, isStandard);
+    }
+  /**
+   * Get a unique ID that identifies this endpoint instance. This ID can be used
+   * to look up an endpoint from the registry.
+   */
+    public String getEndpointId() {
+      // TODO: We probably need something more unique. I'll leave that to Ryan
+      return getPortName().toString();
+    }
+
+    private static final Map<String, WSEndpoint> _endpointRegistry = new HashMap<String, WSEndpoint>();
+
+    public static void registerEndpoint(String id, WSEndpoint endpoint) {
+      synchronized(_endpointRegistry) {
+        _endpointRegistry.put(id, endpoint);
+      }
+    }
+
+    public static WSEndpoint unregisterEndpoint(String id) {
+      synchronized(_endpointRegistry) {
+        return _endpointRegistry.remove(id);
+      }
+    }
+
+    public static WSEndpoint getEndpoint(String id) {
+      synchronized(_endpointRegistry) {
+        return _endpointRegistry.get(id);
+      }
+    }
+
 }

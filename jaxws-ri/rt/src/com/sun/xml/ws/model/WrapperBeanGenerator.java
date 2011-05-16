@@ -286,7 +286,14 @@ public class WrapperBeanGenerator {
             throw new WebServiceException(e);
         }
 
-        return Injector.inject(cl, className, image);
+        Class c = Injector.inject(cl, className, image);
+        if (c == null) {
+        	try {
+        		c = Class.forName(className, true, cl);
+        	} catch (ClassNotFoundException cnfe) {}
+        }
+        
+        return c;
     }
 
     static Class createResponseWrapperBean(String className, Method method, QName resElemName, ClassLoader cl) {
@@ -337,6 +344,28 @@ public class WrapperBeanGenerator {
         }
 
         throw new IllegalArgumentException("Not creating ASM Type for type = "+t);
+    }
+    
+    private static Type getPrimitiveArrayType(Type primitive) {
+        switch (primitive.getSort()) {
+        case Type.BOOLEAN:
+        	return Type.getType("[Z");
+        case Type.BYTE:
+        	return Type.getType("[B");
+        case Type.CHAR:
+        	return Type.getType("[C");
+        case Type.DOUBLE:
+        	return Type.getType("[D");
+        case Type.FLOAT:
+        	return Type.getType("[F");
+        case Type.LONG:
+        	return Type.getType("[J");
+        case Type.SHORT:
+        	return Type.getType("[S");
+        case Type.INT:
+        	return Type.getType("[I");
+        }
+        return null;
     }
 
 

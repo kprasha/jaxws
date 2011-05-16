@@ -55,6 +55,7 @@ import com.sun.xml.ws.developer.SchemaValidationFeature;
 import com.sun.xml.ws.handler.HandlerTube;
 import com.sun.xml.ws.handler.ServerLogicalHandlerTube;
 import com.sun.xml.ws.handler.ServerMessageHandlerTube;
+import com.sun.xml.ws.handler.ServerOutboundAttachmentTube;
 import com.sun.xml.ws.handler.ServerSOAPHandlerTube;
 import com.sun.xml.ws.protocol.soap.ServerMUTube;
 import com.sun.xml.ws.server.ServerSchemaValidationTube;
@@ -174,7 +175,7 @@ public class ServerTubeAssemblerContext {
                 next = new ServerMessageHandlerTube(seiModel, binding, next, cousin);
             }
         }
-        return next;
+        return new ServerOutboundAttachmentTube(next);
     }
 
     /**

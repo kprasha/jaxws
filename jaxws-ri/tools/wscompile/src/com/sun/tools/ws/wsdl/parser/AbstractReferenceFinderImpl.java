@@ -93,7 +93,17 @@ public abstract class AbstractReferenceFinderImpl extends XMLFilterImpl {
 
         try {
             // absolutize URL.
-            String ref = new URI(locator.getSystemId()).resolve(new URI(relativeRef)).toString();
+        	String lsi = locator.getSystemId();
+        	String ref;
+        	if (lsi.startsWith("jar:")) {
+        		int bangIdx = lsi.indexOf('!');
+        		if (bangIdx > 0) {
+        			ref = lsi.substring(0, bangIdx + 1) + 
+        				new URI(lsi.substring(bangIdx + 1)).resolve(new URI(relativeRef)).toString();
+        		} else
+        			ref = relativeRef;
+        	} else
+        		ref = new URI(lsi).resolve(new URI(relativeRef)).toString();
 
             // then parse this schema as well,
             // but don't mark this document as a root.

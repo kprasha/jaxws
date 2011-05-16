@@ -130,7 +130,7 @@ public class ServerLogicalHandlerTube extends HandlerTube {
     }
 
     void setUpProcessor() {
-        if (!handlers.isEmpty()) {
+        if (!handlers.isEmpty() && processor == null) {
             if (binding.getSOAPVersion() == null) {
                 processor = new XMLHandlerProcessor(this, binding,
                         handlers);
@@ -169,7 +169,7 @@ public class ServerLogicalHandlerTube extends HandlerTube {
     void callHandlersOnResponse(MessageUpdatableContext context, boolean handleFault) {
         //Lets copy all the MessageContext.OUTBOUND_ATTACHMENT_PROPERTY to the message
         Map<String, DataHandler> atts = (Map<String, DataHandler>) context.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
-        AttachmentSet attSet = packet.getMessage().getAttachments();
+        AttachmentSet attSet = context.packet.getMessage().getAttachments();
         for(String cid : atts.keySet()){
             Attachment att = new DataHandlerAttachment(cid, atts.get(cid));
             attSet.add(att);

@@ -296,10 +296,14 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
     public void decode(InputStream in, String contentType, Packet packet, AttachmentSet att ) throws IOException {
         List<String> expectedContentTypes = getExpectedContentTypes();
         if (contentType != null && !isContentTypeSupported(contentType,expectedContentTypes)) {
+        	if (in != null)
+        		in.close();
             throw new UnsupportedMediaException(contentType, expectedContentTypes);
         }
         String charset = new ContentTypeImpl(contentType).getCharSet();
         if (charset != null && !Charset.isSupported(charset)) {
+        	if (in != null)
+        		in.close();
             throw new UnsupportedMediaException(charset);
         }
         XMLStreamReader reader = XMLStreamReaderFactory.create(null, in, charset, true);

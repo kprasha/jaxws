@@ -74,14 +74,9 @@ public final class RelatesToHeader extends StringHeader {
         return type;
     }
 
-    @Override
-    public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        w.writeStartElement("", name.getLocalPart(), name.getNamespaceURI());
-        w.writeDefaultNamespace(name.getNamespaceURI());
+    protected void writeAttributes(XMLStreamWriter w) throws XMLStreamException {
         if (type != null)
             w.writeAttribute("type", type);
-        w.writeCharacters(value);
-        w.writeEndElement();
     }
 
     @Override

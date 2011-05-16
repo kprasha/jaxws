@@ -45,6 +45,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.AttachmentPartWrapper;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.developer.StreamingAttachmentFeature;
@@ -52,11 +53,14 @@ import com.sun.xml.ws.developer.StreamingAttachmentFeature;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.activation.DataContentHandler;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.MimeHeader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.UUID;
+import java.util.Iterator;
 
 /**
  * {@link Codec}s that uses the MIME multipart as the underlying format.
@@ -151,6 +155,7 @@ abstract class MimeCodec implements Codec {
                     cid = '<' + cid + '>';
                 writeln("Content-Id:" + cid, out);
                 writeln("Content-Type: " + att.getContentType(), out);
+                writeCustomMimeHeaders(att, out);
                 writeln("Content-Transfer-Encoding: binary", out);
                 writeln(out);                    // write \r\n
                 att.writeTo(out);
@@ -162,7 +167,24 @@ abstract class MimeCodec implements Codec {
         // TODO not returing correct multipart/related type(no boundary)
         return hasAttachments ? new ContentTypeImpl(messageContentType, packet.soapAction, null) : primaryCt;
     }
-    
+
+    private void writeCustomMimeHeaders(Attachment att, OutputStream out) throws IOException {
+        if (att instanceof AttachmentPartWrapper) {
+            AttachmentPart ap = ((AttachmentPartWrapper)att).getAttachmentPart();
+            if (ap != null) {
+                Iterator<MimeHeader> allMimeHeaders = ap.getAllMimeHeaders();
+                while (allMimeHeaders.hasNext()) {
+                    MimeHeader mh = allMimeHeaders.next();
+                    String name = mh.getName();
+
+                    if (!"Content-Type".equalsIgnoreCase(name)) {
+                        writeln(name +": " + mh.getValue(), out);
+                    }
+                }
+            }
+        }
+    }
+
     public ContentType getStaticContentType(Packet packet) {
         Message msg = packet.getMessage();
         hasAttachments = !msg.getAttachments().isEmpty();

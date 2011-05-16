@@ -185,8 +185,8 @@ public class HandlerAnnotationProcessor {
             return null;
         }
         if (!clazz.isAnnotationPresent(WebService.class)) {
-            throw new UtilException("util.handler.no.webservice.annotation",
-                clazz.getCanonicalName());
+        	// No longer throw exception here as validation is redundant
+            return null;
         }
 
         WebService webService = clazz.getAnnotation(WebService.class);

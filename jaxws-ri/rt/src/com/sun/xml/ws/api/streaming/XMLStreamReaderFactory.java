@@ -42,6 +42,8 @@ package com.sun.xml.ws.api.streaming;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.streaming.XMLReaderException;
 import org.xml.sax.InputSource;
 
@@ -78,7 +80,7 @@ public abstract class XMLStreamReaderFactory {
      */
     private static volatile @NotNull XMLStreamReaderFactory theInstance;
 
-    static {
+    public static XMLStreamReaderFactory create() {
         XMLInputFactory xif = getXMLInputFactory();
         XMLStreamReaderFactory f=null;
 
@@ -96,7 +98,11 @@ public abstract class XMLStreamReaderFactory {
         if(f==null)
             f = new Default();
 
-        theInstance = f;
+        return f;
+    }
+    
+    static {
+        theInstance = create();
         LOGGER.fine("XMLStreamReaderFactory instance is = "+theInstance);
     }
 
@@ -128,6 +134,12 @@ public abstract class XMLStreamReaderFactory {
     }
 
     public static XMLStreamReaderFactory get() {
+    	Container c = ContainerResolver.getInstance().getContainer();
+    	if (c != null) {
+    		XMLStreamReaderFactory x = c.getSPI(XMLStreamReaderFactory.class);
+    		if (x != null)
+    			return x;
+    	}
         return theInstance;
     }
 

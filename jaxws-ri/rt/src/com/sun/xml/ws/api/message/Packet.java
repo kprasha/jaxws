@@ -45,6 +45,7 @@ import com.sun.istack.Nullable;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
 import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.addressing.model.InvalidAddressingHeaderException;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.DistributedPropertySet;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.PropertySet;
@@ -56,14 +57,19 @@ import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.TransportBackChannel;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.xml.ws.client.*;
 import com.sun.xml.ws.developer.JAXWSProperties;
 import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.message.StringHeader;
+import com.sun.xml.ws.transport.http.WSHTTPConnection;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.server.WSEndpointImpl;
@@ -74,6 +80,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceContext;
@@ -91,6 +98,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 
 /**
  * Represents a container of a {@link Message}.
@@ -172,17 +182,22 @@ public final class Packet extends DistributedPropertySet {
      *      The request {@link Message}. Can be null.
      */
     public Packet(Message request) {
+        this(request, false);
+    }
+
+    public Packet(Message request, boolean inbound) {
         this();
         this.message = request;
     }
-
+    
     /**
      * Creates an empty {@link Packet} that doesn't have any {@link Message}.
      */
     public Packet() {
         this.invocationProperties = new HashMap<String,Object>();
+        this.persistentContext = new HashMap<String, Serializable>();
     }
-
+    
     /**
      * Used by {@link #createResponse(Message)} and {@link #copy(boolean)}.
      */
@@ -190,18 +205,20 @@ public final class Packet extends DistributedPropertySet {
         that.copySatelliteInto(this);
         this.handlerConfig = that.handlerConfig;
         this.invocationProperties = that.invocationProperties;
+        this.endpoint = that.endpoint;
+        this.component = that.component;
+        this.proxy = that.proxy;
         this.handlerScopePropertyNames = that.handlerScopePropertyNames;
         this.contentNegotiation = that.contentNegotiation;
         this.wasTransportSecure = that.wasTransportSecure;
         this.endpointAddress = that.endpointAddress;
         this.wsdlOperation = that.wsdlOperation;
-
         this.acceptableMimeTypes = that.acceptableMimeTypes;
-        this.endpoint = that.endpoint;
-        this.proxy = that.proxy;
         this.webServiceContextDelegate = that.webServiceContextDelegate;
         this.soapAction = that.soapAction;
         this.expectReply = that.expectReply;
+        this.persistentContext = that.persistentContext;
+        this.outboundHttpHeaders = that.outboundHttpHeaders;
         // copy other properties that need to be copied. is there any?
     }
 
@@ -236,6 +253,13 @@ public final class Packet extends DistributedPropertySet {
         return message;
     }
 
+    public WSBinding getBinding() {
+    	if (endpoint != null)
+    		return endpoint.getBinding();
+    	if (proxy != null)
+    		return (WSBinding) proxy.getBinding();
+    	return null;
+    }
     /**
      * Sets a {@link Message} to this packet.
      *
@@ -404,6 +428,36 @@ public final class Packet extends DistributedPropertySet {
         }
     }
 
+    @NotNull
+    @Property(JAXWSProperties.PERSISTENT_CONTEXT)
+    public Map<String, Serializable> persistentContext;
+
+    /**
+     * Any HTTP headers found on an incoming HTTP message. This applies to
+     * service-side only (e.g. HttpAdapter). This map is read-only, and any
+     * changes to it are ignored.
+     */
+    @Nullable
+    @Property(JAXWSProperties.INBOUND_HTTP_HEADERS)
+    public Map<String,List<String>> getInboundHttpHeaders() {
+    	WSHTTPConnection con = getSatellite(WSHTTPConnection.class);
+    	if (con != null)
+    		return con.getRequestHeaders();
+    	return null;
+    }
+
+    /**
+     * Any HTTP headers that should be placed on an outgoing HTTP message based
+     * on this packet. This applies to service-side only (e.g. HttpAdapter)
+     * and any headers already on the HTTP connection or set by the transport
+     * will take precedence over these headers. Therefore, you should use this
+     * property only to set HTTP headers that are custom or unique to your
+     * protocol.
+     */
+    @Nullable
+    @Property(JAXWSProperties.OUTBOUND_HTTP_HEADERS)
+    public Map<String,List<String>> outboundHttpHeaders;
+
     /**
      * Gives a list of Reference Parameters in the Message
      * <p>
@@ -508,6 +562,12 @@ public final class Packet extends DistributedPropertySet {
         return r;
     }
 
+    /**
+     * The governing owner of this packet.  On the service-side this is the {@link Adapter} and on the client it is the {@link Stub}.
+     *
+     */
+    public Component component;
+    
     /**
      * The governing {@link WSEndpoint} in which this message is floating.
      *
@@ -618,6 +678,23 @@ public final class Packet extends DistributedPropertySet {
     @Deprecated
     public Boolean isOneWay;
 
+    /**
+     * Indicates whether is invoking a synchronous pattern. If true, no
+     * async client programming model (e.g. AsyncResponse or AsyncHandler)
+     * were used to make the request that created this packet.
+     */
+    public Boolean isSynchronousMEP;
+
+    /**
+     * Indicates whether a non-null AsyncHandler was given at the point of
+     * making the request that created this packet. This flag can be used
+     * by Tube implementations to decide how to react when isSynchronousMEP
+     * is false. If true, the client gave a non-null AsyncHandler instance
+     * at the point of request, and will be expecting a response on that
+     * handler when this request has been processed.
+     */
+    public Boolean nonNullAsyncHandlerGiven;
+    
     /**
      * Lazily created set of handler-scope property names.
      *
@@ -747,7 +824,11 @@ public final class Packet extends DistributedPropertySet {
         if (av == null)
             return r;
         //populate WS-A headers only if the request has addressing headers
-        String inputAction = this.getMessage().getHeaders().getAction(av, binding.getSOAPVersion());
+        String inputAction = null;
+        if (this.getMessage() != null) {
+          inputAction = this.getMessage().getHeaders().getAction(av, binding.getSOAPVersion());
+        }
+
         if (inputAction == null) {
             return r;
         }
@@ -875,7 +956,11 @@ public final class Packet extends DistributedPropertySet {
         hl.add(new StringHeader(av.messageIDTag, responsePacket.getMessage().getID(av, sv)));
 
         // wsa:RelatesTo
-        String mid = getMessage().getHeaders().getMessageID(av,sv);
+        HeaderList myhl = getMessage().getHeaders();
+        String mid = myhl.getMessageID(av,sv);
+    	String existingRT = myhl.getRelatesTo(av, sv);
+    	if (existingRT != null)
+    		mid = existingRT;
         if (mid != null)
             hl.add(new RelatesToHeader(av.relatesToTag, mid));
 
@@ -911,6 +996,38 @@ public final class Packet extends DistributedPropertySet {
             return;
         }
         populateAddressingHeaders(responsePacket, addressingVersion, binding.getSOAPVersion(), action, addressingVersion.isRequired(binding));
+    }
+
+    public String toShortString() {
+      return super.toString();
+    }
+
+    // For use only in a debugger
+    public String toString() {
+      StringBuffer buf = new StringBuffer();
+      buf.append(super.toString());
+      String content;
+    	try {
+        if (message != null) {
+		        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		        XMLStreamWriter xmlWriter = XMLStreamWriterFactory.create(baos, "UTF-8");
+		        message.copy().writeTo(xmlWriter);
+		        xmlWriter.flush();
+		        xmlWriter.close();
+		        baos.flush();
+		        XMLStreamWriterFactory.recycle(xmlWriter);
+		        
+		        byte[] bytes = baos.toByteArray();
+		        //message = Messages.create(XMLStreamReaderFactory.create(null, new ByteArrayInputStream(bytes), "UTF-8", true));
+		        content = new String(bytes, "UTF-8");
+    		} else {
+    		    content = "<none>";
+        }
+    	} catch (Throwable t) {
+    		throw new WebServiceException(t);
+    	}
+      buf.append(" Content: ").append(content);
+      return buf.toString();
     }
 
     // completes TypedMap

@@ -59,7 +59,6 @@ import com.sun.tools.ws.processor.modeler.annotation.WebServiceAP;
  */
 public class AnnotationProcessorFactoryImpl implements AnnotationProcessorFactory {
 
-    private static WebServiceAP wsAP;
     /*
      * Processor doesn't examine any options.
      */
@@ -112,11 +111,8 @@ public class AnnotationProcessorFactoryImpl implements AnnotationProcessorFactor
     public AnnotationProcessor getProcessorFor(Set<AnnotationTypeDeclaration> atds,
 					AnnotationProcessorEnvironment apEnv) {
                                             
-        if (wsAP == null) {
-            AnnotationProcessorContext context = new AnnotationProcessorContext();
-            wsAP = new WebServiceAP(null, context, null, null);
-
-        }
+        AnnotationProcessorContext context = new AnnotationProcessorContext();
+        WebServiceAP wsAP = new WebServiceAP(null, context, null, null);
         wsAP.init(apEnv);
         return wsAP;
     }

@@ -61,6 +61,11 @@ import javax.xml.stream.XMLStreamException;
  * @since 2.1.3
  */
 public class WsaPropertyBag extends PropertySet {
+
+    public static final String WSA_REPLYTO_FROM_REQUEST = "com.sun.xml.ws.addressing.WsaPropertyBag.ReplyToFromRequest";
+    public static final String WSA_FAULTTO_FROM_REQUEST = "com.sun.xml.ws.addressing.WsaPropertyBag.FaultToFromRequest";
+    public static final String WSA_MSGID_FROM_REQUEST = "com.sun.xml.ws.addressing.WsaPropertyBag.MessageIdFromRequest";
+
     private final @NotNull AddressingVersion addressingVersion;
     private final @NotNull SOAPVersion soapVersion;
     /**
@@ -69,8 +74,7 @@ public class WsaPropertyBag extends PropertySet {
      */
     private final @NotNull Packet packet;
 
-
-    WsaPropertyBag(AddressingVersion addressingVersion, SOAPVersion soapVersion, Packet packet) {
+    public WsaPropertyBag(AddressingVersion addressingVersion, SOAPVersion soapVersion, Packet packet) {
         this.addressingVersion = addressingVersion;
         this.soapVersion = soapVersion;
         this.packet = packet;
@@ -83,10 +87,13 @@ public class WsaPropertyBag extends PropertySet {
      *      null if the incoming SOAP message didn't have the header.
      */
     @Property(JAXWSProperties.ADDRESSING_TO)
-    public String getTo() throws XMLStreamException {
-        Header h = packet.getMessage().getHeaders().get(addressingVersion.toTag, false);
-        if (h == null) return null;
-        return h.getStringContent();
+    public WSEndpointReference getTo() throws XMLStreamException {
+      if (packet.getMessage() == null) {
+        return null;
+      }
+      Header h = packet.getMessage().getHeaders().get(addressingVersion.toTag, false);
+      if(h==null) return null;
+      return new WSEndpointReference(h.getStringContent(),addressingVersion);
     }
 
     /**
@@ -108,6 +115,9 @@ public class WsaPropertyBag extends PropertySet {
      */
     @Property(JAXWSProperties.ADDRESSING_ACTION)
     public String getAction() {
+        if (packet.getMessage() == null) {
+          return null;
+        }
         Header h = packet.getMessage().getHeaders().get(addressingVersion.actionTag, false);
         if(h==null) return null;
         return h.getStringContent();
@@ -122,10 +132,16 @@ public class WsaPropertyBag extends PropertySet {
     // WsaServerTube.REQUEST_MESSAGE_ID is exposed for backward compatibility with 2.1
     @Property({JAXWSProperties.ADDRESSING_MESSAGEID,WsaServerTube.REQUEST_MESSAGE_ID})
     public String getMessageID() {
+        if (packet.getMessage() == null) {
+          return null;
+        }
         return packet.getMessage().getHeaders().getMessageID(addressingVersion,soapVersion);
     }
 
     private WSEndpointReference getEPR(QName tag) throws XMLStreamException {
+        if (packet.getMessage() == null) {
+          return null;
+        }
         Header h = packet.getMessage().getHeaders().get(tag, false);
         if(h==null) return null;
         return h.readAsEPR(addressingVersion);
@@ -138,5 +154,38 @@ public class WsaPropertyBag extends PropertySet {
     private static final PropertyMap model;
     static {
         model = parse(WsaPropertyBag.class);
+    }
+
+    private WSEndpointReference _replyToFromRequest = null;
+
+    @Property(WSA_REPLYTO_FROM_REQUEST)
+    public WSEndpointReference getReplyToFromRequest() {
+      return _replyToFromRequest;
+    }
+
+    public void setReplyToFromRequest(WSEndpointReference ref) {
+      _replyToFromRequest = ref;
+    }
+
+    private WSEndpointReference _faultToFromRequest = null;
+
+    @Property(WSA_FAULTTO_FROM_REQUEST)
+    public WSEndpointReference getFaultToFromRequest() {
+      return _faultToFromRequest;
+    }
+
+    public void setFaultToFromRequest(WSEndpointReference ref) {
+      _faultToFromRequest = ref;
+    }
+
+    private String _msgIdFromRequest = null;
+
+    @Property(WSA_MSGID_FROM_REQUEST)
+    public String getMessageIdFromRequest() {
+      return _msgIdFromRequest;
+    }
+
+    public void setMessageIdFromRequest(String id) {
+      _msgIdFromRequest = id;
     }
 }

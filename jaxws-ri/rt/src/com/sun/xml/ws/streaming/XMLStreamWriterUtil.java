@@ -75,16 +75,6 @@ public class XMLStreamWriterUtil {
             obj = ((Map) writer).get("sjsxp-outputstream");
         }
 
-        // woodstox
-        if (obj == null) {
-            try {
-                obj = writer.getProperty("com.ctc.wstx.outputUnderlyingStream");
-            } catch(Exception ie) {
-                // Catch all exceptions. SJSXP in JDK throws NPE
-                // nothing to do here
-            }
-        }
-
         // SJSXP
         if (obj == null) {
             try {

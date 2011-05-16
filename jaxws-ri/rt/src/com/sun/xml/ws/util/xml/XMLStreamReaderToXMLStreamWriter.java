@@ -134,7 +134,7 @@ public class XMLStreamReaderToXMLStreamWriter {
                     handleSpace();
                     break;
                 default :
-                    throw new InternalError("processing event: " + event);
+                    throw new XMLStreamException("processing event: " + event);
             }
 
             event=in.next();

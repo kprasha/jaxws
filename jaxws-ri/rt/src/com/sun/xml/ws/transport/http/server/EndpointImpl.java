@@ -159,6 +159,36 @@ public class EndpointImpl extends Endpoint {
         invoker = null;
     }
 
+    /**
+     * Wraps an already created {@link WSEndpoint} into an {@link EndpointImpl},
+     * and immediately publishes it with the given context.
+     *
+     * @param wse created endpoint
+     * @param address endpoint address
+     * @deprecated This is a backdoor method. Don't use it unless you know what you are doing.
+     */
+    public EndpointImpl(WSEndpoint wse, String address) {
+        URL url;
+        try {
+            url = new URL(address);
+        } catch (MalformedURLException ex) {
+            throw new IllegalArgumentException("Cannot create URL for this address " + address);
+        }
+        if (!url.getProtocol().equals("http")) {
+            throw new IllegalArgumentException(url.getProtocol() + " protocol based address is not supported");
+        }
+        if (!url.getPath().startsWith("/")) {
+            throw new IllegalArgumentException("Incorrect WebService address=" + address +
+                    ". The address's path should start with /");
+        }
+        actualEndpoint = new HttpEndpoint(null, getAdapter(wse, url.getPath()));
+        ((HttpEndpoint) actualEndpoint).publish(address);
+        binding = wse.getBinding();
+        implementor = null; // this violates the semantics, but hey, this is a backdoor.
+        implClass = null;
+        invoker = null;
+    }
+
     public Binding getBinding() {
         return binding;
     }

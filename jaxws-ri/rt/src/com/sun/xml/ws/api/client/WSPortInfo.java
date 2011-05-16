@@ -48,6 +48,7 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.PolicyMap;
 
+import javax.xml.namespace.QName;
 import javax.xml.ws.handler.PortInfo;
 
 /**
@@ -88,4 +89,9 @@ public interface WSPortInfo extends PortInfo {
      */
 
     public PolicyMap getPolicyMap();
+    
+    /**
+     * Returns the port name
+     */
+    public QName getPortName();
 }

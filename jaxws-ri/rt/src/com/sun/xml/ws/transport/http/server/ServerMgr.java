@@ -47,7 +47,9 @@ import com.sun.xml.ws.server.ServerRtException;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -101,16 +103,28 @@ final class ServerMgr {
                     logger.fine("Creating HTTP Context at = "+path);
                     HttpContext context = server.createContext(path);
                     server.start();
+                    if (port == 0) {
+                      //A port number of zero will let the system pick up an ephemeral port in a bind operation.
+                      //Get the bound port instead of supplied port number of zero to calculate inetAddress. 
+                      inetAddress = new InetSocketAddress(url.getHost(), server.getAddress().getPort());
+                    }
                     logger.fine("HTTP server started = "+inetAddress);
-                    state = new ServerState(server);
+                    state = new ServerState(server, path);
                     servers.put(inetAddress, state);
                     return context;
                 }
             }
             server = state.getServer();
+            
+            if (state.getPaths().contains(url.getPath())) {
+              String err = "Context with URL path "+url.getPath()+ " already exists on the server "+server.getAddress();
+              logger.fine(err);
+              throw new IllegalArgumentException(err);  
+            }
+            
             logger.fine("Creating HTTP Context at = "+url.getPath());
             HttpContext context = server.createContext(url.getPath());
-            state.oneMoreContext();
+            state.oneMoreContext(url.getPath());
             return context;
         } catch(Exception e) {
             throw new ServerRtException("server.rt.err",e );
@@ -132,7 +146,7 @@ final class ServerMgr {
                 servers.remove(inetAddress);
             } else {
                 state.getServer().removeContext(context);
-                state.oneLessContext();
+                state.oneLessContext(context.getPath());
             }
         }
     }
@@ -140,26 +154,34 @@ final class ServerMgr {
     private static final class ServerState {
         private final HttpServer server;
         private int instances;
+        private Set<String> paths = new HashSet<String>();
         
-        ServerState(HttpServer server) {
+        ServerState(HttpServer server, String path) {
             this.server = server;
             this.instances = 1;
+            paths.add(path);
         }
         
         public HttpServer getServer() {
             return server;
         }
         
-        public void oneMoreContext() {
+        public void oneMoreContext(String path) {
             ++instances;
+            paths.add(path);
         }
         
-        public void oneLessContext() {
+        public void oneLessContext(String path) {
             --instances;
+            paths.remove(path);
         }
         
         public int noOfContexts() {
             return instances;
+        }
+
+        public Set<String> getPaths() {
+          return paths;
         }
     }
 }

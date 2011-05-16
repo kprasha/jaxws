@@ -46,6 +46,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.binding.BindingImpl;
 import com.sun.xml.ws.client.HandlerConfiguration;
 
 import javax.xml.namespace.QName;
@@ -60,12 +61,16 @@ import java.util.Set;
  */
 public class ClientMUTube extends MUTube {
 
+	private Set<QName> bindingKnownHeaders;
+	
     public ClientMUTube(WSBinding binding, Tube next) {
         super(binding, next);
+        bindingKnownHeaders = ((BindingImpl)binding).getKnownHeaders();
     }
 
     protected ClientMUTube(ClientMUTube that, TubeCloner cloner) {
         super(that,cloner);
+        bindingKnownHeaders = that.bindingKnownHeaders;
     }
 
     /**
@@ -84,25 +89,25 @@ public class ClientMUTube extends MUTube {
         }
         HandlerConfiguration handlerConfig = response.handlerConfig;
 
-//        Set<QName> knownHeaders;
-//        Set<String> roles;
+        Set<QName> knownHeaders;
+        Set<String> roles;
 
-//        if (handlerConfig != null) {
-//            knownHeaders = handlerConfig.getKnownHeaders();
-//            roles = handlerConfig.getRoles();
-//        } else {
-//            roles = soapVersion.implicitRoleSet;
-//            knownHeaders = new HashSet<QName>();
-//        }
-//        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(
-//                response.getMessage().getHeaders(), roles,
-//                knownHeaders);
+        if (handlerConfig != null) {
+            knownHeaders = handlerConfig.getHandlerKnownHeaders();
+            roles = handlerConfig.getRoles();
+        } else {
+            roles = soapVersion.implicitRoleSet;
+            knownHeaders = new HashSet<QName>();
+        }
         if (handlerConfig == null) {
             //Use from binding instead of defaults in case response packet does not have it, 
             //may have been changed from the time of invocation, it ok as its only fallback case.
             handlerConfig = binding.getHandlerConfig();
         }
-        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(response.getMessage().getHeaders(), handlerConfig.getRoles(),handlerConfig.getHandlerKnownHeaders());
+        knownHeaders.addAll(bindingKnownHeaders);
+        Set<QName> misUnderstoodHeaders = getMisUnderstoodHeaders(
+                response.getMessage().getHeaders(), roles,
+                knownHeaders);
         if((misUnderstoodHeaders == null) || misUnderstoodHeaders.isEmpty()) {
             return super.processResponse(response);
         }

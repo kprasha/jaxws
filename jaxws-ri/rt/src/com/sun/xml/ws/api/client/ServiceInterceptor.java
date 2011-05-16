@@ -66,7 +66,7 @@ import java.util.List;
  * @since 2.1 EA3
  * @see ServiceInterceptorFactory
  */
-public abstract class ServiceInterceptor {
+public abstract class ServiceInterceptor implements ServiceCreationInterceptor {
     /**
      * Called before {@link WSBinding} is created, to allow interceptors
      * to add {@link WebServiceFeature}s to the created {@link WSBinding}.
@@ -93,7 +93,6 @@ public abstract class ServiceInterceptor {
         return Collections.emptyList();
     }
 
-
     /**
      * A callback to notify the event of creation of proxy object for SEI endpoint. The
      * callback could set some properties on the {@link BindingProvider}.
@@ -103,7 +102,6 @@ public abstract class ServiceInterceptor {
      */
     public void postCreateProxy(@NotNull WSBindingProvider bp,@NotNull Class<?> serviceEndpointInterface) {
     }
-
 
     /**
      * A callback to notify that a {@link Dispatch} object is created. The callback

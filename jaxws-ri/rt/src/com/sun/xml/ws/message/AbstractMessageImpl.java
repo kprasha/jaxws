@@ -49,18 +49,21 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.xml.ws.util.xml.XmlUtil;
+import com.sun.xml.ws.encoding.MimeMultipartParser;
+
 import javax.xml.soap.AttachmentPart;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.LocatorImpl;
+import org.jvnet.mimepull.MIMEPart;
+import org.jvnet.mimepull.Header;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.MimeHeader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
@@ -198,20 +201,42 @@ public abstract class AbstractMessageImpl extends Message {
      * Default implementation that uses {@link #writeTo(ContentHandler, ErrorHandler)}
      */
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
-        SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
+        SOAPMessage msg = soapVersion.getMessageFactory().createMessage();
+
         SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
         try {
             writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
         } catch (SAXException e) {
             throw new SOAPException(e);
         }
+
         for(Attachment att : getAttachments()) {
             AttachmentPart part = msg.createAttachmentPart();
             part.setDataHandler(att.asDataHandler());
             part.setContentId('<'+att.getContentId()+'>');
+            addCustomMimeHeaders(att, part);
             msg.addAttachmentPart(part);
+
+
         }
+        if (msg.getSOAPHeader() == null)
+        	msg.getSOAPPart().getEnvelope().addHeader();
         return msg;
+    }
+
+    private void addCustomMimeHeaders(Attachment att, AttachmentPart part) {
+        if (att instanceof com.sun.xml.ws.encoding.MimeMultipartParser.PartAttachment) {
+            MIMEPart mimePart = ((MimeMultipartParser.PartAttachment)att).getPart();
+            List<? extends Header> allHeaders = mimePart.getAllHeaders();
+            for (Header h : allHeaders) {
+                String name = h.getName();
+                String lowerName = name.toLowerCase();
+                if (!"content-type".equals(lowerName) && !"content-id".equals(lowerName)) {
+                    part.addMimeHeader(name, h.getValue());
+                }
+            }
+
+        }
     }
 
     /**
@@ -233,7 +258,6 @@ public abstract class AbstractMessageImpl extends Message {
                 }
             }
         }
-        msg.saveChanges();
         return msg;
     }
 
