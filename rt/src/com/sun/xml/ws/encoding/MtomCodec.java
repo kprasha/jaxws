@@ -257,8 +257,20 @@ public class MtomCodec extends MimeCodec {
 
         // we'd like to reuse those reader objects but unfortunately decoder may be reused
         // before the decoded message is completely used.
+
+        // thorick: 2010-06-11
+        // Cover case:  The Root attachment may have non-UTF8 charset encoding
+        //              so we need to tell the StAX parser about it.
+        //  This is Oracle BUG 9780051
+        //
+        String rootContentType = mpp.getRootPart().getContentType();
+        String rootCharSet = null;      // note: a null rootCharSet is OK.
+        if (rootContentType != null) {
+          rootCharSet = new ContentTypeImpl(rootContentType).getCharSet();
+        }
+
         XMLStreamReader mtomReader = new MtomXMLStreamReaderEx( mpp,
-            XMLStreamReaderFactory.create(null, mpp.getRootPart().asInputStream(), charset, true)
+            XMLStreamReaderFactory.create(null, mpp.getRootPart().asInputStream(), rootCharSet, true)
         );
 
         packet.setMessage(codec.decode(mtomReader, new MimeAttachmentSet(mpp)));

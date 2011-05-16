@@ -117,7 +117,7 @@ class SOAP11Fault extends SOAPFaultBuilder {
         this.faultstring = reason;
         this.faultactor = actor;
         if (detailObject != null) {
-            if(detailObject.getNamespaceURI().equals("") && detailObject.getLocalName().equals("detail")){
+            if("".equals(detailObject.getNamespaceURI()) && "detail".equals(detailObject.getLocalName())){
                 detail = new DetailType();
                 for(Element detailEntry : DOMUtil.getChildElements(detailObject)){
                     detail.getDetails().add(detailEntry);
@@ -181,7 +181,9 @@ class SOAP11Fault extends SOAPFaultBuilder {
 
     protected Throwable getProtocolException() {
         try {
-            SOAPFault fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault(faultstring, faultcode);
+            SOAPFault fault = SOAPVersion.SOAP_11.getSOAPFactory().createFault();
+            fault.setFaultCode(faultcode);
+            fault.setFaultString(faultstring);
             fault.setFaultActor(faultactor);
             if(detail != null){
                 Detail d = fault.addDetail();

@@ -109,7 +109,7 @@ public class ClientMessageHandlerTube extends HandlerTube {
 
         //Lets copy all the MessageContext.OUTBOUND_ATTACHMENT_PROPERTY to the message
         Map<String, DataHandler> atts = (Map<String, DataHandler>) context.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
-        AttachmentSet attSet = packet.getMessage().getAttachments();
+        AttachmentSet attSet = context.packet.getMessage().getAttachments();
         for(String cid : atts.keySet()){
             if (attSet.get(cid) == null) {  // Otherwise we would be adding attachments twice
                 Attachment att = new DataHandlerAttachment(cid, atts.get(cid));
@@ -142,23 +142,25 @@ public class ClientMessageHandlerTube extends HandlerTube {
     }
     
     void setUpProcessor() {
-       // Take a snapshot, User may change chain after invocation, Same chain
-        // should be used for the entire MEP
-        handlers = new ArrayList<Handler>();
-        HandlerConfiguration handlerConfig = ((BindingImpl) binding).getHandlerConfig();
-        List<MessageHandler> msgHandlersSnapShot= handlerConfig.getMessageHandlers();
-        if (!msgHandlersSnapShot.isEmpty()) {
-            handlers.addAll(msgHandlersSnapShot);
-            roles = new HashSet<String>();
-            roles.addAll(handlerConfig.getRoles());
-            processor = new SOAPHandlerProcessor(true, this, binding, handlers);
-        }
+    	if (handlers == null) {
+	       // Take a snapshot, User may change chain after invocation, Same chain
+	        // should be used for the entire MEP
+	        handlers = new ArrayList<Handler>();
+	        HandlerConfiguration handlerConfig = ((BindingImpl) binding).getHandlerConfig();
+	        List<MessageHandler> msgHandlersSnapShot= handlerConfig.getMessageHandlers();
+	        if (!msgHandlersSnapShot.isEmpty()) {
+	            handlers.addAll(msgHandlersSnapShot);
+	            roles = new HashSet<String>();
+	            roles.addAll(handlerConfig.getRoles());
+	            processor = new SOAPHandlerProcessor(true, this, binding, handlers);
+	        }
+    	}
     }
 
 
 
     MessageUpdatableContext getContext(Packet p) {
-        MessageHandlerContextImpl context = new MessageHandlerContextImpl(seiModel, binding, port, packet,roles);
+        MessageHandlerContextImpl context = new MessageHandlerContextImpl(seiModel, binding, port, p, roles);
         return context;
     }
 

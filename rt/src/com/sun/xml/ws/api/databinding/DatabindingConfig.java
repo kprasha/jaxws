@@ -48,7 +48,9 @@ import java.util.Map;
 import javax.xml.ws.WebServiceFeature;
 
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.WSFeatureList;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.binding.WebServiceFeatureList;
 
 /**
  * DatabindingConfig contains the initial states for Databinding. After a Databinding 
@@ -70,7 +72,7 @@ public class DatabindingConfig {
 	protected ClassLoader classLoader;
 //	protected QName serviceName;
 //	protected BindingID bindingId;
-	protected WebServiceFeature[] features;
+	protected Iterable<WebServiceFeature> features;
 	//TODO WSBinding isn't it BindingID + features? 
 	//On the EndpointFactory.createEndpoint path, WSBinding could be created from DeploymentDescriptorParser.createBinding
 	protected WSBinding wsBinding;
@@ -133,11 +135,14 @@ public class DatabindingConfig {
 //	public void setBindingId(BindingID bindingId) {
 //		this.bindingId = bindingId;
 //	}
-	public WebServiceFeature[] getFeatures() {
+	public Iterable<WebServiceFeature> getFeatures() {
 		return features;
 	}
 	public void setFeatures(WebServiceFeature[] features) {
-		this.features = features;
+		setFeatures(new WebServiceFeatureList(features));
+	}
+	public void setFeatures(Iterable<WebServiceFeature> features) {
+		this.features = WebServiceFeatureList.toList(features);
 	}
 	public WSDLPort getWsdlPort() {
 		return wsdlPort;

@@ -154,7 +154,7 @@ public final class MimeMultipartParser {
         return attach;
     }
 
-    static class PartAttachment implements Attachment {
+    static public class PartAttachment implements Attachment {
 
         final MIMEPart part;
         byte[] buf;
@@ -171,6 +171,9 @@ public final class MimeMultipartParser {
             return part.getContentType();
         }
 
+        public MIMEPart getPart() {
+            return part;
+        }
         public byte[] asByteArray() {
             if (buf == null) {
                 ByteArrayBuffer baf = new ByteArrayBuffer();

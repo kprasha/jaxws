@@ -44,6 +44,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.WSDLLocator;
 import com.sun.xml.ws.api.policy.PolicyResolver;
 import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -51,6 +52,7 @@ import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.ParameterBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLDescriptorKind;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.wsdl.parser.MetaDataResolver;
 import com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory;
@@ -77,6 +79,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,9 +133,9 @@ public class RuntimeWSDLParser {
      *      Null location means the system won't be able to resolve relative references in the WSDL,
      */
     public static WSDLModelImpl parse(@Nullable URL wsdlLoc, @NotNull Source wsdlSource, @NotNull EntityResolver resolver,
-                                      boolean isClientSide, Container container,
+                                      boolean isClientSide, Container container, Class serviceClass,
                                       WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
-        return parse(wsdlLoc, wsdlSource, resolver, isClientSide, container, PolicyResolverFactory.create(),extensions);
+        return parse(wsdlLoc, wsdlSource, resolver, isClientSide, container, serviceClass, PolicyResolverFactory.create(),extensions);
     }
 
     /**
@@ -145,14 +148,21 @@ public class RuntimeWSDLParser {
      *      Null location means the system won't be able to resolve relative references in the WSDL,
      */
     public static WSDLModelImpl parse(@Nullable URL wsdlLoc, @NotNull Source wsdlSource, @NotNull EntityResolver resolver,
-                                      boolean isClientSide, Container container, @NotNull PolicyResolver policyResolver,
+            boolean isClientSide, Container container, Class serviceClass, @NotNull PolicyResolver policyResolver,
+            WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
+    	return parse(wsdlLoc, wsdlSource, resolver, isClientSide, container, serviceClass, policyResolver, false, extensions);
+    }
+    
+    public static WSDLModelImpl parse(@Nullable URL wsdlLoc, @NotNull Source wsdlSource, @NotNull EntityResolver resolver,
+                                      boolean isClientSide, Container container, Class serviceClass, @NotNull PolicyResolver policyResolver,
+                                      boolean useStreamFromEntityResolver,
                                       WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
 
-        RuntimeWSDLParser wsdlParser = new RuntimeWSDLParser(wsdlSource.getSystemId(), new EntityResolverWrapper(resolver), isClientSide, container, policyResolver, extensions);
+        RuntimeWSDLParser wsdlParser = new RuntimeWSDLParser(wsdlSource.getSystemId(), new EntityResolverWrapper(resolver, useStreamFromEntityResolver), isClientSide, container, policyResolver, extensions);
         Parser parser;
         try{
-            parser = wsdlParser.resolveWSDL(wsdlLoc, wsdlSource);
+            parser = wsdlParser.resolveWSDL(wsdlLoc, wsdlSource, serviceClass);
             if(!hasWSDLDefinitions(parser.parser)){
                 throw new XMLStreamException(ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(parser.systemId,
                         WSDLConstants.QNAME_DEFINITIONS, parser.parser.getName(), parser.parser.getLocation()));
@@ -161,14 +171,15 @@ public class RuntimeWSDLParser {
             //Try MEX if there is WSDLLoc available
             if(wsdlLoc == null)
                 throw e;
-            return tryWithMex(wsdlParser, wsdlLoc, resolver, isClientSide, container, e, policyResolver, extensions);
+            return tryWithMex(wsdlParser, wsdlLoc, resolver, isClientSide, container, e, serviceClass, policyResolver, extensions);
 
         }catch(IOException e){
             //Try MEX if there is WSDLLoc available
             if(wsdlLoc == null)
                 throw e;
-            return tryWithMex(wsdlParser, wsdlLoc, resolver, isClientSide, container, e, policyResolver, extensions);
+            return tryWithMex(wsdlParser, wsdlLoc, resolver, isClientSide, container, e, serviceClass, policyResolver, extensions);
         }
+        wsdlParser.extensionFacade.start(wsdlParser.context);
         wsdlParser.parseWSDL(parser, false);
         wsdlParser.wsdlDoc.freeze();
         wsdlParser.extensionFacade.finished(wsdlParser.context);
@@ -180,10 +191,10 @@ public class RuntimeWSDLParser {
         return wsdlParser.wsdlDoc;
     }
 
-    private static WSDLModelImpl tryWithMex(@NotNull RuntimeWSDLParser wsdlParser, @NotNull URL wsdlLoc, @NotNull EntityResolver resolver, boolean isClientSide, Container container, Throwable e, PolicyResolver policyResolver, WSDLParserExtension... extensions) throws SAXException, XMLStreamException {
+    private static WSDLModelImpl tryWithMex(@NotNull RuntimeWSDLParser wsdlParser, @NotNull URL wsdlLoc, @NotNull EntityResolver resolver, boolean isClientSide, Container container, Throwable e, Class serviceClass, PolicyResolver policyResolver, WSDLParserExtension... extensions) throws SAXException, XMLStreamException {
         ArrayList<Throwable> exceptions = new ArrayList<Throwable>();
         try {
-            WSDLModelImpl wsdlModel =  wsdlParser.parseUsingMex(wsdlLoc, resolver, isClientSide, container, policyResolver,extensions);
+            WSDLModelImpl wsdlModel =  wsdlParser.parseUsingMex(wsdlLoc, resolver, isClientSide, container, serviceClass, policyResolver, extensions);
             if(wsdlModel == null){
                 throw new WebServiceException(ClientMessages.FAILED_TO_PARSE(wsdlLoc.toExternalForm(), e.getMessage()), e);
             }
@@ -198,7 +209,7 @@ public class RuntimeWSDLParser {
         throw new InaccessibleWSDLException(exceptions);                
     }
 
-    private WSDLModelImpl parseUsingMex(@NotNull URL wsdlLoc, @NotNull EntityResolver resolver, boolean isClientSide, Container container, PolicyResolver policyResolver, WSDLParserExtension[] extensions) throws IOException, SAXException, XMLStreamException, URISyntaxException {
+    private WSDLModelImpl parseUsingMex(@NotNull URL wsdlLoc, @NotNull EntityResolver resolver, boolean isClientSide, Container container, Class serviceClass, PolicyResolver policyResolver, WSDLParserExtension[] extensions) throws IOException, SAXException, XMLStreamException, URISyntaxException {
         //try MEX
         MetaDataResolver mdResolver = null;
         ServiceDescriptor serviceDescriptor = null;
@@ -215,6 +226,7 @@ public class RuntimeWSDLParser {
         if (serviceDescriptor != null) {
             List<? extends Source> wsdls = serviceDescriptor.getWSDLs();
             wsdlParser = new RuntimeWSDLParser(wsdlLoc.toExternalForm(), new MexEntityResolver(wsdls), isClientSide, container, policyResolver, extensions);
+			wsdlParser.extensionFacade.start(wsdlParser.context);
 
             for(Source src: wsdls ) {
                 String systemId = src.getSystemId();
@@ -229,7 +241,8 @@ public class RuntimeWSDLParser {
             urlString += "?wsdl";
             wsdlLoc = new URL(urlString);
             wsdlParser = new RuntimeWSDLParser(wsdlLoc.toExternalForm(),new EntityResolverWrapper(resolver), isClientSide, container, policyResolver, extensions);
-            Parser parser = resolveWSDL(wsdlLoc, new StreamSource(wsdlLoc.toExternalForm()));
+            wsdlParser.extensionFacade.start(wsdlParser.context);
+            Parser parser = resolveWSDL(wsdlLoc, new StreamSource(wsdlLoc.toExternalForm()), serviceClass);
             wsdlParser.parseWSDL(parser, false);
         }
 
@@ -250,6 +263,7 @@ public class RuntimeWSDLParser {
     public static WSDLModelImpl parse(XMLEntityResolver.Parser wsdl, XMLEntityResolver resolver, boolean isClientSide, Container container, PolicyResolver policyResolver, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId.toExternalForm(), resolver, isClientSide, container, policyResolver, extensions);
+		parser.extensionFacade.start(parser.context);
         parser.parseWSDL(wsdl, false);
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.context);
@@ -260,6 +274,7 @@ public class RuntimeWSDLParser {
     public static WSDLModelImpl parse(XMLEntityResolver.Parser wsdl, XMLEntityResolver resolver, boolean isClientSide, Container container, WSDLParserExtension... extensions) throws IOException, XMLStreamException, SAXException {
         assert resolver != null;
         RuntimeWSDLParser parser = new RuntimeWSDLParser( wsdl.systemId.toExternalForm(), resolver, isClientSide, container, PolicyResolverFactory.create(), extensions);
+		parser.extensionFacade.start(parser.context);
         parser.parseWSDL(wsdl, false);
         parser.wsdlDoc.freeze();
         parser.extensionFacade.finished(parser.context);
@@ -275,7 +290,10 @@ public class RuntimeWSDLParser {
         this.context = new WSDLParserExtensionContextImpl(wsdlDoc, isClientSide, container, policyResolver);
 
         // register handlers for default extensions
-        register(new PolicyWSDLParserExtension());
+        
+        // MERGE FIXME: Find a better way to diable
+        //register(new PolicyWSDLParserExtension());
+        
         register(new MemberSubmissionAddressingWSDLParserExtension());
         register(new W3CAddressingWSDLParserExtension());
         register(new W3CAddressingMetadataWSDLParserExtension());
@@ -286,16 +304,30 @@ public class RuntimeWSDLParser {
     }
 
     private Parser resolveWSDL(@Nullable URL wsdlLoc, @NotNull Source wsdlSource) throws IOException, SAXException, XMLStreamException {
+    	return resolveWSDL(wsdlLoc, wsdlSource, null);
+    }
+    
+    private Parser resolveWSDL(@Nullable URL wsdlLoc, @NotNull Source wsdlSource, Class serviceClass) throws IOException, SAXException, XMLStreamException {
         String systemId = wsdlSource.getSystemId();
 
         XMLEntityResolver.Parser parser = resolver.resolveEntity(null, systemId);
         if (parser == null && wsdlLoc != null) {
-            parser = resolver.resolveEntity(null, wsdlLoc.toExternalForm());
+        	String exForm = wsdlLoc.toExternalForm();
+            parser = resolver.resolveEntity(null, exForm);
 
+            if (parser == null && serviceClass != null) {
+            	URL ru = serviceClass.getResource(".");
+            	if (ru != null) {
+            		String ruExForm = ru.toExternalForm();
+	            	if (exForm.startsWith(ruExForm)) {
+	            		parser = resolver.resolveEntity(null, exForm.substring(ruExForm.length()));
+	            	}
+            	}
+            }
         }
         if(parser == null){
             if(wsdlLoc != null)
-                parser = new Parser(wsdlLoc, createReader(wsdlLoc));
+                parser = new Parser(wsdlLoc, createReader(wsdlLoc, serviceClass));
             else
                 parser = new Parser(wsdlLoc, createReader(wsdlSource));
         }
@@ -837,25 +869,57 @@ public class RuntimeWSDLParser {
      * to parse a WSDL file.
      */
     private static XMLStreamReader createReader(URL wsdlLoc) throws IOException, XMLStreamException {
-        // Reads the complete stream so that connection can be reused
+        return createReader(wsdlLoc, null);
+    }
+    
+    /**
+     * Make sure to return a "fresh" reader each time it is called because
+     * more than one active reader may be needed within a single thread
+     * to parse a WSDL file.
+     */
+    private static XMLStreamReader createReader(URL wsdlLoc, Class<Service> serviceClass) throws IOException, XMLStreamException {
+        InputStream stream;
         try {
-        InputStream stream = new FilterInputStream(wsdlLoc.openStream()) {
-            boolean closed;
-
-            @Override
-            public void close() throws IOException {
-                if (!closed) {
-                    closed = true;
-                    byte[] buf = new byte[8192];
-                    while(read(buf) != -1);
-                    super.close();
-                }
-            }
-        };
-        return new TidyXMLStreamReader(XMLStreamReaderFactory.create(wsdlLoc.toExternalForm(), stream, false), stream);
-        } catch (IOException e) {
-         throw (IOException) new IOException("Got "+ e.getMessage()+ " while opening stream from " + wsdlLoc).initCause(e);   
+        	stream = wsdlLoc.openStream();
+        } catch (IOException io) {
+        	out:
+        	do {
+	        	if (serviceClass != null) {
+	        		WSDLLocator locator = ContainerResolver.getInstance().getContainer().getSPI(WSDLLocator.class);
+	        		if (locator != null) {
+		        	  String exForm = wsdlLoc.toExternalForm();
+		                  URL ru = serviceClass.getResource(".");
+	        		  String loc = wsdlLoc.getPath();
+                                  if (ru != null) {
+                                    String ruExForm = ru.toExternalForm();
+                                    if (exForm.startsWith(ruExForm)) {
+                                      loc = exForm.substring(ruExForm.length());
+                                    }
+                                  }
+	        		  wsdlLoc = locator.locateWSDL(serviceClass, loc);
+	        		  if (wsdlLoc != null) {
+						stream = new FilterInputStream(wsdlLoc.openStream()) {
+						    boolean closed;
+						
+						    @Override
+						    public void close() throws IOException {
+						        if (!closed) {
+						            closed = true;
+						            byte[] buf = new byte[8192];
+						            while(read(buf) != -1);
+						            super.close();
+						        }
+						    }
+						};
+	        			  break out;
+	        		  }
+	        		}
+	        	}
+	        	throw io;
+        	} while(true);
         }
+        
+        return new TidyXMLStreamReader(XMLStreamReaderFactory.create(wsdlLoc.toExternalForm(), stream, false), stream);
     }
 
     private void register(WSDLParserExtension e) {

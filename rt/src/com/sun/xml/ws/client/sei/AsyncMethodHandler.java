@@ -49,6 +49,7 @@ import com.sun.xml.ws.api.databinding.JavaCallInfo;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
 import com.sun.xml.ws.client.AsyncInvoker;
 import com.sun.xml.ws.client.AsyncResponseImpl;
 import com.sun.xml.ws.client.RequestContext;
@@ -149,6 +150,7 @@ abstract class AsyncMethodHandler extends MethodHandler {
     protected final Response<Object> doInvoke(Object proxy, Object[] args, AsyncHandler handler) {
         
         AsyncInvoker invoker = new SEIAsyncInvoker(proxy, args);
+        invoker.setNonNullAsyncHandlerGiven(handler != null);
         AsyncResponseImpl<Object> ft = new AsyncResponseImpl<Object>(invoker,handler);
         invoker.setReceiver(ft);
         ft.run();
@@ -160,15 +162,15 @@ abstract class AsyncMethodHandler extends MethodHandler {
         // and is required by the spec
         private final RequestContext rc = owner.requestContext.copy();
         private final Object[] args;
+        private final FiberContextSwitchInterceptor interceptor;
 
         SEIAsyncInvoker(Object proxy, Object[] args) {
             this.args = args;
+            interceptor = getFiberContextSwitchInterceptor(); 
         }
 
         public void do_run () {    	
         	JavaCallInfo call = new JavaCallInfo(method, args);
-//            Packet req = new Packet(createRequestMessage(args));
-//            Packet req = dbHandler.createRequestPacket(call);
             Packet req = owner.databinding.serializeRequest(call);
 
             Fiber.CompletionCallback callback = new Fiber.CompletionCallback() {
@@ -228,7 +230,8 @@ abstract class AsyncMethodHandler extends MethodHandler {
                     }
                 }
             };
-            owner.doProcessAsync(req, rc, callback);
+            req.invocationProperties.put(FIBER_CONTEXTSWITCHINTERCEPTOR_KEY,interceptor);
+            owner.doProcessAsync(responseImpl, req, rc, callback);
         }
     }
 

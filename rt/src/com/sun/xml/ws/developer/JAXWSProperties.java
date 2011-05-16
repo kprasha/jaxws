@@ -246,4 +246,53 @@ public interface JAXWSProperties {
      * @since 2.1.4
      */
     public static final String REST_BINDING = "http://jax-ws.dev.java.net/rest";
+
+    /**
+     * Oracle/WebLogic specific async request persistent context property map
+     */
+    public static final String PERSISTENT_CONTEXT = "weblogic.wsee.jaxws.async.PersistentContext";
+
+    /**
+     * HTTP headers to put on any outgoing HTTP message sent using this packet.
+     * Service-side only (e.g. HttpAdapter)
+     */
+    public static final String OUTBOUND_HTTP_HEADERS = "weblogic.wsee.jaxws.transport.http.InboundHttpHeaders";
+
+    /**
+     * HTTP headers found on a HTTP message received and represented by this
+     * packet. Service-side only (e.g. HttpAdapter)
+     */
+    public static final String INBOUND_HTTP_HEADERS = "weblogic.wsee.jaxws.transport.http.InboundHttpHeaders";
+
+    /**
+  	 * Set this property on the {@link BindingProvider#getRequestContext()} to
+  	 * enable serializable SSL info {@link PersistentSSLInfo} keep in context. The
+  	 * property is set as follows:
+  	 * 
+  	 * <pre>
+  	 * PersistentSSLInfo persistentSSLInfo = ...; 
+  	 * Map<String, Object> ctxt =
+  	 * ((BindingProvider)proxy).getRequestContext();
+  	 * ctxt.put(JAXWSProperties.CLIENT_PERSISTENT_SSL_INFO, persistentSSLInfo);
+  	 * 
+  	 * <pre>
+  	 */
+	  public static final String CLIENT_PERSISTENT_SSL_INFO = "weblogic.wsee.jaxws.sslclient.PersistentSSLInfo";
+	  
+	  
+	  /**
+	   * Set this property on the {@link BindingProvider#getRequestContext()} to 
+	   * enable serializable Proxy info {@link ClientProxyFeature} keep in context. 
+	   * The property is set as follows:
+	   * 
+	   * <pre>
+	   * ClientProxyFeature proxyInfo = ...;
+	   * Map<String, Object> ctxt =
+	   * 	((BindingProvider)proxy).getRequestContext();
+	   * ctxt.put(JAXWSProperties.CLIENT_PERSISTENT_Proxy_INFO, proxyInfo);
+	   * <pre>
+	   * Note: The setting is done internally with ClientProxyFeature
+	   * */
+	  public static final String CLIENT_PERSISTENT_PROXY_INFO = "weblogic.wsee.jaxws.proxy.PersistentProxyInfo";
+
 }

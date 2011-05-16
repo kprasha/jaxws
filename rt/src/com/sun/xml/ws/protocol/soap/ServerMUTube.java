@@ -46,6 +46,8 @@ import com.sun.xml.ws.api.pipe.*;
 import com.sun.xml.ws.client.HandlerConfiguration;
 import com.sun.xml.ws.binding.BindingImpl;
 import javax.xml.namespace.QName;
+
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -54,7 +56,8 @@ import java.util.Set;
 
 public class ServerMUTube extends MUTube {
     
-    private HandlerConfiguration handlerConfig;
+    private Set<String> handlerRoles;
+    private Set<QName> knownHeaders;
     private ServerTubeAssemblerContext tubeContext;
     private final Set<String> roles;
     private final Set<QName> handlerKnownHeaders;
@@ -65,14 +68,13 @@ public class ServerMUTube extends MUTube {
         this.tubeContext = tubeContext;
 
         //On Server, HandlerConfiguration does n't change after publish, so store locally
-        handlerConfig = binding.getHandlerConfig();
+        HandlerConfiguration handlerConfig = binding.getHandlerConfig();
         roles = handlerConfig.getRoles();
         handlerKnownHeaders = handlerConfig.getHandlerKnownHeaders();
     }
 
     protected ServerMUTube(ServerMUTube that, TubeCloner cloner) {
         super(that,cloner);
-        handlerConfig = that.handlerConfig;
         tubeContext = that.tubeContext;
         roles = that.roles;
         handlerKnownHeaders = that.handlerKnownHeaders;

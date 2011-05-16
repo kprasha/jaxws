@@ -72,7 +72,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.Detail;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -500,14 +499,17 @@ public abstract class Message {
     public abstract Source readPayloadAsSource();
 
     /**
-     * Creates the equivalent {@link SOAPMessage} from this message.
+     * Creates the equivalent {@link SOAPMessage} from this message. It also uses
+     * transport specific headers from Packet during the SOAPMessage construction
+     * so that {@link SOAPMessage#getMimeHeaders()} gives meaningful transport
+     * headers.
      *
      * This consumes the message.
      *
      * @throws SOAPException
      *      if there's any error while creating a {@link SOAPMessage}.
      */
-    public abstract SOAPMessage readAsSOAPMessage() throws SOAPException ;
+    public abstract SOAPMessage readAsSOAPMessage() throws SOAPException;
 
     /**
      * Creates the equivalent {@link SOAPMessage} from this message. It also uses
@@ -742,5 +744,13 @@ public abstract class Message {
             }
         }
         return uuid;
+    }
+
+    /**
+     * Clears any cached message ID within this message, forcing getID to look
+     * at message headers to get it.
+     */
+    public void clearCachedID() {
+      uuid = null;
     }
 }

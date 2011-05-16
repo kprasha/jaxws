@@ -325,7 +325,7 @@ public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pi
      */
     private void postDecode(Packet p) {
         if(decodeFirst == TriState.UNSET)
-            decodeFirst = TriState.TRUE;
+            decodeFirst = TriState.FALSE;
         if(binding.isFeatureEnabled(MTOMFeature.class))
             acceptMtomMessages =isMtomAcceptable(p.acceptableMimeTypes);
         if (!useFastInfosetForEncoding) {

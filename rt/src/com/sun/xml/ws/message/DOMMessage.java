@@ -47,8 +47,9 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.AttachmentSet;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.streaming.DOMStreamReader;
-import com.sun.xml.ws.util.DOMUtil;
+
 import org.w3c.dom.Element;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -149,7 +150,7 @@ public final class DOMMessage extends AbstractMessageImpl {
     public void writePayloadTo(XMLStreamWriter sw) {
         try {
             if (payload != null)
-                DOMUtil.serializeNode(payload, sw);
+                DOMWriter.getInstance().writeNode(payload, sw);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }

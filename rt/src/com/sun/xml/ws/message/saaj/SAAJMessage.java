@@ -48,10 +48,12 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.*;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
-import com.sun.xml.ws.message.AbstractMessageImpl;
-import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.spi.db.XMLBridge;
+import com.sun.xml.ws.message.DOMWriter;
+import com.sun.xml.ws.message.DOMWriterFactory;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Element;
@@ -67,13 +69,16 @@ import org.xml.sax.helpers.LocatorImpl;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.MimeHeader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -81,7 +86,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -97,6 +101,8 @@ import java.util.Map;
  * @author Rama Pulavarthi
  */
 public class SAAJMessage extends Message {
+    public static final String BINARY_NODES = "com.sun.xml.ws.message.saaj.binarynodes";
+
     // flag to switch between representations
     private boolean parsedMessage;
     // flag to check if Message API is exercised;
@@ -139,7 +145,7 @@ public class SAAJMessage extends Message {
             try {
                 access();
                 if (headers == null)
-                    headers = new HeaderList();
+                    headers = new SAAJHeaderList();
                 SOAPHeader header = sm.getSOAPHeader();
                 if (header != null) {
                     headerAttrs = header.getAttributes();
@@ -148,13 +154,69 @@ public class SAAJMessage extends Message {
                         headers.add(new SAAJHeader((SOAPHeaderElement) iter.next()));
                     }
                 }
-                attachmentSet = new SAAJAttachmentSet(sm);
+                attachmentSet = new ChangeAwareAttachmentSetWrapper(new SAAJAttachmentSet(sm));
 
+                if (headers instanceof ChangeAwareHeaderList)
+                	((ChangeAwareHeaderList) headers).reset();
                 parsedMessage = true;
             } catch (SOAPException e) {
                 throw new WebServiceException(e);
             }
         }
+    }
+    
+    private class SAAJHeaderList extends ChangeAwareHeaderList {
+
+		@Override
+		public boolean add(Header header) {
+			if (parsedMessage) {
+				try {
+					if (sm.getSOAPHeader() == null) {
+						sm.getSOAPPart().getEnvelope().addHeader();
+					}
+					header.writeTo(sm);
+				} catch (SOAPException se) {
+					throw new WebServiceException(se);
+				}
+				return super.add(header, false);
+			}
+			return super.add(header);
+		}
+
+		@Override
+	    protected void addInternal(int index, Header header) {
+			if (parsedMessage)
+				try {
+					header.writeTo(sm);
+				} catch (SOAPException se) {
+					throw new WebServiceException(se);
+				}
+	    	super.add(index, header);
+	    }
+	    
+		@Override
+	    protected Header removeInternal(int index) {
+			Header h = super.removeInternal(index);
+			QName q = new QName(h.getNamespaceURI(), h.getLocalPart());
+			if (parsedMessage) {
+				try {
+			        SOAPHeader header = sm.getSOAPHeader();
+		            if (header != null) {
+		                Iterator iter = header.examineAllHeaderElements();
+		                while (iter.hasNext()) {
+		                	SOAPHeaderElement she = (SOAPHeaderElement) iter.next();
+		                	if (q.equals(she.getElementQName())) {
+		                		header.removeChild(she);
+		                		break;
+		                	}
+		                }
+		            }
+				} catch (SOAPException se) {
+					throw new WebServiceException(se);
+				}
+			}
+	    	return h;
+	    }
     }
 
     private void access() {
@@ -255,8 +317,9 @@ public class SAAJMessage extends Message {
                 return new DOMSource(se);
 
             } else {
-                SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
+				SOAPMessage msg = soapVersion.getMessageFactory().createMessage();
                 addAttributes(msg.getSOAPPart().getEnvelope(),envelopeAttrs);
+
                 SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
                 addAttributes(newBody, bodyAttrs);
                 for (Element part : bodyParts) {
@@ -264,6 +327,13 @@ public class SAAJMessage extends Message {
                     newBody.appendChild(n);
                 }
                 addAttributes(msg.getSOAPHeader(),headerAttrs);
+                Iterator<Name> bodyAttrs = sm.getSOAPBody().getAllAttributes();
+                if (bodyAttrs != null) {
+                	while(bodyAttrs.hasNext()) {
+                		Name name = bodyAttrs.next();
+                		newBody.addAttribute(name, sm.getSOAPBody().getAttributeValue(name));
+                	}
+                }
                 for (Header header : headers) {
                     header.writeTo(msg);
                 }
@@ -273,13 +343,17 @@ public class SAAJMessage extends Message {
         } catch (SOAPException e) {
             throw new WebServiceException(e);
         }
-    }
+    } 
 
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
         if (!parsedMessage) {
             return sm;
         } else {
-            SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
+        	if ((!(headers instanceof ChangeAwareHeaderList) || !((ChangeAwareHeaderList) headers).isChanged())
+        			&& (!(attachmentSet instanceof ChangeAwareAttachmentSetWrapper) || !((ChangeAwareAttachmentSetWrapper)attachmentSet).isChanged()))
+        		return sm;
+        	
+            SOAPMessage msg = soapVersion.getMessageFactory().createMessage();
             addAttributes(msg.getSOAPPart().getEnvelope(),envelopeAttrs);
             SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
             addAttributes(newBody, bodyAttrs);
@@ -288,20 +362,47 @@ public class SAAJMessage extends Message {
                 newBody.appendChild(n);
             }
             addAttributes(msg.getSOAPHeader(),headerAttrs);
+            Iterator<Name> bodyAttrs = sm.getSOAPBody().getAllAttributes();
+            if (bodyAttrs != null) {
+            	while(bodyAttrs.hasNext()) {
+            		Name name = bodyAttrs.next();
+            		newBody.addAttribute(name, sm.getSOAPBody().getAttributeValue(name));
+            	}
+            }
             for (Header header : headers) {
-                header.writeTo(msg);
+              header.writeTo(msg);
             }
             for (Attachment att : getAttachments()) {
-                AttachmentPart part = msg.createAttachmentPart();
-                part.setDataHandler(att.asDataHandler());
-                part.setContentId('<' + att.getContentId() + '>');
-                msg.addAttachmentPart(part);
+              AttachmentPart part = msg.createAttachmentPart();
+              part.setDataHandler(att.asDataHandler());
+              part.setContentId('<' + att.getContentId() + '>');
+              addCustomMimeHeaders(att, part);
+              msg.addAttachmentPart(part);
             }
             msg.saveChanges();
             return msg;
         }
     }
+   private void addCustomMimeHeaders(Attachment att, AttachmentPart part) {
+       
+        if (att instanceof AttachmentPartWrapper) {
+          AttachmentPart attachmentPartToCopy = ((AttachmentPartWrapper) att).getAttachmentPart();
+          Iterator allMimeHeaders = attachmentPartToCopy.getAllMimeHeaders();
+          while (allMimeHeaders.hasNext()) {
+            Object o = allMimeHeaders.next();
+            if (o instanceof MimeHeader) {
+              MimeHeader mh = (MimeHeader)o;
+              String name = mh.getName();
+              String lowerName = name.toLowerCase();
+               if (!"content-type".equals(lowerName) && !"content-id".equals(lowerName)) {
+                 part.addMimeHeader(name, mh.getValue());
+               }
+            }
+          }
 
+
+        }
+    }
     public Source readPayloadAsSource() {
         access();
         return (payload != null) ? new DOMSource(payload) : null;
@@ -347,8 +448,16 @@ public class SAAJMessage extends Message {
     public void writePayloadTo(XMLStreamWriter sw) throws XMLStreamException {
         access();
         try {
+            Container c = ContainerResolver.getInstance().getContainer();
+            DOMWriterFactory dFac = null;
+            if (c != null)
+            	dFac = c.getSPI(DOMWriterFactory.class);
+            if (dFac == null)
+            	dFac = DOMWriterFactory.getInstance();
+            
+            DOMWriter d = dFac.create();
             for (Element part : bodyParts)
-                DOMUtil.serializeNode(part, sw);
+                d.writeNode(part, sw);
         } catch (XMLStreamException e) {
             throw new WebServiceException(e);
         }
@@ -356,12 +465,20 @@ public class SAAJMessage extends Message {
 
     public void writeTo(XMLStreamWriter writer) throws XMLStreamException {
         try {
+            Container c = ContainerResolver.getInstance().getContainer();
+            DOMWriterFactory dFac = null;
+            if (c != null)
+            	dFac = c.getSPI(DOMWriterFactory.class);
+            if (dFac == null)
+            	dFac = DOMWriterFactory.getInstance();
+            
+            DOMWriter d = dFac.create();
             writer.writeStartDocument();
             if (!parsedMessage) {
-                DOMUtil.serializeNode(sm.getSOAPPart().getEnvelope(), writer);
+                d.writeNode(sm.getSOAPPart().getEnvelope(), writer);
             } else {
                 SOAPEnvelope env = sm.getSOAPPart().getEnvelope();
-                DOMUtil.writeTagWithAttributes(env, writer);
+                d.writeTagWithAttributes(env, writer);
                 if (hasHeaders()) {
                     if(env.getHeader() != null) {
                         DOMUtil.writeTagWithAttributes(env.getHeader(), writer);
@@ -375,7 +492,7 @@ public class SAAJMessage extends Message {
                     writer.writeEndElement();
                 }
 
-                DOMUtil.serializeNode(sm.getSOAPBody(), writer);
+                d.writeNode(sm.getSOAPBody(), writer);
                 writer.writeEndElement();
             }
             writer.writeEndDocument();
@@ -515,11 +632,18 @@ public class SAAJMessage extends Message {
             if (!parsedMessage) {
                 return new SAAJMessage(readAsSOAPMessage());
             } else {
-                SOAPMessage msg = soapVersion.saajMessageFactory.createMessage();
+                SOAPMessage msg = soapVersion.getMessageFactory().createMessage();
                 SOAPBody newBody = msg.getSOAPPart().getEnvelope().getBody();
                 for (Element part : bodyParts) {
                     Node n = newBody.getOwnerDocument().importNode(part, true);
                     newBody.appendChild(n);
+                }
+                Iterator<Name> bodyAttrs = sm.getSOAPBody().getAllAttributes();
+                if (bodyAttrs != null) {
+                	while(bodyAttrs.hasNext()) {
+                		Name name = bodyAttrs.next();
+                		newBody.addAttribute(name, sm.getSOAPBody().getAttributeValue(name));
+                	}
                 }
                 return new SAAJMessage(getHeaders(), getAttachments(), msg);
             }
@@ -530,12 +654,102 @@ public class SAAJMessage extends Message {
     private static final AttributesImpl EMPTY_ATTS = new AttributesImpl();
     private static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 
-    private class SAAJAttachment implements Attachment {
+    private static class ChangeAwareHeaderList extends HeaderList {
+    	private boolean isChanged = false;
+    	
+    	public boolean isChanged() {
+    		return isChanged;
+    	}
+    	
+    	public void reset() {
+    		isChanged = false;
+    	}
+
+    	protected boolean add(Header header, boolean updateIsChanged) {
+    		if (updateIsChanged)
+    			isChanged = true;
+    		return super.add(header);
+    	}
+    	
+		@Override
+		public boolean add(Header header) {
+			isChanged = true;
+			return super.add(header);
+		}
+
+		@Override
+		public Header set(int index, Header element) {
+			isChanged = true;
+			return super.set(index, element);
+		}
+    }
+    
+    private static class ChangeAwareAttachmentSetWrapper implements AttachmentSet {
+    	private boolean isChanged = false;
+    	private AttachmentSet inner;
+    	
+    	public ChangeAwareAttachmentSetWrapper(AttachmentSet inner) {
+    		this.inner = inner;
+    	}
+    	
+    	public boolean isChanged() {
+    		return isChanged;
+    	}
+    	
+    	public void reset() {
+    		isChanged = false;
+    	}
+    	
+		@Override
+		public void add(Attachment att) {
+			isChanged = true;
+			inner.add(att);
+		}
+
+		@Override
+		public Attachment get(String contentId) {
+			return inner.get(contentId);
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return inner.isEmpty();
+		}
+
+		@Override
+		public Iterator<Attachment> iterator() {
+			return new Iterator<Attachment>() {
+				private Iterator<Attachment> it = inner.iterator();
+				
+				@Override
+				public boolean hasNext() {
+					return it.hasNext();
+				}
+
+				@Override
+				public Attachment next() {
+					return it.next();
+				}
+
+				@Override
+				public void remove() {
+					isChanged = true;
+					it.remove();
+				}
+			};
+		}
+    }
+    
+    private class SAAJAttachment implements Attachment, AttachmentPartWrapper {
 
         final AttachmentPart ap;
 
         public SAAJAttachment(AttachmentPart part) {
             this.ap = part;
+        }
+
+        public AttachmentPart getAttachmentPart() {
+            return ap;
         }
 
         /**

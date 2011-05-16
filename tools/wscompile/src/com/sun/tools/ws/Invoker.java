@@ -280,6 +280,7 @@ public final class Invoker {
      * classLoader from loading
      */
     public static String[] maskedPackages = new String[]{
+        "weblogic.wsee.jaxws.tools.",
         "com.sun.istack.tools.",
         "com.sun.tools.jxc.",
         "com.sun.tools.xjc.",

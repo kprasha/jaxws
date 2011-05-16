@@ -43,8 +43,12 @@ package com.sun.tools.ws.wscompile;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.writer.FileCodeWriter;
 
+import com.sun.mirror.apt.Filer;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
 /**
  * {@link FileCodeWriter} implementation that notifies
@@ -55,6 +59,9 @@ import java.io.IOException;
  */
 public class WSCodeWriter extends FileCodeWriter {
     private final Options options;
+    
+    protected static final ThreadLocal<FileSystem> threadLocalFileSystem =
+        new ThreadLocal<FileSystem>();
 
     public WSCodeWriter( File outDir, Options options) throws IOException {
         super(outDir);
@@ -71,5 +78,33 @@ public class WSCodeWriter extends FileCodeWriter {
         // matter what we set.
 
         return f;
+    }
+
+    @Override
+    public Writer openSource(JPackage jPackage, String name)
+            throws IOException {
+        FileSystem fileSystem = threadLocalFileSystem.get();
+        return (fileSystem == null)
+            ? super.openSource(jPackage, name)
+            : fileSystem.openSource(getFile(jPackage, name));
+    }
+    
+    /**
+     * Sets the <tt>FileSystem</tt> to be used by the current <tt>Thread</tt>.
+     * @param fileSystem FileSystem used to access file resources or
+     *        <tt>null</tt> if the normal disk based file sytem should be use.
+     */
+    public static void setFileSystem(FileSystem fileSystem) {
+        if (fileSystem == null) {
+            threadLocalFileSystem.remove();
+        } else {
+            threadLocalFileSystem.set(fileSystem);
+        }
+    }
+    
+    public static interface FileSystem
+    {
+        Writer openSource(File file);
+        Writer createSourceFile(Filer filer, String name) throws IOException;
     }
 }

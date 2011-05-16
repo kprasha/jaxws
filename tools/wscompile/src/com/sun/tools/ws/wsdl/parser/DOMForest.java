@@ -56,7 +56,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.*;
 import org.xml.sax.helpers.XMLFilterImpl;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -189,6 +188,13 @@ public class DOMForest {
         return parse(systemId, is, root);
     }
     protected Map<String,String> resolvedCache = new HashMap<String,String>();
+    
+    private static class RelaxedVerifier implements javax.net.ssl.HostnameVerifier {
+      public boolean verify(String urlHost, javax.net.ssl.SSLSession ssls) {
+        return true;
+      }
+    }
+    private static final javax.net.ssl.HostnameVerifier NONVERIFIER = new RelaxedVerifier(); 
 
     public Map<String,String> getReferencedEntityMap() {
         return resolvedCache;

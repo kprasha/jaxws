@@ -74,6 +74,9 @@ import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.MessageFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -119,6 +122,7 @@ public final class WSEndpointReference  implements WSDLExtension {
     private @NotNull String address;
 
     private @NotNull QName rootElement;
+    
     /**
      * Creates from the spec version of {@link EndpointReference}.
      *
@@ -127,6 +131,17 @@ public final class WSEndpointReference  implements WSDLExtension {
      * Do not use this method in a performance critical path.
      */
     public WSEndpointReference(EndpointReference epr, AddressingVersion version) {
+    	this(epr, version, null);
+    }
+    
+    /**
+     * Creates from the spec version of {@link EndpointReference}.
+     *
+     * <p>
+     * This method performs the data conversion, so it's slow.
+     * Do not use this method in a performance critical path.
+     */
+    public WSEndpointReference(EndpointReference epr, AddressingVersion version, HeaderList refParams) {
         try {
             MutableXMLStreamBuffer xsb = new MutableXMLStreamBuffer();
             epr.writeTo(new XMLStreamBufferResult(xsb));
@@ -134,9 +149,25 @@ public final class WSEndpointReference  implements WSDLExtension {
             this.version = version;
             this.rootElement = new QName("EndpointReference", version.nsUri);
             parse();
+            if (refParams != null) {
+                HeaderList combined =
+                    combineRefParams(this.referenceParameters, refParams);
+                this.referenceParameters = combined.toArray(new Header[combined.size()]);
+            }
         } catch (XMLStreamException e) {
             throw new WebServiceException(ClientMessages.FAILED_TO_PARSE_EPR(epr),e);
         }
+    }
+
+    private static HeaderList combineRefParams(Header[] referenceParameters,
+            @NotNull HeaderList refParams) {
+    	HeaderList out = new HeaderList(refParams);
+
+    	if (referenceParameters != null) {
+    		out.addAll(referenceParameters);
+    	}
+
+    	return out;
     }
 
     /**
@@ -147,7 +178,18 @@ public final class WSEndpointReference  implements WSDLExtension {
      * Do not use this method in a performance critical path.
      */
     public WSEndpointReference(EndpointReference epr) {
-        this(epr,AddressingVersion.fromSpecClass(epr.getClass()));
+        this(epr, (HeaderList) null);
+    }
+
+    /**
+     * Creates from the spec version of {@link EndpointReference}.
+     *
+     * <p>
+     * This method performs the data conversion, so it's slow.
+     * Do not use this method in a performance critical path.
+     */
+    public WSEndpointReference(EndpointReference epr, HeaderList refParams) {
+        this(epr,AddressingVersion.fromSpecClass(epr.getClass()), refParams);
     }
 
     /**
@@ -204,6 +246,60 @@ public final class WSEndpointReference  implements WSDLExtension {
         this.rootElement = new QName("EndpointReference", version.nsUri);
         this.referenceParameters = EMPTY_ARRAY;
     }
+
+    /**
+     * Creates from another EPR and adds ref params.
+     */
+    public WSEndpointReference(WSEndpointReference epr,
+                               @NotNull HeaderList refParams) {
+      this(epr.address, epr.version, refParams);
+    }
+
+    /**
+     * Creates from another EPR and adds ref params.
+     */
+    public WSEndpointReference(String address,
+                               AddressingVersion addressingVersion,
+                               @NotNull HeaderList refParams) {
+        HeaderList combined =
+          combineRefParams(this.referenceParameters, refParams);
+        this.infoset = createBufferFromData(addressingVersion,
+                                            address,
+                                            createElementListFromHeaderList(combined),
+                                            null, null, null, null, null, null, (List<Element>) null, (Map<QName, String>) null);
+        this.version = addressingVersion;
+        this.address = address;
+        this.referenceParameters = combined.toArray(new Header[combined.size()]);
+    }
+
+  private List<Element> createElementListFromHeaderList(@NotNull HeaderList refParams) {
+    List<Element> out = new ArrayList<Element>();
+    Header[] params = refParams.toArray(new Header[refParams.size()]);
+    SOAPMessage msg;
+    try {
+      msg = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).
+        createMessage();
+    } catch (Exception e) {
+      throw new RuntimeException(e.toString(), e);
+    }
+    for (Header param: params) {
+      try {
+        param.writeTo(msg);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    try {
+      Iterator c = msg.getSOAPHeader().getChildElements();
+      while (c.hasNext()) {
+        Element child = (Element)c.next();
+        out.add(child);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e.toString(), e);
+    }
+    return out;
+  }
 
     private static XMLStreamBuffer createBufferFromAddress(String address, AddressingVersion version) {
         try {
@@ -910,7 +1006,7 @@ public final class WSEndpointReference  implements WSDLExtension {
      */
     public void addReferenceParameters(HeaderList outbound) {
         for (Header header : referenceParameters) {
-            outbound.add(header);
+            outbound.addOrReplace(header);
         }
     }
 

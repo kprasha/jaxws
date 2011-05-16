@@ -46,6 +46,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferSource;
 import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
+import com.sun.xml.ws.message.DOMWriter;
 import com.sun.xml.ws.util.DOMUtil;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
@@ -116,13 +117,13 @@ public class EndpointReferenceUtil {
                 //write ReferenceProperties
                 if (msEpr.referenceProperties != null) {
                     for (Element e : msEpr.referenceProperties.elements) {
-                        DOMUtil.serializeNode(e, writer);
+                        DOMWriter.getInstance().writeNode(e, writer);
                     }
                 }
                 //write referenceParameters
                 if (msEpr.referenceParameters != null) {
                     for (Element e : msEpr.referenceParameters.elements) {
-                        DOMUtil.serializeNode(e, writer);
+                        DOMWriter.getInstance().writeNode(e, writer);
                     }
                 }
                 writer.writeEndElement();
@@ -184,7 +185,7 @@ public class EndpointReferenceUtil {
             }
             //write WSDL
             if (wsdlElement != null) {
-                DOMUtil.serializeNode(wsdlElement, writer);
+                DOMWriter.getInstance().writeNode(wsdlElement, writer);
             }
 
             if (w3cMetadataWritten)
@@ -197,7 +198,7 @@ public class EndpointReferenceUtil {
                             e.getLocalName().equals(WSDLConstants.QNAME_DEFINITIONS.getLocalPart())) {
                         // Don't write it as this is written already in Metadata
                     }
-                    DOMUtil.serializeNode(e, writer);
+                    DOMWriter.getInstance().writeNode(e, writer);
                 }
             }
 

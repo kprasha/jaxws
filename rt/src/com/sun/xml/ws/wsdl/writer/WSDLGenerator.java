@@ -252,13 +252,17 @@ public class WSDLGenerator {
         this.endpointAddress = address;
     }
 
+    protected String mangleName(String name) {
+    	return BindingHelper.mangleNameToClassName(name);
+    }
+    
     /**
      * Performes the actual WSDL generation
      */
     public void doGeneration() {
         XmlSerializer serviceWriter;
         XmlSerializer portWriter = null;
-        String fileName = BindingHelper.mangleNameToClassName(model.getServiceQName().getLocalPart());
+        String fileName = mangleName(model.getServiceQName().getLocalPart());
         Result result = wsdlResolver.getWSDL(fileName+DOT_WSDL);
         wsdlLocation = result.getSystemId();
         serviceWriter = new CommentFilter(ResultFactory.createSerializer(result));
@@ -266,7 +270,7 @@ public class WSDLGenerator {
             portWriter = serviceWriter;
             schemaPrefix = fileName+"_";
         } else {
-            String wsdlName = BindingHelper.mangleNameToClassName(model.getPortTypeName().getLocalPart());
+            String wsdlName = mangleName(model.getPortTypeName().getLocalPart());
             if (wsdlName.equals(fileName))
                 wsdlName += "PortType";
             Holder<String> absWSDLName = new Holder<String>();
@@ -287,7 +291,7 @@ public class WSDLGenerator {
             int idx = schemaPrefix.lastIndexOf('.');
             if (idx > 0)
                 schemaPrefix = schemaPrefix.substring(0, idx);
-            schemaPrefix = BindingHelper.mangleNameToClassName(schemaPrefix)+"_";
+            schemaPrefix = mangleName(schemaPrefix)+"_";
         }    
         generateDocument(serviceWriter, portWriter);
     }
@@ -1035,11 +1039,9 @@ public class WSDLGenerator {
      */    
     public Result createOutputFile(String namespaceUri, String suggestedFileName) throws IOException {
         Result result;
-        if (namespaceUri.equals("")) {
+        if (namespaceUri==null) {
             return null;
         }
-        com.sun.xml.ws.wsdl.writer.document.xsd.Import _import = types.schema()._import().namespace(namespaceUri);
-
         Holder<String> fileNameHolder = new Holder<String>();
         fileNameHolder.value = schemaPrefix+suggestedFileName;
         result = wsdlResolver.getSchemaOutput(namespaceUri, fileNameHolder);
@@ -1051,7 +1053,16 @@ public class WSDLGenerator {
         else
             schemaLoc = relativize(result.getSystemId(), wsdlLocation);
 //        System.out.println("schemaLoca: "+schemaLoc);
-        _import.schemaLocation(schemaLoc);
+         
+        //according XML Schema Part 0: Primer, empty targetnamespae is invalid, so does <xsd:import namespace=""/>
+        //jaxbri generate schema file without any ns desclartion for pojo with targetnamespace="", experience tells that
+        // this schema file is indirectly imported wsdl or not needed at all, so we don't import this schema file directly
+        boolean isEmptyNs = namespaceUri.trim().equals("");
+        if(!isEmptyNs) {
+            com.sun.xml.ws.wsdl.writer.document.xsd.Import _import = types.schema()._import();
+            _import.namespace(namespaceUri);
+            _import.schemaLocation(schemaLoc);
+        }
         return result;
     }
 

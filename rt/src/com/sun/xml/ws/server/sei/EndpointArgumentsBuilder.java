@@ -360,7 +360,6 @@ abstract class EndpointArgumentsBuilder {
         }
     }
 
-    
     /**
      * Gets the WSDL part name of this attachment.
      *
@@ -443,8 +442,9 @@ abstract class EndpointArgumentsBuilder {
 
         private SOAPFaultException createDuplicateHeaderException() {
             try {
-                SOAPFault fault = soapVersion.saajSoapFactory.createFault(
-                        ServerMessages.DUPLICATE_PORT_KNOWN_HEADER(headerName), soapVersion.faultCodeClient);
+                SOAPFault fault = soapVersion.getSOAPFactory().createFault();
+                fault.setFaultCode(soapVersion.faultCodeClient);
+                fault.setFaultString(ServerMessages.DUPLICATE_PORT_KNOWN_HEADER(headerName));
                 return new SOAPFaultException(fault);
             } catch(SOAPException e) {
                 throw new WebServiceException(e);

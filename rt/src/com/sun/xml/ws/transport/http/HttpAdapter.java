@@ -43,6 +43,7 @@ package com.sun.xml.ws.transport.http;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.PropertySet;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.StickyFeature;
@@ -55,7 +56,6 @@ import com.sun.xml.ws.api.server.AbstractServerAsyncTransport;
 import com.sun.xml.ws.api.server.Adapter;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
-import com.sun.xml.ws.api.server.EndpointComponent;
 import com.sun.xml.ws.api.server.Module;
 import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
@@ -265,7 +265,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     public boolean handleGet(@NotNull WSHTTPConnection connection) throws IOException {
         if (connection.getRequestMethod().equals("GET")) {
             // metadata query. let the interceptor run
-            for (EndpointComponent c : endpoint.getComponentRegistry()) {
+            for (Component c : endpoint.getComponentRegistry().values()) {
                 HttpMetadataPublisher spi = c.getSPI(HttpMetadataPublisher.class);
                 if (spi != null && spi.handleMetadataRequest(this, connection))
                     return true; // handled

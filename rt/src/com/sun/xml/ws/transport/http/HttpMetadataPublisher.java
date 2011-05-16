@@ -41,7 +41,7 @@
 package com.sun.xml.ws.transport.http;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.server.EndpointComponent;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.server.WSEndpoint;
 
 import java.io.IOException;
@@ -54,7 +54,7 @@ import java.io.IOException;
  * to allow components to expose additional information through HTTP.
  *
  * @author Kohsuke Kawaguchi
- * @see EndpointComponent#getSPI(Class)
+ * @see Component#getSPI(Class)
  * @since 2.1.2
  */
 public abstract class HttpMetadataPublisher {

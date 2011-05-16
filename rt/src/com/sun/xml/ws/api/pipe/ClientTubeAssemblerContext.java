@@ -60,6 +60,7 @@ import com.sun.xml.ws.developer.SchemaValidationFeature;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.handler.ClientLogicalHandlerTube;
 import com.sun.xml.ws.handler.ClientMessageHandlerTube;
+import com.sun.xml.ws.handler.ClientOutboundAttachmentTube;
 import com.sun.xml.ws.handler.ClientSOAPHandlerTube;
 import com.sun.xml.ws.handler.HandlerTube;
 import com.sun.xml.ws.protocol.soap.ClientMUTube;
@@ -67,6 +68,7 @@ import com.sun.xml.ws.transport.DeferredTransportPipe;
 import com.sun.xml.ws.util.pipe.DumpTube;
 
 import javax.xml.ws.soap.SOAPBinding;
+import javax.xml.namespace.QName;
 import java.io.PrintStream;
 
 /**
@@ -85,6 +87,7 @@ public class ClientTubeAssemblerContext {
     private final @NotNull WSBinding binding;
     private final @NotNull Container container;
     private @NotNull Codec codec;
+    private final QName portName;
 
     //Nullable only to maintain comaptibility with old constructors of this class.
     private final @Nullable WSBindingProvider bindingProvider;
@@ -129,7 +132,7 @@ public class ClientTubeAssemblerContext {
     public ClientTubeAssemblerContext(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel,
                                       @NotNull WSService rootOwner, @NotNull WSBinding binding,
                                       @NotNull Container container, Codec codec, SEIModel seiModel) {
-        this(address, wsdlModel, rootOwner, null/* no info on which port it is, so pass null*/, binding, container, codec,seiModel);
+        this(address, wsdlModel, rootOwner, null/* no info on which port it is, so pass null*/, binding, container, codec, seiModel, null);
     }
 
     /**
@@ -140,7 +143,19 @@ public class ClientTubeAssemblerContext {
     public ClientTubeAssemblerContext(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel,
                                       @NotNull WSBindingProvider bindingProvider, @NotNull WSBinding binding,
                                       @NotNull Container container, Codec codec, SEIModel seiModel) {
-        this(address, wsdlModel, (bindingProvider==null? null: bindingProvider.getPortInfo().getOwner()), bindingProvider, binding, container, codec,seiModel);
+        this(address, wsdlModel, bindingProvider, binding, container, codec, seiModel, null);
+
+    }
+
+    /**
+     * This constructor should be used only by JAX-WS Runtime and is not meant for external consumption.
+     *
+     * @since JAX-WS 2.2
+     */
+    public ClientTubeAssemblerContext(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel,
+                                      @NotNull WSBindingProvider bindingProvider, @NotNull WSBinding binding,
+                                      @NotNull Container container, Codec codec, SEIModel seiModel, QName portName) {
+        this(address, wsdlModel, (bindingProvider==null? null: bindingProvider.getPortInfo().getOwner()), bindingProvider, binding, container, codec, seiModel, portName);
 
     }
 
@@ -148,7 +163,7 @@ public class ClientTubeAssemblerContext {
     //WSService is null, when ClientTubeAssemblerContext is created for sending non-anonymous responses.
     private ClientTubeAssemblerContext(@NotNull EndpointAddress address, @Nullable WSDLPort wsdlModel,
                                        @Nullable WSService rootOwner, @Nullable WSBindingProvider bindingProvider, @NotNull WSBinding binding,
-                                      @NotNull Container container, Codec codec, SEIModel seiModel) {
+                                      @NotNull Container container, Codec codec, SEIModel seiModel, QName portName) {
         this.address = address;
         this.wsdlModel = wsdlModel;
         this.rootOwner = rootOwner;
@@ -157,6 +172,7 @@ public class ClientTubeAssemblerContext {
         this.container = container;
         this.codec = codec;
         this.seiModel = seiModel;
+        this.portName = portName;
     }
 
     /**
@@ -267,6 +283,7 @@ public class ClientTubeAssemblerContext {
      * Creates a {@link Tube} that invokes protocol and logical handlers.
      */
     public Tube createHandlerTube(Tube next) {
+    	next = new ClientOutboundAttachmentTube(next);
         HandlerTube cousinHandlerTube = null;
         //XML/HTTP Binding can have only LogicalHandlerPipe
         if (binding instanceof SOAPBinding) {
@@ -339,5 +356,14 @@ public class ClientTubeAssemblerContext {
     public void setCodec(@NotNull Codec codec) {
         this.codec = codec;
     }
+
+    /**
+     *  return the WSDL portName associated with this client tube.
+     */
+    public QName getPortName() {
+        if (portName != null) return portName;
+        return wsdlModel == null ? null : wsdlModel.getName();
+    }
+
 
 }

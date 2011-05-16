@@ -51,10 +51,12 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.MEP;
+import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.binding.BindingImpl;
+import com.sun.xml.ws.client.AsyncResponseImpl;
 import com.sun.xml.ws.client.*;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -78,19 +80,22 @@ public final class SEIStub extends Stub implements InvocationHandler {
 	Databinding databinding;
 	
     @Deprecated
-    public SEIStub(WSServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master, WSEndpointReference epr) {
+    public SEIStub(WSServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Class portInterface, Tube master, WSEndpointReference epr) {
         super(owner, master, binding, seiModel.getPort(), seiModel.getPort().getAddress(), epr);
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
         databinding = seiModel.getDatabinding();
+        this.portInterface = portInterface;
         initMethodHandlers();
     }
 
-    public SEIStub(WSPortInfo portInfo, BindingImpl binding, SOAPSEIModel seiModel, WSEndpointReference epr) {
+    // added portInterface to the constructor, otherwise AsyncHandler won't work
+    public SEIStub(WSPortInfo portInfo, BindingImpl binding, SOAPSEIModel seiModel, Class portInterface, WSEndpointReference epr) {
         super(portInfo, binding, seiModel.getPort().getAddress(),epr);
         this.seiModel = seiModel;
         this.soapVersion = binding.getSOAPVersion();
         databinding = seiModel.getDatabinding();
+        this.portInterface = portInterface;
         initMethodHandlers();
     }
 
@@ -134,6 +139,8 @@ public final class SEIStub extends Stub implements InvocationHandler {
 
     public final SOAPVersion soapVersion;
 
+    public final Class portInterface;
+
     /**
      * Nullable when there is no associated WSDL Model
      * @return
@@ -145,6 +152,14 @@ public final class SEIStub extends Stub implements InvocationHandler {
         return operationDispatcher;
     }
 
+    public SEIModel getRuntimeModel() {
+    	return seiModel;
+    }
+    
+    public Class getPortInterface() {
+    	return portInterface;
+    }
+    
     /**
      * For each method on the port interface we have
      * a {@link MethodHandler} that processes it.
@@ -174,11 +189,11 @@ public final class SEIStub extends Stub implements InvocationHandler {
         return super.process(request, rc, receiver);
     }
 
-    public final void doProcessAsync(Packet request, RequestContext rc, Fiber.CompletionCallback callback) {
-        super.processAsync(request, rc, callback);
+    public final void doProcessAsync(AsyncResponseImpl<?> receiver, Packet request, RequestContext rc, Fiber.CompletionCallback callback) {
+        super.processAsync(receiver, request, rc, callback);
     }
 
-    protected final @NotNull QName getPortName() {
+    public final @NotNull QName getPortName() {
         return wsdlPort.getName();
     }
 

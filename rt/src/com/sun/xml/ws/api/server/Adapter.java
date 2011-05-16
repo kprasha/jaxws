@@ -41,6 +41,7 @@
 package com.sun.xml.ws.api.server;
 
 import com.sun.xml.ws.api.config.management.Reconfigurable;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
@@ -85,8 +86,8 @@ import com.sun.xml.ws.util.Pool;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Adapter<TK extends Adapter.Toolkit>
-        implements Reconfigurable, EndpointComponent {
+public abstract class Adapter<TK extends Adapter.Toolkit> 
+	implements Reconfigurable, Component {
 
     protected final WSEndpoint<?> endpoint;
 
@@ -130,7 +131,7 @@ public abstract class Adapter<TK extends Adapter.Toolkit>
         assert endpoint!=null;
         this.endpoint = endpoint;
         // Enables other components to reconfigure this adapter
-        endpoint.getComponentRegistry().add(this);
+        endpoint.getComponentRegistry().put(getClass(), this);
     }
 
     /**
@@ -149,7 +150,7 @@ public abstract class Adapter<TK extends Adapter.Toolkit>
             return spiType.cast(this);
         }
         else {
-            return null;
+    		return null;
         }
     }
 
@@ -185,5 +186,4 @@ public abstract class Adapter<TK extends Adapter.Toolkit>
      * to {@link Toolkit}, simply implement this as {@code new Toolkit()}.
      */
     protected abstract TK createToolkit();
-
 }

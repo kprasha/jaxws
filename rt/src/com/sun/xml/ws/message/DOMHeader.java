@@ -43,7 +43,6 @@ package com.sun.xml.ws.message;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.streaming.DOMStreamReader;
-import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
@@ -70,12 +69,19 @@ public class DOMHeader<N extends Element> extends AbstractHeaderImpl {
     private final String nsUri;
     private final String localName;
 
+    private final boolean isSuppressRepeatedEmptyNS;
+    
     public DOMHeader(N node) {
+    	this(node, false);
+    }
+    
+    public DOMHeader(N node, boolean isSuppressRepeatedEmptyNS) {
         assert node!=null;
         this.node = node;
 
         this.nsUri = fixNull(node.getNamespaceURI());
         this.localName = node.getLocalName();
+        this.isSuppressRepeatedEmptyNS = isSuppressRepeatedEmptyNS;
     }
 
 
@@ -102,7 +108,7 @@ public class DOMHeader<N extends Element> extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        DOMUtil.serializeNode(node, w);
+        (new DOMWriter(isSuppressRepeatedEmptyNS)).writeNode(node, w);
     }
 
     private static String fixNull(String s) {

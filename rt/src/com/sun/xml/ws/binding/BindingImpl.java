@@ -52,11 +52,13 @@ import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.developer.BindingTypeFeature;
 
 import javax.xml.ws.Service;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.handler.Handler;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Instances are created by the service, which then
@@ -106,6 +108,10 @@ public abstract class BindingImpl implements WSBinding {
         this.serviceMode = mode;
     }
 
+    public Set<QName> getKnownHeaders() {
+    	return handlerConfig.getHandlerKnownHeaders();
+    }
+    
     public
     @NotNull
     BindingID getBindingId() {
@@ -179,7 +185,7 @@ public abstract class BindingImpl implements WSBinding {
     public void setFeatures(WebServiceFeature... newFeatures) {
         if (newFeatures != null) {
             for (WebServiceFeature f : newFeatures) {
-                features.add(f);
+                features.replace(f);
             }
         }
     }

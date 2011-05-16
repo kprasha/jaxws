@@ -82,9 +82,40 @@ public class XMLStreamWriterFilter implements XMLStreamWriter, RecycleAware {
     public void writeStartDocument() throws XMLStreamException {
         writer.writeStartDocument();
     }
+    
+    private boolean isWhiteSpace(char c){
+    	// all char points between 0 and 31 excluding the allowed white spaces (9=TAB, 10=LF, 13=CR) 
+    	if (c >= 0 && c<=31 && c != 9 && c != 10 && c != 13)
+    		return true;
+    	
+    	return false;
+    }
+    
+    //
+    private char[] transformWhiteSpaces(char[] text, int start, int len){
+    	for(int i=0; i<len; i++){
+    		if (i+start >= text.length) break;
+    		if(isWhiteSpace(text[i]))
+    			text[i] = ' '; //change it to ' '
+    	}
+    	return text;
+    }
+    
+    private String transformWhiteSpaces(String text){
+    	char[] cstr = text.toCharArray();
+    	StringBuffer sb = new StringBuffer();
+    	for(char c:cstr){
+    		if(isWhiteSpace(c))
+    			sb.append("&#").append(Integer.toString(c)).append(";");
+    		else
+    			sb.append(c);
+    	}
+    	return sb.toString();
+    }
 
     public void writeCharacters(char[] text, int start, int len) throws XMLStreamException {
-        writer.writeCharacters(text, start, len);
+    	transformWhiteSpaces(text, start, len);
+    	writer.writeCharacters(text, start, len);
     }
 
     public void setDefaultNamespace(String uri) throws XMLStreamException {
@@ -95,7 +126,10 @@ public class XMLStreamWriterFilter implements XMLStreamWriter, RecycleAware {
         writer.writeCData(data);
     }
 
+    //Bug 9707508 - WS-I-BLK:MTOM SERVICE RETURN INCOMPLETE RESPONSE
+    //transform withespace char to &#n;
     public void writeCharacters(String text) throws XMLStreamException {
+    	text = transformWhiteSpaces(text);
         writer.writeCharacters(text);
     }
 

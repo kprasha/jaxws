@@ -101,6 +101,11 @@ public class StringHeader extends AbstractHeaderImpl {
         return name.getLocalPart();
     }
 
+    @Override
+    public String getStringContent() {
+    	return value;
+    }
+    
     @Nullable public String getAttribute(@NotNull String nsUri, @NotNull String localName) {
         if(mustUnderstand && soapVersion.nsUri.equals(nsUri) && MUST_UNDERSTAND.equals(localName)) {
             return getMustUnderstandLiteral(soapVersion);
@@ -116,8 +121,20 @@ public class StringHeader extends AbstractHeaderImpl {
     }
 
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
-        w.writeStartElement("", name.getLocalPart(), name.getNamespaceURI());
-        w.writeDefaultNamespace(name.getNamespaceURI());
+    	String prefix = w.getNamespaceContext().getPrefix(name.getNamespaceURI());
+    	if (prefix != null) {
+            w.writeStartElement(prefix, name.getLocalPart(), name.getNamespaceURI());
+    	}
+    	else {
+    		prefix = name.getPrefix();
+    		if (prefix != null) {
+    	        w.writeStartElement(prefix, name.getLocalPart(), name.getNamespaceURI());
+    	        w.writeNamespace(prefix, name.getNamespaceURI());
+    		} else {
+    	        w.writeStartElement("", name.getLocalPart(), name.getNamespaceURI());
+    	        w.writeDefaultNamespace(name.getNamespaceURI());
+    		}
+    	}
         if (mustUnderstand) {
             //Writing the ns declaration conditionally checking in the NSContext breaks XWSS. as readHeader() adds ns declaration,
             // where as writing alonf with the soap envelope does n't add it.
@@ -130,8 +147,14 @@ public class StringHeader extends AbstractHeaderImpl {
             // w.writeAttribute(soapVersion.nsUri,MUST_UNDERSTAND, getMustUnderstandLiteral(soapVersion));
             // }
         }
+    	
+    	writeAttributes(w);
         w.writeCharacters(value);
         w.writeEndElement();
+    }
+    
+    protected void writeAttributes(XMLStreamWriter w) throws XMLStreamException {
+    	
     }
 
     public void writeTo(SOAPMessage saaj) throws SOAPException {

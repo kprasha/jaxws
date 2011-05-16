@@ -47,6 +47,8 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.MessageContext;
 
+import org.xml.sax.InputSource;
+
 /**
  * Properties exposed from {@link WSDLPort} for {@link MessageContext}.
  * Donot add this satellite if {@link WSDLPort} is null.
@@ -81,6 +83,11 @@ public final class WSDLProperties extends PropertySet {
         return port.getBinding().getPortTypeName();
     }
 
+    @Property(MessageContext.WSDL_DESCRIPTION)
+    public InputSource getWSDLDescription() {
+    	return new InputSource(port.getOwner().getLocation().getSystemId());
+    }    
+    
     @Override
     protected PropertyMap getPropertyMap() {
         return model;

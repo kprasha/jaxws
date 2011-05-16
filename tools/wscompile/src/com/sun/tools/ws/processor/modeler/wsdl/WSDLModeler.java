@@ -197,6 +197,9 @@ public class WSDLModeler extends WSDLModelerBase {
                                 ? "model"
                                 : document.getDefinitions().getName());
         Model model = new Model(modelName, document.getDefinitions());
+        //CR373105 workaround
+        //To add bindings defined out of the main wsdl, it will be used at JwsImplGenerator class
+        model.setProperty("BAKEUP_BINDINGS", document.getMap(Kinds.BINDING));
         model.setJAXBModel(getJAXBModelBuilder().getJAXBModel());
 
         // This fails with the changed classname (WSDLModeler to WSDLModeler11 etc.)

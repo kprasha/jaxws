@@ -41,6 +41,7 @@
 package com.sun.xml.ws.api;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.ContainerResolver;
@@ -80,8 +81,8 @@ import java.security.PrivilegedAction;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class WSService extends ServiceDelegate {
-    protected WSService() {
+public abstract class WSService extends ServiceDelegate implements Component {
+	protected WSService() {
     }
 
     /**
@@ -115,6 +116,10 @@ public abstract class WSService extends ServiceDelegate {
      */
     public abstract @NotNull Container getContainer();
 
+    public @Nullable <T> T getSPI(@NotNull Class<T> spiType) {
+    	return null;
+    }
+    
     /**
      * Create a <code>Service</code> instance.
      *

@@ -176,9 +176,10 @@ public abstract class PropertySet {
                         Property cp = m.getAnnotation(Property.class);
                         if(cp!=null) {
                             String name = m.getName();
-                            assert name.startsWith("get");
+                            assert name.startsWith("get") || name.startsWith("is");
 
-                            String setName = 's'+name.substring(1);   // getFoo -> setFoo
+                            String setName = name.startsWith("is") ? "set"+name.substring(3) : // isFoo -> setFoo 
+                            	's'+name.substring(1);   // getFoo -> setFoo
                             Method setter;
                             try {
                                 setter = clazz.getMethod(setName,m.getReturnType());
@@ -337,7 +338,7 @@ public abstract class PropertySet {
         Accessor sp = getPropertyMap().get(key);
         if(sp!=null)
             return sp.get(this);
-        throw new IllegalArgumentException("Undefined property "+key);
+        return null;
     }
 
     /**

@@ -42,6 +42,8 @@ package com.sun.xml.ws.api.streaming;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.streaming.XMLReaderException;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -74,8 +76,7 @@ public abstract class XMLStreamWriterFactory {
      */
     private static volatile @NotNull XMLStreamWriterFactory theInstance;
 
-
-    static {
+    public static XMLStreamWriterFactory create() {
         XMLOutputFactory  xof = null;
         if (Boolean.getBoolean(XMLStreamWriterFactory.class.getName()+".woodstox")) {
             try {
@@ -101,8 +102,12 @@ public abstract class XMLStreamWriterFactory {
         }
         if (f == null)
             f = new Default(xof);
-
-        theInstance = f;
+        
+        return f;
+    }
+    
+    static {
+        theInstance = create();
         LOGGER.fine("XMLStreamWriterFactory instance is = "+theInstance);
     }
 
@@ -167,6 +172,12 @@ public abstract class XMLStreamWriterFactory {
      * Gets the singleton instance.
      */
     public static @NotNull XMLStreamWriterFactory get() {
+    	Container c = ContainerResolver.getInstance().getContainer();
+    	if (c != null) {
+    		XMLStreamWriterFactory x = c.getSPI(XMLStreamWriterFactory.class);
+    		if (x != null)
+    			return x;
+    	}
         return theInstance;
     }
 
