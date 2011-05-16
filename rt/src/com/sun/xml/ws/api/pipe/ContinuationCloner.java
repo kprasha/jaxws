@@ -109,26 +109,21 @@ public class ContinuationCloner extends PipeClonerImpl {
 			super(that, cloner);
 		}
 		
-		@Override
 		public AbstractTubeImpl copy(TubeCloner cloner) {
 			return new DummyTube(this, cloner);
 		}
 
-		@Override
 		public void preDestroy() {
 		}
 
-		@Override
 		public NextAction processException(Throwable t) {
 			return doThrow(t);
 		}
 
-		@Override
 		public NextAction processRequest(Packet request) {
 			return doReturnWith(request);
 		}
 
-		@Override
 		public NextAction processResponse(Packet response) {
 			return doReturnWith(response);
 		}

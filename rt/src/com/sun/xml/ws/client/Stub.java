@@ -484,7 +484,6 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         final Fiber fiber = engine.createFiber();
         
         receiver.setCancelable(new Cancelable() {
-			@Override
 			public void cancel(boolean mayInterruptIfRunning) {
 				fiber.cancel(mayInterruptIfRunning);
 			}
