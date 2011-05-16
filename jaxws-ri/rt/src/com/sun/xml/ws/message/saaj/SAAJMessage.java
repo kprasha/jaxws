@@ -700,38 +700,31 @@ public class SAAJMessage extends Message {
     		isChanged = false;
     	}
     	
-		@Override
 		public void add(Attachment att) {
 			isChanged = true;
 			inner.add(att);
 		}
 
-		@Override
 		public Attachment get(String contentId) {
 			return inner.get(contentId);
 		}
 
-		@Override
 		public boolean isEmpty() {
 			return inner.isEmpty();
 		}
 
-		@Override
 		public Iterator<Attachment> iterator() {
 			return new Iterator<Attachment>() {
 				private Iterator<Attachment> it = inner.iterator();
 				
-				@Override
 				public boolean hasNext() {
 					return it.hasNext();
 				}
 
-				@Override
 				public Attachment next() {
 					return it.next();
 				}
 
-				@Override
 				public void remove() {
 					isChanged = true;
 					it.remove();

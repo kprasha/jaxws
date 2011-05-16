@@ -120,7 +120,6 @@ class AsyncProviderInvokerTube<T> extends ProviderInvokerTube<T> {
     private class NoSuspendResumer implements Resumer {
     	protected Packet response = null;
 
-		@Override
 		public void onResume(Packet response) {
 			this.response = response;
 		}
