@@ -551,11 +551,9 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
         // snapshot the context now. this is necessary to avoid concurrency issue,
         // and is required by the spec
         private final RequestContext rc = requestContext.copy();
-        private final FiberContextSwitchInterceptor interceptor;
 
         DispatchAsyncInvoker(T param) {
             this.param = param;
-            interceptor = getFiberContextSwitchInterceptor();
         }
 
         public void do_run () {
@@ -632,7 +630,6 @@ public abstract class DispatchImpl<T> extends Stub implements Dispatch<T> {
                     }
                 }
             };
-            message.invocationProperties.put(FIBER_CONTEXTSWITCHINTERCEPTOR_KEY,interceptor);
             processAsync(responseImpl,message,rc, callback);
         }
     }

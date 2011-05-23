@@ -162,11 +162,9 @@ abstract class AsyncMethodHandler extends MethodHandler {
         // and is required by the spec
         private final RequestContext rc = owner.requestContext.copy();
         private final Object[] args;
-        private final FiberContextSwitchInterceptor interceptor;
 
         SEIAsyncInvoker(Object proxy, Object[] args) {
             this.args = args;
-            interceptor = getFiberContextSwitchInterceptor(); 
         }
 
         public void do_run () {    	
@@ -230,7 +228,6 @@ abstract class AsyncMethodHandler extends MethodHandler {
                     }
                 }
             };
-            req.invocationProperties.put(FIBER_CONTEXTSWITCHINTERCEPTOR_KEY,interceptor);
             owner.doProcessAsync(responseImpl, req, rc, callback);
         }
     }

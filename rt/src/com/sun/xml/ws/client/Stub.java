@@ -474,7 +474,6 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
     protected final void processAsync(AsyncResponseImpl<?> receiver, Packet request, RequestContext requestContext, final Fiber.CompletionCallback completionCallback) {
         // fill in Packet
     	request.component = this;
-        FiberContextSwitchInterceptor interceptor = (FiberContextSwitchInterceptor) request.invocationProperties.remove(AsyncInvoker.FIBER_CONTEXTSWITCHINTERCEPTOR_KEY);
         configureRequestPacket(request, requestContext);
 
         final Pool<Tube> pool = tubes;
@@ -493,8 +492,9 @@ public abstract class Stub implements WSBindingProvider, ResponseContextReceiver
         if (receiver.isCancelled())
         	return;
         
-        if(interceptor!=null)
-            fiber.addInterceptor(interceptor);
+        FiberContextSwitchInterceptorFactory fcsif = owner.getSPI(FiberContextSwitchInterceptorFactory.class);
+        if(fcsif != null)
+            fiber.addInterceptor(fcsif.create());
         // then send it away!
         final Tube tube = pool.take();
 
