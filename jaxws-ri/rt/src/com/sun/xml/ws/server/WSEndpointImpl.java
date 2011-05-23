@@ -71,6 +71,7 @@ import com.sun.xml.ws.util.Pool.TubePool;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.wsdl.OperationDispatcher;
 import org.glassfish.gmbal.ManagedObjectManager;
+import org.glassfish.gmbal.ManagedObjectManagerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
@@ -158,8 +159,10 @@ public class WSEndpointImpl<T> extends WSEndpoint<T> {
 		this.seiModel = seiModel;
         this.endpointPolicy = endpointPolicy;
 
-        this.managedObjectManager = 
-            new MonitorRootService(this).createManagedObjectManager(this);
+        // MERGE FIXME
+        //this.managedObjectManager = 
+        //    new MonitorRootService(this).createManagedObjectManager(this);
+        this.managedObjectManager = ManagedObjectManagerFactory.createNOOP();
 
 		if (serviceDef != null) {
 			serviceDef.setOwner(this);
@@ -263,8 +266,11 @@ public class WSEndpointImpl<T> extends WSEndpoint<T> {
 		this.postSpliceTubeline = postSpliceTubeline;
 		this.masterCodec = ((BindingImpl) this.binding).createCodec();
 
-        this.managedObjectManager = 
-            new MonitorRootService(this).createManagedObjectManager(this);
+		// MERGE FIXME
+        //this.managedObjectManager = 
+        //    new MonitorRootService(this).createManagedObjectManager(this);
+		this.managedObjectManager = ManagedObjectManagerFactory.createNOOP();
+		
         this.operationDispatcher = (port == null) ? null : new OperationDispatcher(port, binding, seiModel);
 	    this.context = new ServerPipeAssemblerContext(
     	        seiModel, port, this, null /* not known */, false);
