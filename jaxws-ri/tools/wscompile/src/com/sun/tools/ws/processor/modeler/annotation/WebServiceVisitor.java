@@ -432,6 +432,9 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         WebMethod webMethod = method.getAnnotation(WebMethod.class);
         if (webMethod != null && webMethod.exclude())
             return;
+        
+        // HERE
+        
         SOAPBinding soapBinding = method.getAnnotation(SOAPBinding.class);
         if (soapBinding == null && !method.getDeclaringType().equals(typeDecl)) {
             if (method.getDeclaringType() instanceof ClassDeclaration) {
@@ -469,13 +472,16 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
 
     protected boolean shouldProcessMethod(MethodDeclaration method, WebMethod webMethod) {
         builder.log("should process method: "+method.getSimpleName()+" hasWebMethods: "+ hasWebMethods+" ");
-        /*
-        Fix for https://jax-ws.dev.java.net/issues/show_bug.cgi?id=577
+        
+        // MERGE FIXME -- Commented out section is restored until we can resolve EE vs SE
+        // discrepancy in how to calculate operations
+        //Fix for https://jax-ws.dev.java.net/issues/show_bug.cgi?id=577
         if (hasWebMethods && webMethod == null) {
             builder.log("webMethod == null");
             return false;
         }
-        */
+        
+        
         Collection<Modifier> modifiers = method.getModifiers();
         boolean staticFinal = modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.FINAL);
         if (staticFinal) {
