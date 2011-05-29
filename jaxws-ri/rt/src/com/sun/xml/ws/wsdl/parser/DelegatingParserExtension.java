@@ -43,6 +43,9 @@ package com.sun.xml.ws.wsdl.parser;
 import com.sun.xml.ws.api.model.wsdl.*;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
+
 
 import javax.xml.stream.XMLStreamReader;
 
@@ -190,4 +193,9 @@ class DelegatingParserExtension extends WSDLParserExtension {
     public void postFinished(WSDLParserExtensionContext context) {
         core.postFinished(context);
     }
+ 
+    public BindingID getBindingID(String transport, SOAPVersion soapVersion) {
+        return core.getBindingID(transport, soapVersion);
+    }
+
 }

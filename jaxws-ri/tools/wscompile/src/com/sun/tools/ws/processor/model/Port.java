@@ -180,6 +180,14 @@ public class Port extends ModelObject {
         _isWrapped = isWrapped;
     }
 
+    public String getTransport() {
+      return _transport;
+    }
+
+    public void setTransport(String s) {
+      _transport = s;
+    }  
+
     private SOAPStyle _style = null;
     private boolean _isWrapped = true;
 
@@ -191,4 +199,5 @@ public class Port extends ModelObject {
     private String _serviceImplName;
     private Map<String, Operation> operationsByName = new HashMap<String, Operation>();
     public Map<QName, PortType> portTypes = new HashMap<QName, PortType>();
+    private String _transport = null;
 }

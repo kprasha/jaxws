@@ -320,6 +320,7 @@ public class WSDLModeler extends WSDLModelerBase {
                 port.setJavaInterface(existingPort.getJavaInterface());
                 port.setStyle(existingPort.getStyle());
                 port.setWrapped(existingPort.isWrapped());
+                port.setTransport(existingPort.getTransport());
             } else {
                 // find out the SOAP binding extension, if any
                 SOAPBinding soapBinding =
@@ -373,6 +374,7 @@ public class WSDLModeler extends WSDLModelerBase {
 
                 if(soapBinding != null){
                     port.setStyle(soapBinding.getStyle());
+                    port.setTransport(soapBinding.getTransport());
                 }
 
                 boolean hasOverloadedOperations = false;

@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.wsdl.parser;
 
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtensionContext;
 import com.sun.xml.ws.api.model.wsdl.*;
@@ -359,4 +361,13 @@ final class WSDLParserExtensionFacade extends WSDLParserExtension {
         return loc;
     }
 
+    public BindingID getBindingID(String transport, SOAPVersion soapVersion) {
+        for (WSDLParserExtension e : extensions) {
+            BindingID bindingID = e.getBindingID(transport, soapVersion);
+            if (bindingID!=null) {
+                return bindingID;
+            }
+        }
+        return null;
+    }
 }

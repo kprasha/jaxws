@@ -47,7 +47,6 @@ import com.sun.codemodel.JCatchBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCommentPart;
-import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
@@ -68,6 +67,7 @@ import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.wscompile.Options;
 import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.tools.ws.wsdl.document.PortType;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.spi.db.BindingHelper;
 
 import org.xml.sax.Locator;
@@ -76,7 +76,6 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.ws.WebServiceException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -210,6 +209,11 @@ public class ServiceGenerator extends GeneratorBase {
         //@WebService
         JAnnotationUse webServiceClientAnn = cls.annotate(cm.ref(WebServiceClient.class));
         writeWebServiceClientAnnotation(service, webServiceClientAnn);
+
+        // additional annotations
+        for (GeneratorExtension f:ServiceFinder.find(GeneratorExtension.class)) {
+            f.writeWebServiceClientAnnotation(options, cm, cls);
+        }
 
         //@HandlerChain
         writeHandlerConfig(Names.customJavaTypeClassName(service.getJavaInterface()), cls, options);

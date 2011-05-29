@@ -38,61 +38,56 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.message;
+package com.sun.tools.ws.processor.generator;
 
-import javax.xml.namespace.QName;
-import junit.framework.TestCase;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.tools.ws.processor.model.Model;
+import com.sun.tools.ws.processor.model.Port;
+import com.sun.tools.ws.wscompile.WsimportOptions;
+import com.sun.xml.ws.api.SOAPVersion;
 
-public class HeaderListTest extends TestCase {
-
-    public static final String TEST_NS = "http://jaxws.dev.java.net/";
-    private HeaderList testInstance;
-
-    public HeaderListTest(String name) {
-        super(name);
+/**
+ * Service Generator Extension for Custom Binding and Transport
+ * @see JwsImplGenerator
+ */
+public abstract class GeneratorExtension {
+    
+    /**
+     * Derive  Binding ID based on transport and SOAP version 
+     * @param transport
+     * @param soapVersion
+     * @return BindingID
+     */
+    public String getBindingValue(String transport, SOAPVersion soapVersion) {
+      return null;
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        testInstance = new HeaderList();
+    
+    /**
+     * Create annotations in service JWS generated
+     * @param model
+     * @param cm
+     * @param cls
+     * @param port
+     */
+    public void writeWebServiceAnnotation(Model model, JCodeModel cm, JDefinedClass cls, Port port) {
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
-        testInstance = null;
+    
+    /**
+     * Allow additional wsimport options 
+     * @param name, for instance, "-neoption"
+     * @return whether the name specifies an option recognized by the extension
+     */
+    public boolean validateOption(String name) {
+      return false;
     }
-
-    public void testRemoveHeader() throws Exception {
-
-        for (int i = 0; i < 40; i++) {
-            testInstance.add(Headers.create(new QName(TEST_NS, "" + i), "" + i));
-        }
-
-        testInstance.understood(1);
-        testInstance.understood(testInstance.size() - 2);
-
-        int expectedSize = testInstance.size();
-        for (int i = 2; i < testInstance.size() - 2; i++) {
-            testInstance.remove(new QName(TEST_NS, "" + i));
-
-
-            assertEquals(--expectedSize, testInstance.size());
-            assertFalse(testInstance.isUnderstood(0));
-            assertTrue(testInstance.isUnderstood(1));
-            for (int j = 2; j < testInstance.size() - 2; j++) {
-                assertFalse(testInstance.isUnderstood(j));
-            }
-            assertTrue(testInstance.isUnderstood(testInstance.size() - 2));
-            assertFalse(testInstance.isUnderstood(testInstance.size() - 1));
-        }
-    }
-    public void testUsingSsl() throws Exception {
-        assertTrue(testInstance.isUsingSsl("https://oracle.com"));
-        assertFalse(testInstance.isUsingSsl("http://oracle.com"));
-        assertFalse(testInstance.isUsingSsl("jms:jndi:myQueue?targetService=MySoapjmsService"));
+    
+    /**
+     * Create annotations in service client generated
+     * @param options
+     * @param cm
+     * @param cls
+     */
+    public void writeWebServiceClientAnnotation(WsimportOptions options, JCodeModel cm, JDefinedClass cls) {
     }
 }
