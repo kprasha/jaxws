@@ -236,6 +236,16 @@ public class WSDLGenerator {
         register(new W3CAddressingWSDLGeneratorExtension());
         register(new W3CAddressingMetadataWSDLGeneratorExtension());
         register(new PolicyWSDLGeneratorExtension());
+
+        if (container!=null) { // on server
+          WSDLGeneratorExtension[] wsdlGeneratorExtensions = container.getSPI(WSDLGeneratorExtension[].class);
+          if (wsdlGeneratorExtensions!=null) {
+            for (WSDLGeneratorExtension wsdlGeneratorExtension:wsdlGeneratorExtensions) {
+              register(wsdlGeneratorExtension);
+            }
+          }
+        }
+
         for (WSDLGeneratorExtension w : extensions)
             register(w);
 

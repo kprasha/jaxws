@@ -43,6 +43,7 @@ package com.sun.xml.ws.wsdl.parser;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSDLLocator;
 import com.sun.xml.ws.api.policy.PolicyResolver;
@@ -489,7 +490,13 @@ public class RuntimeWSDLParser {
         while (XMLStreamReaderUtil.nextElementContent(reader) != XMLStreamConstants.END_ELEMENT) {
             QName name = reader.getName();
             if (WSDLConstants.NS_SOAP_BINDING.equals(name)) {
-                binding.setBindingId(BindingID.SOAP11_HTTP);
+                String transport = reader.getAttributeValue(null, "transport");
+                BindingID bindingID = extensionFacade.getBindingID(transport, SOAPVersion.SOAP_11);
+                if (bindingID==null) {
+                  binding.setBindingId(BindingID.SOAP11_HTTP);
+                } else {
+                  binding.setBindingId(bindingID);
+                }
                 String style = reader.getAttributeValue(null, "style");
 
                 if ((style != null) && (style.equals("rpc"))) {
@@ -499,7 +506,14 @@ public class RuntimeWSDLParser {
                 }
                 goToEnd(reader);
             } else if (WSDLConstants.NS_SOAP12_BINDING.equals(name)) {
-                binding.setBindingId(BindingID.SOAP12_HTTP);
+                String transport = reader.getAttributeValue(null, "transport");
+                BindingID bindingID = extensionFacade.getBindingID(transport, SOAPVersion.SOAP_12);
+                if (bindingID==null) {
+                  binding.setBindingId(BindingID.SOAP12_HTTP);
+                } else {
+                  binding.setBindingId(bindingID);
+                }
+
                 String style = reader.getAttributeValue(null, "style");
                 if ((style != null) && (style.equals("rpc"))) {
                     binding.setStyle(Style.RPC);

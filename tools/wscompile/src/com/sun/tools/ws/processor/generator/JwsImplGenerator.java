@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.tools.ws.processor.generator;
 
 import com.sun.codemodel.*;
@@ -56,6 +55,12 @@ import com.sun.tools.ws.wscompile.ErrorReceiver;
 import com.sun.tools.ws.processor.model.ModelProperties;
 import com.sun.tools.ws.wscompile.WsimportOptions;
 import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.BindingIDFactory;
+import com.sun.xml.ws.api.SOAPVersion;
+
+import com.sun.xml.ws.util.ServiceFinder;
+
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 import javax.xml.namespace.QName;
@@ -239,6 +244,11 @@ public final class JwsImplGenerator extends GeneratorBase {
 			JAnnotationUse bindingTypeAnn = cls.annotate(cm.ref(BindingType.class));
 			writeBindingTypeAnnotation(port, bindingTypeAnn);
 
+                        // extra annotation                  
+                        for( GeneratorExtension f : ServiceFinder.find(GeneratorExtension.class) ) {
+        		    f.writeWebServiceAnnotation(model, cm, cls, port);
+        		}
+
 			// WebMethods
 			for (Operation operation : port.getOperations()) {
 				JavaMethod method = operation.getJavaMethod();
@@ -336,7 +346,6 @@ public final class JwsImplGenerator extends GeneratorBase {
 		webServiceAnn.param("wsdlLocation", wsdlLocation);
 		webServiceAnn.param("endpointInterface", port.getJavaInterface().getName());
 	}
-
 	//CR373098 To transform the java class name as validate.
   private String transToValidJavaIdentifier(String s) {
     if (s == null) return null;
@@ -394,15 +403,29 @@ public final class JwsImplGenerator extends GeneratorBase {
 			SOAPBinding sb = (SOAPBinding) wsdlext;
 			if(javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_MTOM_BINDING.equals(sb.getTransport()))
 				return javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_MTOM_BINDING;
-			else
-				return javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING;
+                        else {
+                            for(GeneratorExtension f : ServiceFinder.find(GeneratorExtension.class) ) {
+                                String bindingValue = f.getBindingValue(sb.getTransport(), SOAPVersion.SOAP_11);
+                                if(bindingValue!=null) {
+                                    return bindingValue;
+                                }
+                            }
+                                return javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING;
+                        }
 		}
 		if (wsdlext.getClass().equals(SOAP12Binding.class)) {
 			SOAP12Binding sb = (SOAP12Binding) wsdlext;
 			if(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_MTOM_BINDING.equals(sb.getTransport()))
 				return javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_MTOM_BINDING;
-			else
-				return javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING;
+		    else {
+		        for(GeneratorExtension f : ServiceFinder.find(GeneratorExtension.class) ) {
+		            String bindingValue = f.getBindingValue(sb.getTransport(), SOAPVersion.SOAP_12);
+		            if(bindingValue!=null) {
+		                return bindingValue;
+		            }
+		        }
+		            return javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING;
+		    }
 		}
 		return null;
 	}

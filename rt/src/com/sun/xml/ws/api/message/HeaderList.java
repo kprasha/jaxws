@@ -720,16 +720,7 @@ public class HeaderList extends ArrayList<Header> {
     }
 
     public static boolean isUsingSsl(String to) {
-      boolean ssl = false;
-      if (to != null) {
-          try {
-              URL url = new URL(to);
-              ssl = isUsingSsl(url);
-          } catch (Exception e) {
-              throw new RuntimeException(e);
-          }
-      }
-      return ssl;
+      return to != null && to.toLowerCase().startsWith("https:");
     }
 
     public static boolean isUsingSsl(@NotNull URL url) {

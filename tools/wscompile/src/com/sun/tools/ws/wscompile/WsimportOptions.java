@@ -41,6 +41,7 @@
 package com.sun.tools.ws.wscompile;
 
 import com.sun.codemodel.JCodeModel;
+import com.sun.tools.ws.processor.generator.GeneratorExtension;
 import com.sun.tools.ws.resources.ConfigurationMessages;
 import com.sun.tools.ws.resources.WscompileMessages;
 import com.sun.tools.ws.util.ForkEntityResolver;
@@ -52,6 +53,7 @@ import com.sun.tools.xjc.api.XJC;
 import com.sun.tools.xjc.reader.Util;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.streaming.XMLStreamReaderUtil;
+import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import org.w3c.dom.Element;
@@ -68,11 +70,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 /**
  * @author Vivek Pandey
@@ -139,6 +141,11 @@ public class WsimportOptions extends Options {
      * Authentication file
      */
     public File authFile;
+
+    /**
+     * Additional arguments
+     */
+    public HashMap<String, String> extensionOptions = new HashMap<String, String>();
 
     public JCodeModel getCodeModel() {
         if(codeModel == null)
@@ -302,6 +309,14 @@ public class WsimportOptions extends Options {
       		implPortName = requireArgument("-implPortName", args, ++i);
           return 2;
         } 
+
+        // handle additional options
+        for (GeneratorExtension f:ServiceFinder.find(GeneratorExtension.class)) {
+            if (f.validateOption(args[i])) {
+                extensionOptions.put(args[i], requireArgument(args[i], args, ++i));
+                return 2;
+            }
+        }
 
         return 0; // what's this option?
     }
@@ -494,6 +509,13 @@ public class WsimportOptions extends Options {
         }
     }
  
+    /**
+     * Get extension argument 
+     */
+    public String getExtensionOption(String argument) {
+        return extensionOptions.get(argument);
+    }
+
     private static final class ByteStream extends ByteArrayOutputStream {
     	byte[] getBuffer() {
     		return buf;

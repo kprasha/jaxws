@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.api.wsdl.parser;
 
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.*;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -281,5 +283,9 @@ public abstract class WSDLParserExtension {
 
     public void postFinished(WSDLParserExtensionContext context) {
         // noop
+    }
+    
+    public BindingID getBindingID(String transport, SOAPVersion soapVersion) {
+        return null;
     }
 }
