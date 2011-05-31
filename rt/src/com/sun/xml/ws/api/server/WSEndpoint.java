@@ -425,14 +425,6 @@ public abstract class WSEndpoint<T> implements ComponentRegistry {
     public abstract <T> Dispatch<T> createDispatch(Class<T> type, Mode mode);
 
     /**
-     * Get a Dispatch instance suitable for sending new requests to a target
-     * endpoint that is 'implied' by the current endpoint's service definition.
-     * For example, if used to send RM protocol messages, the target endpoint
-     * is implied to have the same policy as this endpoint.
-     */
-    public abstract Dispatch<Message> createMessageDispatch();
-
-    /**
      * Get a Dispatch instance suitable for use in sending an async response
      * that has been persisted and rehydrated. Note, the returned Dispatch
      * will not support doing an invoke with a response of any kind.
