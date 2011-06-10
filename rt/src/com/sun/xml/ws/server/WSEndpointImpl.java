@@ -495,32 +495,20 @@ public class WSEndpointImpl<T> extends WSEndpoint<T> {
         }
         return getEndpointReference(clazz, address, wsdlAddress, null, refParams);
     }
+    public <T extends EndpointReference> T getEndpointReference(Class<T> clazz,
+			String address, String wsdlAddress, List<Element> metadata,
+			List<Element> referenceParameters) {
+		QName portType = null;
+		if (port != null) {
+			portType = port.getBinding().getPortTypeName();
+		}
 
-	public <T extends EndpointReference> T getEndpointReference(
-			Class<T> clazz, String address, String wsdlAddress, List<Element> metadata, List<Element> referenceParameters) {
-		return getWSEndpointReference(clazz, address, wsdlAddress, metadata, referenceParameters).toSpec(clazz);
-  }
+		AddressingVersion av = AddressingVersion.fromSpecClass(clazz);
+		return new WSEndpointReference(av, address, serviceName, portName,
+				portType, metadata, wsdlAddress, referenceParameters,
+				endpointReferenceExtensions.values(), null).toSpec(clazz);
 
-	public <T extends EndpointReference> WSEndpointReference getWSEndpointReference(
-			Class<T> clazz, String address, String wsdlAddress, List<Element> metadata, List<Element> referenceParameters) {
-      QName portType = null;
-      if(port != null) {
-          portType = port.getBinding().getPortTypeName();
-      }
-
-      AddressingVersion av = AddressingVersion.fromSpecClass(clazz);
-      if (av == AddressingVersion.W3C) {
-            // Suppress writing ServiceName and EndpointName in W3C EPR,
-          // Until the ns for those metadata elements is resolved.
-          return new WSEndpointReference(
-                  AddressingVersion.W3C,
-                    address, null /*serviceName*/,null /*portName*/, null /*portType*/, metadata, null /*wsdlAddress*/, referenceParameters);
-      } else {
-          return new WSEndpointReference(
-                  AddressingVersion.MEMBER,
-                    address, serviceName, portName, portType, metadata, wsdlAddress, referenceParameters);
-      }
-  }
+	}
 
     public @NotNull QName getPortName() {
 		return portName;
