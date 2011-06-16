@@ -64,9 +64,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *{@link WSHTTPConnection} implemented for {@link HttpServlet}.
@@ -116,6 +118,19 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         return requestHeaders;
     }
 
+    @Override
+    public Set<String> getRequestHeaderNames() {
+    	return getRequestHeaders().keySet();
+    }
+
+    @Override
+    public List<String> getRequestHeaderValues(@NotNull String headerName) {
+    	if (requestHeaders != null) {
+    		return requestHeaders.get(headerName);
+    	}
+    	return null;
+    }
+
     /**
      * sets response headers.
      */
@@ -133,6 +148,20 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         }
     }
 
+    @Override
+    public void setResponseHeader(String key, String value) {
+    	setResponseHeader(key, Collections.singletonList(value));
+    }
+    
+    @Override
+    public void setResponseHeader(String key, List<String> value) {
+        if (responseHeaders == null) {
+            responseHeaders = new Headers();
+        }
+    	
+        responseHeaders.put(key, value);
+    }
+    
     @Override
     @Property({MessageContext.HTTP_RESPONSE_HEADERS, Packet.OUTBOUND_TRANSPORT_HEADERS})
     public Map<String,List<String>> getResponseHeaders() {
@@ -220,6 +249,16 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
     }
 
     @Override
+    public Principal getUserPrincipal() {
+    	return request.getUserPrincipal();
+    }
+    
+    @Override
+    public boolean isUserInRole(String role) {
+    	return request.isUserInRole(role);
+    }
+    
+    @Override
     public String getRequestHeader(String headerName) {
         return request.getHeader(headerName);
     }
@@ -236,6 +275,31 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         return request.getPathInfo();
     }
 
+    @Override
+    public @NotNull String getRequestURI() {
+    	return request.getRequestURI();
+    }
+    
+    @Override
+    public @NotNull String getRequestScheme() {
+    	return request.getScheme();
+    }
+    
+    @Override
+    public @NotNull String getServerName() {
+    	return request.getServerName();
+    }
+    
+    @Override
+    public @NotNull int getServerPort() {
+    	return request.getServerPort();
+    }
+    
+    @Override
+    public @NotNull String getContextPath() {
+    	return request.getContextPath();
+    }
+    
     public @NotNull String getBaseAddress() {
         return getBaseAddress(request);
     }
@@ -250,6 +314,11 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         buf.append(request.getContextPath());
 
         return buf.toString();
+    }
+
+    @Override
+    public Object getRequestAttribute(String key) {
+    	return request.getAttribute(key);
     }
 
     @Property(MessageContext.SERVLET_CONTEXT)

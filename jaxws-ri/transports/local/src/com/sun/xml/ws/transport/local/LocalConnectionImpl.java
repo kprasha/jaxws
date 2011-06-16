@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -179,6 +180,24 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
             return values.get(0);
     }
 
+    @Override
+	public void setResponseHeader(String key, List<String> value) {
+        if(rspHeaders==null)
+            rspHeaders = new HashMap<String,List<String>>();
+
+        rspHeaders.put(key, value);
+	}
+
+	@Override
+	public Set<String> getRequestHeaderNames() {
+        return getRequestHeaders().keySet();
+	}
+
+	@Override
+	public List<String> getRequestHeaderValues(String headerName) {
+		return getRequestHeaders().get(headerName);
+	}
+
     public void setResponseHeaders(Map<String,List<String>> headers) {
         if(headers==null)
             // be defensive
@@ -201,6 +220,26 @@ final class LocalConnectionImpl extends WSHTTPConnection implements WebServiceCo
         rspHeaders.put("Content-Type", Collections.singletonList(value));
     }
 
+	@Override
+	public String getRequestURI() {
+		return null;
+	}
+
+	@Override
+	public String getRequestScheme() {
+		return null;
+	}
+
+	@Override
+	public String getServerName() {
+		return null;
+	}
+
+	@Override
+	public int getServerPort() {
+		return -1;
+	}
+	
     @Override
     public void close() {
         if (!isClosed()) {
