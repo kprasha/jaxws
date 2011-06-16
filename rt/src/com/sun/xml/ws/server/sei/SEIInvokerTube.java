@@ -90,13 +90,14 @@ public class SEIInvokerTube extends InvokerTube {
         	JavaCallInfo call = model.getDatabinding().deserializeRequest(req);
         	if (call.getException() == null) {
 	        	try {
+	        		if (req.getMessage().isOneWay(model.getPort()) && req.transportBackChannel != null) {
+	        			req.transportBackChannel.close();
+	        		}
 	        		Object ret = getInvoker(req).invoke(req, call.getMethod(), call.getParameters());
 	        		call.setReturnValue(ret);
 				} catch (InvocationTargetException e) {
-					e.printStackTrace();
 					call.setException(e);
 				} catch (Exception e) {
-					e.printStackTrace();
 					call.setException(e);
 				}
 			} else if (call.getException() instanceof DispatchException) {
