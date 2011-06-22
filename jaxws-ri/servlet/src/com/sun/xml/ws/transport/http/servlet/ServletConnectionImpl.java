@@ -75,18 +75,18 @@ import java.util.Set;
  *
  * @author WS Development Team
  */
-final class ServletConnectionImpl extends WSHTTPConnection implements WebServiceContextDelegate {
+public class ServletConnectionImpl extends WSHTTPConnection implements WebServiceContextDelegate {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final ServletContext context;
     private int status;
     private Headers requestHeaders;
-    private final HttpAdapter adapter;
+    private final ServletAdapter adapter;
     private Headers responseHeaders;
     private HaInfo haInfo;
 
-    public ServletConnectionImpl(@NotNull HttpAdapter adapter, ServletContext context, HttpServletRequest request, HttpServletResponse response) {
+    public ServletConnectionImpl(@NotNull ServletAdapter adapter, ServletContext context, HttpServletRequest request, HttpServletResponse response) {
         this.adapter = adapter;
         this.context = context;
         this.request = request;
@@ -198,6 +198,9 @@ final class ServletConnectionImpl extends WSHTTPConnection implements WebService
         if (responseHeaders != null) {
             for (Map.Entry<String, List<String>> entry : responseHeaders.entrySet()) {
                 String name = entry.getKey();
+                if (name == null) {
+                	continue;
+                }
                 if(name.equalsIgnoreCase("Content-Type") || name.equalsIgnoreCase("Content-Length"))
                     continue;   // ignore headers that interfere with the operation
                 for (String value : entry.getValue()) {

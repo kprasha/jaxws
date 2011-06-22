@@ -76,10 +76,11 @@ import java.util.logging.Logger;
  * servlet-{@link WSEndpoint} association for {@link }
  *
  */
-public final class ServletAdapter extends HttpAdapter implements BoundEndpoint {
+public class ServletAdapter extends HttpAdapter implements BoundEndpoint {
     final String name;
 
-    protected ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, ServletAdapterList owner) {
+    @SuppressWarnings("unchecked")
+	protected ServletAdapter(String name, String urlPattern, WSEndpoint endpoint, ServletAdapterList owner) {
         super(endpoint, owner, urlPattern);
         this.name = name;
         // registers itself with the container
@@ -89,6 +90,7 @@ public final class ServletAdapter extends HttpAdapter implements BoundEndpoint {
         else {
             module.getBoundEndpoints().add(this);
         }
+        endpoint.getBoundEndpoints().add(this);
 
         boolean sticky = false;
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
@@ -158,8 +160,11 @@ public final class ServletAdapter extends HttpAdapter implements BoundEndpoint {
      * @throws IOException when there is i/o error in handling request
      */
     public void handle(ServletContext context, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        WSHTTPConnection connection = new ServletConnectionImpl(this,context,request,response);
-        super.handle(connection);
+        super.handle(createConnection(context, request, response));
+    }
+    
+    protected WSHTTPConnection createConnection(ServletContext context, HttpServletRequest request, HttpServletResponse response) {
+    	return new ServletConnectionImpl(this,context,request,response);
     }
 
     /**

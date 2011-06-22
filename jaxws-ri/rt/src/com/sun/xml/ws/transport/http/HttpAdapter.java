@@ -65,6 +65,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.resources.WsservletMessages;
 import com.sun.xml.ws.server.UnsupportedMediaException;
+import com.sun.xml.ws.transport.SupportInboundFaultFeature;
 import com.sun.xml.ws.util.ByteArrayBuffer;
 import com.sun.xml.ws.util.Pool;
 
@@ -72,6 +73,8 @@ import javax.xml.ws.Binding;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.http.HTTPBinding;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,7 +105,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * Empty if the endpoint doesn't have {@link ServiceDefinition}.
      * Read-only.
      */
-    private Map<String,SDDocument> wsdls;
+    protected Map<String,SDDocument> wsdls;
 
     /**
      * Reverse map of {@link #wsdls}. Read-only.
@@ -122,6 +125,8 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      * Servlet URL pattern with which this {@link HttpAdapter} is associated.
      */
     public final String urlPattern;
+    
+    private final boolean isSupportInboundFault;
 
     protected boolean stickyCookie;
 
@@ -154,6 +159,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         super(endpoint);
         this.owner = owner;
         this.urlPattern = urlPattern;
+        this.isSupportInboundFault = endpoint.getBinding().getFeature(SupportInboundFaultFeature.class) != null;
 
         initWSDLMap(endpoint.getServiceDefinition());
     }
@@ -323,10 +329,11 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         packet.wasTransportSecure = con.isSecure();
         packet.acceptableMimeTypes = con.getRequestHeader("Accept");
         packet.addSatellite(con);
+        packet.component = this;
         packet.transportBackChannel = new Oneway(con);
         packet.webServiceContextDelegate = con.getWebServiceContextDelegate();
 
-        if (dump) {
+        if (dump || LOGGER.isLoggable(Level.FINER)) {
             ByteArrayBuffer buf = new ByteArrayBuffer();
             buf.write(in);
             in.close();
@@ -346,7 +353,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
      */
     private String fixQuotesAroundSoapAction(String soapAction) {
         if(soapAction != null && (!soapAction.startsWith("\"") || !soapAction.endsWith("\"")) ) {
-            LOGGER.warning("Received WS-I BP non-conformant Unquoted SoapAction HTTP header: "+ soapAction);
+            LOGGER.info("Received WS-I BP non-conformant Unquoted SoapAction HTTP header: "+ soapAction);
             String fixedSoapAction = soapAction;
             if(!soapAction.startsWith("\""))
                 fixedSoapAction = "\"" + fixedSoapAction;
@@ -362,6 +369,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
         if (con.isClosed()) {
             return;                 // Connection is already closed
         }
+        con.setEndpointProcessingComplete();
         Message responseMessage = packet.getMessage();
         addStickyCookie(con);
         addReplicaCookie(con, packet);
@@ -387,11 +395,28 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                         : HttpURLConnection.HTTP_OK);
             }
 
+            // Add any response headers this packet may contain. Any existing
+            // response headers on the connection take precedence over the ones
+            // in the packet.
+            if (packet.outboundHttpHeaders != null &&
+                !packet.outboundHttpHeaders.isEmpty()) {
+
+              Map<String, List<String>> headers =
+                new HashMap<String, List<String>>();
+              headers.putAll(packet.outboundHttpHeaders);
+              Map<String, List<String>> currentHeaders =
+                con.getResponseHeaders();
+              if (currentHeaders != null) {
+                headers.putAll(currentHeaders);
+              }
+              con.setResponseHeaders(headers);
+            }
+
             ContentType contentType = codec.getStaticContentType(packet);
             if (contentType != null) {
                 con.setContentTypeResponseHeader(contentType.getContentType());
                 OutputStream os = con.getProtocol().contains("1.1") ? con.getOutput() : new Http10OutputStream(con);
-                if (dump) {
+                if (dump || LOGGER.isLoggable(Level.FINER)) {
                     ByteArrayBuffer buf = new ByteArrayBuffer();
                     codec.encode(packet, buf);
                     dump(buf, "HTTP response " + con.getStatus(), con.getResponseHeaders());
@@ -405,7 +430,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                 ByteArrayBuffer buf = new ByteArrayBuffer();
                 contentType = codec.encode(packet, buf);
                 con.setContentTypeResponseHeader(contentType.getContentType());
-                if (dump) {
+                if (dump || LOGGER.isLoggable(Level.FINER)) {
                     dump(buf, "HTTP response " + con.getStatus(), con.getResponseHeaders());
                 }
                 OutputStream os = con.getOutput();
@@ -572,10 +597,19 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                     con.setStatus(WSHTTPConnection.ONEWAY);
                 }
 
+                OutputStream output = null;
                 try {
-                    con.getOutput().close(); // no payload
+                    output = con.getOutput();
                 } catch (IOException e) {
-                    throw new WebServiceException(e);
+                    // no-op
+                }
+                
+                if (output != null) {
+                	try {
+                		output.close(); // no payload
+                	} catch (IOException e) {
+                		throw new WebServiceException(e);
+                	}
                 }
                 con.close();
             }
@@ -585,11 +619,9 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     final class HttpToolkit extends Adapter.Toolkit {
         public void handle(WSHTTPConnection con) throws IOException {
             try {
-                boolean invoke = false;
                 Packet packet;
                 try {
                     packet = decodePacket(con, codec);
-                    invoke = true;
                 } catch(Exception e) {
                     packet = new Packet();
                     if (e instanceof ExceptionHasMessage) {
@@ -603,7 +635,7 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
                         con.setStatus(HttpURLConnection.HTTP_INTERNAL_ERROR);
                     }
                 }
-                if (invoke) {
+                if (packet.getMessage() != null && (isSupportInboundFault || !packet.getMessage().isFault())) {
                     try {
                         packet = head.process(packet, con.getWebServiceContextDelegate(),
                                 packet.transportBackChannel);
@@ -662,19 +694,28 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
 
         OutputStream os = con.getProtocol().contains("1.1") ? con.getOutput() : new Http10OutputStream(con);
 
-        final PortAddressResolver portAddressResolver = owner.createPortAddressResolver(con.getBaseAddress());
+        PortAddressResolver portAddressResolver = getPortAddressResolver(con.getBaseAddress());
+        DocumentAddressResolver resolver = getDocumentAddressResolver(portAddressResolver);
+
+        doc.writeTo(portAddressResolver, resolver, os);
+        os.close();
+    }
+
+    public PortAddressResolver getPortAddressResolver(String baseAddress) {
+        return owner.createPortAddressResolver(baseAddress);
+    }
+    
+    public DocumentAddressResolver getDocumentAddressResolver(
+			PortAddressResolver portAddressResolver) {
         final String address = portAddressResolver.getAddressFor(endpoint.getServiceName(), endpoint.getPortName().getLocalPart());
         assert address != null;
-        DocumentAddressResolver resolver = new DocumentAddressResolver() {
+        return new DocumentAddressResolver() {
             public String getRelativeAddressFor(@NotNull SDDocument current, @NotNull SDDocument referenced) {
                 // the map on endpoint should account for all SDDocument
                 assert revWsdls.containsKey(referenced);
                 return address+'?'+ revWsdls.get(referenced);
             }
         };
-
-        doc.writeTo(portAddressResolver, resolver, os);
-        os.close();
     }
 
     /**
@@ -727,22 +768,32 @@ public class HttpAdapter extends Adapter<HttpAdapter.HttpToolkit> {
     }
 
     private void dump(ByteArrayBuffer buf, String caption, Map<String, List<String>> headers) throws IOException {
-        System.out.println("---["+caption +"]---");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintWriter pw = new PrintWriter(baos, true);
+        pw.println("---["+caption +"]---");
         if (headers != null) {
             for (Entry<String, List<String>> header : headers.entrySet()) {
                 if (header.getValue().isEmpty()) {
                     // I don't think this is legal, but let's just dump it,
                     // as the point of the dump is to uncover problems.
-                    System.out.println(header.getValue());
+                    pw.println(header.getValue());
                 } else {
                     for (String value : header.getValue()) {
-                        System.out.println(header.getKey() + ": " + value);
+                        pw.println(header.getKey() + ": " + value);
                     }
                 }
             }
         }
-        buf.writeTo(System.out);
-        System.out.println("--------------------");
+        buf.writeTo(baos);
+        pw.println("--------------------");
+
+        String msg = baos.toString();
+        if (dump) {
+          System.out.println(msg);
+        }
+        if (LOGGER.isLoggable(Level.FINER)) {
+          LOGGER.log(Level.FINER, msg);
+        }
     }
 
     /*

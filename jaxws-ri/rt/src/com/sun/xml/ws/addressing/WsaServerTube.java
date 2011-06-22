@@ -96,7 +96,7 @@ public class WsaServerTube extends WsaTube {
     // can be useful in cases where special back-channel handling is required.
     protected boolean isEarlyBackchannelCloseAllowed = true;
     protected boolean isSendNonAnonymousResponse = true;
-    public final static String SERVER_ENDPOINT_ASYNC_RESPONSE="weblogic.wsee.endpoint.serverresponse";
+    public final static String SERVER_ENDPOINT_ASYNC_RESPONSE="com.sun.xml.ws.addressing.endpoint.serverresponse";
     
     /**
      * WSDLBoundOperation calculated on the Request payload.
@@ -220,7 +220,7 @@ public class WsaServerTube extends WsaTube {
     public @NotNull NextAction processResponse(Packet response) {
         Message msg = response.getMessage();
         if (msg ==null)
-            return doReturnWith(response);  // one way message. Nothing to see here. Move on.
+            return doFinalProcessing(null, response);  // one way message. Nothing to see here. Move on.
 
         if (replyTo == null) {
             // This is an async response or we're not processing the response in
@@ -250,22 +250,31 @@ public class WsaServerTube extends WsaTube {
 
         if(target.isAnonymous() || isAnonymousRequired )
             // the response will go back the back channel. most common case
-            return doReturnWith(response);
+            return doFinalProcessing(target, response);
 
         if(target.isNone()) {
             // the caller doesn't want to hear about it, so proceed like one-way
             response.setMessage(null);
-            return doReturnWith(response);
+            return doFinalProcessing(target, response);
         }
 
         // send the response to this EPR. This *can* generate a response, and
         // if so, we leave it to Fiber.CompletionCallback to deliver it to
         // whoever started this fiber. The 'new' fiber is linked into the old
         // Fiber's completion callback.
-        return processNonAnonymousReply(response, target);
+        processNonAnonymousReply(response, target);
+
+        // then we'll proceed the rest like one-way.
+        response = response.copy(false);
+        return doFinalProcessing(target, response);
     }
 
-  /**
+    protected NextAction doFinalProcessing(WSEndpointReference target,
+            Packet response) {
+    	return doReturnWith(response);
+    }
+    
+    /**
      * Send a response to a non-anonymous address. Also closes the transport back channel
      * of {@link Packet} if it's not closed already.
      *
@@ -277,7 +286,7 @@ public class WsaServerTube extends WsaTube {
      * @param target
      *      Where do we send the packet to?
      */
-    private NextAction processNonAnonymousReply(Packet packet, WSEndpointReference target) {
+    private void processNonAnonymousReply(Packet packet, WSEndpointReference target) {
         // at this point we know we won't be sending anything back through the back channel,
         // so close it first to let the client go.
         if (packet.transportBackChannel != null)
@@ -286,7 +295,7 @@ public class WsaServerTube extends WsaTube {
         if ((wsdlPort!=null) && packet.getMessage().isOneWay(wsdlPort)) {
             // one way message but with replyTo. I believe this is a hack for WS-TX - KK.
             LOGGER.fine(AddressingMessages.NON_ANONYMOUS_RESPONSE_ONEWAY());
-            return doReturnWith(packet);
+            return;
         }
 
         EndpointAddress adrs;
@@ -350,8 +359,6 @@ public class WsaServerTube extends WsaTube {
 	        // then we'll proceed the rest like one-way.
 	        packet = packet.copy(false);
         }
-        
-        return doReturnWith(packet);
     }
 
     @Override
