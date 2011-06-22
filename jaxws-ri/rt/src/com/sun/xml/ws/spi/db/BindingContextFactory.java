@@ -65,8 +65,8 @@ abstract public class BindingContextFactory {
         for (BindingContextFactory bcf : ServiceFinder.find(BindingContextFactory.class)) {
             factories.add(bcf);
         }
+		factories.add(new com.sun.xml.ws.db.glassfish.JAXBRIContextFactory());
         return factories;
-//		factoryImpls.put(GlassfishJAXB,   "com.sun.xml.ws.db.glassfish.JAXBRIContextFactory");
 //		factoryImpls.put(EclipseLinkJAXB, "com.sun.xml.ws.db.toplink.JAXBContextFactory");
 	}
 	
