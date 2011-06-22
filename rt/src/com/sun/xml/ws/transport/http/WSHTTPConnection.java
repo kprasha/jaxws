@@ -344,6 +344,7 @@ public abstract class WSHTTPConnection extends PropertySet {
     }
 
     private volatile boolean closed;
+    private boolean endpointProcessingComplete;
 
     /**
      * Close the connection
@@ -357,6 +358,14 @@ public abstract class WSHTTPConnection extends PropertySet {
      */
     public boolean isClosed() {
         return closed;
+    }
+
+    public void setEndpointProcessingComplete() {
+    	endpointProcessingComplete = true;
+    }
+    
+    public boolean isEndpointProcessingComplete() {
+    	return endpointProcessingComplete;
     }
 
     /**

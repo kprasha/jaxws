@@ -109,6 +109,16 @@ public abstract class TransportTubeFactory {
      */
     public abstract Tube doCreate(@NotNull ClientTubeAssemblerContext context);
 
+    private static final TransportTubeFactory DEFAULT = new DefaultTransportTubeFactory();
+    private static class DefaultTransportTubeFactory extends TransportTubeFactory {
+
+		@Override
+		public Tube doCreate(ClientTubeAssemblerContext context) {
+			return createDefault(context);
+		}
+    	
+    }
+    
     /**
      * Locates {@link TransportTubeFactory}s and create a suitable transport {@link Tube}.
      *
@@ -138,11 +148,15 @@ public abstract class TransportTubeFactory {
             }
         }
 
+        return DEFAULT.createDefault(ctxt);
+    }
+    
+    protected Tube createDefault(ClientTubeAssemblerContext context) {
         // default built-in transports
         String scheme = context.getAddress().getURI().getScheme();
         if (scheme != null) {
             if(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
-                return new HttpTransportPipe(context.getCodec(), context.getBinding());
+                return createHttpTransport(context);
         }
         TransportTubeFactory f = context.getContainer().getSPI(TransportTubeFactory.class);
         if (f != null) {
@@ -150,6 +164,10 @@ public abstract class TransportTubeFactory {
             if(tube != null) return tube;
         }
         throw new WebServiceException("Unsupported endpoint address: "+context.getAddress());    // TODO: i18n
+    }
+    
+    protected Tube createHttpTransport(ClientTubeAssemblerContext context) {
+        return new HttpTransportPipe(context.getCodec(), context.getBinding());
     }
 
     private static final Logger logger = Logger.getLogger(TransportTubeFactory.class.getName());
