@@ -136,7 +136,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     }
 
     public NextAction processException(@NotNull Throwable t) {
-        throw new IllegalStateException("HttpTransportPipe's processException shouldn't be called.");
+        return doThrow(t);
     }
 
     public NextAction processRequest(@NotNull Packet request) {
@@ -144,7 +144,7 @@ public class HttpTransportPipe extends AbstractTubeImpl {
     }
 
     public NextAction processResponse(@NotNull Packet response) {
-        throw new IllegalStateException("HttpTransportPipe's processResponse shouldn't be called.");
+        return doReturnWith(response);
     }
 
     protected HttpClientTransport getTransport(Packet request, Map<String, List<String>> reqHeaders) {
