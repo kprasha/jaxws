@@ -70,6 +70,7 @@ import com.sun.xml.ws.util.Pool;
 import com.sun.xml.ws.util.Pool.TubePool;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.wsdl.OperationDispatcher;
+import com.sun.xml.ws.wsdl.DispatchException;
 import org.glassfish.gmbal.ManagedObjectManager;
 import org.glassfish.gmbal.ManagedObjectManagerFactory;
 import org.w3c.dom.Element;
@@ -412,12 +413,16 @@ public class WSEndpointImpl<T> extends WSEndpoint<T> {
 	            			new InputSource(seiModel.getWSDLLocation()));
 		        	}
 				}
-		        //put the operation name for each invocation.
-                String localPart = port == null ? null : request.getMessage().getPayloadLocalPart();
-                if (localPart != null) {
-                    request.invocationProperties.put(javax.xml.ws.handler.MessageContext.WSDL_OPERATION,
-                            new QName(request.getMessage().getPayloadNamespaceURI(), localPart));
-                }
+                //todo, should we put the logic for storing operation  name into message context into some other places.
+                if(operationDispatcher!=null)
+                  try {
+                    QName operationName = operationDispatcher.getWSDLOperationQName(request);
+                    if(operationName != null)
+                       request.invocationProperties.put(javax.xml.ws.handler.MessageContext.WSDL_OPERATION,
+                            operationName);
+                  } catch (DispatchException e) {
+                    //Ignore, this might be a protocol message which may not have a wsdl operation
+                  }
 
 				Fiber fiber = engine.createFiber();
 				Packet response;
