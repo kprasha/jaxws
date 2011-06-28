@@ -290,17 +290,20 @@ public class RuntimeWSDLParser {
         this.extensions = new ArrayList<WSDLParserExtension>();
         this.context = new WSDLParserExtensionContextImpl(wsdlDoc, isClientSide, container, policyResolver);
 
+        boolean isPolicyExtensionFound = false;
+        for (WSDLParserExtension e : extensions) {
+        	if (e instanceof com.sun.xml.ws.api.wsdl.parser.PolicyWSDLParserExtension)
+        		isPolicyExtensionFound = true;
+            register(e);
+        }
+
         // register handlers for default extensions
-        
-        // MERGE FIXME: Find a better way to diable
-        //register(new PolicyWSDLParserExtension());
+        if (!isPolicyExtensionFound)
+        	register(new PolicyWSDLParserExtension());
         
         register(new MemberSubmissionAddressingWSDLParserExtension());
         register(new W3CAddressingWSDLParserExtension());
         register(new W3CAddressingMetadataWSDLParserExtension());
-        for (WSDLParserExtension e : extensions)
-            register(e);
-
         this.extensionFacade =  new WSDLParserExtensionFacade(this.extensions.toArray(new WSDLParserExtension[0]));
     }
 
