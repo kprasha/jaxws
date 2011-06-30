@@ -139,7 +139,9 @@ public final class DeferredTransportPipe extends AbstractTubeImpl {
     }
 
     public NextAction processResponse(@NotNull Packet response) {
-        return transport.processResponse(response);
+        if (transport != null)
+            return transport.processResponse(response);
+        return doReturnWith(response);
     }
 
     public void preDestroy() {
