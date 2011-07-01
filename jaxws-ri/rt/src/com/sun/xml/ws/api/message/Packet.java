@@ -43,6 +43,7 @@ package com.sun.xml.ws.api.message;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.bind.marshaller.SAX2DOMEx;
+import com.sun.xml.ws.message.saaj.SAAJMessage;
 import com.sun.xml.ws.addressing.WsaTubeHelper;
 import com.sun.xml.ws.addressing.model.InvalidAddressingHeaderException;
 import com.sun.xml.ws.api.Component;
@@ -79,6 +80,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import javax.activation.DataHandler;
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.BindingProvider;
@@ -202,7 +205,7 @@ public final class Packet extends DistributedPropertySet {
      * Used by {@link #createResponse(Message)} and {@link #copy(boolean)}.
      */
     private Packet(Packet that) {
-        that.copySatelliteInto(this);
+        that.copySatelliteInto((DistributedPropertySet)this);
         this.handlerConfig = that.handlerConfig;
         this.invocationProperties = that.invocationProperties;
         this.endpoint = that.endpoint;
@@ -281,7 +284,7 @@ public final class Packet extends DistributedPropertySet {
      * @return null if there is no WSDL model or  
      *              runtime cannot uniquely identify the wsdl operation from the information in the packet.
      */
-    @Property(MessageContext.WSDL_OPERATION)
+    @com.sun.xml.ws.api.PropertySet.Property(MessageContext.WSDL_OPERATION)
     public final @Nullable QName getWSDLOperation(){
         if(wsdlOperation != null)
             return wsdlOperation;
@@ -356,7 +359,7 @@ public final class Packet extends DistributedPropertySet {
      * at the time of invocation.
      * This property is used by MUPipe and HandlerPipe implementations.
      */
-    @Property(BindingProviderProperties.JAXWS_HANDLER_CONFIG)
+    @com.sun.xml.ws.api.PropertySet.Property(BindingProviderProperties.JAXWS_HANDLER_CONFIG)
     public HandlerConfiguration handlerConfig;
 
     /**
@@ -365,7 +368,7 @@ public final class Packet extends DistributedPropertySet {
      *
      * TODO: who's using this property?
      */
-    @Property(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
+    @com.sun.xml.ws.api.PropertySet.Property(BindingProviderProperties.JAXWS_CLIENT_HANDLE_PROPERTY)
     public BindingProvider proxy;
 
     /**
@@ -387,7 +390,7 @@ public final class Packet extends DistributedPropertySet {
      *      {@link #endpointAddress}. This is for JAX-WS client applications
      *      that access this property via {@link BindingProvider#ENDPOINT_ADDRESS_PROPERTY}.
      */
-    @Property(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
+    @com.sun.xml.ws.api.PropertySet.Property(BindingProvider.ENDPOINT_ADDRESS_PROPERTY)
     public String getEndPointAddressString() {
         if(endpointAddress==null)
             return null;
@@ -410,7 +413,7 @@ public final class Packet extends DistributedPropertySet {
      */
     public ContentNegotiation contentNegotiation;
 
-    @Property(ContentNegotiation.PROPERTY)
+    @com.sun.xml.ws.api.PropertySet.Property(ContentNegotiation.PROPERTY)
     public String getContentNegotiationString() {
         return (contentNegotiation != null) ? contentNegotiation.toString() : null;
     }
@@ -429,7 +432,7 @@ public final class Packet extends DistributedPropertySet {
     }
 
     @NotNull
-    @Property(JAXWSProperties.PERSISTENT_CONTEXT)
+    @com.sun.xml.ws.api.PropertySet.Property(JAXWSProperties.PERSISTENT_CONTEXT)
     public Map<String, Serializable> persistentContext;
 
     /**
@@ -438,7 +441,7 @@ public final class Packet extends DistributedPropertySet {
      * changes to it are ignored.
      */
     @Nullable
-    @Property(JAXWSProperties.INBOUND_HTTP_HEADERS)
+    @com.sun.xml.ws.api.PropertySet.Property(JAXWSProperties.INBOUND_HTTP_HEADERS)
     public Map<String,List<String>> getInboundHttpHeaders() {
     	WSHTTPConnection con = getSatellite(WSHTTPConnection.class);
     	if (con != null)
@@ -455,7 +458,7 @@ public final class Packet extends DistributedPropertySet {
      * protocol.
      */
     @Nullable
-    @Property(JAXWSProperties.OUTBOUND_HTTP_HEADERS)
+    @com.sun.xml.ws.api.PropertySet.Property(JAXWSProperties.OUTBOUND_HTTP_HEADERS)
     public Map<String,List<String>> outboundHttpHeaders;
 
     /**
@@ -465,7 +468,7 @@ public final class Packet extends DistributedPropertySet {
      * This is not cached as one may reset the Message.
      *<p>
      */
-    @Property(MessageContext.REFERENCE_PARAMETERS)
+    @com.sun.xml.ws.api.PropertySet.Property(MessageContext.REFERENCE_PARAMETERS)
     public @NotNull List<Element> getReferenceParameters() {
         List<Element> refParams =  new ArrayList<Element>();
         HeaderList hl = message.getHeaders();
@@ -500,7 +503,7 @@ public final class Packet extends DistributedPropertySet {
      *      This method is for exposing header list through {@link PropertySet#get(Object)},
      *      for user applications, and should never be invoked directly from within the JAX-WS RI.
      */
-    @Property(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY)
+    @com.sun.xml.ws.api.PropertySet.Property(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY)
     /*package*/ HeaderList getHeaderList() {
         if(message==null)   return null;
         return message.getHeaders();
@@ -574,7 +577,7 @@ public final class Packet extends DistributedPropertySet {
      * <p>
      * This property is set if and only if this is on the server side.
      */
-    @Property(JAXWSProperties.WSENDPOINT)
+    @com.sun.xml.ws.api.PropertySet.Property(JAXWSProperties.WSENDPOINT)
     public WSEndpoint endpoint;
 
     /**
@@ -601,7 +604,7 @@ public final class Packet extends DistributedPropertySet {
      * header is present (See {@BP R2744} and {@BP R2745}.) For SOAP 1.2,
      * this is moved to the parameter of the "application/soap+xml".
      */
-    @Property(BindingProvider.SOAPACTION_URI_PROPERTY)
+    @com.sun.xml.ws.api.PropertySet.Property(BindingProvider.SOAPACTION_URI_PROPERTY)
     public String soapAction;
 
     /**
@@ -662,7 +665,7 @@ public final class Packet extends DistributedPropertySet {
      * In all other situations, this property is null.
      *
      */
-    @Property(BindingProviderProperties.ONE_WAY_OPERATION)
+    @com.sun.xml.ws.api.PropertySet.Property(BindingProviderProperties.ONE_WAY_OPERATION)
     public Boolean expectReply;
 
 
@@ -843,7 +846,7 @@ public final class Packet extends DistributedPropertySet {
 
     
    public Packet relateServerResponse(@Nullable Packet r, @Nullable WSDLPort wsdlPort, @Nullable SEIModel seiModel, @NotNull WSBinding binding) {
-       copySatelliteInto(r);
+       copySatelliteInto((DistributedPropertySet)r);
        r.soapAction = null;
        r.handlerConfig = this.handlerConfig;
        r.invocationProperties.putAll(this.invocationProperties);
@@ -1042,4 +1045,16 @@ public final class Packet extends DistributedPropertySet {
     }
 
     private static final Logger LOGGER = Logger.getLogger(Packet.class.getName());
+
+    public SOAPMessage getSOAPMessage() throws SOAPException {
+        return (message != null) ? message.readAsSOAPMessage() : null;
+    }
+
+    public void setSOAPMessage(SOAPMessage soap) {
+        if (soap != null) {
+            message = new SAAJMessage(soap);
+        } else {
+            message = null;
+        }
+    }
 }

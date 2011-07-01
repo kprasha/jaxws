@@ -46,12 +46,13 @@ import com.sun.xml.ws.api.databinding.MetadataReader;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.model.soap.SOAPBindingImpl;
-import com.sun.xml.ws.model.wsdl.WSDLBoundOperationImpl;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.model.soap.SOAPBinding;
+import com.sun.xml.ws.model.soap.SOAPBindingImpl;
 import com.sun.xml.ws.spi.db.TypeInfo;
+import com.sun.xml.ws.wsdl.ActionBasedOperationSignature;
 import com.sun.istack.Nullable;
 
 import javax.xml.namespace.QName;
@@ -79,10 +80,10 @@ public final class JavaMethodImpl implements JavaMethod {
     /*package*/ final List<ParameterImpl> responseParams = new ArrayList<ParameterImpl>();
     private final List<ParameterImpl> unmReqParams = Collections.unmodifiableList(requestParams);
     private final List<ParameterImpl> unmResParams = Collections.unmodifiableList(responseParams);
-    private SOAPBindingImpl binding;
+    private SOAPBinding binding;
     private MEP mep;
     private QName operationName;
-    private WSDLBoundOperationImpl wsdlOperation;
+    private WSDLBoundOperation wsdlOperation;
     /*package*/ final AbstractSEIModelImpl owner;
     private final Method seiMethod;
     private QName requestPayloadName;
@@ -123,6 +124,12 @@ public final class JavaMethodImpl implements JavaMethod {
                 throw new WebServiceException("@Action and @WebMethod(action=\"\" does not match on operation "+ method.getName());
             }
         }
+    }
+    
+    public ActionBasedOperationSignature getOperationSignature() {
+        QName qname = getRequestPayloadName();
+        if (qname == null) qname = new QName("", "");
+        return new ActionBasedOperationSignature(getInputAction(), qname);
     }
 
     public SEIModel getOwner() {
@@ -165,7 +172,7 @@ public final class JavaMethodImpl implements JavaMethod {
     /**
      * @return the Binding object
      */
-    public SOAPBindingImpl getBinding() {
+    public SOAPBinding getBinding() {
         if (binding == null)
             return new SOAPBindingImpl();
         return binding;
@@ -174,14 +181,14 @@ public final class JavaMethodImpl implements JavaMethod {
     /**
      * @param binding
      */
-    void setBinding(SOAPBindingImpl binding) {
+    void setBinding(SOAPBinding binding) {
         this.binding = binding;
     }
 
     /**
      * Returns the {@link WSDLBoundOperation} Operation associated with {@link this}
      * operation.
-     *
+     * @deprecated
      * @return the WSDLBoundOperation for this JavaMethod
      */
     public WSDLBoundOperation getOperation() {
@@ -333,13 +340,13 @@ public final class JavaMethodImpl implements JavaMethod {
     }
 
     public String getInputAction() {
-        return (wsdlOperation != null)? wsdlOperation.getOperation().getInput().getAction(): inputAction;    
-//        return inputAction;
+//        return (wsdlOperation != null)? wsdlOperation.getOperation().getInput().getAction(): inputAction; 
+        return inputAction;
     }
 
     public String getOutputAction() {
-        return (wsdlOperation != null)? wsdlOperation.getOperation().getOutput().getAction(): outputAction;   
-//        return outputAction;
+//        return (wsdlOperation != null)? wsdlOperation.getOperation().getOutput().getAction(): outputAction; 
+        return outputAction;
     }
 
     /**
@@ -368,7 +375,7 @@ public final class JavaMethodImpl implements JavaMethod {
         return mep.isAsync;
     }
 
-    /*package*/ void freeze(WSDLPortImpl portType) {
+    /*package*/ void freeze(WSDLPort portType) {
         this.wsdlOperation = portType.getBinding().get(new QName(portType.getBinding().getPortType().getName().getNamespaceURI(),getOperationName()));
         // TODO: replace this with proper error handling
         if(wsdlOperation ==null)
