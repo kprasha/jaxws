@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -97,7 +97,8 @@ final class ServerMgr {
                 state = servers.get(inetAddress);
                 if (state == null) {
                     logger.fine("Creating new HTTP Server at "+inetAddress);
-                    server = HttpServer.create(inetAddress, 5);
+                    // Creates server with default socket backlog
+                    server = HttpServer.create(inetAddress, 0);
                     server.setExecutor(Executors.newCachedThreadPool());
                     String path = url.toURI().getPath();
                     logger.fine("Creating HTTP Context at = "+path);

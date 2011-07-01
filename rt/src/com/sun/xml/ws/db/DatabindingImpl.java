@@ -50,6 +50,8 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
 
+import org.jvnet.ws.message.MessageContext;
+
 import com.sun.xml.ws.api.databinding.EndpointCallBridge;
 import com.sun.xml.ws.api.databinding.JavaCallInfo;
 import com.sun.xml.ws.api.databinding.WSDLGenInfo;
@@ -60,7 +62,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ContentType;
@@ -72,16 +73,16 @@ import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.server.sei.TieHandler;
 import com.sun.xml.ws.util.QNameMap;
+import com.sun.xml.ws.wsdl.ActionBasedOperationSignature;
 import com.sun.xml.ws.wsdl.DispatchException;
 import com.sun.xml.ws.wsdl.OperationDispatcher;
-import com.sun.xml.ws.wsdl.writer.WSDLGenerator;
 
 /**
  * WsRuntimeImpl is the databinding processor built on SEIModel
  *
  * @author shih-chang.chen@oracle.com
  */
-public class DatabindingImpl implements Databinding {
+public class DatabindingImpl implements Databinding, org.jvnet.ws.databinding.Databinding {
 	
     AbstractSEIModelImpl seiModel;
 	Map<Method, StubHandler> stubHandlers;
@@ -98,17 +99,17 @@ public class DatabindingImpl implements Databinding {
 		seiModel = modeler.buildRuntimeModel();
 		WSDLPort wsdlport = config.getWsdlPort();
 		clientConfig = isClientConfig(config);
-		if (wsdlport != null && clientConfig ) initStubHandlers();
+		if ( clientConfig ) initStubHandlers();
 		seiModel.setDatabinding(this);
 		if (wsdlport != null) freeze(wsdlport);
 		if (operationDispatcher == null) operationDispatcherNoWsdl = new OperationDispatcher(null, seiModel.getWSBinding(), seiModel);
-        if(!clientConfig) {
-    		for(JavaMethodImpl jm: seiModel.getJavaMethods()) {
-                TieHandler th = new TieHandler(jm, seiModel.getWSBinding());
-                wsdlOpMap.put(jm.getOperationQName(), th);
-                tieHandlers.put(th.getMethod(), th);
-            }
+//    if(!clientConfig) {
+		for(JavaMethodImpl jm: seiModel.getJavaMethods()) if (!jm.isAsync()) {
+            TieHandler th = new TieHandler(jm, seiModel.getWSBinding());
+            wsdlOpMap.put(jm.getOperationQName(), th);
+            tieHandlers.put(th.getMethod(), th);
         }
+//    }
 	}
 	
 	//TODO isClientConfig
@@ -130,18 +131,18 @@ public class DatabindingImpl implements Databinding {
 //Refactored from SEIStub
     private void initStubHandlers() {
 		stubHandlers = new HashMap<Method, StubHandler>();
-        Map<WSDLBoundOperation, JavaMethodImpl> syncs = new HashMap<WSDLBoundOperation, JavaMethodImpl>();
+        Map<ActionBasedOperationSignature, JavaMethodImpl> syncs = new HashMap<ActionBasedOperationSignature, JavaMethodImpl>();
         // fill in methodHandlers.
         // first fill in sychronized versions
         for (JavaMethodImpl m : seiModel.getJavaMethods()) {
             if (!m.getMEP().isAsync) {
             	StubHandler handler = new StubHandler(m);
-                syncs.put(m.getOperation(), m);
+                syncs.put(m.getOperationSignature(), m);
                 stubHandlers.put(m.getMethod(), handler);
             }
         }
         for (JavaMethodImpl jm : seiModel.getJavaMethods()) {
-            JavaMethodImpl sync = syncs.get(jm.getOperation());
+            JavaMethodImpl sync = syncs.get(jm.getOperationSignature());
             if (jm.getMEP() == MEP.ASYNC_CALLBACK || jm.getMEP() == MEP.ASYNC_POLL) {
                 Method m = jm.getMethod();
                 StubAsyncHandler handler = new StubAsyncHandler(jm, sync);
@@ -213,7 +214,7 @@ public class DatabindingImpl implements Databinding {
 	
 	
 	public void generateWSDL(WSDLGenInfo info) {        
-        WSDLGenerator wsdlGen = new WSDLGenerator(
+	    com.sun.xml.ws.wsdl.writer.WSDLGenerator wsdlGen = new com.sun.xml.ws.wsdl.writer.WSDLGenerator(
 		    seiModel, 
 		    info.getWsdlResolver(), 
 		    seiModel.getWSBinding(), 
@@ -240,5 +241,26 @@ public class DatabindingImpl implements Databinding {
 
 	public void decode( InputStream in, String ct, Packet p ) throws IOException{
     	getCodec().decode(in, ct, p);    	
+    }
+
+    public org.jvnet.ws.databinding.JavaCallInfo createJavaCallInfo(Method method, Object[] args) {
+        return new JavaCallInfo(method, args);
+    }
+
+    public MessageContext serializeRequest(org.jvnet.ws.databinding.JavaCallInfo call) {
+        return serializeRequest((JavaCallInfo)call);
+    }
+
+    public org.jvnet.ws.databinding.JavaCallInfo deserializeResponse(
+            MessageContext message, org.jvnet.ws.databinding.JavaCallInfo call) {
+        return deserializeResponse((Packet)message, (JavaCallInfo)call);
+    }
+
+    public org.jvnet.ws.databinding.JavaCallInfo deserializeRequest(MessageContext message) {
+        return deserializeRequest((Packet)message);
+    }
+
+    public MessageContext serializeResponse(org.jvnet.ws.databinding.JavaCallInfo call) {
+        return serializeResponse((JavaCallInfo)call);
     }
 }
