@@ -473,7 +473,7 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
     protected boolean shouldProcessMethod(MethodDeclaration method, WebMethod webMethod) {
         builder.log("should process method: "+method.getSimpleName()+" hasWebMethods: "+ hasWebMethods+" ");
         
-        // MERGE RESOLVED -- include fix, which is to commnet out lines.
+        // MERGE RESOLVED -- include fix, which is to comment out lines.
         //Fix for https://jax-ws.dev.java.net/issues/show_bug.cgi?id=577
         //if (hasWebMethods && webMethod == null) {
         //    builder.log("webMethod == null");
