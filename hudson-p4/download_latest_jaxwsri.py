@@ -56,7 +56,21 @@ localLibDir = "/tmp/libDir/"
 
 _mkdir(localLibDir)
 
-fnames = ["jsr181-api.jar", "common.sdo.jar"]
+# small list fnames = ["jsr181-api.jar", "common.sdo.jar"]
+fnames = ["jsr181-api.jar", "common.sdo.jar",
+"activation.jar",  "jaxb-impl.src.zip", "management-api.jar", 
+"common.sdo.jar",  "jaxb-xjc.jar",  "mimepull.jar", 
+"eclipselink.jar",  "jaxb-xjc.src.zip ", "policy.jar", 
+"FastInfoset.jar",  "jaxws-api.jar",  "resolver.jar", 
+"gmbal-api-only.jar",  "jaxws-eclipselink-plugin.jar",  "saaj-api.jar", 
+"ha-api.jar",  "jaxws-rt.jar",  "saaj-impl.jar", 
+"http.jar",  "jaxws-tools.jar",  "stax-ex.jar", 
+"javax.mail_1.4.jar", "jsr173_api.jar", "streambuffer.jar", 
+"jaxb-api.jar",  "jsr181-api.jar",  "woodstox.jar", 
+"jaxb-impl.jar",  "jsr250-api.jar", 
+"jaxws-rt.src.zip", 
+"jaxws-tools.src.zip", 
+"jaxws-libs.src.zip"]
 
 for fname in fnames:
 
