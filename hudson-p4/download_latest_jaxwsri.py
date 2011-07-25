@@ -32,10 +32,10 @@ def _mkdir(newdir):
             os.mkdir(newdir)
 
 #todo unique or temp file name needed
-HUDSON_XML_LOCAL_FILE = "/tmp/urlretrieve.xml"
+HUDSON_XML_LOCAL_FILE = "${WORKSPACE}/urlretrieve.xml"
 urllib.urlretrieve("http://hudson-sca.us.oracle.com/view/JAX-WS/view/WLS/job/jaxws-ri-wls/api/xml", HUDSON_XML_LOCAL_FILE)
 
-WORK_DIR="/tmp/jaxwstop4"
+WORK_DIR="${WORKSPACE}/jaxwstop4"
 _mkdir(WORK_DIR);
 P4_EXE_FILE= WORK_DIR + "/p4"
 urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
@@ -52,7 +52,7 @@ libUrl =  "%sartifact/jaxws-ri/dist/jaxws-ri/lib/" %  getText(urlToBuild.childNo
 
 print "libUrl is %s" % libUrl
 
-localLibDir = "/tmp/libDir/"
+localLibDir = "${WORKSPACE}/libDir/"
 
 _mkdir(localLibDir)
 
