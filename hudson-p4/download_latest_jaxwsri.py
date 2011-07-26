@@ -82,6 +82,9 @@ fnames = ["jsr181-api.jar", "common.sdo.jar",
 "jaxws-tools.src.zip", 
 "jaxws-libs.src.zip"]
 
+# todo delete me
+fnames = ["jsr181-api.jar", "common.sdo.jar"]
+
 
 for fname in fnames:
 
