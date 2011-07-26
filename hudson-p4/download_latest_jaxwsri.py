@@ -36,10 +36,14 @@ WORKSPACE = os.environ['WORKSPACE']
 HUDSON_XML_LOCAL_FILE = WORKSPACE + "/urlretrieve.xml"
 urllib.urlretrieve("http://hudson-sca.us.oracle.com/view/JAX-WS/view/WLS/job/jaxws-ri-wls/api/xml", HUDSON_XML_LOCAL_FILE)
 
+print "Got xml api file"
 WORK_DIR= WORKSPACE + "/jaxwstop4"
 _mkdir(WORK_DIR);
 P4_EXE_FILE= WORK_DIR + "/p4"
-urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
+# todo home.us.oracle.com is down so disable this for now
+# urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
+
+print "got p4 exe"
 
 os.chmod(P4_EXE_FILE, 0777)
 
