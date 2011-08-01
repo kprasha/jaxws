@@ -89,9 +89,11 @@ fnames = ["jsr181-api.jar", "common.sdo.jar",
 for fname in fnames:
     fullUrl  = libUrl + fname
     print "fullUrl  is " + fullUrl
-#	urllib.urlretrieve(libUrl + fname, localLibDir + fname)
+	urllib.urlretrieve(fullUrl, localLibDir + fname)
+	# next line will fail on 404 error
     resp = urllib2.urlopen(fullUrl)
-    print " response code is %i" % resp.code
+    urllib.urlretrieve(fullUrl, localLibDir + fname)
+    
 # end for
 
 
