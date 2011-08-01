@@ -71,7 +71,6 @@ print "local lib dir is " + localLibDir
 fnames = ["jsr181-api.jar", "common.sdo.jar",
 "activation.jar", "management-api.jar", 
 "common.sdo.jar",  "jaxb-xjc.jar",  "mimepull.jar", 
-"jaxb-impl.src.zip",
 "eclipselink.jar",  
 "policy.jar", 
 "FastInfoset.jar",  "jaxws-api.jar",  "resolver.jar", 
