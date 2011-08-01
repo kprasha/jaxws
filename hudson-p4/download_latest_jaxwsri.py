@@ -90,7 +90,7 @@ for fname in fnames:
     fullUrl  = libUrl + fname
     print "fullUrl  is " + fullUrl
     urllib.urlretrieve(fullUrl, localLibDir + fname)
-	# next line will fail if file is not found /  404 error
+    # next line will fail if file is not found /  404 error
     resp = urllib2.urlopen(fullUrl)
     # next line downloads the file
     urllib.urlretrieve(fullUrl, localLibDir + fname)
