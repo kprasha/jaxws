@@ -86,11 +86,10 @@ fnames = ["jsr181-api.jar", "common.sdo.jar",
 
 for fname in fnames:
     fullUrl  = libUrl + fname
-    print "fullUrl  is " + fullUrl	
+    print "fullUrl  is " + fullUrl
 #	urllib.urlretrieve(libUrl + fname, localLibDir + fname)
     resp = urllib2.urlopen(fullUrl)
     print fullUrl + resp.code
-    
 # end for
 
 
