@@ -89,7 +89,7 @@ for fname in fnames:
     print "fullUrl  is " + fullUrl
 #	urllib.urlretrieve(libUrl + fname, localLibDir + fname)
     resp = urllib2.urlopen(fullUrl)
-    print fullUrl + resp.code
+    print " response code is %i" % resp.code
 # end for
 
 
