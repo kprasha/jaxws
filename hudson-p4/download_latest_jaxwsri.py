@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 import urllib
-#import xml
+#import urllib2
+import xml
 import xml.dom.minidom
 import os
 import shutil
@@ -66,11 +67,11 @@ _mkdir(localLibDir)
 print "local lib dir is " + localLibDir
 
 #fnames = ["jsr181-api.jar", "common.sdo.jar"]
-
+#  "jaxb-xjc.src.zip ", ,  "jaxb-impl.src.zip"
 fnames = ["jsr181-api.jar", "common.sdo.jar",
-"activation.jar",  "jaxb-impl.src.zip", "management-api.jar", 
+"activation.jar", "management-api.jar", 
 "common.sdo.jar",  "jaxb-xjc.jar",  "mimepull.jar", 
-"eclipselink.jar",  "jaxb-xjc.src.zip ", "policy.jar", 
+"eclipselink.jar",  "policy.jar", 
 "FastInfoset.jar",  "jaxws-api.jar",  "resolver.jar", 
 "gmbal-api-only.jar",  "jaxws-eclipselink-plugin.jar",  "saaj-api.jar", 
 "ha-api.jar",  "jaxws-rt.jar",  "saaj-impl.jar", 
@@ -86,7 +87,10 @@ fnames = ["jsr181-api.jar", "common.sdo.jar",
 for fname in fnames:
 
 	print "fname is " + fname
-	urllib.urlretrieve(libUrl + fname, localLibDir + fname)
+#	urllib.urlretrieve(libUrl + fname, localLibDir + fname)
+    resp = urllib2.urlopen(libUrl + fname)
+    print fname + resp.code
+    
 # end for
 
 
