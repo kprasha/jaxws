@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import urllib
-#import urllib2
-import xml
+import urllib2
+#import xml
 import xml.dom.minidom
 import os
 import shutil
