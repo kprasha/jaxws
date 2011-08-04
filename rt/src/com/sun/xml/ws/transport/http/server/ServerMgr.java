@@ -105,9 +105,9 @@ final class ServerMgr {
                     HttpContext context = server.createContext(path);
                     server.start();
                     if (port == 0) {
-                      //A port number of zero will let the system pick up an ephemeral port in a bind operation.
-                      //Get the bound port instead of supplied port number of zero to calculate inetAddress. 
-                      inetAddress = new InetSocketAddress(url.getHost(), server.getAddress().getPort());
+                        //A port number of zero will let the system pick up an ephemeral port in a bind operation.
+                        //Get the actual inetAddress from server, which has the bound port instead of supplied port number of zero.
+                        inetAddress = server.getAddress();
                     }
                     logger.fine("HTTP server started = "+inetAddress);
                     state = new ServerState(server, path);
