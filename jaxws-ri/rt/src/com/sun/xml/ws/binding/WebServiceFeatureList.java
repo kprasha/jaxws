@@ -48,7 +48,6 @@ import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLFeaturedObject;
 import com.sun.xml.ws.model.RuntimeModelerException;
-import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.resources.ModelerMessages;
 import com.sun.xml.bind.util.Which;
 
@@ -366,7 +365,7 @@ public final class WebServiceFeatureList extends AbstractMap<Class<? extends Web
 	}
 
     /**
-	 * Extracts features from {@link WSDLPortImpl#getFeatures()}. Extra features
+	 * Extracts features from {@link WSDLPort#getFeatures()}. Extra features
 	 * that are not already set on binding. i.e, if a feature is set already on
 	 * binding through someother API the coresponding wsdlFeature is not set.
 	 * 
