@@ -70,8 +70,7 @@ print "local lib dir is " + localLibDir
 #  "jaxb-xjc.src.zip ", ,  "jaxb-impl.src.zip"
 fnames = ["jsr181-api.jar", "common.sdo.jar",
 "activation.jar", "management-api.jar", 
-"common.sdo.jar",  "jaxb-xjc.jar",  "mimepull.jar", 
-"eclipselink.jar",  
+"common.sdo.jar",  "jaxb-xjc.jar",  "mimepull.jar",   
 "policy.jar", 
 "FastInfoset.jar",  "jaxws-api.jar",  "resolver.jar", 
 "gmbal-api-only.jar",  "jaxws-eclipselink-plugin.jar",  "saaj-api.jar", 
