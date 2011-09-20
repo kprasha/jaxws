@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,14 +40,10 @@
 
 package org.jvnet.ws.message;
 
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import com.sun.istack.Nullable;
 
 /**
- * MessageContext represents a container of a SOAP message and all the properties
- * including the transport headers.
- *
- * MessageContext is a composite {@link PropertySet} that combines properties exposed from multiple
+ * {@link PropertySet} that combines properties exposed from multiple
  * {@link PropertySet}s into one.
  *
  * <p>
@@ -55,50 +51,40 @@ import javax.xml.soap.SOAPMessage;
  * all properties exposed from other "satellite" {@link PropertySet}s.
  * (A satellite may itself be a {@link DistributedPropertySet}, so
  * in general this can form a tree.)
- * 
- * @author shih-chang.chen@oracle.com
+ *
+ * <p>
+ * This is useful for JAX-WS because the properties we expose to the application
+ * are contributed by different pieces, and therefore we'd like each of them
+ * to have a separate {@link PropertySet} implementation that backs up
+ * the properties. For example, this allows FastInfoset to expose its
+ * set of properties to {@link RequestContext} by using a strongly-typed fields.
+ *
+ * <p>
+ * This is also useful for a client-side transport to expose a bunch of properties
+ * into {@link ResponseContext}. It simply needs to create a {@link PropertySet}
+ * object with methods for each property it wants to expose, and then add that
+ * {@link PropertySet} to {@link Packet}. This allows property values to be
+ * lazily computed (when actually asked by users), thus improving the performance
+ * of the typical case where property values are not asked.
+ *
+ * <p>
+ * A similar benefit applies on the server-side, for a transport to expose
+ * a bunch of properties to {@link WebServiceContext}.
+ *
+ * <p>
+ * To achieve these benefits, access to {@link DistributedPropertySet} is slower
+ * compared to {@link PropertySet} (such as get/set), while adding a satellite
+ * object is relatively fast.
+ *
+ * @author Kohsuke Kawaguchi
  */
-public interface MessageContext extends DistributedPropertySet {
-	
-	/**
-	 * Gets the SAAJ SOAPMessage representation of the SOAP message.
-	 * 
-	 * @return The SOAPMessage
-	 */
-	SOAPMessage getSOAPMessage() throws SOAPException;
+public interface DistributedPropertySet extends org.jvnet.ws.message.PropertySet {
 
-	/**
-	 * Sets the SAAJ SOAPMessage to be the SOAP message.
-	 * 
-	 * @param message The SOAP message to set
-	 */
-	void setSOAPMessage(SOAPMessage message);
+    public @Nullable <T extends org.jvnet.ws.message.PropertySet> T getSatellite(Class<T> satelliteClass);
 
-	/**
-	 * Adds the {@link PropertySet} 
-	 * 
-	 * @param satellite the PropertySet
-	 */
-    void addSatellite(PropertySet satellite);
+    public void addSatellite(org.jvnet.ws.message.PropertySet satellite);
 
-    /**
-     * Removes the {@link PropertySet} 
-     * 
-     * @param satellite the PropertySet
-     */
-    void removeSatellite(PropertySet satellite);
+    public void removeSatellite(org.jvnet.ws.message.PropertySet satellite);
 
-    /**
-     * Copies all the {@link PropertySet} of this MessageContext into the other MessageContext
-     * 
-     * @param otherMessageContext the MessageContext
-     */
-    void copySatelliteInto(MessageContext otherMessageContext);
-
-    /**
-     * Gets the {@link PropertySet}
-     * 
-     * @param satellite the PropertySet type
-     */
-    <T extends PropertySet> T getSatellite(Class<T> satelliteClass);
+    public void copySatelliteInto(org.jvnet.ws.message.MessageContext r);
 }
