@@ -88,7 +88,10 @@ import java.util.Set;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class DistributedPropertySet extends PropertySet implements org.jvnet.ws.message.MessageContext {
+public abstract class DistributedPropertySet
+    extends PropertySet
+    implements org.jvnet.ws.message.DistributedPropertySet
+{
     /**
      * All {@link PropertySet}s that are bundled into this {@link PropertySet}.
      */
