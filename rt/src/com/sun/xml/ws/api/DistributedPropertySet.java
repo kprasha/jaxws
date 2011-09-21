@@ -187,6 +187,10 @@ public abstract class DistributedPropertySet
         addSatellite((PropertySet)satellite);       
     }
 
+    public void addSatellite(@NotNull Class keyClass, @NotNull org.jvnet.ws.message.PropertySet satellite) {
+        addSatellite(keyClass, (PropertySet)satellite);
+    }
+
     public void removeSatellite(org.jvnet.ws.message.PropertySet satellite) {
         removeSatellite((PropertySet)satellite);       
     }

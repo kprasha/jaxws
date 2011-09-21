@@ -84,6 +84,8 @@ public interface DistributedPropertySet extends org.jvnet.ws.message.PropertySet
 
     public void addSatellite(org.jvnet.ws.message.PropertySet satellite);
 
+    public void addSatellite(Class keyClass, org.jvnet.ws.message.PropertySet satellite);
+
     public void removeSatellite(org.jvnet.ws.message.PropertySet satellite);
 
     public void copySatelliteInto(org.jvnet.ws.message.MessageContext r);
