@@ -61,10 +61,6 @@ import java.io.ByteArrayOutputStream;
  */
 public final class DataHandlerAttachment implements Attachment {
 		
-    // Maintain a DCH list here (instead of initiating in MimeCodec).
-    private final static com.sun.xml.ws.encoding.ImageDataContentHandler imgDCH = 
-        new com.sun.xml.ws.encoding.ImageDataContentHandler();
-		
     private final DataHandler dh;
     private final String contentId;
 
@@ -115,10 +111,6 @@ public final class DataHandlerAttachment implements Attachment {
     }
 
     public void writeTo(OutputStream os) throws IOException {
-        //Fix CR361579: workaround here, always using ImageDCH of jaxws to process image/gif.
-        if ("image/gif".equals(dh.getContentType()) || "image/jpeg".equals(dh.getContentType())) 
-    		imgDCH.writeTo(dh.getContent(), dh.getContentType(), os);
-        else
     		dh.writeTo(os);
     }
 
