@@ -165,8 +165,9 @@ public class RuntimeModeler {
         this.classLoader = config.getClassLoader();
         this.portName = config.getMappingInfo().getPortName();
         this.config = config;
-        this.wsBinding = config.getWSBinding();  
-        //TODO default bindingId
+        this.wsBinding = config.getWSBinding(); 
+        metadataReader = config.getMetadataReader();
+        if (metadataReader == null) metadataReader = new ReflectAnnotationReader();
         if (wsBinding != null) {
             this.bindingId = wsBinding.getBindingId();
         	if (config.getFeatures() != null) wsBinding.getFeatures().mergeFeatures(config.getFeatures(), false);
@@ -175,12 +176,17 @@ public class RuntimeModeler {
         } else {
             this.bindingId = config.getMappingInfo().getBindingID();
             if (binding != null) bindingId = binding.getBinding().getBindingId();
+            if (bindingId == null) bindingId = getDefaultBindingID();
             this.features = WebServiceFeatureList.toList(config.getFeatures());
             this.wsBinding = bindingId.createBinding(features);
         }
-        metadataReader = config.getMetadataReader();
-        if (metadataReader == null) metadataReader = new ReflectAnnotationReader();
     }
+
+    private BindingID getDefaultBindingID() {
+    	BindingType bt = getAnnotation(portClass, BindingType.class);
+    	String id = (bt != null) ? bt.value() :  javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING;
+		return BindingID.parse(id);
+	}
 
     /**
      * sets the classloader to be used when loading classes by the <code>RuntimeModeler</code>.
