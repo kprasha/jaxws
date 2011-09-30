@@ -304,6 +304,14 @@
     <zip file="${dist20.home}/lib/jaxws-libs.src.zip">
       <fileset dir="${basedir}/lib" includes="*src.zip" excludes="jaxws-asm-src.zip,junit-src.zip,htmlmacro.src.zip"/>
     </zip>
+  	<zip file="${dist20.home}/lib/jaxws-eclipselink-plugin.src.zip">
+      <fileset dir="${basedir}/eclipselink_jaxb/src"/>
+      <fileset dir="${basedir}/eclipselink_jaxb/build/classes" includes="META-INF/services/*"/>
+  	</zip>
+  	<zip file="${dist20.home}/lib/sdo-eclipselink-plugin.src.zip">
+      <fileset dir="${basedir}/eclipselink_sdo/src"/>
+      <fileset dir="${basedir}/eclipselink_sdo/build/classes" includes="META-INF/services/*"/>
+  	</zip>
   </target>
 
     <target name="jdk-jaxws-src.zip" description="create source zip bundles of the JAX-WS in JDK" depends="src.zip">
@@ -427,6 +435,8 @@
         <property  name="release.maven.api.version" value="${release.api.version}"/>                
         <push-to-m2 module="jaxws-rt" module-src="${dist20.home}/lib/jaxws-rt.src.zip"/>
         <push-to-m2 module="jaxws-tools" module-src="${dist20.home}/lib/jaxws-tools.src.zip"/>
+        <push-to-m2 module="jaxws-eclipselink-plugin" module-src="${dist20.home}/lib/jaxws-eclipselink-plugin.src.zip"/>
+        <push-to-m2 module="sdo-eclipselink-plugin" module-src="${dist20.home}/lib/sdo-eclipselink-plugin.src.zip"/>
         <push-to-m2-zip module="jaxws-ri"/>
     </target>
 
@@ -471,6 +481,9 @@
         <install-local-m2 module="jaxws-api" module-src="lib/jaxws-api-src.zip"/>
         <install-local-m2 module="jaxws-rt" module-src="${dist20.home}/lib/jaxws-rt.src.zip"/>
         <install-local-m2 module="jaxws-tools" module-src="${dist20.home}/lib/jaxws-tools.src.zip"/>
+        <install-local-m2 module="jaxws-eclipselink-plugin" module-src="${dist20.home}/lib/jaxws-eclipselink-plugin.src.zip"/>
+        <install-local-m2 module="sdo-eclipselink-plugin" module-src="${dist20.home}/lib/sdo-eclipselink-plugin.src.zip"/>
+
         <install-local-m2-zip module="jaxws-ri"/>
     </target>
 
@@ -519,6 +532,14 @@
         jar="${dist20.home}/lib/jaxws-tools.jar"
         pom="etc/poms/jaxws-tools.pom"
         srczip="${dist20.home}/lib/jaxws-tools.src.zip" />
+      <artifact
+        jar="${dist20.home}/lib/sdo-eclipselink-plugin.jar"
+        pom="etc/poms/sdo-eclipselink-plugin.pom"
+        srczip="${dist20.home}/lib/sdo-eclipselink-plugin.src.zip" />
+      <artifact
+        jar="${dist20.home}/lib/jaxws-eclipselink-plugin.jar"
+        pom="etc/poms/jaxws-eclipselink-plugin.pom"
+        srczip="${dist20.home}/lib/jaxws-eclipselink-plugin.src.zip" />
       <artifact
                 jar="${build.home}/jaxws-ri.zip"
                 pom="etc/poms/jaxws-ri.pom"/>
@@ -631,6 +652,10 @@
     <property name="java.net.maven2.repo.push.url" value="java-net:/maven2-repository~svn/trunk/repository/"/>
     <!--property name="java.net.maven2.repo.push.url" value="svn:https://svn.java.net/svn/maven2-repository~svn/trunk/repository"/-->
     <!--property name="java.net.maven2.repo.push.url" value="dav:http://glassfish-maven-repository.us.oracle.com/maven/repositories/glassfish/"/-->
+	
+	<!-- TODO - come up with a better scheme than using hard-coded value shere. -->
+	<property name="eclipselink.version" value="2.3.1-M6"/>
+	<property name="common.sdo.version" value="2.1.1"/>
 
     <target name="check-maven-ant-task">
         <available property="maven.ant.task.available" value="true" file="${lib.home}/${maven.ant.task.jar}"
