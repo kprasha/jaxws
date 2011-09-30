@@ -352,6 +352,8 @@
                     <filter token="POLICY_VERSION" value="${policy.version}"/>
                     <filter token="GMBAL_API_VERSION" value="${gmbal.version}"/>
                     <filter token="HA_API_VERSION" value="${ha-api.version}"/>
+                    <filter token="ECLIPSELINK_VERSION" value="${eclipselink.version}"/>
+                    <filter token="COMMON_SDO_VERSION" value="${common.sdo.version}"/>
                     <filter token="VERSION" value="${jar.suffix}"/>
                 </filterset>
             </copy>
