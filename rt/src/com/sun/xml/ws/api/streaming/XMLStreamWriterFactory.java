@@ -44,7 +44,10 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.ContainerResolver;
+import com.sun.xml.ws.encoding.HasEncoding;
+import com.sun.xml.ws.encoding.SOAPBindingCodec;
 import com.sun.xml.ws.streaming.XMLReaderException;
+import com.sun.xml.ws.util.xml.XMLStreamWriterFilter;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -249,7 +252,8 @@ public abstract class XMLStreamWriterFactory {
 
         public synchronized XMLStreamWriter doCreate(OutputStream out, String encoding) {
             try {
-                return xof.createXMLStreamWriter(out,encoding);
+                XMLStreamWriter writer = xof.createXMLStreamWriter(out,encoding);
+                return new HasEncodingWriter(writer, encoding);
             } catch (XMLStreamException e) {
                 throw new XMLReaderException("stax.cantCreate",e);
             }
@@ -317,23 +321,27 @@ public abstract class XMLStreamWriterFactory {
                 try {
                     resetMethod.invoke(xsw);
                     setOutputMethod.invoke(xsw,new StreamResult(out),encoding);
-                    return xsw;
                 } catch (IllegalAccessException e) {
                     throw new XMLReaderException("stax.cantCreate",e);
                 } catch (InvocationTargetException e) {
                     throw new XMLReaderException("stax.cantCreate",e);
                 }
+            } else {
+                // create a new instance
+                try {
+                        xsw = xof.createXMLStreamWriter(out,encoding);
+                } catch (XMLStreamException e) {
+                    throw new XMLReaderException("stax.cantCreate",e);
+                }
             }
-
-            // create a new instance
-            try {
-                return xof.createXMLStreamWriter(out,encoding);
-            } catch (XMLStreamException e) {
-                throw new XMLReaderException("stax.cantCreate",e);
-            }
+            
+            return new HasEncodingWriter(xsw, encoding);
         }
 
         public void doRecycle(XMLStreamWriter r) {
+            if (r instanceof HasEncodingWriter) {
+                r = ((HasEncodingWriter)r).getWriter();
+            }
             if(zephyrClass.isInstance(r)) {
                 // this flushes the underlying stream, so it might cause chunking issue 
                 try {
@@ -360,12 +368,13 @@ public abstract class XMLStreamWriterFactory {
         }
 
         public XMLStreamWriter doCreate(OutputStream out) {
-            return doCreate(out,"UTF-8");
+            return doCreate(out, SOAPBindingCodec.UTF8_ENCODING);
         }
 
         public XMLStreamWriter doCreate(OutputStream out, String encoding) {
             try {
-                return xof.createXMLStreamWriter(out,encoding);
+                XMLStreamWriter writer = xof.createXMLStreamWriter(out,encoding);
+                return new HasEncodingWriter(writer, encoding);
             } catch (XMLStreamException e) {
                 throw new XMLReaderException("stax.cantCreate",e);
             }
@@ -375,5 +384,22 @@ public abstract class XMLStreamWriterFactory {
             // no recycling
         }
 
+    }
+
+    private static class HasEncodingWriter extends XMLStreamWriterFilter implements HasEncoding {
+        private final String encoding;
+
+        HasEncodingWriter(XMLStreamWriter writer, String encoding) {
+            super(writer);
+            this.encoding = encoding;
+        }
+
+        public String getEncoding() {
+            return encoding;
+        }
+
+        XMLStreamWriter getWriter() {
+            return writer;
+        }
     }
 }

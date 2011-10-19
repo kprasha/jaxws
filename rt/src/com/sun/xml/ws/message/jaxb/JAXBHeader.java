@@ -46,6 +46,7 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.encoding.SOAPBindingCodec;
 import com.sun.xml.ws.message.AbstractHeaderImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
 import com.sun.xml.ws.spi.db.BindingContext;
@@ -191,9 +192,12 @@ public final class JAXBHeader extends AbstractHeaderImpl {
 
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException {
         try {
+            // Get the encoding of the writer
+            String encoding = XMLStreamWriterUtil.getEncoding(sw);
+            
             // Get output stream and use JAXB UTF-8 writer
             OutputStream os = XMLStreamWriterUtil.getOutputStream(sw);
-            if (os != null && bridge.supportOutputStream()) {
+            if (os != null && bridge.supportOutputStream() && encoding != null && encoding.equalsIgnoreCase(SOAPBindingCodec.UTF8_ENCODING)) {
                 bridge.marshal(jaxbObject, os, sw.getNamespaceContext(), null);
             } else {
                 bridge.marshal(jaxbObject,sw, null);
