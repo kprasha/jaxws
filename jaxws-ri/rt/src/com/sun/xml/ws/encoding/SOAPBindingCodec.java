@@ -85,6 +85,8 @@ import java.util.StringTokenizer;
  * @author Kohsuke Kawaguchi
  */
 public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pipe.SOAPBindingCodec {
+    public static final String UTF8_ENCODING = "utf-8";
+    public static final String DEFAULT_ENCODING = UTF8_ENCODING;
 
     /**
      * Based on request's Accept header this is set.
@@ -200,7 +202,7 @@ public class SOAPBindingCodec extends MimeCodec implements com.sun.xml.ws.api.pi
     private AcceptContentType _adaptingContentType = new AcceptContentType();
     
     public SOAPBindingCodec(WSBinding binding) {
-        this(binding, Codecs.createSOAPEnvelopeXmlCodec(binding.getSOAPVersion()));
+        this(binding, Codecs.createSOAPEnvelopeXmlCodec(binding));
     }
     
     public SOAPBindingCodec(WSBinding binding, StreamSOAPCodec xmlSoapCodec) {

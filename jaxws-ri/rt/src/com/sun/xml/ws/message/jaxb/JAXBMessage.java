@@ -49,6 +49,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.encoding.SOAPBindingCodec;
 import com.sun.xml.ws.message.AbstractMessageImpl;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.RootElementSniffer;
@@ -79,7 +80,6 @@ import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
 import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * {@link Message} backed by a JAXB bean.
@@ -376,6 +376,9 @@ public final class JAXBMessage extends AbstractMessageImpl {
                     ? ((MtomStreamWriter)sw).getAttachmentMarshaller()
                     : new AttachmentMarshallerImpl(attachmentSet);
 
+            // Get the encoding of the writer
+            String encoding = XMLStreamWriterUtil.getEncoding(sw);
+
             // Get output stream and use JAXB UTF-8 writer
             OutputStream os = XMLStreamWriterUtil.getOutputStream(sw);
 			if (rawContext != null) {
@@ -387,7 +390,7 @@ public final class JAXBMessage extends AbstractMessageImpl {
 				else
 					m.marshal(jaxbObject, sw);
 			} else {
-				if (os != null && bridge.supportOutputStream()) {
+				if (os != null && bridge.supportOutputStream()  && encoding != null && encoding.equalsIgnoreCase(SOAPBindingCodec.UTF8_ENCODING)) {
 					bridge.marshal(jaxbObject, os, sw.getNamespaceContext(), am);
 				} else {
 					bridge.marshal(jaxbObject, sw, am);

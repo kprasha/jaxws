@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,58 +40,15 @@
 
 package com.sun.xml.ws.encoding;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.message.stream.StreamHeader;
-import com.sun.xml.ws.message.stream.StreamHeader11;
-
-import javax.xml.stream.XMLStreamReader;
-import java.util.Collections;
-import java.util.List;
-
 /**
- * {@link StreamSOAPCodec} for SOAP 1.1.
+ * A {@link javax.xml.stream.XMLStreamWriter} doesn't expose any method to
+ * give encoding. An implementation of writer may implement
+ * this interface to give the encoding with which the writer is created.
  *
- * @author Paul.Sandoz@Sun.Com
+ * @author  Jitendra Kotamraju
+ * @since JAX-WS RI 2.2.6
  */
-final class StreamSOAP11Codec extends StreamSOAPCodec {
-    public static final String SOAP11_MIME_TYPE = "text/xml";
-    public static final String DEFAULT_SOAP11_CONTENT_TYPE =
-            SOAP11_MIME_TYPE+"; charset="+SOAPBindingCodec.DEFAULT_ENCODING;
-
-    private static final List<String> EXPECTED_CONTENT_TYPES = Collections.singletonList(SOAP11_MIME_TYPE);
-
-    /*package*/  StreamSOAP11Codec() {
-        super(SOAPVersion.SOAP_11);
-    }
-
-    /*package*/  StreamSOAP11Codec(WSBinding binding) {
-        super(binding);
-    }
-
-    public String getMimeType() {
-        return SOAP11_MIME_TYPE;
-    }
-    
-    @Override
-    protected final StreamHeader createHeader(XMLStreamReader reader, XMLStreamBuffer mark) {
-        return new StreamHeader11(reader, mark);
-    }
-
-    @Override
-    protected ContentType getContentType(Packet packet) {
-        return new ContentTypeImpl(getContenTypeStr(packet), packet.soapAction);
-    }
-
-    @Override
-    protected String getDefaultContentType() {
-        return DEFAULT_SOAP11_CONTENT_TYPE;
-    }
-
-    protected List<String> getExpectedContentTypes() {
-        return EXPECTED_CONTENT_TYPES;
-    }
+public interface HasEncoding {
+    public String getEncoding();
 }
+
