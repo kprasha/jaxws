@@ -43,7 +43,9 @@ WORK_DIR= WORKSPACE + "/jaxwstop4"
 _mkdir(WORK_DIR);
 P4_EXE_FILE= WORK_DIR + "/p4"
 # todo home.us.oracle.com is not stable, if down it can cause this script to fail, check for existence of the file before trying to download
-urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
+#urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
+# todo download the proper 64 or 32 bit p4 client depending on the machine
+urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux26x86_64/p4", P4_EXE_FILE)
 
 print "got p4 exe"
 
