@@ -60,6 +60,8 @@ libUrl =  "%sartifact/jaxws-ri/dist/jaxws-ri/lib/" %  getText(urlToBuild.childNo
 print "libUrl is %s" % libUrl
 
 localLibDir = WORKSPACE + "/libDir/"
+_mkdir(localLibDir)
+
 shutil.rmtree(localLibDir)
 
 _mkdir(localLibDir)
