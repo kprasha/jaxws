@@ -42,8 +42,8 @@ print "Got xml api file"
 WORK_DIR= WORKSPACE + "/jaxwstop4"
 _mkdir(WORK_DIR);
 P4_EXE_FILE= WORK_DIR + "/p4"
-# todo home.us.oracle.com is down so disable this for now
-# urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
+# todo home.us.oracle.com is not stable, if down it can cause this script to fail, check for existence of the file before trying to download
+urllib.urlretrieve("http://home.us.oracle.com/p4/r09.1/bin.linux24x86/p4", P4_EXE_FILE)
 
 print "got p4 exe"
 
