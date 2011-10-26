@@ -172,10 +172,7 @@ import java.io.Serializable;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class Packet
-    extends DistributedPropertySet
-    implements org.jvnet.ws.message.MessageContext
-{
+public final class Packet extends DistributedPropertySet {
 
     /**
      * Creates a {@link Packet} that wraps a given {@link Message}.
@@ -474,10 +471,6 @@ public final class Packet
     @com.sun.xml.ws.api.PropertySet.Property(MessageContext.REFERENCE_PARAMETERS)
     public @NotNull List<Element> getReferenceParameters() {
         List<Element> refParams =  new ArrayList<Element>();
-        // TODO: HC: TMP: Remove after DISI/MessageContext integration complete
-        if (message == null) {
-            return null;
-        }
         HeaderList hl = message.getHeaders();
         for(Header h :hl) {
             String attr = h.getAttribute(AddressingVersion.W3C.nsUri,"IsReferenceParameter");
