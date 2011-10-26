@@ -38,6 +38,7 @@
  * holder.
  */
 
+
 package org.jvnet.ws.message;
 
 import javax.xml.soap.SOAPException;
@@ -58,7 +59,7 @@ import javax.xml.soap.SOAPMessage;
  * 
  * @author shih-chang.chen@oracle.com
  */
-public interface MessageContext extends DistributedPropertySet {
+public interface MessageContext extends PropertySet {
 	
 	/**
 	 * Gets the SAAJ SOAPMessage representation of the SOAP message.

@@ -88,10 +88,7 @@ import java.util.Set;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class DistributedPropertySet
-    extends PropertySet
-    implements org.jvnet.ws.message.DistributedPropertySet
-{
+public abstract class DistributedPropertySet extends PropertySet implements org.jvnet.ws.message.MessageContext {
     /**
      * All {@link PropertySet}s that are bundled into this {@link PropertySet}.
      */
@@ -185,10 +182,6 @@ public abstract class DistributedPropertySet
 
     public void addSatellite(org.jvnet.ws.message.PropertySet satellite) {
         addSatellite((PropertySet)satellite);       
-    }
-
-    public void addSatellite(@NotNull Class keyClass, @NotNull org.jvnet.ws.message.PropertySet satellite) {
-        addSatellite(keyClass, (PropertySet)satellite);
     }
 
     public void removeSatellite(org.jvnet.ws.message.PropertySet satellite) {
