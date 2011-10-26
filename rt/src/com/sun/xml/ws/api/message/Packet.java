@@ -868,6 +868,8 @@ public final class Packet
        r.proxy = this.proxy;
        r.webServiceContextDelegate = this.webServiceContextDelegate;
        r.expectReply = this.expectReply;
+       r.persistentContext = this.persistentContext; 
+       r.outboundHttpHeaders = this.outboundHttpHeaders;
        
        AddressingVersion av = binding.getAddressingVersion();
        // populate WS-A headers only if WS-A is enabled
