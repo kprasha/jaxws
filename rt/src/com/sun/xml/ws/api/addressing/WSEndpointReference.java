@@ -514,6 +514,7 @@ public final class WSEndpointReference  implements WSDLExtension {
             writer.writeStartElement(W3CAddressingMetadataConstants.WSAM_PREFIX_NAME,
                     AddressingVersion.W3C.eprType.portTypeName,
                     W3CAddressingMetadataConstants.WSAM_NAMESPACE_NAME);
+            writer.writeNamespace(W3CAddressingMetadataConstants.WSAM_PREFIX_NAME, W3CAddressingMetadataConstants.WSAM_NAMESPACE_NAME);
             String portTypePrefix = portType.getPrefix();
             if (portTypePrefix == null || portTypePrefix.equals("")) {
                 //TODO check prefix again
@@ -529,6 +530,7 @@ public final class WSEndpointReference  implements WSDLExtension {
                 writer.writeStartElement(W3CAddressingMetadataConstants.WSAM_PREFIX_NAME,
                         AddressingVersion.W3C.eprType.serviceName,
                         W3CAddressingMetadataConstants.WSAM_NAMESPACE_NAME);
+                writer.writeNamespace(W3CAddressingMetadataConstants.WSAM_PREFIX_NAME, W3CAddressingMetadataConstants.WSAM_NAMESPACE_NAME);
                 String servicePrefix = service.getPrefix();
                 if (servicePrefix == null || servicePrefix.equals("")) {
                     //TODO check prefix again
@@ -574,7 +576,7 @@ public final class WSEndpointReference  implements WSDLExtension {
             throw new WebServiceException("WSDL target Namespace cannot be resolved");
         }
         wsdliLocation += wsdlAddress;
-        //writer.writeNamespace("wsdli","http://www.w3.org/ns/wsdl-instance");
+        writer.writeNamespace("wsdli","http://www.w3.org/ns/wsdl-instance");
         writer.writeAttribute(W3CAddressingMetadataConstants.WSAM_WSDLI_ATTRIBUTE_PREFIX,
                 W3CAddressingMetadataConstants.WSAM_WSDLI_ATTRIBUTE_NAMESPACE,
                 W3CAddressingMetadataConstants.WSAM_WSDLI_ATTRIBUTE_LOCALNAME,
