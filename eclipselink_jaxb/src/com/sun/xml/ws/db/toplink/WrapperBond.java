@@ -102,6 +102,7 @@ public class WrapperBond<T> implements XMLBridge<T> {
 			public String getValue(String qName)  { return null; }
 		};
 		try {
+			contentHandler.startPrefixMapping("W", typeInfo.tagName.getNamespaceURI());
 			contentHandler.startElement(typeInfo.tagName.getNamespaceURI(), typeInfo.tagName.getLocalPart(), WrapperPrefix + typeInfo.tagName.getLocalPart(), att);
 		} catch (SAXException e) {
 			throw new JAXBException(e);
@@ -111,6 +112,7 @@ public class WrapperBond<T> implements XMLBridge<T> {
 		}
 		try {
 			contentHandler.endElement(typeInfo.tagName.getNamespaceURI(), typeInfo.tagName.getLocalPart(), null);
+			contentHandler.endPrefixMapping("W");
 		} catch (SAXException e) {
 			throw new JAXBException(e);
 		}
