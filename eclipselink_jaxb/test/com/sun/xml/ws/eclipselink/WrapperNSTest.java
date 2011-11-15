@@ -46,12 +46,12 @@ public class WrapperNSTest extends TestCase {
 			JavaCallInfo call = db.createJavaCallInfo(method, args);
 			MessageContext mc = db.serializeRequest(call);
 			SOAPMessage msg = mc.getSOAPMessage();
-			System.out.println("------------------ eclipselink");
-			msg.writeTo(System.out);
-			System.out.println();
+//			System.out.println("------------------ eclipselink");
+//			msg.writeTo(System.out);
+//			System.out.println();
 			
 			Node n = msg.getSOAPBody().getChildNodes().item(0);
-			System.out.println("num of attributes is: "+ n.getAttributes().getLength());
+//			System.out.println("num of attributes is: "+ n.getAttributes().getLength());
 			assertTrue(n.getAttributes().getLength() == 1);
 		}
 		
@@ -75,11 +75,11 @@ public class WrapperNSTest extends TestCase {
 			JavaCallInfo call = db.createJavaCallInfo(method, args);
 			MessageContext mc = db.serializeRequest(call);
 			SOAPMessage msg = mc.getSOAPMessage();
-			System.out.println("------------------ glassfish");
-			msg.writeTo(System.out);
-			System.out.println();
+//			System.out.println("------------------ glassfish");
+//			msg.writeTo(System.out);
+//			System.out.println();
 			Node n = msg.getSOAPBody().getChildNodes().item(0);
-			System.out.println("num of attributes is: "+ n.getAttributes().getLength());
+//			System.out.println("num of attributes is: "+ n.getAttributes().getLength());
 			assertTrue(n.getAttributes().getLength() == 1);
 		}
 		
