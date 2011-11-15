@@ -48,8 +48,10 @@ import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElement;
@@ -95,7 +97,7 @@ public class JAXBWrapperAccessor extends WrapperAccessor {
             }
         }   
         HashSet<String> elementLocalNames = new HashSet<String>();
-        for (Field field : getDeclaredFields(contentClass) ) {
+        for (Field field : getAllFields(contentClass) ) {
             XmlElement xmlElem = field.getAnnotation(XmlElement.class);
             XmlElementRef xmlElemRef = field.getAnnotation(XmlElementRef.class);
             String fieldName = field.getName().toLowerCase();
@@ -160,6 +162,15 @@ public class JAXBWrapperAccessor extends WrapperAccessor {
             elementDeclaredTypes = elementDeclaredTypesByLocalpart;
         }
 	}
+
+    static protected List<Field> getAllFields(Class<?> clz) {
+    	List<Field> list = new ArrayList<Field>();
+    	while (!Object.class.equals(clz)) {
+    		for (Field f : getDeclaredFields(clz)) list.add(f);
+    		clz = clz.getSuperclass();
+    	}
+    	return list;
+    }
     
     //oracle.j2ee.ws.common.jaxws.AccessControllHelper   
     static protected Field[] getDeclaredFields(final Class<?> clz) {
