@@ -248,7 +248,8 @@ public class WsaServerTube extends WsaTube {
         	target = ((Stub) response.proxy).getWSEndpointReference();
         }
 
-        if(target.isAnonymous() || isAnonymousRequired )
+        //  go back from back channel if the target is null
+        if(target == null || target.isAnonymous() || isAnonymousRequired )
             // the response will go back the back channel. most common case
             return doFinalProcessing(target, response);
 
@@ -258,6 +259,11 @@ public class WsaServerTube extends WsaTube {
             return doFinalProcessing(target, response);
         }
 
+        // make a copy of packet (exclude message), the copy will be used in
+        // current fiber, we do the pre-process is to avoid a new fiber might
+        // modify the satellite properties in the packet
+        Packet copyResponse = response.copy(false);
+
         // send the response to this EPR. This *can* generate a response, and
         // if so, we leave it to Fiber.CompletionCallback to deliver it to
         // whoever started this fiber. The 'new' fiber is linked into the old
@@ -265,8 +271,7 @@ public class WsaServerTube extends WsaTube {
         processNonAnonymousReply(response, target);
 
         // then we'll proceed the rest like one-way.
-        response = response.copy(false);
-        return doFinalProcessing(target, response);
+        return doFinalProcessing(target, copyResponse);
     }
 
     protected NextAction doFinalProcessing(WSEndpointReference target,
@@ -354,10 +359,11 @@ public class WsaServerTube extends WsaTube {
 	        Tube transport = TransportTubeFactory.create(Thread.currentThread().getContextClassLoader(),
 	            new ClientTubeAssemblerContext(adrs, wsdlPort, (WSService) null, binding,endpoint.getContainer(),((BindingImpl)binding).createCodec(),null));
 	        Fiber fiber = currentFiber.owner.createFiber();
+	        Packet copyPkt = packet.copy(false);
 	        fiber.start(transport, packet, fiberCallback);
 
 	        // then we'll proceed the rest like one-way.
-	        packet = packet.copy(false);
+	        packet = copyPkt;
         }
     }
 
