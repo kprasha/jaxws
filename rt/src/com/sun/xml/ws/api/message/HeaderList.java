@@ -798,16 +798,17 @@ public class HeaderList extends ArrayList<Header> {
         //See if WSA headers are already set by the user.
         HeaderList hl = packet.getMessage().getHeaders();
         String action = hl.getAction(binding.getAddressingVersion(), binding.getSOAPVersion());
-        if(action != null) {
-            //assume that all the WSA headers are set by the user
-            return;
-        }
+     
         AddressingVersion addressingVersion = binding.getAddressingVersion();
         //seiModel is passed as null as it is not needed.
         WsaTubeHelper wsaHelper = addressingVersion.getWsaHelper(wsdlPort, null, binding);
 
         // wsa:Action
         String effectiveInputAction = wsaHelper.getEffectiveInputAction(packet);
+        
+        if (effectiveInputAction == null || effectiveInputAction.equals("")) {
+            effectiveInputAction = action;
+        }
         if (effectiveInputAction == null || effectiveInputAction.equals("") && binding.getSOAPVersion() == SOAPVersion.SOAP_11) {
             throw new WebServiceException(ClientMessages.INVALID_SOAP_ACTION());
         }
