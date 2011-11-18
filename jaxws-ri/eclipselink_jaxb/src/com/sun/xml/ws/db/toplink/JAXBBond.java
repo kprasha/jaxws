@@ -72,13 +72,13 @@ import org.eclipse.persistence.jaxb.JAXBMarshaller;
 import org.eclipse.persistence.jaxb.JAXBTypeElement;
 import org.eclipse.persistence.jaxb.JAXBUnmarshaller;
 import org.eclipse.persistence.jaxb.TypeMappingInfo;
-//import org.eclipse.persistence.oxm.record.XMLStreamWriterRecord;
+import org.eclipse.persistence.oxm.record.XMLStreamWriterRecord;
 
 import org.eclipse.persistence.internal.oxm.record.XMLStreamReaderInputSource;
 import org.eclipse.persistence.internal.oxm.record.XMLStreamReaderReader;
 import org.jvnet.staxex.Base64Data;
 import org.jvnet.staxex.XMLStreamReaderEx;
-//import org.jvnet.staxex.XMLStreamWriterEx;
+import org.jvnet.staxex.XMLStreamWriterEx;
 
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
@@ -119,31 +119,31 @@ public class JAXBBond<T> implements XMLBridge<T> {
       marshaller = parent.mpool.allocate();
       marshaller.setAttachmentMarshaller(am);
       marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FRAGMENT, true);
-      //boolean isEx = (output instanceof XMLStreamWriterEx);
+      boolean isEx = (output instanceof XMLStreamWriterEx);
       if (mappingInfo != null) {
         if (isParameterizedType) {
           JAXBTypeElement jte = new JAXBTypeElement(
               mappingInfo.getXmlTagName(), object,
               (ParameterizedType) mappingInfo.getType());
-          /*if (isEx)
+          if (isEx)
             marshaller.marshal(jte, new NewStreamWriterRecord(
                 (XMLStreamWriterEx) output), mappingInfo);
-          else*/
+          else
             marshaller.marshal(jte, output, mappingInfo);
         } else {
           JAXBElement<T> elt = new JAXBElement<T>(mappingInfo.getXmlTagName(),
               (Class<T>) typeInfo.type, object);
-          /*if (isEx)
+          if (isEx)
             marshaller.marshal(elt, new NewStreamWriterRecord(
                 (XMLStreamWriterEx) output), mappingInfo);
-          else*/
+          else
             marshaller.marshal(elt, output, mappingInfo);
         }
       } else {
-        /*if (isEx)
+        if (isEx)
           marshaller.marshal(object, new NewStreamWriterRecord(
               (XMLStreamWriterEx) output));
-        else*/
+        else
           marshaller.marshal(object, output);
       }
     } finally {
@@ -457,9 +457,7 @@ public class JAXBBond<T> implements XMLBridge<T> {
             return null;
         }
     }
-    
-    /*
-     * Enable when added to eclipselink jar.
+
     public class NewStreamWriterRecord extends XMLStreamWriterRecord {
       private XMLStreamWriterEx xsw;
 
@@ -483,5 +481,4 @@ public class JAXBBond<T> implements XMLBridge<T> {
           super.characters(schemaType, value, mimeType, isCData);
        }
    }
-   */
 }
