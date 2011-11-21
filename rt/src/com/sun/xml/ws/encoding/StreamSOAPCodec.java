@@ -48,7 +48,6 @@ import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.developer.SerializationFeature;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -56,6 +55,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.developer.SerializationFeature;
 import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.message.stream.StreamHeader;
 import com.sun.xml.ws.message.stream.StreamMessage;
@@ -93,7 +93,6 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
 
     private final String SOAP_NAMESPACE_URI;
     private final SOAPVersion soapVersion;
-
     protected final SerializationFeature serializationFeature;
 
     // charset of last decoded message. Will be used for encoding server's
@@ -248,10 +247,10 @@ public abstract class StreamSOAPCodec implements com.sun.xml.ws.api.pipe.StreamS
         XMLStreamReaderUtil.verifyTag(reader, SOAP_NAMESPACE_URI, SOAP_BODY);
         TagInfoset bodyTag = new TagInfoset(reader);
 
-        XMLStreamReaderUtil.nextElementContent(reader);
-        return new StreamMessage(envelopeTag,headerTag,attachmentSet,headers,bodyTag,reader,soapVersion);
+        String bodyPrologue = XMLStreamReaderUtil.nextWhiteSpaceContent(reader);
+        return new StreamMessage(envelopeTag,headerTag,attachmentSet,headers,bodyPrologue,bodyTag,null,reader,soapVersion);
         // when there's no payload,
-        // it's tempting to use EmptyMessageImpl, but it doesn't presere the infoset
+        // it's tempting to use EmptyMessageImpl, but it doesn't preserve the infoset
         // of <envelope>,<header>, and <body>, so we need to stick to StreamMessage.
     }
 
