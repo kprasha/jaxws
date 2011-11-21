@@ -61,7 +61,7 @@ echo Building with classpath %LOCALCLASSPATH%
 
 echo Starting Ant...
 
-%JAVA_HOME%\bin\java.exe -Dant.home="%ANT_HOME%" -Dfile.extension=bat -classpath "%LOCALCLASSPATH%" org.apache.tools.ant.Main -emacs %CMD_LINE_ARGS%
+"%JAVA_HOME%\bin\java.exe" -Dant.home="%ANT_HOME%" -Dfile.extension=bat -classpath "%LOCALCLASSPATH%" org.apache.tools.ant.Main -emacs %CMD_LINE_ARGS%
 
 goto end
 
