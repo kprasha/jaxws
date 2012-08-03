@@ -11,7 +11,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: JAX-WS RI Eclpselink SDO Plugin
 Bundle-SymbolicName: com.sun.xml.ws.sdo-eclipselink-plugin
 Bundle-Vendor: Oracle Corporation
-Bundle-Version: 2.2.7.SNAPSHOT
+Bundle-Version: 2.2.7
 Created-By: Apache Maven Bundle Plugin
 Export-Package: com.sun.xml.ws.db.sdo;uses:="commonj.sdo.helper,javax.xm
  l.namespace,javax.xml.parsers,org.w3c.dom,org.xml.sax,javax.xml.stream,

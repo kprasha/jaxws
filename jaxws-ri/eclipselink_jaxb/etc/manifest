@@ -11,7 +11,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: JAX-WS RI Eclpselink Plugin
 Bundle-SymbolicName: com.sun.xml.ws.jaxws-eclipselink-plugin
 Bundle-Vendor: Oracle Corporation
-Bundle-Version: 2.2.7.SNAPSHOT
+Bundle-Version: 2.2.7
 Created-By: Apache Maven Bundle Plugin
 Export-Package: com.sun.xml.ws.db.toplink;uses:="javax.activation,javax.
  xml.stream,javax.mail.internet,javax.xml.transform,org.jvnet.staxex,org
