@@ -418,7 +418,7 @@ public class JAXBBond<T> implements XMLBridge<T> {
 	}
 
 	public boolean supportOutputStream() {
-		return true;
+		return false;
 	}
 
     public static class CustomXMLStreamReaderReader extends
