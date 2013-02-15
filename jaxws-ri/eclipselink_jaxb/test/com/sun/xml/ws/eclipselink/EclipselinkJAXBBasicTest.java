@@ -113,5 +113,6 @@ public class EclipselinkJAXBBasicTest extends BasicDatabindingTestBase  {
             assertTrue(equalsMap(ans, res));
 		}
 	}
+	
 }
 

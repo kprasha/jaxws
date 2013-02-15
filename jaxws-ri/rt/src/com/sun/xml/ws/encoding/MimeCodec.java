@@ -177,7 +177,7 @@ abstract class MimeCodec implements Codec {
                     MimeHeader mh = allMimeHeaders.next();
                     String name = mh.getName();
 
-                    if (!"Content-Type".equalsIgnoreCase(name)) {
+                    if (!"Content-Type".equalsIgnoreCase(name)&& !"Content-Id".equalsIgnoreCase(name)) {
                         writeln(name +": " + mh.getValue(), out);
                     }
                 }
