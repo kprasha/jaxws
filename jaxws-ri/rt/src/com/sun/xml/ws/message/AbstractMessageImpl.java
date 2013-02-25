@@ -203,21 +203,14 @@ public abstract class AbstractMessageImpl extends Message {
      */
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
         SOAPMessage msg = soapVersion.getMessageFactory().createMessage();
-/*
+
         SaajStaxWriter writer = new SaajStaxWriter(msg);
         try {
             this.writeTo(writer);
         } catch (XMLStreamException e) {
             throw (e.getCause() instanceof SOAPException) ? (SOAPException) e.getCause() : new SOAPException(e);
         }
-*/
-        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart(), true);
-        try {
-            writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
-        } catch (SAXException e) {
-            throw new SOAPException(e);
-        }        
-             
+        msg = writer.getSOAPMessage();    
         for(Attachment att : getAttachments()) {
             AttachmentPart part = msg.createAttachmentPart();
             part.setDataHandler(att.asDataHandler());
