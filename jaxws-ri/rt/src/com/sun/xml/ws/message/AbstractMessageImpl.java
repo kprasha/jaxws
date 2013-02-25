@@ -47,6 +47,7 @@ import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.message.saaj.SaajStaxWriter;
 import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import com.sun.xml.ws.encoding.MimeMultipartParser;
@@ -202,22 +203,27 @@ public abstract class AbstractMessageImpl extends Message {
      */
     public SOAPMessage readAsSOAPMessage() throws SOAPException {
         SOAPMessage msg = soapVersion.getMessageFactory().createMessage();
-
-        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart());
+/*
+        SaajStaxWriter writer = new SaajStaxWriter(msg);
+        try {
+            this.writeTo(writer);
+        } catch (XMLStreamException e) {
+            throw (e.getCause() instanceof SOAPException) ? (SOAPException) e.getCause() : new SOAPException(e);
+        }
+*/
+        SAX2DOMEx s2d = new SAX2DOMEx(msg.getSOAPPart(), true);
         try {
             writeTo(s2d, XmlUtil.DRACONIAN_ERROR_HANDLER);
         } catch (SAXException e) {
             throw new SOAPException(e);
-        }
-
+        }        
+             
         for(Attachment att : getAttachments()) {
             AttachmentPart part = msg.createAttachmentPart();
             part.setDataHandler(att.asDataHandler());
             part.setContentId('<'+att.getContentId()+'>');
             addCustomMimeHeaders(att, part);
             msg.addAttachmentPart(part);
-
-
         }
         if (msg.getSOAPHeader() == null)
         	msg.getSOAPPart().getEnvelope().addHeader();

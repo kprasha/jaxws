@@ -50,6 +50,8 @@ import com.sun.xml.ws.util.ByteArrayBuffer;
 import junit.framework.TestCase;
 
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
@@ -57,6 +59,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -238,6 +241,25 @@ public class StreamMessageTest extends TestCase {
         assertEquals("http://schemas.xmlsoap.org/soap/envelope/", xsr.getNamespaceURI("ns4"));
     }
 
+    public void testMessageWithComments() throws IOException, SOAPException {
+        String soapMsg = 
+        	"<S:Envelope xmlns:S='http://schemas.xmlsoap.org/soap/envelope/'>" +
+        		"<S:Body>" +
+        			"<ns2:c xmlns:ns2='local'>" +
+        				"<!-- Comments -->" +
+        				"<clientName>Test</clientName>" + 
+        				"<ns2:year>2007</ns2:year>" +
+        			"</ns2:c>" +
+        		"</S:Body>" +
+        	"</S:Envelope>";
+        Message message = useStreamCodec(soapMsg);
+        SOAPMessage msg = message.readAsSOAPMessage();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        msg.writeTo(baos);
+        msg.writeTo(System.out);
+        assertTrue(baos.toString().contains("<!-- Comments -->"));
+    }    
+    
 /*
     private DOMSource toDOMSource(Source source) throws Exception {
         if (source instanceof DOMSource) {
