@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,6 +45,7 @@ import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.SimpleDeclarationVisitor;
 import com.sun.mirror.util.SourcePosition;
+import com.sun.mirror.util.Types;
 import com.sun.tools.ws.processor.model.Port;
 import com.sun.tools.ws.processor.modeler.JavaSimpleTypeCreator;
 import com.sun.tools.ws.processor.modeler.annotation.AnnotationProcessorContext.SEIContext;
@@ -61,6 +62,7 @@ import javax.jws.soap.SOAPBinding.ParameterStyle;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -559,9 +561,10 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
                 return true;
         }
         boolean implementsMethod;
+        List<MethodDeclaration> classMethods=getClassMethods(classDecl);
         for (MethodDeclaration method : intfDecl.getMethods()) {
             implementsMethod = false;
-            for (MethodDeclaration classMethod : classDecl.getMethods()) {
+            for (MethodDeclaration classMethod : classMethods) {
                 if (sameMethod(method, classMethod)) {
                     implementsMethod = true;
                     break;
@@ -575,13 +578,29 @@ public abstract class WebServiceVisitor extends SimpleDeclarationVisitor impleme
         return true;
     }
 
+    private static List<MethodDeclaration> getClassMethods(ClassDeclaration classElement) {
+        if (classElement.getQualifiedName().equals(Object.class.getName())) // we don't need Object's methods
+            return null;
+        ClassDeclaration superclassElement = classElement.getSuperclass().getDeclaration();
+        List<MethodDeclaration> superclassesMethods = getClassMethods(superclassElement);
+        List<MethodDeclaration> classMethods = (List<MethodDeclaration>) classElement.getMethods();
+        if (superclassesMethods == null)
+            return classMethods;
+        else
+            superclassesMethods.addAll(classMethods);
+        return superclassesMethods;
+    }
+
     protected boolean sameMethod(MethodDeclaration method1, MethodDeclaration method2) {
         if (!method1.getSimpleName().equals(method2.getSimpleName()))
             return false;
-        if (!method1.getReturnType().equals(method2.getReturnType()))
-            return false;
-        ParameterDeclaration[] params1 = method1.getParameters().toArray(new ParameterDeclaration[0]);
-        ParameterDeclaration[] params2 = method2.getParameters().toArray(new ParameterDeclaration[0]);
+        if (!method1.getReturnType().equals(method2.getReturnType())) {
+            Types typeUtils = builder.getAPEnv().getTypeUtils();
+            if (!typeUtils.isSubtype(method2.getReturnType(), method1.getReturnType()))
+                return false;
+        }
+        ParameterDeclaration[] params1 = method1.getParameters().toArray(new ParameterDeclaration[method1.getParameters().size()]);
+        ParameterDeclaration[] params2 = method2.getParameters().toArray(new ParameterDeclaration[method2.getParameters().size()]);
         if (params1.length != params2.length)
             return false;
         int pos = 0;
