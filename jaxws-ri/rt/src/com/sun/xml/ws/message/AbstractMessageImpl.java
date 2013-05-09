@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,6 +46,8 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.Attachment;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
+import static com.sun.xml.ws.api.message.Message.BODY;
+import static com.sun.xml.ws.api.message.Message.PREFIX;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.util.xml.XmlUtil;
 import javax.xml.soap.AttachmentPart;
@@ -59,7 +61,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.MimeHeader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
@@ -84,6 +85,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public abstract class AbstractMessageImpl extends Message {
+
     /**
      * SOAP version of this message.
      * Used to implement some of the methods, but nothing more than that.
@@ -130,10 +132,10 @@ public abstract class AbstractMessageImpl extends Message {
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         String soapNsUri = soapVersion.nsUri;
         w.writeStartDocument();
-        w.writeStartElement("S","Envelope",soapNsUri);
-        w.writeNamespace("S",soapNsUri);
+        w.writeStartElement(PREFIX,"Envelope",soapNsUri);
+        w.writeNamespace(PREFIX,soapNsUri);
         if(hasHeaders()) {
-            w.writeStartElement("S","Header",soapNsUri);
+            w.writeStartElement(PREFIX,"Header",soapNsUri);
             HeaderList headers = getHeaders();
             int len = headers.size();
             for( int i=0; i<len; i++ ) {
@@ -142,7 +144,7 @@ public abstract class AbstractMessageImpl extends Message {
             w.writeEndElement();
         }
         // write the body
-        w.writeStartElement("S","Body",soapNsUri);
+        w.writeStartElement(PREFIX, BODY, soapNsUri);
 
         writePayloadTo(w);
 
@@ -159,7 +161,7 @@ public abstract class AbstractMessageImpl extends Message {
 
         contentHandler.setDocumentLocator(NULL_LOCATOR);
         contentHandler.startDocument();
-        contentHandler.startPrefixMapping("S",soapNsUri);
+        contentHandler.startPrefixMapping(PREFIX,soapNsUri);
         contentHandler.startElement(soapNsUri,"Envelope","S:Envelope",EMPTY_ATTS);
         if(hasHeaders()) {
             contentHandler.startElement(soapNsUri,"Header","S:Header",EMPTY_ATTS);
@@ -172,9 +174,9 @@ public abstract class AbstractMessageImpl extends Message {
             contentHandler.endElement(soapNsUri,"Header","S:Header");
         }
         // write the body
-        contentHandler.startElement(soapNsUri,"Body","S:Body",EMPTY_ATTS);
+        contentHandler.startElement(soapNsUri, BODY, BODY_WITH_PREFIX,EMPTY_ATTS);
         writePayloadTo(contentHandler,errorHandler, true);
-        contentHandler.endElement(soapNsUri,"Body","S:Body");
+        contentHandler.endElement(soapNsUri, BODY, BODY_WITH_PREFIX);
         contentHandler.endElement(soapNsUri,"Envelope","S:Envelope");
     }
 
@@ -211,6 +213,7 @@ public abstract class AbstractMessageImpl extends Message {
     /**
      *
      */
+    @Override
     public SOAPMessage readAsSOAPMessage(Packet packet, boolean inbound) throws SOAPException {
         SOAPMessage msg = readAsSOAPMessage();
         Map<String, List<String>> headers = null;
@@ -231,7 +234,11 @@ public abstract class AbstractMessageImpl extends Message {
         return msg;
     }
 
-
+//    @Override
+    public void writeBodyTo(XMLStreamWriter writer) throws XMLStreamException {
+        writer.writeStartElement(PREFIX, BODY, this.soapVersion.nsUri);
+    }
+    
     protected static final AttributesImpl EMPTY_ATTS = new AttributesImpl();
     protected static final LocatorImpl NULL_LOCATOR = new LocatorImpl();
 }

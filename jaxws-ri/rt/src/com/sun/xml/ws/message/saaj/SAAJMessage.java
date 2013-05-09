@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -49,8 +49,6 @@ import com.sun.xml.bind.unmarshaller.DOMScanner;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.*;
 import com.sun.xml.ws.message.AttachmentUnmarshallerImpl;
-import com.sun.xml.ws.message.AbstractMessageImpl;
-import com.sun.xml.ws.message.AttachmentSetImpl;
 import com.sun.xml.ws.streaming.DOMStreamReader;
 import com.sun.xml.ws.util.DOMUtil;
 import org.w3c.dom.Element;
@@ -80,7 +78,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
-import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -96,6 +93,7 @@ import java.util.Map;
  * @author Rama Pulavarthi
  */
 public class SAAJMessage extends Message {
+    
     // flag to switch between representations
     private boolean parsedMessage;
     // flag to check if Message API is exercised;
@@ -346,6 +344,19 @@ public class SAAJMessage extends Message {
         }
     }
 
+//    @Override
+    public void writeBodyTo(XMLStreamWriter writer) throws XMLStreamException {
+        writer.writeStartElement(PREFIX, BODY, this.soapVersion.nsUri);
+        
+        if (bodyAttrs != null) {
+            int attrCount = bodyAttrs.getLength();
+            for (int i=0; i<attrCount; i++) {
+                Node n = bodyAttrs.item(i);
+                writer.writeAttribute(n.getNodeName(), n.getNodeValue());
+            }
+        }
+    }
+    
     public void writeTo(XMLStreamWriter writer) throws XMLStreamException {
         try {
             writer.writeStartDocument();
@@ -387,34 +398,34 @@ public class SAAJMessage extends Message {
         } else {
             contentHandler.setDocumentLocator(NULL_LOCATOR);
             contentHandler.startDocument();
-            contentHandler.startPrefixMapping("S", soapNsUri);
-            startPrefixMapping(contentHandler, envelopeAttrs,"S");
+            contentHandler.startPrefixMapping(PREFIX, soapNsUri);
+            startPrefixMapping(contentHandler, envelopeAttrs, PREFIX);
             contentHandler.startElement(soapNsUri, "Envelope", "S:Envelope", getAttributes(envelopeAttrs));
             if (hasHeaders()) {
-                startPrefixMapping(contentHandler, headerAttrs,"S");
+                startPrefixMapping(contentHandler, headerAttrs, PREFIX);
                 contentHandler.startElement(soapNsUri, "Header", "S:Header", getAttributes(headerAttrs));
-                HeaderList headers = getHeaders();
-                int len = headers.size();
+                HeaderList headerList = getHeaders();
+                int len = headerList.size();
                 for (int i = 0; i < len; i++) {
                     // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
-                    headers.get(i).writeTo(contentHandler, errorHandler);
+                    headerList.get(i).writeTo(contentHandler, errorHandler);
                 }
-                endPrefixMapping(contentHandler, headerAttrs,"S");
+                endPrefixMapping(contentHandler, headerAttrs, PREFIX);
                 contentHandler.endElement(soapNsUri, "Header", "S:Header");
 
             }
-            startPrefixMapping(contentHandler, bodyAttrs,"S");
+            startPrefixMapping(contentHandler, bodyAttrs, PREFIX);
             // write the body
-            contentHandler.startElement(soapNsUri, "Body", "S:Body", getAttributes(bodyAttrs));
+            contentHandler.startElement(soapNsUri, BODY, BODY_WITH_PREFIX, getAttributes(bodyAttrs));
             writePayloadTo(contentHandler, errorHandler, true);
-            endPrefixMapping(contentHandler, bodyAttrs,"S");
-            contentHandler.endElement(soapNsUri, "Body", "S:Body");
-            endPrefixMapping(contentHandler, envelopeAttrs,"S");
+            endPrefixMapping(contentHandler, bodyAttrs, PREFIX);
+            contentHandler.endElement(soapNsUri, "Body", BODY_WITH_PREFIX);
+            endPrefixMapping(contentHandler, envelopeAttrs, PREFIX);
             contentHandler.endElement(soapNsUri, "Envelope", "S:Envelope");
         }
     }
     /**
-     * Gets the Attributes that are not namesapce declarations
+     * Gets the Attributes that are not namespace declarations
      * @param attrs
      * @return
      */
@@ -437,7 +448,7 @@ public class SAAJMessage extends Message {
      * Collects the ns declarations and starts the prefix mapping, consequently the associated endPrefixMapping needs to be called.
      * @param contentHandler
      * @param attrs
-     * @param excludePrefix , this is to excldue the global prefix mapping "S" used at the start
+     * @param excludePrefix , this is to exclude the global prefix mapping "S" used at the start
      * @throws SAXException
      */
     private void startPrefixMapping(ContentHandler contentHandler, NamedNodeMap attrs, String excludePrefix) throws SAXException {

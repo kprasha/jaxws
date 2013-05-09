@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -71,7 +71,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.Detail;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -206,6 +205,10 @@ import java.util.UUID;
  */
 public abstract class Message {
 
+    public static final String BODY = "Body";
+    public static final String PREFIX = "S";
+    public static final String BODY_WITH_PREFIX = PREFIX+":"+BODY;
+            
     /**
      * Returns true if headers are present in the message.
      *
@@ -603,6 +606,19 @@ public abstract class Message {
      */
     public abstract void writeTo(XMLStreamWriter sw) throws XMLStreamException;
 
+//    /**
+//     * Writes the body element (with attributes) to the given writer.
+//     *
+//     * Used within security implementation.
+//     * 
+//     * @throws XMLStreamException
+//     *      If the {@link XMLStreamWriter} reports an error,
+//     *      or some other errors happen during the processing.
+//     */
+//    public void writeBodyTo(XMLStreamWriter sw) throws XMLStreamException {
+//        sw.writeStartElement(PREFIX, BODY, this.soapVersion.nsUri);
+//    }   
+    
     /**
      * Writes the whole SOAP envelope as SAX events.
      *
@@ -610,7 +626,7 @@ public abstract class Message {
      * This consumes the message.
      *
      * @param contentHandler
-     *      must not be nulll.
+     *      must not be null.
      * @param errorHandler
      *      must not be null.
      *      any error encountered during the SAX event production must be
