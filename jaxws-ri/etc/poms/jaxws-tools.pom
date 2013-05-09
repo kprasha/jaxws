@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -48,7 +48,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sun.xml.ws</groupId>
     <artifactId>jaxws-tools</artifactId>
-    <version>@VERSION@</version>
+    <version>2.2.3-1</version>
     <url>https://jax-ws.dev.java.net//</url>
     <name>JAX-WS (JSR-224) Reference Implementation Tools</name>
     <description>
@@ -58,6 +58,28 @@
         <name>Oracle Corporation</name>
         <url>http://www.oracle.com/</url>
     </organization>
+    <developers>
+        <developer>
+            <name>Martin Grebac</name>
+            <email>martin.grebac@oracle.com</email>
+            <organization>Oracle Corporation</organization>
+        </developer>
+        <developer>
+            <name>Lukas Jungmann</name>
+            <email>lukas.jungmann@oracle.com</email>
+            <organization>Oracle Corporation</organization>
+        </developer>
+        <developer>
+            <name>Miroslav Kos</name>
+            <email>miroslav.kos@oracle.com</email>
+            <organization>Oracle Corporation</organization>
+        </developer>
+        <developer>
+            <name>Jaroslav Savytskyi</name>
+            <email>iaroslav.savytskyi@oracle.com</email>
+            <organization>Oracle Corporation</organization>
+        </developer>
+    </developers>
     <scm>
         <connection>scm:svn:https://svn.java.net/svn/jax-ws~sources/branches/jaxws22/jaxws-ri</connection>
         <developerConnection>scm:svn:https://svn.java.net/svn/jax-ws~sources/branches/jaxws22/jaxws-ri</developerConnection>
@@ -102,12 +124,12 @@
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
-            <version>@VERSION@</version>
+            <version>2.2.3-1</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-xjc</artifactId>
-            <version>@JAXB_VERSION@</version>
+            <version>2.2.3-2</version>
         </dependency>
     </dependencies>
 </project>
