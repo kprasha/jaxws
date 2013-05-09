@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -129,11 +129,10 @@
                 version="false"
                 windowtitle="${Name} Generated Documentation"
                 doctitle="${Name}"
-                bottom="Copyright &#169; 2005 Sun Microsystems, Inc. All Rights Reserved.">
+                bottom="Copyright &#169; 2013 Oracle, Inc. All Rights Reserved.">
             <classpath>
                 <path refid="runtime.compile.classpath"/>
                 <fileset dir="${basedir}/servlet/lib" includes="servlet.jar"/>
-                <fileset file="${java.home}/../lib/tools.jar"/>
             </classpath>
         </javadoc>
     </target>
@@ -164,6 +163,19 @@
         </sequential>
     </macrodef>
 
+    <path id="jaxws-rt-source-path">
+        <!--<pathelement path="${basedir}/ws-api/src"/>-->
+        <pathelement path="${basedir}/rt/src"/>
+        <pathelement path="${basedir}/rt/build/gen-src"/>
+        <pathelement path="${basedir}/rt-fi/src"/>
+        <pathelement path="${basedir}/rt-ha/src"/>
+        <pathelement path="${basedir}/servlet/src"/>
+    </path>
+
+    <path id="jaxws-tools-source-path">
+        <pathelement path="${basedir}/tools/wscompile/src"/>
+        <pathelement path="${basedir}/tools/wscompile/build/gen-src"/>
+    </path>
 
     <target name="runtime-build" depends="runtime-compile">
         <!-- Copy resource files etc -->
@@ -187,6 +199,35 @@
             <fileset dir="${basedir}/servlet/build/classes"/>
             <fileset dir="${basedir}/rt/src" includes="**/*.xml"/>
         </jar>
+        
+        <javadoc
+                packagenames=".,com.sun.xml.ws.*,com.sun.pept.*,javax.xml.ws.*,javax.xml.soap.*,javax.xml.bind.*,com.sun.tools.ws.*"
+                sourcepathref="jaxws-rt-source-path"
+                destdir="${build.home}/javadocs/rt/"
+                use="true"
+                author="false"
+                version="false"
+                access="package"
+                windowtitle="${Name} Runtime Documentation"
+                doctitle="${Name}"
+                bottom="Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.">
+            <classpath>
+                <path refid="runtime.compile.classpath"/>
+                <fileset dir="${basedir}/servlet/lib" includes="servlet.jar"/>
+                <fileset dir="${basedir}/lib" includes="ha-api.jar" />
+            </classpath>
+            <link href="http://jaxb.java.net/nonav/2.2.4-1/docs/api/"
+                  offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxb-api"/>
+            <link href="http://jax-ws.java.net/nonav/jaxws-api/2.2/"
+                  offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxws-api"/>
+            <link href="http://download.oracle.com/javase/1.5.0/docs/api/"
+                  offline="true" packagelistloc="${basedir}/tools/javadoc-link/j2se5.0"/>
+        </javadoc>
+        <zip zipfile="${build.home}/lib/jaxws-rt-javadoc.jar">
+            <fileset dir="${build.home}/javadocs/rt"/>
+        </zip>
+        <delete dir="${build.home}/javadocs/rt/"/>
+        
         <ant dir="${basedir}/httpspi-servlet" target="jar"/>        
     </target>
 
@@ -234,6 +275,35 @@
             <!-- sneaky but it's easy because this is just one class -->
             <fileset dir="${basedir}/tools/resourcegen/build/classes"/>
         </jar>
+
+        <javadoc
+                packagenames=".,com.sun.xml.ws.*,com.sun.pept.*,javax.xml.ws.*,javax.xml.soap.*,javax.xml.bind.*,com.sun.tools.ws.*"
+                sourcepathref="jaxws-tools-source-path"
+                destdir="${build.home}/javadocs/tools/"
+                use="true"
+                author="false"
+                version="false"
+                access="package"
+                windowtitle="${Name} Tools Documentation"
+                doctitle="${Name}"
+                bottom="Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.">
+            <classpath>
+                <path refid="runtime.compile.classpath"/>
+                <fileset dir="${basedir}/servlet/lib" includes="servlet.jar"/>
+                <fileset dir="${basedir}/lib" includes="ha-api.jar" />
+            </classpath>
+            <link href="http://jaxb.java.net/nonav/2.2.4-1/docs/api/"
+                  offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxb-api"/>
+            <link href="http://jax-ws.java.net/nonav/jaxws-api/2.2/"
+                  offline="true" packagelistloc="${basedir}/tools/javadoc-link/jaxws-api"/>
+            <link href="http://download.oracle.com/javase/1.5.0/docs/api/"
+                  offline="true" packagelistloc="${basedir}/tools/javadoc-link/j2se5.0"/>
+        </javadoc>
+        <zip zipfile="${build.home}/lib/jaxws-tools-javadoc.jar">
+            <fileset dir="${build.home}/javadocs/tools"/>
+        </zip>
+        <delete dir="${build.home}/javadocs/tools/"/>
+
     </target>
 
     <target name="copy-woodstox-libs" description="Copies woodstox.jar into distribution jars" if="woodstox">
