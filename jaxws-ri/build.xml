@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -523,6 +523,68 @@
             <arg  value="project.properties"/>
         </exec>
 
+    </target>
+
+    <condition property="mvn.exec" value="mvn.bat" else="mvn">
+        <os family="windows"/>
+    </condition>
+
+    <macrodef name="mvn.install.snapshot.module">
+        <attribute name="module"/>
+        <attribute name="libpath" default="lib"/>
+        <attribute name="extra-args" default=""/>
+        <attribute name="repo" default="${maven.repo.local}"/>
+        <sequential>
+            <property name="jar.suffix" value="${release.impl.version}-SNAPSHOT"/>
+            <prepare-pom module="@{module}"/>
+            <mvn.install.file jar="${dist20.home}/@{libpath}/@{module}.jar" pom="build/maven2-repo/@{module}.pom"
+                              repo="@{repo}" extra-args="@{extra-args}"/>
+            <mvn.install.file jar="${dist20.home}/@{libpath}/@{module}.src.zip" pom="build/maven2-repo/@{module}.pom"
+                              repo="@{repo}" extra-args="@{extra-args}"
+                              classifier="sources"/>
+            <mvn.install.file jar="${dist20.home}/@{libpath}/@{module}-javadoc.jar"
+                              pom="build/maven2-repo/@{module}.pom" repo="@{repo}" extra-args="@{extra-args}"
+                              classifier="javadoc"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="mvn.install.snapshot.zip">
+        <attribute name="module"/>
+        <attribute name="extra-args" default=""/>
+        <attribute name="repo" default="${maven.repo.local}"/>
+        <sequential>
+            <property name="jar.suffix" value="${release.impl.version}-SNAPSHOT"/>
+            <prepare-pom module="@{module}"/>
+            <mvn.install.file jar="${build.home}/@{module}.zip" pom="build/maven2-repo/@{module}.pom"
+                              repo="@{repo}" extra-args="@{extra-args}"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="mvn.install.file">
+        <attribute name="command" default="install:install-file"/>
+        <attribute name="repo" default="${maven.repo.local}"/>
+
+        <attribute name="jar"/>
+        <attribute name="pom"/>
+        <attribute name="classifier" default=""/>
+        <attribute name="extra-args" default=""/>
+        <sequential>
+            <exec executable="${mvn.exec}" failonerror="true">
+                <arg line="@{command}"/>
+                <arg line="-Dfile=@{jar}"/>
+                <arg line="-Dclassifier=@{classifier}"/>
+                <arg line="-DpomFile=@{pom}"/>
+                <arg line="-DlocalRepositoryPath=@{repo}"/>
+                <arg line="@{extra-args}"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target  name="mvn.install.snapshots.local">
+        <fail unless="maven.repo.local">maven.repo.local property needs to be set</fail>
+        <mvn.install.snapshot.module module="jaxws-rt"/>
+        <mvn.install.snapshot.module module="jaxws-tools"/>
+        <mvn.install.snapshot.zip module="jaxws-ri"/>
     </target>
 
     <target name="install-locally" depends="mavenize,dist-zip-with-src">
