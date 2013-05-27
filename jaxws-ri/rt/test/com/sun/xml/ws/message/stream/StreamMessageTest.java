@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -260,6 +260,33 @@ public class StreamMessageTest extends TestCase {
         assertTrue(baos.toString().contains("<!-- Comments -->"));
     }    
     
+
+    public void testCData() throws Exception {
+        String soap18Msg = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+"<soapenv:Body>" +
+    "<echoRequest xmlns=\"http://test.oracle.com/xsd\">" +
+      "<arg0>outside cdata <![CDATA[<data>inside cdata</data>]]></arg0>" +
+    "</echoRequest>" +
+  "</soapenv:Body>" +
+"</soapenv:Envelope>";
+		Message message = useStreamCodec(soap18Msg);
+        Source source = message.readPayloadAsSource();
+        InputStream is = getInputStream(source);
+        XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(is);
+        reader.next();
+        while (reader.getEventType() == XMLStreamReader.START_ELEMENT) reader.next();
+        String text = "";
+        //Depending on parser settings, multiple characters events may be reported
+        //in small chunks, instead of one event for an entire text node
+        while (reader.getEventType() == XMLStreamReader.CHARACTERS) {
+            String textTmp = new String(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength());
+            reader.next();
+            text += textTmp;
+        }
+        assertEquals("outside cdata <data>inside cdata</data>", text);
+    }
+	
+
 /*
     private DOMSource toDOMSource(Source source) throws Exception {
         if (source instanceof DOMSource) {
