@@ -9,14 +9,20 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 import javax.xml.ws.WebServiceFeature;
 
 import junit.framework.TestCase;
 
 import org.jvnet.ws.databinding.Databinding;
 import org.jvnet.ws.databinding.DatabindingFactory;
+
 import org.jvnet.ws.databinding.JavaCallInfo;
 import org.jvnet.ws.message.MessageContext;
+import com.sun.xml.ws.api.databinding.DatabindingConfig;
+import com.sun.xml.ws.api.databinding.MappingInfo;
+import com.sun.xml.ws.model.RuntimeModeler;
 import org.w3c.dom.Node;
 
 import com.sun.xml.ws.api.databinding.DatabindingModeFeature;
@@ -27,6 +33,13 @@ public class WrapperNSTest extends TestCase {
 	@SOAPBinding(style = RPC, use = LITERAL)
 	static public interface MyHelloRPC {	
 		public String echoString(String str);
+	}
+	
+	@WebService(targetNamespace = "http://echo.org/")
+	static public class MyHelloClass {
+	    @ResponseWrapper(className = "response1", localName="gigi")
+	    @RequestWrapper(className = "request1")
+	    public String echoString(String str) {return "Hello " + str; }
 	}
 	
 	public void testWrapperNS() throws Exception {
@@ -56,7 +69,26 @@ public class WrapperNSTest extends TestCase {
 		}
 		
 	}
-
+    public void testGenerateWsdl() throws Exception {
+        Class<?> sei = MyHelloRPC.class;
+        DatabindingFactory fac = DatabindingFactory.newInstance();
+        Databinding.Builder b = fac.createBuilder(sei, null);
+        DatabindingModeFeature dbf = new DatabindingModeFeature(
+		                "eclipselink.jaxb");
+        WebServiceFeature[] f = { dbf };
+		DatabindingConfig config = new DatabindingConfig();
+		config.setFeatures(f);
+		config.setEndpointClass(MyHelloClass.class);
+		MappingInfo mi = new MappingInfo();
+		mi.setServiceName(new QName("http://echo.org/", "helloService"));
+		mi.setPortName(new QName("http://echo.org/", "helloPort"));
+		config.setMappingInfo(mi);
+		config.setClassLoader(this.getClass().getClassLoader());
+		
+		RuntimeModeler rtModeler = new RuntimeModeler(config);
+		rtModeler.buildRuntimeModel();    	
+    }
+	
 	public void testWrapperNS_JAXBRI() throws Exception {
 		Class<?> sei = MyHelloRPC.class;
 		DatabindingFactory fac = DatabindingFactory.newInstance();

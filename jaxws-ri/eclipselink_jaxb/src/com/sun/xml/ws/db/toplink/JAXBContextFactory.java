@@ -137,7 +137,7 @@ public class JAXBContextFactory extends BindingContextFactory {
 						javaAttributes.appendChild(xmlelem);
 					}
 				}
-				wrpCls.getPackage().getName();
+				if (wrpCls.getPackage() != null) wrpCls.getPackage().getName();
 			}
 		}
 		
