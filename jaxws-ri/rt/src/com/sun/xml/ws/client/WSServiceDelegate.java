@@ -45,13 +45,11 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.Closeable;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.ServiceInterceptor;
 import com.sun.xml.ws.api.client.ServiceInterceptorFactory;
-import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.pipe.*;
+import com.sun.xml.ws.api.pipe.Stubs;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.ContainerResolver;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
@@ -60,8 +58,8 @@ import com.sun.xml.ws.binding.WebServiceFeatureList;
 import com.sun.xml.ws.client.HandlerConfigurator.AnnotationConfigurator;
 import com.sun.xml.ws.client.HandlerConfigurator.HandlerResolverImpl;
 import com.sun.xml.ws.client.sei.SEIStub;
-import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.developer.UsesJAXBContextFeature;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.model.AbstractSEIModelImpl;
 import com.sun.xml.ws.model.RuntimeModeler;
 import com.sun.xml.ws.model.SOAPSEIModel;
@@ -74,7 +72,6 @@ import com.sun.xml.ws.resources.ProviderApiMessages;
 import com.sun.xml.ws.util.JAXWSUtils;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.ws.util.ServiceFinder;
-import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
 import com.sun.xml.ws.wsdl.parser.RuntimeWSDLParser;
 import org.xml.sax.SAXException;
 
@@ -89,15 +86,16 @@ import javax.xml.ws.*;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.soap.AddressingFeature;
 import java.io.IOException;
+import java.lang.RuntimePermission;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.security.*;
 import java.util.*;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import static com.sun.xml.ws.util.xml.XmlUtil.createDefaultCatalogResolver;
 
 /**
  * <code>Service</code> objects provide the client view of a Web service.
@@ -158,8 +156,8 @@ public class WSServiceDelegate extends WSService {
     /**
      * Information about SEI, keyed by their interface type.
      */
-   // private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
-   private final Map<QName,SEIPortInfo> seiContext = new HashMap<QName,SEIPortInfo>();
+    // private final Map<Class,SEIPortInfo> seiContext = new HashMap<Class,SEIPortInfo>();
+    private final Map<QName,SEIPortInfo> seiContext = new HashMap<QName,SEIPortInfo>();
 
     // This executor is used for all the async invocations for all proxies
     // created from this service. But once the proxy is created, then changing
@@ -184,8 +182,8 @@ public class WSServiceDelegate extends WSService {
 
     public WSServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class<? extends Service> serviceClass) {
         this(
-            wsdlDocumentLocation==null ? null : new StreamSource(wsdlDocumentLocation.toExternalForm()),
-            serviceName,serviceClass);
+                wsdlDocumentLocation==null ? null : new StreamSource(wsdlDocumentLocation.toExternalForm()),
+                serviceName,serviceClass);
     }
 
     /**
@@ -222,10 +220,10 @@ public class WSServiceDelegate extends WSService {
         if(wsdl == null){
             if(serviceClass != Service.class){
                 WebServiceClient wsClient = AccessController.doPrivileged(new PrivilegedAction<WebServiceClient>() {
-                        public WebServiceClient run() {
-                            return serviceClass.getAnnotation(WebServiceClient.class);
-                        }
-                    });
+                    public WebServiceClient run() {
+                        return serviceClass.getAnnotation(WebServiceClient.class);
+                    }
+                });
                 String wsdlLocation = wsClient.wsdlLocation();
                 wsdlLocation = JAXWSUtils.absolutize(JAXWSUtils.getFileOrURLName(wsdlLocation));
                 wsdl = new StreamSource(wsdlLocation);
@@ -239,8 +237,8 @@ public class WSServiceDelegate extends WSService {
                 service = model.getService(this.serviceName);
                 if (service == null)
                     throw new WebServiceException(
-                        ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
-                            buildNameList(model.getServices().keySet())));
+                            ClientMessages.INVALID_SERVICE_NAME(this.serviceName,
+                                    buildNameList(model.getServices().keySet())));
                 // fill in statically known ports
                 for (WSDLPortImpl port : service.getPorts())
                     ports.put(port.getName(), new PortInfo(this, port));
@@ -273,7 +271,7 @@ public class WSServiceDelegate extends WSService {
     private WSDLModelImpl parseWSDL(URL wsdlDocumentLocation, Source wsdlSource) {
         try {
             return RuntimeWSDLParser.parse(wsdlDocumentLocation, wsdlSource, createDefaultCatalogResolver(),
-                true, getContainer(), ServiceFinder.find(WSDLParserExtension.class).toArray());
+                    true, getContainer(), ServiceFinder.find(WSDLParserExtension.class).toArray());
         } catch (IOException e) {
             throw new WebServiceException(e);
         } catch (XMLStreamException e) {
@@ -363,7 +361,7 @@ public class WSServiceDelegate extends WSService {
         //get the first port corresponding to the SEI
         WSDLPortImpl port = wsdlService.getMatchingPort(portTypeName);
         if (port == null)
-                throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
+            throw new WebServiceException(ClientMessages.UNDEFINED_PORT_TYPE(portTypeName));
         QName portName = port.getName();
         return getPort(portName, portInterface,features);
     }
@@ -449,8 +447,8 @@ public class WSServiceDelegate extends WSService {
         binding.setMode(mode);
         Dispatch<Object> dispatch = Stubs.createJAXBDispatch(
                 port, binding, jaxbContext, mode,wsepr);
-         serviceInterceptor.postCreateDispatch((WSBindingProvider)dispatch);
-         return dispatch;
+        serviceInterceptor.postCreateDispatch((WSBindingProvider)dispatch);
+        return dispatch;
     }
 
     @Override
@@ -593,7 +591,7 @@ public class WSServiceDelegate extends WSService {
         }
     }
 
-    private <T> T createEndpointIFBaseProxy(@Nullable WSEndpointReference epr,QName portName, Class<T> portInterface,
+    private <T> T createEndpointIFBaseProxy(@Nullable WSEndpointReference epr,QName portName, final Class<T> portInterface,
                                             WebServiceFeature[] webServiceFeatures, SEIPortInfo eif) {
         //fail if service doesnt have WSDL
         if (wsdlService == null)
@@ -601,18 +599,41 @@ public class WSServiceDelegate extends WSService {
 
         if (wsdlService.get(portName)==null) {
             throw new WebServiceException(
-                ClientMessages.INVALID_PORT_NAME(portName,buildWsdlPortNames()));
+                    ClientMessages.INVALID_PORT_NAME(portName,buildWsdlPortNames()));
         }
 
         BindingImpl binding = eif.createBinding(webServiceFeatures,portInterface);
         SEIStub pis = new SEIStub(eif, binding, eif.model, epr);
 
-        T proxy = portInterface.cast(Proxy.newProxyInstance(portInterface.getClassLoader(),
-                new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis));
+        T proxy = createProxy(portInterface, pis);
+
         if (serviceInterceptor != null) {
             serviceInterceptor.postCreateProxy((WSBindingProvider)proxy, portInterface);
         }
         return proxy;
+    }
+
+    private <T> T createProxy(final Class<T> portInterface, final SEIStub pis) {
+
+        // accessClassInPackage privilege needs to be granted ...
+        RuntimePermission perm = new RuntimePermission("accessClassInPackage.com.sun." + "xml.*");
+        PermissionCollection perms = perm.newPermissionCollection();
+        perms.add(perm);
+
+        return AccessController.doPrivileged(
+                new PrivilegedAction<T>() {
+                    @Override
+                    public T run() {
+                        Object proxy = Proxy.newProxyInstance(portInterface.getClassLoader(),
+                                new Class[]{portInterface, WSBindingProvider.class, Closeable.class}, pis);
+                        return portInterface.cast(proxy);
+                    }
+                },
+                new AccessControlContext(
+                        new ProtectionDomain[]{
+                                new ProtectionDomain(null, perms)
+                        })
+        );
     }
 
     /**
@@ -676,7 +697,7 @@ public class WSServiceDelegate extends WSService {
         return wsdlService;
     }
 
-     class DaemonThreadFactory implements ThreadFactory {
+    class DaemonThreadFactory implements ThreadFactory {
         public Thread newThread(Runnable r) {
             Thread daemonThread = new Thread(r);
             daemonThread.setDaemon(Boolean.TRUE);
@@ -686,5 +707,3 @@ public class WSServiceDelegate extends WSService {
 
     private static final WebServiceFeature[] EMPTY_FEATURES = new WebServiceFeature[0];
 }
-
-

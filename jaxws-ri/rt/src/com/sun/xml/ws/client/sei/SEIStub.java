@@ -43,25 +43,26 @@ package com.sun.xml.ws.client.sei;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.MEP;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.binding.BindingImpl;
-import com.sun.xml.ws.client.*;
+import com.sun.xml.ws.client.RequestContext;
+import com.sun.xml.ws.client.ResponseContextReceiver;
+import com.sun.xml.ws.client.Stub;
+import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.model.JavaMethodImpl;
 import com.sun.xml.ws.model.SOAPSEIModel;
 import com.sun.xml.ws.wsdl.OperationDispatcher;
 
 import javax.xml.namespace.QName;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +73,19 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public final class SEIStub extends Stub implements InvocationHandler {
+
+    private static final Method INVOKE_METHOD;
+
+    static {
+        Method method;
+        try {
+            Class<?> clazz = Class.forName("sun.reflect.misc.MethodUtil");
+            method = clazz.getMethod("invoke", Method.class, Object.class, Object[].class);
+        } catch (Throwable t) {
+            method = null;
+        }
+        INVOKE_METHOD = method;
+    }
 
     @Deprecated
     public SEIStub(WSServiceDelegate owner, BindingImpl binding, SOAPSEIModel seiModel, Tube master, WSEndpointReference epr) {
@@ -139,13 +153,14 @@ public final class SEIStub extends Stub implements InvocationHandler {
     private final Map<Method, MethodHandler> methodHandlers = new HashMap<Method, MethodHandler>();
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        validateInputs(proxy, method);
         MethodHandler handler = methodHandlers.get(method);
         if (handler != null) {
             return handler.invoke(proxy, args);
         } else {
             // we handle the other method invocations by ourselves
             try {
-                return method.invoke(this, args);
+                return invokeMethod(method, args);
             } catch (IllegalAccessException e) {
                 // impossible
                 throw new AssertionError(e);
@@ -154,6 +169,25 @@ public final class SEIStub extends Stub implements InvocationHandler {
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
+        }
+    }
+
+    private Object invokeMethod(Method method, Object[] args) throws IllegalAccessException, InvocationTargetException {
+        return INVOKE_METHOD != null ?
+                // sun.reflect.misc.MethodUtil.invoke(method, owner, args)
+                INVOKE_METHOD.invoke(null, method, this, args) :
+                // other then Oracle JDK ...
+                method.invoke(this, args);
+    }
+
+    private void validateInputs(Object proxy, Method method) {
+        if (!Proxy.isProxyClass(proxy.getClass())) {
+            throw new IllegalStateException();
+        }
+        Class<?> declaringClass = method.getDeclaringClass();
+        if (method == null || declaringClass == null
+                || Modifier.isStatic(method.getModifiers())) {
+            throw new IllegalStateException();
         }
     }
 
