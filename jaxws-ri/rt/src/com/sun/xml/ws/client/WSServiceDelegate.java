@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.client;
 
 import com.sun.istack.NotNull;
@@ -616,7 +615,7 @@ public class WSServiceDelegate extends WSService {
     private <T> T createProxy(final Class<T> portInterface, final SEIStub pis) {
 
         // accessClassInPackage privilege needs to be granted ...
-        RuntimePermission perm = new RuntimePermission("accessClassInPackage.com.sun." + "xml.*");
+        RuntimePermission perm = new RuntimePermission("accessClassInPackage.com.sun." + "xml.internal.*");
         PermissionCollection perms = perm.newPermissionCollection();
         perms.add(perm);
 
