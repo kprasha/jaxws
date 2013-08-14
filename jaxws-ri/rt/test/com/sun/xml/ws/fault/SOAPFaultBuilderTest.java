@@ -151,18 +151,18 @@ public class SOAPFaultBuilderTest extends TestCase {
         verifyDetail(msg);
     }
 
-    public void testCreateException_14504957() throws Exception {
-        MessageFactory f = MessageFactory.newInstance();
-        SOAPMessage soapMsg = f.createMessage(null, new ByteArrayInputStream(NPE_FAULT.getBytes()));
-        Message m = new SAAJMessage(soapMsg);
-        SOAPFaultBuilder builder = SOAPFaultBuilder.create(m);
-        try {
-            SOAPFaultException sex = (SOAPFaultException)builder.createException(null);
-        } catch (Throwable t) {
-            t.printStackTrace(System.out);
-            fail("Got unexpected exception: " + t.getClass().getName());
-        }
-    }
+//    public void testCreateException_14504957() throws Exception {
+//        MessageFactory f = MessageFactory.newInstance();
+//        SOAPMessage soapMsg = f.createMessage(null, new ByteArrayInputStream(NPE_FAULT.getBytes()));
+//        Message m = new SAAJMessage(soapMsg);
+//        SOAPFaultBuilder builder = SOAPFaultBuilder.create(m);
+//        try {
+//            SOAPFaultException sex = (SOAPFaultException)builder.createException(null);
+//        } catch (Throwable t) {
+//            t.printStackTrace(System.out);
+//            fail("Got unexpected exception: " + t.getClass().getName());
+//        }
+//    }
 
     private void verifyDetail(Message message) throws Exception {
         boolean detail = false;
