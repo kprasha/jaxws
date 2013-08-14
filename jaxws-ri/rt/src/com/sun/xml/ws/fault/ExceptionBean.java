@@ -164,9 +164,7 @@ final class ExceptionBean {
             try {
                 return Integer.parseInt(v);
             } catch (NumberFormatException e) {
-                if ("native".equals(v)) {
-                    return -2;
-                }
+                if(v.equals("native"))  return -2;
                 return -1;
             }
         }
@@ -180,7 +178,7 @@ final class ExceptionBean {
      * Checks if the given element is the XML representation of {@link ExceptionBean}.
      */
     public static boolean isStackTraceXml(Element n) {
-        return LOCAL_NAME.equals(n.getLocalName()) && NS.equals(n.getNamespaceURI());
+        return n.getLocalName().equals(LOCAL_NAME) && n.getNamespaceURI().equals(NS);
     }
 
     private static final JAXBContext JAXB_CONTEXT;
@@ -203,9 +201,7 @@ final class ExceptionBean {
 
     private static final NamespacePrefixMapper nsp = new NamespacePrefixMapper() {
         public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-            if (NS.equals(namespaceUri)) {
-                return "";
-            }
+            if(namespaceUri.equals(NS)) return "";
             return suggestion;
         }
     };
